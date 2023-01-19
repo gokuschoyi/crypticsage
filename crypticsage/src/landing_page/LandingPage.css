@@ -1,0 +1,24 @@
+.animation-container {
+  height: 100vh;
+  position: fixed;
+}
+
+.webgl {
+  width: 100vw;
+  height: 100vh;
+  background-color: black;
+}
+
+.login{
+    position:absolute;
+    z-index: 10;
+    color:azure;
+    top: 50%;
+    left: 50%;
+}
+
+.navbar{
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+}
