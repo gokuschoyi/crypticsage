@@ -1,0 +1,38 @@
+.testimonial-container {
+  position: relative;
+  top: 55vh;
+  height: auto;
+}
+
+.testimonial-card {
+  width: 600px;
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+}
+
+.testimonial-box {
+  padding: 2rem;
+}
+
+@media screen and (max-width: 1200px) {
+  .testimonial-card {
+    width: 1000px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .testimonial-box {
+    padding: 0;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .testimonial-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}

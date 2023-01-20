@@ -1,0 +1,19 @@
+.pricing-container {
+  position: relative;
+  top: 55vh;
+  height: auto;
+}
+.pricing-box {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+.padding-price {
+  padding: 2rem;
+}
+
+@media screen and (max-width: 900px) {
+  .pricing-box {
+    padding: 4rem;
+  }
+}

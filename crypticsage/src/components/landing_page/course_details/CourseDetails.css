@@ -1,0 +1,31 @@
+.course-container {
+  position: relative;
+  top: 55vh;
+  height: auto;
+}
+
+.course-box {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.course-card {
+  padding: 20px;
+}
+
+.padding-course {
+  padding-left: 2rem;
+  padding-top: 2rem;
+  padding-right: 2rem;
+}
+
+.li-padding {
+  padding-bottom: 10px;
+}
+
+@media screen and (max-width: 900px) {
+  .course-box {
+    padding: 4rem;
+  }
+}

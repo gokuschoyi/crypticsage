@@ -3,22 +3,24 @@
   position: fixed;
 }
 
+.main {
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+}
+
 .webgl {
   width: 100vw;
   height: 100vh;
   background-color: black;
 }
 
-.login{
-    position:absolute;
-    z-index: 10;
-    color:azure;
-    top: 50%;
-    left: 50%;
+.login {
+  position: absolute;
+  z-index: 10;
+  color: azure;
+  top: 50%;
+  left: 50%;
 }
 
-.navbar{
-    position: absolute;
-    z-index: 10;
-    width: 100%;
-}
+  

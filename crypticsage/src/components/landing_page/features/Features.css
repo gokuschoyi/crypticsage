@@ -1,0 +1,43 @@
+.features-container {
+  position: relative;
+  top: 55vh;
+  height: auto;
+}
+
+.padding {
+  padding-bottom: 10px;
+}
+
+.feature-box {
+  padding: 2rem;
+}
+
+.features-card{
+    width:600px;
+    display:flex;
+    flex-direction:row;
+    padding:10px;
+}
+
+@media screen and (max-width: 1200px) {
+  .features-card {
+    width: 1000px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .feature-box {
+    padding:0;
+  }
+}
+    
+@media screen and (max-width: 600px) {
+  .features-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+    

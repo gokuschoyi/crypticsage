@@ -1,0 +1,24 @@
+.banner-container {
+    position: relative;
+  
+  padding-top:20vh;
+}
+.img-container {
+  width: 400px;
+}
+
+.banner-left-content {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+}
+
+.grid-col-left {
+  display: flex;
+  flex-direction: column !important;
+  justify-content: flex-start;
+}
+
+.grid-col-button-left {
+  width: 150px;
+}

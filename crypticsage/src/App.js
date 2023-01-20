@@ -2,7 +2,7 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./themes/theme";
 import './App.css';
 import LandingPage from './landing_page/LandingPage';
-import ParallaxStar from './landing_page/ParallaxStar';
+import ParallaxStar from './components/landing_page/animation/ParallaxStar';
 
 function App() {
   const [theme, colorMode] = useMode();

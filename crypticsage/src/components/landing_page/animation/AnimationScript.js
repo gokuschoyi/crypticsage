@@ -1,9 +1,31 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Canvas, extend, useFrame, useLoader, useThree } from '@react-three/fiber';
-import circleImg from '../assets/circle.png';
+import circleImg from '../../../assets/circle.png';
 import { Suspense, useCallback, useMemo, useRef } from 'react';
 extend({ OrbitControls })
+
+export default function AnimationScript() {
+    return (
+        <div className="webgl">
+            <Suspense fallback={<div>Loading...</div>}>
+                <Canvas
+                    legacy={false}
+                    camera={{ fov: 60, near: 0.1, far: 1000, position: [100, 20, 1] }}
+                >
+                    <Suspense fallback={null}>
+                        <Points />
+                    </Suspense>
+                    <CameraControls />
+                </Canvas>
+            </Suspense>
+        </div>
+    );
+}
+
+document.addEventListener('mousemove', animateWaves)
+let mouseY = 0
+let mouseX = 0
 
 function CameraControls() {
     const {
@@ -18,10 +40,14 @@ function CameraControls() {
         <orbitControls
             ref={controlsRef}
             args={[camera, domElement]}
-            autoRotate
-            autoRotateSpeed={-0.2}
+            
         />
     );
+}
+
+function animateWaves(event) {
+    mouseY = event.clientY
+    mouseX = event.clientX
 }
 
 function Points() {
@@ -30,13 +56,13 @@ function Points() {
 
     let t = 0;
     let f = 0.002;
-    let a = 3;
+    let a = 5;
     const graph = useCallback((x, z) => {
         return Math.sin(f * (x ** 2 + z ** 2 + t)) * a;
     }, [t, f, a])
 
     const count = 100
-    const sep = 3
+    const sep = 5
     let positions = useMemo(() => {
         let positions = []
 
@@ -53,7 +79,8 @@ function Points() {
     }, [count, sep, graph])
 
     useFrame(() => {
-        t += 15
+
+        t += 10
 
         const positions = bufferRef.current.array;
 
@@ -69,56 +96,36 @@ function Points() {
         }
 
         bufferRef.current.needsUpdate = true;
+
     })
+    
 
     return (
-        <points>
-            <bufferGeometry attach="geometry">
-                <bufferAttribute
-                    ref={bufferRef}
-                    attach='attributes-position'
-                    array={positions}
-                    count={positions.length / 3}
-                    itemSize={3}
+        <group rotation={[0, 0, 2]}>
+            <points>
+                <bufferGeometry attach="geometry">
+                    <bufferAttribute
+                        ref={bufferRef}
+                        attach='attributes-position'
+                        array={positions}
+                        count={positions.length / 3}
+                        itemSize={3}
+                    />
+                </bufferGeometry>
+
+                <pointsMaterial
+                    attach="material"
+                    map={imgTex}
+                    color={0x2cf2dc}
+                    size={0.5}
+                    sizeAttenuation
+                    transparent={false}
+                    alphaTest={0.5}
+                    opacity={1.0}
                 />
-            </bufferGeometry>
-
-            <pointsMaterial
-                attach="material"
-                map={imgTex}
-                color={0x00AAFF}
-                size={0.5}
-                sizeAttenuation
-                transparent={false}
-                alphaTest={0.5}
-                opacity={1.0}
-            />
-        </points>
+            </points>
+        </group>
     );
 }
 
-function AnimationCanvas() {
-    return (
-        <Canvas
-            legacy={false}
-            camera={{fov: 75, near: 0.1, far: 1000, position: [100, 10, 0] }}
-        >
-            <Suspense fallback={null}>
-                <Points />
-            </Suspense>
-            <CameraControls />
-        </Canvas>
-    );
-}
 
-function AnimationScript() {
-    return (
-        <div className="webgl">
-            <Suspense fallback={<div>Loading...</div>}>
-                <AnimationCanvas />
-            </Suspense>
-        </div>
-    );
-}
-
-export default AnimationScript;

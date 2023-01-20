@@ -102,7 +102,7 @@ const Navbar = () => {
     }, [md, lg])
 
     return (
-        <Box display="flex" mt={2} justifyContent="space-between" alignItems="center">
+        <Box display="flex" mt={2} justifyContent="space-between" alignItems="center" className="navbar-main" sx={{backgroundColor:`${theme.palette.primary.main}`}}>
 
             {/* logo */}
             <Box ml={2}>
