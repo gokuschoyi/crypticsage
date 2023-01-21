@@ -50,7 +50,7 @@ function Stars(props) {
     const [sphere] = useState(() => random.inSphere(new Float32Array(5000), { radius: 1 }))
 
     useFrame((state, delta) => {
-        console.log(state)
+        // console.log(state)
         ref.current.rotation.x = -mouseY * 0.0004
         ref.current.rotation.y = -mouseX * 0.0004
     })

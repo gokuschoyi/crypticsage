@@ -1,5 +1,6 @@
 import { Box, useTheme, Button } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import "./Navbar.css";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Logo from "../../../assets/logoNew.png";
@@ -8,11 +9,11 @@ import HelpCenterIcon from '@mui/icons-material/HelpCenter';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import SellIcon from '@mui/icons-material/Sell';
-
 import MenuIcon from '@mui/icons-material/Menu';
 
 const Navbar = () => {
     const theme = useTheme();
+    const navigate = useNavigate();
 
     const getToTop = () => {
         window.scrollTo({
@@ -101,6 +102,14 @@ const Navbar = () => {
         }
     }, [md, lg])
 
+    const handleSigninClick = () => {
+        navigate('auth');
+    }
+
+    const handleSignupClick = () => {
+        navigate('auth');
+    }
+
     return (
         <Box display="flex" mt={2} justifyContent="space-between" alignItems="center" className="navbar-main" sx={{backgroundColor:`${theme.palette.primary.main}`}}>
 
@@ -132,12 +141,12 @@ const Navbar = () => {
 
             {/* CTA */}
             <Box mr={2} className="cta">
-                <Button variant="outlined" style={{ color: `${theme.palette.text.primary}` }} sx={{
+                <Button onClick={handleSigninClick} variant="outlined" style={{ color: `${theme.palette.text.primary}` }} sx={{
                     ':hover': {
                         color: 'red !important',
                     },
                 }} >LOGIN</Button>
-                <Button variant="outlined" style={{ color: `${theme.palette.text.primary}` }} sx={{
+                <Button onClick={handleSignupClick}variant="outlined" style={{ color: `${theme.palette.text.primary}` }} sx={{
                     ':hover': {
                         color: 'red !important',
                     },

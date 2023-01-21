@@ -1,0 +1,97 @@
+.login-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.login-container-left {
+  width: 400px;
+  height: auto;
+}
+.login-title {
+  margin-bottom: 40px;
+}
+
+.forgotpassword-box {
+  margin-top: 5px;
+  margin-bottom: 40px;
+  margin-right:10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.forgot-password {
+  cursor: pointer;
+  text-align: right;
+  margin-top: 10px;
+  margin-right: 10px;
+  transition: all 0.5s ease;
+}
+
+.forgot-password:hover {
+  color: red;
+  transition: all 0.5s ease;
+}
+
+.signup-box {
+  margin-top: 40px;
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.signup-start {
+  cursor: auto;
+}
+
+.signup {
+  color: red;
+  cursor: pointer;
+  text-align: right;
+  margin-top: 10px;
+  margin-right: 10px;
+  transition: all 0.5s ease;
+}
+
+.signup:hover {
+  color: white;
+  transition: all 0.5s ease;
+}
+
+.icon-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.login-button {
+  background-color: red !important;
+  color: white !important;
+  margin: 40px;
+  letter-spacing: 5px;
+}
+
+.MuiFormLabel-root {
+  color: red !important;
+}
+
+.reset-button {
+  margin-top: 40px !important;
+  margin-bottom: 40px !important;
+  background-color: red !important;
+  color: white !important;
+  margin: 40px;
+  letter-spacing: 5px;
+}

@@ -1,8 +1,9 @@
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./themes/theme";
 import './App.css';
-import LandingPage from './landing_page/LandingPage';
-import ParallaxStar from './components/landing_page/animation/ParallaxStar';
+import LandingPage from './pages/landing_page/LandingPage';
+import Auth from "./pages/auth/Auth";
+import { Route, Routes, BrowserRouter } from "react-router-dom";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -10,9 +11,15 @@ function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <div className="App">
-          <LandingPage />
-        </div>
+        <BrowserRouter>
+          <div className="App">
+            <Routes>
+              <Route index element={<LandingPage />} />
+              <Route path="auth" element={<Auth />} />
+                
+            </Routes>
+          </div>
+        </BrowserRouter>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

@@ -11,7 +11,7 @@ export default function AnimationScript() {
             <Suspense fallback={<div>Loading...</div>}>
                 <Canvas
                     legacy={false}
-                    camera={{ fov: 60, near: 0.1, far: 1000, position: [100, 20, 1] }}
+                    camera={{ fov: 100, near: 0.1, far: 1000, position: [0, 130, 0] }}
                 >
                     <Suspense fallback={null}>
                         <Points />
@@ -35,12 +35,12 @@ function CameraControls() {
 
     const controlsRef = useRef();
     useFrame(() => controlsRef.current.update())
-
     return (
         <orbitControls
             ref={controlsRef}
             args={[camera, domElement]}
-            
+            // autoRotate
+            // autoRotateSpeed={-0.2}
         />
     );
 }
@@ -57,12 +57,14 @@ function Points() {
     let t = 0;
     let f = 0.002;
     let a = 5;
+
     const graph = useCallback((x, z) => {
         return Math.sin(f * (x ** 2 + z ** 2 + t)) * a;
     }, [t, f, a])
 
-    const count = 100
+    const count = 150
     const sep = 5
+
     let positions = useMemo(() => {
         let positions = []
 
@@ -78,8 +80,7 @@ function Points() {
         return new Float32Array(positions);
     }, [count, sep, graph])
 
-    useFrame(() => {
-
+    const Wave = () => {
         t += 10
 
         const positions = bufferRef.current.array;
@@ -96,12 +97,18 @@ function Points() {
         }
 
         bufferRef.current.needsUpdate = true;
+    }
 
+    useFrame((state, delta) => {
+        Wave();
+        console.log()
+        state.camera.rotation.z = (mouseY + state.camera.rotation.z) * 0.0001;
+        state.camera.rotation.y = (mouseX + state.camera.rotation.x) * 0.0001;
     })
-    
+
 
     return (
-        <group rotation={[0, 0, 2]}>
+        <group rotation={[2, 2, 0]}>
             <points>
                 <bufferGeometry attach="geometry">
                     <bufferAttribute
