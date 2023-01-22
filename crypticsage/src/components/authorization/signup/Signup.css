@@ -4,3 +4,53 @@
   margin: 40px 0 0 0 !important;
   letter-spacing: 5px;
 }
+
+.login-model-signup {
+  width: 500px;
+  height:500px;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.animation-grid-signup{
+    display:flex;
+    justify-content: center;
+}
+
+.signup-container-left{
+  width: 400px;
+  height: auto;
+}
+
+.animation-grid-signup{
+  align-items: center;
+}
+
+.signup-box{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.grid-container{
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.signup-container{
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.signup-box{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}

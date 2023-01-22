@@ -1,17 +1,16 @@
 import React from 'react'
 import './Login.css'
-import { Box, Typography, TextField, Button, IconButton, useTheme } from '@mui/material'
+import { Box, Typography, TextField, Button, IconButton, useTheme, Grid } from '@mui/material'
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
 import Logo from '../../../assets/logoNew.png'
 import { useNavigate } from 'react-router-dom';
+import Animation from '../animation/Animation';
 const Login = (props) => {
     const { switchState } = props
     const theme = useTheme()
     const navigate = useNavigate()
-    const handleResetClick = () => {
-        navigate('/auth/forgot-password')
-    }
+    
     const redirectToHome = () => {
         navigate('/')
     }
@@ -31,75 +30,85 @@ const Login = (props) => {
                 </Box>
             </Box>
             <Box className='login-box'>
-                {!fPassword ?
-                    <Box className="login-container-left">
-                        <Box className="login-title">
-                            <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px' }}>Login</Typography>
-                        </Box>
-                        <Box className="input-filed-box" display="flex" flexDirection="column">
-                            <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Username" variant="outlined" type='text' />
-                            <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Password" variant="outlined" type='password' />
-                        </Box>
-                        <Box className='forgotpassword-box' justifyContent="end" display="flex">
-                            <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px' }}>Forgot Password?</Typography>
-                        </Box>
+                <Grid className='grid-container' container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                        <Box className='login-box'>
+                            {!fPassword ?
+                                <Box className="login-container-left">
+                                    <Box className="login-title">
+                                        <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px' }}>Login</Typography>
+                                    </Box>
+                                    <Box className="input-filed-box" display="flex" flexDirection="column">
+                                        <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Username" variant="outlined" type='text' />
+                                        <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Password" variant="outlined" type='password' />
+                                    </Box>
+                                    <Box className='forgotpassword-box' justifyContent="end" display="flex">
+                                        <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px' }}>Forgot Password?</Typography>
+                                    </Box>
 
-                        <Button className='login-button' variant="contained" sx={{
-                            ':hover': {
-                                color: 'black !important',
-                                backgroundColor: 'white !important'
+                                    <Button className='login-button' variant="contained" sx={{
+                                        ':hover': {
+                                            color: 'black !important',
+                                            backgroundColor: 'white !important'
+                                        }
+                                    }}>LOGIN</Button>
+                                    <Box className='signup-box' justifyContent="center" display="flex">
+                                        <Typography className='signup-start' variant='div' fontWeight="300" sx={{ letterSpacing: '4px' }}>Don't have an Account? <span className="signup" onClick={switchState} >Signup Now </span></Typography>
+                                    </Box>
+                                    <Box className="icon-box">
+                                        <Box className="footer-icon">
+                                            <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                                                <FacebookIcon />
+                                            </IconButton>
+                                        </Box>
+                                        <Box className="footer-icon">
+                                            <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                                                <GoogleIcon />
+                                            </IconButton>
+                                        </Box>
+                                    </Box>
+                                </Box>
+                                :
+                                <Box className="login-container-left">
+                                    <Box className="login-title">
+                                        <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px' }}>Forgot Password</Typography>
+                                    </Box>
+                                    <Box className="input-filed-box" display="flex" flexDirection="column">
+                                        <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Enter your Email" variant="outlined" type='email' />
+                                    </Box>
+                                    <Box className='forgotpassword-box' justifyContent="end" display="flex">
+                                        <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px' }}>Login</Typography>
+                                    </Box>
+                                    <Button className='reset-button' variant="contained" sx={{
+                                        ':hover': {
+                                            color: 'black !important',
+                                            backgroundColor: 'white !important'
+                                        }
+                                    }}>Submit</Button>
+                                    <Box className="icon-box">
+                                        <Box className="footer-icon">
+                                            <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                                                <FacebookIcon />
+                                            </IconButton>
+                                        </Box>
+                                        <Box className="footer-icon">
+                                            <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                                                <GoogleIcon />
+                                            </IconButton>
+                                        </Box>
+                                    </Box>
+                                </Box>
                             }
-                        }}>LOGIN</Button>
-                        <Box className='signup-box' justifyContent="center" display="flex">
-                            <Typography className='signup-start' variant='div' fontWeight="300" sx={{ letterSpacing: '4px' }}>Don't have an Account? <span className="signup" onClick={switchState} >Signup Now </span></Typography>
                         </Box>
-                        <Box className="icon-box">
-                            <Box className="footer-icon">
-                                <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
-                                    <FacebookIcon />
-                                </IconButton>
-                            </Box>
-                            <Box className="footer-icon">
-                                <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
-                                    <GoogleIcon />
-                                </IconButton>
-                            </Box>
+                    </Grid>
+                    <Grid className='animation-grid' item xs={12} sm={6}>
+                        <Box className='login-model'>
+                            <Animation />
                         </Box>
-                    </Box>
-                    :
-                    <Box className="login-container-left">
-                        <Box className="login-title">
-                            <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px' }}>Forgot Password</Typography>
-                        </Box>
-                        <Box className="input-filed-box" display="flex" flexDirection="column">
-                            <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Enter your Email" variant="outlined" type='email' />
-                        </Box>
-                        <Box className='forgotpassword-box' justifyContent="end" display="flex">
-                            <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px' }}>Login</Typography>
-                        </Box>
-                        <Button className='reset-button' variant="contained" sx={{
-                            ':hover': {
-                                color: 'black !important',
-                                backgroundColor: 'white !important'
-                            }
-                        }}>Submit</Button>
-                        <Box className="icon-box">
-                            <Box className="footer-icon">
-                                <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
-                                    <FacebookIcon />
-                                </IconButton>
-                            </Box>
-                            <Box className="footer-icon">
-                                <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
-                                    <GoogleIcon />
-                                </IconButton>
-                            </Box>
-                        </Box>
-                    </Box>
-                }
+                    </Grid>
+                </Grid>
             </Box>
-
-        </Box>
+        </Box >
     )
 }
 
