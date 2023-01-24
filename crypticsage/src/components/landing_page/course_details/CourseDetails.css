@@ -1,6 +1,5 @@
 .course-container {
   position: relative;
-  top: 55vh;
   height: auto;
 }
 
@@ -8,6 +7,7 @@
   padding: 2rem;
   display: flex;
   justify-content: center;
+  margin-top: 60px;
 }
 
 .course-card {
@@ -27,5 +27,14 @@
 @media screen and (max-width: 900px) {
   .course-box {
     padding: 4rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .course-box{
+    padding: 20px;
+  }
+  .course-card{
+    padding:0;
   }
 }

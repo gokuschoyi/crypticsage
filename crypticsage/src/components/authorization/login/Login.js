@@ -15,6 +15,10 @@ const Login = (props) => {
         navigate('/')
     }
 
+    const toDashboard = () => {
+        navigate('/dashboard')
+    }
+
     const [fPassword, setFPassword] = React.useState(false)
     const handleFPassword = () => {
         setFPassword(!fPassword)
@@ -46,7 +50,7 @@ const Login = (props) => {
                                         <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px' }}>Forgot Password?</Typography>
                                     </Box>
 
-                                    <Button className='login-button' variant="contained" sx={{
+                                    <Button onClick = {toDashboard}className='login-button' variant="contained" sx={{
                                         ':hover': {
                                             color: 'black !important',
                                             backgroundColor: 'white !important'

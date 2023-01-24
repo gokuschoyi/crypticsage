@@ -1,7 +1,10 @@
 .banner-container {
-    position: relative;
-  
-  padding-top:20vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height:100vh;
+  background: linear-gradient(60deg, #bfaa270d, rgba(0,0,0,1) 100%), linear-gradient(230deg, #fdda4724, rgba(0,0,0,1) 100%);
 }
 .img-container {
   width: 400px;

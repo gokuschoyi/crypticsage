@@ -1,7 +1,7 @@
 import React from 'react'
 import './LandingPage.css'
 import AnimationScript from '../../components/landing_page/animation/AnimationScript'
-import ParallaxStar from '../../components/landing_page/animation/ParallaxStar'
+// import ParallaxStar from '../../components/landing_page/animation/ParallaxStar'
 import Navbar from '../../components/landing_page/navbar/Navbar'
 import Banner from '../../components/landing_page/banner/Banner'
 import Features from '../../components/landing_page/features/Features'

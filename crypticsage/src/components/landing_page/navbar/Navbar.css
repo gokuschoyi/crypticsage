@@ -1,3 +1,7 @@
+.logo-container{
+  display:flex;
+  align-items: center;
+}
 .logo {
   width: 76px;
   cursor: pointer;
@@ -7,7 +11,7 @@
   width: 100%;
   z-index: 200;
   margin-top:0px !important;
-  padding:10px;
+  padding:15px;
 }
 .navbar-nav {
   display: flex;
@@ -47,6 +51,12 @@
   -webkit-animation: scale-in-center 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)
     both;
   animation: scale-in-center 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.hamburger-icon{
+  display:flex;
+  justify-content: center;
+  align-items: center;
 }
 
 @-webkit-keyframes scale-in-center {

@@ -1,6 +1,6 @@
 import { Box, useTheme, Button } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Logo from "../../../assets/logoNew.png";
@@ -56,12 +56,12 @@ const Navbar = () => {
         return (
             <Box className="ham-nav" style={toggle ? mountedStyle : unmountedStyle}>
                 <Box mr={2} className="cta-small">
-                    <Button variant="outlined" style={{ color: `${theme.palette.primary.main}`, backgroundColor: `${theme.palette.secondary.main}`, margin: '5px' }} sx={{
+                    <Button onClick={handleClick} variant="outlined" style={{ color: `${theme.palette.primary.main}`, backgroundColor: `${theme.palette.secondary.main}`, margin: '5px' }} sx={{
                         ':hover': {
                             color: 'white !important',
                         },
                     }} >LOGIN</Button>
-                    <Button variant="outlined" style={{ color: `${theme.palette.primary.main}`, backgroundColor: `${theme.palette.secondary.main}`, margin: '5px' }} sx={{
+                    <Button onClick={handleClick} variant="outlined" style={{ color: `${theme.palette.primary.main}`, backgroundColor: `${theme.palette.secondary.main}`, margin: '5px' }} sx={{
                         ':hover': {
                             color: 'white !important',
                         },
@@ -102,19 +102,22 @@ const Navbar = () => {
         }
     }, [md, lg])
 
-    const handleSigninClick = () => {
-        navigate('auth');
-    }
-
-    const handleSignupClick = () => {
+    const handleClick = () => {
         navigate('auth');
     }
 
     return (
-        <Box display="flex" mt={2} justifyContent="space-between" alignItems="center" className="navbar-main" sx={{backgroundColor:`${theme.palette.primary.main}`}}>
+        <Box
+            display="flex"
+            mt={2}
+            justifyContent="space-between"
+            alignItems="center"
+            className="navbar-main" 
+            sx={{ backgroundColor: `${theme.palette.primary.extraDark}` }}
+        >
 
             {/* logo */}
-            <Box ml={2}>
+            <Box className="logo-container" ml={2}>
                 <img src={Logo} alt="logo" className="logo" />
             </Box>
 
@@ -141,12 +144,12 @@ const Navbar = () => {
 
             {/* CTA */}
             <Box mr={2} className="cta">
-                <Button onClick={handleSigninClick} variant="outlined" style={{ color: `${theme.palette.text.primary}` }} sx={{
+                <Button onClick={handleClick} variant="outlined" style={{ color: `${theme.palette.text.primary}` }} sx={{
                     ':hover': {
                         color: 'red !important',
                     },
                 }} >LOGIN</Button>
-                <Button onClick={handleSignupClick}variant="outlined" style={{ color: `${theme.palette.text.primary}` }} sx={{
+                <Button onClick={handleClick} variant="outlined" style={{ color: `${theme.palette.text.primary}` }} sx={{
                     ':hover': {
                         color: 'red !important',
                     },
@@ -155,7 +158,7 @@ const Navbar = () => {
 
             {/* hamburger */}
             {lg &&
-                <Box mr={2}>
+                <Box className="hamburger-icon" mr={2}>
                     <MenuIcon onClick={showNav} className="hamburger" />
                 </Box>
             }

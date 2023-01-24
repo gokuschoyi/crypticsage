@@ -1,6 +1,5 @@
 .features-container {
   position: relative;
-  top: 55vh;
   height: auto;
 }
 
@@ -38,6 +37,9 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+  }
+  .features-grid{
+    padding:20px !important;
   }
 }
     

@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Canvas, extend, useFrame, useLoader, useThree } from '@react-three/fiber';
 import circleImg from '../../../assets/circle.png';
-import { Suspense, useCallback, useMemo, useRef } from 'react';
+import { Suspense, useCallback, useMemo, useRef, useEffect } from 'react';
+import * as dat from 'dat.gui'
 extend({ OrbitControls })
 
 export default function AnimationScript() {
@@ -23,6 +24,9 @@ export default function AnimationScript() {
     );
 }
 
+const gui = new dat.GUI()
+
+
 document.addEventListener('mousemove', animateWaves)
 let mouseY = 0
 let mouseX = 0
@@ -39,8 +43,8 @@ function CameraControls() {
         <orbitControls
             ref={controlsRef}
             args={[camera, domElement]}
-            // autoRotate
-            // autoRotateSpeed={-0.2}
+        // autoRotate
+        // autoRotateSpeed={-0.2}
         />
     );
 }
@@ -104,7 +108,12 @@ function Points() {
         console.log()
         state.camera.rotation.z = (mouseY + state.camera.rotation.z) * 0.0001;
         state.camera.rotation.y = (mouseX + state.camera.rotation.x) * 0.0001;
+
     })
+    useEffect(() => {
+        
+        gui.add(bufferRef.camera.position, "x",).max(10).min(-10).step(0.01).name("x")
+    }, [])
 
 
     return (

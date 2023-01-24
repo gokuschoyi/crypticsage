@@ -1,8 +1,9 @@
 import React from 'react'
 import './Testimonials.css'
 import TESTIMONIAL_DATA from './TestimonialContent'
-import { Box, Typography, Card, CardContent, Grid } from "@mui/material"
+import { Box, Typography, Card, CardContent, Grid, useTheme } from "@mui/material"
 const Testimonials = () => {
+    const theme = useTheme();
     const CustomCard = (props) => {
         const { title, content } = props
         return (
@@ -22,10 +23,10 @@ const Testimonials = () => {
     }
 
     return (
-        <Box id="testimonials" className="testimonial-container" >
-            <Typography fontWeight={300} variant="h1" pt={10}>Testimonials</Typography>
+        <Box id="testimonials" className="testimonial-container" sx={{ backgroundColor: `${theme.palette.primary.extraDark}`}}>
+            <Typography fontWeight={300} fontSize="40px" letterSpacing="5px" variant="h1" pt={18}>TESTIMONIALS</Typography>
             <Box className="testimonial-box">
-                <Grid justifyContent="center" container p={8} spacing={{ xs: 2, md: 3 }} >
+                <Grid justifyContent="center" container p={8} spacing={{ xs: 2, md: 3 }} className="testimonial-grid">
                     {TESTIMONIAL_DATA.map((item, index) => {
                         return (
                             <Grid sx={{ display: 'flex', justifyContent: 'center' }} item xs={12} sm={12} md={12} lg={6} key={index}>

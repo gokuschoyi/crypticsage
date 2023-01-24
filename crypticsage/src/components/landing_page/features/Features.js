@@ -1,8 +1,9 @@
 import React from 'react'
-import { Box, Typography, Card, CardContent, CardMedia, Grid } from "@mui/material"
+import { Box, Typography, Card, CardContent, CardMedia, Grid, useTheme } from "@mui/material"
 import "./Features.css"
 import FEATURES_DATA from './FeatureContent'
 const Features = () => {
+    const theme = useTheme();
     const CustomCard = (props) => {
         const { title, subtitle, content } = props
         return (
@@ -32,10 +33,10 @@ const Features = () => {
         )
     }
     return (
-        <Box id='whatis' className="features-container">
-            <Typography fontWeight={300} variant="h1" pt={10}>Features</Typography>
+        <Box id='whatis' className="features-container" sx={{ backgroundColor: `${theme.palette.primary.extraDark}` }}>
+            <Typography fontWeight={300} fontSize="40px" letterSpacing="5px" variant="h1" pt={18}>FEATURES</Typography>
             <Box className="feature-box">
-                <Grid justifyContent="center" container p={8} spacing={{ xs: 2, md: 3 }} >
+                <Grid justifyContent="center" container p={8} spacing={{ xs: 2, md: 3 }} className="features-grid">
                     {FEATURES_DATA.map((item, index) => {
                         return (
                             <Grid sx={{ display: 'flex', justifyContent: 'center' }} item xs={12} sm={12} md={12} lg={6} key={index}>

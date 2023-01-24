@@ -1,0 +1,18 @@
+.content {
+  width: 100%;
+  margin-left: var(--marginLeft);
+  transition: all 0.2s ease-in-out;
+}
+
+.dashboard-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  position: relative;
+}
+
+
+.menu-item :hover{
+    color: red !important;
+    transition: all 0.2s ease-in-out;
+}

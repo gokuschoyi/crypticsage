@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, useTexture, PivotControls, GizmoHelper, GizmoViewport } from '@react-three/drei'
 import './Animation.css'
@@ -17,11 +17,11 @@ export default function Animation() {
 }
 
 document.addEventListener('mousemove', animateStars)
-let mouseY = 0
+
 let mouseX = 0
 
 function animateStars(event) {
-    mouseY = event.clientY
+    
     mouseX = event.clientX
 }
 
