@@ -2,11 +2,31 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Canvas, extend, useFrame, useLoader, useThree } from '@react-three/fiber';
 import circleImg from '../../../assets/circle.png';
-import { Suspense, useCallback, useMemo, useRef, useEffect } from 'react';
-import * as dat from 'dat.gui'
+import { Suspense, useCallback, useMemo, useRef } from 'react';
+// import { useControls } from 'leva'
 extend({ OrbitControls })
 
 export default function AnimationScript() {
+   /*  const options = useMemo(() => {
+        return {
+            x: { value: 3.12, min: 0, max: Math.PI * 2, step: 0.01 },
+            y: { value: 0, min: 0, max: Math.PI * 2, step: 0.01 },
+            z: { value: 0, min: 0, max: Math.PI * 2, step: 0.01 },
+            visible: true,
+            color: { value: 'lime' },
+        }
+    }, [])
+    const position = useMemo(() => {
+        return {
+            x: { value: 0, min: 0, max: 100, step: 0.01 },
+            y: { value: 0, min: -100, max: 100, step: 0.01 },
+            z: { value: 0, min: 0, max: 100, step: 0.01 },
+            color: { value: 'lime' },
+        }
+    }, []) */
+
+    // const pA = useControls('Points', options)
+    // const pB = useControls('position', position)
     return (
         <div className="webgl">
             <Suspense fallback={<div>Loading...</div>}>
@@ -15,7 +35,11 @@ export default function AnimationScript() {
                     camera={{ fov: 100, near: 0.1, far: 1000, position: [0, 130, 0] }}
                 >
                     <Suspense fallback={null}>
-                        <Points />
+                        <Points
+                            /* rotation={[pA.x, pA.y, pA.z]}
+                            position={[pB.x, pB.y, pB.z]}
+                            visible={pA.visible} */ 
+                            />
                     </Suspense>
                     <CameraControls />
                 </Canvas>
@@ -24,12 +48,19 @@ export default function AnimationScript() {
     );
 }
 
-const gui = new dat.GUI()
-
-
 document.addEventListener('mousemove', animateWaves)
 let mouseY = 0
 let mouseX = 0
+
+const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight
+}
+
+document.addEventListener('resize', () => {
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+})
 
 function CameraControls() {
     const {
@@ -50,11 +81,12 @@ function CameraControls() {
 }
 
 function animateWaves(event) {
-    mouseY = event.clientY
-    mouseX = event.clientX
+    mouseX = (event.clientX / sizes.width) * 2 - 1
+    mouseY = (event.clientY / sizes.height) * 2 - 1
+    // console.log({mouseX, mouseY})
 }
 
-function Points() {
+function Points(props) {
     const imgTex = useLoader(THREE.TextureLoader, circleImg);
     const bufferRef = useRef();
 
@@ -63,7 +95,7 @@ function Points() {
     let a = 5;
 
     const graph = useCallback((x, z) => {
-        return Math.sin(f * (x ** 2 + z ** 2 + t)) * a;
+        return Math.sin(f * (x ** 2 + z ** 2 +z**2 + t)) * a;
     }, [t, f, a])
 
     const count = 150
@@ -103,21 +135,16 @@ function Points() {
         bufferRef.current.needsUpdate = true;
     }
 
-    useFrame((state, delta) => {
+    useFrame((state) => {
         Wave();
         console.log()
-        state.camera.rotation.z = (mouseY + state.camera.rotation.z) * 0.0001;
-        state.camera.rotation.y = (mouseX + state.camera.rotation.x) * 0.0001;
-
+        state.camera.rotation.x = (mouseY * 0.1 + state.camera.rotation.x);
+        state.camera.rotation.y = (mouseX * 0.1 + state.camera.rotation.y);
+        // state.scene.rotation.y = clock * 0.1;
     })
-    useEffect(() => {
-        
-        gui.add(bufferRef.camera.position, "x",).max(10).min(-10).step(0.01).name("x")
-    }, [])
-
 
     return (
-        <group rotation={[2, 2, 0]}>
+        <mesh rotation={[3.12,0,0]} >
             <points>
                 <bufferGeometry attach="geometry">
                     <bufferAttribute
@@ -140,7 +167,7 @@ function Points() {
                     opacity={1.0}
                 />
             </points>
-        </group>
+        </mesh>
     );
 }
 

@@ -1,6 +1,7 @@
 .course-container {
   position: relative;
   height: auto;
+  background: linear-gradient(0deg, #00000096 0%, #000000cc 100%);
 }
 
 .course-box {

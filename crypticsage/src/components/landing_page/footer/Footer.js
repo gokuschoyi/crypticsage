@@ -10,45 +10,49 @@ const Footer = () => {
     const theme = useTheme();
     const md = useMediaQuery(theme.breakpoints.down('md'));
     return (
-        <Box className="footer-container centering">
-            <Card sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Box className="footer-firstpart">
-                    <Box pb={2}>
-                        <Typography variant="h6" fontWeight={300} color="white">
-                            JOIN OUR COURSE NOW
-                        </Typography>
+        <Box className="footer-container centering" >
+            <Box sx={{ backgroundColor: `${theme.palette.primary.main}` }}>
+                <Card sx={{
+                    display: 'flex', justifyContent: 'center'
+                }}>
+                    <Box className="footer-firstpart" >
+                        <Box pb={2}>
+                            <Typography variant="h6" fontWeight={300} color="white">
+                                JOIN OUR COURSE NOW
+                            </Typography>
+                        </Box>
+                        <Box pb={1}>
+                            <Typography variant="h1" fontWeight={300} color="white">
+                                Request More Information
+                            </Typography>
+                        </Box>
+                        <Box pb={2}>
+                            <Typography variant="h5" fontWeight={300} color="white">
+                                CrypticSage Media, LLC is a E-Learning platform which is developing a unique platform for learning stocks and trading.
+                            </Typography>
+                        </Box>
+                        <Box pb={2}>
+                            <Typography variant="h5" fontWeight={300} color="white">
+                                <Button variant="outlined" style={{ color: 'white', backgroundColor: 'red', margin: '5px' }} sx={{
+                                    ':hover': {
+                                        color: 'black !important',
+                                        backgroundColor: 'white !important'
+                                    }
+                                }}>
+                                    Contact Us
+                                </Button>
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <Typography variant="h5" fontWeight={300} color="white">
+                                © 2023 CRYPTICSAGE, LLC
+                            </Typography>
+                        </Box>
                     </Box>
-                    <Box pb={1}>
-                        <Typography variant="h1" fontWeight={300} color="white">
-                            Request More Information
-                        </Typography>
-                    </Box>
-                    <Box pb={2}>
-                        <Typography variant="h5" fontWeight={300} color="white">
-                            CrypticSage Media, LLC is a E-Learning platform which is developing a unique platform for learning stocks and trading.
-                        </Typography>
-                    </Box>
-                    <Box pb={2}>
-                        <Typography variant="h5" fontWeight={300} color="white">
-                            <Button variant="outlined" style={{ color: 'white', backgroundColor: 'red', margin: '5px' }} sx={{
-                                ':hover': {
-                                    color: 'black !important',
-                                    backgroundColor: 'white !important'
-                                }
-                            }}>
-                                Contact Us
-                            </Button>
-                        </Typography>
-                    </Box>
-                    <Box>
-                        <Typography variant="h5" fontWeight={300} color="white">
-                            © 2023 CRYPTICSAGE, LLC
-                        </Typography>
-                    </Box>
-                </Box>
-            </Card>
+                </Card>
+            </Box>
             <Divider />
-            <Box className="footer-lower-container" sx={{ backgroundColor: `${theme.palette.primary.dark}`, flexDirection: md ? 'column' : 'row' }}>
+            <Box className="footer-lower-container" sx={{ backgroundColor: `${theme.palette.primary.extraDark}`, flexDirection: md ? 'column' : 'row' }}>
                 <Box >
                     <img src={Logo} alt="logo" className="footer-logo" />
                 </Box>

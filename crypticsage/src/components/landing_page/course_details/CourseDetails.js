@@ -1,10 +1,9 @@
 import React from 'react'
 import "./CourseDetails.css"
-import { Box, Card, Typography,useTheme } from "@mui/material"
+import { Box, Card, Typography } from "@mui/material"
 const CourseDetails = () => {
-    const theme = useTheme();
     return (
-        <Box id="course" className="course-container" sx={{ backgroundColor: `${theme.palette.primary.extraDark}`}}>
+        <Box id="course" className="course-container" >
             <Typography fontWeight={300} fontSize="40px" letterSpacing="5px" variant="h1" pt={18}>COURSE DETAILS</Typography>
             <Box className="course-box">
                 <Card className='course-card' sx={{ display: 'flex', flexDirection: 'column', width: '1000px', textAlign: 'start' }}>

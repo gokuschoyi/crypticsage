@@ -1,6 +1,7 @@
 .testimonial-container {
   position: relative;
   height: auto;
+  background: linear-gradient(0deg, #00000012 0%, #100f079c 100%);
 }
 
 .testimonial-card {

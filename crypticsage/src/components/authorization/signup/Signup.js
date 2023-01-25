@@ -31,10 +31,10 @@ const Signup = (props) => {
                                     <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px' }}>Signup</Typography>
                                 </Box>
                                 <Box className="input-filed-box" display="flex" flexDirection="column">
-                                    <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Username" variant="outlined" type='text' />
-                                    <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Email" variant="outlined" type='text' />
-                                    <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Mobile Number" variant="outlined" type='text' />
-                                    <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Password" variant="outlined" type='password' />
+                                    <TextField sx={{ padding: '10px' }} id="outlined-username" label="Username" variant="outlined" type='text' />
+                                    <TextField sx={{ padding: '10px' }} id="outlined-email" label="Email" variant="outlined" type='text' />
+                                    <TextField sx={{ padding: '10px' }} id="outlined-mobileNumber" label="Mobile Number" variant="outlined" type='text' />
+                                    <TextField sx={{ padding: '10px' }} id="outlined-password" label="Password" variant="outlined" type='password' />
                                 </Box>
 
 

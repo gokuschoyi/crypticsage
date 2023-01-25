@@ -1,6 +1,7 @@
 .features-container {
   position: relative;
   height: auto;
+  background: linear-gradient(0deg, #000000cc 0%, rgba(0 0 0) 100%);
 }
 
 .padding {

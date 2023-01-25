@@ -56,14 +56,16 @@ const Navbar = () => {
         return (
             <Box className="ham-nav" style={toggle ? mountedStyle : unmountedStyle}>
                 <Box mr={2} className="cta-small">
-                    <Button onClick={handleClick} variant="outlined" style={{ color: `${theme.palette.primary.main}`, backgroundColor: `${theme.palette.secondary.main}`, margin: '5px' }} sx={{
+                    <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.primary.main}`, backgroundColor: `${theme.palette.secondary.main}`, margin: '5px' }} sx={{
                         ':hover': {
-                            color: 'white !important',
+                            color: `${theme.palette.primary.main} !important`,
+                            backgroundColor: 'white !important',
                         },
                     }} >LOGIN</Button>
-                    <Button onClick={handleClick} variant="outlined" style={{ color: `${theme.palette.primary.main}`, backgroundColor: `${theme.palette.secondary.main}`, margin: '5px' }} sx={{
+                    <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.primary.main}`, backgroundColor: `${theme.palette.secondary.main}`, margin: '5px' }} sx={{
                         ':hover': {
-                            color: 'white !important',
+                            color: `${theme.palette.primary.main} !important`,
+                            backgroundColor: 'white !important',
                         },
                     }}>SIGNUP</Button>
                 </Box>
@@ -112,7 +114,7 @@ const Navbar = () => {
             mt={2}
             justifyContent="space-between"
             alignItems="center"
-            className="navbar-main" 
+            className="navbar-main"
             sx={{ backgroundColor: `${theme.palette.primary.extraDark}` }}
         >
 
@@ -144,14 +146,16 @@ const Navbar = () => {
 
             {/* CTA */}
             <Box mr={2} className="cta">
-                <Button onClick={handleClick} variant="outlined" style={{ color: `${theme.palette.text.primary}` }} sx={{
+                <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.text.primary}`, marginRight: '20px' }} sx={{
                     ':hover': {
                         color: 'red !important',
+                        backgroundColor: `${theme.palette.secondary.main}`,
                     },
                 }} >LOGIN</Button>
-                <Button onClick={handleClick} variant="outlined" style={{ color: `${theme.palette.text.primary}` }} sx={{
+                <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.text.primary}` }} sx={{
                     ':hover': {
                         color: 'red !important',
+                        backgroundColor: `${theme.palette.secondary.main}`,
                     },
                 }}>SIGNUP</Button>
             </Box>

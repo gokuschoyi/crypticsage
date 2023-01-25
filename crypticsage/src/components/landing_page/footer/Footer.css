@@ -7,6 +7,7 @@
   position: relative;
   top: 100vh;
   height: auto;
+  width: auto;
 }
 .centering {
   display: flex;
@@ -64,3 +65,4 @@
   color: red;
   transition: all 0.3s ease-in-out;
 }
+

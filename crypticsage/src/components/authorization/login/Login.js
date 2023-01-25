@@ -35,7 +35,7 @@ const Login = (props) => {
             </Box>
             <Box className='login-box'>
                 <Grid className='grid-container' container spacing={2}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={12} md={12}  lg={6}>
                         <Box className='login-box'>
                             {!fPassword ?
                                 <Box className="login-container-left">
@@ -43,7 +43,7 @@ const Login = (props) => {
                                         <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px' }}>Login</Typography>
                                     </Box>
                                     <Box className="input-filed-box" display="flex" flexDirection="column">
-                                        <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Username" variant="outlined" type='text' />
+                                        <TextField sx={{ padding: '10px' }} id="outlined-username" label="Username" variant="outlined" type='text' />
                                         <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Password" variant="outlined" type='password' />
                                     </Box>
                                     <Box className='forgotpassword-box' justifyContent="end" display="flex">
@@ -105,7 +105,7 @@ const Login = (props) => {
                             }
                         </Box>
                     </Grid>
-                    <Grid className='animation-grid' item xs={12} sm={6}>
+                    <Grid className='animation-grid' item xs={12} sm={12} md ={12} lg={6}>
                         <Box className='login-model'>
                             <Animation />
                         </Box>
