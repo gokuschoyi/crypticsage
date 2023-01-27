@@ -1,5 +1,5 @@
 import { Box, useTheme, Button } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -11,7 +11,8 @@ import RateReviewIcon from '@mui/icons-material/RateReview';
 import SellIcon from '@mui/icons-material/Sell';
 import MenuIcon from '@mui/icons-material/Menu';
 
-const Navbar = () => {
+const Navbar = (props) => {
+    const { toggle, setToggle } = props;
     const theme = useTheme();
     const navigate = useNavigate();
 
@@ -56,13 +57,13 @@ const Navbar = () => {
         return (
             <Box className="ham-nav" style={toggle ? mountedStyle : unmountedStyle}>
                 <Box mr={2} className="cta-small">
-                    <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.primary.main}`, backgroundColor: `${theme.palette.secondary.main}`, margin: '5px' }} sx={{
+                    <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.primary.extraDark}`, backgroundColor: 'red', margin: '5px' }} sx={{
                         ':hover': {
                             color: `${theme.palette.primary.main} !important`,
                             backgroundColor: 'white !important',
                         },
                     }} >LOGIN</Button>
-                    <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.primary.main}`, backgroundColor: `${theme.palette.secondary.main}`, margin: '5px' }} sx={{
+                    <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.primary.extraDark}`, backgroundColor: 'red', margin: '5px' }} sx={{
                         ':hover': {
                             color: `${theme.palette.primary.main} !important`,
                             backgroundColor: 'white !important',
@@ -93,16 +94,6 @@ const Navbar = () => {
             </Box>
         )
     }
-
-    const [toggle, setToggle] = useState(false);
-    const showNav = () => {
-        setToggle((prev) => !prev);
-    }
-    useEffect(() => {
-        if (!md || !lg) {
-            setToggle(false);
-        }
-    }, [md, lg])
 
     const handleClick = () => {
         navigate('auth');
@@ -148,14 +139,14 @@ const Navbar = () => {
             <Box mr={2} className="cta">
                 <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.text.primary}`, marginRight: '20px' }} sx={{
                     ':hover': {
-                        color: 'red !important',
-                        backgroundColor: `${theme.palette.secondary.main}`,
+                        color: 'black !important',
+                        backgroundColor: 'red !important',
                     },
                 }} >LOGIN</Button>
                 <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.text.primary}` }} sx={{
                     ':hover': {
-                        color: 'red !important',
-                        backgroundColor: `${theme.palette.secondary.main}`,
+                        color: 'black !important',
+                        backgroundColor: 'red !important',
                     },
                 }}>SIGNUP</Button>
             </Box>
@@ -163,7 +154,7 @@ const Navbar = () => {
             {/* hamburger */}
             {lg &&
                 <Box className="hamburger-icon" mr={2}>
-                    <MenuIcon onClick={showNav} className="hamburger" />
+                    <MenuIcon onClick={setToggle} className="hamburger" />
                 </Box>
             }
             {hamburgerContent()}

@@ -1,28 +1,35 @@
-import React from 'react'
+import React, { useState } from 'react'
+import {Box} from '@mui/material'
 import './LandingPage.css'
-import AnimationScript from '../../components/landing_page/animation/AnimationScript'
+// import AnimationScript from '../../components/landing_page/animation/AnimationScript'
 // import ParallaxStar from '../../components/landing_page/animation/ParallaxStar'
-import Navbar from '../../components/landing_page/navbar/Navbar'
-import Banner from '../../components/landing_page/banner/Banner'
-import Features from '../../components/landing_page/features/Features'
-import CourseDetails from '../../components/landing_page/course_details/CourseDetails'
-import Testimonials from '../../components/landing_page/testimonials/Testimonials';
-import Pricing from '../../components/landing_page/pricing/Pricing';
-import Footer from '../../components/landing_page/footer/Footer'
+
+import { Navbar, Banner, Features, CourseDetails, Testimonials, Pricing, Footer, ParallaxStar} from '../../components/landing_page/index'
 const LandingPage = () => {
+    const [toggle, setToggle] = useState(false);
+    const showNav = () => {
+        setToggle((prev) => !prev);
+    }
+
+    const closeNav = () => {
+        setToggle(false);
+    }
+
     return (
         <>
             <div className="animation-container">
-                <AnimationScript />
+                <ParallaxStar />
             </div>
             <div className='main'>
-                <Navbar />
-                <Banner />
-                <Features />
-                <CourseDetails />
-                <Testimonials />
-                <Pricing />
-                <Footer />
+                <Navbar toggle={toggle} setToggle={showNav} />
+                <Box className='content' onClick={closeNav}>
+                    <Banner />
+                    <Features />
+                    <CourseDetails />
+                    <Testimonials />
+                    <Pricing />
+                    <Footer />
+                </Box>
             </div>
         </>
     )

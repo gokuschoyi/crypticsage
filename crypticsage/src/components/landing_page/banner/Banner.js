@@ -1,8 +1,9 @@
 import React, { useRef, useEffect } from 'react'
 import { Box, useTheme, Grid, Button, Typography } from "@mui/material"
-import Maincomp from "../../../assets/Main_Comp.png"
+// import Maincomp from "../../../assets/Main_Comp.png"
 import Typed from 'typed.js';
 import "./Banner.css"
+import WordGlobe from '../animation/WordGlobe';
 const Banner = () => {
     const el = useRef(null);
     // Create reference to store the Typed instance itself
@@ -35,7 +36,7 @@ const Banner = () => {
     }, [])
     const theme = useTheme();
     return (
-        <Box className="banner-container" sx={{ backgroundColor: `${theme.palette.primary.extraDark}` }} id='home'>
+        <Box className="banner-container" sx={{ backgroundColor: `${theme.palette.primary.extraDark}80` }} id='home'>
             <Grid
                 container
                 direction="row"
@@ -44,24 +45,31 @@ const Banner = () => {
                 spacing={2}
             >
                 <Grid item xs={12} sm={12} md={6} lg={5} className="grid-col-left">
-                    <Typography pb={4} variant='h1' fontSize='50px' fontWeight='400' sx={{ textAlign: 'start' }}>Master the Market: Learn Crypto and Stocks Today.</Typography>
-                    <p><span 
-                        style={{
-                            fontSize:'20px',
-                            fontWeight:'400',
-                            textAlign: 'start'
-                        }}    
-                    ref={el}></span></p>
-                    
-                    <Button className="grid-col-button-left " pb={4} style={{ color: `${theme.palette.primary.extraDark}`, backgroundColor: `${theme.palette.secondary.main}` }} variant="contained" sx={{
+                    <Typography className='banner-text' pb={4} variant='h1' fontSize='50px' fontWeight='400' sx={{ textAlign: 'start', color: 'white' }}>Master the Market: Learn Crypto and Stocks Today.</Typography>
+                    <p style={{height:'65px'}}>
+                        <span
+                            style={{
+                                fontSize: '20px',
+                                fontWeight: '400',
+                                textAlign: 'start'
+                            }}
+                            ref={el}>
+                            </span>
+                    </p>
+
+                    <Button className="grid-col-button-left " pb={4} style={{ color: 'white', backgroundColor: 'red' }} variant="contained" sx={{
                         ':hover': {
                             color: 'black !important',
                             backgroundColor: 'white !important'
                         }
                     }} >Get Started</Button>
                 </Grid>
-                <Grid item xs={12} sm={12} md={6} lg={7} sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <img className='img-container' src={Maincomp} alt="banner" />
+                <Grid className="banner-animation-container" item xs={12} sm={12} md={6} lg={7} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Box className="banner-animation-model">
+                        <WordGlobe />
+                    </Box>    
+                
+                {/* <img className='img-container' src={Maincomp} alt="banner" /> */}
                 </Grid>
             </Grid>
         </Box>

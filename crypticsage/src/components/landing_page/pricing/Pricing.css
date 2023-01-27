@@ -1,6 +1,6 @@
 .pricing-container {
   position: relative;
-  top: 100vh;
+  /* top: 100vh; */
   height: auto;
 }
 .pricing-box {
@@ -8,9 +8,17 @@
   display: flex;
   justify-content: center;
   margin-top: 60px;
+  padding-bottom: 10rem;
 }
 .padding-price {
   padding: 2rem;
+}
+
+.get-to-top{
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 20px;
+  padding-bottom: 20px;
 }
 
 @media screen and (max-width: 900px) {

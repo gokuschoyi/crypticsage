@@ -1,7 +1,8 @@
 .course-container {
   position: relative;
   height: auto;
-  background: linear-gradient(0deg, #00000096 0%, #000000cc 100%);
+  /* background: linear-gradient(0deg, #00000096 0%, #000000cc 100%); */
+  background-color: #00000080;
 }
 
 .course-box {
@@ -9,6 +10,7 @@
   display: flex;
   justify-content: center;
   margin-top: 60px;
+  padding-bottom: 5rem;
 }
 
 .course-card {

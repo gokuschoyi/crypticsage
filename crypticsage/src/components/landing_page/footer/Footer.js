@@ -53,19 +53,19 @@ const Footer = () => {
             </Box>
             <Divider />
             <Box className="footer-lower-container" sx={{ backgroundColor: `${theme.palette.primary.extraDark}`, flexDirection: md ? 'column' : 'row' }}>
-                <Box >
+                <Box className='logo-container'>
                     <img src={Logo} alt="logo" className="footer-logo" />
                 </Box>
                 <Box display="flex" flexDirection="row" className="footer-menu">
                     <ul className="footer-nav justify-content-center flex-grow-1" >
-                        <li className="footer-item" >
-                            <a className="footer-link" href="#team"><span>HOME</span></a>
+                        <li className="nav-item" >
+                            <a className="nav-link" href="#team"><span>HOME</span></a>
                         </li>
-                        <li className="footer-item">
-                            <a className="footer-link" href="#CaseStudy"><span>WHAT IS</span></a>
+                        <li className="nav-item">
+                            <a className="nav-link" href="#CaseStudy"><span>WHAT IS</span></a>
                         </li>
-                        <li className="footer-item">
-                            <a className="footer-link" href="#CaseStudy"><span>BLOGS</span></a>
+                        <li className="nav-item">
+                            <a className="nav-link" href="#CaseStudy"><span>BLOGS</span></a>
                         </li>
                     </ul>
                 </Box>

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Points, PointMaterial } from '@react-three/drei'
 import * as random from 'maath/random/dist/maath-random.esm'
+import { OrbitControls } from '@react-three/drei'
 
 export default function ParallaxStar() {
     return (
@@ -10,7 +11,7 @@ export default function ParallaxStar() {
                 <Stars />
                 <CameraControls />
             </Canvas>
-            <Overlay />
+            
         </div>
 
     )
@@ -30,19 +31,30 @@ function CameraControls() {
     useFrame(() => controlsRef.current.update())
 
     return (
-        <orbitControls
+        <OrbitControls
             ref={controlsRef}
             args={[camera, domElement]}
             autoRotate
-            autoRotateSpeed={-0.2}
+            autoRotateSpeed={-0.1}
         />
     );
 }
 
 
+const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight
+}
+
+document.addEventListener('resize', () => {
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+})
+
+
 function animateStars(event) {
-    mouseY = event.clientY
-    mouseX = event.clientX
+    mouseX = (event.clientX / sizes.width) * 2 - 1
+    mouseY = (event.clientY / sizes.height) * 2 - 1
 }
 
 function Stars(props) {
@@ -51,24 +63,15 @@ function Stars(props) {
 
     useFrame((state, delta) => {
         // console.log(state)
-        ref.current.rotation.x = -mouseY * 0.0004
-        ref.current.rotation.y = -mouseX * 0.0004
+        ref.current.rotation.y = mouseX * 0.04
+        ref.current.rotation.z = -mouseY * 0.04
     })
     return (
-        <group rotation={[0, 0, Math.PI / 4]}>
+        <group rotation={[0, 0,0]}>
             <Points ref={ref} positions={sphere} stride={3} frustumCulled={false} {...props}>
-                <PointMaterial transparent color="#21BBAA" size={0.005} sizeAttenuation={true} depthWrite={false} />
+                <PointMaterial transparent color="#ffffff" size={0.005} sizeAttenuation={true} depthWrite={false} />
             </Points>
         </group>
     )
 }
 
-function Overlay() {
-    return (
-        <div style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none', width: '100%', height: '100%' }}>
-            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate3d(-50%,-50%,0)' }}>
-                <h1 style={{ margin: 0, padding: 0, fontSize: '15em', fontWeight: 500, letterSpacing: '-0.05em', color: 'aquamarine' }}>Hello</h1>
-            </div>
-        </div>
-    )
-}
