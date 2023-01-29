@@ -161,5 +161,41 @@ const themeThree = {
     },
 }
 
+const BlackAndWhite = {
+    colorOne: {
+        100: "#d3d3d3",
+        200: "#a6a6a6",
+        300: "#7a7a7a",
+        400: "#4d4d4d",
+        500: "#212121",
+        600: "#1a1a1a",
+        700: "#141414",
+        800: "#0d0d0d",
+        900: "#070707",
+    },
+    colorTwo: {
+        100: "#fefefe",
+        200: "#fdfdfd",
+        300: "#fcfcfc",
+        400: "#fbfbfb",
+        500: "#fafafa",
+        600: "#c8c8c8",
+        700: "#969696",
+        800: "#646464",
+        900: "#323232"
+    },
+    colorThree: {
+        100: "#fef4da",
+        200: "#fde9b5",
+        300: "#fbde90",
+        400: "#fad36b",
+        500: "#f9c846",
+        600: "#c7a038",
+        700: "#95782a",
+        800: "#64501c",
+        900: "#32280e"
+    },
+}
 
-export { Colors, initialColors, themeOne, themeTwo, themeThree };
+
+export { Colors, initialColors, themeOne, themeTwo, themeThree, BlackAndWhite };

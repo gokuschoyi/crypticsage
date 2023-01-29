@@ -57,15 +57,15 @@ const Navbar = (props) => {
         return (
             <Box className="ham-nav" style={toggle ? mountedStyle : unmountedStyle}>
                 <Box mr={2} className="cta-small">
-                    <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.primary.extraDark}`, backgroundColor: 'red', margin: '5px' }} sx={{
+                    <Button onClick={handleClick} variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px' }} sx={{
                         ':hover': {
-                            color: `${theme.palette.primary.main} !important`,
+                            color: `black !important`,
                             backgroundColor: 'white !important',
                         },
                     }} >LOGIN</Button>
-                    <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.primary.extraDark}`, backgroundColor: 'red', margin: '5px' }} sx={{
+                    <Button onClick={handleClick} variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px' }} sx={{
                         ':hover': {
-                            color: `${theme.palette.primary.main} !important`,
+                            color: `black !important`,
                             backgroundColor: 'white !important',
                         },
                     }}>SIGNUP</Button>
@@ -106,7 +106,7 @@ const Navbar = (props) => {
             justifyContent="space-between"
             alignItems="center"
             className="navbar-main"
-            sx={{ backgroundColor: `${theme.palette.primary.extraDark}` }}
+            sx={{ backgroundColor: `black` }}
         >
 
             {/* logo */}
@@ -137,13 +137,13 @@ const Navbar = (props) => {
 
             {/* CTA */}
             <Box mr={2} className="cta">
-                <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.text.primary}`, marginRight: '20px' }} sx={{
+                <Button onClick={handleClick} variant="text" style={{ fontSize:'18px', color: `white`, marginRight: '20px' }} sx={{
                     ':hover': {
                         color: 'black !important',
                         backgroundColor: 'red !important',
                     },
                 }} >LOGIN</Button>
-                <Button onClick={handleClick} variant="text" style={{ color: `${theme.palette.text.primary}` }} sx={{
+                <Button onClick={handleClick} variant="text" style={{ fontSize:'18px', color: `white` }} sx={{
                     ':hover': {
                         color: 'black !important',
                         backgroundColor: 'red !important',

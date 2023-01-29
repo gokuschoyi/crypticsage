@@ -1,12 +1,11 @@
 import React from 'react'
 import './Pricing.css'
-import { Box, Card, Typography, useTheme, IconButton } from "@mui/material"
+import { Box, Card, Typography, IconButton } from "@mui/material"
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 const Pricing = () => {
-    const theme = useTheme();
     return (
-        <Box id="pricing" className="pricing-container" sx={{ backgroundColor: `${theme.palette.primary.extraDark}` }}>
-            <Typography fontWeight={300} fontSize="50px" letterSpacing="5px" variant="h1" pt={18}>PRICING</Typography>
+        <Box id="pricing" className="pricing-container" sx={{ backgroundColor: `black` }}>
+            <Typography sx={{color:'white'}} fontWeight={300} fontSize="50px" letterSpacing="5px" variant="h1" pt={18}>PRICING</Typography>
             <Box className="pricing-box">
                 <Card sx={{ display: 'flex', width: '800px', textAlign: 'justify' }} className="pricing-card">
                     <Typography variant="h5" fontWeight={300} className="padding-price" color="white">

@@ -10,12 +10,16 @@ const Header = ({ title, subtitle }) => {
                 variant="h2"
                 color={`${theme.palette.secondary.main}`}
                 fontWeight="bold"
-                sx={{ m: "0 0 5px 0" ,textAlign:"left" }}
+                sx={{ m: "0 0 5px 10px", textAlign: "left" }}
 
             >
                 {title}
             </Typography>
-            <Typography variant="h5" color={colors.colorOne[400]} sx={{textAlign:"left"}}>
+            <Typography
+                variant="h5"
+                color={colors.colorOne[400]}
+                sx={{ textAlign: "left", m: "0 0 5px 10px" }}
+            >
                 {subtitle}
             </Typography>
         </Box>

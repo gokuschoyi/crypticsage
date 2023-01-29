@@ -15,6 +15,7 @@
 
 .course-card {
   padding: 20px;
+  padding-bottom: 60px;
 }
 
 .padding-course {
@@ -39,5 +40,6 @@
   }
   .course-card{
     padding:0;
+    padding-bottom: 30px;
   }
 }

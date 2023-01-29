@@ -4,7 +4,7 @@ import { Box, Card, Typography } from "@mui/material"
 const CourseDetails = () => {
     return (
         <Box id="course" className="course-container" >
-            <Typography fontWeight={300} fontSize="50px" letterSpacing="5px" variant="h1" pt={18}>COURSE DETAILS</Typography>
+            <Typography sx={{color:'white'}} fontWeight={300} fontSize="50px" letterSpacing="5px" variant="h1" pt={18}>COURSE DETAILS</Typography>
             <Box className="course-box">
                 <Card className='course-card' sx={{ display: 'flex', flexDirection: 'column', width: '1000px', textAlign: 'start' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>

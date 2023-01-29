@@ -1,6 +1,6 @@
 import React from 'react'
 import './Signup.css'
-import { Box, Typography, TextField, Button, IconButton, useTheme, Grid } from '@mui/material'
+import { Box, Typography, TextField, Button, IconButton, Grid } from '@mui/material'
 import Logo from '../../../assets/logoNew.png'
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -9,7 +9,6 @@ import Animation from '../animation/Animation';
 const Signup = (props) => {
     const { switchState } = props
     const navigate = useNavigate()
-    const theme = useTheme()
     const redirectToHome = () => {
         navigate('/')
     }
@@ -49,12 +48,12 @@ const Signup = (props) => {
                                 </Box>
                                 <Box className="icon-box">
                                     <Box className="footer-icon">
-                                        <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                                        <IconButton aria-label="facebook">
                                             <FacebookIcon />
                                         </IconButton>
                                     </Box>
                                     <Box className="footer-icon">
-                                        <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                                        <IconButton aria-label="facebook">
                                             <GoogleIcon />
                                         </IconButton>
                                     </Box>

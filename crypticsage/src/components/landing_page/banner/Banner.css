@@ -35,6 +35,13 @@
   .banner-text{
     font-size: 40px !important;
   }
+  .MuiGrid-container{
+    padding: 30px !important ;
+    padding-top: 60px !important;
+  }
+  .grid-col-left{
+    padding-left:20px !important;
+  }
 }
 
 .banner-animation-container {

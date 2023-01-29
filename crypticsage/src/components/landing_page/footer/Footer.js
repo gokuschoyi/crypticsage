@@ -11,7 +11,7 @@ const Footer = () => {
     const md = useMediaQuery(theme.breakpoints.down('md'));
     return (
         <Box className="footer-container centering" >
-            <Box sx={{ backgroundColor: `${theme.palette.primary.main}` }}>
+            <Box sx={{ backgroundColor: `#545863` }}>
                 <Card sx={{
                     display: 'flex', justifyContent: 'center'
                 }}>
@@ -51,8 +51,8 @@ const Footer = () => {
                     </Box>
                 </Card>
             </Box>
-            <Divider />
-            <Box className="footer-lower-container" sx={{ backgroundColor: `${theme.palette.primary.extraDark}`, flexDirection: md ? 'column' : 'row' }}>
+            <Divider sx={{ color: 'white' }} />
+            <Box className="footer-lower-container" sx={{ backgroundColor: `#000000`, flexDirection: md ? 'column' : 'row' }}>
                 <Box className='logo-container'>
                     <img src={Logo} alt="logo" className="footer-logo" />
                 </Box>
@@ -71,17 +71,17 @@ const Footer = () => {
                 </Box>
                 <Box display="flex" flexDirection="row" className="social-icons">
                     <Box className="footer-icon">
-                        <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}  >
+                        <IconButton aria-label="facebook">
                             <FacebookRoundedIcon />
                         </IconButton>
                     </Box>
                     <Box className="footer-icon">
-                        <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                        <IconButton aria-label="facebook">
                             <VideoLibraryRoundedIcon />
                         </IconButton>
                     </Box>
                     <Box className="footer-icon">
-                        <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                        <IconButton aria-label="facebook">
                             <BurstModeRoundedIcon />
                         </IconButton>
                     </Box>

@@ -1,6 +1,6 @@
 import { Box, IconButton, useTheme } from "@mui/material";
 import { useContext } from "react";
-import { ColorModeContext, tokens } from "../../../themes/theme";
+import { ColorModeContext } from "../../../themes/theme";
 import InputBase from "@mui/material/InputBase";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -11,24 +11,24 @@ import SearchIcon from "@mui/icons-material/Search";
 
 const Topbar = () => {
     const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
     const colorMode = useContext(ColorModeContext);
     /* console.log(theme.palette.primary); */
     console.log(theme.palette.mode);
 
     return (
-        <Box display="flex" justifyContent="space-between" p={2} backgroundColor={theme.palette.secondary.main}>
+        <Box display="flex" justifyContent="space-between" p={2} backgroundColor={theme.palette.primary.dark}>
             {/* SEARCH BAR */}
             <Box
                 display="flex"
                 borderRadius="3px"
-                color={colors.colorTwo[500]}
+
             >
                 <InputBase
                     sx={{
                         ml: 2,
                         flex: 1,
-                        backgroundColor: theme.palette.background.default,
+                        backgroundColor: theme.palette.secondary.main,
+                        color: theme.palette.primary.dark,
                         borderRadius: '20px',
                         ' .MuiInputBase-input': {
                             textIndent: '20px',
@@ -42,22 +42,41 @@ const Topbar = () => {
 
             {/* ICONS */}
             <Box display="flex">
-                <IconButton onClick={colorMode.toggleColorMode}>
-                    {theme.palette.mode === "dark" ? (
-                        <DarkModeOutlinedIcon />
-                    ) : (
-                        <LightModeOutlinedIcon />
-                    )}
-                </IconButton>
-                <IconButton>
-                    <NotificationsOutlinedIcon />
-                </IconButton>
-                <IconButton>
-                    <SettingsOutlinedIcon />
-                </IconButton>
-                <IconButton>
-                    <PersonOutlinedIcon />
-                </IconButton>
+                {theme.palette.mode === "dark" ?
+                    (
+                        <Box display='flex'>
+                            <IconButton onClick={colorMode.toggleColorMode}>
+                                <LightModeOutlinedIcon />
+                            </IconButton>
+                            <IconButton>
+                                <NotificationsOutlinedIcon />
+                            </IconButton>
+                            <IconButton>
+                                <SettingsOutlinedIcon />
+                            </IconButton>
+                            <IconButton>
+                                <PersonOutlinedIcon />
+                            </IconButton>
+                        </Box>
+                    )
+                    :
+                    (
+                        <Box display='flex'>
+                            <IconButton onClick={colorMode.toggleColorMode}>
+                                <DarkModeOutlinedIcon sx={{ color: 'white' }} />
+                            </IconButton>
+                            <IconButton>
+                                <NotificationsOutlinedIcon sx={{ color: 'white' }} />
+                            </IconButton>
+                            <IconButton>
+                                <SettingsOutlinedIcon sx={{ color: 'white' }} />
+                            </IconButton>
+                            <IconButton>
+                                <PersonOutlinedIcon sx={{ color: 'white' }} />
+                            </IconButton>
+                        </Box>
+                    )
+                }
             </Box>
         </Box>
     );

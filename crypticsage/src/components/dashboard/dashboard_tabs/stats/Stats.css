@@ -1,17 +1,31 @@
-.card-holder{
-    padding:10px !important;
-    border-radius: 20px !important;
-    margin:10px !important;
-    /* height:360px !important; */
-}
-.card-button{
-    color:white !important;
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-    transition: all 0.3s ease-in-out;
-    border-radius: 5px !important;
+.card-holder {
+  padding: 15px 10px 20px 20px !important;
+  border-radius: 20px !important;
+  margin: 15px !important;
+  min-height: 250px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.stat-cards-container{
-    padding:20px;
+.action-box {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.card-button {
+  color: white !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  transition: all 0.3s ease-in-out;
+  border-radius: 5px !important;
+}
+
+.stat-cards-container {
+  padding: 20px;
+}
+
+.sidebar-label {
+  font-size: 13px !important;
+  transition: all 0.3s ease-in-out;
 }

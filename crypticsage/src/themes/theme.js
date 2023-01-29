@@ -1,11 +1,11 @@
 import { createContext, useState, useMemo } from "react";
 import { createTheme } from "@mui/material/styles";
 import Typography from "./typography";
-import { initialColors, themeOne } from "./colors";
+import { initialColors, BlackAndWhite } from "./colors";
 export const tokens = (mode) => ({
     ...(mode === 'dark'
         ?
-        { ...themeOne }
+        { ...BlackAndWhite }
         :
         { ...initialColors }
     )
@@ -25,27 +25,27 @@ export const themeSettings = (mode) => {
             ...(mode === 'dark'
                 ? {
                     primary: {
+                        main: colors.colorOne[500],
+                        light: colors.colorOne[300],
+                        dark: colors.colorOne[700],
+                        extraDark: colors.colorOne[900],
+                        contrastText: colors.colorTwo[500],
+                    },
+                    secondary: {
                         main: colors.colorTwo[500],
                         light: colors.colorTwo[300],
                         dark: colors.colorTwo[700],
-                        extraDark: colors.colorTwo[900],
-                        contrastText: colors.colorOne[500],
-                    },
-                    secondary: {
-                        main: colors.colorThree[500],
-                        light: colors.colorThree[300],
-                        dark: colors.colorThree[700],
-                        contrastText: colors.colorThree[500],
+                        contrastText: colors.colorTwo[500],
                     },
                     text: {
-                        primary: colors.colorOne[600],
-                        secondary: colors.colorOne[300],
-                        disabled: colors.colorOne[100],
-                        hint: colors.colorOne[100],
-                        dark: colors.colorOne[900],
+                        primary: colors.colorThree[600],
+                        secondary: colors.colorThree[300],
+                        disabled: colors.colorThree[100],
+                        hint: colors.colorThree[100],
+                        dark: colors.colorThree[900],
                     },
                     background: {
-                        default: colors.colorTwo[800],
+                        default: colors.colorOne[800],
                     },
                     error: {
                         main: '#F44336',

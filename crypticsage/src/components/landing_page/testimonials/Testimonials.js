@@ -8,7 +8,7 @@ const Testimonials = () => {
         return (
             <Card className="testimonial-card" sx={{ textAlign: 'start' }}>
                 <CardContent >
-                    <Typography variant="h3" fontWeight={400} className="padding">
+                    <Typography variant="h3" fontWeight={400} color="secondary.main" className="padding">
                         {title}
                     </Typography>
                     <Typography textAlign="justify" variant="h6" fontWeight={300} color="white" >

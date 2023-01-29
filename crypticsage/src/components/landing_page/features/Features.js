@@ -8,10 +8,10 @@ const Features = () => {
         return (
             <Card className="features-card" sx={{ textAlign: 'start' }}>
                 <CardContent sx={{ flex: '1 0 auto' }}>
-                    <Typography variant="h3" fontWeight={400} className="padding">
+                    <Typography variant="h3" fontWeight={400} color="secondary.main" className="padding">
                         {title}
                     </Typography>
-                    <Typography variant="h4" fontWeight={300} color="text.secondary" className="padding">
+                    <Typography variant="h4" fontWeight={300} color="secondary.main" className="padding">
                         {subtitle}
                     </Typography>
                     <Typography textAlign="justify" variant="h6" fontWeight={300} color="white" >

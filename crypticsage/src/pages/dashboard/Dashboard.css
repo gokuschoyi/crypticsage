@@ -2,6 +2,7 @@
   width: 100%;
   margin-left: var(--marginLeft);
   transition: all 0.2s ease-in-out;
+  /* background-image: url("../../assets/bg.jpg"); */
 }
 
 .dashboard-container {
@@ -11,8 +12,17 @@
   position: relative;
 }
 
-
-.menu-item :hover{
-    color: red !important;
-    transition: all 0.2s ease-in-out;
+.menu-icon-holder {
+  transition: all 0.2s ease-in-out;
 }
+
+.menu-item :hover {
+  color: red !important;
+  transition: all 0.2s ease-in-out;
+}
+/* 
+.menu-item :active {
+  background-color: white !important;
+  color: black !important;
+  transition: all 0.2s ease-in-out;
+} */

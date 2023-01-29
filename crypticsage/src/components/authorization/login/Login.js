@@ -1,6 +1,6 @@
 import React from 'react'
 import './Login.css'
-import { Box, Typography, TextField, Button, IconButton, useTheme, Grid } from '@mui/material'
+import { Box, Typography, TextField, Button, IconButton, Grid } from '@mui/material'
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
 import Logo from '../../../assets/logoNew.png'
@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import Animation from '../animation/Animation';
 const Login = (props) => {
     const { switchState } = props
-    const theme = useTheme()
     const navigate = useNavigate()
     
     const redirectToHome = () => {
@@ -61,12 +60,12 @@ const Login = (props) => {
                                     </Box>
                                     <Box className="icon-box">
                                         <Box className="footer-icon">
-                                            <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                                            <IconButton aria-label="facebook" >
                                                 <FacebookIcon />
                                             </IconButton>
                                         </Box>
                                         <Box className="footer-icon">
-                                            <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                                            <IconButton aria-label="facebook" >
                                                 <GoogleIcon />
                                             </IconButton>
                                         </Box>
@@ -91,12 +90,12 @@ const Login = (props) => {
                                     }}>Submit</Button>
                                     <Box className="icon-box">
                                         <Box className="footer-icon">
-                                            <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                                            <IconButton aria-label="facebook">
                                                 <FacebookIcon />
                                             </IconButton>
                                         </Box>
                                         <Box className="footer-icon">
-                                            <IconButton aria-label="facebook" sx={{ color: `${theme.palette.text.primary}` }}>
+                                            <IconButton aria-label="facebook">
                                                 <GoogleIcon />
                                             </IconButton>
                                         </Box>

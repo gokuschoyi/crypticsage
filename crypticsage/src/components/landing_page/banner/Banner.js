@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react'
-import { Box, useTheme, Grid, Button, Typography } from "@mui/material"
+import { Box, Grid, Button, Typography } from "@mui/material"
 // import Maincomp from "../../../assets/Main_Comp.png"
 import Typed from 'typed.js';
 import "./Banner.css"
@@ -34,9 +34,8 @@ const Banner = () => {
             typed.current.destroy();
         }
     }, [])
-    const theme = useTheme();
     return (
-        <Box className="banner-container" sx={{ backgroundColor: `${theme.palette.primary.extraDark}80` }} id='home'>
+        <Box className="banner-container" sx={{ backgroundColor: `#00000080` }} id='home'>
             <Grid
                 container
                 direction="row"
@@ -51,7 +50,8 @@ const Banner = () => {
                             style={{
                                 fontSize: '20px',
                                 fontWeight: '400',
-                                textAlign: 'start'
+                                textAlign: 'start',
+                                color: 'white'
                             }}
                             ref={el}>
                             </span>
@@ -64,7 +64,7 @@ const Banner = () => {
                         }
                     }} >Get Started</Button>
                 </Grid>
-                <Grid className="banner-animation-container" item xs={12} sm={12} md={6} lg={7} sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Grid className="banner-animation-container" item xs={12} sm={12} md={6} lg={6} sx={{ display: 'flex', justifyContent: 'center' }}>
                     <Box className="banner-animation-model">
                         <WordGlobe />
                     </Box>    

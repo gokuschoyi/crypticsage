@@ -1,7 +1,7 @@
 import React from 'react'
 import Header from '../../global/Header';
 import './Stats.css'
-import { Box, CardContent, Typography, CardActions, Button, Card, useTheme, Grid } from '@mui/material';
+import { Box, Typography, Button, useTheme, Grid } from '@mui/material';
 const Stats = (props) => {
     const { title, subtitle } = props
 
@@ -10,104 +10,95 @@ const Stats = (props) => {
     const CustomCard = (props) => {
         const { title, subtitle, value, buttonName } = props
         return (
-            <React.Fragment>
-                <Card
-                    className='card-holder'
-                    sx={{ backgroundColor: `${theme.palette.secondary.main}` }}
-                    variant="outlined"
-                >
-                    <CardContent>
-                        <Typography sx={{ fontSize: 20, fontWeight: '300', textAlign: 'left' }} color="black" gutterBottom>
-                            {title} :
-                        </Typography>
-                        <Typography sx={{ fontSize: 50, fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} color="black" gutterBottom>
-                            {value}
-                        </Typography>
-                        <Typography sx={{ fontSize: 16, fontWeight: '300', textAlign: 'left' }} color="black" gutterBottom>
-                            {subtitle}
-                        </Typography>
-                    </CardContent>
-                    <CardActions>
-                        <Button className='card-button' sx={{
-                            ':hover': {
-                                color: 'black !important',
-                                backgroundColor: 'white !important',
-                                transition: '0.5s'
-                            },
-                            backgroundColor: `${theme.palette.primary.main}`
-                        }} size="small">{buttonName}</Button>
-                    </CardActions>
-                </Card>
-            </React.Fragment>
+            <Box
+                className='card-holder'
+                sx={{ background: `${theme.palette.secondary.dark}` }}
+            >
+                <Box className='info-box'>
+                    <Typography sx={{ fontSize: 20, fontWeight: '500', textAlign: 'left' }} color="black" gutterBottom>
+                        {title} :
+                    </Typography>
+                    <Typography sx={{ fontSize: 50, fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} color="black" gutterBottom>
+                        {value}
+                    </Typography>
+                    <Typography sx={{ fontSize: 16, fontWeight: '300', textAlign: 'left' }} color="black" gutterBottom>
+                        {subtitle}
+                    </Typography>
+                </Box>
+                <Box className='action-box'>
+                    <Button className='card-button' sx={{
+                        ':hover': {
+                            color: 'black !important',
+                            backgroundColor: 'red !important',
+                            transition: '0.5s'
+                        },
+                        backgroundColor: `${theme.palette.primary.main}`
+                    }} size="small">{buttonName}</Button>
+                </Box>
+            </Box>
         )
     };
 
     const CustomLongCard = (props) => {
         const { title, content, subtitle, buttonName } = props
         return (
-            <React.Fragment>
-                <Card
-                    className='card-holder'
-                    sx={{ backgroundColor: `${theme.palette.secondary.main}` }}
-                    variant="outlined"
-                >
-                    <CardContent>
-                        <Typography sx={{ fontSize: 20, fontWeight: '300', textAlign: 'left' }} color="black" gutterBottom>
-                            {title} :
-                        </Typography>
-                        <Typography sx={{ fontSize: 50, fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} color="black" gutterBottom>
-                            {content}
-                        </Typography>
-                        <Typography sx={{ fontSize: 16, fontWeight: '300', textAlign: 'left' }} color="black" gutterBottom>
-                            {subtitle}
-                        </Typography>
-                    </CardContent>
-                    <CardActions>
-                        <Button className='card-button' sx={{
-                            ':hover': {
-                                color: 'black !important',
-                                backgroundColor: 'white !important',
-                                transition: '0.5s'
-                            },
-                            backgroundColor: `${theme.palette.primary.main}`
-                        }} size="small">{buttonName}</Button>
-                    </CardActions>
-                </Card>
-            </React.Fragment>
+            <Box
+                className='card-holder'
+                sx={{ backgroundColor: `${theme.palette.secondary.dark}` }}
+                variant="outlined"
+            >
+                <Box className='info-box'>
+                    <Typography sx={{ fontSize: 20, fontWeight: '500', textAlign: 'left' }} color="black" gutterBottom>
+                        {title} :
+                    </Typography>
+                    <Typography sx={{ fontSize: 40, fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} color="black" gutterBottom>
+                        {content}
+                    </Typography>
+                    <Typography sx={{ fontSize: 16, fontWeight: '300', textAlign: 'left' }} color="black" gutterBottom>
+                        {subtitle}
+                    </Typography>
+                </Box>
+                <Box className='action-box'>
+                    <Button className='card-button' sx={{
+                        ':hover': {
+                            color: 'black !important',
+                            backgroundColor: 'white !important',
+                            transition: '0.5s'
+                        },
+                        backgroundColor: `${theme.palette.primary.main}`
+                    }} size="small">{buttonName}</Button>
+                </Box>
+            </Box>
         )
     }
 
     const CustonTextCard = (props) => {
         const { title, content, buttonName } = props
         return (
-            <React.Fragment>
-                <Card
-                    className='card-holder'
-                    sx={{ backgroundColor: `${theme.palette.secondary.main}` }}
-                    variant="outlined"
-                >
-                    <CardContent>
-                        <Typography sx={{ fontSize: 20, fontWeight: '300', textAlign: 'left' }} color="black" gutterBottom>
-                            {title} :
-                        </Typography>
-
-
-                        <Typography sx={{ fontSize: 35, fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} color="black" gutterBottom>
-                            {content}
-                        </Typography>
-                    </CardContent>
-                    <CardActions>
-                        <Button className='card-button' sx={{
-                            ':hover': {
-                                color: 'black !important',
-                                backgroundColor: 'white !important',
-                                transition: '0.5s'
-                            },
-                            backgroundColor: `${theme.palette.primary.main}`
-                        }} size="small">{buttonName}</Button>
-                    </CardActions>
-                </Card>
-            </React.Fragment>
+            <Box
+                className='card-holder'
+                sx={{ backgroundColor: `${theme.palette.secondary.dark}` }}
+                variant="outlined"
+            >
+                <Box className='info-box'>
+                    <Typography sx={{ fontSize: 20, fontWeight: '500', textAlign: 'left' }} color="black" gutterBottom>
+                        {title} :
+                    </Typography>
+                    <Typography sx={{ fontSize: 25, fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} color="black" gutterBottom>
+                        {content}
+                    </Typography>
+                </Box>
+                <Box className='action-box'>
+                    <Button className='card-button' sx={{
+                        ':hover': {
+                            color: 'black !important',
+                            backgroundColor: 'white !important',
+                            transition: '0.5s'
+                        },
+                        backgroundColor: `${theme.palette.primary.main}`
+                    }} size="small">{buttonName}</Button>
+                </Box>
+            </Box>
         )
     }
 
@@ -116,6 +107,7 @@ const Stats = (props) => {
             <Box height='100%' width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
             </Box>
+
             <Box className='stat-cards-container'>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={6} md={6} lg={3}>
@@ -124,30 +116,25 @@ const Stats = (props) => {
                     <Grid item xs={12} sm={6} md={6} lg={3}>
                         <CustomCard title='Recent Quiz' subtitle='Technical Analysis Quiz 2' value='8/45' buttonName="GO TO QUIZ" />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={12} lg={6}>
-                        <CustomLongCard title='Word of the Day' subtitle='A currency pair is a price quote of the exchange rate for two different currencies traded in FX markets.' content='Currency Pair' buttonName="GO TO DEFINITION" />
+                    <Grid item xs={12} sm={6} md={6} lg={3}>
+                        <CustonTextCard title='New Challenge Available' content='Weekly Challenge' buttonName="GO TO CHALLENGE" />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6} lg={3}>
+                        <CustonTextCard title='New Challenge Available' content='Weekly Challenge' buttonName="GO TO CHALLENGE" />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6} lg={3}>
+                        <CustonTextCard title='Upload Trading-View data' content='Upload your Trading View data for analysis' buttonName="UPLOAD" />
                     </Grid>
                 </Grid>
                 <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={6} lg={3}>
-                        <CustonTextCard title='Weekly Challenge' content='New Challenge Available' buttonName="GO TO CHALLENGE" />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={3}>
-                        <CustonTextCard title='Weekly Challenge' content='New Challenge Available' buttonName="GO TO CHALLENGE" />
+                    <Grid item xs={12} sm={12} md={12} lg={6}>
+                        <CustomLongCard title='WORD OF THE DAY' subtitle='A currency pair is a price quote of the exchange rate for two different currencies traded in FX markets.' content='Currency Pair' buttonName="GO TO DEFINITION" />
                     </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={6}>
                         <CustomLongCard title='IN-COMPLETE JOURNAL ENTRY' subtitle='20/10/2022' content='Complete your last entry' buttonName="GO TO JOURNAL" />
                     </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={6} lg={3}>
-                        <CustonTextCard title='Upload Trading-View data' content='Upload your Trading View data for analysis' buttonName="UPLOAD" />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={3}>
-
-                    </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={6}>
-                        <CustomLongCard title='Journal entry' subtitle='20/10/2022' content='Make an entry to your Journal' buttonName="GO TO JOURNAL" />
+                        <CustomLongCard title='JOURNAL ENTRY' subtitle='20/10/2022' content='Make an entry to your Journal' buttonName="GO TO JOURNAL" />
                     </Grid>
                 </Grid>
             </Box>
@@ -162,7 +149,7 @@ const Stats = (props) => {
                     disableSelectionOnClick
                 /> */}
             </Box>
-            <Box display='flex'>
+            <Box display='flex' flexDirection='column'>
                 <Box sx={{ backgroundColor: `${theme.palette.primary.main}` }}>
                     <h2>Primary</h2>
                 </Box>
@@ -191,7 +178,7 @@ const Stats = (props) => {
                     <h2>divider</h2>
                 </Box>
             </Box>
-        </Box>
+        </Box >
     )
 }
 

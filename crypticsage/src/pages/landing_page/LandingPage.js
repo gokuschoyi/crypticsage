@@ -1,11 +1,15 @@
-import React, { useState } from 'react'
-import {Box} from '@mui/material'
+import React, { useEffect, useState } from 'react'
+import { Box, useTheme } from '@mui/material'
+import useMediaQuery from '@mui/material/useMediaQuery';
+
 import './LandingPage.css'
 // import AnimationScript from '../../components/landing_page/animation/AnimationScript'
 // import ParallaxStar from '../../components/landing_page/animation/ParallaxStar'
 
-import { Navbar, Banner, Features, CourseDetails, Testimonials, Pricing, Footer, ParallaxStar} from '../../components/landing_page/index'
+import { Navbar, Banner, Features, CourseDetails, Testimonials, Pricing, Footer, ParallaxStar } from '../../components/landing_page/index'
 const LandingPage = () => {
+    const theme = useTheme();
+    const lg = useMediaQuery(theme.breakpoints.down('lg'));
     const [toggle, setToggle] = useState(false);
     const showNav = () => {
         setToggle((prev) => !prev);
@@ -14,6 +18,13 @@ const LandingPage = () => {
     const closeNav = () => {
         setToggle(false);
     }
+
+    useEffect(() => {
+        if (!lg) {
+            setToggle(false);
+        }
+    }, [lg])
+
 
     return (
         <>
