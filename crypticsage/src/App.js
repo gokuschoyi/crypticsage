@@ -6,8 +6,7 @@ import Auth from "./pages/auth/Auth";
 import Dashboard from "./pages/dashboard/Dashboard";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
 import { ProSidebarProvider } from 'react-pro-sidebar';
-import Stats from "./components/dashboard/dashboard_tabs/stats/Stats";
-
+import TabRoutes from "./components/dashboard/Routes";
 function App() {
   const [theme, colorMode] = useMode();
   return (
@@ -21,7 +20,7 @@ function App() {
                 <Route index element={<LandingPage />} />
                 <Route path="auth" element={<Auth />} />
                 <Route path="dashboard" element={<Dashboard />} >
-                  <Route path="dashboardTab" element={<Stats title="Dashboard" subtitle="Explore your activities"/>} />
+                  {TabRoutes}
                 </Route>
               </Routes>
             </div>

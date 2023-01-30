@@ -1,0 +1,133 @@
+.user-nav {
+  position: absolute;
+  width: 250px;
+  padding: 10px;
+  background-color: rgb(39, 33, 33);
+  top: 0;
+  right: 0;
+  margin-top: 115px;
+  margin-right: 30px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+  z-index: 40;
+}
+
+.user-nav-title{
+    text-align: left;
+    padding-top:10px;
+    padding-bottom:15px;
+    padding-left:10px;
+}
+
+.user-cta-small {
+  display: flex;
+  flex-direction: column;
+  margin-right: 0px !important;
+}
+
+.user-nav-item-small {
+  list-style: none;
+  margin: 5px 10px;
+  transition: all 0.3s ease-in-out;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-left: 10px;
+  align-items: center;
+}
+
+.user-nav-item-small :visited {
+  color: inherit;
+}
+
+.user-nav-item-small :hover {
+  color: red;
+  transition: all 0.3s ease-in-out;
+  background-color: antiquewhite;
+  scale: 1.1 !important;
+}
+
+.user-nav-link-small {
+  text-decoration: none;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  transition: all 0.3s ease-in-out;
+  align-items: center;
+}
+
+.user-nav-icon-small {
+  vertical-align: sub;
+  font-size: 15px;
+  margin-right: 10px;
+}
+
+@keyframes inAnimation {
+  0% {
+    opacity: 0;
+    visibility: hidden;
+  }
+  100% {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@keyframes outAnimation {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+
+/* Notification -- CSS */
+
+.user-notification{
+  position: absolute;
+  width: 300px;
+  height:420px;
+  padding: 10px;
+  background-color: rgb(39, 33, 33);
+  top: 0;
+  right: 0;
+  margin-top: 115px;
+  margin-right: 30px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+  z-index: 40;
+}
+
+.notification-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-right: 0px !important;
+}
+
+.notification-title{
+  text-align: left;
+  padding-top:10px;
+  padding-bottom:10px;
+  padding-left:10px;
+}
+
+.notification-body{
+  height:310px;
+  overflow: auto;
+}
+.notification-alert{
+  margin-top:5px !important;
+  margin-bottom:5px !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}

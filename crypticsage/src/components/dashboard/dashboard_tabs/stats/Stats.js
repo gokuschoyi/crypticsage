@@ -1,11 +1,22 @@
 import React from 'react'
 import Header from '../../global/Header';
+import { toast } from 'react-toastify';
 import './Stats.css'
 import { Box, Typography, Button, useTheme, Grid } from '@mui/material';
 const Stats = (props) => {
     const { title, subtitle } = props
 
     const theme = useTheme();
+
+    const showToast = () => {
+        toast.success('Hello World', {
+            data: {
+                title: 'Hello World Again',
+                text: 'We are here again with another article'
+            },
+            toastId: `hello-world${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}`,
+        });
+    };
 
     const CustomCard = (props) => {
         const { title, subtitle, value, buttonName } = props
@@ -26,7 +37,7 @@ const Stats = (props) => {
                     </Typography>
                 </Box>
                 <Box className='action-box'>
-                    <Button className='card-button' sx={{
+                    <Button onClick={showToast} className='card-button' sx={{
                         ':hover': {
                             color: 'black !important',
                             backgroundColor: 'red !important',
