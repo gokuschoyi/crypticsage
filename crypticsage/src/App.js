@@ -6,6 +6,8 @@ import Auth from "./pages/auth/Auth";
 import Dashboard from "./pages/dashboard/Dashboard";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
 import { ProSidebarProvider } from 'react-pro-sidebar';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import TabRoutes from "./components/dashboard/Routes";
 function App() {
   const [theme, colorMode] = useMode();
@@ -15,15 +17,17 @@ function App() {
         <CssBaseline />
         <BrowserRouter>
           <ProSidebarProvider>
-            <div className="App">
-              <Routes>
-                <Route index element={<LandingPage />} />
-                <Route path="auth" element={<Auth />} />
-                <Route path="dashboard" element={<Dashboard />} >
-                  {TabRoutes}
-                </Route>
-              </Routes>
-            </div>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <div className="App">
+                <Routes>
+                  <Route index element={<LandingPage />} />
+                  <Route path="auth" element={<Auth />} />
+                  <Route path="dashboard" element={<Dashboard />} >
+                    {TabRoutes}
+                  </Route>
+                </Routes>
+              </div>
+            </LocalizationProvider>
           </ProSidebarProvider>
         </BrowserRouter>
       </ThemeProvider>

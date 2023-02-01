@@ -32,7 +32,7 @@ const SidebarC = () => {
         if (sm) {
             collapseSidebar();
         }
-    }, [sm, collapseSidebar])
+    }, [sm])
 
     useEffect(() => {
         const content = document.getElementsByClassName('content')[0];
@@ -48,7 +48,10 @@ const SidebarC = () => {
         <div style={{ display: 'flex', height: '100%', position: 'fixed' }}>
             <Sidebar width="300px" style={{ height: '100vh' }} rootStyles={{
                 [`.ps-sidebar-container`]: {
-                    backgroundColor: `${theme.palette.background.default}`,
+                    backgroundColor: `${theme.palette.primary.extraDark}`,
+                },
+                [`.ps-menu-root`]: {
+                    height: '100%',
                 },
                 [`.ps-menu-label`]: {
                     textAlign: 'left',

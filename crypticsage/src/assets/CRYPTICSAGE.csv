@@ -1,0 +1,6 @@
+ID,Journal Date,Trade Name,Ticker,Size,Points,Entry Rate,Exit Rate,Entry Date,Exit Date,Conviction,Strategy,Success
+1,01/31/2023,goku,BTC,300,100,12300,12500,01/31/2023 00:01:00 AM,01/02/2023 02:15:00 AM,Strong,unknown,success
+2,01/31/2023,goku,BTC,100,100,12300,12500,01/31/2023 00:01:00 AM,01/02/2023 02:15:00 AM,Strong,unknown,success
+3,01/31/2023,goku,BTC,400,100,12300,12500,01/31/2023 00:01:00 AM,01/02/2023 02:15:00 AM,Strong,unknown,success
+4,01/31/2023,goku,BTC,500,100,12300,12500,01/31/2023 00:01:00 AM,01/02/2023 02:15:00 AM,Strong,unknown,success
+5,01/31/2023,goku,BTC,600,100,12300,12500,01/31/2023 00:01:00 AM,01/02/2023 02:15:00 AM,Strong,unknown,success

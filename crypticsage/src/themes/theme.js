@@ -71,9 +71,7 @@ export const themeSettings = (mode) => {
                         dark: '#388E3C',
                         contrastText: 'rgba(0, 0, 0, 0.87)',
                     },
-                    divider: {
-                        main: colors.colorTwo[500],
-                    },
+                    divider: colors.colorTwo[500],
                 }
                 : {
                     primary: {
@@ -108,7 +106,7 @@ export const themeSettings = (mode) => {
                         main: '#FF9800',
                         light: '#FFB74D',
                         dark: '#F57C00',
-                        contrastText: 'rgba(0, 0, 0, 0.87)',
+                        contrastText: '#000000DD',
                     },
                     info: {
                         main: '#2196F3',
@@ -120,11 +118,9 @@ export const themeSettings = (mode) => {
                         main: '#4CAF50',
                         light: '#81C784',
                         dark: '#388E3C',
-                        contrastText: 'rgba(0, 0, 0, 0.87)',
+                        contrastText: '#000000DD',
                     },
-                    divider: {
-                        main: colors.colorTwo[500],
-                    },
+                    divider: colors.colorTwo[500],
                 }
             )
         },

@@ -1,0 +1,104 @@
+.journal-switch {
+  display: flex;
+  justify-content: flex-start;
+  padding-right: 20px;
+  align-items: center;
+}
+.padding {
+  margin: 12px !important;
+}
+
+.journal-content {
+  margin-left: 20px;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 20px;
+  /* width:300px */
+}
+
+.layout {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.inputfield {
+  width: 230px;
+}
+
+.inputtextfield {
+  width: 300px;
+}
+
+.technical-marker-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: centstarter;
+  margin-top: 20px;
+}
+
+.journal-submit-button {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-right: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media screen and (min-width: 1200px) {
+  .inputtextfield {
+    width: 280px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .inputfield {
+    width: 300px;
+  }
+  .inputtextfield {
+    width: 300px;
+  }
+
+  .technical-marker {
+    padding-left: 0px !important;
+  }
+
+  .performance-marker {
+    padding-left: 0px !important;
+  }
+}
+
+.history-content {
+  margin-left: 20px;
+  margin-top: 20px;
+  margin-right: 20px;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 20px;
+}
+.MuiDataGrid-filterFormDeleteIcon {
+  align-items: flex-end !important;
+}
+
+.MuiDataGrid-filterFormDeleteIcon button {
+  width: 30px !important;
+}
+
+@media screen and (min-width: 600px) {
+  .MuiDataGrid-toolbarContainer {
+    display: flex !important;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .MuiDataGrid-filterForm {
+    flex-direction: column !important;
+  }
+}

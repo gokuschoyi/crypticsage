@@ -1,0 +1,55 @@
+.lessons-grid-container {
+  padding: 30px !important;
+  padding-top: 10px !important;
+}
+
+/* .lessons-grid-card{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+} */
+
+.lesson-card {
+  /* padding: 15px 10px 20px 20px !important; */
+  border-radius: 20px !important;
+  margin: 15px !important;
+  min-height: 250px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: start;
+}
+
+.text-holder {
+  padding-right: 15px;
+}
+
+.lesson-title{
+    margin-bottom: 20px !important;
+}
+
+.lesson-image-container {
+  display: flex !important;
+  justify-content: center;
+}
+
+.lesson-image-container img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.lesson-button-container {
+  padding-top: 20px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+@media screen and (max-width: 600px) {
+  .lessons-grid-container {
+    padding: 0px !important;
+  }
+  .text-holder{
+    padding-right: 0px;
+  }
+}

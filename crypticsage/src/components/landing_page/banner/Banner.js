@@ -42,6 +42,7 @@ const Banner = () => {
                 justifyContent="center"
                 alignItems="center" p={8}
                 spacing={2}
+                className="banner-grid-container"
             >
                 <Grid item xs={12} sm={12} md={6} lg={5} className="grid-col-left">
                     <Typography className='banner-text' pb={4} variant='h1' fontSize='50px' fontWeight='400' sx={{ textAlign: 'start', color: 'white' }}>Master the Market: Learn Crypto and Stocks Today.</Typography>
