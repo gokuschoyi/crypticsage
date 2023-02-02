@@ -1,7 +1,14 @@
 import React from 'react'
 import { Box, useTheme, Button, Dialog, DialogTitle, DialogActions, DialogContent, Alert, Snackbar } from '@mui/material'
 import JOURNAL_DATA from './JournalData';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid, GridToolbar, GridRowModes, GridActionsCellItem } from '@mui/x-data-grid';
+
+import { toast } from 'react-toastify';
+
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Close';
 
 const useFakeMutation = () => {
     return React.useCallback(
@@ -61,6 +68,58 @@ const JournalGrid = () => {
 
     const columns = [
         { field: 'id', headerName: 'ID', width: 50, hideable: true },
+        {
+            field: 'edit',
+            headerName: 'Edit',
+            width: 80,
+            cellClassName: 'actions',
+            renderCell: ({ id }) => {
+                const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+
+                if (isInEditMode) {
+                    return [
+                        <GridActionsCellItem
+                            icon={<SaveIcon />}
+                            label="Save"
+                            onClick={handleSaveClick(id)}
+                            key={id + 5}
+                        />,
+                        <GridActionsCellItem
+                            icon={<CancelIcon />}
+                            label="Cancel"
+                            className="textPrimary"
+                            onClick={handleCancelClick(id)}
+                            color="inherit"
+                            key={id + 10}
+                        />,
+                    ];
+                }
+
+                return [
+                    <GridActionsCellItem
+                        icon={<EditIcon />}
+                        label="Edit"
+                        className="textPrimary"
+                        onClick={handleEditClick(id)}
+                        color="inherit"
+                        key={id + 15}
+                    />
+                ];
+            },
+        },
+        {
+            field: 'delete', headerName: 'Delete', width: 80, hideable: true,
+            renderCell: ({ id }) => {
+                return [
+                    <GridActionsCellItem
+                        icon={<DeleteIcon />}
+                        label="Delete"
+                        onClick={handleDeleteClick(id)}
+                        color="inherit"
+                        key={id + 20}
+                    />]
+            }
+        },
         { field: 'journalEntryDate', headerName: 'Journal Date', type: 'date', width: 150, hideable: true },
         { field: 'tradeName', headerName: 'Trade Name', width: 150, editable: true, hideable: true },
         { field: 'ticker', headerName: 'Ticker', width: 150, editable: true, hideable: true },
@@ -85,9 +144,9 @@ const JournalGrid = () => {
     const noButtonRef = React.useRef(null);
     const [promiseArguments, setPromiseArguments] = React.useState(null);
 
-    const [snackbar, setSnackbar] = React.useState(null);
+    const [alert, setAlert] = React.useState(null);
 
-    const handleCloseSnackbar = () => setSnackbar(null);
+    const handleCloseSnackbar = () => setAlert(null);
 
     const processRowUpdate = React.useCallback(
         (newRow, oldRow) =>
@@ -115,12 +174,12 @@ const JournalGrid = () => {
         try {
             // Make the HTTP request to save in the backend
             const response = await mutateRow(newRow);
-            setSnackbar({ children: 'User successfully saved', severity: 'success' });
+            setAlert({ children: 'User successfully saved', type: 'success' });
             resolve(response);
             console.log(response)
             setPromiseArguments(null);
         } catch (error) {
-            setSnackbar({ children: "Name can't be empty", severity: 'error' });
+            setAlert({ children: "Name can't be empty", severity: 'error' });
             reject(oldRow);
             setPromiseArguments(null);
         }
@@ -147,19 +206,83 @@ const JournalGrid = () => {
                 TransitionProps={{ onEntered: handleEntered }}
                 open={!!promiseArguments}
             >
-                <DialogTitle>Are you sure?</DialogTitle>
-                <DialogContent dividers>
+                <DialogTitle sx={{ color: `${theme.palette.secondary.main}` }}>Are you sure?</DialogTitle>
+                <DialogContent sx={{ color: `${theme.palette.secondary.main}` }} dividers>
                     {`Pressing 'Yes' will change ${mutation}.`}
                 </DialogContent>
-                <DialogActions>
-                    <Button ref={noButtonRef} onClick={handleNo}>
+                <DialogActions >
+                    <Button
+                        sx={{
+                            color: `${theme.palette.secondary.main}`,
+                            ':hover': {
+                                color: `black !important`,
+                                backgroundColor: 'white !important',
+                            },
+                        }}
+                        ref={noButtonRef} onClick={handleNo}
+                    >
                         No
                     </Button>
-                    <Button onClick={handleYes}>Yes</Button>
+                    <Button
+                        sx={{
+                            color: `${theme.palette.secondary.main}`,
+                            ':hover': {
+                                color: `black !important`,
+                                backgroundColor: 'white !important',
+                            },
+                        }}
+                        onClick={handleYes}
+                    >
+                        Yes
+                    </Button>
                 </DialogActions>
             </Dialog>
         );
     };
+
+    const [rows, setRows] = React.useState(rowData());
+    const [rowModesModel, setRowModesModel] = React.useState({});
+
+    const handleRowEditStart = (params, event) => {
+        event.defaultMuiPrevented = true;
+    };
+
+    const handleRowEditStop = (params, event) => {
+        event.defaultMuiPrevented = true;
+    };
+
+    const handleEditClick = (id) => () => {
+        setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+    };
+
+    const handleSaveClick = (id) => () => {
+        setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+    };
+
+    const handleDeleteClick = (id) => () => {
+        // console.log(id)
+        setRows(rows.filter((row) => row.id !== id));
+    };
+
+    const handleCancelClick = (id) => () => {
+        setRowModesModel({
+            ...rowModesModel,
+            [id]: { mode: GridRowModes.View, ignoreModifications: true },
+        });
+    };
+
+    const editSuccess = () => toast.success('Changes Saved', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        toastId: `editSuccess${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}`,
+        type: alert.type,
+        onClose: () => handleCloseSnackbar()
+    });
 
     return (
         <Box
@@ -198,18 +321,21 @@ const JournalGrid = () => {
                     },
                 }}
                 sx={{ color: 'white' }}
-                rows={rowData()}
-                columns={columns}
                 disableColumnMenu={true}
+                rows={rows}
+                columns={columns}
+                editMode="row"
+                rowModesModel={rowModesModel}
+                onRowModesModelChange={(newModel) => setRowModesModel(newModel)}
+                onRowEditStart={handleRowEditStart}
+                onRowEditStop={handleRowEditStop}
                 components={{ Toolbar: GridToolbar }}
                 processRowUpdate={processRowUpdate}
                 experimentalFeatures={{ newEditingApi: true }}
-                // checkboxSelection={true}
+            // checkboxSelection={true}
             />
-            {!!snackbar && (
-                <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
-                    <Alert {...snackbar} onClose={handleCloseSnackbar} />
-                </Snackbar>
+            {!!alert && (
+                editSuccess()
             )}
         </Box>
     )

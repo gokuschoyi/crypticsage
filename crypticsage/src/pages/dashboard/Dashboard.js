@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SidebarC from '../../components/dashboard/global/Sidebar';
@@ -38,8 +38,24 @@ const Dashboard = (props) => {
         }
     }
 
+    const hide = () => {
+        setToggleUser(false);
+        setToggleSettings(false);
+        setToggleNotifications(false);
+        setTest(false);
+    }
+
+    const [test, setTest] = React.useState(false);
+
+    useEffect(() => {
+        if(test){
+            hide();
+        }
+    })
+
+    console.log(test)
     return (
-        <Box className="dashboard-container">
+        <Box className="dashboard-container" >
             <ToastContainer
                 position="top-right"
                 autoClose={5000}
@@ -65,7 +81,7 @@ const Dashboard = (props) => {
                     toggleNotifications={toggleNotifications}
                     setToggleNotifications={handleToggleNotifications}
                 />
-                <Outlet />
+                <Outlet context={[ setTest]} />
             </main>
         </Box>
     )

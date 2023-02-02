@@ -1,0 +1,51 @@
+.alphabet-box {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.glossary-card {
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px 10px;
+}
+
+.glossary-card-word {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.search-box {
+  margin: 15px 0px 15px 0px !important;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.clear-icon {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.search-result-count{
+    margin-left: 10px !important;
+}
+
+.search-result {
+  display: flex;
+
+  justify-content: flex-start;
+  align-items: center;
+  width: 250px;
+}
+
+.search-field {
+  margin-left: 0px !important;
+}
+
+/* @media screen and (max-width: 600px) {
+  .glossary-card {
+    margin: 0px 0px 0px 0px !important;
+    padding: 0px 0px 0px 0px !important;
+  }
+} */

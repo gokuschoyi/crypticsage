@@ -1,4 +1,5 @@
 import React from 'react'
+import { useOutletContext } from "react-router-dom";
 import Header from '../../global/Header';
 import { Box, Typography, Button, useTheme, Grid, CardMedia } from '@mui/material';
 import './Lessons.css'
@@ -7,6 +8,11 @@ import LESSONS_DATA from './LessonsData';
 const Lessons = (props) => {
     const theme = useTheme();
     const { title, subtitle } = props
+
+    const [setTest] = useOutletContext();
+    const hide = () => {
+        setTest(true);
+    }
 
     const CustomCard = (props) => {
         const { title, content } = props
@@ -48,7 +54,7 @@ const Lessons = (props) => {
     }
 
     return (
-        <Box className='lessons-container'>
+        <Box className='lessons-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
             </Box>

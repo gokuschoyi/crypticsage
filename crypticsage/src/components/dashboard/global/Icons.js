@@ -24,6 +24,8 @@ import AddCardOutlinedIcon from '@mui/icons-material/AddCardOutlined';
 import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined';
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
 
+import ClearAllIcon from '@mui/icons-material/ClearAll';
+
 export { 
     LightModeOutlinedIcon, 
     DarkModeOutlinedIcon, 
@@ -46,5 +48,6 @@ export {
     ColorLensOutlinedIcon,
     AddCardOutlinedIcon,
     QuizOutlinedIcon,
-    ExitToAppOutlinedIcon
+    ExitToAppOutlinedIcon,
+    ClearAllIcon
 }

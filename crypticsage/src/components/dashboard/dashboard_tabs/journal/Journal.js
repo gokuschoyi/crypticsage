@@ -1,4 +1,5 @@
 import React from 'react'
+import { useOutletContext } from "react-router-dom";
 import Header from '../../global/Header';
 import { Box, Typography, Button, useTheme, Grid, Switch, FormControlLabel, TextField } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
@@ -10,6 +11,11 @@ const Journal = (props) => {
     const theme = useTheme();
     const { title, subtitle } = props
     const [toggle, setToggle] = React.useState(true)
+
+    const [setTest] = useOutletContext();
+    const hide = () => {
+        setTest(true);
+    }
 
     const handleToggle = () => {
         setToggle(!toggle)
@@ -97,7 +103,7 @@ const Journal = (props) => {
     }
 
     return (
-        <Box className='journal-container'>
+        <Box className='journal-container' onClick={hide}>
             <Box width='100%' display='flex' flexDirection='row' justifyContent='space-between'>
                 <Header title={title} subtitle={subtitle} />
                 <Box className='journal-switch'>

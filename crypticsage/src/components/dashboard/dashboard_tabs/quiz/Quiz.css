@@ -1,0 +1,33 @@
+.MuiAccordion-root {
+  margin-bottom: 20px !important;
+}
+
+.quiz-question-holder {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+}
+
+.quiz-topic {
+  display: flex;
+  text-align: start;
+  align-items: center;
+}
+.quiz-number{
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.quiz-action {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+@media screen and (max-width: 600px) {
+  .MuiAccordionSummary-content {
+    justify-content: space-around !important;
+    transition: all 0.3s ease-in-out !important;
+  }
+}

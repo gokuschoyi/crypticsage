@@ -11,7 +11,7 @@ const TabRoutes = [
     <Route key='lesson' path="lessons" element={<Lessons title="Lessons" subtitle="Explore your lessons" />} />,
     <Route key='journal' path="journal" element={<Journal title="Journal" subtitle="Explore your journal" />} />,
     <Route key='quiz' path="quiz" element={<Quiz title="Quiz" subtitle="Explore your quiz" />} />,
-    <Route key='glossary' path="glossary" element={<Glossary title="Glossary" subtitle="Explore your glossary" />} />,
+    <Route key='glossary' path="glossary" element={<Glossary title="Glossary of Terms" subtitle="Explore your glossary" />} />,
     <Route key='schedule' path="schedule" element={<Schedule title="Schedule" subtitle="Explore your schedule" />} />,
 ];
 

@@ -20,7 +20,7 @@ import {
 
 const SidebarC = () => {
     const theme = useTheme();
-    const [selected, setSelected] = useState("");
+    const [selected, setSelected] = useState("dashboardTab");
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
 
     const { collapseSidebar, collapsed } = useProSidebar();
@@ -32,7 +32,7 @@ const SidebarC = () => {
         if (sm) {
             collapseSidebar();
         }
-    }, [sm])
+    }, [collapseSidebar, sm])
 
     useEffect(() => {
         const content = document.getElementsByClassName('content')[0];
@@ -48,7 +48,7 @@ const SidebarC = () => {
         <div style={{ display: 'flex', height: '100%', position: 'fixed' }}>
             <Sidebar width="300px" style={{ height: '100vh' }} rootStyles={{
                 [`.ps-sidebar-container`]: {
-                    backgroundColor: `${theme.palette.primary.extraDark}`,
+                    backgroundColor: `${theme.palette.primary.dark}`,
                 },
                 [`.ps-menu-root`]: {
                     height: '100%',

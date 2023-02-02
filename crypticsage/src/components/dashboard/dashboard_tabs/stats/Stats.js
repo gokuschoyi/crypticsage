@@ -1,10 +1,16 @@
 import React from 'react'
+import { useOutletContext } from "react-router-dom";
 import Header from '../../global/Header';
 import { toast } from 'react-toastify';
 import './Stats.css'
 import { Box, Typography, Button, useTheme, Grid } from '@mui/material';
 const Stats = (props) => {
     const { title, subtitle } = props
+
+    const [setTest] = useOutletContext();
+    const hide = () => {
+        setTest(true);
+    }
 
     const theme = useTheme();
 
@@ -114,7 +120,7 @@ const Stats = (props) => {
     }
 
     return (
-        <Box className='stat-container'>
+        <Box className='stat-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
             </Box>
