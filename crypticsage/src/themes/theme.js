@@ -45,7 +45,7 @@ export const themeSettings = (mode) => {
                         dark: colors.colorThree[900],
                     },
                     background: {
-                        default: colors.colorOne[800],
+                        default: colors.colorOne[900],
                     },
                     error: {
                         main: '#F44336',

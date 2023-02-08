@@ -25,6 +25,12 @@ import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined';
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
 
 import ClearAllIcon from '@mui/icons-material/ClearAll';
+import ClearIcon from '@mui/icons-material/Clear';
+
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+
+import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined';
 
 export { 
     LightModeOutlinedIcon, 
@@ -49,5 +55,9 @@ export {
     AddCardOutlinedIcon,
     QuizOutlinedIcon,
     ExitToAppOutlinedIcon,
-    ClearAllIcon
+    ClearAllIcon,
+    ClearIcon,
+    ChevronRightIcon,
+    ExpandMoreIcon,
+    KeyboardDoubleArrowRightOutlinedIcon
 }

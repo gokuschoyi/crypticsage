@@ -1,5 +1,8 @@
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { ColorModeContext, useMode } from "./themes/theme";
+import { Provider } from 'react-redux';
+import store, { persistor } from './store';
+import { PersistGate } from 'redux-persist/integration/react';
 import './App.css';
 import LandingPage from './pages/landing_page/LandingPage';
 import Auth from "./pages/auth/Auth";
@@ -18,15 +21,19 @@ function App() {
         <BrowserRouter>
           <ProSidebarProvider>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <div className="App">
-                <Routes>
-                  <Route index element={<LandingPage />} />
-                  <Route path="auth" element={<Auth />} />
-                  <Route path="dashboard" element={<Dashboard />} >
-                    {TabRoutes}
-                  </Route>
-                </Routes>
-              </div>
+              <Provider store={store}>
+                <PersistGate loading={null} persistor={persistor}>
+                  <div className="App">
+                    <Routes>
+                      <Route index element={<LandingPage />} />
+                      <Route path="auth" element={<Auth />} />
+                      <Route path="dashboard" element={<Dashboard />} >
+                        {TabRoutes}
+                      </Route>
+                    </Routes>
+                  </div>
+                </PersistGate>
+              </Provider>
             </LocalizationProvider>
           </ProSidebarProvider>
         </BrowserRouter>

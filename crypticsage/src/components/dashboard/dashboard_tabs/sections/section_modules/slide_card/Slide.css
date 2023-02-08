@@ -1,0 +1,47 @@
+.introduction-top {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chapter-slide-container {
+  text-align: justify;
+
+  overflow-y: auto;
+}
+.chapter-slide-title {
+  margin-bottom: 10px;
+}
+
+.chapter-slide-content {
+  height: 300px;
+  min-height: 200px;
+
+  overflow-y: auto;
+}
+
+.lesson-tree {
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.slide-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.highlight {
+  text-decoration: underline;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 600px) {
+  .slides {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}

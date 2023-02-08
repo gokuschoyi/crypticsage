@@ -48,7 +48,7 @@ const SidebarC = () => {
         <div style={{ display: 'flex', height: '100%', position: 'fixed' }}>
             <Sidebar width="300px" style={{ height: '100vh' }} rootStyles={{
                 [`.ps-sidebar-container`]: {
-                    backgroundColor: `${theme.palette.primary.dark}`,
+                    backgroundColor: `${theme.palette.background.default}`,
                 },
                 [`.ps-menu-root`]: {
                     height: '100%',

@@ -1,0 +1,40 @@
+.lessons-container-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px;
+}
+
+.lesson-title-box {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.lesson-title-box span {
+  display: inline-block;
+  position: relative;
+  transition: all 2s linear;
+}
+
+.lesson-title-box:hover span {
+  scale:1.2;
+}
+
+.lesson-card-icon{
+  pointer-events: none;
+}
+
+.animate-text {
+  animation: rolling-text 6s linear infinite;
+}
+
+
+@keyframes rolling-text {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

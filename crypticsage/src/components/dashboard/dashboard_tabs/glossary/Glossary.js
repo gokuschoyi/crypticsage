@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import Header from '../../global/Header';
 import { Box, Typography, Button, useTheme, Grid, Divider, Input } from '@mui/material';
 import './Glossary.css'
-import { ClearAllIcon } from '../../global/Icons';
+import { ClearIcon } from '../../global/Icons';
 
 import GLOSSARY_DATA from './GlossaryData';
 // console.log(GLOSSARY_DATA.A_C)
@@ -162,7 +162,16 @@ const Glossary = (props) => {
                                         },
                                     }}
                                     placeholder="Search" />
-                                <ClearAllIcon className='clear-icon' onClick={clearSearch} />
+                                <ClearIcon
+                                    className='clear-icon'
+                                    onClick={clearSearch}
+                                    sx={{
+                                        ':hover': {
+                                            color: `${theme.palette.primary.dark} !important`,
+                                            backgroundColor: `${theme.palette.secondary.main} !important`,
+                                        }
+                                    }}
+                                />
                                 <Typography className='search-result-count' variant='body1' sx={{ color: `${theme.palette.secondary.main}` }} >{filterCount} results</Typography>
                             </Box>
                         </Box>
