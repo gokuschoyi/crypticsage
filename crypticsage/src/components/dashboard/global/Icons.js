@@ -31,6 +31,13 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
+import RoomPreferencesOutlinedIcon from '@mui/icons-material/RoomPreferencesOutlined';
+import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 
 export { 
     LightModeOutlinedIcon, 
@@ -59,5 +66,12 @@ export {
     ClearIcon,
     ChevronRightIcon,
     ExpandMoreIcon,
-    KeyboardDoubleArrowRightOutlinedIcon
+    KeyboardDoubleArrowRightOutlinedIcon,
+    DeleteOutlineOutlinedIcon,
+    FileUploadOutlinedIcon,
+    CheckOutlinedIcon,
+    CameraAltIcon,
+    ClearOutlinedIcon,
+    RoomPreferencesOutlinedIcon,
+    ManageAccountsOutlinedIcon
 }

@@ -1,6 +1,10 @@
 import { Box, IconButton, useTheme, Button, Typography, Divider, Badge } from "@mui/material";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { ColorModeContext } from "../../../themes/theme";
+import { resetSettingsState } from '../dashboard_tabs/settings/SettingsSlice'
+import { resetSectionState } from '../dashboard_tabs/sections/SectionSlice';
+import { resetSidebarState } from "./SideBarSlice";
+import { useDispatch } from 'react-redux';
 import InputBase from "@mui/material/InputBase";
 import {
     LightModeOutlinedIcon,
@@ -13,7 +17,11 @@ import {
     AddReactionOutlinedIcon,
     AdminPanelSettingsOutlinedIcon,
     HeadphonesOutlinedIcon,
-    HelpOutlineOutlinedIcon
+    HelpOutlineOutlinedIcon,
+    AddCardOutlinedIcon,
+    QuizOutlinedIcon,
+    RoomPreferencesOutlinedIcon,
+    ManageAccountsOutlinedIcon
 } from './Icons'
 
 import "./Global.css"
@@ -49,6 +57,12 @@ const Topbar = (props) => {
     const theme = useTheme();
     const colorMode = useContext(ColorModeContext);
     // console.log(toggleNotifications);
+    const dispatch = useDispatch();
+    const logOut = () => {
+        dispatch(resetSettingsState());
+        dispatch(resetSectionState());
+        dispatch(resetSidebarState());
+    }
 
     const userContainer = () => {
         return (
@@ -56,12 +70,6 @@ const Topbar = (props) => {
                 <Box mr={2} className="user-cta-small">
                     <Typography className='user-nav-title' variant="h6" sx={{ color: theme.palette.secondary.main }}>Profile Settings</Typography>
                     <Divider />
-                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
-                        <a className="user-nav-link-small" href="#userprofile">
-                            <PersonOutlinedIcon className="user-nav-icon-small" />
-                            <span>View Profile</span>
-                        </a>
-                    </Box>
                     <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <ExploreOutlinedIcon className="user-nav-icon-small" />
@@ -74,7 +82,13 @@ const Topbar = (props) => {
                             <span>Invite</span>
                         </a>
                     </Box>
-                    <Button variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px' }} sx={{
+                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                        <a className="user-nav-link-small" href="#userprofile">
+                            <HelpOutlineOutlinedIcon className="user-nav-icon-small" />
+                            <span>About</span>
+                        </a>
+                    </Box>
+                    <Button onClick={logOut} variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px' }} sx={{
                         ':hover': {
                             color: `black !important`,
                             backgroundColor: 'white !important',
@@ -93,26 +107,38 @@ const Topbar = (props) => {
                     <Divider />
                     <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
                         <a className="user-nav-link-small" href="#userprofile">
-                            <SettingsOutlinedIcon className="user-nav-icon-small" />
-                            <span>Basic Settings</span>
+                            <ManageAccountsOutlinedIcon className="user-nav-icon-small" />
+                            <span>Your Profile</span>
+                        </a>
+                    </Box>
+                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                        <a className="user-nav-link-small" href="#userprofile">
+                            <RoomPreferencesOutlinedIcon className="user-nav-icon-small" />
+                            <span>Preferences</span>
+                        </a>
+                    </Box>
+                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                        <a className="user-nav-link-small" href="#userprofile">
+                            <AddCardOutlinedIcon className="user-nav-icon-small" />
+                            <span>Subscriptions</span>
+                        </a>
+                    </Box>
+                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                        <a className="user-nav-link-small" href="#userprofile">
+                            <QuizOutlinedIcon className="user-nav-icon-small" />
+                            <span>F.A.Q</span>
                         </a>
                     </Box>
                     <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <AdminPanelSettingsOutlinedIcon className="user-nav-icon-small" />
-                            <span>Privacy & Security</span>
+                            <span>Privacy Policy</span>
                         </a>
                     </Box>
                     <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <HeadphonesOutlinedIcon className="user-nav-icon-small" />
-                            <span>Help & Support</span>
-                        </a>
-                    </Box>
-                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
-                        <a className="user-nav-link-small" href="#userprofile">
-                            <HelpOutlineOutlinedIcon className="user-nav-icon-small" />
-                            <span>About</span>
+                            <span>Support</span>
                         </a>
                     </Box>
                 </Box>

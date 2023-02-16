@@ -43,6 +43,18 @@ const sectionSlice = createSlice({
         },
         setSlideFlag: (state, action) => {
             state.slideFlag = action.payload;
+        },
+        resetSectionState: (state) => {
+            state.counter = 0;
+            state.sections = [];
+            state.sectionFlag = true;
+            state.lessons = [];
+            state.lessonFlag = false;
+            state.slides = '';
+            state.slideFlag = false;
+            state.currentLesson = 0;
+            state.currentSlide = 0;
+            state.lessonComplete = false;
         }
     }
 })
@@ -57,6 +69,7 @@ export const {
     setSlides,
     incrementCounter,
     decrementCounter,
-    resetCounter
+    resetCounter,
+    resetSectionState
 } = actions;
 export default reducer;

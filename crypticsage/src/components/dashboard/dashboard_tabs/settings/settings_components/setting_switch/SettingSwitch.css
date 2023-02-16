@@ -1,0 +1,13 @@
+.single-setting-card{
+    cursor: pointer;
+    padding-bottom: 0px !important;
+    padding: 0px !important;
+}
+
+
+@media screen and (max-width: 600px) {
+    .setting-switch-box {
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+    }
+  }

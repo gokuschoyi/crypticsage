@@ -1,0 +1,88 @@
+.basic-settings-container {
+  padding: 32px !important;
+}
+
+.avatar-container {
+  margin-top: 20px;
+  display: flex;
+  align-items: center !important;
+}
+.basic-settings-input-container {
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+}
+
+.basicsetting-icon {
+  pointer-events: none;
+}
+
+.image-upload > input {
+  display: none;
+}
+
+.reset-password-button {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.profile-pic {
+  color: transparent;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.profile-pic input {
+  display: none;
+}
+.profile-pic img {
+  position: absolute;
+  object-fit: cover;
+  width: 120px;
+  height: 120px;
+  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.35);
+  border-radius: 100px;
+  z-index: 0;
+}
+.profile-pic .-label {
+    display: flex;
+    flex-direction: column;
+  cursor: pointer;
+  height: 120px;
+  width: 120px;
+}
+.profile-pic:hover .-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 10000;
+  color: #fafafa;
+  transition: background-color 0.2s ease-in-out;
+  border-radius: 100px;
+  margin-bottom: 0;
+}
+.profile-pic span {
+  display: inline-flex;
+  padding: 0.2em;
+  height: 2em;
+}
+
+@media screen and (max-width: 600px) {
+  .basic-settings-container {
+    padding-left: 20px !important;
+    padding-right: 16px !important;
+  }
+  .basic-settings-input-container {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .basic-settings-input-container {
+    width: 100%;
+  }
+}

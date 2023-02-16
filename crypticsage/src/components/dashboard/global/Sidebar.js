@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { useSelector, useDispatch } from 'react-redux';
 import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
@@ -11,28 +12,24 @@ import {
     QuestionMarkIcon,
     ListAltIcon,
     ScheduleIcon,
-    ColorLensOutlinedIcon,
-    AddCardOutlinedIcon,
-    QuizOutlinedIcon,
     ExitToAppOutlinedIcon,
     SettingsOutlinedIcon
 } from "./Icons";
+import { setSidebarState } from "./SideBarSlice";
 
 const SidebarC = () => {
     const theme = useTheme();
-    const [selected, setSelected] = useState("dashboardTab");
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    const dispatch = useDispatch();
+    const { sidebarTab } = useSelector(state => state.sidebar);
 
     const { collapseSidebar, collapsed } = useProSidebar();
-    /* console.log(theme.palette.mode); */
-    /* console.log(colors.colorTwo[400]) */
-    /* let pathname = useLocation().pathname */
 
     useEffect(() => {
         if (sm) {
             collapseSidebar();
         }
-    }, [collapseSidebar, sm])
+    }, [collapseSidebar])
 
     useEffect(() => {
         const content = document.getElementsByClassName('content')[0];
@@ -43,6 +40,11 @@ const SidebarC = () => {
             content.style.setProperty('--marginLeft', '80px')
         }
     }, [collapsed])
+
+    const handleOnClick = (name) => {
+        dispatch(setSidebarState(name));
+        console.log(name)
+    }
 
     return (
         <div style={{ display: 'flex', height: '100%', position: 'fixed' }}>
@@ -87,14 +89,14 @@ const SidebarC = () => {
 
                     <Box className="menu-icon-holder" paddingLeft={collapsed ? undefined : "0%"} paddingTop={collapsed ? '20px' : '24px'}>
                         <MenuItem
-                            active={selected === "dashboardTab"}
+                            active={sidebarTab === "dashboardTab"}
                             style={{
-                                backgroundColor: selected === "dashboardTab" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: selected === "dashboardTab" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "dashboardTab" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
+                                color: sidebarTab === "dashboardTab" ? theme.palette.primary.main : theme.palette.secondary.main,
                             }}
-                            onClick={() => setSelected("dashboardTab")}
+                            onClick={() => handleOnClick("dashboardTab")}
                             icon={<HomeOutlinedIcon />}
-                            component={<Link to="dashboardTab" />}
+                            component={<Link to="/dashboard" />}
                             className="menu-item"
                         >
                             <Typography>Dashboard</Typography>
@@ -113,12 +115,12 @@ const SidebarC = () => {
                         </Typography>
 
                         <MenuItem
-                            active={selected === "lessons"}
+                            active={sidebarTab === "lessons"}
                             style={{
-                                backgroundColor: selected === "lessons" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: selected === "lessons" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "lessons" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
+                                color: sidebarTab === "lessons" ? theme.palette.primary.main : theme.palette.secondary.main,
                             }}
-                            onClick={() => setSelected("lessons")}
+                            onClick={() => handleOnClick("lessons")}
                             icon={<LibraryBooksOutlinedIcon />}
                             component={<Link to="lessons" />}
                             className="menu-item"
@@ -127,12 +129,12 @@ const SidebarC = () => {
                         </MenuItem>
 
                         <MenuItem
-                            active={selected === "journal"}
+                            active={sidebarTab === "journal"}
                             style={{
-                                backgroundColor: selected === "journal" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: selected === "journal" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "journal" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
+                                color: sidebarTab === "journal" ? theme.palette.primary.main : theme.palette.secondary.main,
                             }}
-                            onClick={() => setSelected("journal")}
+                            onClick={() => handleOnClick("journal")}
                             icon={<MenuBookOutlinedIcon />}
                             component={<Link to="journal" />}
                             className="menu-item"
@@ -141,12 +143,12 @@ const SidebarC = () => {
                         </MenuItem>
 
                         <MenuItem
-                            active={selected === "quiz"}
+                            active={sidebarTab === "quiz"}
                             style={{
-                                backgroundColor: selected === "quiz" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: selected === "quiz" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "quiz" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
+                                color: sidebarTab === "quiz" ? theme.palette.primary.main : theme.palette.secondary.main,
                             }}
-                            onClick={() => setSelected("quiz")}
+                            onClick={() => handleOnClick("quiz")}
                             icon={<QuestionMarkIcon />}
                             component={<Link to="quiz" />}
                             className="menu-item"
@@ -155,12 +157,12 @@ const SidebarC = () => {
                         </MenuItem>
 
                         <MenuItem
-                            active={selected === "glossary"}
+                            active={sidebarTab === "glossary"}
                             style={{
-                                backgroundColor: selected === "glossary" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: selected === "glossary" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "glossary" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
+                                color: sidebarTab === "glossary" ? theme.palette.primary.main : theme.palette.secondary.main,
                             }}
-                            onClick={() => setSelected("glossary")}
+                            onClick={() => handleOnClick("glossary")}
                             icon={<ListAltIcon />}
                             component={<Link to="glossary" />}
                             className="menu-item"
@@ -169,12 +171,12 @@ const SidebarC = () => {
                         </MenuItem>
 
                         <MenuItem
-                            active={selected === "schedule"}
+                            active={sidebarTab === "schedule"}
                             style={{
-                                backgroundColor: selected === "schedule" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: selected === "schedule" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "schedule" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
+                                color: sidebarTab === "schedule" ? theme.palette.primary.main : theme.palette.secondary.main,
                             }}
-                            onClick={() => setSelected("schedule")}
+                            onClick={() => handleOnClick("schedule")}
                             icon={<ScheduleIcon />}
                             component={<Link to="schedule" />}
                             className="menu-item"
@@ -192,12 +194,12 @@ const SidebarC = () => {
                         </Typography>
 
                         <MenuItem
-                            active={selected === "settings"}
+                            active={sidebarTab === "settings"}
                             style={{
-                                backgroundColor: selected === "settings" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: selected === "settings" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "settings" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
+                                color: sidebarTab === "settings" ? theme.palette.primary.main : theme.palette.secondary.main,
                             }}
-                            onClick={() => setSelected("settings")}
+                            onClick={() => handleOnClick("settings")}
                             icon={<SettingsOutlinedIcon />}
                             component={<Link to="settings" />}
                             className="menu-item"
@@ -206,54 +208,12 @@ const SidebarC = () => {
                         </MenuItem>
 
                         <MenuItem
-                            active={selected === "theme"}
+                            active={sidebarTab === "logout"}
                             style={{
-                                backgroundColor: selected === "theme" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: selected === "theme" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "logout" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
+                                color: sidebarTab === "logout" ? theme.palette.primary.main : theme.palette.secondary.main,
                             }}
-                            onClick={() => setSelected("theme")}
-                            icon={<ColorLensOutlinedIcon />}
-                            component={<Link to="theme" />}
-                            className="menu-item"
-                        >
-                            <Typography>Theme</Typography>
-                        </MenuItem>
-
-                        <MenuItem
-                            active={selected === "Subscriptions"}
-                            style={{
-                                backgroundColor: selected === "Subscriptions" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: selected === "Subscriptions" ? theme.palette.primary.main : theme.palette.secondary.main,
-                            }}
-                            onClick={() => setSelected("Subscriptions")}
-                            icon={<AddCardOutlinedIcon />}
-                            component={<Link to="subscriptions" />}
-                            className="menu-item"
-                        >
-                            <Typography>Subscriptions</Typography>
-                        </MenuItem>
-
-                        <MenuItem
-                            active={selected === "faq"}
-                            style={{
-                                backgroundColor: selected === "faq" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: selected === "faq" ? theme.palette.primary.main : theme.palette.secondary.main,
-                            }}
-                            onClick={() => setSelected("faq")}
-                            icon={<QuizOutlinedIcon />}
-                            component={<Link to="faq" />}
-                            className="menu-item"
-                        >
-                            <Typography>F.A.Q</Typography>
-                        </MenuItem>
-
-                        <MenuItem
-                            active={selected === "logout"}
-                            style={{
-                                backgroundColor: selected === "logout" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: selected === "logout" ? theme.palette.primary.main : theme.palette.secondary.main,
-                            }}
-                            onClick={() => setSelected("logout")}
+                            onClick={() => handleOnClick("logout")}
                             icon={<ExitToAppOutlinedIcon />}
                             component={<Link to="logout" />}
                             className="menu-item"
