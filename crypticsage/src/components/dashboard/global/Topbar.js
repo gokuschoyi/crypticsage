@@ -29,6 +29,8 @@ import "./Global.css"
 import { useNotificationCenter } from "react-toastify/addons/use-notification-center";
 import Notifications from "./Notifications";
 
+import { signOutUser } from "../../../utils/firebaseUtils";
+
 const Topbar = (props) => {
     const {
         notifications,
@@ -58,7 +60,9 @@ const Topbar = (props) => {
     const colorMode = useContext(ColorModeContext);
     // console.log(toggleNotifications);
     const dispatch = useDispatch();
-    const logOut = () => {
+    const logOut = async () => {
+        await signOutUser();
+
         dispatch(resetSettingsState());
         dispatch(resetSectionState());
         dispatch(resetSidebarState());

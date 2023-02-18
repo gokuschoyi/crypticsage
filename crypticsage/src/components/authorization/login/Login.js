@@ -6,10 +6,12 @@ import GoogleIcon from '@mui/icons-material/Google';
 import Logo from '../../../assets/logoNew.png'
 import { useNavigate } from 'react-router-dom';
 import Animation from '../animation/Animation';
+import { signInWithGooglePopup, signInWithFacebookPopup, createUserDocumentFromAuth } from '../../../utils/firebaseUtils';
+import { GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
 const Login = (props) => {
     const { switchState } = props
     const navigate = useNavigate()
-    
+
     const redirectToHome = () => {
         navigate('/')
     }
@@ -23,18 +25,50 @@ const Login = (props) => {
         setFPassword(!fPassword)
     }
 
+    const signInWithGoogle = async () => {
+        await signInWithGooglePopup()
+        .then((result) => {
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential.accessToken;
+            const user = result.user;
+            console.log(token, user)
+            createUserDocumentFromAuth(user);
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            const email = error.email;
+            const credential = GoogleAuthProvider.credentialFromError(error);
+            console.log(errorCode, errorMessage, email, credential)
+        });
+    }
+
+    const signInWithFacebook = async () => {
+        await signInWithFacebookPopup()
+        .then((result) => {
+            const credential = FacebookAuthProvider.credentialFromResult(result);
+            const token = credential.accessToken;
+            const user = result.user;
+            console.log(token, user)
+            createUserDocumentFromAuth(user);
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            const email = error.email;
+            const credential = FacebookAuthProvider.credentialFromError(error);
+            console.log(errorCode, errorMessage, email, credential)
+        });
+    }
+
     return (
         <Box className='login-container'>
-            <Box className='logo-container'>
-                <Box display="flex" justifyContent="start">
-                    <Box pt={2} ml={2}>
-                        <img src={Logo} alt="logo" className="logo" onClick={redirectToHome} />
-                    </Box>
-                </Box>
+            <Box className='logo-container' ml={2} mt={2}>
+                <img src={Logo} alt="logo" className="logo" onClick={redirectToHome} />
             </Box>
             <Box className='login-box'>
                 <Grid className='grid-container' container spacing={2}>
-                    <Grid item xs={12} sm={12} md={12}  lg={6}>
+                    <Grid item xs={12} sm={12} md={12} lg={6}>
                         <Box className='login-box'>
                             {!fPassword ?
                                 <Box className="login-container-left">
@@ -49,7 +83,7 @@ const Login = (props) => {
                                         <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px' }}>Forgot Password?</Typography>
                                     </Box>
 
-                                    <Button onClick = {toDashboard}className='login-button' variant="contained" sx={{
+                                    <Button onClick={toDashboard} className='login-button' variant="contained" sx={{
                                         ':hover': {
                                             color: 'black !important',
                                             backgroundColor: 'white !important'
@@ -60,13 +94,13 @@ const Login = (props) => {
                                     </Box>
                                     <Box className="icon-box">
                                         <Box className="footer-icon">
-                                            <IconButton aria-label="facebook" >
-                                                <FacebookIcon />
+                                            <IconButton onClick={signInWithGoogle} aria-label="facebook" >
+                                                <GoogleIcon />
                                             </IconButton>
                                         </Box>
                                         <Box className="footer-icon">
-                                            <IconButton aria-label="facebook" >
-                                                <GoogleIcon />
+                                            <IconButton onClick={signInWithFacebook} aria-label="facebook" >
+                                                <FacebookIcon />
                                             </IconButton>
                                         </Box>
                                     </Box>
@@ -88,23 +122,23 @@ const Login = (props) => {
                                             backgroundColor: 'white !important'
                                         }
                                     }}>Submit</Button>
-                                    <Box className="icon-box">
+                                    {/* <Box className="icon-box">
                                         <Box className="footer-icon">
                                             <IconButton aria-label="facebook">
                                                 <FacebookIcon />
                                             </IconButton>
                                         </Box>
                                         <Box className="footer-icon">
-                                            <IconButton aria-label="facebook">
+                                            <IconButton onClick={signInWithGoogle} aria-label="facebook">
                                                 <GoogleIcon />
                                             </IconButton>
                                         </Box>
-                                    </Box>
+                                    </Box> */}
                                 </Box>
                             }
                         </Box>
                     </Grid>
-                    <Grid className='animation-grid' item xs={12} sm={12} md ={12} lg={6}>
+                    <Grid className='animation-grid' item xs={12} sm={12} md={12} lg={6}>
                         <Box className='login-model'>
                             <Animation />
                         </Box>

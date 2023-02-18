@@ -17,6 +17,8 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "dayjs": "^1.11.7",
+    "dotenv": "^16.0.3",
+    "firebase": "^9.17.1",
     "gsap": "^3.11.4",
     "leva": "^0.9.34",
     "maath": "^0.5.1",

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react'
+import { useNavigate } from "react-router-dom";
 import { Box, Grid, Button, Typography } from "@mui/material"
 // import Maincomp from "../../../assets/Main_Comp.png"
 import Typed from 'typed.js';
@@ -34,6 +35,11 @@ const Banner = () => {
             typed.current.destroy();
         }
     }, [])
+    const navigate = useNavigate();
+    const handleClick = () => {
+        navigate('auth');
+    }
+
     return (
         <Box className="banner-container" sx={{ backgroundColor: `#00000080` }} id='home'>
             <Grid
@@ -58,7 +64,7 @@ const Banner = () => {
                             </span>
                     </p>
 
-                    <Button className="grid-col-button-left " pb={4} style={{ color: 'white', backgroundColor: 'red' }} variant="contained" sx={{
+                    <Button onClick={handleClick} className="grid-col-button-left " pb={4} style={{ color: 'white', backgroundColor: 'red' }} variant="contained" sx={{
                         ':hover': {
                             color: 'black !important',
                             backgroundColor: 'white !important'
