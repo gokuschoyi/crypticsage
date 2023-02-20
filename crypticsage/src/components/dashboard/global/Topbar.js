@@ -4,6 +4,7 @@ import { ColorModeContext } from "../../../themes/theme";
 import { resetSettingsState } from '../dashboard_tabs/settings/SettingsSlice'
 import { resetSectionState } from '../dashboard_tabs/sections/SectionSlice';
 import { resetSidebarState } from "./SideBarSlice";
+import { resetAuthState } from "../../authorization/authSlice";
 import { useDispatch } from 'react-redux';
 import InputBase from "@mui/material/InputBase";
 import {
@@ -62,7 +63,7 @@ const Topbar = (props) => {
     const dispatch = useDispatch();
     const logOut = async () => {
         await signOutUser();
-
+        dispatch(resetAuthState());
         dispatch(resetSettingsState());
         dispatch(resetSectionState());
         dispatch(resetSidebarState());

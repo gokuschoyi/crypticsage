@@ -12,6 +12,7 @@ import { ProSidebarProvider } from 'react-pro-sidebar';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import TabRoutes from "./components/dashboard/Routes";
+import ProtectedRoute from "./components/authorization/ProtectedRoute";
 function App() {
   const [theme, colorMode] = useMode();
   return (
@@ -27,7 +28,11 @@ function App() {
                     <Routes>
                       <Route index element={<LandingPage />} />
                       <Route path="auth" element={<Auth />} />
-                      <Route path="dashboard" element={<Dashboard />} >
+                      <Route path="dashboard" element={
+                        <ProtectedRoute >
+                          <Dashboard />
+                        </ProtectedRoute>
+                      } >
                         {TabRoutes}
                       </Route>
                     </Routes>

@@ -43,7 +43,7 @@
   transition: all 0.5s ease;
 }
 
-.signup-box {
+.login-box-noaccount {
   margin-top: 40px;
   margin-bottom: 40px;
   display: flex;
@@ -83,9 +83,9 @@
   letter-spacing: 5px;
 }
 
-.MuiFormLabel-root {
+/* .MuiFormLabel-root {
   color: red !important;
-}
+} */
 
 .reset-button {
   margin-top: 40px !important;
@@ -98,7 +98,7 @@
 
 @media screen and (max-width: 1200px) {
   .grid-container {
-    margin-top: 80px !important;
+    margin-top: 40px !important;
   }
   .login-model {
     width: 300px !important;

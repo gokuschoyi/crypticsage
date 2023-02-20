@@ -1,7 +1,7 @@
 .signup-button {
   background-color: red !important;
   color: white !important;
-  margin: 40px 0 0 0 !important;
+  margin: 20px 0 20px 0 !important;
   letter-spacing: 5px;
 }
 
@@ -27,15 +27,16 @@
   align-items: center;
 }
 
-.signup-box{
+.signup-box-already{
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   height: 100%;
+  margin: 20px 0 20px 0 !important;
 }
 
-.grid-container{
+.signup-grid-container{
   display:flex;
   flex-direction: row;
   justify-content: center;
@@ -53,4 +54,20 @@
   justify-content: center;
   align-items: center;
   height: 100%;
+}
+
+@media screen and (min-width : 1200px){
+  .signup-container{
+    height: 100vh;
+  }
+}
+
+@media screen and (max-width : 1200px){
+  .signup-container{
+    min-height: 100vh;
+  }
+  .signup-box{
+    height:auto;
+    margin-top: 40px;
+  }
 }

@@ -39,6 +39,10 @@ import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
 import RoomPreferencesOutlinedIcon from '@mui/icons-material/RoomPreferencesOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 
+import CloseIcon from '@mui/icons-material/Close';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import GoogleIcon from '@mui/icons-material/Google';
+
 export { 
     LightModeOutlinedIcon, 
     DarkModeOutlinedIcon, 
@@ -73,5 +77,8 @@ export {
     CameraAltIcon,
     ClearOutlinedIcon,
     RoomPreferencesOutlinedIcon,
-    ManageAccountsOutlinedIcon
+    ManageAccountsOutlinedIcon,
+    CloseIcon,
+    GoogleIcon,
+    FacebookIcon
 }

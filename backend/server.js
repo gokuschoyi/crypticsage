@@ -11,7 +11,7 @@ const authentication = require('./middleware/auth/authRouter');
 
 app.use(express.json())
 app.use(cors(
-    { origin: 'http://localhost:3000' }
+    { origin: 'https://localhost:3000' }
 ))
 app.use(bodyParser.json());
 app.use(logger)
