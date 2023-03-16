@@ -1,5 +1,6 @@
 import { createContext, useState, useMemo } from "react";
-import { createTheme } from "@mui/material/styles";
+// import { createTheme } from "@mui/material/styles";
+import { experimental_extendTheme as extendTheme} from '@mui/material/styles';
 import Typography from "./typography";
 import { initialColors, BlackAndWhite } from "./colors";
 export const tokens = (mode) => ({
@@ -152,6 +153,6 @@ export const useMode = () => {
         }), []
     )
 
-    const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
+    const theme = useMemo(() => extendTheme(themeSettings(mode)), [mode]);
     return [theme, colorMode]
 }

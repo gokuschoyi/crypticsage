@@ -22,9 +22,9 @@ const SidebarC = () => {
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const dispatch = useDispatch();
     const { sidebarTab } = useSelector(state => state.sidebar);
-
     const { collapseSidebar, collapsed } = useProSidebar();
-
+    
+    //add sm to dep to triggrer collapseSidebar
     useEffect(() => {
         if (sm) {
             collapseSidebar();

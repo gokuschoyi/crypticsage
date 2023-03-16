@@ -1,76 +1,30 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import './Login.css'
 import { Box, Typography, TextField, Button, IconButton, Grid, Alert, useTheme } from '@mui/material'
 import Collapse from '@mui/material/Collapse';
-import { CloseIcon, FacebookIcon, GoogleIcon } from '../../dashboard/global/Icons';
+import { CloseIcon, FacebookIcon } from '../../dashboard/global/Icons';
 import Logo from '../../../assets/logoNew.png'
 import { useNavigate } from 'react-router-dom';
 import Animation from '../animation/Animation';
-import { signInWithGooglePopup, signInWithFacebookPopup, createUserDocumentFromAuth } from '../../../utils/firebaseUtils';
-import { GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
+
+import { LoginSocialFacebook } from "reactjs-social-login";
+import { GoogleLogin } from '@react-oauth/google';
+
 import { useDispatch } from 'react-redux';
 import { setAuthState } from '../authSlice';
 import { LoginUser } from '../../../api/auth';
 const Login = (props) => {
     const { switchState } = props
     const navigate = useNavigate()
+    const dispatch = useDispatch()
     const theme = useTheme()
     const redirectToHome = () => {
         navigate('/')
     }
 
-    const [fPassword, setFPassword] = React.useState(false)
-    const handleFPassword = () => {
-        setFPassword(!fPassword)
-    }
-
-    const dispatch = useDispatch()
-
-    const signInWithGoogle = async () => {
-        await signInWithGooglePopup()
-            .then((result) => {
-                const user = result.user;
-                const userData = {
-                    'accessToken': user.accessToken,
-                    'displayName': user.displayName,
-                    'email': user.email,
-                    'emailVerified': user.emailVerified,
-                    'photoUrl': user.photoURL,
-                    'uid': user.uid,
-                }
-                dispatch(setAuthState(userData))
-                console.log(userData)
-                createUserDocumentFromAuth(user);
-                navigate('/dashboard')
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                const email = error.email;
-                const credential = GoogleAuthProvider.credentialFromError(error);
-                setError(errorCode)
-                console.log(errorCode, errorMessage, email, credential)
-            });
-    }
-
-    const signInWithFacebook = async () => {
-        await signInWithFacebookPopup()
-            .then((result) => {
-                const credential = FacebookAuthProvider.credentialFromResult(result);
-                const token = credential.accessToken;
-                const user = result.user;
-                console.log(token, user)
-                createUserDocumentFromAuth(user);
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                const email = error.email;
-                const credential = FacebookAuthProvider.credentialFromError(error);
-                setError(errorCode + '. You already have an account with a google email. Please login with Google credentials')
-                console.log(errorCode, errorMessage, email, credential)
-            });
-    }
+    const [open, setOpen] = useState(false);
+    const [error, setError] = useState('');
+    const [fPassword, setFPassword] = useState(false)
 
     const initialLoginData = {
         email: '',
@@ -78,52 +32,113 @@ const Login = (props) => {
     }
 
     const [loginData, setLoginData] = React.useState(initialLoginData)
-
-    const handleLoginData = (e) => {
-        const { name, value } = e.target
-        setLoginData({ ...loginData, [name]: value })
-    }
-
     const { email, password } = loginData
-
-    const signinUser = async () => {
-        console.log("clicked")
-        if (loginData.email !== '' && loginData.password !== '') {
-            const result = await LoginUser(loginData)
-            if (result.data.code === 200) {
-                const userData = {
-                    'accessToken': result.data.data.accessToken,
-                    'displayName': result.data.data.displayName,
-                    'email': result.data.data.email,
-                    'emailVerified': result.data.data.emailVerified,
-                    'photoUrl': result.data.data.photoURL || '',
-                    'uid': result.data.data.uid,
-                }
-                dispatch(setAuthState(userData))
-                navigate('/dashboard')
-            }
-            else {
-                setError(result.data.errorMessage)
-            }
-        }
-        else {
-            setError('Please fill all the fields')
-        }
-    }
-
-    const [open, setOpen] = React.useState(false);
-    const [error, setError] = React.useState('');
 
     const hideError = () => {
         setOpen(false);
         setError('')
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (error !== '') {
             setOpen(true)
         }
     }, [error])
+
+    const handleFPassword = () => {
+        setFPassword(!fPassword)
+    }
+
+    const handleLoginData = (e) => {
+        const { name, value } = e.target
+        setLoginData({ ...loginData, [name]: value })
+    }
+
+    const signinUser = async () => {
+        console.log("clicked")
+        if (email === '' || password === '') {
+            setError('Please fill all the fields')
+        }
+        else {
+            try {
+                let loginD = {
+                    'login_type': 'emailpassword',
+                    email,
+                    password
+                }
+                const result = await LoginUser(loginD)
+                const userData = {
+                    'accessToken': result.data.data.accessToken,
+                    'displayName': result.data.data.displayName,
+                    'email': result.data.data.email,
+                    'emailVerified': result.data.data.emailVerified,
+                    'photoUrl': result.data.data.profile_image || '',
+                    'uid': result.data.data.uid,
+                }
+                dispatch(setAuthState(userData))
+                navigate('/dashboard')
+            } catch (err) {
+                setError(err.response.data.message)
+                console.log(err)
+            }
+        }
+    }
+
+    const googleLoginSuccess = async (response) => {
+        const loginData = {
+            'login_type': 'google',
+            'credential': response.credential
+        }
+        try {
+            const result = await LoginUser(loginData)
+            const userData = {
+                'accessToken': result.data.data.accessToken,
+                'displayName': result.data.data.displayName,
+                'email': result.data.data.email,
+                'emailVerified': result.data.data.emailVerified,
+                'photoUrl': result.data.data.profile_image || '',
+                'uid': result.data.data.uid,
+            }
+            dispatch(setAuthState(userData))
+            navigate('/dashboard')
+        } catch (err) {
+            console.log(err)
+            if (err.response) {
+                setError(err.response.data.message)
+            }
+        }
+    };
+
+    const facebookLoginSuccess = async (response) => {
+        const loginData = {
+            'login_type': 'facebook',
+            'facebook_email': response.data.email
+        }
+        try {
+            const result = await LoginUser(loginData)
+            const userData = {
+                'accessToken': result.data.data.accessToken,
+                'displayName': result.data.data.displayName,
+                'email': result.data.data.email,
+                'emailVerified': result.data.data.emailVerified,
+                'photoUrl': result.data.data.profile_image || '',
+                'uid': result.data.data.uid,
+            }
+            console.log(result)
+            dispatch(setAuthState(userData))
+            navigate('/dashboard')
+        } catch (err) {
+            console.log(err)
+            if (err.response) {
+                setError(err.response.data.message)
+            }
+        }
+        console.log(response);
+    }
+
+    const errorMessage = (error) => {
+        console.log(error);
+    };
 
 
 
@@ -210,15 +225,19 @@ const Login = (props) => {
                                         <Typography className='signup-start' variant='div' fontWeight="300" sx={{ letterSpacing: '4px', color: `${theme.palette.secondary.main}` }}>Don't have an Account? <span className="signup" onClick={switchState} >Signup Now </span></Typography>
                                     </Box>
                                     <Box className="icon-box">
-                                        <Box className="footer-icon">
-                                            <IconButton onClick={signInWithGoogle} aria-label="facebook" >
-                                                <GoogleIcon />
-                                            </IconButton>
+                                        <Box className="footer-icon" alignItems='center' display='flex'>
+                                            <GoogleLogin shape='pill' type='icon' onSuccess={googleLoginSuccess} onError={errorMessage} state_cookie_domain='single-host-origin' />
                                         </Box>
                                         <Box className="footer-icon">
-                                            <IconButton onClick={signInWithFacebook} aria-label="facebook" >
-                                                <FacebookIcon />
-                                            </IconButton>
+                                            <LoginSocialFacebook
+                                                appId={process.env.REACT_APP_FACEBOOK_APP_ID}
+                                                onResolve={facebookLoginSuccess}
+                                                onReject={errorMessage}
+                                            >
+                                                <IconButton size='large' aria-label="facebook" >
+                                                    <FacebookIcon sx={{ width: '40px', height: '40px' }} />
+                                                </IconButton>
+                                            </LoginSocialFacebook>
                                         </Box>
                                     </Box>
                                 </Box>

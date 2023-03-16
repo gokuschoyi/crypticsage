@@ -43,6 +43,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from '@mui/icons-material/Google';
 
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+
 export { 
     LightModeOutlinedIcon, 
     DarkModeOutlinedIcon, 
@@ -80,5 +83,7 @@ export {
     ManageAccountsOutlinedIcon,
     CloseIcon,
     GoogleIcon,
-    FacebookIcon
+    FacebookIcon,
+    ArrowDropUpIcon,
+    ArrowDropDownIcon
 }

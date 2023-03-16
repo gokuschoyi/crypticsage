@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import './BasicSettings.css'
-import { Box, Typography, Avatar, Button, IconButton, TextField, FormControl, InputLabel, OutlinedInput, InputAdornment } from '@mui/material'
+import { Box, Typography, Button, IconButton, TextField, FormControl, InputLabel, OutlinedInput, InputAdornment } from '@mui/material'
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Me from '../../../../../../assets/me.jpg'
-import { DeleteOutlineOutlinedIcon, CheckOutlinedIcon, CameraAltIcon, ClearOutlinedIcon } from '../../../../global/Icons'
+import { CheckOutlinedIcon, CameraAltIcon, ClearOutlinedIcon } from '../../../../global/Icons'
 const BasicSettings = () => {
     const [showPassword, setShowPassword] = React.useState(false);
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -41,8 +41,27 @@ const BasicSettings = () => {
         setFile(null)
     }
 
+    const textFieldStyle = {
+        marginTop: '10px',
+        marginBotton: '10px',
+        width: 'fill-available',
+        '& label.Mui-focused': {
+            color: 'white',
+            paddingBottom: '10px',
+        },
+        '& label': {
+            color: 'white',
+        },
+        '& .MuiOutlinedInput-root': {
+            '&:hover fieldset': {
+                borderColor: 'red',
+            },
+        }
+    }
+
+
     return (
-        <Box className='basic-settings-container'>
+        <Box className='basic-settings-container' sx={{backgroundColor:'#2e2e2e'}}>
             <Box display='flex' flexDirection='column' alignItems='start' className='user-name-box'>
                 <Typography variant='h4' color='secondary'>
                     Gokul S Choyi
@@ -79,7 +98,7 @@ const BasicSettings = () => {
                             }}><ClearOutlinedIcon className='basicsetting-icon' /></IconButton>
 
                         <IconButton
-                        onClick={saveChange}
+                            onClick={saveChange}
                             size='small'
                             variant="text"
                             style={{
@@ -100,15 +119,19 @@ const BasicSettings = () => {
             <Box marginTop="20px" className='basic-settings-input-box'>
                 <Box className='basic-settings-input-container'>
                     <Box display='flex' alignItems='baseline' justifyContent='space-between'>
-                        <TextField sx={{ marginTop: '10px', marginBotton: '10px', width: 'fill-available' }} id="outlined-basic-username" size="small" label="User Name" variant="outlined" />
+                        <TextField
+                            sx={textFieldStyle}
+                            id="outlined-basic-username" size="small" label="User Name" variant="outlined" />
                         <Button size='small' variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginLeft: '10px' }} sx={{ ':hover': { color: `black !important`, backgroundColor: 'white !important', } }}>Change</Button>
                     </Box>
                     <Box display='flex' alignItems='baseline' justifyContent='space-between'>
-                        <TextField sx={{ marginTop: '10px', marginBotton: '10px', width: 'fill-available' }} id="outlined-basic-email" size="small" label="Email" variant="outlined" />
+                        <TextField sx={textFieldStyle}
+                            id="outlined-basic-email" size="small" label="Email" variant="outlined" />
                         <Button size='small' variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginLeft: '10px' }} sx={{ ':hover': { color: `black !important`, backgroundColor: 'white !important', } }}>Change</Button>
                     </Box>
                     <Box display='flex' alignItems='baseline' justifyContent='space-between'>
-                        <TextField sx={{ marginTop: '10px', marginBotton: '10px', width: 'fill-available' }} id="outlined-basic-phoneNumber" size="small" label="Phone Number" variant="outlined" />
+                        <TextField sx={textFieldStyle}
+                            id="outlined-basic-phoneNumber" size="small" label="Phone Number" variant="outlined" />
                         <Button size='small' variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginLeft: '10px' }} sx={{ ':hover': { color: `black !important`, backgroundColor: 'white !important', } }}>Change</Button>
                     </Box>
                 </Box>
@@ -120,7 +143,7 @@ const BasicSettings = () => {
                 </Box>
                 <Box className='basic-settings-input-container'>
                     <Box display='flex' alignItems='baseline' justifyContent='space-between'>
-                        <FormControl sx={{ width: 'fill-available', marginTop: '10px', marginBotton: '10px' }} size='small' variant="outlined">
+                        <FormControl sx={textFieldStyle} size='small' variant="outlined">
                             <InputLabel htmlFor="outlined-adornment-password">Old Password</InputLabel>
                             <OutlinedInput
                                 id="outlined-adornment-password"
@@ -146,7 +169,7 @@ const BasicSettings = () => {
                         <Box className='reset-password-box'>
                             <Box className='basic-settings-input-container'>
                                 <Box display='flex' alignItems='baseline' justifyContent='space-between'>
-                                    <FormControl sx={{ width: 'fill-available', marginTop: '15px', marginBotton: '15px' }} size='small' variant="outlined">
+                                    <FormControl sx={textFieldStyle} size='small' variant="outlined">
                                         <InputLabel htmlFor="outlined-adornment-password">New Password</InputLabel>
                                         <OutlinedInput
                                             id="outlined-adornment-password"
@@ -168,7 +191,7 @@ const BasicSettings = () => {
                                     </FormControl>
                                 </Box>
                                 <Box display='flex' alignItems='baseline' justifyContent='space-between'>
-                                    <FormControl sx={{ width: 'fill-available', marginTop: '15px', marginBotton: '15px' }} size='small' variant="outlined">
+                                    <FormControl sx={textFieldStyle} size='small' variant="outlined">
                                         <InputLabel htmlFor="outlined-adornment-password">Re-Enter New Password</InputLabel>
                                         <OutlinedInput
                                             id="outlined-adornment-password"

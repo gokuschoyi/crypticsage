@@ -3,26 +3,25 @@ var cors = require('cors')
 const bodyParser = require('body-parser');
 const logger = require('./middleware/logger/Logger');
 const config = require('./config');
-const verify = require('./middleware/auth/verifyToken');
+const verify = require('./routes/auth/verifyToken');
 
 const app = express();
 
-const authentication = require('./middleware/auth/authRouter');
+const authentication = require('./routes/auth/authRoute')
+const fetchCryptoData = require('./utils/crypto/fetchCryptoData');
 
 app.use(express.json())
-app.use(cors(
-    { origin: 'https://localhost:3000' }
-))
+app.use(cors({ origin: 'https://localhost:3001', credentials: true }))
 app.use(bodyParser.json());
 app.use(logger)
 
 app.use('/auth', authentication);
 
+app.use('/crypto', fetchCryptoData);
+
 app.post('/', verify, (req, res) => {
     console.log('Verify request received');
-    var data = res.locals.data;
-    res.json({ message: "POST request received", code: 200, status: 'success', data });
-    console.log('Verify request sent');
+    res.status(200).json({ message: "Verified" });
 })
 
 app.listen(config.port, () => {

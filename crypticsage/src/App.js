@@ -1,4 +1,5 @@
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { CssBaseline } from "@mui/material";
+import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles'
 import { ColorModeContext, useMode } from "./themes/theme";
 import { Provider } from 'react-redux';
 import store, { persistor } from './store';
@@ -13,36 +14,39 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import TabRoutes from "./components/dashboard/Routes";
 import ProtectedRoute from "./components/authorization/ProtectedRoute";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 function App() {
   const [theme, colorMode] = useMode();
   return (
     <ColorModeContext.Provider value={colorMode}>
-      <ThemeProvider theme={theme}>
+      <CssVarsProvider theme={theme}>
         <CssBaseline />
         <BrowserRouter>
           <ProSidebarProvider>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <Provider store={store}>
                 <PersistGate loading={null} persistor={persistor}>
-                  <div className="App">
-                    <Routes>
-                      <Route index element={<LandingPage />} />
-                      <Route path="auth" element={<Auth />} />
-                      <Route path="dashboard" element={
-                        <ProtectedRoute >
-                          <Dashboard />
-                        </ProtectedRoute>
-                      } >
-                        {TabRoutes}
-                      </Route>
-                    </Routes>
-                  </div>
+                  <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID}>
+                    <div className="App">
+                      <Routes>
+                        <Route index element={<LandingPage />} />
+                        <Route path="auth" element={<Auth />} />
+                        <Route path="dashboard" element={
+                          <ProtectedRoute >
+                            <Dashboard />
+                          </ProtectedRoute>
+                        } >
+                          {TabRoutes}
+                        </Route>
+                      </Routes>
+                    </div>
+                  </GoogleOAuthProvider>
                 </PersistGate>
               </Provider>
             </LocalizationProvider>
           </ProSidebarProvider>
         </BrowserRouter>
-      </ThemeProvider>
+      </CssVarsProvider>
     </ColorModeContext.Provider>
   );
 }
