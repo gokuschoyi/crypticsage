@@ -39,8 +39,8 @@ export const themeSettings = (mode) => {
                         contrastText: colors.colorTwo[500],
                     },
                     text: {
-                        primary: colors.colorThree[600],
-                        secondary: colors.colorThree[300],
+                        primary: colors.colorTwo[700],
+                        secondary: colors.colorTwo[300],
                         disabled: colors.colorThree[100],
                         hint: colors.colorThree[100],
                         dark: colors.colorThree[900],

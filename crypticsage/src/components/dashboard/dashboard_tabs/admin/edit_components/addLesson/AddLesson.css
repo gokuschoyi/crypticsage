@@ -1,0 +1,51 @@
+.add-lesson-data-header {
+  height: 40px;
+  align-items: center;
+  display: flex;
+}
+
+.add-content-subtitle {
+  width: 100%;
+  height: 100%;
+}
+
+.section-selector {
+  padding-top: 20px;
+}
+
+.lesson-title {
+  margin-top: 30px;
+}
+
+.header-width-lesson {
+  min-width: 200px;
+}
+
+.slide-box {
+  margin: 0.5rem;
+  padding: 1rem;
+  border-radius: 5px;
+  background-color: var(--mui-palette-primary-dark);
+}
+
+.slide-padding {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.header-width {
+  min-width: 160px;
+}
+
+.content-width {
+  width: stretch !important;
+}
+
+.margin-for-header {
+  margin-top: 10px !important;
+}
+
+.highlight-word-box {
+  display: flex;
+  flex-direction: row;
+}

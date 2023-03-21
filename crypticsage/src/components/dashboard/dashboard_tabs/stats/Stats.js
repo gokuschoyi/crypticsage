@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useOutletContext } from "react-router-dom";
 import Header from '../../global/Header';
 import { toast } from 'react-toastify';
@@ -8,7 +8,7 @@ import { Box, Typography, Button, useTheme, Grid } from '@mui/material';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 
-import { ArrowDropDownIcon, ArrowDropUpIcon } from '../../global/Icons';
+import { ArrowDropDownIcon, ArrowDropUpIcon} from '../../global/Icons';
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -96,7 +96,7 @@ const Stats = (props) => {
     }
 
     const CustonTextCard = (props) => {
-        const { title, price, image, price_change_24h, price_change_percentage_24h, market_cap_rank,high_24h, low_24h } = props
+        const { title, price, image, price_change_24h, price_change_percentage_24h, market_cap_rank, high_24h, low_24h } = props
         return (
             <Box className='card-holder-slider' >
                 <Box className='info-box'>
@@ -156,7 +156,7 @@ const Stats = (props) => {
     const [cryptoData, setCryptoData] = useState(null);
     const token = useSelector(state => state.auth.accessToken);
 
-    /* useEffect(() => {
+    useEffect(() => {
         const intervalId = setInterval(() => {
             const baseUrl = process.env.REACT_APP_BASEURL;
             const config = {
@@ -169,12 +169,12 @@ const Stats = (props) => {
                 .catch(error => {
                     console.error(error);
                 });
-        }, 60000);
+        }, 300000);
 
         return () => {
             clearInterval(intervalId);
         };
-    }, [token]); */
+    }, [token]);
 
     //hover effect on tabs
     useEffect(() => {
@@ -195,38 +195,6 @@ const Stats = (props) => {
         })
     })
 
-    function getWordsInSpans(sentence) {
-        const words = sentence.split(' ');
-        return words.map((word, index) => {
-            return <span key={index}>{word} </span>;
-        });
-    }
-
-    const [content, setContent] = useState([
-        'This code wraps the entire HTML structure inside a parent div.',
-        'The event listener listens for the Backspace key press and removes the selected words from the HTML structure. It also checks whether the selected words span across multiple spans and handles each case accordingly.',
-        "In this implementation, when you select multiple words across multiple spans, it will only allow you to edit the selected words within a single span at a time. The input box will not appear when selecting the words.",
-        "We're also using the useRef hook to get a ref to the div element inside the component. We'll use this ref later to get the editable text content when the user blurs the div.",
-        "We're using the contentEditable attribute on the div element to make the entire text editable. We're also using the onBlur event to update the component's state when the user blurs the div."
-    ]);
-    const ref = useRef(null);
-
-    const handleBlur = () => {
-        const textContent = ref.current.textContent;
-        setContent((content) => {
-            const updatedContent = [...content];
-            updatedContent[0] = textContent;
-            return updatedContent;
-        });
-    };
-
-    function handleChange(event) {
-        const updatedContent = Array.from(event.target.childNodes[0].childNodes)
-            .map((div) => div.innerText)
-            .filter((text) => text.length > 0);
-        setContent(updatedContent);
-        console.log(updatedContent)
-    }
     return (
         <Box className='stat-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
@@ -292,72 +260,6 @@ const Stats = (props) => {
                         <CustomLongCard title='Upload Trading-View data' subtitle='Upload your Trading View data for analysis' content='Make an entry to your Journal' buttonName="UPLOAD" />
                     </Grid>
                 </Grid>
-            </Box>
-            <Box className='leaderboard-conatiner'>
-                {/* <DataGrid
-                sx={{color:'white'}}
-                    rows={rows}
-                    columns={columns}
-                    pageSize={5}
-                    rowsPerPageOptions={[5]}
-                    checkboxSelection
-                    disableSelectionOnClick
-                /> */}
-            </Box>
-
-
-
-            <Box
-                className='span-selection-test'
-                contentEditable={true}
-                suppressContentEditableWarning={true}
-            >
-                <div>
-                    {content.map((text, index) => (
-                        <div
-                            className='text-div'
-                            key={index}
-                            onBlur={handleBlur}
-                            onInput={handleChange}
-                        >
-                            {getWordsInSpans(text)}
-                        </div>
-                    ))}
-                </div>
-
-            </Box>
-
-
-
-
-            <Box display='flex' flexDirection='column'>
-                <Box sx={{ backgroundColor: `${theme.palette.primary.main}` }}>
-                    <h2>Primary</h2>
-                </Box>
-                <Box sx={{ backgroundColor: `${theme.palette.secondary.main}` }}>
-                    <h2>Secondary</h2>
-                </Box>
-                <Box sx={{ backgroundColor: `${theme.palette.text.primary}` }}>
-                    <h2>Text</h2>
-                </Box>
-                <Box sx={{ backgroundColor: `${theme.palette.background.default}` }}>
-                    <h2>background</h2>
-                </Box>
-                <Box sx={{ backgroundColor: `${theme.palette.error.main}` }}>
-                    <h2>error</h2>
-                </Box>
-                <Box sx={{ backgroundColor: `${theme.palette.warning.main}` }}>
-                    <h2>warning</h2>
-                </Box>
-                <Box sx={{ backgroundColor: `${theme.palette.info.main}` }}>
-                    <h2>info</h2>
-                </Box>
-                <Box sx={{ backgroundColor: `${theme.palette.success.main}` }}>
-                    <h2>success</h2>
-                </Box>
-                <Box sx={{ backgroundColor: `${theme.palette.divider.main}` }}>
-                    <h2>divider</h2>
-                </Box>
             </Box>
         </Box >
     )

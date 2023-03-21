@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const logger = require('./middleware/logger/Logger');
 const config = require('./config');
 const verify = require('./routes/auth/verifyToken');
+const contentManager = require('./routes/content/contentManager');
 
 const app = express();
 
@@ -15,14 +16,16 @@ app.use(cors({ origin: 'https://localhost:3001', credentials: true }))
 app.use(bodyParser.json());
 app.use(logger)
 
-app.use('/auth', authentication);
-
-app.use('/crypto', fetchCryptoData);
-
 app.post('/', verify, (req, res) => {
     console.log('Verify request received');
     res.status(200).json({ message: "Verified" });
 })
+
+app.use('/auth', authentication);
+
+app.use('/crypto', fetchCryptoData);
+
+app.use('/content', contentManager);
 
 app.listen(config.port, () => {
     console.log(`Server listening on port ${config.port}`);

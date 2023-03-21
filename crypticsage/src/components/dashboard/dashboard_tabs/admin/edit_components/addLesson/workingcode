@@ -1,0 +1,83 @@
+const [addedSlides, setAddedSlides] = useState([]);
+
+    const [slideTemplate, setSlideTemplate] = useState();
+const [slideCounter, setSlideCounter] = useState(2);
+    const incrementSlideCounter = () => {
+        setSlideCounter((prev) => prev + 1);
+    }
+    const decrementSlideCounter = () => {
+        setSlideCounter((prev) => prev - 1);
+    }
+useEffect(() => {
+        if (documentType === 'lesson') {
+            console.log('ini temp load')
+            const slide = document.getElementsByClassName('slide-box-initial');
+            setSlideTemplate(slide);
+        }
+    }, [documentType])
+
+
+
+    useEffect(() => {
+        const updatedContainer = document.getElementsByClassName('slide-box');
+        let newSlides = [];
+        for (let i = 1; i < updatedContainer.length; i++) {
+            newSlides.push(updatedContainer[i])
+        }
+        setAddedSlides(newSlides);
+    }, [slideCounter])
+    // console.log(addedSlides)
+
+    useEffect(() => {
+        if (addedSlides.length > 0) {
+            try {
+                const slideContainer = document.getElementsByClassName('slide')
+                for (let i = 0; i < addedSlides.length; i++) {
+                    slideContainer[0].appendChild(addedSlides[i]);
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
+    })
+
+    const removeSlide = (e) => {
+        console.log('remove button clicked', e.target.id)
+        decrementSlideCounter();
+        let elementToRemove = document.getElementById(e.target.id);
+        const slideContainer = document.getElementsByClassName('slide')
+        slideContainer[0].removeChild(elementToRemove);
+
+        let updatedSlidesContainer = document.getElementsByClassName('slide-box');
+        let newSlides = [];
+        for (let i = 1; i < updatedSlidesContainer.length; i++) {
+            newSlides.push(updatedSlidesContainer[i])
+        }
+        setAddedSlides(newSlides);
+        for (let i = 1; i < updatedSlidesContainer.length; i++) {
+            updatedSlidesContainer[i].querySelector('.slide-number').innerText = `Slide ${i + 1} :`;
+        }
+    }
+
+    const addSlide = (e) => {
+        incrementSlideCounter();
+        const slideContainer = document.getElementsByClassName('slide')
+        // const slide = document.getElementsByClassName('slide-box-initial');
+
+        console.log(slideTemplate[0])
+
+        const clonedSlide = slideTemplate[0].cloneNode(true);
+        clonedSlide.classList.remove('slide-box-initial');
+        clonedSlide.querySelector('.slide-number').innerText = `Slide ${slideCounter} :`;
+
+        const removeButton = document.createElement("button");
+        removeButton.id = `slide-${slideCounter}`;
+        removeButton.classList.add('MuiButtonBase-root', 'MuiButton-root', 'MuiButton-text', 'MuiButton-textPrimary', 'MuiButton-sizeSmall', 'MuiButton-textSizeSmall', 'MuiButton-root', 'MuiButton-text', 'MuiButton-textPrimary', 'MuiButton-sizeSmall', 'MuiButton-textSizeSmall', 'css-vxm92a-MuiButtonBase-root-MuiButton-root')
+        removeButton.innerText = "Remove";
+        removeButton.addEventListener("click", (e) => removeSlide(e));
+
+        clonedSlide.id = `slide-${slideCounter}`;
+        clonedSlide.appendChild(removeButton);
+        slideContainer[0].appendChild(clonedSlide);
+        console.log('add slide clicked')
+    }

@@ -131,7 +131,7 @@
   flex-direction: row;
 }
 
-.high-low-box{
+.high-low-box {
   display: flex;
   flex-direction: row;
   gap: 1rem;

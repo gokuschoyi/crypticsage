@@ -45,6 +45,10 @@ import GoogleIcon from '@mui/icons-material/Google';
 
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ReplayIcon from '@mui/icons-material/Replay';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import AddIcon from '@mui/icons-material/Add';
 
 export { 
     LightModeOutlinedIcon, 
@@ -85,5 +89,9 @@ export {
     GoogleIcon,
     FacebookIcon,
     ArrowDropUpIcon,
-    ArrowDropDownIcon
+    ArrowDropDownIcon,
+    ReplayIcon,
+    AdminPanelSettingsIcon,
+    PlayArrowIcon,
+    AddIcon
 }

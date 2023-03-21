@@ -13,7 +13,8 @@ import {
     ListAltIcon,
     ScheduleIcon,
     ExitToAppOutlinedIcon,
-    SettingsOutlinedIcon
+    SettingsOutlinedIcon,
+    AdminPanelSettingsIcon
 } from "./Icons";
 import { setSidebarState } from "./SideBarSlice";
 
@@ -205,6 +206,20 @@ const SidebarC = () => {
                             className="menu-item"
                         >
                             <Typography>Settings</Typography>
+                        </MenuItem>
+
+                        <MenuItem
+                            active={sidebarTab === "admin"}
+                            style={{
+                                backgroundColor: sidebarTab === "admin" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
+                                color: sidebarTab === "admin" ? theme.palette.primary.main : theme.palette.secondary.main,
+                            }}
+                            onClick={() => handleOnClick("admin")}
+                            icon={<AdminPanelSettingsIcon />}
+                            component={<Link to="admin" />}
+                            className="menu-item"
+                        >
+                            <Typography>Admin</Typography>
                         </MenuItem>
 
                         <MenuItem
