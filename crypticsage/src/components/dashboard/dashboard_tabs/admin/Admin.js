@@ -20,15 +20,15 @@ import './Admin.css'
 import { addSection, fetchSections, fetchLessons } from '../../../../api/db';
 import { AddSection, AddLesson } from './edit_components';
 import SlideBox from './edit_components/addLesson/SlideBox';
+import HighLightWordBox from './edit_components/addLesson/HighLightWordBox';
 const Admin = (props) => {
     const { title, subtitle } = props
     const theme = useTheme();
 
     const [editMode, setEditMode] = useState('add');
-    const [documentType, setDocumentType] = useState('sections');
+    const [documentType, setDocumentType] = useState('lesson');
     const [sectionData, setSectionData] = useState(null);
     const token = useSelector(state => state.auth.accessToken);
-
 
     const handleDocumentType = (e) => {
         setDocumentType(e.target.value);
@@ -38,6 +38,7 @@ const Admin = (props) => {
         setEditMode(param);
     }
 
+    //ADD SECTION INFO
     //initial load of section data
     useEffect(() => {
         let data = {
@@ -118,6 +119,7 @@ const Admin = (props) => {
         }
     }
 
+    //GETTING SECTION ID FROM ADD LESSONS TAB
     const [selectedSectionId, setSelectedSectionId] = useState('');
     const [selectedSectionName, setSelectSectionName] = useState('');
 
@@ -129,17 +131,144 @@ const Admin = (props) => {
         // console.log(selectedSectionId)
     }
 
-    //initial data for new lessons slides
-    const [slideList, setSlideList] = useState([<SlideBox key={0} count={0} />]);
-
-    //add new slide to lesson
-    const handleAddSlide = () => {
-        setSlideList([...slideList, <SlideBox key={slideList.length} count={slideList.length} handleRemoveSlide={handleRemoveSlide} />])
+    //initial data when add lesson is rendered
+    const initialHighlightWordData = {
+        keyword: '',
+        explanation: '',
+        id: '',
     }
 
-    //remove slide from lesson
+    const initialSlideData = {
+        heading: '',
+        content_text: '',
+        media_type: '',
+        start_timestamp: '',
+        end_timestamp: '',
+        media_url: '',
+    }
+
+    const initialLessonData = {
+        title: '',
+        lesson_video_url: '',
+        next_lesson_id: '',
+        prev_lesson_id: '',
+        lesson_logo_url: '',
+        content: {}
+    }
+
+    //LESSON LEVEL : handling new lesson data
+    const [newLessonData, setNewLessonData] = useState(initialLessonData);
+    const handleLessonDataChange = (e) => {
+        const { name, value } = e.target;
+        // console.log(name, value)
+        setNewLessonData({ ...newLessonData, [name]: value });
+    }
+
+    //HIGHLIGHT_WORD LEVEL : handling new highligh word data
+    const [newHighlightWordData, setNewHighlightWordData] = useState([[initialHighlightWordData]]);
+    const handleHighlightWordDataChange = (e) => {
+        // console.log(e)
+        const { name, value } = e.target;
+        const { id, parentId } = e.target.dataset;
+        // console.log(name, value, id, parentId)
+        let newArray = [...newHighlightWordData];
+        newArray[parentId][id][name] = value;
+        setNewHighlightWordData(newArray);
+    }
+
+    //HIGHLIGHT_WORD LEVEL : additional highlight word component to be rendered
+    const [highlightWordList, setHighlightWordList] = useState([[<HighLightWordBox key={0} count={0} />]])
+    const handleAddHighlightWord = (e) => {
+        const { id } = e.target
+        console.log(id)
+
+        let updatedHighLightWordList = highlightWordList
+        updatedHighLightWordList[id] = [...updatedHighLightWordList[id], <HighLightWordBox key={updatedHighLightWordList[id].length} count={updatedHighLightWordList[id].length} />]
+        // console.log(updatedHighLightWordList)
+        setHighlightWordList(updatedHighLightWordList)
+
+        let updatedHighlightWordData = [...newHighlightWordData]
+        updatedHighlightWordData[id] = [initialHighlightWordData, ...updatedHighlightWordData[id]]
+        setNewHighlightWordData(updatedHighlightWordData)
+    }
+
+    //HIGHLIGHT_WORD LEVEL : remove highlight word from slide
+    const handleRemoveHighlightWord = (e) => {
+        let parentId = e.target.dataset.parentId;
+        let highlightWordToRemove = e.target.dataset.id;
+        console.log(parentId, highlightWordToRemove)
+
+        let updatedHighlightWordData = [...newHighlightWordData]
+        updatedHighlightWordData[parentId].splice(highlightWordToRemove, 1)
+        setNewHighlightWordData(updatedHighlightWordData)
+
+        let updatedHighlightWordList = [...highlightWordList]
+        updatedHighlightWordList[parentId].splice(highlightWordToRemove, 1)
+        const transform = () => {
+            return updatedHighlightWordList[parentId].map((item, index) => {
+                return React.cloneElement(item, { key: index, count: index })
+            })
+        }
+        updatedHighlightWordList[parentId] = transform()
+        setHighlightWordList(updatedHighlightWordList)
+    }
+
+    //SLIDE LEVEL : handling new slide data
+    const [newSlideData, setNewSlideData] = useState([initialSlideData]);
+    const handleSlideDataChange = (e) => {
+        let name = e.target.name || e.target.dataset.name;
+        let value = e.target.value || e.target.dataset.value;
+        let id = e.target.id || e.target.dataset.id;
+
+        let newArray = [...newSlideData];
+        newArray[id][name] = value;
+        setNewSlideData(newArray);
+    }
+
+    //SLIDE LEVEL : initial slide component to be rendered
+    const [slideList, setSlideList] = useState([<SlideBox key={0} count={0} />]);
+
+    //SLIDE LEVEL : add new slide to lesson
+    const handleAddSlide = (e) => {
+        let count = slideList.length
+
+        let updatedHBoxList = highlightWordList;
+        updatedHBoxList[count] = [<HighLightWordBox key={0} count={0} />]
+        setHighlightWordList(updatedHBoxList)
+
+        let updatedHighlightWordData = newHighlightWordData
+        updatedHighlightWordData[count] = [initialHighlightWordData]
+        setNewHighlightWordData(updatedHighlightWordData)
+
+        let updatedSlideData = newSlideData
+        updatedSlideData[slideList.length] = initialSlideData
+        setNewSlideData(updatedSlideData)
+        setSlideList([...slideList, <SlideBox key={slideList.length} count={count} />])
+    }
+
+    //SLIDE LEVEL : remove slide data from newSlideData helper function
+    const removeSlideData = (id) => {
+        console.log("remove slide data", id)
+        let updatedSlideData = newSlideData
+        updatedSlideData.splice(id, 1)
+        setNewSlideData(updatedSlideData)
+
+        let updatedHBoxList = highlightWordList;
+        updatedHBoxList.splice(id, 1)
+        setHighlightWordList(updatedHBoxList)
+
+        let updatedHighlightWordData = newHighlightWordData
+        updatedHighlightWordData.splice(id, 1)
+        setNewHighlightWordData(updatedHighlightWordData)
+        // setNewSlideData(updatedSlideData)
+    }
+
+    //SLIDE LEVEL : remove slide from lesson
     const handleRemoveSlide = (e) => {
         let slideToRemove = e.target.id;
+        console.log(slideToRemove)
+        removeSlideData(slideToRemove)
+        console.log(newSlideData)
         setSlideList(prevList => {
             const newList = [...prevList]
             newList.splice(slideToRemove, 1);
@@ -149,6 +278,32 @@ const Admin = (props) => {
             return udatedList;
         })
     }
+
+    //save lesson to db
+    const handlelessonSave = () => {
+        const finalLessonData = {
+            chapter_title: '',
+            sectionId: '',
+            lessonData: {}
+        }
+        finalLessonData.chapter_title = newLessonData.title;
+        finalLessonData.sectionId = selectedSectionId;
+
+        let lessonData = newLessonData;
+
+        const updatedSlideInfo = newSlideData.map((slide, index) => {
+            return {
+                ...slide,
+                highlightWords: newHighlightWordData[index]
+            }
+        })
+
+        lessonData.contents = { slides: updatedSlideInfo };
+        finalLessonData.lessonData = lessonData;
+        console.log(finalLessonData)
+        console.log('save lesson')
+    }
+
 
     const [open, setOpen] = React.useState(false);
     const [message, setMessage] = React.useState('');
@@ -310,6 +465,18 @@ const Admin = (props) => {
                                                 selectedSectionName={selectedSectionName}
                                                 handleAddSlide={handleAddSlide}
                                                 slideList={slideList}
+                                                handlelessonSave={handlelessonSave}
+                                                newLessonData={newLessonData}
+                                                handleLessonDataChange={handleLessonDataChange}
+                                                count={slideList.length}
+                                                handleRemoveSlide={handleRemoveSlide}
+                                                newSlideData={newSlideData}
+                                                handleSlideDataChange={handleSlideDataChange}
+                                                highlightWordList={highlightWordList}
+                                                handleAddHighlightWord={handleAddHighlightWord}
+                                                handleRemoveHighlightWord={handleRemoveHighlightWord}
+                                                newHighlightWordData={newHighlightWordData}
+                                                handleHighlightWordDataChange={handleHighlightWordDataChange}
                                             />
                                         }
                                     </Box>
