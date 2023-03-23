@@ -16,6 +16,7 @@ import { AddIcon } from '../../../../global/Icons'
 
 const AddLesson = (props) => {
     const {
+        mode,
         sectionData,
         handleGetSection,
         selectedSectionName,
@@ -44,30 +45,33 @@ const AddLesson = (props) => {
             color: 'red',
         }
     }
+
     return (
         <Box className='add-lesson-box'>
             <Box className='add-lesson-data-header'>
                 <Typography variant='h4' color='white' textAlign='start' className='add-content-subtitle'>Add Lesson</Typography>
             </Box>
             <Box className='section-selector'>
-                <Box sx={{ width: '60%' }}>
-                    <FormControl fullWidth>
-                        <InputLabel id="document-type-label">Select a Section</InputLabel>
-                        <Select
-                            onChange={(e) => handleGetSection(e)}
-                            labelId="document-type"
-                            id="document-type"
-                            value={selectedSectionName}
-                            label="Media Type"
-                        >
-                            {sectionData && sectionData.map((section, index) => {
-                                return (
-                                    <MenuItem key={index} value={`${section.title}`}>{section.title}</MenuItem>
-                                )
-                            })}
-                        </Select>
-                    </FormControl>
-                </Box>
+                {mode === 'add' &&
+                    <Box sx={{ width: '60%' }}>
+                        <FormControl fullWidth>
+                            <InputLabel id="document-type-label">Select a Section</InputLabel>
+                            <Select
+                                onChange={(e) => handleGetSection(e)}
+                                labelId="document-type"
+                                id="document-type"
+                                value={selectedSectionName}
+                                label="Media Type"
+                            >
+                                {sectionData && sectionData.map((section, index) => {
+                                    return (
+                                        <MenuItem key={index} value={`${section.title}`}>{section.title}</MenuItem>
+                                    )
+                                })}
+                            </Select>
+                        </FormControl>
+                    </Box>
+                }
                 <Box className='new-lwsson-box'>
                     <Box className='lesson-title flex-row'>
                         <Typography variant='h5' color='white' textAlign='start' className='header-width-lesson'>Lesson Title : </Typography>
@@ -100,7 +104,7 @@ const AddLesson = (props) => {
                     <Box className='slide flex-column'>
                         {slideList && slideList.map((slide) => {
                             return (
-                                React.cloneElement(slide, { 
+                                React.cloneElement(slide, {
                                     handleRemoveSlide: handleRemoveSlide,
                                     newSlideData: newSlideData,
                                     handleSlideDataChange: handleSlideDataChange,

@@ -18,11 +18,24 @@ export const addSection = async (data) => {
     return response;
 }
 
+export const updateSection = async (data) => {
+    const baseUrl = process.env.REACT_APP_BASEURL;
+    let token = data.token;
+    let payload = data.payload
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/content/update_section`, payload, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
 export const fetchLessons = async (data) => {
     let token = data.token;
     let searchParams = {
         sectionId: data.sectionId
-    } 
+    }
     const baseUrl = process.env.REACT_APP_BASEURL;
     const config = {
         headers: { Authorization: `Bearer ${token}` }

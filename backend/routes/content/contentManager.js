@@ -38,6 +38,28 @@ router.post('/add_section', async (req, res) => {
     }
 })
 
+router.post('/update_section', verify, async (req, res) => {
+    console.log("Update ection request received");
+    const { title, content, url, sectionId } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('sections');
+        let section = await userCollection.findOne({ sectionId });
+        if (section === null) {
+            await close(db);
+            res.status(500).json({ message: "Section not found" });
+        }
+        else {
+            await userCollection.updateOne({ sectionId }, { $set: { title, content, url } });
+            await close(db);
+            res.status(200).json({ message: "Section updated successfully" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Section update failed" });
+    }
+})
+
 router.post('/get_lessons', verify, async (req, res) => {
     const { sectionId } = req.body;
     console.log("Get lessons request received");
@@ -59,13 +81,13 @@ router.post('/get_lessons', verify, async (req, res) => {
 
 router.post('/add_lesson', async (req, res) => {
     console.log("Add lesson request received");
-    const {  chapter_title, sectionId, lessonData } = req.body;
+    const { chapter_title, sectionId, lessonData } = req.body;
     try {
-        let data={
+        let data = {
             chapter_title,
             sectionId,
             lessonData,
-            lessonId:uuidv4()
+            lessonId: uuidv4()
         }
 
         const db = await connect();

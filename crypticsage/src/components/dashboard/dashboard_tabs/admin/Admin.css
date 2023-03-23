@@ -101,3 +101,9 @@ sx={{
     backgroundColor: `${theme.palette.secondary.main}`
 }}
 onClick={(e) => viewLessons(section.sectionId)(e)}>View Lessons</Button> */
+
+.lessons-list-box-action {
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+}

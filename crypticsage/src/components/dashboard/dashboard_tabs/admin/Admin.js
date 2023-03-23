@@ -1,29 +1,34 @@
 import React, { useState, useEffect } from 'react'
+import { useOutletContext } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import Header from '../../global/Header';
+import { toast } from 'react-toastify';
 import {
     Box,
     Typography,
-    Collapse,
-    Alert,
-    IconButton,
     TextField,
     Button,
     useTheme,
     FormControl,
     MenuItem,
     Select,
-    InputLabel
+    InputLabel,
+    Divider
 } from '@mui/material';
-import { CloseIcon } from '../../global/Icons';
 import './Admin.css'
-import { addSection, fetchSections, fetchLessons } from '../../../../api/db';
+import { addSection, fetchSections, fetchLessons, updateSection } from '../../../../api/db';
 import { AddSection, AddLesson } from './edit_components';
 import SlideBox from './edit_components/addLesson/SlideBox';
 import HighLightWordBox from './edit_components/addLesson/HighLightWordBox';
+import UpdateSection from './edit_components/updateSection/UpdateSection';
 const Admin = (props) => {
     const { title, subtitle } = props
     const theme = useTheme();
+
+    const [setTest] = useOutletContext();
+    const hide = () => {
+        setTest(true);
+    }
 
     const [editMode, setEditMode] = useState('add');
     const [documentType, setDocumentType] = useState('lesson');
@@ -38,7 +43,50 @@ const Admin = (props) => {
         setEditMode(param);
     }
 
-    //ADD SECTION INFO
+    const successToast = (message) => {
+        toast.success(message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            toastId: `addedit${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}`,
+            type: alert.type,
+            onClose: () => refreshSection()
+        })
+    }
+
+    const errorToast = (message) => {
+        toast.error(message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            toastId: `addedit${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}`,
+            type: alert.type,
+        })
+    }
+
+    const refreshSection = async () => {
+        try {
+            let data = {
+                token: token
+            }
+            let res = await fetchSections(data);
+            setSectionData(res.data.sections);
+            setNewSectionData(initialSectionData);
+        } catch (error) {
+            console.log(error)
+            errorToast('Error refreshing section data')
+        }
+    }
+
+    // ---> ADD ENTIRE LESSON DATA <--- //
     //initial load of section data
     useEffect(() => {
         let data = {
@@ -105,17 +153,31 @@ const Admin = (props) => {
                 })
                 let res = await addSection(sectionD);
                 if (res.data.message) {
-                    setMessage(res.data.message)
+                    successToast(res.data.message)
                 }
             } catch (error) {
                 if (error.response) {
-                    setMessage(error.response.data.message)
-                    console.log(error.response.data)
+                    errorToast(error.response.data.message)
                 }
             }
         }
         else {
             console.log('empty fields')
+        }
+    }
+
+    //refresh section data
+    const refreshSectionData = async () => {
+        try {
+            let data = {
+                token: token
+            }
+            let res = await fetchSections(data);
+            setSectionData(res.data.sections);
+            successToast('Section data refreshed')
+        } catch (error) {
+            console.log(error)
+            errorToast('Error refreshing section data')
         }
     }
 
@@ -248,7 +310,7 @@ const Admin = (props) => {
 
     //SLIDE LEVEL : remove slide data from newSlideData helper function
     const removeSlideData = (id) => {
-        console.log("remove slide data", id)
+        // console.log("remove slide data", id)
         let updatedSlideData = newSlideData
         updatedSlideData.splice(id, 1)
         setNewSlideData(updatedSlideData)
@@ -266,9 +328,9 @@ const Admin = (props) => {
     //SLIDE LEVEL : remove slide from lesson
     const handleRemoveSlide = (e) => {
         let slideToRemove = e.target.id;
-        console.log(slideToRemove)
+        // console.log(slideToRemove)
         removeSlideData(slideToRemove)
-        console.log(newSlideData)
+        // console.log(newSlideData)
         setSlideList(prevList => {
             const newList = [...prevList]
             newList.splice(slideToRemove, 1);
@@ -303,10 +365,59 @@ const Admin = (props) => {
         console.log(finalLessonData)
         console.log('save lesson')
     }
+    // ---> ADD ENTIRE LESSON DATA <--- //
 
 
-    const [open, setOpen] = React.useState(false);
-    const [message, setMessage] = React.useState('');
+    // ---> EDIT ENTIRE SECTION DATA <--- //
+    const [editSectionName, setEditSectionName] = useState(''); //to be displayed in select box
+    const [selectedSectionData, setSelectedSectionData] = useState({}); //to be used in db query
+
+    //getting the sectionId from the section data, filtering based on id and passed to UpdateSection
+    const handleEditGetSection = (e) => {
+        setEditSectionName(e.target.value)
+        let selectedSectionData = sectionData.filter(section => section.title === e.target.value)[0];
+        let sectionId = selectedSectionData.sectionId;
+        delete selectedSectionData._id
+        setSelectedSectionData(selectedSectionData)
+        viewLessons(sectionId)
+        console.log(sectionId)
+        // console.log(lessonContent)
+    }
+
+    //handles the changes in the input fields
+    const handleUpdateSectionData = (e) => {
+        const { name, value } = e.target;
+        setSelectedSectionData(prevState => ({
+            ...prevState, [name]: value
+        }))
+        console.log(name, value)
+    }
+
+    //handles the submit button to save the section datato db
+    const handleUpdateSectionSubmit = async () => {
+        console.log('saved to db ')
+        if (selectedSectionData === {}) {
+            console.log('no data')
+        } else {
+            try {
+                let data = {
+                    token: token,
+                    payload: selectedSectionData
+                }
+                let res = await updateSection(data)
+                if (res.data.message) {
+                    successToast(res.data.message)
+                }
+            } catch (err) {
+                if (err.response) {
+                    errorToast(err.response.data.message)
+                }
+            }
+        }
+    }
+
+    // ---> EDIT ENTIRE SECTION DATA <--- //
+
 
     const inputStyleLesson = {
         width: '400px',
@@ -337,74 +448,44 @@ const Admin = (props) => {
         },
     }
 
-    useEffect(() => {
-        if (message !== '') {
-            setOpen(true)
-        }
-    }, [message])
-
-    const hideMessage = async () => {
-        setOpen(false);
-        setMessage('')
-        try {
-            let data = {
-                token: token
-            }
-            let res = await fetchSections(data);
-            setSectionData(res.data.sections);
-        } catch (error) {
-            console.log(error)
-            setMessage(error.response.data.message)
-        }
-    }
-
+    //all lessons associated with the section id
     const [lessonContent, setLessonContent] = useState(null);
 
-    const viewLessons = (param) => async () => {
+    //fetches the lessons from db based on sectionID
+    async function viewLessons(sectionId) {
+        console.log("view lessons")
         let data = {
             token: token,
-            sectionId: param
+            sectionId: sectionId
         }
         try {
             let res = await fetchLessons(data);
             setLessonContent(res.data.lessons);
+            if (res.data.message) {
+                successToast(res.data.message)
+            }
         } catch (error) {
-            console.log(error)
+            if (error.response) {
+                errorToast(error.response.data.message)
+            }
         }
     }
 
+    //setting the selected lesson data to be displayed in the edit lesson section
     const [seletctedLesson, setSelectedLesson] = useState(null);
-    const viewLessonContent = (param) => () => {
-        const selected = lessonContent.find(lesson => lesson.lessonId === param)
-        setSelectedLesson(selected)
+    const viewLessonContent = (e) => {
+        let param = e.target.value;
+        const selectedLesson = lessonContent.find(lesson => lesson.lessonId === param)
+        setSelectedLesson(selectedLesson)
     }
-    // console.log(seletctedLesson)
+
     return (
-        <Box className='admin-container'>
+        <Box className='admin-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
             </Box>
             <Box className='add-content'>
                 <Typography variant='h2' color='white' textAlign='start' className='add-content-title'>Add Content</Typography>
-                <Box height='50px'>
-                    <Collapse in={open}>
-                        <Alert severity="info"
-                            action={
-                                <IconButton
-                                    aria-label="close"
-                                    color="inherit"
-                                    size="small"
-                                    onClick={() => hideMessage()}
-                                >
-                                    <CloseIcon fontSize="inherit" />
-                                </IconButton>
-                            }
-                            sx={{ mb: 2 }}
-                        >
-                            {message}
-                        </Alert>
-                    </Collapse>
-                </Box>
                 <Box className='add-content-box'>
                     <Box className='edit-add-box'>
                         <Box className='add-edit-button-box'>
@@ -457,9 +538,11 @@ const Admin = (props) => {
                                                 handleNewSectionData={handleNewSectionData}
                                                 handleSectionSubmit={handleSectionSubmit}
                                                 sectionData={sectionData}
+                                                refreshSectionData={refreshSectionData}
                                             />
                                             :
                                             <AddLesson
+                                                mode={editMode}
                                                 sectionData={sectionData}
                                                 handleGetSection={handleGetSection}
                                                 selectedSectionName={selectedSectionName}
@@ -484,65 +567,73 @@ const Admin = (props) => {
                                 :
                                 <Box className='edit-items-container'>
                                     <Typography variant='h4' color='white' textAlign='start' className='add-content-title'>Edit</Typography>
+                                    <Box sx={{ marginTop: '20px' }}>
+                                        <Box sx={{ width: '60%' }}>
+                                            <FormControl fullWidth>
+                                                <InputLabel id="select-section-edit-label">Select a Section</InputLabel>
+                                                <Select
+                                                    onChange={(e) => handleEditGetSection(e)}
+                                                    labelId="select-section-edit"
+                                                    id="select-section-edit"
+                                                    value={editSectionName}
+                                                    label="Media Type"
+                                                >
+                                                    {sectionData && sectionData.map((section, index) => {
+                                                        return (
+                                                            <MenuItem key={index} value={`${section.title}`}>{section.title}</MenuItem>
+                                                        )
+                                                    })}
+                                                </Select>
+                                            </FormControl>
+                                        </Box>
+                                        {Object.keys(selectedSectionData).length !== 0 &&
+                                            <UpdateSection
+                                                selectedSectionData={selectedSectionData}
+                                                handleUpdateSectionData={handleUpdateSectionData}
+                                                handleUpdateSectionSubmit={handleUpdateSectionSubmit}
+                                            />}
+                                    </Box>
+                                    <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} />
+                                    <Box className='lessons-list-box'>
+                                        <Box className='lessons-list-box-action'>
+                                            <Typography variant='h4' color='white' textAlign='start' className='add-content-title'>Lessons for {selectedSectionData.title}</Typography>
+                                        </Box>
+                                        <Box className='lesson-title'>
+                                            <Box className='all-lesson'>
+                                                {lessonContent && lessonContent.map((lesson, index) => {
+                                                    return (
+                                                        <Box key={index} className='single-lesson-box'>
+                                                            <Typography variant='h5' color='white' textAlign='start' >{lesson.chapter_title}</Typography>
+                                                            <Button
+                                                                value={lesson.lessonId}
+                                                                onClick={(e) => viewLessonContent(e)}
+                                                                size='small'
+                                                                sx={{
+                                                                    width: '150px',
+                                                                    ':hover': {
+                                                                        color: 'black !important',
+                                                                        backgroundColor: '#d11d1d !important',
+                                                                        transition: '0.5s'
+                                                                    },
+                                                                    backgroundColor: `${theme.palette.secondary.main}`
+                                                                }}
+                                                            >View </Button>
+                                                        </Box>
+                                                    )
+                                                })}
+                                            </Box>
+                                            <Box className='single-lesson-content'>
+                                                
+                                            </Box>
+                                        </Box>
+                                    </Box>
                                 </Box>
                             }
                         </Box>
                     </Box>
 
-                    <Box className='lesson-title'>
-                        <Box className='all-lesson'>
-                            {lessonContent && lessonContent.map((lesson, index) => {
-                                return (
-                                    <Box key={index} className='single-lesson-box'>
-                                        <Typography variant='h5' color='white' textAlign='start' >{lesson.chapter_title}</Typography>
-                                        <Button
-                                            size='small'
-                                            sx={{
-                                                width: '150px',
-                                                ':hover': {
-                                                    color: 'black !important',
-                                                    backgroundColor: '#d11d1d !important',
-                                                    transition: '0.5s'
-                                                },
-                                                backgroundColor: `${theme.palette.secondary.main}`
-                                            }}
-                                            onClick={(e) => viewLessonContent(lesson.lessonId)(e)}>View Lesson</Button>
-                                    </Box>
-                                )
-                            })}
-                        </Box>
-                    </Box>
-                    <Box className='edit-add-box'>
-                        <Box className='add-edit-button-box'>
-                            <Box display='flex' justifyContent='center' sx={{ width: '100%' }}>
-                                <Button
-                                    size='small'
-                                    sx={{
-                                        width: '150px',
-                                        ':hover': {
-                                            color: 'black !important',
-                                            backgroundColor: '#d11d1d !important',
-                                            transition: '0.5s'
-                                        },
-                                        backgroundColor: `${theme.palette.secondary.main}`
-                                    }}
-                                >Edit</Button>
-                            </Box>
-                            <Box display='flex' justifyContent='center' sx={{ width: '100%' }}>
-                                <Button
-                                    size='small'
-                                    sx={{
-                                        width: '150px',
-                                        ':hover': {
-                                            color: 'black !important',
-                                            backgroundColor: '#d11d1d !important',
-                                            transition: '0.5s'
-                                        },
-                                        backgroundColor: `${theme.palette.secondary.main}`
-                                    }}
-                                >Add</Button>
-                            </Box>
-                        </Box>
+
+                    {/* <Box sx={{ marginTop: '40px' }} className='edit-add-box'>
                         {seletctedLesson &&
                             <Box className='lesson-values'>
                                 <Box className='lesson-title flex-row'>
@@ -641,7 +732,7 @@ const Admin = (props) => {
                                 </Box>
                             </Box>
                         }
-                    </Box>
+                    </Box> */}
                 </Box>
             </Box>
         </Box >

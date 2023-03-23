@@ -11,7 +11,7 @@ import {
 } from '@mui/material'
 import { ReplayIcon } from '../../../../global/Icons'
 const AddSection = (props) => {
-    const { newSectionData, handleNewSectionData, handleSectionSubmit, sectionData } = props
+    const { newSectionData, handleNewSectionData, handleSectionSubmit, sectionData, refreshSectionData } = props
     const theme = useTheme()
     const inputStyleSection = {
         width: 'fill-available',
@@ -54,7 +54,7 @@ const AddSection = (props) => {
                             size="small"
                             multiline={true}
                             fullWidth
-                            minRows='8'
+                            minRows='12'
                             sx={inputStyleSection}
                             id="section-content"
                             label="Section Content"
@@ -90,7 +90,7 @@ const AddSection = (props) => {
                 <Grid item xs={12} sm={12} md={4} lg={4} order={{ xs: 1, md: 2 }}>
                     <Box className='refresh-sections'>
                         <Typography variant='h4' color='white' textAlign='start' className='add-content-subtitle'>Available Sections</Typography>
-                        <IconButton className='refreshIcon'>
+                        <IconButton className='refreshIcon' onClick={refreshSectionData}>
                             <ReplayIcon />
                         </IconButton>
                     </Box>

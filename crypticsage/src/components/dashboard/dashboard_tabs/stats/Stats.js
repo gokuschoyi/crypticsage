@@ -26,7 +26,7 @@ const Stats = (props) => {
     const theme = useTheme();
 
     const showToast = () => {
-        toast.success('Hello World', {
+        toast.success('Hello World jdjdj', {
             data: {
                 title: 'Hello World Again',
                 text: 'We are here again with another article'

@@ -24,7 +24,7 @@ const SidebarC = () => {
     const dispatch = useDispatch();
     const { sidebarTab } = useSelector(state => state.sidebar);
     const { collapseSidebar, collapsed } = useProSidebar();
-    
+
     //add sm to dep to triggrer collapseSidebar
     useEffect(() => {
         if (sm) {
@@ -49,7 +49,7 @@ const SidebarC = () => {
 
     return (
         <div style={{ display: 'flex', height: '100%', position: 'fixed' }}>
-            <Sidebar width="300px" style={{ height: '100vh' }} rootStyles={{
+            <Sidebar defaultCollapsed={true} width="300px" style={{ height: '100vh' }} rootStyles={{
                 [`.ps-sidebar-container`]: {
                     backgroundColor: `${theme.palette.background.default}`,
                 },
