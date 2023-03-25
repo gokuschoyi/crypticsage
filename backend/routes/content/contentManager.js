@@ -101,4 +101,25 @@ router.post('/add_lesson', async (req, res) => {
     }
 })
 
+router.post('/update_lesson', verify, async (req, res) => {
+    console.log("Update lesson request received");
+    const { chapter_title, sectionId, lessonData, lessonId } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('lessons');
+        let lesson = await userCollection.findOne({ lessonId });
+        if (lesson === null) {
+            await close(db);
+            res.status(500).json({ message: "Lesson not found" });
+        } else {
+            await userCollection.updateOne({ lessonId }, { $set: { chapter_title, sectionId, lessonData } });
+            await close(db)
+            res.status(200).json({ message: "Lesson updated successfully" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Lesson update failed" });
+    }
+})
+
 module.exports = router

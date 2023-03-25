@@ -107,3 +107,8 @@ onClick={(e) => viewLessons(section.sectionId)(e)}>View Lessons</Button> */
   flex-direction: row;
   justify-content: space-between;
 }
+
+.single-lesson-content{
+  margin-top:20px;
+  min-height: 600px;
+}

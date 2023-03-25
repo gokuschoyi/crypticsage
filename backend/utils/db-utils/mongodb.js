@@ -46,7 +46,7 @@ const createNewUser = async (req, res) => {
                         },
                         config.tokenKey,
                         {
-                            expiresIn: '2h'
+                            expiresIn: '4h'
                         }
                     );
                     try {
@@ -107,7 +107,7 @@ const createNewUser = async (req, res) => {
                         },
                         config.tokenKey,
                         {
-                            expiresIn: '2h'
+                            expiresIn: '4h'
                         }
                     );
                     try {
@@ -163,7 +163,7 @@ const createNewUser = async (req, res) => {
                     },
                     config.tokenKey,
                     {
-                        expiresIn: '2h'
+                        expiresIn: '4h'
                     }
                 );
                 try {
@@ -211,7 +211,7 @@ const loginUser = async (req, res) => {
                         },
                         config.tokenKey,
                         {
-                            expiresIn: '2h'
+                            expiresIn: '4h'
                         }
                     );
                     if (decryptedPassword) {
@@ -262,7 +262,7 @@ const loginUser = async (req, res) => {
                             },
                             config.tokenKey,
                             {
-                                expiresIn: '2h'
+                                expiresIn: '4h'
                             }
                         );
                         let userData = {};
@@ -304,7 +304,7 @@ const loginUser = async (req, res) => {
                         },
                         config.tokenKey,
                         {
-                            expiresIn: '2h'
+                            expiresIn: '4h'
                         }
                     );
                     let userData = {};

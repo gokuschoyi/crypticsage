@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import {
     Box,
     Typography,
-    TextField,
+    Skeleton,
     Button,
     useTheme,
     FormControl,
@@ -16,7 +16,7 @@ import {
     Divider
 } from '@mui/material';
 import './Admin.css'
-import { addSection, fetchSections, fetchLessons, updateSection } from '../../../../api/db';
+import { fetchSections, addSection, updateSection, fetchLessons, addLesson, updateLesson } from '../../../../api/db';
 import { AddSection, AddLesson } from './edit_components';
 import SlideBox from './edit_components/addLesson/SlideBox';
 import HighLightWordBox from './edit_components/addLesson/HighLightWordBox';
@@ -215,64 +215,129 @@ const Admin = (props) => {
         next_lesson_id: '',
         prev_lesson_id: '',
         lesson_logo_url: '',
-        content: {}
     }
 
-    //LESSON LEVEL : handling new lesson data
+    //LESSON LEVEL : handling new lesson data. Saved based on editMode
     const [newLessonData, setNewLessonData] = useState(initialLessonData);
     const handleLessonDataChange = (e) => {
         const { name, value } = e.target;
-        // console.log(name, value)
-        setNewLessonData({ ...newLessonData, [name]: value });
+        switch (editMode) {
+            case 'add':
+                setNewLessonData({ ...newLessonData, [name]: value });
+                break;
+            case 'edit':
+                setLessonDataToUpdate({ ...lessonDataToUpdate, [name]: value })
+                break;
+            default:
+                break;
+        }
     }
 
     //HIGHLIGHT_WORD LEVEL : handling new highligh word data
     const [newHighlightWordData, setNewHighlightWordData] = useState([[initialHighlightWordData]]);
     const handleHighlightWordDataChange = (e) => {
-        // console.log(e)
         const { name, value } = e.target;
         const { id, parentId } = e.target.dataset;
-        // console.log(name, value, id, parentId)
-        let newArray = [...newHighlightWordData];
-        newArray[parentId][id][name] = value;
-        setNewHighlightWordData(newArray);
+        let newArray
+        switch (editMode) {
+            case 'add':
+                newArray = [...newHighlightWordData];
+                newArray[parentId][id][name] = value;
+                setNewHighlightWordData(newArray);
+                break;
+            case 'edit':
+                newArray = [...highlightWordDataToUpdate];
+                newArray[parentId][id][name] = value;
+                setHighlightWordDataToUpdate(newArray);
+                break;
+            default:
+                break;
+        }
     }
 
     //HIGHLIGHT_WORD LEVEL : additional highlight word component to be rendered
     const [highlightWordList, setHighlightWordList] = useState([[<HighLightWordBox key={0} count={0} />]])
     const handleAddHighlightWord = (e) => {
         const { id } = e.target
-        console.log(id)
+        let updatedHighLightWordList, updatedHighlightWordData
+        switch (editMode) {
+            case 'add':
+                console.log("add : add highlight")
+                updatedHighLightWordList = highlightWordList
+                updatedHighlightWordData = [...newHighlightWordData]
 
-        let updatedHighLightWordList = highlightWordList
-        updatedHighLightWordList[id] = [...updatedHighLightWordList[id], <HighLightWordBox key={updatedHighLightWordList[id].length} count={updatedHighLightWordList[id].length} />]
-        // console.log(updatedHighLightWordList)
-        setHighlightWordList(updatedHighLightWordList)
+                updatedHighLightWordList[id] = [...updatedHighLightWordList[id], <HighLightWordBox key={updatedHighLightWordList[id].length} count={updatedHighLightWordList[id].length} />]
+                setHighlightWordList(updatedHighLightWordList)
 
-        let updatedHighlightWordData = [...newHighlightWordData]
-        updatedHighlightWordData[id] = [initialHighlightWordData, ...updatedHighlightWordData[id]]
-        setNewHighlightWordData(updatedHighlightWordData)
+                updatedHighlightWordData[id] = [initialHighlightWordData, ...updatedHighlightWordData[id]]
+                setNewHighlightWordData(updatedHighlightWordData)
+                break;
+            case 'edit':
+                console.log("edit : remove highlight")
+                updatedHighLightWordList = highlightWordListToUpdate
+                updatedHighlightWordData = [...highlightWordDataToUpdate]
+
+                updatedHighLightWordList[id] = [...updatedHighLightWordList[id], <HighLightWordBox key={updatedHighLightWordList[id].length} count={updatedHighLightWordList[id].length} />]
+                setHighlightWordListToUpdate(updatedHighLightWordList)
+
+                updatedHighlightWordData[id] = [initialHighlightWordData, ...updatedHighlightWordData[id]]
+                setHighlightWordDataToUpdate(updatedHighlightWordData)
+                break;
+            default:
+                break;
+        }
     }
 
     //HIGHLIGHT_WORD LEVEL : remove highlight word from slide
     const handleRemoveHighlightWord = (e) => {
         let parentId = e.target.dataset.parentId;
         let highlightWordToRemove = e.target.dataset.id;
-        console.log(parentId, highlightWordToRemove)
+        let updatedHighlightWordData, updatedHighlightWordList
 
-        let updatedHighlightWordData = [...newHighlightWordData]
-        updatedHighlightWordData[parentId].splice(highlightWordToRemove, 1)
-        setNewHighlightWordData(updatedHighlightWordData)
+        switch (editMode) {
+            case 'add':
+                console.log("add : remove highlight")
+                updatedHighlightWordData = [...newHighlightWordData]
+                updatedHighlightWordList = [...highlightWordList]
 
-        let updatedHighlightWordList = [...highlightWordList]
-        updatedHighlightWordList[parentId].splice(highlightWordToRemove, 1)
-        const transform = () => {
-            return updatedHighlightWordList[parentId].map((item, index) => {
-                return React.cloneElement(item, { key: index, count: index })
-            })
+                updatedHighlightWordData[parentId].splice(highlightWordToRemove, 1)
+                setNewHighlightWordData(updatedHighlightWordData)
+
+                updatedHighlightWordList[parentId].splice(highlightWordToRemove, 1)
+
+                const transformOne = () => {
+                    return updatedHighlightWordList[parentId].map((item, index) => {
+                        return React.cloneElement(item, { key: index, count: index })
+                    })
+                }
+
+                updatedHighlightWordList[parentId] = transformOne()
+                setHighlightWordList(updatedHighlightWordList)
+                break;
+            case 'edit':
+                console.log("edit : remove highlight")
+                updatedHighlightWordData = [...highlightWordDataToUpdate]
+                updatedHighlightWordList = [...highlightWordListToUpdate]
+
+                updatedHighlightWordData[parentId].splice(highlightWordToRemove, 1)
+                setHighlightWordDataToUpdate(updatedHighlightWordData)
+
+                updatedHighlightWordList[parentId].splice(highlightWordToRemove, 1)
+
+                const transformTwo = () => {
+                    return updatedHighlightWordList[parentId].map((item, index) => {
+                        return React.cloneElement(item, { key: index, count: index })
+                    })
+                }
+
+                updatedHighlightWordList[parentId] = transformTwo()
+                setHighlightWordListToUpdate(updatedHighlightWordList)
+                break;
+            default:
+                break;
         }
-        updatedHighlightWordList[parentId] = transform()
-        setHighlightWordList(updatedHighlightWordList)
+
+
     }
 
     //SLIDE LEVEL : handling new slide data
@@ -281,10 +346,22 @@ const Admin = (props) => {
         let name = e.target.name || e.target.dataset.name;
         let value = e.target.value || e.target.dataset.value;
         let id = e.target.id || e.target.dataset.id;
+        let newArray
+        switch (editMode) {
+            case 'add':
+                newArray = [...newSlideData];
+                newArray[id][name] = value;
+                setNewSlideData(newArray);
+                break;
+            case 'edit':
+                newArray = [...slideDataToUpdate];
+                newArray[id][name] = value;
+                setSlideDataToUpdate(newArray);
+                break;
+            default:
+                break;
+        }
 
-        let newArray = [...newSlideData];
-        newArray[id][name] = value;
-        setNewSlideData(newArray);
     }
 
     //SLIDE LEVEL : initial slide component to be rendered
@@ -292,57 +369,107 @@ const Admin = (props) => {
 
     //SLIDE LEVEL : add new slide to lesson
     const handleAddSlide = (e) => {
-        let count = slideList.length
+        let updatedHBoxList, updatedHighlightWordData, updatedSlideData, count
+        switch (editMode) {
+            case 'add':
+                console.log("add mode slide")
+                count = slideList.length
+                updatedHBoxList = highlightWordList;
+                updatedHighlightWordData = newHighlightWordData
+                updatedSlideData = newSlideData
 
-        let updatedHBoxList = highlightWordList;
-        updatedHBoxList[count] = [<HighLightWordBox key={0} count={0} />]
-        setHighlightWordList(updatedHBoxList)
+                updatedHBoxList[count] = [<HighLightWordBox key={0} count={0} />]
+                setHighlightWordList(updatedHBoxList)
 
-        let updatedHighlightWordData = newHighlightWordData
-        updatedHighlightWordData[count] = [initialHighlightWordData]
-        setNewHighlightWordData(updatedHighlightWordData)
+                updatedHighlightWordData[count] = [initialHighlightWordData]
+                setNewHighlightWordData(updatedHighlightWordData)
 
-        let updatedSlideData = newSlideData
-        updatedSlideData[slideList.length] = initialSlideData
-        setNewSlideData(updatedSlideData)
-        setSlideList([...slideList, <SlideBox key={slideList.length} count={count} />])
-    }
+                updatedSlideData[slideList.length] = initialSlideData
+                setNewSlideData(updatedSlideData)
+                setSlideList([...slideList, <SlideBox key={slideList.length} count={count} />])
+                break;
+            case 'edit':
+                console.log("edit mode slide")
+                count = slideListToUpdate.length
+                updatedHBoxList = highlightWordListToUpdate;
+                updatedHighlightWordData = highlightWordDataToUpdate
+                updatedSlideData = slideDataToUpdate
 
-    //SLIDE LEVEL : remove slide data from newSlideData helper function
-    const removeSlideData = (id) => {
-        // console.log("remove slide data", id)
-        let updatedSlideData = newSlideData
-        updatedSlideData.splice(id, 1)
-        setNewSlideData(updatedSlideData)
+                updatedHBoxList[count] = [<HighLightWordBox key={0} count={0} />]
+                setHighlightWordListToUpdate(updatedHBoxList)
 
-        let updatedHBoxList = highlightWordList;
-        updatedHBoxList.splice(id, 1)
-        setHighlightWordList(updatedHBoxList)
+                updatedHighlightWordData[count] = [initialHighlightWordData]
+                setHighlightWordDataToUpdate(updatedHighlightWordData)
 
-        let updatedHighlightWordData = newHighlightWordData
-        updatedHighlightWordData.splice(id, 1)
-        setNewHighlightWordData(updatedHighlightWordData)
-        // setNewSlideData(updatedSlideData)
+                updatedSlideData[slideListToUpdate.length] = initialSlideData
+                setSlideDataToUpdate(updatedSlideData)
+                setSlideListToUpdate([...slideListToUpdate, <SlideBox key={slideListToUpdate.length} count={count} />])
+                break;
+            default:
+                break;
+        }
     }
 
     //SLIDE LEVEL : remove slide from lesson
     const handleRemoveSlide = (e) => {
-        let slideToRemove = e.target.id;
-        // console.log(slideToRemove)
-        removeSlideData(slideToRemove)
-        // console.log(newSlideData)
-        setSlideList(prevList => {
-            const newList = [...prevList]
-            newList.splice(slideToRemove, 1);
-            const udatedList = newList.map((component, index) =>
-                React.cloneElement(component, { key: index, count: index })
-            );
-            return udatedList;
-        })
+        let id = e.target.id;
+        let updatedSlideData, updatedHBoxList, updatedHighlightWordData
+        switch (editMode) {
+            case 'add':
+                console.log("add mode remove")
+                updatedSlideData = newSlideData
+                updatedHBoxList = highlightWordList
+                updatedHighlightWordData = newHighlightWordData
+
+                updatedSlideData.splice(id, 1)
+                setNewSlideData(updatedSlideData)
+
+                updatedHBoxList.splice(id, 1)
+                setHighlightWordList(updatedHBoxList)
+
+                updatedHighlightWordData.splice(id, 1)
+                setNewHighlightWordData(updatedHighlightWordData)
+
+                setSlideList(prevList => {
+                    const newList = [...prevList]
+                    newList.splice(id, 1);
+                    const udatedList = newList.map((component, index) =>
+                        React.cloneElement(component, { key: index, count: index })
+                    );
+                    return udatedList;
+                })
+                break;
+            case 'edit':
+                console.log("edit mode remove")
+                updatedSlideData = slideDataToUpdate
+                updatedHBoxList = highlightWordListToUpdate
+                updatedHighlightWordData = highlightWordDataToUpdate
+
+                updatedSlideData.splice(id, 1)
+                setSlideDataToUpdate(updatedSlideData)
+
+                updatedHBoxList.splice(id, 1)
+                setHighlightWordListToUpdate(updatedHBoxList)
+
+                updatedHighlightWordData.splice(id, 1)
+                setHighlightWordDataToUpdate(updatedHighlightWordData)
+
+                setSlideListToUpdate(prevList => {
+                    const newList = [...prevList]
+                    newList.splice(id, 1);
+                    const udatedList = newList.map((component, index) =>
+                        React.cloneElement(component, { key: index, count: index })
+                    );
+                    return udatedList;
+                })
+                break;
+            default:
+                break;
+        }
     }
 
     //save lesson to db
-    const handlelessonSave = () => {
+    const handlelessonSave = async () => {
         const finalLessonData = {
             chapter_title: '',
             sectionId: '',
@@ -362,8 +489,21 @@ const Admin = (props) => {
 
         lessonData.contents = { slides: updatedSlideInfo };
         finalLessonData.lessonData = lessonData;
-        console.log(finalLessonData)
-        console.log('save lesson')
+        let payload = {
+            token: token,
+            data: finalLessonData
+        }
+        try {
+            let res = await addLesson(payload)
+            if (res.data.message) {
+                successToast(res.data.message)
+            }
+        } catch (err) {
+            if (err.response) {
+                errorToast(err.response.data.message)
+            }
+        }
+        console.log('add : add lesson')
     }
     // ---> ADD ENTIRE LESSON DATA <--- //
 
@@ -372,16 +512,28 @@ const Admin = (props) => {
     const [editSectionName, setEditSectionName] = useState(''); //to be displayed in select box
     const [selectedSectionData, setSelectedSectionData] = useState({}); //to be used in db query
 
+    const [sectionSkeletonFlag, setSectionSkeletonFlag] = useState(false); //to display skeleton loader
+
     //getting the sectionId from the section data, filtering based on id and passed to UpdateSection
     const handleEditGetSection = (e) => {
         setEditSectionName(e.target.value)
+        setSectionSkeletonFlag(true)
         let selectedSectionData = sectionData.filter(section => section.title === e.target.value)[0];
         let sectionId = selectedSectionData.sectionId;
         delete selectedSectionData._id
         setSelectedSectionData(selectedSectionData)
+        setSelectedLesson(null)
+        setLessonDataToUpdate()
+        setSlideListToUpdate([])
+        setSlideDataToUpdate([])
+        setHighlightWordListToUpdate([[]])
+        setHighlightWordDataToUpdate([[]])
         viewLessons(sectionId)
         console.log(sectionId)
-        // console.log(lessonContent)
+        const timer = setTimeout(() => {
+            setSectionSkeletonFlag(false)
+        }, 1000);
+        return () => clearTimeout(timer);
     }
 
     //handles the changes in the input fields
@@ -416,44 +568,12 @@ const Admin = (props) => {
         }
     }
 
-    // ---> EDIT ENTIRE SECTION DATA <--- //
-
-
-    const inputStyleLesson = {
-        width: '400px',
-        padding: '10px',
-        color: 'white',
-        '& label.Mui-focused': {
-            color: 'white',
-        },
-        '& label': {
-            color: 'red',
-        },
-        '& .MuiOutlinedInput-root': {
-            border: '1px solid #dd2727',
-        },
-    }
-
-    const highlightStyleLesson = {
-        padding: '10px',
-        color: 'white',
-        '& label.Mui-focused': {
-            color: 'white',
-        },
-        '& label': {
-            color: 'red',
-        },
-        '& .MuiOutlinedInput-root': {
-            border: '1px solid #dd2727',
-        },
-    }
-
     //all lessons associated with the section id
     const [lessonContent, setLessonContent] = useState(null);
 
     //fetches the lessons from db based on sectionID
     async function viewLessons(sectionId) {
-        console.log("view lessons")
+        console.log("view lessons for section")
         let data = {
             token: token,
             sectionId: sectionId
@@ -472,12 +592,127 @@ const Admin = (props) => {
     }
 
     //setting the selected lesson data to be displayed in the edit lesson section
-    const [seletctedLesson, setSelectedLesson] = useState(null);
+    const [selectedLesson, setSelectedLesson] = useState(null); //all lessons for a specific section
+    const [lessonDataToUpdate, setLessonDataToUpdate] = useState() //1 lesson based on selected lesson
+    const [slideListToUpdate, setSlideListToUpdate] = useState([]) //slide list for the selected lesson
+    const [slideDataToUpdate, setSlideDataToUpdate] = useState([]) //slide data for the selected lesson
+    const [highlightWordListToUpdate, setHighlightWordListToUpdate] = useState([[]]) //highlight word list for the selected lesson
+    const [highlightWordDataToUpdate, setHighlightWordDataToUpdate] = useState([[]]) //highlight word data for the selected lesson
+
+    const [skeletonFlag, setSkeletonFlag] = useState(false)
+
+    //load the single lesson data and initialize the states
     const viewLessonContent = (e) => {
+        setSkeletonFlag(true)
+        setSelectedLesson(null)
+        setLessonDataToUpdate()
+        setSlideListToUpdate([])
+        setSlideDataToUpdate([])
+        setHighlightWordListToUpdate([[]])
+        setHighlightWordDataToUpdate([[]])
         let param = e.target.value;
         const selectedLesson = lessonContent.find(lesson => lesson.lessonId === param)
         setSelectedLesson(selectedLesson)
+
+        //change key values after updating db
+        let lessonData = {
+            'title': selectedLesson.lessonData.title,
+            'lesson_video_url': selectedLesson.lessonData.lesson_video_url,
+            'next_lesson_id': selectedLesson.lessonData.next_lesson_id,
+            'prev_lesson_id': selectedLesson.lessonData.prev_lesson_id,
+            'lesson_logo_url': selectedLesson.lessonData.lesson_logo_url,
+            'sectionId': selectedLesson.sectionId,
+        }
+        setLessonDataToUpdate(lessonData)
+
+        let newSlideList = []
+        selectedLesson.lessonData.contents.slides.map((slide, index) => {
+            return newSlideList.push(
+                <SlideBox key={index} count={index} />
+            )
+        })
+        setSlideListToUpdate(newSlideList)
+
+        let newSlideData = []
+        selectedLesson.lessonData.contents.slides.map((slide, index) => {
+            return newSlideData.push({
+                "heading": slide.heading,
+                "content_text": slide.content_text,
+                "media_type": slide.media_type,
+                "start_timestamp": slide.start_timestamp,
+                "end_timestamp": slide.end_timestamp,
+                "media_url": slide.media_url,
+            })
+        })
+        setSlideDataToUpdate(newSlideData)
+
+        let newHighlightWordList = []
+        selectedLesson.lessonData.contents.slides.map((slide) => {
+            return newHighlightWordList.push(slide.highlightWords.map((word, index) => {
+                return <HighLightWordBox key={index} count={index} />
+            }))
+        })
+        setHighlightWordListToUpdate(newHighlightWordList)
+
+        let newHighlightWordData = []
+        selectedLesson.lessonData.contents.slides.map((slide) => {
+            return newHighlightWordData.push(slide.highlightWords.map((word, index) => {
+                return {
+                    "keyword": word.keyword,
+                    "explanation": word.explanation,
+                    "id": word.id,
+                }
+            }))
+        })
+        setHighlightWordDataToUpdate(newHighlightWordData)
+
+        const timer = setTimeout(() => {
+            setSkeletonFlag(false)
+        }, 1000);
+        return () => clearTimeout(timer);
     }
+
+    // handle save for edit tab data
+    const handleUpdateLessonSave = async () => {
+        const finalLessonData = {
+            chapter_title: '',
+            sectionId: '',
+            lessonData: {},
+            lessonId: selectedLesson.lessonId
+        }
+        finalLessonData.chapter_title = lessonDataToUpdate.title;
+        finalLessonData.sectionId = lessonDataToUpdate.sectionId;
+
+        let lessonData = lessonDataToUpdate;
+
+        const updatedSlideInfo = slideDataToUpdate.map((slide, index) => {
+            return {
+                ...slide,
+                highlightWords: highlightWordDataToUpdate[index]
+            }
+        })
+
+        lessonData.contents = { slides: updatedSlideInfo };
+        finalLessonData.lessonData = lessonData;
+        let payload = {
+            token: token,
+            data: finalLessonData
+        }
+        try {
+            let res = await updateLesson(payload)
+            if (res.data.message) {
+                successToast(res.data.message)
+            }
+        } catch (err) {
+            if (err.response) {
+                errorToast(err.response.data.message)
+            }
+        }
+        console.log('edit : save lesson')
+
+    }
+
+    // ---> EDIT ENTIRE SECTION DATA <--- //    
 
     return (
         <Box className='admin-container' onClick={hide}>
@@ -546,12 +781,11 @@ const Admin = (props) => {
                                                 sectionData={sectionData}
                                                 handleGetSection={handleGetSection}
                                                 selectedSectionName={selectedSectionName}
-                                                handleAddSlide={handleAddSlide}
-                                                slideList={slideList}
-                                                handlelessonSave={handlelessonSave}
                                                 newLessonData={newLessonData}
+                                                handleAddSlide={handleAddSlide}
                                                 handleLessonDataChange={handleLessonDataChange}
-                                                count={slideList.length}
+                                                handlelessonSave={handlelessonSave}
+                                                slideList={slideList}
                                                 handleRemoveSlide={handleRemoveSlide}
                                                 newSlideData={newSlideData}
                                                 handleSlideDataChange={handleSlideDataChange}
@@ -586,155 +820,80 @@ const Admin = (props) => {
                                                 </Select>
                                             </FormControl>
                                         </Box>
-                                        {Object.keys(selectedSectionData).length !== 0 &&
-                                            <UpdateSection
-                                                selectedSectionData={selectedSectionData}
-                                                handleUpdateSectionData={handleUpdateSectionData}
-                                                handleUpdateSectionSubmit={handleUpdateSectionSubmit}
-                                            />}
-                                    </Box>
-                                    <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} />
-                                    <Box className='lessons-list-box'>
-                                        <Box className='lessons-list-box-action'>
-                                            <Typography variant='h4' color='white' textAlign='start' className='add-content-title'>Lessons for {selectedSectionData.title}</Typography>
-                                        </Box>
-                                        <Box className='lesson-title'>
-                                            <Box className='all-lesson'>
-                                                {lessonContent && lessonContent.map((lesson, index) => {
-                                                    return (
-                                                        <Box key={index} className='single-lesson-box'>
-                                                            <Typography variant='h5' color='white' textAlign='start' >{lesson.chapter_title}</Typography>
-                                                            <Button
-                                                                value={lesson.lessonId}
-                                                                onClick={(e) => viewLessonContent(e)}
-                                                                size='small'
-                                                                sx={{
-                                                                    width: '150px',
-                                                                    ':hover': {
-                                                                        color: 'black !important',
-                                                                        backgroundColor: '#d11d1d !important',
-                                                                        transition: '0.5s'
-                                                                    },
-                                                                    backgroundColor: `${theme.palette.secondary.main}`
-                                                                }}
-                                                            >View </Button>
-                                                        </Box>
-                                                    )
-                                                })}
-                                            </Box>
-                                            <Box className='single-lesson-content'>
-                                                
-                                            </Box>
+                                        <Box>
+                                            {sectionSkeletonFlag && <Skeleton variant="rectangular" width='100%' height='600px' />}
+                                            {Object.keys(selectedSectionData).length !== 0 && !sectionSkeletonFlag &&
+                                                <UpdateSection
+                                                    selectedSectionData={selectedSectionData}
+                                                    handleUpdateSectionData={handleUpdateSectionData}
+                                                    handleUpdateSectionSubmit={handleUpdateSectionSubmit}
+                                                />}
                                         </Box>
                                     </Box>
+                                    {editSectionName &&
+                                        <Box className='lessons-list-box'>
+                                            <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} />
+                                            <Box className='lessons-list-box-action'>
+                                                <Typography variant='h4' color='white' textAlign='start' className='add-content-title'>Lessons for {selectedSectionData.title}</Typography>
+                                            </Box>
+                                            <Box className='lesson-title'>
+                                                <Box className='all-lesson'>
+                                                    {lessonContent && lessonContent.map((lesson, index) => {
+                                                        return (
+                                                            <Box key={index} className='single-lesson-box'>
+                                                                <Typography variant='h5' color='white' textAlign='start' >{lesson.chapter_title}</Typography>
+                                                                <Button
+                                                                    value={lesson.lessonId}
+                                                                    onClick={(e) => viewLessonContent(e)}
+                                                                    size='small'
+                                                                    sx={{
+                                                                        width: '150px',
+                                                                        ':hover': {
+                                                                            color: 'black !important',
+                                                                            backgroundColor: '#d11d1d !important',
+                                                                            transition: '0.5s'
+                                                                        },
+                                                                        backgroundColor: `${theme.palette.secondary.main}`
+                                                                    }}
+                                                                >View </Button>
+                                                            </Box>
+                                                        )
+                                                    })
+                                                    }
+                                                </Box>
+                                            </Box>
+                                            <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} />
+                                            <Box className='lesson-content-box'>
+                                                <Box className='single-lesson-content'>
+                                                    {skeletonFlag && <Skeleton variant="rectangular" width='100%' height='600px' />}
+                                                    {selectedLesson && !skeletonFlag &&
+                                                        <AddLesson
+                                                            mode={editMode}
+                                                            newLessonData={lessonDataToUpdate}
+                                                            handleLessonDataChange={handleLessonDataChange}
+                                                            handlelessonSave={handleUpdateLessonSave}
+                                                            slideList={slideListToUpdate}
+                                                            handleAddSlide={handleAddSlide}
+                                                            handleRemoveSlide={handleRemoveSlide}
+                                                            newSlideData={slideDataToUpdate}
+                                                            handleSlideDataChange={handleSlideDataChange}
+                                                            highlightWordList={highlightWordListToUpdate}
+                                                            handleAddHighlightWord={handleAddHighlightWord}
+                                                            handleRemoveHighlightWord={handleRemoveHighlightWord}
+                                                            newHighlightWordData={highlightWordDataToUpdate}
+                                                            handleHighlightWordDataChange={handleHighlightWordDataChange}
+                                                        />
+                                                    }
+                                                </Box>
+                                            </Box>
+                                        </Box>
+                                    }
                                 </Box>
                             }
                         </Box>
                     </Box>
-
-
-                    {/* <Box sx={{ marginTop: '40px' }} className='edit-add-box'>
-                        {seletctedLesson &&
-                            <Box className='lesson-values'>
-                                <Box className='lesson-title flex-row'>
-                                    <Typography variant='h5' color='white' textAlign='start' className='header-width'>Lesson Title : </Typography>
-                                    <TextField size='small' sx={inputStyleLesson} className='lesson-title-input' value={seletctedLesson.chapter_title} />
-                                </Box>
-                                <Box className='flex-row'>
-                                    <Typography variant='h5' color='white' textAlign='start' className='header-width'>Media URL : </Typography>
-                                    <TextField size='small' sx={inputStyleLesson} className='lesson-title-input' value={seletctedLesson.video_url} />
-                                </Box>
-                                <Box className='slide-content'>
-                                    {seletctedLesson.lessonData.contents.slides.map((slide, index) => {
-                                        return (
-                                            <Box key={index} className='slide-box flex-column'>
-                                                <Box className='flex-row slide-padding'>
-                                                    <Typography variant='h5' color='white' textAlign='start' className='header-width'>Slide {index + 1} : </Typography>
-                                                    <TextField size='small' sx={inputStyleLesson} className='slide-title-input' value={slide.heading} />
-                                                </Box>
-                                                <Box className='flex-row slide-padding' alignItems='flex-start'>
-                                                    <Typography variant='h5' color='white' textAlign='start' className='header-width margin-for-header'>Slide Content : </Typography>
-                                                    <TextField size='small' fullWidth multiline={true} minRows='2' sx={inputStyleLesson} className='slide-content-input content-width' value={slide.content_text} />
-                                                </Box>
-                                                <Box className='flex-row slide-padding' sx={{ alignItems: 'flex-start' }}>
-                                                    <Typography variant='h5' color='white' textAlign='start' className='header-width '>Highlight Words </Typography>
-                                                    <Box sx={{ width: '100%' }}>
-                                                        <Box className='flex-row' sx={{ paddingLeft: '10px' }}>
-                                                            <Box sx={{ width: '60%' }}>
-                                                                <Typography variant='h5' color='white' textAlign='start' className='header-width'>Keyword</Typography>
-                                                            </Box>
-                                                            <Box sx={{ width: '100%' }}>
-                                                                <Typography variant='h5' color='white' textAlign='start' className='header-width'>Explanation</Typography>
-                                                            </Box>
-                                                        </Box>
-                                                        {slide.highlightWords.map((word, index) => {
-                                                            return (
-                                                                <Box key={index} className='highlight-word-box flex-row'>
-                                                                    <Box sx={{ width: '60%' }}>
-                                                                        <TextField size='small' fullWidth sx={highlightStyleLesson} className='highlight-word-input' value={word.keyword} />
-                                                                    </Box>
-                                                                    <Box sx={{ width: '100%' }}>
-                                                                        <TextField size='small' fullWidth sx={highlightStyleLesson} className='highlight-word-input' value={word.explanation} />
-                                                                    </Box>
-                                                                </Box>
-                                                            )
-                                                        })}
-                                                    </Box>
-                                                </Box>
-                                                <Box className='flex-row slide-padding' sx={{ alignItems: 'flex-start' }}>
-                                                    <Typography variant='h5' color='white' textAlign='start' className='header-width'>Media Type</Typography>
-                                                    <Box sx={{ width: '100%' }}>
-                                                        <Box className='flex-row' sx={{ paddingLeft: '10px' }}>
-                                                            <Box sx={{ width: '60%' }}>
-                                                                <Typography variant='h5' color='white' textAlign='start' className='header-width'>Media Type</Typography>
-                                                            </Box>
-                                                            <Box sx={{ width: '100%' }}>
-                                                                <Typography variant='h5' color='white' textAlign='start' className='header-width'>URL</Typography>
-                                                            </Box>
-                                                        </Box>
-                                                        <Box className='flex-row' sx={{ paddingTop: '10px' }}>
-                                                            <Box sx={{ width: '60%' }}>
-                                                                <FormControl fullWidth>
-                                                                    <InputLabel id="demo-simple-select-label">Media Type</InputLabel>
-                                                                    <Select
-                                                                        labelId="demo-simple-select-label"
-                                                                        id="demo-simple-select"
-                                                                        value={slide.media_type}
-                                                                        label="Media Type"
-                                                                    >
-                                                                        <MenuItem value="image">Image</MenuItem>
-                                                                        <MenuItem value="video">Video</MenuItem>
-                                                                    </Select>
-                                                                </FormControl>
-                                                            </Box>
-                                                            <Box sx={{ width: '100%' }}>
-                                                                <TextField size='small' fullWidth sx={highlightStyleLesson} className='highlight-word-input' value={slide.url} />
-                                                            </Box>
-                                                        </Box>
-                                                    </Box>
-                                                </Box>
-                                                <Box className='flex-row slide-padding' sx={{ alignItems: 'flex-start' }}>
-                                                    <Typography variant='h5' color='white' textAlign='start' className='header-width' sx={{ paddingTop: '17px' }}>Slide Times</Typography>
-                                                    <Box>
-                                                        <Box className='flex-row'>
-                                                            <Typography variant='h5' color='white' textAlign='start' className='header-width'>Start Time</Typography>
-                                                            <TextField size='small' sx={inputStyleLesson} className='slide-title-input' value={slide.start_timestamp} />
-                                                        </Box>
-                                                        <Box className='flex-row'>
-                                                            <Typography variant='h5' color='white' textAlign='start' className='header-width'>End Time</Typography>
-                                                            <TextField size='small' sx={inputStyleLesson} className='slide-title-input' value={slide.end_timestamp} />
-                                                        </Box>
-                                                    </Box>
-                                                </Box>
-                                            </Box>
-                                        )
-                                    })}
-                                </Box>
-                            </Box>
-                        }
-                    </Box> */}
                 </Box>
-            </Box>
+            </Box >
         </Box >
     )
 }

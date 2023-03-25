@@ -16,23 +16,23 @@ import { AddIcon } from '../../../../global/Icons'
 
 const AddLesson = (props) => {
     const {
-        mode,
-        sectionData,
-        handleGetSection,
-        selectedSectionName,
-        handleAddSlide,
-        slideList,
+        mode, //working
+        sectionData, // for add mode
+        handleGetSection, // for add mode
+        selectedSectionName, // for add mode
+        newLessonData, //working
+        handleLessonDataChange, //working
         handlelessonSave,
-        newLessonData,
-        handleLessonDataChange,
-        handleRemoveSlide,
-        newSlideData,
-        handleSlideDataChange,
-        highlightWordList,
-        handleAddHighlightWord,
+        slideList, //working
+        handleAddSlide,  //working
+        handleRemoveSlide, //working
+        newSlideData, //working
+        handleSlideDataChange, 
+        highlightWordList, //working
+        handleAddHighlightWord, //working
         handleRemoveHighlightWord,
-        newHighlightWordData,
-        handleHighlightWordDataChange
+        newHighlightWordData, //working
+        handleHighlightWordDataChange //working
     } = props
     const theme = useTheme()
     const inputStyleLesson = {
@@ -49,7 +49,7 @@ const AddLesson = (props) => {
     return (
         <Box className='add-lesson-box'>
             <Box className='add-lesson-data-header'>
-                <Typography variant='h4' color='white' textAlign='start' className='add-content-subtitle'>Add Lesson</Typography>
+                <Typography variant='h4' color='white' textAlign='start' className='add-content-subtitle'>{mode === 'add' ? 'Add Lesson' : 'Edit Lesson'}</Typography>
             </Box>
             <Box className='section-selector'>
                 {mode === 'add' &&
