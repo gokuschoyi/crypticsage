@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useOutletContext } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import Header from '../../global/Header';
+import NewLessonDialog from './edit_components/addLesson/NewLessonDialog';
 import { toast } from 'react-toastify';
 import {
     Box,
@@ -29,6 +30,16 @@ const Admin = (props) => {
     const hide = () => {
         setTest(true);
     }
+    const [open, setOpen] = useState(false);
+
+    // new lesson dialog box
+    const handleNewLessonDialog = (e) => {
+        setOpen(true)
+    }
+
+    const handleClose = () => {
+        setOpen(false);
+    };
 
     const [editMode, setEditMode] = useState('add');
     const [documentType, setDocumentType] = useState('lesson');
@@ -469,7 +480,9 @@ const Admin = (props) => {
     }
 
     //save lesson to db
+    const [lessonId, setLessonId] = useState('')
     const handlelessonSave = async () => {
+        setOpen(false)
         const finalLessonData = {
             chapter_title: '',
             sectionId: '',
@@ -489,18 +502,41 @@ const Admin = (props) => {
 
         lessonData.contents = { slides: updatedSlideInfo };
         finalLessonData.lessonData = lessonData;
-        let payload = {
-            token: token,
-            data: finalLessonData
-        }
-        try {
-            let res = await addLesson(payload)
-            if (res.data.message) {
-                successToast(res.data.message)
+
+
+        if (lessonId === '') {
+            console.log("initial save")
+            let payload = {
+                token: token,
+                data: finalLessonData
             }
-        } catch (err) {
-            if (err.response) {
-                errorToast(err.response.data.message)
+            try {
+                let res = await addLesson(payload)
+                if (res.data.message) {
+                    setLessonId(res.data.lessonId)
+                    successToast(res.data.message)
+                }
+            } catch (err) {
+                if (err.response) {
+                    errorToast(err.response.data.message)
+                }
+            }
+        } else {
+            console.log("update save")
+            finalLessonData.lessonId = lessonId;
+            let payload = {
+                token: token,
+                data: finalLessonData
+            }
+            try {
+                let res = await updateLesson(payload)
+                if (res.data.message) {
+                    successToast(res.data.message)
+                }
+            } catch (err) {
+                if (err.response) {
+                    errorToast(err.response.data.message)
+                }
             }
         }
         console.log('add : add lesson')
@@ -714,12 +750,29 @@ const Admin = (props) => {
 
     // ---> EDIT ENTIRE SECTION DATA <--- //    
 
+    // reset add  lessons to initial state
+    const resetAddSection = () => {
+        setOpen(false)
+        console.log("reset")
+        setNewLessonData(initialLessonData);
+        setNewHighlightWordData([[initialHighlightWordData]]);
+        setHighlightWordList([[<HighLightWordBox key={0} count={0} />]]);
+        setNewSlideData([initialSlideData]);
+        setSlideList([<SlideBox key={0} count={0} />]);
+        setLessonId('')
+    }
+
     return (
         <Box className='admin-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
             </Box>
             <Box className='add-content'>
+                <NewLessonDialog
+                    open={open}
+                    handleClose={handleClose}
+                    resetAddSection={resetAddSection}
+                />
                 <Typography variant='h2' color='white' textAlign='start' className='add-content-title'>Add Content</Typography>
                 <Box className='add-content-box'>
                     <Box className='edit-add-box'>
@@ -778,6 +831,7 @@ const Admin = (props) => {
                                             :
                                             <AddLesson
                                                 mode={editMode}
+                                                handleNewLessonDialog={handleNewLessonDialog}
                                                 sectionData={sectionData}
                                                 handleGetSection={handleGetSection}
                                                 selectedSectionName={selectedSectionName}

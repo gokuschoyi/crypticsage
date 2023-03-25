@@ -17,6 +17,7 @@ import { AddIcon } from '../../../../global/Icons'
 const AddLesson = (props) => {
     const {
         mode, //working
+        handleNewLessonDialog,
         sectionData, // for add mode
         handleGetSection, // for add mode
         selectedSectionName, // for add mode
@@ -27,7 +28,7 @@ const AddLesson = (props) => {
         handleAddSlide,  //working
         handleRemoveSlide, //working
         newSlideData, //working
-        handleSlideDataChange, 
+        handleSlideDataChange,
         highlightWordList, //working
         handleAddHighlightWord, //working
         handleRemoveHighlightWord,
@@ -50,6 +51,36 @@ const AddLesson = (props) => {
         <Box className='add-lesson-box'>
             <Box className='add-lesson-data-header'>
                 <Typography variant='h4' color='white' textAlign='start' className='add-content-subtitle'>{mode === 'add' ? 'Add Lesson' : 'Edit Lesson'}</Typography>
+                {mode === 'add' &&
+                    <Box display='flex' flexDirection='row' gap='20px'>
+                        <Button
+                            onClick={(e) => handlelessonSave(e)}
+                            size='small'
+                            sx={{
+                                width: '150px',
+                                ':hover': {
+                                    color: 'black !important',
+                                    backgroundColor: '#d11d1d !important',
+                                    transition: '0.5s'
+                                },
+                                backgroundColor: `${theme.palette.secondary.main}`
+                            }}
+                        >Save</Button>
+                        <Button
+                            onClick={(e) => handleNewLessonDialog(e)}
+                            size='small'
+                            sx={{
+                                width: '150px',
+                                ':hover': {
+                                    color: 'black !important',
+                                    backgroundColor: '#d11d1d !important',
+                                    transition: '0.5s'
+                                },
+                                backgroundColor: `${theme.palette.secondary.main}`
+                            }}
+                        >New Lesson</Button>
+                    </Box>
+                }
             </Box>
             <Box className='section-selector'>
                 {mode === 'add' &&
@@ -118,7 +149,7 @@ const AddLesson = (props) => {
                         })}
                     </Box>
                 </Box>
-                <Box>
+                <Box sx={{marginTop:'40px'}}>
                     <Button
                         onClick={handlelessonSave}
                         size='small'

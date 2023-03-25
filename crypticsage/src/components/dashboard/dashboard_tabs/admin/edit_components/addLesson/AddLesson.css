@@ -2,6 +2,9 @@
   height: 40px;
   align-items: center;
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin:10px 0px 10px 0px
 }
 
 .add-content-subtitle {

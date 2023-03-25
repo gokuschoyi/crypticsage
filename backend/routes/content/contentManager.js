@@ -92,9 +92,12 @@ router.post('/add_lesson', async (req, res) => {
 
         const db = await connect();
         const userCollection = await db.collection('lessons');
-        await userCollection.insertOne(data);
+        const result = await userCollection.insertOne(data);
+        let insertedId = result.insertedId;
+        let insertedLessonData = await userCollection.find({_id: insertedId}).toArray();
+        let lessonId = insertedLessonData[0].lessonId;
         await close(db);
-        res.status(200).json({ message: "Lesson added successfully" });
+        res.status(200).json({ message: "Lesson added successfully", lessonId });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Lesson creation failed" });
