@@ -74,6 +74,8 @@ const Login = (props) => {
                     'emailVerified': result.data.data.emailVerified,
                     'photoUrl': result.data.data.profile_image || '',
                     'uid': result.data.data.uid,
+                    'preferences': result.data.preferences || {},
+                    'mobile_number': result.data.mobile_number || ''
                 }
                 dispatch(setAuthState(userData))
                 navigate('/dashboard')

@@ -7,6 +7,8 @@ const initialState = {
     emailVerified:'',
     photoUrl:'',
     uid:'',
+    preferences:{},
+    mobile_number:''
 }
 
 const authSlice = createSlice({
@@ -20,6 +22,8 @@ const authSlice = createSlice({
             state.emailVerified = action.payload.emailVerified;
             state.photoUrl = action.payload.photoUrl;
             state.uid = action.payload.uid;
+            state.preferences = action.payload.preferences,
+            state.mobile_number = action.payload.mobile_number
         },
         resetAuthState: (state) => {
             state.accessToken = '';
