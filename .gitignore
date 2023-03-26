@@ -1,0 +1,30 @@
+#frontend
+
+crypticsage/node_modules
+crypticsage/.pnp
+crypticsage/.pnp.js
+crypticsage/.env
+crypticsage/ssl
+
+crypticsage/.env
+
+
+./crypticsage/coverage
+./crypticsage/build
+
+crypticsage/.DS_Store
+crypticsage/.env.local
+crypticsage/.env.development.local
+crypticsage/.env.test.local
+crypticsage/.env.production.local
+
+crypticsage/ npm-debug.log*
+crypticsage/ yarn-debug.log*
+crypticsage/ yarn-error.log*
+
+#backend
+
+/backend/node_modules
+/backend/keys.json
+/backend/.env
+/backend/crypticsage_key.json
