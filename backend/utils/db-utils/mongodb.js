@@ -224,6 +224,7 @@ const loginUser = async (req, res) => {
                         userData.preferences = user[0].preferences;
                         userData.mobile_number = user[0].mobile_number;
                         userData.accessToken = token;
+                        userData.signup_type = user[0].signup_type;
                         res.status(200).json({ message: "User login successful", data: userData });
                     }
                     else {
@@ -274,6 +275,7 @@ const loginUser = async (req, res) => {
                         userData.preferences = user[0].preferences;
                         userData.mobile_number = user[0].mobile_number;
                         userData.accessToken = token;
+                        userData.signup_type = user[0].signup_type;
                         res.status(200).json({ message: "User login successful", data: userData });
                     }
                 }
@@ -316,6 +318,7 @@ const loginUser = async (req, res) => {
                     userData.preferences = user[0].preferences;
                     userData.mobile_number = user[0].mobile_number;
                     userData.accessToken = token;
+                    userData.signup_type = user[0].signup_type;
                     res.status(200).json({ message: "User login successful", data: userData });
                 }
             }

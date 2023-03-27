@@ -1,14 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    accessToken:'',
-    displayName:'',
-    email:'',
-    emailVerified:'',
-    photoUrl:'',
-    uid:'',
-    preferences:{},
-    mobile_number:''
+    accessToken: '',
+    displayName: '',
+    email: '',
+    emailVerified: '',
+    photoUrl: '',
+    uid: '',
+    preferences: {},
+    mobile_number: ''
 }
 
 const authSlice = createSlice({
@@ -22,8 +22,15 @@ const authSlice = createSlice({
             state.emailVerified = action.payload.emailVerified;
             state.photoUrl = action.payload.photoUrl;
             state.uid = action.payload.uid;
-            state.preferences = action.payload.preferences,
-            state.mobile_number = action.payload.mobile_number
+            state.preferences = action.payload.preferences;
+            state.mobile_number = action.payload.mobile_number;
+        },
+        setNewProfileImage: (state, action) => {
+            state.photoUrl = action.payload.photoUrl;
+        },
+        setNewUserData: (state, action) => {
+            state.displayName = action.payload.displayName;
+            state.mobile_number = action.payload.mobile_number;
         },
         resetAuthState: (state) => {
             state.accessToken = '';
@@ -32,10 +39,12 @@ const authSlice = createSlice({
             state.emailVerified = '';
             state.photoUrl = '';
             state.uid = '';
+            state.preferences = {};
+            state.mobile_number = '';
         }
     }
 })
 
 const { reducer, actions } = authSlice;
-export const { setAuthState, resetAuthState } = actions;
+export const { setAuthState, setNewProfileImage, setNewUserData, resetAuthState } = actions;
 export default reducer;

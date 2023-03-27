@@ -38,7 +38,7 @@ const Settings = (props) => {
         }
     }
 
-    console.log(tabName)
+    // console.log(tabName)
 
     return (
         <Box className='settings-container' onClick={hide}>

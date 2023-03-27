@@ -10,7 +10,6 @@
 .basic-settings-input-container {
   display: flex;
   flex-direction: column;
-  width: 40%;
 }
 
 .basicsetting-icon {
@@ -48,8 +47,8 @@
   z-index: 0;
 }
 .profile-pic .-label {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
   cursor: pointer;
   height: 120px;
   width: 120px;
@@ -69,6 +68,21 @@
   display: inline-flex;
   padding: 0.2em;
   height: 2em;
+}
+
+.new-pass-box {
+  margin: 10px 0px 0px 0px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.change-password-box-info {
+  margin: 0px 0px 10px 0px;
+}
+
+.reset-password-box {
+  margin: 40px 0px 0px 0px;
 }
 
 @media screen and (max-width: 600px) {
