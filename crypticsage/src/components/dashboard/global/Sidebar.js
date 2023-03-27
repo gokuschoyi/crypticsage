@@ -51,7 +51,7 @@ const SidebarC = () => {
         <div style={{ display: 'flex', height: '100%', position: 'fixed' }}>
             <Sidebar defaultCollapsed={true} width="300px" style={{ height: '100vh' }} rootStyles={{
                 [`.ps-sidebar-container`]: {
-                    backgroundColor: `${theme.palette.background.default}`,
+                    backgroundColor: `${theme.palette.primary.dark}`,
                 },
                 [`.ps-menu-root`]: {
                     height: '100%',
@@ -82,7 +82,7 @@ const SidebarC = () => {
                             textAlign="center"
                             sx={{ height: '72px' }}
                         >
-                            <IconButton sx={{ marginTop: '20%', color: `${theme.palette.secondary.main}` }} onClick={() => collapseSidebar()}>
+                            <IconButton sx={{ marginTop: '20%', color: `${theme.palette.text.primary}` }} onClick={() => collapseSidebar()}>
                                 <MenuOutlinedIcon />
                             </IconButton>
                         </Box>
@@ -92,8 +92,8 @@ const SidebarC = () => {
                         <MenuItem
                             active={sidebarTab === "dashboardTab"}
                             style={{
-                                backgroundColor: sidebarTab === "dashboardTab" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: sidebarTab === "dashboardTab" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "dashboardTab" ? theme.palette.text.primary : theme.palette.primary.extraDark,
+                                color: sidebarTab === "dashboardTab" ? theme.palette.secondary.main : theme.palette.secondary.main,
                             }}
                             onClick={() => handleOnClick("dashboardTab")}
                             icon={<HomeOutlinedIcon />}

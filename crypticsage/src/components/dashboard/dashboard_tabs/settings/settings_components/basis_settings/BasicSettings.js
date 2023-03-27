@@ -20,7 +20,7 @@ const BasicSettings = () => {
 
     useEffect(() => {
         let image = null
-        if (user.photoUrl === '') {
+        if (user.photoUrl === '' || user.photoUrl.startsWith('https://')) {
             image = document.getElementById("output");
             image.src = DefaultUser
         } else {

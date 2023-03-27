@@ -4,7 +4,7 @@ import Header from '../../../../global/Header'
 import { useSelector } from 'react-redux';
 import SlideComponent from './Slide'
 
-import { Box, useTheme, Button, CircularProgress } from '@mui/material'
+import { Box, Button, CircularProgress } from '@mui/material'
 const SlideCard = (props) => {
     const { slides, slideName, goBackToLessons } = props
     const { lessons } = useSelector(state => state.section)

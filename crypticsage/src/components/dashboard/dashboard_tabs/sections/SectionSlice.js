@@ -6,7 +6,7 @@ const initialState = {
     sectionFlag: true,
     lessons: [],
     lessonFlag: false,
-    slides: '',
+    slides: {},
     slideFlag: false,
     currentLesson: 0,
     currentSlide: 0,
@@ -35,6 +35,9 @@ const sectionSlice = createSlice({
         setLessons: (state, action) => {
             state.lessons = action.payload;
         },
+        clearLessons: (state) => {
+            state.lessons = [];
+        },
         setLessonFlag: (state, action) => {
             state.lessonFlag = action.payload;
         },
@@ -50,7 +53,7 @@ const sectionSlice = createSlice({
             state.sectionFlag = true;
             state.lessons = [];
             state.lessonFlag = false;
-            state.slides = '';
+            state.slides = {};
             state.slideFlag = false;
             state.currentLesson = 0;
             state.currentSlide = 0;
@@ -66,6 +69,7 @@ export const {
     setSlideFlag,
     setSections,
     setLessons,
+    clearLessons,
     setSlides,
     incrementCounter,
     decrementCounter,

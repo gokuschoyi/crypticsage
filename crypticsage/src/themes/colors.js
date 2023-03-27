@@ -199,39 +199,90 @@ const BlackAndWhite = {
 
 const WhiteAndBlack = {
     colorOne: {
-        100: "#fefefe",
-        200: "#fdfdfd",
-        300: "#fcfcfc",
-        400: "#fbfbfb",
-        500: "#fafafa",
-        600: "#c8c8c8",
-        700: "#969696",
-        800: "#646464",
-        900: "#323232"
+        100: "#070707",
+        200: "#0d0d0d",
+        300: "#141414",
+        400: "#1a1a1a",
+        500: "#212121",
+        600: "#4d4d4d",
+        700: "#7a7a7a",
+        800: "#a6a6a6",
+        900: "#d3d3d3",
     },
     colorTwo: {
-        100: "#d3d3d3",
-        200: "#a6a6a6",
-        300: "#7a7a7a",
-        400: "#4d4d4d",
-        500: "#212121",
-        600: "#1a1a1a",
-        700: "#141414",
-        800: "#0d0d0d",
-        900: "#070707",
+        100: "#323232",
+        200: "#646464",
+        300: "#969696",
+        400: "#c8c8c8",
+        500: "#fafafa",
+        600: "#fbfbfb",
+        700: "#fcfcfc",
+        800: "#fdfdfd",
+        900: "#fefefe",
     },
     colorThree: {
-        100: "#fef4da",
-        200: "#fde9b5",
-        300: "#fbde90",
-        400: "#fad36b",
+        100: "#32280e",
+        200: "#64501c",
+        300: "#95782a",
+        400: "#c7a038",
         500: "#f9c846",
-        600: "#c7a038",
-        700: "#95782a",
-        800: "#64501c",
-        900: "#32280e"
-    },
+        600: "#fad36b",
+        700: "#fbde90",
+        800: "#fde9b5",
+        900: "#fef4da",
+    }
 }
 
+/* {
+    background: {
+        default: '#fff',
+        paper: '#000000',
+        card: '#332C39'
+    },
+    text: {
+        primary: '#000000db',
+        secondary: '#00000099',
+        disabled: '#0000005e',
+        hint: '#22194D',
+        dark: '#072522',
+    },
+    primary: {
+        main: '#2a2c2f',
+        light: '#545658',
+        dark: '#1D1E20',
+        contrastText: '#fff',
+    },
+    secondary: {
+        main: '#21dec8',
+        light: '#4DE4D3',
+        dark: '#179B8C',
+        contrastText: '#000000db',
+    },
+    error: {
+        main: '#F44336',
+        light: '#E57373',
+        dark: '#D32F2F',
+        contrastText: '#fff',
+    },
+    warning: {
+        main: '#FF9800',
+        light: '#FFB74D',
+        dark: '#F57C00',
+        contrastText: '#000000DD',
+    },
+    info: {
+        main: '#2196F3',
+        light: '#64B5F6',
+        dark: '#1976D2',
+        contrastText: '#fff',
+    },
+    success: {
+        main: '#4CAF50',
+        light: '#81C784',
+        dark: '#388E3C',
+        contrastText: '#000000DD',
+    },
+    divider: '#000000',
+} */
 
 export { Colors, initialColors, themeOne, themeTwo, themeThree, BlackAndWhite, WhiteAndBlack };

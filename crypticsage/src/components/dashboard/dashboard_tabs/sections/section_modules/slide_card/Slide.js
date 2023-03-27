@@ -9,7 +9,7 @@ import { ChevronRightIcon, ExpandMoreIcon } from '../../../../global/Icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { incrementCounter, decrementCounter } from '../../SectionSlice'
 
-import { useProSidebar } from "react-pro-sidebar";
+import WordDialog from './WordDialog'
 
 import Video from '../../../../../../assets/lessons/candleStick.mp4'
 
@@ -35,7 +35,7 @@ const SlideComponent = (props) => {
                 <TreeItem nodeId="0" label="Introduction To the Market">
                     {lessons.map((lesson, index) => {
                         return (
-                            <TreeItem nodeId={lesson.chapter_id} label={lesson.title} key={index} />
+                            <TreeItem nodeId={lesson.lessonId} label={lesson.chapter_title} key={index} />
                         )
                     }
                     )}
@@ -59,9 +59,9 @@ const SlideComponent = (props) => {
     var startTimes = sTimes.splice(1, sTimes.length)
     var endTimes = eTimes.splice(1, eTimes.length)
 
-    useEffect(() => {
+    /* useEffect(() => {
         console.log("latest", counter)
-    }, [counter])
+    }, [counter]) */
 
     useEffect(() => {
         if (counter === 0 && videoContent !== null) {
@@ -73,7 +73,7 @@ const SlideComponent = (props) => {
                 }
             }
         }
-    }, [counter, videoContent, sTimes, eTimes])
+    }, [counter, videoContent])
 
     const next = () => {
         if (counter <= data.length - 1 && counter >= 0) {
@@ -150,42 +150,10 @@ const SlideComponent = (props) => {
     }
 
     const [open, setOpen] = React.useState(false);
-    const Transition = React.forwardRef(function Transition(props, ref) {
-        return <Slide direction="up" ref={ref} {...props} />;
-    });
 
     const handleClose = () => {
         setOpen(false);
     };
-    const { collapsed } = useProSidebar();
-    
-
-    const WordModal = (props) => {
-        const { word, meaning } = props
-        return (
-            <Dialog
-                sx={{
-                    '& .MuiDialog-paper': { width: '100%', minWidth: 300, maxHeight: 435, }, marginLeft: collapsed ? '80px' : '300px',
-                }}
-                open={open}
-                TransitionComponent={Transition}
-                keepMounted
-                onClose={handleClose}
-                maxWidth='sm'
-                aria-describedby="alert-dialog-slide-description"
-            >
-                <DialogTitle sx={{color:`${theme.palette.secondary.main}`}}>{`${word}`}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-slide-description">
-                        {`${meaning}`}
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>CLOSE</Button>
-                </DialogActions>
-            </Dialog>
-        )
-    }
 
     useEffect(() => {
         addHighlight({ chapterContent, highlightWords })
@@ -210,26 +178,25 @@ const SlideComponent = (props) => {
             <Box className='lesson-tree' sx={{ color: `${theme.palette.secondary.main}` }}>
                 {renderTree()}
             </Box>
-            <WordModal word={clickedWord.word} meaning={clickedWord.meaning} />
-            <Grid container spacing={{xs:4, sm:3, md:2}} className='slide-container'>
-                <Grid item xs={12} sm={12} md={12} lg={12} xl={6} display='flex' alignItems='center'>
+            <WordDialog open={open} handleClose={handleClose} word={clickedWord.word} meaning={clickedWord.meaning} />
+            <Grid container spacing={{ xs: 4, sm: 3, md: 2 }} className='slide-container'>
+                <Grid item xs={12} sm={12} md={12} lg={6} xl={6} display='flex' alignItems='center'>
                     <Box className='chapter-slide-container' sx={{ color: `${theme.palette.secondary.main}` }}>
                         {ChapterSlide({ chapterTitle })}
                     </Box>
                 </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={12} xl={6}>
+                <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
                     <Box className='slide-video-box'>
                         <CardMedia
                             id='slide-video'
                             component='video'
                             src={`${Video}`}
-
                         >
                         </CardMedia>
                     </Box>
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                    <Box>{counter+1}</Box>
+                    <Box>{counter + 1}</Box>
                     <Box className='slide-actions'>
                         {started ? null :
                             <Button

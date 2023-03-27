@@ -1,14 +1,14 @@
 import { createContext, useState, useMemo } from "react";
 // import { createTheme } from "@mui/material/styles";
-import { experimental_extendTheme as extendTheme} from '@mui/material/styles';
+import { experimental_extendTheme as extendTheme } from '@mui/material/styles';
 import Typography from "./typography";
-import { initialColors, BlackAndWhite } from "./colors";
+import { WhiteAndBlack, BlackAndWhite } from "./colors";
 export const tokens = (mode) => ({
     ...(mode === 'dark'
         ?
         { ...BlackAndWhite }
         :
-        { ...initialColors }
+        { ...WhiteAndBlack }
     )
 })
 
@@ -31,6 +31,7 @@ export const themeSettings = (mode) => {
                         dark: colors.colorOne[700],
                         extraDark: colors.colorOne[900],
                         contrastText: colors.colorTwo[500],
+                        new: colors.colorOne[500],
                     },
                     secondary: {
                         main: colors.colorTwo[500],
@@ -76,26 +77,28 @@ export const themeSettings = (mode) => {
                 }
                 : {
                     primary: {
-                        main: colors.colorTwo[500],
-                        light: colors.colorTwo[300],
-                        dark: colors.colorTwo[700],
-                        contrastText: colors.colorOne[500],
+                        main: colors.colorOne[500],
+                        light: colors.colorOne[600],
+                        dark: colors.colorOne[500],
+                        extraDark: colors.colorOne[500],
+                        contrastText: colors.colorTwo[500],
+                        new: colors.colorOne[900],
                     },
                     secondary: {
-                        main: colors.colorThree[500],
-                        light: colors.colorThree[300],
-                        dark: colors.colorThree[700],
-                        contrastText: colors.colorThree[500],
+                        main: colors.colorTwo[300],
+                        light: colors.colorTwo[300],
+                        dark: colors.colorTwo[700],
+                        contrastText: colors.colorTwo[500],
                     },
                     text: {
-                        primary: colors.colorOne[500],
-                        secondary: colors.colorOne[300],
-                        disabled: colors.colorOne[100],
-                        hint: colors.colorOne[100],
-                        dark: colors.colorOne[900],
+                        primary: colors.colorTwo[100],
+                        secondary: colors.colorTwo[300],
+                        disabled: colors.colorThree[100],
+                        hint: colors.colorThree[100],
+                        dark: colors.colorThree[900],
                     },
                     background: {
-                        default: colors.colorTwo[500],
+                        default: '#fff',
                     },
                     error: {
                         main: '#F44336',
@@ -107,7 +110,7 @@ export const themeSettings = (mode) => {
                         main: '#FF9800',
                         light: '#FFB74D',
                         dark: '#F57C00',
-                        contrastText: '#000000DD',
+                        contrastText: 'rgba(0, 0, 0, 0.87)',
                     },
                     info: {
                         main: '#2196F3',
@@ -119,9 +122,9 @@ export const themeSettings = (mode) => {
                         main: '#4CAF50',
                         light: '#81C784',
                         dark: '#388E3C',
-                        contrastText: '#000000DD',
+                        contrastText: 'rgba(0, 0, 0, 0.87)',
                     },
-                    divider: colors.colorTwo[500],
+                    divider: colors.colorTwo[100],
                 }
             )
         },

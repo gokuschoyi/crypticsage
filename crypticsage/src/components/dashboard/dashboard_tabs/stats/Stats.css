@@ -11,10 +11,12 @@
   position: relative;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
+  background-color: var(--mui-palette-background-card);
 }
 
 .card-holder-long {
   color: var(--mui-palette-secondary-main) !important;
+  background-color: var(--mui-palette-background-card);
   border: 2px solid;
   padding: 15px 10px 20px 20px !important;
   border-radius: 20px !important;

@@ -8,7 +8,7 @@ import { Box, Typography, Button, useTheme, Grid } from '@mui/material';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 
-import { ArrowDropDownIcon, ArrowDropUpIcon} from '../../global/Icons';
+import { ArrowDropDownIcon, ArrowDropUpIcon } from '../../global/Icons';
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";

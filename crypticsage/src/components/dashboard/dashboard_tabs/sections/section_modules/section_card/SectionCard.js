@@ -8,10 +8,10 @@ const SectionCard = (props) => {
     const theme = useTheme()
 
     const CustomCard2 = (props) => {
-        const { title, content, lessonId } = props
+        const { title, content, sectionId } = props
         const lessonData = {
             'sectionName': title,
-            'sectionId': lessonId
+            'sectionId': sectionId
         }
         return (
             <Box className="section-card" sx={{ backgroundColor: `${theme.palette.primary.dark}` }}>
@@ -63,10 +63,10 @@ const SectionCard = (props) => {
                     ? <CircularProgress />
                     :
                     <Grid container className='section-grid-container' justifyContent='start'>
-                        {sections.map(({ title, lessonId, content }, index) => {
+                        {sections.map(({ title, sectionId, content }, index) => {
                             return (
                                 <Grid item xs={11} sm={11} md={6} lg={4} xl={3} className='section-grid-card' key={index}>
-                                    {CustomCard2({ title, content, lessonId })}
+                                    {CustomCard2({ title, content, sectionId })}
                                 </Grid>
                             )
                         })}

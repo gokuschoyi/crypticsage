@@ -773,7 +773,7 @@ const Admin = (props) => {
                     handleClose={handleClose}
                     resetAddSection={resetAddSection}
                 />
-                <Typography variant='h2' color='white' textAlign='start' className='add-content-title'>Add Content</Typography>
+                <Typography variant='h2'  textAlign='start' className='add-content-title'>Add Content</Typography>
                 <Box className='add-content-box'>
                     <Box className='edit-add-box'>
                         <Box className='add-edit-button-box'>

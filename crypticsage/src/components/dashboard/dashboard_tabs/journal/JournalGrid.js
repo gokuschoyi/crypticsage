@@ -295,14 +295,14 @@ const JournalGrid = () => {
                 },
                 '& .MuiDataGrid-toolbarContainer button': {
                     marginRight: '5px !important',
-                    color: `${theme.palette.secondary.main} !important`,
+                    color: `${theme.palette.warning.main} !important`,
                 },
                 '& .MuiDataGrid-toolbarContainer button:hover': {
                     color: `black !important`,
                     backgroundColor: 'white !important',
                 },
                 '& .MuiTablePagination-root': {
-                    color: `${theme.palette.secondary.main} !important`,
+                    color: `${theme.palette.warning.main} !important`,
                 },
             }}
         >
@@ -320,7 +320,7 @@ const JournalGrid = () => {
                         },
                     },
                 }}
-                sx={{ color: 'white' }}
+                sx={{ color: `${theme.palette.secondary.main}` }}	
                 disableColumnMenu={true}
                 rows={rows}
                 columns={columns}

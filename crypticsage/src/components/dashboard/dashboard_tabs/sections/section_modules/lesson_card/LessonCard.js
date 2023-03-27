@@ -4,7 +4,7 @@ import './LessonCard.css'
 import { KeyboardDoubleArrowRightOutlinedIcon } from '../../../../global/Icons'
 import { Box, IconButton, Button, CircularProgress, Grid, CardContent, Typography, CardActions, useTheme } from '@mui/material'
 const LessonCard = (props) => {
-    const { lessons, lessonId, lessonName, goBackToSections, openSlide } = props
+    const { lessons, sectionId, sectionName, goBackToSections, openSlide } = props
     const theme = useTheme()
 
     /* useEffect(() => {
@@ -32,20 +32,17 @@ const LessonCard = (props) => {
     })
 
     const LessonsBox = (props) => {
-        const { title, chapter_id } = props
+        const { title, lessonId } = props
         const values = {
             'lessonName': title,
-            'lessonId': chapter_id
+            'lessonId': lessonId
         }
         return (
             <Box className='lessons-container-box ' sx={{ backgroundColor: `${theme.palette.primary.dark}` }}>
                 <CardContent className='text lesson-title-box' sx={{ width: 'fill-available' }}>
                     <Typography variant="h5" className='rolling' component='span' sx={{ color: `${theme.palette.secondary.main}`, width: 'fill-available', cursor: 'pointer' }}>
                         {title}
-                    </Typography>
-                    <Typography sx={{ mb: 1.5, color: `${theme.palette.secondary.main}` }}>
-                        {chapter_id}
-                    </Typography>
+                    </Typography>                    
                 </CardContent>
                 <CardActions sx={{ width: 'fill-available', justifyContent: 'center' }}>
                     <IconButton
@@ -70,7 +67,7 @@ const LessonCard = (props) => {
     return (
         <React.Fragment>
             <Box className='introduction-top'>
-                <Header title={lessonName} subtitle={lessonId} />
+                <Header title={sectionName} subtitle={sectionId} />
                 <Box>
                     <Button
                         onClick={goBackToSections}
@@ -92,7 +89,7 @@ const LessonCard = (props) => {
                         {lessons.map((lesson, index) => {
                             return (
                                 <Grid item xs={11} sm={4} md={3} lg={2} key={index}>
-                                    <LessonsBox title={lesson.title} chapter_id={lesson.chapter_id} />
+                                    <LessonsBox title={lesson.chapter_title} lessonId={lesson.lessonId} />
                                 </Grid>
                             )
                         })}
