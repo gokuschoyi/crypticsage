@@ -1,0 +1,13 @@
+.admin-menu-icon-holder {
+  transition: all 0.2s ease-in-out;
+}
+
+.admin-menu-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.admin-menu-item :hover {
+  color: red !important;
+  transition: all 0.2s ease-in-out;
+}
+

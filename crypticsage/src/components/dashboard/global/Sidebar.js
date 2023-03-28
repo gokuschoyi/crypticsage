@@ -43,8 +43,12 @@ const SidebarC = () => {
     }, [collapsed])
 
     const handleOnClick = (name) => {
-        dispatch(setSidebarState(name));
-        console.log(name)
+        if (name === 'admin') {
+            dispatch(setSidebarState('dashboardTab'));
+        } else {
+            dispatch(setSidebarState(name));
+            console.log(name)
+        }
     }
 
     return (
@@ -62,7 +66,8 @@ const SidebarC = () => {
             }}>
                 <Menu iconshape="square">
                     {/* LOGO AND MENU ICON */}
-                    {!collapsed ? (
+                    {!collapsed ? 
+                        (
                         <Box
                             display="flex"
                             justifyContent="space-between"
@@ -216,7 +221,7 @@ const SidebarC = () => {
                             }}
                             onClick={() => handleOnClick("admin")}
                             icon={<AdminPanelSettingsIcon />}
-                            component={<Link to="admin" />}
+                            component={<Link to="/admin-dashboard" />}
                             className="menu-item"
                         >
                             <Typography>Admin</Typography>

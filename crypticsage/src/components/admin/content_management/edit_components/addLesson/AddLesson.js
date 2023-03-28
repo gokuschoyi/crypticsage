@@ -12,7 +12,7 @@ import {
     Button,
     useTheme
 } from '@mui/material'
-import { AddIcon } from '../../../../global/Icons'
+import { AddIcon } from '../../../../dashboard/global/Icons'
 
 const AddLesson = (props) => {
     const {

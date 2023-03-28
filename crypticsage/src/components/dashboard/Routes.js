@@ -5,7 +5,6 @@ import Quiz from "./dashboard_tabs/quiz/Quiz";
 import Glossary from "./dashboard_tabs/glossary/Glossary";
 import Schedule from "./dashboard_tabs/schedule/Schedule";
 import Settings from "./dashboard_tabs/settings/Settings";
-import Admin from "./dashboard_tabs/admin/Admin";
 import { Route } from "react-router-dom";
 
 const TabRoutes = [
@@ -16,7 +15,6 @@ const TabRoutes = [
     <Route key='glossary' path="glossary" element={<Glossary title="Glossary of Terms" subtitle="Explore your glossary" />} />,
     <Route key='schedule' path="schedule" element={<Schedule title="Schedule" subtitle="Explore your schedule" />} />,
     <Route key='settings' path="settings" element={<Settings title="Settings" subtitle="Explore your settings" />} />,
-    <Route key='admin' path="admin" element={<Admin title="Admin" subtitle="Explore your admin" />} />
 ];
 
 export default TabRoutes;

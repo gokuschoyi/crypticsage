@@ -9,7 +9,7 @@ import {
     IconButton,
     useTheme
 } from '@mui/material'
-import { ReplayIcon } from '../../../../global/Icons'
+import { ReplayIcon } from '../../../../dashboard/global/Icons'
 const AddSection = (props) => {
     const { newSectionData, handleNewSectionData, handleSectionSubmit, sectionData, refreshSectionData } = props
     const theme = useTheme()

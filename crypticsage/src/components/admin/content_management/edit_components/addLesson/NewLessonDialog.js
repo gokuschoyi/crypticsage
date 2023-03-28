@@ -1,13 +1,12 @@
 import React from 'react'
 import { useProSidebar } from "react-pro-sidebar";
-import JC from '../../../../../../assets/JC.gif'
+import JC from '../../../../../assets/JC.gif'
 import {
     Box,
     Dialog,
     DialogTitle,
     DialogContent,
     DialogActions,
-    Slide,
     useTheme,
     Button
 } from '@mui/material'
@@ -23,9 +22,6 @@ const NewLessonDialog = (props) => {
         },
         backgroundColor: `${theme.palette.secondary.main}`
     }
-    const Transition = React.forwardRef(function Transition(props, ref) {
-        return <Slide direction="up" ref={ref} {...props} />;
-    });
     return (
         <Dialog
             sx={{
@@ -33,7 +29,6 @@ const NewLessonDialog = (props) => {
                 marginLeft: collapsed ? '80px' : '300px',
             }}
             open={open}
-            /* TransitionComponent={Transition} */
             keepMounted
             onClose={handleClose}
             maxWidth='sm'

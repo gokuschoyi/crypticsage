@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useOutletContext } from "react-router-dom";
 import { useSelector } from 'react-redux';
-import Header from '../../global/Header';
+import AdminHeader from '../global/AdminHeader';
 import NewLessonDialog from './edit_components/addLesson/NewLessonDialog';
 import { toast } from 'react-toastify';
 import {
@@ -16,8 +16,8 @@ import {
     InputLabel,
     Divider
 } from '@mui/material';
-import './Admin.css'
-import { fetchSections, addSection, updateSection, fetchLessons, addLesson, updateLesson } from '../../../../api/db';
+import './ContentManagement.css'
+import { fetchSections, addSection, updateSection, fetchLessons, addLesson, updateLesson } from '../../../api/db';
 import { AddSection, AddLesson } from './edit_components';
 import SlideBox from './edit_components/addLesson/SlideBox';
 import HighLightWordBox from './edit_components/addLesson/HighLightWordBox';
@@ -765,7 +765,7 @@ const Admin = (props) => {
     return (
         <Box className='admin-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
-                <Header title={title} subtitle={subtitle} />
+                <AdminHeader title={title} subtitle={subtitle} />
             </Box>
             <Box className='add-content'>
                 <NewLessonDialog

@@ -1,0 +1,6 @@
+.admin-content {
+  width: stretch;
+  margin-left: var(--marginLeft);
+  transition: all 0.2s ease-in-out;
+  /* background-image: url("../../assets/bg.jpg"); */
+}

@@ -7,12 +7,14 @@ import sectionSlice from './components/dashboard/dashboard_tabs/sections/Section
 import settingsSlice from './components/dashboard/dashboard_tabs/settings/SettingsSlice';
 import sideBarSlice from './components/dashboard/global/SideBarSlice';
 import authSlice from './components/authorization/authSlice';
+import adminSidebarSlice from './components/admin/global/AdminSidebarSiice.js';
 
 const reducer = combineReducers({
     settings: settingsSlice,
     sidebar: sideBarSlice,
     section: sectionSlice,
     auth: authSlice,
+    adminSidebar: adminSidebarSlice,
 })
 
 const persistConfig = {
