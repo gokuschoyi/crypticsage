@@ -43,9 +43,10 @@ const AdminSidebar = () => {
     useEffect(() => {
         if (adminSidebarTab === 'adminDashboard') {
             navigate('/admin-dashboard')
-        }
-        else if (adminSidebarTab === 'sections&lessons') {
+        } else if (adminSidebarTab === 'sections&lessons') {
             navigate('/admin-dashboard/content_management')
+        } else if (adminSidebarTab === 'quiz') {
+            navigate('/admin-dashboard/quiz')
         }
     }, [adminSidebarTab, navigate])
 

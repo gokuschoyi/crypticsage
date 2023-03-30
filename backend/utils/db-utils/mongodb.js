@@ -187,6 +187,8 @@ const createNewUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
     const { login_type } = req.body;
+    let adminList = ['goku@gmail.com','gokulsangamitrachoyi@gmail.com']
+    let admin_status = false;
     switch (login_type) {
         case 'emailpassword':
             const { email, password } = req.body;
@@ -202,6 +204,7 @@ const loginUser = async (req, res) => {
                     res.status(400).json({ message: "User does not exist or email is wrong" });
                 }
                 else {
+                    admin_status = adminList.includes(email);
                     const hashedPassword = user[0].password;
                     const decryptedPassword = await bcrypt.compare(password, hashedPassword);
                     const token = jwt.sign(
@@ -225,6 +228,7 @@ const loginUser = async (req, res) => {
                         userData.mobile_number = user[0].mobile_number;
                         userData.accessToken = token;
                         userData.signup_type = user[0].signup_type;
+                        userData.admin_status = admin_status;
                         res.status(200).json({ message: "User login successful", data: userData });
                     }
                     else {
@@ -256,6 +260,7 @@ const loginUser = async (req, res) => {
                         res.status(400).json({ message: "There is no account associated with your email. Register first" });
                     }
                     else {
+                        admin_status = adminList.includes(email);
                         const token = jwt.sign(
                             {
                                 email: payload.email,
@@ -276,6 +281,7 @@ const loginUser = async (req, res) => {
                         userData.mobile_number = user[0].mobile_number;
                         userData.accessToken = token;
                         userData.signup_type = user[0].signup_type;
+                        userData.admin_status = admin_status;
                         res.status(200).json({ message: "User login successful", data: userData });
                     }
                 }
@@ -299,6 +305,7 @@ const loginUser = async (req, res) => {
                     res.status(400).json({ message: "There is no account associated with your email. Register first" });
                 }
                 else {
+                    admin_status = adminList.includes(facebook_email);
                     const token = jwt.sign(
                         {
                             email: user[0].email,
@@ -319,6 +326,7 @@ const loginUser = async (req, res) => {
                     userData.mobile_number = user[0].mobile_number;
                     userData.accessToken = token;
                     userData.signup_type = user[0].signup_type;
+                    userData.admin_status = admin_status;
                     res.status(200).json({ message: "User login successful", data: userData });
                 }
             }

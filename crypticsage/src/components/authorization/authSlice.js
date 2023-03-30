@@ -8,7 +8,8 @@ const initialState = {
     photoUrl: '',
     uid: '',
     preferences: {},
-    mobile_number: ''
+    mobile_number: '',
+    admin_status: false
 }
 
 const authSlice = createSlice({
@@ -24,6 +25,7 @@ const authSlice = createSlice({
             state.uid = action.payload.uid;
             state.preferences = action.payload.preferences;
             state.mobile_number = action.payload.mobile_number;
+            state.admin_status = action.payload.admin_status;
         },
         setNewProfileImage: (state, action) => {
             state.photoUrl = action.payload.photoUrl;
@@ -41,6 +43,7 @@ const authSlice = createSlice({
             state.uid = '';
             state.preferences = {};
             state.mobile_number = '';
+            state.admin_status = false;
         }
     }
 })

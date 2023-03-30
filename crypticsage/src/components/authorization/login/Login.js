@@ -74,8 +74,9 @@ const Login = (props) => {
                     'emailVerified': result.data.data.emailVerified,
                     'photoUrl': result.data.data.profile_image || '',
                     'uid': result.data.data.uid,
-                    'preferences': result.data.preferences || {},
-                    'mobile_number': result.data.mobile_number || ''
+                    'preferences': result.data.data.preferences || {},
+                    'mobile_number': result.data.data.mobile_number || '',
+                    'admin_status': result.data.data.admin_status
                 }
                 dispatch(setAuthState(userData))
                 navigate('/dashboard')
@@ -100,6 +101,9 @@ const Login = (props) => {
                 'emailVerified': result.data.data.emailVerified,
                 'photoUrl': result.data.data.profile_image || '',
                 'uid': result.data.data.uid,
+                'preferences': result.data.data.preferences || {},
+                'mobile_number': result.data.data.mobile_number || '',
+                'admin_status': result.data.data.admin_status
             }
             dispatch(setAuthState(userData))
             navigate('/dashboard')
@@ -125,6 +129,9 @@ const Login = (props) => {
                 'emailVerified': result.data.data.emailVerified,
                 'photoUrl': result.data.data.profile_image || '',
                 'uid': result.data.data.uid,
+                'preferences': result.data.data.preferences || {},
+                'mobile_number': result.data.data.mobile_number || '',
+                'admin_status': result.data.data.admin_status
             }
             console.log(result)
             dispatch(setAuthState(userData))

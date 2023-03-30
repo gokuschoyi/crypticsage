@@ -1,0 +1,22 @@
+.quiz-editor-container {
+  min-height: 100vh;
+  margin: 2rem;
+}
+
+.quiz-toggle {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.quiz-add-box {
+  padding: 20px;
+  background-color: #383535;
+  min-height: 60vh;
+}
+
+.quiz-edit-box {
+  padding: 20px;
+  background-color: #383535;
+  min-height: 60vh;
+}

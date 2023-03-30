@@ -23,6 +23,7 @@ const SidebarC = () => {
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const dispatch = useDispatch();
     const { sidebarTab } = useSelector(state => state.sidebar);
+    const { admin_status } = useSelector(state => state.auth);
     const { collapseSidebar, collapsed } = useProSidebar();
 
     //add sm to dep to triggrer collapseSidebar
@@ -66,32 +67,32 @@ const SidebarC = () => {
             }}>
                 <Menu iconshape="square">
                     {/* LOGO AND MENU ICON */}
-                    {!collapsed ? 
+                    {!collapsed ?
                         (
-                        <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            ml="15px"
-                            sx={{ height: '72px' }}
-                        >
-                            <Typography variant="h3" color={theme.palette.secondary.main}>
-                                CRYPTICSAGE
-                            </Typography>
-                            <IconButton sx={{ color: `${theme.palette.secondary.main}` }} onClick={() => collapseSidebar()}>
-                                <MenuOutlinedIcon />
-                            </IconButton>
-                        </Box>
-                    ) : (
-                        <Box
-                            textAlign="center"
-                            sx={{ height: '72px' }}
-                        >
-                            <IconButton sx={{ marginTop: '20%', color: `${theme.palette.text.primary}` }} onClick={() => collapseSidebar()}>
-                                <MenuOutlinedIcon />
-                            </IconButton>
-                        </Box>
-                    )}
+                            <Box
+                                display="flex"
+                                justifyContent="space-between"
+                                alignItems="center"
+                                ml="15px"
+                                sx={{ height: '72px' }}
+                            >
+                                <Typography variant="h3" color={theme.palette.secondary.main}>
+                                    CRYPTICSAGE
+                                </Typography>
+                                <IconButton sx={{ color: `${theme.palette.secondary.main}` }} onClick={() => collapseSidebar()}>
+                                    <MenuOutlinedIcon />
+                                </IconButton>
+                            </Box>
+                        ) : (
+                            <Box
+                                textAlign="center"
+                                sx={{ height: '72px' }}
+                            >
+                                <IconButton sx={{ marginTop: '20%', color: `${theme.palette.text.primary}` }} onClick={() => collapseSidebar()}>
+                                    <MenuOutlinedIcon />
+                                </IconButton>
+                            </Box>
+                        )}
 
                     <Box className="menu-icon-holder" paddingLeft={collapsed ? undefined : "0%"} paddingTop={collapsed ? '20px' : '24px'}>
                         <MenuItem
@@ -212,20 +213,22 @@ const SidebarC = () => {
                         >
                             <Typography>Settings</Typography>
                         </MenuItem>
-
-                        <MenuItem
-                            active={sidebarTab === "admin"}
-                            style={{
-                                backgroundColor: sidebarTab === "admin" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: sidebarTab === "admin" ? theme.palette.primary.main : theme.palette.secondary.main,
-                            }}
-                            onClick={() => handleOnClick("admin")}
-                            icon={<AdminPanelSettingsIcon />}
-                            component={<Link to="/admin-dashboard" />}
-                            className="menu-item"
-                        >
-                            <Typography>Admin</Typography>
-                        </MenuItem>
+                        
+                        {admin_status && (
+                            <MenuItem
+                                active={sidebarTab === "admin"}
+                                style={{
+                                    backgroundColor: sidebarTab === "admin" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
+                                    color: sidebarTab === "admin" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                }}
+                                onClick={() => handleOnClick("admin")}
+                                icon={<AdminPanelSettingsIcon />}
+                                component={<Link to="/admin-dashboard" />}
+                                className="menu-item"
+                            >
+                                <Typography>Admin</Typography>
+                            </MenuItem>
+                        )}
 
                         <MenuItem
                             active={sidebarTab === "logout"}
