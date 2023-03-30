@@ -4418,3 +4418,6 @@
 ::1 - - [30/Mar/2023:00:23:37 +0000] "POST /content/get_quizquestions HTTP/1.1" 200 971 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
 ::1 - - [30/Mar/2023:00:24:16 +0000] "POST /content/get_sections HTTP/1.1" 200 2491 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
 ::1 - - [30/Mar/2023:00:26:19 +0000] "POST /content/get_sections HTTP/1.1" 200 2491 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+::1 - - [30/Mar/2023:00:26:58 +0000] "POST /content/update_quizquestion HTTP/1.1" 200 48 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+::1 - - [30/Mar/2023:00:27:44 +0000] "POST /content/get_sections HTTP/1.1" 200 2491 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+::1 - - [30/Mar/2023:00:28:43 +0000] "POST /content/get_sections HTTP/1.1" 200 2491 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
