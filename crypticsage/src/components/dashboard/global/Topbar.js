@@ -5,6 +5,7 @@ import { resetSettingsState } from '../dashboard_tabs/settings/SettingsSlice'
 import { resetSectionState } from '../dashboard_tabs/sections/SectionSlice';
 import { resetSidebarState } from "./SideBarSlice";
 import { resetAuthState } from "../../authorization/authSlice";
+import {resetStatsState} from '../dashboard_tabs/stats/StatsSlice.js';
 import { useDispatch } from 'react-redux';
 import InputBase from "@mui/material/InputBase";
 import {
@@ -64,6 +65,7 @@ const Topbar = (props) => {
         dispatch(resetSettingsState());
         dispatch(resetSectionState());
         dispatch(resetSidebarState());
+        dispatch(resetStatsState());
     }
 
     const userContainer = () => {

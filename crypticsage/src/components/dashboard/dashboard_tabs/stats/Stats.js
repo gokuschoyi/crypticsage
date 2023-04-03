@@ -1,29 +1,274 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useOutletContext } from "react-router-dom";
-import Header from '../../global/Header';
+import { useSelector, useDispatch } from 'react-redux';
+import { setCryptoDataAutoComplete, setSelectedCoinData, setSelectedCoinName, setTimePeriod } from './StatsSlice.js';
 import { toast } from 'react-toastify';
-import './Stats.css'
-import { Box, Typography, Button, useTheme, Grid } from '@mui/material';
 
-import { useSelector } from 'react-redux';
-import axios from 'axios';
+import './Stats.css'
 
 import { ArrowDropDownIcon, ArrowDropUpIcon } from '../../global/Icons';
+import { getCryptoData, getHistoricalData } from '../../../../api/crypto';
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/pagination";
 import { Autoplay, Pagination } from "swiper";
+import "swiper/css/pagination";
+import "swiper/css";
+
+import CoinChart from './CoinChart';
+import Header from '../../global/Header';
+
+
+import {
+    Box,
+    Typography,
+    Button,
+    useTheme,
+    Grid,
+    Autocomplete,
+    TextField,
+    FormControlLabel,
+    Checkbox,
+    Skeleton
+} from '@mui/material';
 
 const Stats = (props) => {
     const { title, subtitle } = props
-
+    const theme = useTheme();
+    const dispatch = useDispatch();
     const [setTest] = useOutletContext();
     const hide = () => {
         setTest(true);
     }
 
-    const theme = useTheme();
+    const [cryptoData, setCryptoData] = useState(null);
+    const token = useSelector(state => state.auth.accessToken);
+
+    // const [chartTokens, setChartTokens] = useState([]);
+    const [options, setOptions] = useState([]);
+    const [inputValue, setInputValue] = useState('');
+    const [selectedTokenName, setSelectedTokenName] = useState('');
+
+    const CDAutoComplete = useSelector(state => state.stats.cryptoDataAutoComplete)
+    const optionsLength = CDAutoComplete.length;
+    const SCData = useSelector(state => state.stats.selectedCoinData)
+    const SCName = useSelector(state => state.stats.selectedCoinName)
+    const SCToken = useSelector(state => state.stats.selectedTokenName)
+    const timePeriod = useSelector(state => state.stats.timePeriod)
+    // console.log(CDAutoComplete)
+
+    //initial load of token data for charts
+    const isMounted = useRef(false);
+    useEffect(() => {
+        if (!isMounted.current) { // Only run if the component is mounted
+            isMounted.current = true; // Set the mount state to true after the first run
+            if (optionsLength === 0) {
+                console.log('initial load of token data for charts', optionsLength)
+                let result;
+                try {
+                    let data = {
+                        token: token
+                    }
+                    getCryptoData(data).then((res) => {
+                        result = res.data.cryptoData;
+                        setCryptoData(result);
+                        dispatch(setCryptoDataAutoComplete(result))
+                    })
+                } catch (e) {
+                    console.log(e)
+                }
+            }
+        }
+    }, [optionsLength, dispatch, token])
+
+    //interval fetch of token for token slider // *** activate later ***
+    /* useEffect(() => {
+        const intervalId = setInterval(() => {
+            let data = {
+                token: token
+            }
+            try {
+                getCryptoData(data).then(response => {
+                    setCryptoData(response.data.cryptoData);
+                })
+            } catch (err) {
+                console.log(err);
+            }
+        }, 30000);
+
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [token]); */
+
+    //hover effect on tabs
+    useEffect(() => {
+        var itemBg = document.getElementsByClassName('item-bg')
+        var hoverBox = document.querySelectorAll('.hover');
+        hoverBox.forEach((box) => {
+            box.addEventListener('mouseover', () => {
+                let scrollTop = window.pageYOffset
+                const { left, top, width, height } = box.getBoundingClientRect();
+                itemBg[0].classList.add('active');
+                itemBg[0].style.width = `${width}px`;
+                itemBg[0].style.height = `${height}px`;
+                itemBg[0].style.transform = `translateX(${left}px) translateY(${top + scrollTop}px)`;
+            })
+            box.addEventListener('mouseout', () => {
+                itemBg[0].classList.remove('active');
+            })
+        })
+    })
+
+    const [skWidth, setSkWidth] = useState(0);
+    const [skHeight, setSkHeight] = useState(0);
+
+    //set height ofchart container and skeleton
+    useEffect(() => {
+        let coinChartGridBox = document.getElementsByClassName('coin-chart-grid-box')[0];
+        let tokenSelector = document.getElementsByClassName('token-selector-box')[0];
+        let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
+        let coinChartBox = document.getElementsByClassName('coin-chart-box')[0];
+        let sHeight = coinChartBox.clientHeight * 0.8;
+        let sWidth = coinChartBox.clientWidth * 0.8;
+        setSkHeight(sHeight)
+        setSkWidth(sWidth)
+        coinChartBox.style.setProperty('--height', `${height}px`)
+    }, [])
+
+    //resize event for chart container and skeleton
+    window.addEventListener('resize', () => {
+        let coinChartGridBox = document.getElementsByClassName('coin-chart-grid-box')[0];
+        let tokenSelector = document.getElementsByClassName('token-selector-box')[0];
+        let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
+        let coinChartBox = document.getElementsByClassName('coin-chart-box')[0];
+        let sHeight = coinChartBox.clientHeight * 0.8;
+        let sWidth = coinChartBox.clientWidth * 0.8;
+        setSkHeight(sHeight)
+        setSkWidth(sWidth)
+        coinChartBox.style.setProperty('--height', `${height}px`)
+    });
+
+    //setting initial values for MUI autocomplete and value and options states
+    useEffect(() => {
+        if (CDAutoComplete.length > 0) {
+            setCryptoData(CDAutoComplete) /// *** remove later ***
+            let newOptions = CDAutoComplete.map((option) => option.name)
+            if (SCName !== '' && SCToken !== '') {
+                let inputValue = SCName
+                let tokenName = SCToken
+                setOptions(newOptions)
+                setInputValue(inputValue)
+                setSelectedTokenName(tokenName)
+            } else {
+                let inputValue = CDAutoComplete[0].name
+                let tokenName = CDAutoComplete[0].symbol
+                setOptions(newOptions)
+                setInputValue(inputValue)
+                setSelectedTokenName(tokenName)
+            }
+        }
+    }, [CDAutoComplete, SCName, SCToken])
+
+    //handling input change for MUI autocomplete
+    const handleInputChange = (event, newInputValue) => {
+        setError(false)
+        setErrorMessage('')
+        setChartData([])
+        setInputValue(newInputValue);
+        let tokenSymbol = CDAutoComplete.filter((token) => token.name === newInputValue)
+        setSelectedTokenName(tokenSymbol[0].symbol)
+    }
+
+    //handling MUI autocomplete initial checkbox and initial chart load
+    useEffect(() => {
+        if (selectedTokenName !== '') {
+            if (SCToken !== selectedTokenName) {
+                let checked;
+                for (let key in timePeriod) {
+                    if (timePeriod[key].checked) {
+                        checked = key
+                    }
+                }
+                let data = {
+                    token: token,
+                    tokenName: selectedTokenName,
+                    timePeriod: timePeriod[checked].timePeriod,
+                    timeFrame: timePeriod[checked].timeFrame
+                }
+                try {
+                    getHistoricalData(data).then((res) => {
+                        dispatch(setSelectedCoinName({ coinName: inputValue, tokenName: selectedTokenName }))
+                        setChartData(res.data.historicalData.Data.Data)
+                        dispatch(setSelectedCoinData(res.data.historicalData.Data.Data))
+                    })
+
+                } catch (e) {
+                    console.log(e)
+                }
+            } else {
+                setChartData(SCData)
+            }
+        } else return;
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedTokenName, SCData, SCToken, SCName, dispatch])
+
+
+    const [chartData, setChartData] = useState([])
+    const [error, setError] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
+
+    //handling time period checkbox and fetch data for chart
+    const handleTimePeriodChange = async (event) => {
+        if (selectedTokenName === '') { setError(true); setErrorMessage("Please fill this field"); return }
+        else {
+            setError(false);
+            setErrorMessage("")
+            setChartData([])
+            const { name } = event.target
+            //check if any timePeriodState is checked and uncheck it and set checked for event.name to true
+            const newTimePeriodState = {};
+            let foundChecked = false;
+            for (const [k, v] of Object.entries(timePeriod)) {
+                if (k === name) {
+                    newTimePeriodState[k] = {
+                        ...v,
+                        checked: !v.checked
+                    };
+                    foundChecked = true;
+                } else if (v.checked) {
+                    newTimePeriodState[k] = {
+                        ...v,
+                        checked: false
+                    };
+                } else {
+                    newTimePeriodState[k] = v;
+                }
+            }
+            if (!foundChecked) {
+                newTimePeriodState[name] = {
+                    ...newTimePeriodState[name],
+                    checked: true
+                };
+            }
+
+            dispatch(setTimePeriod(newTimePeriodState))
+
+            let data = {
+                token: token,
+                tokenName: selectedTokenName,
+                timePeriod: newTimePeriodState[name].timePeriod,
+                timeFrame: newTimePeriodState[name].timeFrame
+            }
+            try {
+                let res = await getHistoricalData(data)
+                setChartData(res.data.historicalData.Data.Data)
+                dispatch(setSelectedCoinData(res.data.historicalData.Data.Data))
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    }
 
     const showToast = () => {
         toast.success('Hello World jdjdj', {
@@ -112,18 +357,18 @@ const Stats = (props) => {
                                     </Typography>
                                 </Box>
                             }
-                            <img className='token-image' src={`${image}`} alt='crypto' />
+                            <img className='token-image' loading='lazy' src={`${image}`} alt='crypto' />
                         </Box>
                     </Box>
                     <Typography sx={{ fontSize: 25, fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} gutterBottom>
                         {price}
                     </Typography>
                     <Box className='token-diff-box'>
-                        <Typography sx={{ fontSize: 16, fontWeight: '600', textAlign: 'left', color: 'green' }} gutterBottom>
-                            {price_change_24h}
+                        <Typography className='price_change_24h' sx={{ fontSize: 16, fontWeight: '600', textAlign: 'left', color: price_change_24h > 0 ? 'green' : 'red' }} gutterBottom>
+                            {price_change_24h.toFixed(5)}
                         </Typography>
-                        {price_change_24h > 0 ? <ArrowDropUpIcon sx={{ color: 'green' }} /> : <ArrowDropDownIcon />}
-                        <Typography sx={{ fontSize: 16, fontWeight: '600', textAlign: 'left', color: 'green' }} gutterBottom>
+                        {price_change_24h > 0 ? <ArrowDropUpIcon sx={{ color: 'green' }} /> : <ArrowDropDownIcon sx={{ color: 'red' }} />}
+                        <Typography sx={{ fontSize: 16, fontWeight: '600', textAlign: 'left', color: price_change_percentage_24h < 0 ? 'red' : 'green' }} gutterBottom>
                             {`${price_change_percentage_24h.toFixed(2)}%`}
                         </Typography>
                     </Box>
@@ -153,48 +398,6 @@ const Stats = (props) => {
         )
     }
 
-    const [cryptoData, setCryptoData] = useState(null);
-    const token = useSelector(state => state.auth.accessToken);
-
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            const baseUrl = process.env.REACT_APP_BASEURL;
-            const config = {
-                headers: { Authorization: `Bearer ${token}` }
-            };
-            axios.post(`${baseUrl}/crypto/getCryptoData`, { withCredentials: true }, config)
-                .then(response => {
-                    setCryptoData(response.data.cryptoData);
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-        }, 300000);
-
-        return () => {
-            clearInterval(intervalId);
-        };
-    }, [token]);
-
-    //hover effect on tabs
-    useEffect(() => {
-        var itemBg = document.getElementsByClassName('item-bg')
-        var hoverBox = document.querySelectorAll('.hover');
-        hoverBox.forEach((box) => {
-            box.addEventListener('mouseover', () => {
-                let scrollTop = window.pageYOffset
-                const { left, top, width, height } = box.getBoundingClientRect();
-                itemBg[0].classList.add('active');
-                itemBg[0].style.width = `${width}px`;
-                itemBg[0].style.height = `${height}px`;
-                itemBg[0].style.transform = `translateX(${left}px) translateY(${top + scrollTop}px)`;
-            })
-            box.addEventListener('mouseout', () => {
-                itemBg[0].classList.remove('active');
-            })
-        })
-    })
-
     return (
         <Box className='stat-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
@@ -203,47 +406,123 @@ const Stats = (props) => {
             <Box className='stat-cards-container'>
                 <div className="item-bg"></div>
                 <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={6} lg={3} className='single-card-grid'>
-                        <CustomCard title='Recent Chapter' subtitle='Features' value='6/30' buttonName="GO TO LESSON 6" />
+                    <Grid item xs={12} sm={12} md={12} lg={6} >
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={12} md={6} lg={6} className='single-card-grid'>
+                                <CustomCard title='Recent Chapter' subtitle='Features' value='6/30' buttonName="GO TO LESSON 6" />
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={6} lg={6}>
+                                <CustomCard title='Recent Quiz' subtitle='Technical Analysis Quiz 2' value='8/45' buttonName="GO TO QUIZ" />
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={6} lg={6}>
+                                <CustomCard title='New Challenge' subtitle='Technical Analysis Quiz 2' buttonName="GO TO CHALLENGE" />
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={6} lg={6}>
+                                <Swiper
+                                    centeredSlides={true}
+                                    autoplay={{
+                                        delay: 2500,
+                                        disableOnInteraction: false,
+                                    }}
+                                    loop={true}
+                                    pagination={{
+                                        clickable: true,
+                                        dynamicBullets: true,
+                                    }}
+                                    navigation={false}
+                                    modules={[Autoplay, Pagination]}
+                                    className="mySwiper"
+                                >
+                                    {cryptoData && cryptoData.map((token, index) => {
+                                        return (
+                                            <SwiperSlide key={index}>
+                                                <CustonTextCard
+                                                    title={token.symbol}
+                                                    price={`$ ${token.current_price}`}
+                                                    image={`${token.image_url}`}
+                                                    price_change_24h={token.price_change_24h}
+                                                    price_change_percentage_24h={token.price_change_percentage_24h}
+                                                    market_cap_rank={token.market_cap_rank}
+                                                    high_24h={token.high_24h}
+                                                    low_24h={token.low_24h}
+                                                />
+                                            </SwiperSlide>
+                                        )
+                                    })}
+                                </Swiper>
+                            </Grid>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={3}>
-                        <CustomCard title='Recent Quiz' subtitle='Technical Analysis Quiz 2' value='8/45' buttonName="GO TO QUIZ" />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={3}>
-                        <CustomCard title='New Challenge' subtitle='Technical Analysis Quiz 2' buttonName="GO TO CHALLENGE" />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={3}>
-                        <Swiper
-                            centeredSlides={true}
-                            autoplay={{
-                                delay: 2500,
-                                disableOnInteraction: false,
-                            }}
-                            loop={true}
-                            pagination={{
-                                clickable: true,
-                            }}
-                            navigation={false}
-                            modules={[Autoplay, Pagination]}
-                            className="mySwiper"
-                        >
-                            {cryptoData && cryptoData.map((token, index) => {
-                                return (
-                                    <SwiperSlide key={index}>
-                                        <CustonTextCard
-                                            title={token.symbol}
-                                            price={`$ ${token.current_price}`}
-                                            image={`${token.image_url}`}
-                                            price_change_24h={token.price_change_24h}
-                                            price_change_percentage_24h={token.price_change_percentage_24h}
-                                            market_cap_rank={token.market_cap_rank}
-                                            high_24h={token.high_24h}
-                                            low_24h={token.low_24h}
+                    <Grid item xs={12} sm={12} md={12} lg={6} className='coin-chart-grid-box'>
+                        <Box className='token-selector-box'>
+                            <Box className='token-selector'>
+                                <Typography sx={{ fontSize: 26, fontWeight: '600', textAlign: 'left', color: `${theme.palette.secondary.main}`, marginBottom: '0px' }} gutterBottom>Coin</Typography>
+                                {options && options.length > 0 &&
+                                    <Box>
+                                        <Autocomplete
+                                            size='small'
+                                            className='tokenSelector-autocomplete'
+
+                                            value={inputValue}
+                                            onChange={(event, newInputValue) => handleInputChange(event, newInputValue)}
+                                            id="controllable-states-demo"
+                                            options={options}
+                                            sx={{ width: 300 }}
+                                            renderInput={(params) => <TextField
+                                                error={error}
+                                                helperText={errorMessage}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        '& fieldset': {
+                                                            borderColor: 'white',
+                                                        }
+                                                    }
+                                                }}
+                                                {...params}
+                                                label="Select a Token"
+
+                                                color="secondary"
+                                            />}
                                         />
-                                    </SwiperSlide>
-                                )
-                            })}
-                        </Swiper>
+                                    </Box>
+                                }
+                            </Box>
+                            <Box className='time-period-checkbox'>
+                                <FormControlLabel
+                                    value="30m"
+                                    control={<Checkbox name='thirtyM' onChange={handleTimePeriodChange} checked={timePeriod.thirtyM.checked} color='secondary' />}
+                                    label="30m"
+                                    labelPlacement="start"
+                                />
+                                <FormControlLabel
+                                    value="2h"
+                                    control={<Checkbox name='twoH' onChange={handleTimePeriodChange} checked={timePeriod.twoH.checked} color='secondary' />}
+                                    label="2h"
+                                    labelPlacement="start"
+                                />
+                                <FormControlLabel
+                                    value="4h"
+                                    control={<Checkbox name='fourH' onChange={handleTimePeriodChange} checked={timePeriod.fourH.checked} color='secondary' />}
+                                    label="4h"
+                                    labelPlacement="start"
+                                />
+                                <FormControlLabel
+                                    value="1D"
+                                    control={<Checkbox name='oneD' onChange={handleTimePeriodChange} checked={timePeriod.oneD.checked} color='secondary' />}
+                                    label="1D"
+                                    labelPlacement="start"
+                                />
+                            </Box>
+                        </Box>
+                        {chartData.length === 0 ?
+                            <Box className='coin-chart-box' alignItems='center' justifyContent='center' display='flex'>
+                                <Skeleton variant="rounded" width={skWidth} height={skHeight} />
+                            </Box>
+                            :
+                            <Box className='coin-chart-box'>
+                                <CoinChart chartData={chartData} />
+                            </Box>
+                        }
                     </Grid>
                 </Grid>
                 <Grid container spacing={2}>

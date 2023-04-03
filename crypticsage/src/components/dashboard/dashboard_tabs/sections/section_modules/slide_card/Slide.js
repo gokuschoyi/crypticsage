@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import './Slide.css'
-import { Box, Button, useTheme, CardMedia, Grid, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Slide } from '@mui/material'
+import { Box, Button, useTheme, CardMedia, Grid } from '@mui/material'
 import TreeView from '@mui/lab/TreeView';
 import TreeItem from '@mui/lab/TreeItem';
 import { useOutletContext } from "react-router-dom";

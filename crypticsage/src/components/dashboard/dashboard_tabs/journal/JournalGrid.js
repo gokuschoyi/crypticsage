@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, useTheme, Button, Dialog, DialogTitle, DialogActions, DialogContent, Alert, Snackbar } from '@mui/material'
+import { Box, useTheme, Button, Dialog, DialogTitle, DialogActions, DialogContent } from '@mui/material'
 import JOURNAL_DATA from './JournalData';
 import { DataGrid, GridToolbar, GridRowModes, GridActionsCellItem } from '@mui/x-data-grid';
 
@@ -320,7 +320,7 @@ const JournalGrid = () => {
                         },
                     },
                 }}
-                sx={{ color: `${theme.palette.secondary.main}` }}	
+                sx={{ color: `${theme.palette.secondary.main}` }}
                 disableColumnMenu={true}
                 rows={rows}
                 columns={columns}

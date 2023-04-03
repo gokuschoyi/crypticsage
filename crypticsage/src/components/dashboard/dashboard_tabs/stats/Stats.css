@@ -1,7 +1,7 @@
 .card-holder {
   color: var(--mui-palette-secondary-main) !important;
   border: 2px solid;
-  padding: 15px 10px 20px 20px !important;
+  padding: 20px !important;
   border-radius: 20px !important;
   margin: 15px !important;
   min-height: 220px !important;
@@ -18,7 +18,7 @@
   color: var(--mui-palette-secondary-main) !important;
   background-color: var(--mui-palette-background-card);
   border: 2px solid;
-  padding: 15px 10px 20px 20px !important;
+  padding: 20px !important;
   border-radius: 20px !important;
   margin: 15px !important;
   min-height: 250px !important;
@@ -73,6 +73,7 @@
 
 .swiper-pagination span {
   background-color: #fff;
+  overflow: hidden;
 }
 
 .span-selection-test {
@@ -142,4 +143,45 @@
 .center-col {
   display: flex;
   flex-direction: column;
+}
+
+.coin-chart-box {
+  height: var(--height);
+}
+
+.coin-chart-grid-box {
+  height: var(--heightmain);
+}
+
+.token-selector-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.token-selector {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0px 10px;
+  margin: 10px;
+}
+
+.time-period-checkbox {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  /* gap: 1rem; */
+  padding: 0px 20px;
+  /* margin:10px; */
+}
+
+.tokenSelector-autocomplete {
+  cursor: pointer;
+}
+
+@media screen and (max-width: 1200px) {
+  .coin-chart-box {
+    height: 450px;
+  }
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './Login.css'
-import { Box, Typography, TextField, Button, IconButton, Grid, Alert, useTheme } from '@mui/material'
+import { Box, Typography, TextField, Button, IconButton, Grid, Alert, CircularProgress, useTheme } from '@mui/material'
 import Collapse from '@mui/material/Collapse';
 import { CloseIcon, FacebookIcon } from '../../dashboard/global/Icons';
 import Logo from '../../../assets/logoNew.png'
@@ -54,12 +54,15 @@ const Login = (props) => {
         setLoginData({ ...loginData, [name]: value })
     }
 
+    const [isLodaing, setIsLoading] = useState(false)
+
     const signinUser = async () => {
         console.log("clicked")
         if (email === '' || password === '') {
             setError('Please fill all the fields')
         }
         else {
+            setIsLoading(true)
             try {
                 let loginD = {
                     'login_type': 'emailpassword',
@@ -79,10 +82,16 @@ const Login = (props) => {
                     'admin_status': result.data.data.admin_status
                 }
                 dispatch(setAuthState(userData))
+                setIsLoading(false)
                 navigate('/dashboard')
             } catch (err) {
-                setError(err.response.data.message)
-                console.log(err)
+                setIsLoading(false)
+                if (err.response) {
+                    setError(err.response.data.message)
+                }
+                if (err.name === 'AxiosError') {
+                    setError("Server is down. Please try again later")
+                }
             }
         }
     }
@@ -93,6 +102,7 @@ const Login = (props) => {
             'credential': response.credential
         }
         try {
+            setIsLoading(true)
             const result = await LoginUser(loginData)
             const userData = {
                 'accessToken': result.data.data.accessToken,
@@ -106,11 +116,15 @@ const Login = (props) => {
                 'admin_status': result.data.data.admin_status
             }
             dispatch(setAuthState(userData))
+            setIsLoading(false)
             navigate('/dashboard')
         } catch (err) {
-            console.log(err)
+            setIsLoading(false)
             if (err.response) {
                 setError(err.response.data.message)
+            }
+            if (err.name === 'AxiosError') {
+                setError("Server is down. Please try again later")
             }
         }
     };
@@ -121,6 +135,7 @@ const Login = (props) => {
             'facebook_email': response.data.email
         }
         try {
+            setIsLoading(true)
             const result = await LoginUser(loginData)
             const userData = {
                 'accessToken': result.data.data.accessToken,
@@ -135,14 +150,17 @@ const Login = (props) => {
             }
             console.log(result)
             dispatch(setAuthState(userData))
+            setIsLoading(false)
             navigate('/dashboard')
         } catch (err) {
-            console.log(err)
+            setIsLoading(false)
             if (err.response) {
                 setError(err.response.data.message)
             }
+            if (err.name === 'AxiosError') {
+                setError("Server is down. Please try again later")
+            }
         }
-        console.log(response);
     }
 
     const errorMessage = (error) => {
@@ -185,6 +203,7 @@ const Login = (props) => {
                                 <Box className="login-container-left">
                                     <Box className="login-title">
                                         <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px', color: `${theme.palette.secondary.main}` }}>Login</Typography>
+                                        <CircularProgress color="secondary" size='30px' style={{ display: isLodaing ? 'block' : 'none' }} />
                                     </Box>
                                     <Box className="input-filed-box" display="flex" flexDirection="column">
                                         <TextField onChange={(e) => handleLoginData(e)} name='email' value={email}
