@@ -99,4 +99,36 @@ router.post('/update_userdata', verify, async (req, res) => {
     }
 })
 
+router.post('/update_preferences', verify, async (req, res) => {
+    console.log("Update preferences request received");
+    const { uid, preferences } = req.body;
+    if (!uid || !preferences) {
+        res.status(500).json({ message: "Invalid request" });
+    } else {
+        try {
+            const db = await connect();
+            const userCollection = await db.collection('users');
+            const user = await userCollection.updateOne(
+                { 'uid': uid },
+                {
+                    $set:
+                    {
+                        'preferences.dashboardHover': preferences.dashboardHover,
+                        'preferences.collapsedSidebar': preferences.collapsedSidebar
+                    }
+                }
+            );
+            if (user) {
+                res.status(200).json({ message: "Preferences updated successfully", status: true });
+                await close(db);
+            } else {
+                res.status(500).json({ message: "Preferences updation failed" });
+            }
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message: "Preferences updation failed" });
+        }
+    }
+})
+
 module.exports = router

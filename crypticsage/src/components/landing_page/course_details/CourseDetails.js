@@ -6,7 +6,7 @@ const CourseDetails = () => {
         <Box id="course" className="course-container" >
             <Typography sx={{color:'white'}} fontWeight={300} fontSize="50px" letterSpacing="5px" variant="h1" pt={18}>COURSE DETAILS</Typography>
             <Box className="course-box">
-                <Card className='course-card' sx={{ display: 'flex', flexDirection: 'column', width: '1000px', textAlign: 'start' }}>
+                <Card className='course-card' sx={{ display: 'flex', backgroundColor:'#121212', flexDirection: 'column', width: '1000px', textAlign: 'start' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Typography variant="h4" fontWeight={400} className="padding-course" color="white">
                             The course will be divided into several modules, each covering a specific aspect of the financial market. For example:
@@ -14,22 +14,22 @@ const CourseDetails = () => {
                         <Box p={2}>
                             <ul sx={{ padding: '10px' }}>
                                 <li>
-                                    <Typography variant="h6" fontWeight={300} color="secondary.light" className="li-padding">
+                                    <Typography variant="h6" fontWeight={300} color="#e5e5e5" className="li-padding">
                                         Introduction to Crypto and Stocks: The basics of how crypto and stock markets work, the differences and similarities, the most relevant market actors and how the market is impacted by external factors
                                     </Typography>
                                 </li>
                                 <li>
-                                    <Typography variant="h6" fontWeight={300} color="secondary.light" className="li-padding">
+                                    <Typography variant="h6" fontWeight={300} color="#e5e5e5" className="li-padding">
                                         Crypto Analysis and Trading Strategies: An in-depth look into the crypto market, different types of analysis used to evaluate crypto assets, how to develop a trading strategy and how to use different trading tools.
                                     </Typography>
                                 </li>
                                 <li>
-                                    <Typography variant="h6" fontWeight={300} color="secondary.light" className="li-padding">
+                                    <Typography variant="h6" fontWeight={300} color="#e5e5e5" className="li-padding">
                                         Stocks Analysis and Trading Strategies: Understanding the stock market, different methods of analysis, how to evaluate stocks and how to create a stock trading plan.
                                     </Typography>
                                 </li>
                                 <li>
-                                    <Typography variant="h6" fontWeight={300} color="secondary.light">
+                                    <Typography variant="h6" fontWeight={300} color="#e5e5e5">
                                         Risk Management and Portfolio construction: How to evaluate risk, the importance of diversification, how to create a balanced portfolio and how to manage a portfolio over time.
                                     </Typography>
                                 </li>

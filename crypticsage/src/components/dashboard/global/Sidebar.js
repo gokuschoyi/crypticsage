@@ -24,6 +24,7 @@ const SidebarC = () => {
     const dispatch = useDispatch();
     const { sidebarTab } = useSelector(state => state.sidebar);
     const { admin_status } = useSelector(state => state.auth);
+    const userCollapsedSidebar = useSelector(state => state.auth.preferences.collapsedSidebar);
     const { collapseSidebar, collapsed } = useProSidebar();
 
     //add sm to dep to triggrer collapseSidebar
@@ -54,7 +55,7 @@ const SidebarC = () => {
 
     return (
         <div style={{ display: 'flex', height: '100%', position: 'fixed' }}>
-            <Sidebar defaultCollapsed={true} width="300px" style={{ height: '100vh' }} rootStyles={{
+            <Sidebar defaultCollapsed={userCollapsedSidebar} width="300px" style={{ height: '100vh' }} rootStyles={{
                 [`.ps-sidebar-container`]: {
                     backgroundColor: `${theme.palette.primary.dark}`,
                 },

@@ -6,15 +6,15 @@ const Features = () => {
     const CustomCard = (props) => {
         const { title, subtitle, content } = props
         return (
-            <Card className="features-card" sx={{ textAlign: 'start' }}>
+            <Card className="features-card" sx={{ textAlign: 'start', backgroundColor:'#121212' }}>
                 <CardContent sx={{ flex: '1 0 auto' }}>
-                    <Typography variant="h3" fontWeight={400} color="secondary.main" className="padding">
+                    <Typography variant="h3" fontWeight={400} color="#fafafa" className="padding">
                         {title}
                     </Typography>
-                    <Typography variant="h4" fontWeight={300} color="secondary.main" className="padding">
+                    <Typography variant="h4" fontWeight={300} color="#fafafa" className="padding">
                         {subtitle}
                     </Typography>
-                    <Typography textAlign="justify" variant="h6" fontWeight={300} color="white" >
+                    <Typography textAlign="justify" variant="h6" fontWeight={300} color="#fafafa" >
                         {content}
                     </Typography>
                 </CardContent>

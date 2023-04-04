@@ -161,6 +161,7 @@ const Signup = (props) => {
                     'emailVerified': result.data.data.emailVerified,
                     'photoUrl': result.data.data.profile_image || '',
                     'uid': result.data.data.uid,
+                    'preferences': result.data.data.preferences,
                 }
                 dispatch(setAuthState(userDataRedux))
                 navigate('/dashboard')
@@ -191,6 +192,7 @@ const Signup = (props) => {
                 'emailVerified': result.data.data.emailVerified,
                 'photoUrl': result.data.data.profile_image || '',
                 'uid': result.data.data.uid,
+                'preferences': result.data.data.preferences,
             }
             dispatch(setAuthState(userDataRedux))
             navigate('/dashboard')
@@ -218,6 +220,7 @@ const Signup = (props) => {
                 'emailVerified': result.data.data.emailVerified,
                 'photoUrl': result.data.data.profile_image || '',
                 'uid': result.data.data.uid,
+                'preferences': result.data.data.preferences,
             }
             dispatch(setAuthState(userDataRedux))
             navigate('/dashboard')
@@ -419,7 +422,7 @@ const Signup = (props) => {
                                         onResolve={facebookSignUpSuccess}
                                         onReject={errorMessage}
                                     >
-                                        <IconButton size='large' aria-label="facebook" >
+                                        <IconButton size='large' aria-label="facebook" sx={{ color: 'white' }}>
                                             <FacebookIcon sx={{ width: '40px', height: '40px' }} />
                                         </IconButton>
                                     </LoginSocialFacebook>

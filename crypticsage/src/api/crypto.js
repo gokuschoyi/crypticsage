@@ -22,3 +22,12 @@ export const getHistoricalData = async (data) => {
     const response = await axios.post(`${baseUrl}/crypto/getHistoricalData`, { token, tokenName, timePeriod, timeFrame }, config)
     return response;
 }
+
+export const getWordOfTheDay = async (data) => {
+    let token = data.token;
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/crypto/wordOfTheDay`, { withCredentials: true }, config)
+    return response;
+}

@@ -36,7 +36,11 @@ const createNewUser = async (req, res) => {
                         emailVerified: false,
                         date: new Date().toLocaleString('au'),
                         uid: uuidv4(),
-                        preferences: {},
+                        preferences: {
+                            theme: true,
+                            dashboardHover: true,
+                            collapsedSidebar: true,
+                        },
                         signup_type: 'registration'
                     }
                     token = jwt.sign(
@@ -96,7 +100,11 @@ const createNewUser = async (req, res) => {
                             emailVerified: payload.email_verified,
                             date: new Date().toLocaleString('au'),
                             uid: uuidv4(),
-                            preferences: {},
+                            preferences: {
+                                theme: true,
+                                dashboardHover: true,
+                                collapsedSidebar: true,
+                            },
                             signup_type: signup_type
                         }
                     }
@@ -152,7 +160,11 @@ const createNewUser = async (req, res) => {
                         emailVerified: false,
                         date: new Date().toLocaleString('au'),
                         uid: uuidv4(),
-                        preferences: {},
+                        preferences: {
+                            theme: true,
+                            dashboardHover: true,
+                            collapsedSidebar: true,
+                        },
                         signup_type: 'facebook'
                     }
                 }
@@ -187,7 +199,7 @@ const createNewUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
     const { login_type } = req.body;
-    let adminList = ['goku@gmail.com','gokulsangamitrachoyi@gmail.com']
+    let adminList = ['goku@gmail.com', 'gokulsangamitrachoyi@gmail.com']
     let admin_status = false;
     switch (login_type) {
         case 'emailpassword':

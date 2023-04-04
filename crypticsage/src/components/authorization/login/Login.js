@@ -81,6 +81,7 @@ const Login = (props) => {
                     'mobile_number': result.data.data.mobile_number || '',
                     'admin_status': result.data.data.admin_status
                 }
+                localStorage.setItem('userTheme', userData.preferences.theme)
                 dispatch(setAuthState(userData))
                 setIsLoading(false)
                 navigate('/dashboard')
@@ -115,6 +116,7 @@ const Login = (props) => {
                 'mobile_number': result.data.data.mobile_number || '',
                 'admin_status': result.data.data.admin_status
             }
+            localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
             setIsLoading(false)
             navigate('/dashboard')
@@ -148,7 +150,7 @@ const Login = (props) => {
                 'mobile_number': result.data.data.mobile_number || '',
                 'admin_status': result.data.data.admin_status
             }
-            console.log(result)
+            localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
             setIsLoading(false)
             navigate('/dashboard')
@@ -262,7 +264,7 @@ const Login = (props) => {
                                                 onResolve={facebookLoginSuccess}
                                                 onReject={errorMessage}
                                             >
-                                                <IconButton size='large' aria-label="facebook" >
+                                                <IconButton size='large' aria-label="facebook" sx={{ color: 'white' }}>
                                                     <FacebookIcon sx={{ width: '40px', height: '40px' }} />
                                                 </IconButton>
                                             </LoginSocialFacebook>
@@ -290,11 +292,11 @@ const Login = (props) => {
                             }
                         </Box>
                     </Grid>
-                    <Grid className='animation-grid' item xs={12} sm={12} md={12} lg={6}>
+                    {/* <Grid className='animation-grid' item xs={12} sm={12} md={12} lg={6}>
                         <Box className='login-model'>
                             <Animation />
                         </Box>
-                    </Grid>
+                    </Grid> */}
                 </Grid>
             </Box>
         </Box >

@@ -1,17 +1,18 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import './BasicSettings.css'
 import { createCanvas } from 'canvas';
-import { Box, Grid, Typography, Button, IconButton, TextField, InputAdornment } from '@mui/material'
+import { Box, Grid, Typography, Button, IconButton, TextField, InputAdornment, Switch, FormControlLabel, useTheme } from '@mui/material'
 import { CheckOutlinedIcon, CameraAltIcon, ClearOutlinedIcon, VisibilityOff, Visibility } from '../../../../global/Icons'
-import { verifyPassword, updatePassword, updateProfileImage, updateUserData } from '../../../../../../api/user'
+import { verifyPassword, updatePassword, updateProfileImage, updateUserData, updatePreferences } from '../../../../../../api/user'
 import { Success, Error, Info } from '../../../../global/CustomToasts'
 import DefaultUser from '../../../../../../assets/user.png'
 import { useSelector, useDispatch } from 'react-redux'
-import { setNewProfileImage, setNewUserData } from '../../../../../../components/authorization/authSlice'
+import { setNewProfileImage, setNewUserData, setUserPreferences } from '../../../../../../components/authorization/authSlice'
 const BasicSettings = () => {
     const user = useSelector(state => state.auth)
+    const theme = useTheme()
     const dispatch = useDispatch()
-    const [showPassword, setShowPassword] = React.useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const handleClickShowPassword = () => setShowPassword((show) => !show);
 
     const handleMouseDownPassword = (event) => {
@@ -29,8 +30,8 @@ const BasicSettings = () => {
         }
     }, [user.photoUrl])
 
-    const [file, setFile] = React.useState(null)
-    const [currentPic, setCurrentPic] = React.useState(null)
+    const [file, setFile] = useState(null)
+    const [currentPic, setCurrentPic] = useState(null)
 
     const loadFile = (e) => {
         var image = document.getElementById("output");
@@ -120,8 +121,8 @@ const BasicSettings = () => {
         currentPassword: { value: '', error: false, helperText: '' }
     }
 
-    const [passwordCorrect, setPasswordCorrect] = React.useState(false)
-    const [currentPassword, setCurrentPassword] = React.useState(currentPasswordData)
+    const [passwordCorrect, setPasswordCorrect] = useState(false)
+    const [currentPassword, setCurrentPassword] = useState(currentPasswordData)
     const handlePasswordChange = (e) => {
         const { name, value } = e.target
         setCurrentPassword({ ...currentPassword, [name]: { value: value, error: false, helperText: '' } })
@@ -158,7 +159,7 @@ const BasicSettings = () => {
         confirmPassword: { value: '', error: false, helperText: '' }
     }
 
-    const [newPassword, setNewPassword] = React.useState(newPasswordData)
+    const [newPassword, setNewPassword] = useState(newPasswordData)
     const handleNewPasswordChange = (e) => {
         const { name, value } = e.target
         validatePassword(name, value)
@@ -216,7 +217,7 @@ const BasicSettings = () => {
         mobileNumber: { value: user.mobile_number, error: false, helperText: '' },
     }
 
-    const [userDetails, setUserDetails] = React.useState(userData)
+    const [userDetails, setUserDetails] = useState(userData)
 
     const handleUserDetailsChange = (e) => {
         const { name, value } = e.target
@@ -255,8 +256,59 @@ const BasicSettings = () => {
         }
     }
 
+    const userPreferences = user.preferences
+
+    const [dahsboardHoverLabel, setDashboardHoverLabel] = useState(userPreferences.dashboardHover)
+    const handleDashboardHoverLabel = (e) => {
+        if (e.target.checked) {
+            setDashboardHoverLabel((prev) => !prev)
+        } else {
+            setDashboardHoverLabel((prev) => !prev)
+        }
+    }
+
+    const [navbarCollapse, setNavbarCollapse] = useState(userPreferences.collapsedSidebar)
+    const handleNavbarCollapseLabel = (e) => {
+        if (e.target.checked) {
+            setNavbarCollapse((prev) => !prev)
+        } else {
+            setNavbarCollapse((prev) => !prev)
+        }
+    }
+
+    const handleUserPreferenceSave = async (e) => {
+        if (dahsboardHoverLabel === userPreferences.dashboardHover && navbarCollapse === userPreferences.collapsedSidebar) {
+            Info('No changes made')
+            return
+        } else {
+            let editedPreferences = {
+                dashboardHover: dahsboardHoverLabel,
+                collapsedSidebar: navbarCollapse
+            }
+            let data = {
+                token: user.accessToken,
+                payload: {
+                    uid: user.uid,
+                    preferences: editedPreferences
+                }
+            }
+            try {
+                let res = await updatePreferences(data)
+                dispatch(setUserPreferences(editedPreferences))
+                console.log(editedPreferences)
+                Success(res.data.message)
+            } catch (err) {
+                if (err.response) {
+                    Error(err.response.data.message)
+                }
+            }
+        }
+    }
+
+
+
     return (
-        <Box className='basic-settings-container' sx={{ backgroundColor: '#2e2e2e' }}>
+        <Box className='basic-settings-container' sx={{ backgroundColor: `${theme.palette.primary.dark}` }}>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                     <Box display='flex' flexDirection='column' alignItems='start' className='user-name-box'>
@@ -314,7 +366,7 @@ const BasicSettings = () => {
                         }
                     </Box>
                     <Box marginTop="20px" className='basic-settings-input-box'>
-                        <Box width='90%' className='basic-settings-input-container'>
+                        <Box className='basic-settings-input-container'>
                             <Box display='flex' alignItems='baseline' justifyContent='space-between'>
                                 <TextField
                                     error={userDetails.displayName.error}
@@ -342,7 +394,7 @@ const BasicSettings = () => {
                                     variant="outlined"
                                 />
                             </Box>
-                            <Box sx={{ margin: '20px 0px 10px 0px' }}>
+                            <Box display='flex' justifyContent='flex-end'>
                                 <Button
                                     onClick={(e) => handleUserDetailsSave(e)}
                                     size='small'
@@ -351,6 +403,45 @@ const BasicSettings = () => {
                                     sx={{ ':hover': { color: `black !important`, backgroundColor: 'white !important', } }}
                                 >
                                     Update</Button>
+                            </Box>
+                        </Box>
+                        <Box className='preference-box'>
+                            <Typography textAlign='start' variant='h4' color='secondary'>PREFERENCES</Typography>
+                            <Box className='preference-box-container'>
+                                <Box className='preference-box-item'>
+                                    <Typography textAlign='start' variant='h6' color='secondary'>Dahsboard Hover</Typography>
+                                    <Box display='flex' sx={{ width: '100px' }}>
+                                        <FormControlLabel
+                                            value="top"
+                                            control={<Switch checked={dahsboardHoverLabel} color="secondary" />}
+                                            label={(dahsboardHoverLabel === true && 'ON') || (dahsboardHoverLabel === false && 'OFF')}
+                                            labelPlacement="end"
+                                            onChange={(e) => handleDashboardHoverLabel(e)}
+                                        />
+                                    </Box>
+                                </Box>
+                                <Box className='preference-box-item'>
+                                    <Typography textAlign='start' variant='h6' color='secondary'>Collapsed Sidebar</Typography>
+                                    <Box display='flex' sx={{ width: '100px' }}>
+                                        <FormControlLabel
+                                            value="top"
+                                            control={<Switch checked={navbarCollapse} color="secondary" />}
+                                            label={(navbarCollapse === true && 'ON') || (navbarCollapse === false && 'OFF')}
+                                            labelPlacement="end"
+                                            onChange={(e) => handleNavbarCollapseLabel(e)}
+                                        />
+                                    </Box>
+                                </Box>
+                                <Box display='flex' justifyContent='flex-end' sx={{ margin: '20px 0px 10px 0px' }}>
+                                    <Button
+                                        onClick={(e) => handleUserPreferenceSave(e)}
+                                        size='small'
+                                        variant="text"
+                                        style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginLeft: '10px' }}
+                                        sx={{ ':hover': { color: `black !important`, backgroundColor: 'white !important', } }}
+                                    >
+                                        Save</Button>
+                                </Box>
                             </Box>
                         </Box>
                     </Box>

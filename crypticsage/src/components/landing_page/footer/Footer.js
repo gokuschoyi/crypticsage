@@ -13,7 +13,7 @@ const Footer = () => {
         <Box className="footer-container centering" >
             <Box sx={{ backgroundColor: `#545863` }}>
                 <Card sx={{
-                    display: 'flex', justifyContent: 'center'
+                    display: 'flex', justifyContent: 'center', backgroundColor: '#121212'
                 }}>
                     <Box className="footer-firstpart" >
                         <Box pb={2}>
@@ -71,17 +71,17 @@ const Footer = () => {
                 </Box>
                 <Box display="flex" flexDirection="row" className="social-icons">
                     <Box className="footer-icon">
-                        <IconButton aria-label="facebook">
+                        <IconButton aria-label="facebook" sx={{ color: 'white' }} >
                             <FacebookRoundedIcon />
                         </IconButton>
                     </Box>
                     <Box className="footer-icon">
-                        <IconButton aria-label="facebook">
+                        <IconButton aria-label="facebook" sx={{ color: 'white' }}>
                             <VideoLibraryRoundedIcon />
                         </IconButton>
                     </Box>
                     <Box className="footer-icon">
-                        <IconButton aria-label="facebook">
+                        <IconButton aria-label="facebook" sx={{ color: 'white' }}>
                             <BurstModeRoundedIcon />
                         </IconButton>
                     </Box>

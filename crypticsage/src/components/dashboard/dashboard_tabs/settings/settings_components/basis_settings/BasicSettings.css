@@ -1,6 +1,6 @@
 .basic-settings-container {
   padding: 32px !important;
-  margin:20px;
+  margin: 20px;
 }
 
 .avatar-container {
@@ -86,18 +86,50 @@
   margin: 40px 0px 0px 0px;
 }
 
+.preference-box-container {
+  display: flex;
+  width: 90%;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.preference-box-item {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.basic-settings-input-box{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+}
+
+.basic-settings-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 90%;
+}
+
 @media screen and (max-width: 600px) {
   .basic-settings-container {
     padding-left: 20px !important;
     padding-right: 16px !important;
   }
-  .basic-settings-input-container {
-    width: 100%;
-  }
 }
 
 @media screen and (max-width: 900px) {
   .basic-settings-input-container {
+    width: 100%;
+  }
+  .basic-settings-input-container {
+    width: 100% !important;
+  }
+  .preference-box-container {
     width: 100%;
   }
 }

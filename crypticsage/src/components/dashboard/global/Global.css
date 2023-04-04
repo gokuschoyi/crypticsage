@@ -14,11 +14,11 @@
   z-index: 40;
 }
 
-.user-nav-title{
-    text-align: left;
-    padding-top:10px;
-    padding-bottom:15px;
-    padding-left:10px;
+.user-nav-title {
+  text-align: left;
+  padding-top: 10px;
+  padding-bottom: 15px;
+  padding-left: 10px;
 }
 
 .user-cta-small {
@@ -57,6 +57,7 @@
   justify-content: flex-start;
   transition: all 0.3s ease-in-out;
   align-items: center;
+  color: white;
 }
 
 .user-nav-icon-small {
@@ -86,13 +87,12 @@
   }
 }
 
-
 /* Notification -- CSS */
 
-.user-notification{
+.user-notification {
   position: absolute;
   width: 350px;
-  height:420px;
+  height: 420px;
   padding: 10px;
   background-color: rgb(39, 33, 33);
   top: 0;
@@ -106,27 +106,27 @@
   z-index: 40;
 }
 
-.notification-container{
+.notification-container {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   margin-right: 0px !important;
 }
 
-.notification-title{
+.notification-title {
   text-align: left;
-  padding-top:10px;
-  padding-bottom:10px;
-  padding-left:10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
 }
 
-.notification-body{
-  height:310px;
+.notification-body {
+  height: 310px;
   overflow: auto;
 }
-.notification-alert{
-  margin-top:5px !important;
-  margin-bottom:5px !important;
+.notification-alert {
+  margin-top: 5px !important;
+  margin-bottom: 5px !important;
   display: flex;
   flex-direction: row;
   align-items: center;

@@ -6,12 +6,12 @@ const Testimonials = () => {
     const CustomCard = (props) => {
         const { title, content } = props
         return (
-            <Card className="testimonial-card" sx={{ textAlign: 'start' }}>
+            <Card className="testimonial-card" sx={{ textAlign: 'start', backgroundColor:'#121212' }}>
                 <CardContent >
-                    <Typography variant="h3" fontWeight={400} color="secondary.main" className="padding">
+                    <Typography variant="h3" fontWeight={400} color="#fafafa" className="padding">
                         {title}
                     </Typography>
-                    <Typography textAlign="justify" variant="h6" fontWeight={300} color="white" >
+                    <Typography textAlign="justify" variant="h6" fontWeight={300} color="#fafafa" >
                         {content}
                     </Typography>
                 </CardContent>

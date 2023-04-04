@@ -1,13 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useOutletContext } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
-import { setCryptoDataAutoComplete, setSelectedCoinData, setSelectedCoinName, setTimePeriod } from './StatsSlice.js';
+import {
+    setCryptoDataAutoComplete,
+    setSelectedCoinData,
+    setSelectedCoinName,
+    setTimePeriod,
+    setWordOfTheDay
+} from './StatsSlice.js';
 import { toast } from 'react-toastify';
 
 import './Stats.css'
 
 import { ArrowDropDownIcon, ArrowDropUpIcon } from '../../global/Icons';
-import { getCryptoData, getHistoricalData } from '../../../../api/crypto';
+import { getCryptoData, getHistoricalData, getWordOfTheDay } from '../../../../api/crypto';
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper";
@@ -80,6 +86,34 @@ const Stats = (props) => {
         }
     }, [optionsLength, dispatch, token])
 
+    //initial load of word of the day
+    const WODMounted = useRef(false);
+    const [wordOfTheDay, setWordOfTheDayL] = useState({});
+    const wordData = useSelector(state => state.stats.wordOfTheDay)
+    useEffect(() => {
+        if (!WODMounted.current) { // Only run if the component is mounted
+            WODMounted.current = true; // Set the mount state to true after the first run
+            if (Object.keys(wordData).length === 0) {
+                let result;
+                try {
+                    let data = {
+                        token: token
+                    }
+                    getWordOfTheDay(data).then((res) => {
+                        result = res.data.word;
+                        setWordOfTheDayL(result);
+                        dispatch(setWordOfTheDay(result));
+                    })
+                } catch (e) {
+                    console.log(e)
+                }
+            } else {
+                setWordOfTheDayL(wordData);
+            }
+        }
+    }, [token, dispatch, wordData])
+
+
     //interval fetch of token for token slider // *** activate later ***
     /* useEffect(() => {
         const intervalId = setInterval(() => {
@@ -101,22 +135,28 @@ const Stats = (props) => {
     }, [token]); */
 
     //hover effect on tabs
+    const hoverEffectPreference = useSelector(state => state.auth.preferences.dashboardHover)
     useEffect(() => {
-        var itemBg = document.getElementsByClassName('item-bg')
-        var hoverBox = document.querySelectorAll('.hover');
-        hoverBox.forEach((box) => {
-            box.addEventListener('mouseover', () => {
-                let scrollTop = window.pageYOffset
-                const { left, top, width, height } = box.getBoundingClientRect();
-                itemBg[0].classList.add('active');
-                itemBg[0].style.width = `${width}px`;
-                itemBg[0].style.height = `${height}px`;
-                itemBg[0].style.transform = `translateX(${left}px) translateY(${top + scrollTop}px)`;
+        if (hoverEffectPreference) {
+            var itemBg = document.getElementsByClassName('item-bg')
+            var hoverBox = document.querySelectorAll('.hover');
+            hoverBox.forEach((box) => {
+                box.addEventListener('mouseover', () => {
+                    let scrollTop = window.pageYOffset
+                    const { left, top, width, height } = box.getBoundingClientRect();
+                    itemBg[0].classList.add('active');
+                    itemBg[0].style.width = `${width}px`;
+                    itemBg[0].style.height = `${height}px`;
+                    itemBg[0].style.transform = `translateX(${left}px) translateY(${top + scrollTop}px)`;
+                })
+                box.addEventListener('mouseout', () => {
+                    itemBg[0].classList.remove('active');
+                })
             })
-            box.addEventListener('mouseout', () => {
-                itemBg[0].classList.remove('active');
-            })
-        })
+        } else {
+            var itemBgs = document.getElementsByClassName('item-bg')
+            itemBgs[0].classList.remove('active');
+        }
     })
 
     const [skWidth, setSkWidth] = useState(0);
@@ -136,7 +176,7 @@ const Stats = (props) => {
     }, [])
 
     //resize event for chart container and skeleton
-    window.addEventListener('resize', () => {
+    const handleResize = () => {
         let coinChartGridBox = document.getElementsByClassName('coin-chart-grid-box')[0];
         let tokenSelector = document.getElementsByClassName('token-selector-box')[0];
         let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
@@ -146,7 +186,14 @@ const Stats = (props) => {
         setSkHeight(sHeight)
         setSkWidth(sWidth)
         coinChartBox.style.setProperty('--height', `${height}px`)
-    });
+    }
+    useEffect(() => {
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        }
+    })
+
 
     //setting initial values for MUI autocomplete and value and options states
     useEffect(() => {
@@ -310,7 +357,7 @@ const Stats = (props) => {
     };
 
     const CustomLongCard = (props) => {
-        const { title, content, subtitle, buttonName } = props
+        const { title, content, subtitle, link } = props
         return (
             <Box
                 className='card-holder-long hover'
@@ -327,14 +374,7 @@ const Stats = (props) => {
                     </Typography>
                 </Box>
                 <Box className='action-box'>
-                    <Button className='card-button' sx={{
-                        ':hover': {
-                            color: 'black !important',
-                            backgroundColor: 'white !important',
-                            transition: '0.5s'
-                        },
-                        backgroundColor: `${theme.palette.primary.main}`
-                    }} size="small">{buttonName}</Button>
+                    <a href={link} target='_blank' rel="noreferrer">Read More</a>
                 </Box>
             </Box>
         )
@@ -527,7 +567,14 @@ const Stats = (props) => {
                 </Grid>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={12} md={12} lg={6}>
-                        <CustomLongCard title='WORD OF THE DAY' subtitle='A currency pair is a price quote of the exchange rate for two different currencies traded in FX markets.' content='Currency Pair' buttonName="GO TO DEFINITION" />
+                        {Object.keys(wordOfTheDay).length !== 0 &&
+                            <CustomLongCard
+                                title='WORD OF THE DAY'
+                                content={wordOfTheDay.word}
+                                subtitle={wordOfTheDay.meaning}
+                                link={wordOfTheDay.url}
+                            />
+                        }
                     </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={6}>
                         <CustomLongCard title='IN-COMPLETE JOURNAL ENTRY' subtitle='20/10/2022' content='Complete your last entry' buttonName="GO TO JOURNAL" />

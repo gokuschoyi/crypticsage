@@ -2,7 +2,7 @@ const express = require('express')
 const verifyToken = require('../../routes/auth/verifyToken')
 const router = express.Router()
 const axios = require('axios');
-
+const wodData = require('./wodData')
 router.post('/getCryptoData', verifyToken, async (req, res) => {
     console.log("Get Crypto Data request received");
     try {
@@ -41,6 +41,14 @@ router.post('/getHistoricalData', verifyToken, async (req, res) => {
         console.log(err);
         res.status(400).json({ message: "Get Historical Data request error" })
     }
+})
+
+router.post('/wordOfTheDay', verifyToken, async (req, res) => {
+    console.log("Word of the day request received");
+    let wordData = wodData[Math.floor(Math.random() * wodData.length)];
+    let objectkey = Object.keys(wordData)[0];
+    let word = wordData[objectkey];
+    res.status(200).json({ message: "Word of the day request success", word });
 })
 
 module.exports = router

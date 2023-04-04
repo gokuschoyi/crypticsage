@@ -1,12 +1,12 @@
-import { Box, IconButton, useTheme, Button, Typography, Divider, Badge } from "@mui/material";
+import { Box, IconButton, useTheme, Button, Typography, Divider, Badge, Avatar } from "@mui/material";
 import { useContext } from "react";
 import { ColorModeContext } from "../../../themes/theme";
 import { resetSettingsState } from '../dashboard_tabs/settings/SettingsSlice'
 import { resetSectionState } from '../dashboard_tabs/sections/SectionSlice';
 import { resetSidebarState } from "./SideBarSlice";
 import { resetAuthState } from "../../authorization/authSlice";
-import {resetStatsState} from '../dashboard_tabs/stats/StatsSlice.js';
-import { useDispatch } from 'react-redux';
+import { resetStatsState } from '../dashboard_tabs/stats/StatsSlice.js';
+import { useSelector, useDispatch } from 'react-redux';
 import InputBase from "@mui/material/InputBase";
 import {
     LightModeOutlinedIcon,
@@ -40,6 +40,7 @@ const Topbar = (props) => {
         unreadCount
     } = useNotificationCenter();
 
+    const profileImage = useSelector(state => state.auth.photoUrl);
 
     const {
         toggleUser,
@@ -61,6 +62,7 @@ const Topbar = (props) => {
     // console.log(toggleNotifications);
     const dispatch = useDispatch();
     const logOut = async () => {
+        // localStorage.removeItem('userTheme');
         dispatch(resetAuthState());
         dispatch(resetSettingsState());
         dispatch(resetSectionState());
@@ -205,7 +207,7 @@ const Topbar = (props) => {
                                 <SettingsOutlinedIcon />
                             </IconButton>
                             <IconButton onClick={setToggleUser}>
-                                <PersonOutlinedIcon />
+                                {profileImage ? <Avatar  sx={{ width: 24, height: 24 }} src={profileImage} /> : <PersonOutlinedIcon />}
                             </IconButton>
                         </Box>
                     )

@@ -49,3 +49,15 @@ export const updateUserData = async (data) => {
     })
     return response;
 }
+
+export const updatePreferences = async (data) => {
+    let token = data.token;
+    let payload = data.payload
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/user/update_preferences`, payload, config, {
+        withCredentials: true
+    })
+    return response;
+}
