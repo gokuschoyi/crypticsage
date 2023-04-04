@@ -2,7 +2,7 @@ import React from 'react'
 import './SettingSwitch.css'
 import { useDispatch } from 'react-redux'
 import { setSettingsState } from '../../SettingsSlice'
-import { Box, Grid, Card, CardContent, Typography, useTheme, Button } from '@mui/material'
+import { Box, Grid, Button } from '@mui/material'
 const SettingSwitch = (props) => {
     const dispatch = useDispatch()
 
@@ -10,10 +10,6 @@ const SettingSwitch = (props) => {
         {
             heading: 'Your Profile',
             subheading: 'Basic settings for your account'
-        },
-        {
-            heading: 'Preferences',
-            subheading: 'Manage your subscriptions'
         },
         {
             heading: 'Subscriptions',
@@ -33,30 +29,6 @@ const SettingSwitch = (props) => {
         },
         
     ]
-
-    const theme = useTheme()
-
-    const SettingSwitchCard = ({ heading, subheading }) => {
-        return (
-            <Grid item xs={12} sm={6} md={4} lg={3} xl={2} className='grid-item-hover'>
-                <Card sx={{
-                    backgroundColor: 'red', height: '50px', width: 'fill-available', display: 'flex', justifyContent: 'center', alignItems: 'center', ':hover': {
-                        color: `black !important`,
-                        backgroundColor: 'white !important',
-                    }
-                }} >
-                    <CardContent className='single-setting-card' sx={{ width: 'fill-available' }}>
-                        <Typography sx={{ color: `${theme.palette.secondary.main}`, marginBottom: '0px' }} gutterBottom variant="h5" component="div">
-                            {heading}
-                        </Typography>
-                        {/* <Typography sx={{ color: `${theme.palette.secondary.main}` }} variant="body2" color="text.secondary">
-                            {subheading}
-                        </Typography> */}
-                    </CardContent>
-                </Card>
-            </Grid>
-        )
-    }
 
     const SettingSwitchCard2 = ({ heading, subheading }) => {
         return (

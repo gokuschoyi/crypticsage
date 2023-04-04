@@ -25,7 +25,7 @@
 .quiz-options {
   display: flex;
   flex-direction: row;
-  width: fill-available;
+  width: stretch;
   gap: 1rem;
   padding-right:10px;
   margin-left: 10px;

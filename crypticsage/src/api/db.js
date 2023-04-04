@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseUrl = process.env.REACT_APP_BASEURL;
+const baseUrl = process.env.NODE_ENV === 'development' ? process.env.REACT_APP_BASEURL : process.env.REACT_APP_NGROK_URL;
 
 export const addSection = async (data) => {
     const response = await axios.post(`${baseUrl}/content/add_section`, data, {
