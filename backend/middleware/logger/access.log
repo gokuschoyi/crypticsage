@@ -8322,3 +8322,4 @@
 ::1 - - [04/Apr/2023:07:32:16 +0000] "POST /content/get_sections HTTP/1.1" 200 2491 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
 ::1 - - [05/Apr/2023:00:08:22 +0000] "POST /content/get_sections HTTP/1.1" 401 33 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
 ::1 - - [05/Apr/2023:00:08:22 +0000] "POST /content/get_sections HTTP/1.1" 401 33 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+::1 - - [05/Apr/2023:00:47:36 +0000] "POST /auth/login HTTP/1.1" 200 58212 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
