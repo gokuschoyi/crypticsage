@@ -1,8 +1,12 @@
 import React, { useEffect } from 'react'
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const CoinChart = (props) => {
     const { chartData } = props;
+    const theme = useTheme();
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const [formattedData, setFormattedData] = React.useState([])
 
     useEffect(() => {
@@ -33,7 +37,8 @@ const CoinChart = (props) => {
                 }}
             >
                 <XAxis dataKey="time" />
-                <YAxis type='number' domain={['auto', 'auto']} />
+                
+                <YAxis type='number' domain={['auto', 'auto']} hide={sm}/>
                 <Tooltip />
                 <Legend />
                 <Line type="monotone" dataKey="open" stroke="#f30505" dot={false} />

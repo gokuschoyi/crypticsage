@@ -437,7 +437,7 @@ const Stats = (props) => {
             </Box>
         )
     }
-console.log(process.env.NODE_ENV)
+
     return (
         <Box className='stat-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>

@@ -185,3 +185,10 @@
     height: 450px;
   }
 }
+
+@media screen and (max-width: 600px){
+  .token-selector{
+    display: flex;
+    flex-direction: column !important;
+  }
+}

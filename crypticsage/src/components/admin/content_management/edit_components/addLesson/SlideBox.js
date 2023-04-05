@@ -38,11 +38,11 @@ const SlideBox = (props) => {
 
     return (
         <Box className='slide-box slide-box-initial flex-column' name={`slide-${count + 1}`} id={count + 1}>
-            <Box className='flex-row slide-padding'>
+            <Box className='flex-row slide-padding slide-name'>
                 <Typography variant='h5' color='white' textAlign='start' className='header-width slide-number'>Slide {`${count + 1}`} : </Typography>
                 <TextField size='small' id={`${count}`} name='heading' value={newSlideData[count].heading} onChange={(e) => handleChange(e)} fullWidth sx={slideStyle} className='slide-title-input' />
             </Box>
-            <Box className='flex-row slide-padding' alignItems='flex-start'>
+            <Box className='flex-row slide-padding slide-name' alignItems='flex-start'>
                 <Typography variant='h5' color='white' textAlign='start' className='header-width margin-for-header'>Slide Content : </Typography>
                 <TextField size='small' id={`${count}`} name='content_text' value={newSlideData[count].content_text} onChange={(e) => handleChange(e)} fullWidth multiline={true} minRows='8' sx={slideStyle} className='slide-content-input content-width' />
             </Box>
@@ -59,7 +59,7 @@ const SlideBox = (props) => {
                     </Box>
                 </Box>
                 <Box sx={{ width: '100%', paddingTop: '10px' }} display='flex' justifyContent='flex-end'>
-                    <Box sx={{ width: 'calc(100% - 160px)' }} >
+                    <Box className='highlightwordbox' sx={{ width: 'calc(100% - 160px)' }} >
                         <Box className='flex-row' sx={{ paddingLeft: '10px', gap: '5px' }}>
                             <Box sx={{ width: '60%' }}>
                                 <Typography variant='h5' color='white' textAlign='start' className='header-width'>Keyword</Typography>
@@ -83,12 +83,12 @@ const SlideBox = (props) => {
                     </Box>
                 </Box>
             </Box>
-            <Box className='flex-row slide-padding' sx={{ alignItems: 'flex-start' }}>
+            <Box className='flex-row slide-padding slide-name' sx={{ alignItems: 'flex-start' }}>
                 <Typography variant='h5' color='white' textAlign='start' className='header-width'>Media Type</Typography>
-                <Box sx={{ width: '100%' }}>
-                    <Box className='flex-row' sx={{ paddingLeft: '10px' }}>
+                <Box className='mediaTypePadding' sx={{ width: '100%'}}>
+                    <Box className='flex-row'>
                         <Box sx={{ width: '60%' }}>
-                            <Typography variant='h5' color='white' textAlign='start' className='header-width'>Media Type</Typography>
+                            <Typography variant='h5' color='white' textAlign='start' className='header-width'>Select Type</Typography>
                         </Box>
                         <Box sx={{ width: '100%' }}>
                             <Typography variant='h5' color='white' textAlign='start' className='header-width'>URL</Typography>
@@ -120,9 +120,9 @@ const SlideBox = (props) => {
                     </Box>
                 </Box>
             </Box>
-            <Box className='flex-row slide-padding' sx={{ alignItems: 'flex-start' }}>
+            <Box className='flex-row slide-padding slide-name' sx={{ alignItems: 'flex-start' }}>
                 <Typography variant='h5' color='white' textAlign='start' className='header-width' sx={{ paddingTop: '17px' }}>Slide Times</Typography>
-                <Box sx={{ paddingLeft: '10px' }}>
+                <Box>
                     <Box className='flex-row'>
                         <Typography variant='h5' color='white' textAlign='start' className='header-width'>Start Time</Typography>
                         <TextField name='start_timestamp' id={`${count}`} value={newSlideData[count].start_timestamp} onChange={(e) => handleChange(e)} size='small' sx={slideStyle} className='slide-title-input' />
