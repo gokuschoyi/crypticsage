@@ -48,7 +48,7 @@ const Dashboard = (props) => {
     const [test, setTest] = React.useState(false);
 
     useEffect(() => {
-        if(test){
+        if (test) {
             hide();
         }
     })
@@ -68,7 +68,7 @@ const Dashboard = (props) => {
                 pauseOnHover
             />
             <SidebarC />
-            <main className="content"
+            <Box className="content"
                 style={{
                     backgroundColor: props.color,
                 }}
@@ -81,8 +81,10 @@ const Dashboard = (props) => {
                     toggleNotifications={toggleNotifications}
                     setToggleNotifications={handleToggleNotifications}
                 />
-                <Outlet context={[ setTest]} />
-            </main>
+                <Box className='content-box'>
+                    <Outlet context={[setTest]} />
+                </Box>
+            </Box>
         </Box>
     )
 }

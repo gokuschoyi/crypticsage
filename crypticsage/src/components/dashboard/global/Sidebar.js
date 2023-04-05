@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useSelector, useDispatch } from 'react-redux';
 import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
@@ -21,18 +21,22 @@ import { setSidebarState } from "./SideBarSlice";
 const SidebarC = () => {
     const theme = useTheme();
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    const md = useMediaQuery(theme.breakpoints.down('md'));
     const dispatch = useDispatch();
     const { sidebarTab } = useSelector(state => state.sidebar);
     const { admin_status } = useSelector(state => state.auth);
     const userCollapsedSidebar = useSelector(state => state.auth.preferences.collapsedSidebar);
     const { collapseSidebar, collapsed } = useProSidebar();
 
-    //add sm to dep to triggrer collapseSidebar
+    //add md to dep to triggrer collapseSidebar
+    //adding collapsed prevetents opening the sidebar
     useEffect(() => {
-        if (sm) {
-            collapseSidebar();
+        if (md) {
+            if (!collapsed) {
+                collapseSidebar();
+            }
         }
-    }, [collapseSidebar])
+    }, [collapseSidebar, md])
 
     useEffect(() => {
         const content = document.getElementsByClassName('content')[0];
@@ -44,6 +48,15 @@ const SidebarC = () => {
         }
     }, [collapsed])
 
+    useEffect(() => {
+        let content = document.getElementsByClassName('content')[0];
+        if (sm) {
+            content.style.setProperty('--marginLeft', '0px')
+        } else {
+            content.style.setProperty('--marginLeft', '80px')
+        }
+    }, [sm])
+
     const handleOnClick = (name) => {
         if (name === 'admin') {
             dispatch(setSidebarState('dashboardTab'));
@@ -54,7 +67,7 @@ const SidebarC = () => {
     }
 
     return (
-        <div style={{ display: 'flex', height: '100%', position: 'fixed' }}>
+        <div className='sidebar' style={{ display: 'flex', height: '100%', position: 'fixed' }}>
             <Sidebar defaultCollapsed={userCollapsedSidebar} width="300px" style={{ height: '100vh' }} rootStyles={{
                 [`.ps-sidebar-container`]: {
                     backgroundColor: `${theme.palette.primary.dark}`,
@@ -214,7 +227,7 @@ const SidebarC = () => {
                         >
                             <Typography>Settings</Typography>
                         </MenuItem>
-                        
+
                         {admin_status && (
                             <MenuItem
                                 active={sidebarTab === "admin"}

@@ -1,4 +1,6 @@
+import { useRef } from "react";
 import { Box, IconButton, useTheme, Button, Typography, Divider, Badge, Avatar } from "@mui/material";
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useContext } from "react";
 import { ColorModeContext } from "../../../themes/theme";
 import { resetSettingsState } from '../dashboard_tabs/settings/SettingsSlice'
@@ -23,7 +25,8 @@ import {
     AddCardOutlinedIcon,
     QuizOutlinedIcon,
     RoomPreferencesOutlinedIcon,
-    ManageAccountsOutlinedIcon
+    ManageAccountsOutlinedIcon,
+    ArrowForwardIcon
 } from './Icons'
 
 import "./Global.css"
@@ -58,6 +61,31 @@ const Topbar = (props) => {
     };
 
     const theme = useTheme();
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    const toggleSmallScreenSidebar = useRef(true)
+    const showSidebar = () => {
+        if (toggleSmallScreenSidebar.current) {
+            let sidebar = document.getElementsByClassName('sidebar')[0]
+            let content = document.getElementsByClassName('content')[0]
+            let icon = document.getElementsByClassName('expand-sm-icon')[0]
+            icon.classList.add('rotate-icon')
+            sidebar.classList.add('show-sidebar');
+            content.style.setProperty('--marginLeft', '80px');
+            toggleSmallScreenSidebar.current = false;
+            console.log('show sidebar');
+        } else {
+            let sidebar = document.getElementsByClassName('sidebar')[0]
+            let content = document.getElementsByClassName('content')[0]
+            let icon = document.getElementsByClassName('expand-sm-icon')[0]
+            icon.classList.remove('rotate-icon')
+            sidebar.classList.remove('show-sidebar');
+            content.style.setProperty('--marginLeft', '0px');
+            toggleSmallScreenSidebar.current = true;
+            console.log('hide sidebar');
+        }
+    }
+
+
     const colorMode = useContext(ColorModeContext);
     // console.log(toggleNotifications);
     const dispatch = useDispatch();
@@ -167,7 +195,15 @@ const Topbar = (props) => {
     }
 
     return (
-        <Box display="flex" justifyContent="space-between" p={2} backgroundColor={theme.palette.primary.dark}>
+        <Box className="topbar" display="flex" justifyContent="space-between" p={2} backgroundColor={theme.palette.primary.dark}>
+            {sm && (
+                <Box display="flex">
+                    <IconButton className="expand-sm-icon" sx={{ color: `${theme.palette.secondary.main}` }} onClick={(e) => showSidebar(e)}>
+                        <ArrowForwardIcon />
+                    </IconButton>
+                </Box>
+            )}
+
             {/* SEARCH BAR */}
             <Box
                 display="flex"
@@ -207,7 +243,7 @@ const Topbar = (props) => {
                                 <SettingsOutlinedIcon />
                             </IconButton>
                             <IconButton onClick={setToggleUser}>
-                                {profileImage ? <Avatar  sx={{ width: 24, height: 24 }} src={profileImage} /> : <PersonOutlinedIcon />}
+                                {profileImage ? <Avatar sx={{ width: 24, height: 24 }} src={profileImage} /> : <PersonOutlinedIcon />}
                             </IconButton>
                         </Box>
                     )

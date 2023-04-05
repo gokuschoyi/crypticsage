@@ -53,6 +53,7 @@ import AddIcon from '@mui/icons-material/Add';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import RemoveIcon from '@mui/icons-material/Remove';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 export { 
     LightModeOutlinedIcon, 
@@ -100,5 +101,6 @@ export {
     AddIcon,
     Visibility,
     VisibilityOff,
-    RemoveIcon
+    RemoveIcon,
+    ArrowForwardIcon
 }
