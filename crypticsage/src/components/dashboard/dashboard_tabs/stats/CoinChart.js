@@ -29,6 +29,7 @@ const CoinChart = (props) => {
                 width={500}
                 height={300}
                 data={formattedData}
+                isAnimationActive={false}
                 margin={{
                     top: 5,
                     right: 30,

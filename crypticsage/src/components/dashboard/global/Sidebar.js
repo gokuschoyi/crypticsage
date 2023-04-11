@@ -37,8 +37,13 @@ const SidebarC = () => {
                 collapseSidebar();
             }
         }
+        if (sm) {
+            if (!collapsed) {
+                collapseSidebar();
+            }
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [collapseSidebar, md])
+    }, [collapseSidebar, md, sm])
 
     const handleOnClick = (name) => {
         if (name === 'admin') {

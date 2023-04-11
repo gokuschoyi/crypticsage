@@ -445,19 +445,19 @@ const Stats = (props) => {
             </Box>
             <Box className='stat-cards-container'>
                 <div className="item-bg"></div>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={12} md={12} lg={6} >
+                <Grid container spacing={4}>
+                    <Grid item xs={12} sm={12} md={12} lg={6} xl={12}>
                         <Grid container spacing={2}>
-                            <Grid item xs={12} sm={12} md={6} lg={6} className='single-card-grid'>
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={3} className='single-card-grid'>
                                 <CustomCard title='Recent Chapter' subtitle='Features' value='6/30' buttonName="GO TO LESSON 6" />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={6}>
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
                                 <CustomCard title='Recent Quiz' subtitle='Technical Analysis Quiz 2' value='8/45' buttonName="GO TO QUIZ" />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={6}>
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
                                 <CustomCard title='New Challenge' subtitle='Technical Analysis Quiz 2' buttonName="GO TO CHALLENGE" />
                             </Grid>
-                            <Grid item xs={12} sm={12} md={6} lg={6}>
+                            <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
                                 <Swiper
                                     centeredSlides={true}
                                     autoplay={{
@@ -493,7 +493,7 @@ const Stats = (props) => {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={12} md={12} lg={6} className='coin-chart-grid-box'>
+                    <Grid item xs={12} sm={12} md={12} lg={6} xl={12} className='coin-chart-grid-box'>
                         <Box className='token-selector-box'>
                             <Box className='token-selector'>
                                 <Typography sx={{ fontSize: 26, fontWeight: '600', textAlign: 'left', color: `${theme.palette.secondary.main}`, marginBottom: '0px' }} gutterBottom>Coin</Typography>
