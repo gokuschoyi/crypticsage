@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useSelector, useDispatch } from 'react-redux';
 import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
+import CSLogo from '../../../assets/csLogo.png'
 import {
     HomeOutlinedIcon,
     MenuOutlinedIcon,
@@ -36,26 +37,8 @@ const SidebarC = () => {
                 collapseSidebar();
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [collapseSidebar, md])
-
-    useEffect(() => {
-        const content = document.getElementsByClassName('content')[0];
-        if (!collapsed) {
-            content.style.setProperty('--marginLeft', '300px')
-        }
-        else {
-            content.style.setProperty('--marginLeft', '80px')
-        }
-    }, [collapsed])
-
-    useEffect(() => {
-        let content = document.getElementsByClassName('content')[0];
-        if (sm) {
-            content.style.setProperty('--marginLeft', '0px')
-        } else {
-            content.style.setProperty('--marginLeft', '80px')
-        }
-    }, [sm])
 
     const handleOnClick = (name) => {
         if (name === 'admin') {
@@ -68,7 +51,7 @@ const SidebarC = () => {
 
     return (
         <div className='sidebar' style={{ display: 'flex', height: '100%', position: 'fixed' }}>
-            <Sidebar defaultCollapsed={userCollapsedSidebar} width="300px" style={{ height: '100vh' }} rootStyles={{
+            <Sidebar transitionDuration={700} defaultCollapsed={userCollapsedSidebar} width="300px" style={{ height: '100vh' }} rootStyles={{
                 [`.ps-sidebar-container`]: {
                     backgroundColor: `${theme.palette.primary.dark}`,
                 },
@@ -99,12 +82,22 @@ const SidebarC = () => {
                             </Box>
                         ) : (
                             <Box
+                                backgroundColor={sm ? 'white' : 'black'}
                                 textAlign="center"
+                                justifyContent='center'
+                                alignItems='center'
+                                display='flex'
                                 sx={{ height: '72px' }}
                             >
-                                <IconButton sx={{ marginTop: '20%', color: `${theme.palette.text.primary}` }} onClick={() => collapseSidebar()}>
-                                    <MenuOutlinedIcon />
-                                </IconButton>
+                                {!sm ?
+                                    (<IconButton sx={{ color: `${theme.palette.text.primary}` }} onClick={() => collapseSidebar()}>
+                                        <MenuOutlinedIcon />
+                                    </IconButton>)
+                                    :
+                                    (
+                                        <img className="smallscreen-logo" height="45px" alt='logo' src={CSLogo}></img>
+                                    )
+                                }
                             </Box>
                         )}
 

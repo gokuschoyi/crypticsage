@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ToastContainer } from 'react-toastify';
+import { useProSidebar } from "react-pro-sidebar";
+import useMediaQuery from '@mui/material/useMediaQuery';
 import 'react-toastify/dist/ReactToastify.css';
 import SidebarC from '../../components/dashboard/global/Sidebar';
 import Topbar from '../../components/dashboard/global/Topbar';
 import { Outlet } from 'react-router-dom';
 import './Dashboard.css'
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 const Dashboard = (props) => {
     /* const colors = tokens(theme.palette.mode);
     console.log(colors.yellow[200]); */
@@ -52,8 +54,14 @@ const Dashboard = (props) => {
             hide();
         }
     })
+    const { collapsed } = useProSidebar();
+    const theme = useTheme();
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    const [toggleSmallScreenSidebar, setToggleSmallScreenSidebar] = useState(true)
+    const handleToggleSmallScreenSidebar = () => {
+        setToggleSmallScreenSidebar((prev) => !prev)
+    }
 
-    // console.log(test)
     return (
         <Box className="dashboard-container" >
             <ToastContainer
@@ -72,6 +80,12 @@ const Dashboard = (props) => {
                 style={{
                     backgroundColor: props.color,
                 }}
+                sx={{
+                    flexGrow: 1,
+                    marginLeft: sm ? (toggleSmallScreenSidebar ? "0px !important" : "80px !important") : (collapsed ? "80px !important" : "300px !important"),
+                    transition: "margin-left 0.7s ease",
+                    overflow: "auto",
+                }}
             >
                 <Topbar
                     toggleUser={toggleUser}
@@ -80,6 +94,8 @@ const Dashboard = (props) => {
                     setToggleSettings={handleToggleSettings}
                     toggleNotifications={toggleNotifications}
                     setToggleNotifications={handleToggleNotifications}
+                    toggleSmallScreenSidebar={toggleSmallScreenSidebar}
+                    handleToggleSmallScreenSidebar={handleToggleSmallScreenSidebar}
                 />
                 <Box className='content-box'>
                     <Outlet context={[setTest]} />

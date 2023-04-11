@@ -6,7 +6,7 @@
 
 .sidebar {
   transform: translateX(0px);
-  transition: all 0.2s ease-in-out;
+  transition: all 0.7s ease-in-out;
 }
 
 .hide-sidebar {
@@ -20,6 +20,10 @@
 .rotate-icon {
   transition: all 0.2s ease-in-out;
   transform: rotate(180deg);
+}
+
+.smallscreen-logo{
+  cursor: pointer;
 }
 
 @media screen and (max-width: 600px) {

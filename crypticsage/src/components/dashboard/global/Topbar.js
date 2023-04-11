@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { Box, IconButton, useTheme, Button, Typography, Divider, Badge, Avatar } from "@mui/material";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useContext } from "react";
@@ -52,6 +51,8 @@ const Topbar = (props) => {
         setToggleSettings,
         toggleNotifications,
         setToggleNotifications,
+        toggleSmallScreenSidebar,
+        handleToggleSmallScreenSidebar,
     } = props;
 
     const mountedStyle = { animation: "inAnimation 250ms ease-in" };
@@ -62,16 +63,15 @@ const Topbar = (props) => {
 
     const theme = useTheme();
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
-    const toggleSmallScreenSidebar = useRef(true)
     const showSidebar = () => {
-        if (toggleSmallScreenSidebar.current) {
+        if (toggleSmallScreenSidebar) {
             let sidebar = document.getElementsByClassName('sidebar')[0]
             let content = document.getElementsByClassName('content')[0]
             let icon = document.getElementsByClassName('expand-sm-icon')[0]
             icon.classList.add('rotate-icon')
             sidebar.classList.add('show-sidebar');
-            content.style.setProperty('--marginLeft', '80px');
-            toggleSmallScreenSidebar.current = false;
+            content.style.setProperty('--marginLeft', '80px!important');
+            handleToggleSmallScreenSidebar()
             console.log('show sidebar');
         } else {
             let sidebar = document.getElementsByClassName('sidebar')[0]
@@ -79,8 +79,8 @@ const Topbar = (props) => {
             let icon = document.getElementsByClassName('expand-sm-icon')[0]
             icon.classList.remove('rotate-icon')
             sidebar.classList.remove('show-sidebar');
-            content.style.setProperty('--marginLeft', '0px');
-            toggleSmallScreenSidebar.current = true;
+            content.style.setProperty('--marginLeft', '0px !important');
+            handleToggleSmallScreenSidebar()
             console.log('hide sidebar');
         }
     }
