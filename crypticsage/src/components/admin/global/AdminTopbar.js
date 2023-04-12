@@ -99,16 +99,16 @@ const AdminTopbar = (props) => {
 
     return (
         <Box className='admin-topbar' display='flex' justifyContent='flex-end' width='100%'
-            sx={{ backgroundColor: theme.palette.primary.dark }}
+            sx={{ backgroundColor: theme.palette.primary.newBlack }}
         >
             <Box display='flex' padding='10px'>
                 <IconButton onClick={setToggleNotifications}>
                     <Badge badgeContent={unreadCount || 0}>
-                        <NotificationsOutlinedIcon />
+                        <NotificationsOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}`}}/>
                     </Badge>
                 </IconButton>
                 <IconButton onClick={setToggleSettings}>
-                    <SettingsOutlinedIcon />
+                    <SettingsOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}`}}/>
                 </IconButton>
             </Box>
             {settingsContainer()}

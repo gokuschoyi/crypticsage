@@ -1,10 +1,11 @@
+import { useRef, useEffect } from "react";
 import { Box, IconButton, useTheme, Button, Typography, Divider, Badge, Avatar } from "@mui/material";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useContext } from "react";
 import { ColorModeContext } from "../../../themes/theme";
 import { resetSettingsState } from '../dashboard_tabs/settings/SettingsSlice'
 import { resetSectionState } from '../dashboard_tabs/sections/SectionSlice';
-import { resetSidebarState } from "./SideBarSlice";
+import { handleReduxToggleSmallScreenSidebar, resetSidebarState } from "./SideBarSlice";
 import { resetAuthState } from "../../authorization/authSlice";
 import { resetStatsState } from '../dashboard_tabs/stats/StatsSlice.js';
 import { useSelector, useDispatch } from 'react-redux';
@@ -62,7 +63,27 @@ const Topbar = (props) => {
     };
 
     const theme = useTheme();
+    const mode = theme.palette.mode;
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const smallScreenSidebarLoad = useRef(false)
+    useEffect(() => {
+        if (!smallScreenSidebarLoad.current) { // Only run if the component is mounted
+            smallScreenSidebarLoad.current = true // Set the mount state to true after the first run
+            if (!toggleSmallScreenSidebar) {
+                let sidebar = document.getElementsByClassName('sidebar')[0]
+                let content = document.getElementsByClassName('content')[0]
+                let icon = document.getElementsByClassName('expand-sm-icon')[0]
+                icon.classList.remove('rotate-icon')
+                sidebar.classList.remove('show-sidebar');
+                content.style.setProperty('--marginLeft', '0px !important');
+                handleToggleSmallScreenSidebar()
+                dispatch(handleReduxToggleSmallScreenSidebar({ value: !toggleSmallScreenSidebar }))
+                console.log('hide sidebar');
+            }
+        }
+    })
+
     const showSidebar = () => {
         if (toggleSmallScreenSidebar) {
             let sidebar = document.getElementsByClassName('sidebar')[0]
@@ -72,6 +93,7 @@ const Topbar = (props) => {
             sidebar.classList.add('show-sidebar');
             content.style.setProperty('--marginLeft', '80px!important');
             handleToggleSmallScreenSidebar()
+            dispatch(handleReduxToggleSmallScreenSidebar({ value: !toggleSmallScreenSidebar }))
             console.log('show sidebar');
         } else {
             let sidebar = document.getElementsByClassName('sidebar')[0]
@@ -81,6 +103,7 @@ const Topbar = (props) => {
             sidebar.classList.remove('show-sidebar');
             content.style.setProperty('--marginLeft', '0px !important');
             handleToggleSmallScreenSidebar()
+            dispatch(handleReduxToggleSmallScreenSidebar({ value: !toggleSmallScreenSidebar }))
             console.log('hide sidebar');
         }
     }
@@ -102,21 +125,21 @@ const Topbar = (props) => {
         return (
             <Box className="user-nav" style={toggleUser ? mountedStyle : unmountedStyle}>
                 <Box mr={2} className="user-cta-small">
-                    <Typography className='user-nav-title' variant="h6" sx={{ color: theme.palette.secondary.main }}>Profile Settings</Typography>
+                    <Typography className='user-nav-title' variant="h6" sx={{ color: 'white' }}>Profile Settings</Typography>
                     <Divider />
-                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <ExploreOutlinedIcon className="user-nav-icon-small" />
                             <span>Explore Creators</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <AddReactionOutlinedIcon className="user-nav-icon-small" />
                             <span>Invite</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <HelpOutlineOutlinedIcon className="user-nav-icon-small" />
                             <span>About</span>
@@ -137,39 +160,39 @@ const Topbar = (props) => {
         return (
             <Box className="user-nav" style={toggleSettings ? mountedStyle : unmountedStyle}>
                 <Box mr={2} className="user-cta-small">
-                    <Typography className='user-nav-title' variant="h6" sx={{ color: theme.palette.secondary.main }}>Settings</Typography>
+                    <Typography className='user-nav-title' variant="h6" sx={{ color: 'white' }}>Settings</Typography>
                     <Divider />
-                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <ManageAccountsOutlinedIcon className="user-nav-icon-small" />
                             <span>Your Profile</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <RoomPreferencesOutlinedIcon className="user-nav-icon-small" />
                             <span>Preferences</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <AddCardOutlinedIcon className="user-nav-icon-small" />
                             <span>Subscriptions</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <QuizOutlinedIcon className="user-nav-icon-small" />
                             <span>F.A.Q</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <AdminPanelSettingsOutlinedIcon className="user-nav-icon-small" />
                             <span>Privacy Policy</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: `${theme.palette.secondary.main} !important` }}>
+                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
                         <a className="user-nav-link-small" href="#userprofile">
                             <HeadphonesOutlinedIcon className="user-nav-icon-small" />
                             <span>Support</span>
@@ -195,7 +218,14 @@ const Topbar = (props) => {
     }
 
     return (
-        <Box className="topbar" display="flex" justifyContent="space-between" p={2} backgroundColor={theme.palette.primary.dark}>
+        <Box
+            className="topbar"
+            display="flex"
+            sx={{ borderBottom: mode === 'light' ? '1px solid #000000' : '' }}
+            justifyContent="space-between"
+            p={2}
+            backgroundColor={theme.palette.primary.newBlack}
+        >
             {sm && (
                 <Box display="flex">
                     <IconButton className="expand-sm-icon" sx={{ color: `${theme.palette.secondary.main}` }} onClick={(e) => showSidebar(e)}>
@@ -213,8 +243,8 @@ const Topbar = (props) => {
                     sx={{
                         ml: 2,
                         flex: 1,
-                        backgroundColor: theme.palette.secondary.main,
-                        color: theme.palette.primary.dark,
+                        backgroundColor: theme.palette.primary.newWhite,
+                        color: theme.palette.primary.newBlack,
                         borderRadius: '20px',
                         ' .MuiInputBase-input': {
                             textIndent: '20px',
@@ -251,18 +281,18 @@ const Topbar = (props) => {
                     (
                         <Box display='flex'>
                             <IconButton onClick={colorMode.toggleColorMode}>
-                                <DarkModeOutlinedIcon sx={{ color: 'white' }} />
+                                <DarkModeOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
                             </IconButton>
                             <IconButton onClick={setToggleNotifications}>
-                                <Badge badgeContent={unreadCount || 0} sx={{ color: 'white' }}>
-                                    <NotificationsOutlinedIcon sx={{ color: 'white' }} />
+                                <Badge badgeContent={unreadCount || 0} sx={{ color: `${theme.palette.primary.newWhite}` }}>
+                                    <NotificationsOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
                                 </Badge>
                             </IconButton>
                             <IconButton onClick={setToggleSettings}>
-                                <SettingsOutlinedIcon sx={{ color: 'white' }} />
+                                <SettingsOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
                             </IconButton>
                             <IconButton onClick={setToggleUser}>
-                                <PersonOutlinedIcon sx={{ color: 'white' }} />
+                                <PersonOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
                             </IconButton>
                         </Box>
                     )

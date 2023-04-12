@@ -153,7 +153,7 @@ const Glossary = (props) => {
                                     sx={{
                                         ml: 2,
                                         flex: 1,
-                                        backgroundColor: theme.palette.secondary.main,
+                                        backgroundColor: 'white',
                                         color: theme.palette.primary.dark,
                                         borderRadius: '5px',
                                         borderBottom: '0px !important',

@@ -32,6 +32,8 @@ export const themeSettings = (mode) => {
                         extraDark: colors.colorOne[900],
                         contrastText: colors.colorTwo[500],
                         new: colors.colorOne[500],
+                        newWhite: '#ffffff',
+                        newBlack: '#000000',
                     },
                     secondary: {
                         main: colors.colorTwo[500],
@@ -83,10 +85,12 @@ export const themeSettings = (mode) => {
                         extraDark: colors.colorOne[500],
                         contrastText: colors.colorTwo[500],
                         new: colors.colorOne[900],
+                        newWhite: '#000000',
+                        newBlack: '#ffffff',
                     },
                     secondary: {
-                        main: colors.colorTwo[300],
-                        light: colors.colorTwo[300],
+                        main: colors.colorOne[500],
+                        light: colors.colorOne[300],
                         dark: colors.colorTwo[700],
                         contrastText: colors.colorTwo[500],
                     },

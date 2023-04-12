@@ -38,9 +38,9 @@ const LessonCard = (props) => {
             'lessonId': lessonId
         }
         return (
-            <Box className='lessons-container-box ' sx={{ backgroundColor: `${theme.palette.primary.dark}` }}>
+            <Box className='lessons-container-box ' sx={{ backgroundColor: `${theme.palette.primary.light}`, borderRadius:'10px' }}>
                 <CardContent className='text lesson-title-box' sx={{ width: 'fill-available' }}>
-                    <Typography variant="h5" className='rolling' component='span' sx={{ color: `${theme.palette.secondary.main}`, width: 'fill-available', cursor: 'pointer' }}>
+                    <Typography variant="h5" className='rolling' component='span' sx={{ color: 'white', width: 'fill-available', cursor: 'pointer' }}>
                         {title}
                     </Typography>                    
                 </CardContent>

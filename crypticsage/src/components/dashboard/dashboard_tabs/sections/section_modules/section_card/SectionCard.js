@@ -16,7 +16,7 @@ const SectionCard = (props) => {
         return (
             <Box className="section-card" sx={{ backgroundColor: `${theme.palette.primary.dark}` }}>
                 <Box className='text-holder section-grid-card-padding'>
-                    <Typography className='section-title' variant="h3" fontWeight={400} color="secondary.main">
+                    <Typography className='section-title' variant="h3" fontWeight={400} color="white">
                         {title}
                     </Typography>
                     <Typography textAlign="justify" variant="h6" fontWeight={300} color="white"  >

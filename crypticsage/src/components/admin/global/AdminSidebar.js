@@ -101,8 +101,8 @@ const AdminSidebar = () => {
                         <MenuItem
                             active={adminSidebarTab === "adminDashboard"}
                             style={{
-                                backgroundColor: adminSidebarTab === "adminDashboard" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: adminSidebarTab === "adminDashboard" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: adminSidebarTab === "adminDashboard" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: adminSidebarTab === "adminDashboard" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
                             onClick={() => handleOnClick("adminDashboard")}
                             icon={<HomeOutlinedIcon />}
@@ -127,8 +127,8 @@ const AdminSidebar = () => {
                         <MenuItem
                             active={adminSidebarTab === "sections&lessons"}
                             style={{
-                                backgroundColor: adminSidebarTab === "sections&lessons" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: adminSidebarTab === "sections&lessons" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: adminSidebarTab === "sections&lessons" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: adminSidebarTab === "sections&lessons" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                                 ':hover': {
                                     color: 'red'
                                 }
@@ -144,8 +144,8 @@ const AdminSidebar = () => {
                         <MenuItem
                             active={adminSidebarTab === "quiz"}
                             style={{
-                                backgroundColor: adminSidebarTab === "quiz" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: adminSidebarTab === "quiz" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: adminSidebarTab === "quiz" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: adminSidebarTab === "quiz" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
                             onClick={() => handleOnClick("quiz")}
                             icon={<QuestionMarkIcon />}
@@ -159,8 +159,8 @@ const AdminSidebar = () => {
                         <MenuItem
                             active={adminSidebarTab === "settings"}
                             style={{
-                                backgroundColor: adminSidebarTab === "settings" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: adminSidebarTab === "settings" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: adminSidebarTab === "settings" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: adminSidebarTab === "settings" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
                             onClick={() => handleOnClick("settings")}
                             icon={<SettingsOutlinedIcon />}

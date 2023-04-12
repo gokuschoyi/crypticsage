@@ -204,7 +204,7 @@ const Login = (props) => {
                             {!fPassword ?
                                 <Box className="login-container-left">
                                     <Box className="login-title">
-                                        <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px', color: `${theme.palette.secondary.main}` }}>Login</Typography>
+                                        <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Login</Typography>
                                         <CircularProgress color="secondary" size='30px' style={{ display: isLodaing ? 'block' : 'none' }} />
                                     </Box>
                                     <Box className="input-filed-box" display="flex" flexDirection="column">
@@ -221,12 +221,16 @@ const Login = (props) => {
                                                         borderColor: 'red',
                                                     },
                                                 },
+                                                '& .MuiInputBase-input': {
+                                                    color: 'white',
+                                                }
                                             }}
                                             id="outlined-login-email" label="Email" variant="outlined" type='text'
                                         />
                                         <TextField onChange={(e) => handleLoginData(e)} name='password' value={password}
                                             sx={{
-                                                padding: '10px', '& label.Mui-focused': {
+                                                padding: '10px',
+                                                '& label.Mui-focused': {
                                                     color: 'white',
                                                 },
                                                 '& label': {
@@ -237,14 +241,16 @@ const Login = (props) => {
                                                         borderColor: 'red',
                                                     },
                                                 },
+                                                '& .MuiInputBase-input': {
+                                                    color: 'white',
+                                                }
                                             }}
                                             id="outlined-login-password" label="Password" variant="outlined" type='password'
                                         />
                                     </Box>
                                     <Box className='forgotpassword-box' justifyContent="end" display="flex">
-                                        <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px', color: `${theme.palette.secondary.main}` }}>Forgot Password?</Typography>
+                                        <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Forgot Password?</Typography>
                                     </Box>
-
                                     <Button onClick={signinUser} className='login-button' variant="contained" sx={{
                                         ':hover': {
                                             color: 'black !important',
@@ -252,7 +258,7 @@ const Login = (props) => {
                                         }
                                     }}>LOGIN</Button>
                                     <Box className='login-box-noaccount' justifyContent="center" display="flex">
-                                        <Typography className='signup-start' variant='div' fontWeight="300" sx={{ letterSpacing: '4px', color: `${theme.palette.secondary.main}` }}>Don't have an Account? <span className="signup" onClick={switchState} >Signup Now </span></Typography>
+                                        <Typography className='signup-start' variant='div' fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Don't have an Account? <span className="signup" onClick={switchState} >Signup Now </span></Typography>
                                     </Box>
                                     <Box className="icon-box">
                                         <Box className="footer-icon" alignItems='center' display='flex'>
@@ -274,13 +280,31 @@ const Login = (props) => {
                                 :
                                 <Box className="login-container-left">
                                     <Box className="login-title">
-                                        <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px' }}>Forgot Password</Typography>
+                                        <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Forgot Password</Typography>
                                     </Box>
                                     <Box className="input-filed-box" display="flex" flexDirection="column">
-                                        <TextField sx={{ padding: '10px' }} id="outlined-basic" label="Enter your Email" variant="outlined" type='email' />
+                                        <TextField name='email' 
+                                            sx={{
+                                                padding: '10px',
+                                                '& label.Mui-focused': {
+                                                    color: 'white',
+                                                },
+                                                '& label': {
+                                                    color: 'red',
+                                                },
+                                                '& .MuiOutlinedInput-root': {
+                                                    '&:hover fieldset': {
+                                                        borderColor: 'red',
+                                                    },
+                                                },
+                                                '& .MuiInputBase-input': {
+                                                    color: 'white',
+                                                }
+                                            }}
+                                            id="outlined-basic-forgot-email" label="Enter your Email" variant="outlined" type='email' />
                                     </Box>
                                     <Box className='forgotpassword-box' justifyContent="end" display="flex">
-                                        <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px' }}>Login</Typography>
+                                        <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Login</Typography>
                                     </Box>
                                     <Button className='reset-button' variant="contained" sx={{
                                         ':hover': {

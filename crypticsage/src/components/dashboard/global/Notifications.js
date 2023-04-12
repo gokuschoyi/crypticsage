@@ -14,20 +14,20 @@ const Notifications = (props) => {
     return (
         <Box className='notification-container'>
             <Box className='notification-header' display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
-                <Typography className='notification-title' variant="h6" sx={{ color: theme.palette.secondary.main }}>Notifications</Typography>
+                <Typography className='notification-title' variant="h6" sx={{ color: 'white' }}>Notifications</Typography>
                 <FormControlLabel
                     control={
                         <Switch
                             onChange={toggleFilter}
-                            style={{ color: `${!showUnreadOnly ? theme.palette.secondary.main : theme.palette.text.primary}` }}
+                            style={{ color: `${!showUnreadOnly ? theme.palette.primary.newBlack : theme.palette.primary.light}` }}
                         />
                     }
                     label="UnRead"
-                    sx={{ color: `${theme.palette.secondary.main}` }}
+                    sx={{ color: 'white' }}
                 />
             </Box>
 
-            <Box className='notification-body'>
+            <Box className='notification-body' sx={{ color: 'white' }}>
                 {(!notifications.length ||
                     (unreadCount === 0 && showUnreadOnly)) && (
                         <h4>

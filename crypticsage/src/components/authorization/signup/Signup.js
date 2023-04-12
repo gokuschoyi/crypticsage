@@ -275,7 +275,7 @@ const Signup = (props) => {
                         <Box className="signup-box">
                             <Box className="signup-container-left">
                                 <Box className="login-title">
-                                    <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px', color: `${theme.palette.secondary.main}` }}>Signup</Typography>
+                                    <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Signup</Typography>
                                 </Box>
                                 <Box className="input-filed-box" display="flex" flexDirection="column">
                                     <TextField
@@ -294,6 +294,9 @@ const Signup = (props) => {
                                                     borderColor: 'red',
                                                 },
                                             },
+                                            '& .MuiInputBase-input': {
+                                                color: 'white',
+                                            }
                                         }}
                                         onChange={(e) => handleSignupData(e)}
                                         name='userName'
@@ -319,6 +322,9 @@ const Signup = (props) => {
                                                     borderColor: 'red',
                                                 },
                                             },
+                                            '& .MuiInputBase-input': {
+                                                color: 'white',
+                                            }
                                         }}
                                         onChange={(e) => handleSignupData(e)}
                                         name='email'
@@ -344,6 +350,9 @@ const Signup = (props) => {
                                                     borderColor: 'red',
                                                 },
                                             },
+                                            '& .MuiInputBase-input': {
+                                                color: 'white',
+                                            }
                                         }}
                                         onChange={(e) => handleSignupData(e)}
                                         name='mobile_number'
@@ -369,6 +378,9 @@ const Signup = (props) => {
                                                     borderColor: 'red',
                                                 },
                                             },
+                                            '& .MuiInputBase-input': {
+                                                color: 'white',
+                                            }
                                         }}
                                         onChange={(e) => handleSignupData(e)}
                                         name='password'
@@ -394,6 +406,9 @@ const Signup = (props) => {
                                                     borderColor: 'red',
                                                 },
                                             },
+                                            '& .MuiInputBase-input': {
+                                                color: 'white',
+                                            }
                                         }}
                                         onChange={(e) => handleSignupData(e)}
                                         name='reenterPassword'

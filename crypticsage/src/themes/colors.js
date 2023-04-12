@@ -207,7 +207,7 @@ const WhiteAndBlack = {
         600: "#4d4d4d",
         700: "#7a7a7a",
         800: "#a6a6a6",
-        900: "#d3d3d3",
+        900: "#ffffff",
     },
     colorTwo: {
         100: "#323232",

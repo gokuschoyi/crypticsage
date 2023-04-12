@@ -167,6 +167,9 @@ const Stats = (props) => {
         let coinChartGridBox = document.getElementsByClassName('coin-chart-grid-box')[0];
         let tokenSelector = document.getElementsByClassName('token-selector-box')[0];
         let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
+        if(height < 0) {
+            height = 500;
+        }
         let coinChartBox = document.getElementsByClassName('coin-chart-box')[0];
         let sHeight = coinChartBox.clientHeight * 0.8;
         let sWidth = coinChartBox.clientWidth * 0.8;

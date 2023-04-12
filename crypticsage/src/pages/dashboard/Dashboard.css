@@ -5,8 +5,7 @@
   align-items: center;
   overflow: auto !important;
   margin-left: var(--marginLeft) !important;
-  transition: all 0.2s ease-in-out;
-  /* background-image: url("../../assets/bg.jpg"); */
+  transition: all 0.7s ease-in-out;
 }
 
 .dashboard-container {

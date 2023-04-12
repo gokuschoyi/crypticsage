@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useOutletContext } from "react-router-dom";
 import { Box } from '@mui/material';
 import './Sections.css'
@@ -23,19 +23,23 @@ const Sections = (props) => {
     const { sections, lessons, slides } = useSelector(state => state.section)
     const { sectionFlag, lessonFlag, slideFlag } = useSelector(state => state.section)
     // Load section from backend here
+    const fetchSectionMounted = useRef(false)
     useEffect(() => {
-        if (sections.length === 0) {
-            let data = {
-                token: token
+        if (!fetchSectionMounted.current) { // Only run if the component is mounted
+            fetchSectionMounted.current = true // Set the mount state to true after the first run
+            if (sections.length === 0) {
+                let data = {
+                    token: token
+                }
+                fetchSections(data)
+                    .then(res => {
+                        dispatch(setSections(res.data.sections))
+                        console.log(res)
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    })
             }
-            fetchSections(data)
-                .then(res => {
-                    dispatch(setSections(res.data.sections))
-                    console.log(res)
-                })
-                .catch(error => {
-                    console.error(error);
-                })
         }
     }, [sections, dispatch, token])
 

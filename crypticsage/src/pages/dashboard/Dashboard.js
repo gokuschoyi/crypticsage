@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import { useProSidebar } from "react-pro-sidebar";
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -54,10 +55,12 @@ const Dashboard = (props) => {
             hide();
         }
     })
+    const toggleSmallScreenSidebarState = useSelector(state => state.sidebar.toggleSmallScreenSidebarState);
+    // console.log(toggleSmallScreenSidebarState)
     const { collapsed } = useProSidebar();
     const theme = useTheme();
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
-    const [toggleSmallScreenSidebar, setToggleSmallScreenSidebar] = useState(true)
+    const [toggleSmallScreenSidebar, setToggleSmallScreenSidebar] = useState(toggleSmallScreenSidebarState)
     const handleToggleSmallScreenSidebar = () => {
         setToggleSmallScreenSidebar((prev) => !prev)
     }

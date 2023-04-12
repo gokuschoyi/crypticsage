@@ -1,5 +1,7 @@
 import React from 'react'
 import { useProSidebar } from "react-pro-sidebar";
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useSelector } from 'react-redux';
 import {
     Dialog,
     DialogTitle,
@@ -14,12 +16,18 @@ const WordModal = (props) => {
     const { word, meaning, open, handleClose } = props
     const { collapsed } = useProSidebar();
     const theme = useTheme()
-
-    
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    const smallScreenSidebarState = useSelector(state => state.sidebar.toggleSmallScreenSidebarState);
+    console.log(smallScreenSidebarState)
     return (
         <Dialog
             sx={{
-                '& .MuiDialog-paper': { width: '100%', minWidth: 300, maxHeight: 435, }, marginLeft: collapsed ? '80px' : '300px',
+                '& .MuiDialog-paper': {
+                    width: '100%',
+                    minWidth: 300,
+                    maxHeight: 435,
+                },
+                marginLeft: sm ? (smallScreenSidebarState ? '0px' : '80px') : (collapsed ? '80px' : '300px')
             }}
             open={open}
             onClose={handleClose}

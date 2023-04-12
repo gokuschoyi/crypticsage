@@ -21,6 +21,7 @@ import { setSidebarState } from "./SideBarSlice";
 
 const SidebarC = () => {
     const theme = useTheme();
+    const mode = theme.palette.mode
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const md = useMediaQuery(theme.breakpoints.down('md'));
     const dispatch = useDispatch();
@@ -58,7 +59,7 @@ const SidebarC = () => {
         <div className='sidebar' style={{ display: 'flex', height: '100%', position: 'fixed' }}>
             <Sidebar transitionDuration={700} defaultCollapsed={userCollapsedSidebar} width="300px" style={{ height: '100vh' }} rootStyles={{
                 [`.ps-sidebar-container`]: {
-                    backgroundColor: `${theme.palette.primary.dark}`,
+                    backgroundColor: `${theme.palette.primary.newBlack}`,
                 },
                 [`.ps-menu-root`]: {
                     height: '100%',
@@ -87,7 +88,7 @@ const SidebarC = () => {
                             </Box>
                         ) : (
                             <Box
-                                backgroundColor={sm ? 'white' : 'black'}
+                                backgroundColor={sm ? `${theme.palette.primary.newBlack}` : ''}
                                 textAlign="center"
                                 justifyContent='center'
                                 alignItems='center'
@@ -95,23 +96,25 @@ const SidebarC = () => {
                                 sx={{ height: '72px' }}
                             >
                                 {!sm ?
-                                    (<IconButton sx={{ color: `${theme.palette.text.primary}` }} onClick={() => collapseSidebar()}>
+                                    (<IconButton style={{ color: `${theme.palette.text.primary}` }} onClick={() => collapseSidebar()}>
                                         <MenuOutlinedIcon />
                                     </IconButton>)
                                     :
                                     (
-                                        <img className="smallscreen-logo" height="45px" alt='logo' src={CSLogo}></img>
+                                        <img 
+                                        style={{filter: `${mode === 'dark' ? 'invert(1)' : ''}`}}
+                                        className="smallscreen-logo" height="45px" alt='logo' src={CSLogo}></img>
                                     )
                                 }
                             </Box>
                         )}
 
-                    <Box className="menu-icon-holder" paddingLeft={collapsed ? undefined : "0%"} paddingTop={collapsed ? '20px' : '24px'}>
+                    <Box className="menu-icon-holder" paddingLeft={collapsed ? undefined : "0%"} >
                         <MenuItem
                             active={sidebarTab === "dashboardTab"}
                             style={{
-                                backgroundColor: sidebarTab === "dashboardTab" ? theme.palette.text.primary : theme.palette.primary.extraDark,
-                                color: sidebarTab === "dashboardTab" ? theme.palette.secondary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "dashboardTab" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: sidebarTab === "dashboardTab" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
                             onClick={() => handleOnClick("dashboardTab")}
                             icon={<HomeOutlinedIcon />}
@@ -136,8 +139,8 @@ const SidebarC = () => {
                         <MenuItem
                             active={sidebarTab === "lessons"}
                             style={{
-                                backgroundColor: sidebarTab === "lessons" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: sidebarTab === "lessons" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "lessons" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: sidebarTab === "lessons" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
                             onClick={() => handleOnClick("lessons")}
                             icon={<LibraryBooksOutlinedIcon />}
@@ -150,8 +153,8 @@ const SidebarC = () => {
                         <MenuItem
                             active={sidebarTab === "journal"}
                             style={{
-                                backgroundColor: sidebarTab === "journal" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: sidebarTab === "journal" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "journal" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: sidebarTab === "journal" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
                             onClick={() => handleOnClick("journal")}
                             icon={<MenuBookOutlinedIcon />}
@@ -164,8 +167,8 @@ const SidebarC = () => {
                         <MenuItem
                             active={sidebarTab === "quiz"}
                             style={{
-                                backgroundColor: sidebarTab === "quiz" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: sidebarTab === "quiz" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "quiz" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: sidebarTab === "quiz" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
                             onClick={() => handleOnClick("quiz")}
                             icon={<QuestionMarkIcon />}
@@ -178,8 +181,8 @@ const SidebarC = () => {
                         <MenuItem
                             active={sidebarTab === "glossary"}
                             style={{
-                                backgroundColor: sidebarTab === "glossary" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: sidebarTab === "glossary" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "glossary" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: sidebarTab === "glossary" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
                             onClick={() => handleOnClick("glossary")}
                             icon={<ListAltIcon />}
@@ -192,8 +195,8 @@ const SidebarC = () => {
                         <MenuItem
                             active={sidebarTab === "schedule"}
                             style={{
-                                backgroundColor: sidebarTab === "schedule" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: sidebarTab === "schedule" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "schedule" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: sidebarTab === "schedule" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
                             onClick={() => handleOnClick("schedule")}
                             icon={<ScheduleIcon />}
@@ -215,8 +218,8 @@ const SidebarC = () => {
                         <MenuItem
                             active={sidebarTab === "settings"}
                             style={{
-                                backgroundColor: sidebarTab === "settings" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: sidebarTab === "settings" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "settings" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: sidebarTab === "settings" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
                             onClick={() => handleOnClick("settings")}
                             icon={<SettingsOutlinedIcon />}
@@ -230,8 +233,8 @@ const SidebarC = () => {
                             <MenuItem
                                 active={sidebarTab === "admin"}
                                 style={{
-                                    backgroundColor: sidebarTab === "admin" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                    color: sidebarTab === "admin" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                    backgroundColor: sidebarTab === "admin" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                    color: sidebarTab === "admin" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                                 }}
                                 onClick={() => handleOnClick("admin")}
                                 icon={<AdminPanelSettingsIcon />}
@@ -245,8 +248,8 @@ const SidebarC = () => {
                         <MenuItem
                             active={sidebarTab === "logout"}
                             style={{
-                                backgroundColor: sidebarTab === "logout" ? theme.palette.secondary.main : theme.palette.primary.extraDark,
-                                color: sidebarTab === "logout" ? theme.palette.primary.main : theme.palette.secondary.main,
+                                backgroundColor: sidebarTab === "logout" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: sidebarTab === "logout" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
                             onClick={() => handleOnClick("logout")}
                             icon={<ExitToAppOutlinedIcon />}

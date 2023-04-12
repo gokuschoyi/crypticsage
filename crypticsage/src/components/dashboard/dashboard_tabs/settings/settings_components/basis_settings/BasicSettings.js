@@ -308,7 +308,7 @@ const BasicSettings = () => {
 
 
     return (
-        <Box className='basic-settings-container' sx={{ backgroundColor: `${theme.palette.primary.dark}` }}>
+        <Box className='basic-settings-container' sx={{ backgroundColor: `${theme.palette.primary.newBlack}` }}>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                     <Box display='flex' flexDirection='column' alignItems='start' className='user-name-box'>
