@@ -44,6 +44,7 @@ const Topbar = (props) => {
     } = useNotificationCenter();
 
     const profileImage = useSelector(state => state.auth.photoUrl);
+    const smallScreenToggleState = useSelector(state => state.sidebar.toggleSmallScreenSidebarState)
 
     const {
         toggleUser,
@@ -69,18 +70,24 @@ const Topbar = (props) => {
     const smallScreenSidebarLoad = useRef(false)
     useEffect(() => {
         if (!smallScreenSidebarLoad.current) { // Only run if the component is mounted
-            smallScreenSidebarLoad.current = true // Set the mount state to true after the first run
             if (!toggleSmallScreenSidebar) {
                 let sidebar = document.getElementsByClassName('sidebar')[0]
                 let content = document.getElementsByClassName('content')[0]
-                let icon = document.getElementsByClassName('expand-sm-icon')[0]
-                icon.classList.remove('rotate-icon')
-                sidebar.classList.remove('show-sidebar');
-                content.style.setProperty('--marginLeft', '0px !important');
-                handleToggleSmallScreenSidebar()
-                dispatch(handleReduxToggleSmallScreenSidebar({ value: !toggleSmallScreenSidebar }))
-                console.log('hide sidebar');
-            }
+                
+                if (sidebar === undefined || content === undefined) {
+                    smallScreenSidebarLoad.current = false
+                    console.log("undefined")
+                    return
+                } else {
+                    smallScreenSidebarLoad.current = true // Set the mount state to true after the first run
+                    
+                    sidebar.classList.remove('show-sidebar');
+                    content.style.setProperty('--marginLeft', '0px !important');
+                    handleToggleSmallScreenSidebar()
+                    dispatch(handleReduxToggleSmallScreenSidebar({ value: !toggleSmallScreenSidebar }))
+                    console.log('hide sidebar');
+                }
+            } else { smallScreenSidebarLoad.current = true }
         }
     })
 
@@ -88,8 +95,7 @@ const Topbar = (props) => {
         if (toggleSmallScreenSidebar) {
             let sidebar = document.getElementsByClassName('sidebar')[0]
             let content = document.getElementsByClassName('content')[0]
-            let icon = document.getElementsByClassName('expand-sm-icon')[0]
-            icon.classList.add('rotate-icon')
+            
             sidebar.classList.add('show-sidebar');
             content.style.setProperty('--marginLeft', '80px!important');
             handleToggleSmallScreenSidebar()
@@ -98,8 +104,7 @@ const Topbar = (props) => {
         } else {
             let sidebar = document.getElementsByClassName('sidebar')[0]
             let content = document.getElementsByClassName('content')[0]
-            let icon = document.getElementsByClassName('expand-sm-icon')[0]
-            icon.classList.remove('rotate-icon')
+            
             sidebar.classList.remove('show-sidebar');
             content.style.setProperty('--marginLeft', '0px !important');
             handleToggleSmallScreenSidebar()
@@ -228,7 +233,7 @@ const Topbar = (props) => {
         >
             {sm && (
                 <Box display="flex">
-                    <IconButton className="expand-sm-icon" sx={{ color: `${theme.palette.secondary.main}` }} onClick={(e) => showSidebar(e)}>
+                    <IconButton className={smallScreenToggleState ? 'remove-rotate-icon' : 'rotate-icon'} sx={{ color: `${theme.palette.secondary.main}` }} onClick={(e) => showSidebar(e)}>
                         <ArrowForwardIcon />
                     </IconButton>
                 </Box>
