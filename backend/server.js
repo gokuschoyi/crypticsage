@@ -11,6 +11,7 @@ const app = express();
 
 const authentication = require('./routes/auth/authRoute')
 const fetchCryptoData = require('./utils/crypto/fetchCryptoData');
+const { makeUserLessonStatus } = require('./utils/db-utils/mongodb');
 
 const log = (req, res, next) => {
     console.log('_____________________________________________________');
@@ -24,9 +25,10 @@ app.use(bodyParser.json());
 app.use(logger)
 app.use(log);
 
-app.post('/', verify, (req, res) => {
+app.post('/', verify, async (req, res) => {
     console.log('Verify request received');
-    res.status(200).json({ message: "Verified" });
+    let dat = await makeUserLessonStatus();
+    res.status(200).json({ message: "Verified", dat });
 })
 
 app.use('/auth', authentication);

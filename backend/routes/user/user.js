@@ -4,28 +4,21 @@ const bcrypt = require('bcrypt');
 const { connect, close } = require('../../utils/db-utils/db-conn')
 const verify = require('../auth/verifyToken')
 
+const {
+    verifyPassword,
+    updatePassword,
+    updateProfilePicture,
+    updateUserData,
+    updateUserPreference
+} = require('../../utils/db-utils/mongodb')
+
 router.post('/verify_password', verify, async (req, res) => {
     console.log("Verify password request received");
     const { uid, password } = req.body;
     if (!uid || !password) {
         res.status(500).json({ message: "Invalid request" });
     } else {
-        try {
-            const db = await connect();
-            const userCollection = await db.collection('users');
-            const user = await userCollection.find({ 'uid': uid }).toArray();
-            const hashedPassword = user[0].password;
-            const validPassword = await bcrypt.compare(password, hashedPassword);
-            if (validPassword) {
-                res.status(200).json({ message: "Password verified successfully", validPassword });
-                await close(db);
-            } else {
-                res.status(500).json({ message: "Incorrect Password", validPassword });
-            }
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({ message: "Password verification failed" });
-        }
+        verifyPassword(req, res)
     }
 })
 
@@ -35,21 +28,7 @@ router.post('/update_password', verify, async (req, res) => {
     if (!uid || !password) {
         res.status(500).json({ message: "Invalid request" });
     } else {
-        try {
-            const db = await connect();
-            const userCollection = await db.collection('users');
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const user = await userCollection.updateOne({ 'uid': uid }, { $set: { 'password': hashedPassword } });
-            if (user) {
-                res.status(200).json({ message: "Password updated successfully", status: true });
-                await close(db);
-            } else {
-                res.status(500).json({ message: "Password updation failed" });
-            }
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({ message: "Password updation failed" });
-        }
+        updatePassword(req, res)
     }
 })
 
@@ -59,20 +38,7 @@ router.post('/update_profileimage', verify, async (req, res) => {
     if (!uid || !profileImage) {
         res.status(500).json({ message: "Invalid request" });
     } else {
-        try {
-            const db = await connect();
-            const userCollection = await db.collection('users');
-            const user = await userCollection.updateOne({ 'uid': uid }, { $set: { 'profile_image': profileImage } });
-            if (user) {
-                res.status(200).json({ message: "Profile image updated successfully", status: true });
-                await close(db);
-            } else {
-                res.status(500).json({ message: "Profile image updation failed" });
-            }
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({ message: "Profile image updation failed" });
-        }
+        updateProfilePicture(req, res)
     }
 })
 
@@ -82,20 +48,7 @@ router.post('/update_userdata', verify, async (req, res) => {
     if (!uid || !userData) {
         res.status(500).json({ message: "Invalid request" });
     } else {
-        try {
-            const db = await connect();
-            const userCollection = await db.collection('users');
-            const user = await userCollection.updateOne({ 'uid': uid }, { $set: { 'displayName': userData.displayName, 'mobile_number': userData.mobile_number } });
-            if (user) {
-                res.status(200).json({ message: "User data updated successfully", status: true });
-                await close(db);
-            } else {
-                res.status(500).json({ message: "User data updation failed" });
-            }
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({ message: "User data updation failed" });
-        }
+        updateUserData(req, res)
     }
 })
 
@@ -105,29 +58,7 @@ router.post('/update_preferences', verify, async (req, res) => {
     if (!uid || !preferences) {
         res.status(500).json({ message: "Invalid request" });
     } else {
-        try {
-            const db = await connect();
-            const userCollection = await db.collection('users');
-            const user = await userCollection.updateOne(
-                { 'uid': uid },
-                {
-                    $set:
-                    {
-                        'preferences.dashboardHover': preferences.dashboardHover,
-                        'preferences.collapsedSidebar': preferences.collapsedSidebar
-                    }
-                }
-            );
-            if (user) {
-                res.status(200).json({ message: "Preferences updated successfully", status: true });
-                await close(db);
-            } else {
-                res.status(500).json({ message: "Preferences updation failed" });
-            }
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({ message: "Preferences updation failed" });
-        }
+        updateUserPreference(req, res)
     }
 })
 

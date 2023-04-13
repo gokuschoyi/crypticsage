@@ -79,7 +79,8 @@ const Login = (props) => {
                     'uid': result.data.data.uid,
                     'preferences': result.data.data.preferences || {},
                     'mobile_number': result.data.data.mobile_number || '',
-                    'admin_status': result.data.data.admin_status
+                    'admin_status': result.data.data.admin_status,
+                    'user_lesson_status': result.data.data.lesson_status || {}
                 }
                 localStorage.setItem('userTheme', userData.preferences.theme)
                 dispatch(setAuthState(userData))
@@ -114,7 +115,8 @@ const Login = (props) => {
                 'uid': result.data.data.uid,
                 'preferences': result.data.data.preferences || {},
                 'mobile_number': result.data.data.mobile_number || '',
-                'admin_status': result.data.data.admin_status
+                'admin_status': result.data.data.admin_status,
+                'user_lesson_status': result.data.data.lesson_status || {}
             }
             localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
@@ -148,7 +150,8 @@ const Login = (props) => {
                 'uid': result.data.data.uid,
                 'preferences': result.data.data.preferences || {},
                 'mobile_number': result.data.data.mobile_number || '',
-                'admin_status': result.data.data.admin_status
+                'admin_status': result.data.data.admin_status,
+                'user_lesson_status': result.data.data.lesson_status || {}
             }
             localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
@@ -283,7 +286,7 @@ const Login = (props) => {
                                         <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Forgot Password</Typography>
                                     </Box>
                                     <Box className="input-filed-box" display="flex" flexDirection="column">
-                                        <TextField name='email' 
+                                        <TextField name='email'
                                             sx={{
                                                 padding: '10px',
                                                 '& label.Mui-focused': {

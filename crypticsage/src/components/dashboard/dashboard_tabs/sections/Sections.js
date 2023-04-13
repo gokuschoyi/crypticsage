@@ -22,6 +22,8 @@ const Sections = (props) => {
     const token = useSelector(state => state.auth.accessToken)
     const { sections, lessons, slides } = useSelector(state => state.section)
     const { sectionFlag, lessonFlag, slideFlag } = useSelector(state => state.section)
+    const allStatus = useSelector(state => state.auth.user_lesson_status)
+
     // Load section from backend here
     const fetchSectionMounted = useRef(false)
     useEffect(() => {
@@ -33,25 +35,39 @@ const Sections = (props) => {
                 }
                 fetchSections(data)
                     .then(res => {
-                        dispatch(setSections(res.data.sections))
-                        console.log(res)
+                        let sect = res.data.sections;
+                        const combinedArray = sect.map(section => {
+                            const sectionId = section.sectionId;
+                            if (allStatus[sectionId]) {
+                                return {
+                                    ...section,
+                                    section_status: allStatus[sectionId]
+                                };
+                            } else {
+                                return section;
+                            }
+                        });
+                        dispatch(setSections(combinedArray))
                     })
                     .catch(error => {
                         console.error(error);
                     })
             }
         }
-    }, [sections, dispatch, token])
+    }, [sections, dispatch, token, allStatus])
 
 
     const [sectionId, setSectionId] = React.useState(0)
     const [sectionName, setSectionName] = React.useState('')
     const [slideName, setSlideName] = React.useState('')
 
-
     //load lesson from backend here based on id and section name
     const openLesson = async (e) => {
         dispatch(clearLessons())
+        let sectId = JSON.parse(e.target.value).sectionId
+        let selectedSectionLessonStatus = allStatus[sectId]
+
+
         dispatch(setSectionFlag(false))
         dispatch(setLessonFlag(true))
         let data = {
@@ -60,7 +76,19 @@ const Sections = (props) => {
         }
         try {
             let res = await fetchLessons(data);
-            dispatch(setLessons(res.data.lessons))
+            let lessons = res.data.lessons
+            const combinedArray = lessons.map((lesson, index) => {
+                const lessonId = lesson.lessonId;
+                if (selectedSectionLessonStatus[index].lesson_id === lessonId) {
+                    return {
+                        ...lesson,
+                        lesson_status: selectedSectionLessonStatus[index]
+                    };
+                } else {
+                    return lesson;
+                }
+            });
+            dispatch(setLessons(combinedArray))
             var id = JSON.parse(e.target.value).sectionId
             var name = JSON.parse(e.target.value).sectionName
             setSectionId(id)
@@ -76,7 +104,7 @@ const Sections = (props) => {
         dispatch(setLessonFlag(false))
         let lessonId = JSON.parse(e.target.value).lessonId
         let selectedLesson = lessons.filter(lesson => lesson.lessonId === lessonId)[0]
-        dispatch(setSlides(selectedLesson.lessonData))
+        dispatch(setSlides(selectedLesson))
         setSlideName(selectedLesson.chapter_title)
     }
 

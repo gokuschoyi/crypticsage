@@ -23,7 +23,7 @@ const SlideComponent = (props) => {
     const hide = () => {
         setTest(true);
     }
-
+    const slideData = slides.lessonData
     const renderTree = () => {
         return (
             <TreeView
@@ -47,7 +47,7 @@ const SlideComponent = (props) => {
     const [started, setStarted] = React.useState(true);
     const [finished, setFinished] = React.useState(false);
 
-    const data = slides.contents.slides
+    const data = slideData.contents.slides
 
     const chapterTitle = data[counter].heading
     const chapterContent = data[counter].content_text

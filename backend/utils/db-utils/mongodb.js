@@ -6,6 +6,47 @@ const { OAuth2Client } = require('google-auth-library');
 
 const { connect, close } = require('./db-conn')
 
+const sortAndGroupLessons = (lessonArray) => {
+    const sortedLessons = lessonArray.sort((a, b) => {
+        if (a.section_id < b.section_id) {
+            return -1;
+        } else if (a.section_id > b.section_id) {
+            return 1;
+        }
+        return 0;
+    });
+
+    const groupedLessons = {};
+    sortedLessons.forEach((lesson) => {
+        if (!groupedLessons[lesson.section_id]) {
+            groupedLessons[lesson.section_id] = [];
+        }
+        groupedLessons[lesson.section_id].push(lesson);
+    });
+
+    return groupedLessons;
+};
+
+const makeUserLessonStatus = async () => {
+    const db = await connect();
+    const lessonCollection = await db.collection('lessons');
+    const lessons = await lessonCollection.find({}).toArray();
+    const userLessonStatus = [];
+    lessons.forEach(lesson => {
+        userLessonStatus.push({
+            section_id: lesson.sectionId,
+            lesson_id: lesson.lessonId,
+            lesson_name: lesson.chapter_title,
+            lesson_start: false,
+            lesson_progress: 0,
+            lesson_completed: false,
+        })
+    });
+    const groupedLessons = sortAndGroupLessons(userLessonStatus);
+    close();
+    return groupedLessons;
+}
+
 const createNewUser = async (req, res) => {
     const { signup_type } = req.body;
     let token = '';
@@ -41,7 +82,8 @@ const createNewUser = async (req, res) => {
                             dashboardHover: true,
                             collapsedSidebar: true,
                         },
-                        signup_type: 'registration'
+                        signup_type: 'registration',
+                        lesson_status: await makeUserLessonStatus()
                     }
                     token = jwt.sign(
                         {
@@ -105,7 +147,8 @@ const createNewUser = async (req, res) => {
                                 dashboardHover: true,
                                 collapsedSidebar: true,
                             },
-                            signup_type: signup_type
+                            signup_type: signup_type,
+                            lesson_status: await makeUserLessonStatus()
                         }
                     }
                     const token = jwt.sign(
@@ -165,7 +208,8 @@ const createNewUser = async (req, res) => {
                             dashboardHover: true,
                             collapsedSidebar: true,
                         },
-                        signup_type: 'facebook'
+                        signup_type: 'facebook',
+                        lesson_status: await makeUserLessonStatus()
                     }
                 }
                 const token = jwt.sign(
@@ -241,6 +285,7 @@ const loginUser = async (req, res) => {
                         userData.accessToken = token;
                         userData.signup_type = user[0].signup_type;
                         userData.admin_status = admin_status;
+                        userData.lesson_status = user[0].lesson_status;
                         res.status(200).json({ message: "User login successful", data: userData });
                     }
                     else {
@@ -294,6 +339,7 @@ const loginUser = async (req, res) => {
                         userData.accessToken = token;
                         userData.signup_type = user[0].signup_type;
                         userData.admin_status = admin_status;
+                        userData.lesson_status = user[0].lesson_status;
                         res.status(200).json({ message: "User login successful", data: userData });
                     }
                 }
@@ -339,6 +385,7 @@ const loginUser = async (req, res) => {
                     userData.accessToken = token;
                     userData.signup_type = user[0].signup_type;
                     userData.admin_status = admin_status;
+                    userData.lesson_status = user[0].lesson_status;
                     res.status(200).json({ message: "User login successful", data: userData });
                 }
             }
@@ -348,8 +395,296 @@ const loginUser = async (req, res) => {
     }
 }
 
+const getSections = async (req, res) => {
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('sections');
+        const sections = await userCollection.find({}).toArray();
+        await close(db);
+        if (sections.length === 0) {
+            res.status(200).json({ message: "No sections found" });
+        } else {
+            res.status(200).json({ message: "Sections fetched successfully", sections });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Sections fetch failed" });
+    }
+}
+
+const addSection = async (req, res) => {
+    const { title, content, url } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('sections');
+        sectionId = uuidv4();
+        await userCollection.insertOne({ title, content, url, sectionId });
+        await close(db);
+        res.status(200).json({ message: "Section added successfully" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Section creation failed" });
+    }
+}
+
+const updateSection = async (req, res) => {
+    const { title, content, url, sectionId } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('sections');
+        let section = await userCollection.findOne({ sectionId });
+        if (section === null) {
+            await close(db);
+            res.status(500).json({ message: "Section not found" });
+        }
+        else {
+            await userCollection.updateOne({ sectionId }, { $set: { title, content, url } });
+            await close(db);
+            res.status(200).json({ message: "Section updated successfully" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Section update failed" });
+    }
+}
+
+const getLessons = async (req, res) => {
+    const { sectionId } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('lessons');
+        const lessons = await userCollection.find({ 'sectionId': sectionId }).toArray();
+        await close(db);
+        if (lessons.length === 0) {
+            res.status(200).json({ message: "No lessons found" });
+        } else {
+            res.status(200).json({ message: "Lessons fetched successfully", lessons });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Lessons fetch failed" });
+    }
+}
+
+const addLesson = async (req, res) => {
+    const { chapter_title, sectionId, lessonData } = req.body;
+    try {
+        let data = {
+            chapter_title,
+            sectionId,
+            lessonData,
+            lessonId: uuidv4()
+        }
+
+        const db = await connect();
+        const userCollection = await db.collection('lessons');
+        const result = await userCollection.insertOne(data);
+        let insertedId = result.insertedId;
+        let insertedLessonData = await userCollection.find({ _id: insertedId }).toArray();
+        let lessonId = insertedLessonData[0].lessonId;
+        await close(db);
+        res.status(200).json({ message: "Lesson added successfully", lessonId });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Lesson creation failed" });
+    }
+}
+
+const updateLesson = async (req, res) => {
+    const { chapter_title, sectionId, lessonData, lessonId } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('lessons');
+        let lesson = await userCollection.findOne({ lessonId });
+        if (lesson === null) {
+            await close(db);
+            res.status(500).json({ message: "Lesson not found" });
+        } else {
+            await userCollection.updateOne({ lessonId }, { $set: { chapter_title, sectionId, lessonData } });
+            await close(db)
+            res.status(200).json({ message: "Lesson updated successfully" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Lesson update failed" });
+    }
+}
+
+const getQuizQuestions = async (req, res) => {
+    const { lessonId } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('quiz');
+        const quizQuestions = await userCollection.find({ 'lessonId': lessonId }).toArray();
+        await close(db);
+        if (quizQuestions.length === 0) {
+            res.status(200).json({ message: "No quiz questions found", status: false });
+        } else {
+            res.status(200).json({ message: "Quiz questions fetched successfully", quizQuestions, status: true });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Quiz questions fetch failed" });
+    }
+}
+
+const addQuizQuestions = async (req, res) => {
+    const { quizData } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('quiz');
+        quizData.quizId = uuidv4();
+        const result = await userCollection.insertOne(quizData);
+        let insertedId = result.insertedId;
+        let insertedQuizData = await userCollection.find({ _id: insertedId }).toArray();
+        let quizId = insertedQuizData[0].quizId;
+        await close(db);
+        res.status(200).json({ message: "Quiz question added successfully", quizId });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Quiz question creation failed" });
+    }
+}
+
+const updateQuizQuestions = async (req, res) => {
+    const { quizId, quizTitle, quizDescription, questions } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('quiz');
+        let quiz = await userCollection.findOne({ quizId });
+        if (quiz === null) {
+            await close(db);
+            res.status(500).json({ message: "Quiz question not found" });
+        } else {
+            await userCollection.updateOne({ quizId }, { $set: { quizTitle, quizDescription, questions } });
+            await close(db);
+            res.status(200).json({ message: "Quiz question updated successfully" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Quiz question update failed" });
+    }
+}
+
+const verifyPassword = async (req, res) => {
+    const { uid, password } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('users');
+        const user = await userCollection.find({ 'uid': uid }).toArray();
+        const hashedPassword = user[0].password;
+        const validPassword = await bcrypt.compare(password, hashedPassword);
+        if (validPassword) {
+            res.status(200).json({ message: "Password verified successfully", validPassword });
+            await close(db);
+        } else {
+            res.status(500).json({ message: "Incorrect Password", validPassword });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Password verification failed" });
+    }
+}
+
+const updatePassword = async (req, res) => {
+    const { uid, password } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('users');
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await userCollection.updateOne({ 'uid': uid }, { $set: { 'password': hashedPassword } });
+        if (user) {
+            res.status(200).json({ message: "Password updated successfully", status: true });
+            await close(db);
+        } else {
+            res.status(500).json({ message: "Password updation failed" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Password updation failed" });
+    }
+}
+
+const updateProfilePicture = async (req, res) => {
+    const { uid, profileImage } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('users');
+        const user = await userCollection.updateOne({ 'uid': uid }, { $set: { 'profile_image': profileImage } });
+        if (user) {
+            res.status(200).json({ message: "Profile image updated successfully", status: true });
+            await close(db);
+        } else {
+            res.status(500).json({ message: "Profile image updation failed" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Profile image updation failed" });
+    }
+}
+
+const updateUserData = async (req, res) => {
+    const { uid, userData } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('users');
+        const user = await userCollection.updateOne({ 'uid': uid }, { $set: { 'displayName': userData.displayName, 'mobile_number': userData.mobile_number } });
+        if (user) {
+            res.status(200).json({ message: "User data updated successfully", status: true });
+            await close(db);
+        } else {
+            res.status(500).json({ message: "User data updation failed" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "User data updation failed" });
+    }
+}
+
+const updateUserPreference = async (req, res) => {
+    const { uid, preferences } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('users');
+        const user = await userCollection.updateOne(
+            { 'uid': uid },
+            {
+                $set:
+                {
+                    'preferences.dashboardHover': preferences.dashboardHover,
+                    'preferences.collapsedSidebar': preferences.collapsedSidebar
+                }
+            }
+        );
+        if (user) {
+            res.status(200).json({ message: "Preferences updated successfully", status: true });
+            await close(db);
+        } else {
+            res.status(500).json({ message: "Preferences updation failed" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Preferences updation failed" });
+    }
+}
+
 
 module.exports = {
+    makeUserLessonStatus,
     createNewUser,
-    loginUser
+    loginUser,
+    getSections,
+    addSection,
+    updateSection,
+    getLessons,
+    addLesson,
+    updateLesson,
+    getQuizQuestions,
+    addQuizQuestions,
+    updateQuizQuestions,
+    verifyPassword,
+    updatePassword,
+    updateProfilePicture,
+    updateUserData,
+    updateUserPreference,
 }
