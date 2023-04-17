@@ -8798,3 +8798,5 @@
 ::1 - - [17/Apr/2023:02:08:07 +0000] "POST /crypto/getHistoricalData HTTP/1.1" 200 88317 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
 ::1 - - [17/Apr/2023:02:08:09 +0000] "POST /content/get_sections HTTP/1.1" 200 2363 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
 ::1 - - [17/Apr/2023:02:08:13 +0000] "POST /content/get_lessons HTTP/1.1" 200 19138 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
+::1 - - [17/Apr/2023:02:30:16 +0000] "POST /content/update_userLessonStatus HTTP/1.1" 200 1828 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
+::1 - - [17/Apr/2023:02:37:03 +0000] "POST /content/update_userLessonStatus HTTP/1.1" 200 1826 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
