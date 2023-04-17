@@ -7,9 +7,10 @@ import { useOutletContext } from "react-router-dom";
 import { ChevronRightIcon, ExpandMoreIcon } from '../../../../global/Icons';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { incrementCounter, decrementCounter } from '../../SectionSlice'
-
+import { setSections, setLessons, incrementCounter, decrementCounter, setLessonStartedFlag, setLessonCompleteFlag } from '../../SectionSlice'
+import { setUserLessonStatus } from '../../../../../authorization/authSlice'
 import WordDialog from './WordDialog'
+import { updatUserLessonStatus } from '../../../../../../api/user'
 
 import Video from '../../../../../../assets/lessons/candleStick.mp4'
 
@@ -17,7 +18,11 @@ const SlideComponent = (props) => {
     const { lessons } = props
     const theme = useTheme();
     const dispatch = useDispatch();
+    const token = useSelector(state => state.auth.accessToken)
+    const uid = useSelector(state => state.auth.uid)
     const { slides, counter } = useSelector(state => state.section);
+    const sectionData = useSelector(state => state.section.sections)
+    const lessonsData = useSelector(state => state.section.lessons)
     const [setTest] = useOutletContext();
     const videoContent = document.getElementById('slide-video')
     const hide = () => {
@@ -65,6 +70,7 @@ const SlideComponent = (props) => {
 
     useEffect(() => {
         if (counter === 0 && videoContent !== null) {
+            console.log(startTimes, endTimes)
             videoContent.currentTime = sTimes[0];
             videoContent.play();
             videoContent.ontimeupdate = function () {
@@ -73,11 +79,16 @@ const SlideComponent = (props) => {
                 }
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [counter, videoContent])
 
     const next = () => {
         if (counter <= data.length - 1 && counter >= 0) {
             dispatch(incrementCounter())
+            console.log(counter)
+            if (counter === 0) {
+                dispatch(setLessonStartedFlag(true))
+            }
             videoContent.currentTime = startTimes[counter];
             videoContent.play();
             videoContent.ontimeupdate = function () {
@@ -91,9 +102,68 @@ const SlideComponent = (props) => {
     const prev = () => {
         if (counter >= 0) {
             dispatch(decrementCounter())
+            console.log(counter)
             videoContent.currentTime = ssTime[counter];
         }
     }
+
+    // console.log(res)
+
+    const sectionId = useSelector(state => state.section.slides.lesson_status.section_id)
+    const completeLesson = async (e) => {
+        e.preventDefault()
+        console.log("Lesson Completed")
+        dispatch(setLessonCompleteFlag(true))
+        let lessonState = { ...slides.lesson_status }
+        lessonState.lesson_completed = true
+        let data = {
+            token: token,
+            payload: {
+                "uid": uid,
+                "lesson_status": lessonState,
+            }
+        }
+        try {
+            await updatUserLessonStatus(data)
+                .then((res) => {
+                    let lesson_status = res.data.lessonStatus;
+                    dispatch(setUserLessonStatus(lesson_status))
+                    let sectionRaw = [...sectionData]
+                    sectionRaw.map(({ lesson_status, ...rest }) => rest);
+                    const combinedSectionArray = sectionRaw.map(section => {
+                        const sectionId = section.sectionId;
+                        if (lesson_status[sectionId]) {
+                            return {
+                                ...section,
+                                section_status: lesson_status[sectionId]
+                            };
+                        } else {
+                            return section;
+                        }
+                    });
+                    dispatch(setSections(combinedSectionArray))
+
+                    let selectedLS = lesson_status[sectionId]
+                    let lessonRaw = [...lessonsData]
+                    lessonRaw.map(({ lesson_status, ...rest }) => rest);
+                    const combinedLessonArray = lessonRaw.map((lesson, index) => {
+                        const lessonId = lesson.lessonId;
+                        if (selectedLS[index].lesson_id === lessonId) {
+                            return {
+                                ...lesson,
+                                lesson_status: selectedLS[index]
+                            };
+                        } else {
+                            return lesson;
+                        }
+                    })
+                    dispatch(setLessons(combinedLessonArray))
+                })
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
 
     useEffect(() => {
         if (counter === data.length - 1) {
@@ -173,6 +243,9 @@ const SlideComponent = (props) => {
         )
     }
 
+    // const currentLessonStatus = slides.lesson_status
+    // console.log("currentLessonStatus", currentLessonStatus)
+
     return (
         <Box className='introduction-container' onClick={hide}>
             <Box className='lesson-tree' sx={{ color: `${theme.palette.secondary.main}` }}>
@@ -213,6 +286,7 @@ const SlideComponent = (props) => {
                         {finished
                             ?
                             <Button
+                                onClick={(e) => completeLesson(e)}
                                 variant="text"
                                 style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '25px', height: '30px' }}
                                 sx={{

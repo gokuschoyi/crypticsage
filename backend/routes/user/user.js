@@ -1,7 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const bcrypt = require('bcrypt');
-const { connect, close } = require('../../utils/db-utils/db-conn')
 const verify = require('../auth/verifyToken')
 
 const {

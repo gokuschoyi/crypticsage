@@ -18,7 +18,7 @@ const WordModal = (props) => {
     const theme = useTheme()
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const smallScreenSidebarState = useSelector(state => state.sidebar.toggleSmallScreenSidebarState);
-    console.log(smallScreenSidebarState)
+    // console.log(smallScreenSidebarState)
     return (
         <Dialog
             sx={{

@@ -40,6 +40,9 @@ const authSlice = createSlice({
             state.preferences.dashboardHover = action.payload.dashboardHover;
             state.preferences.collapsedSidebar = action.payload.collapsedSidebar;
         },
+        setUserLessonStatus: (state, action) => {
+            state.user_lesson_status = action.payload;
+        },
         resetAuthState: (state) => {
             state.accessToken = '';
             state.displayName = '';
@@ -62,6 +65,7 @@ export const {
     setNewProfileImage,
     setNewUserData,
     setUserPreferences,
+    setUserLessonStatus,
     resetAuthState
 } = actions;
 export default reducer;

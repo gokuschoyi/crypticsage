@@ -38,7 +38,7 @@ const makeUserLessonStatus = async () => {
             lesson_id: lesson.lessonId,
             lesson_name: lesson.chapter_title,
             lesson_start: false,
-            lesson_progress: 0,
+            lesson_progress: 1,
             lesson_completed: false,
         })
     });
@@ -668,6 +668,40 @@ const updateUserPreference = async (req, res) => {
     }
 }
 
+const updateUserLessonStatus = async (req, res) => {
+    const { uid, lesson_status } = req.body;
+    try {
+        const db = await connect();
+        const userCollection = await db.collection('users');
+        const user = await userCollection.updateOne(
+            { "uid": uid },
+            {
+                $set: {
+                    [`lesson_status.${lesson_status.section_id}.$[inner].lesson_start`]: lesson_status.lesson_start,
+                    [`lesson_status.${lesson_status.section_id}.$[inner].lesson_progress`]: lesson_status.lesson_progress,
+                    [`lesson_status.${lesson_status.section_id}.$[inner].lesson_completed`]: lesson_status.lesson_completed,
+                }
+            },
+            {
+                arrayFilters: [
+                    { "inner.section_id": lesson_status.section_id, "inner.lesson_id": lesson_status.lesson_id }
+                ]
+            },
+        );
+        let lessonStatus
+        if (user.acknowledged) {
+            lessonStatus = await userCollection.find({ "uid": uid }).toArray();
+            lessonStatus = lessonStatus[0].lesson_status;
+            res.status(200).json({ message: "User lesson status updated successfully", status: true, lessonStatus });
+            await close(db);
+        } else {
+            res.status(500).json({ message: "User lesson status updation failed" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "User lesson status updation failed" });
+    }
+}
 
 module.exports = {
     makeUserLessonStatus,
@@ -687,4 +721,5 @@ module.exports = {
     updateProfilePicture,
     updateUserData,
     updateUserPreference,
+    updateUserLessonStatus,
 }
