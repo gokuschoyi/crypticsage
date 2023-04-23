@@ -71,9 +71,7 @@
   justify-content: space-between;
 }
 
-.all-lesson {
-  width: 500px;
-}
+
 
 .single-lesson-box {
   margin: 10px 0px 10px 0px;
@@ -81,6 +79,18 @@
   flex-direction: row;
   width: stretch;
   justify-content: space-between;
+}
+.single-section-box{
+  margin: 10px 0px 10px 0px;
+  display: flex;
+  flex-direction: row;
+  width: stretch;
+  justify-content: space-between;
+}
+
+.selected{
+  background-color: #454242 !important;
+  color:white !important;
 }
 
 @media screen and (max-width :900px){
@@ -110,5 +120,5 @@ onClick={(e) => viewLessons(section.sectionId)(e)}>View Lessons</Button> */
 
 .single-lesson-content{
   margin-top:20px;
-  min-height: 600px;
+  /* min-height: 600px; */
 }

@@ -10,10 +10,6 @@ import { Outlet } from 'react-router-dom';
 import './Dashboard.css'
 import { Box, useTheme } from '@mui/material';
 const Dashboard = (props) => {
-    /* const colors = tokens(theme.palette.mode);
-    console.log(colors.yellow[200]); */
-    /* console.log(props.color); */
-
     const [toggleUser, setToggleUser] = React.useState(false);
     const handleToggleUser = () => {
         setToggleUser(!toggleUser);

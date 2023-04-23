@@ -7,7 +7,7 @@ import { useOutletContext } from "react-router-dom";
 import { ChevronRightIcon, ExpandMoreIcon } from '../../../../global/Icons';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { setSections, setLessons, incrementCounter, decrementCounter, setLessonStartedFlag, setLessonCompleteFlag } from '../../SectionSlice'
+import { setSections, setLessons, setCounter, incrementCounter, decrementCounter, setLessonStartedFlag, setLessonCompleteFlag } from '../../SectionSlice'
 import { setUserLessonStatus } from '../../../../../authorization/authSlice'
 import WordDialog from './WordDialog'
 import { updatUserLessonStatus } from '../../../../../../api/user'
@@ -54,60 +54,66 @@ const SlideComponent = (props) => {
 
     const data = slideData.contents.slides
 
-    const chapterTitle = data[counter].heading
-    const chapterContent = data[counter].content_text
-    const highlightWords = data[counter].highlightWords
+    // ----------------- Counter Test ----------------- //
+    const [slideCounter, setSlideCounter] = React.useState(0);
 
-    var sTimes = data.map(item => item.start_timestamp)
-    var ssTime = data.map(item => item.start_timestamp)
-    var eTimes = data.map(item => item.end_timestamp)
-    var startTimes = sTimes.splice(1, sTimes.length)
-    var endTimes = eTimes.splice(1, eTimes.length)
+    const chapterTitle = data[slideCounter].heading
+    const chapterContent = data[slideCounter].content_text
+    const highlightWords = data[slideCounter].highlightWords
 
-    /* useEffect(() => {
-        console.log("latest", counter)
-    }, [counter]) */
+    const slideVideoStartTime = data.map(slide => slide.start_timestamp)
+    const slideVideoEndTime = data.map(slide => slide.end_timestamp)
+
+    //renders twice here on first render
+    useEffect(() => {
+        console.log("slideCounter useEffect", slideCounter);
+        dispatch(setCounter({ slideCounter: slideCounter }));
+
+        if (slideCounter === 1) {
+            dispatch(setLessonStartedFlag(true))
+        }
+    }, [slideCounter, dispatch]);
+
+    const next = () => {
+        if (slideCounter >= 0 && slideCounter <= data.length - 1) {
+            setSlideCounter((prev) => prev + 1)
+        }
+    }
+
+    const prev = () => {
+        if (slideCounter >= 0) {
+            setSlideCounter((prev) => prev - 1)
+        }
+    }
 
     useEffect(() => {
-        if (counter === 0 && videoContent !== null) {
-            console.log(startTimes, endTimes)
-            videoContent.currentTime = sTimes[0];
+        if (slideCounter === 0 && videoContent !== null) {
+            console.log(slideVideoStartTime, slideVideoEndTime)
+            videoContent.currentTime = 0;
             videoContent.play();
             videoContent.ontimeupdate = function () {
-                if (videoContent.currentTime >= eTimes[0]) {
+                if (videoContent.currentTime >= slideVideoEndTime[0]) {
                     videoContent.pause();
                 }
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [counter, videoContent])
+    }, [slideCounter, videoContent])
 
-    const next = () => {
-        if (counter <= data.length - 1 && counter >= 0) {
-            dispatch(incrementCounter())
-            console.log(counter)
-            if (counter === 0) {
-                dispatch(setLessonStartedFlag(true))
-            }
-            videoContent.currentTime = startTimes[counter];
+    useEffect(() => {
+        if (slideCounter >= 1 && videoContent !== null) {
+            videoContent.currentTime = slideVideoStartTime[slideCounter];
             videoContent.play();
             videoContent.ontimeupdate = function () {
-                if (videoContent.currentTime >= endTimes[counter]) {
+                if (videoContent.currentTime >= slideVideoEndTime[slideCounter]) {
                     videoContent.pause();
                 }
             }
         }
-    }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [slideCounter, videoContent])
 
-    const prev = () => {
-        if (counter >= 0) {
-            dispatch(decrementCounter())
-            console.log(counter)
-            videoContent.currentTime = ssTime[counter];
-        }
-    }
-
-    // console.log(res)
+    // ----------------- Counter Test ----------------- //
 
     const sectionId = useSelector(state => state.section.slides.lesson_status.section_id)
     const completeLesson = async (e) => {
@@ -163,7 +169,6 @@ const SlideComponent = (props) => {
             console.log(err)
         }
     }
-
 
     useEffect(() => {
         if (counter === data.length - 1) {
@@ -264,12 +269,13 @@ const SlideComponent = (props) => {
                             id='slide-video'
                             component='video'
                             src={`${Video}`}
+                            controls
                         >
                         </CardMedia>
                     </Box>
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                    <Box>{counter + 1}</Box>
+                    <Box>{slideCounter + 1}</Box>
                     <Box className='slide-actions'>
                         {started ? null :
                             <Button

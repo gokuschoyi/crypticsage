@@ -1,4 +1,12 @@
 .update-section-box{
     margin-top:20px;
-    padding-bottom:20px;
+    margin-bottom:20px;
+}
+
+.update-section-accordion{
+    background-color: '' !important;
+}
+
+.MuiAccordionSummary-root{
+    background-color: var(--mui-palette-primary-main) !important;
 }

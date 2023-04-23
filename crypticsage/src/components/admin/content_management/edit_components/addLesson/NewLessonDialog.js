@@ -11,7 +11,7 @@ import {
     Button
 } from '@mui/material'
 const NewLessonDialog = (props) => {
-    const {open, handleClose, resetAddSection} = props
+    const { open, resetDialogTitle, handleClose, resetAddSection, resetAddLesson } = props
     const { collapsed } = useProSidebar();
     const theme = useTheme()
     const buttonStyle = {
@@ -34,7 +34,7 @@ const NewLessonDialog = (props) => {
             maxWidth='sm'
             aria-describedby="alert-dialog-slide-description"
         >
-            <DialogTitle sx={{ color: `${theme.palette.secondary.main}`, textAlign: 'center' }}>???????</DialogTitle>
+            <DialogTitle sx={{ color: `${theme.palette.secondary.main}`, textAlign: 'center' }}>{resetDialogTitle.title}</DialogTitle>
             <DialogContent>
                 <Box sx={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center' }}>
                     <img
@@ -46,7 +46,11 @@ const NewLessonDialog = (props) => {
                 </Box>
             </DialogContent>
             <DialogActions sx={{ paddingRight: '25px' }}>
-                <Button sx={buttonStyle} onClick={(e) => resetAddSection(e)} >YES</Button>
+                {resetDialogTitle.mode === 'lesson' ?
+                    <Button sx={buttonStyle} onClick={(e) => resetAddLesson(e)} >YES</Button>
+                    :
+                    <Button sx={buttonStyle} onClick={(e) => resetAddSection(e)} >YES</Button>
+                }
                 <Button sx={buttonStyle} onClick={handleClose}>CLOSE</Button>
             </DialogActions>
         </Dialog>

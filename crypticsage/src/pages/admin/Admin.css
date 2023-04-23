@@ -1,6 +1,32 @@
+.admincontainer {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  position: relative;
+}
+
 .admin-content {
-  width: stretch;
-  margin-left: var(--marginLeft);
-  transition: all 0.2s ease-in-out;
-  /* background-image: url("../../assets/bg.jpg"); */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: auto !important;
+  margin-left: var(--marginLeft) !important;
+  transition: all 0.7s ease-in-out;
+}
+
+.admin-content-box{
+  width:100%;  
+}
+
+@media screen and (min-width: 1400px) {
+  .admin-content-box {
+    width: 1200px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .admin-content {
+    overflow: initial;
+  }
 }

@@ -14,13 +14,16 @@ const sectionSlice = createSlice({
     name: 'section',
     initialState,
     reducers: {
+        setCounter: (state, action) => {
+            state.counter = action.payload.slideCounter;
+        },
         incrementCounter: (state) => {
-            state.counter += 1;
-            state.slides.lesson_status.lesson_progress = (state.counter)+1;
+            state.counter = state.counter + 1;
+            state.slides.lesson_status.lesson_progress = (state.counter) + 1;
         },
         decrementCounter: (state) => {
-            state.counter -= 1;
-            state.slides.lesson_status.lesson_progress = (state.counter)+1;
+            state.counter = state.counter - 1;
+            state.slides.lesson_status.lesson_progress = (state.counter) + 1;
         },
         resetCounter: (state) => {
             state.counter = 0;
@@ -49,7 +52,7 @@ const sectionSlice = createSlice({
         setLessonStartedFlag: (state, action) => {
             state.slides.lesson_status.lesson_start = action.payload;
         },
-        setLessonCompleteFlag : (state, action) => {
+        setLessonCompleteFlag: (state, action) => {
             state.slides.lesson_status.lesson_completed = action.payload;
         },
         resetSectionState: (state) => {
@@ -73,6 +76,7 @@ export const {
     setLessons,
     clearLessons,
     setSlides,
+    setCounter,
     incrementCounter,
     decrementCounter,
     resetCounter,

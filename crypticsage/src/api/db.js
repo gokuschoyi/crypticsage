@@ -30,6 +30,18 @@ export const updateSection = async (data) => {
     return response;
 }
 
+export const deleteSection = async (data) => {
+    let token = data.token;
+    let payload = data.data
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/content/delete_section`, payload, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
 export const addLesson = async (data) => {
     let token = data.token;
     let payload = data.data
@@ -63,6 +75,18 @@ export const updateLesson = async (data) => {
         headers: { Authorization: `Bearer ${token}` }
     };
     const response = await axios.post(`${baseUrl}/content/update_lesson`, payload, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
+export const deleteLesson = async (data) => {
+    let token = data.token;
+    let payload = data.data
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/content/delete_lesson`, payload, config, {
         withCredentials: true
     })
     return response;

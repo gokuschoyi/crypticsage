@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useOutletContext } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import AdminHeader from '../global/AdminHeader';
 import NewLessonDialog from './edit_components/addLesson/NewLessonDialog';
 import { toast } from 'react-toastify';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import {
     Box,
     Typography,
@@ -14,14 +15,25 @@ import {
     MenuItem,
     Select,
     InputLabel,
-    Divider
+    Divider,
+    IconButton
 } from '@mui/material';
 import './ContentManagement.css'
-import { fetchSections, addSection, updateSection, fetchLessons, addLesson, updateLesson } from '../../../api/db';
+import {
+    fetchSections,
+    addSection,
+    updateSection,
+    deleteSection,
+    fetchLessons,
+    addLesson,
+    updateLesson,
+    deleteLesson
+} from '../../../api/db';
 import { AddSection, AddLesson } from './edit_components';
 import SlideBox from './edit_components/addLesson/SlideBox';
 import HighLightWordBox from './edit_components/addLesson/HighLightWordBox';
 import UpdateSection from './edit_components/updateSection/UpdateSection';
+import DeleteDialog from './edit_components/deleteDialog';
 const Admin = (props) => {
     const { title, subtitle } = props
     const theme = useTheme();
@@ -33,8 +45,17 @@ const Admin = (props) => {
     const [open, setOpen] = useState(false);
 
     // new lesson dialog box
+    const [resetDialogTitle, setResetDialogTitle] = useState({});
     const handleNewLessonDialog = (e) => {
-        setOpen(true)
+        let mode = e.target.value;
+        if (mode === 'addlesson') {
+            setOpen(true)
+            setResetDialogTitle({ title: "Reset Lesson data??", mode: 'lesson' })
+        } else if (mode === 'addsection') {
+            setOpen(true)
+            setResetDialogTitle({ title: "Reset Section data??", mode: "section" })
+        }
+        // console.log(e.target.value)
     }
 
     const handleClose = () => {
@@ -42,7 +63,7 @@ const Admin = (props) => {
     };
 
     const [editMode, setEditMode] = useState('add');
-    const [documentType, setDocumentType] = useState('lesson');
+    const [documentType, setDocumentType] = useState('sections');
     const [sectionData, setSectionData] = useState(null);
     const token = useSelector(state => state.auth.accessToken);
 
@@ -52,6 +73,21 @@ const Admin = (props) => {
 
     const handleEditState = (param) => (e) => {
         setEditMode(param);
+    }
+
+    // onClose called twice possibly because of Strict mode.. Works without Strickmode..
+    const saveSuccessToast = (data) => {
+        toast.success(data.message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            toastId: `addedit${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}`,
+            type: alert.type,
+        })
     }
 
     const successToast = (message) => {
@@ -65,7 +101,6 @@ const Admin = (props) => {
             progress: undefined,
             toastId: `addedit${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}`,
             type: alert.type,
-            onClose: () => refreshSection()
         })
     }
 
@@ -83,34 +118,24 @@ const Admin = (props) => {
         })
     }
 
-    const refreshSection = async () => {
-        try {
+    // ---> ADD ENTIRE LESSON DATA <--- //
+    //initial load of section data
+    const isMounted = useRef(false)
+    useEffect(() => {
+        if (!isMounted.current) {
+            isMounted.current = true
             let data = {
                 token: token
             }
-            let res = await fetchSections(data);
-            setSectionData(res.data.sections);
-            setNewSectionData(initialSectionData);
-        } catch (error) {
-            console.log(error)
-            errorToast('Error refreshing section data')
+            fetchSections(data)
+                .then(res => {
+                    setSectionData(res.data.sections);
+                })
+                .catch(error => {
+                    console.log(error);
+                    errorToast(error.response.data.message)
+                })
         }
-    }
-
-    // ---> ADD ENTIRE LESSON DATA <--- //
-    //initial load of section data
-    useEffect(() => {
-        let data = {
-            token: token
-        }
-        fetchSections(data)
-            .then(res => {
-                setSectionData(res.data.sections);
-            })
-            .catch(error => {
-                console.error(error);
-            })
-
     }, [token]);
 
     //initial data for new section
@@ -129,6 +154,7 @@ const Admin = (props) => {
     }
 
     //saving new section to db
+    const [sectionId, setSectionId] = useState('')
     const handleSectionSubmit = async () => {
         const formFields = Object.keys(newSectionData)
         let updatedSectionData = { ...newSectionData }
@@ -157,18 +183,45 @@ const Admin = (props) => {
         const isNotEmpty = Object.values(newSectionData).every(field => field.value !== '')
 
         if (isNotEmpty) {
-            try {
-                const sectionD = {}
-                formFields.forEach((field) => {
-                    sectionD[field] = newSectionData[field].value
-                })
-                let res = await addSection(sectionD);
-                if (res.data.message) {
-                    successToast(res.data.message)
+            if (sectionId === '') {
+                console.log("initial section save")
+                try {
+                    const sectionD = {}
+                    formFields.forEach((field) => {
+                        sectionD[field] = newSectionData[field].value
+                    })
+                    let res = await addSection(sectionD);
+                    if (res.data.message) {
+                        setSectionId(res.data.createdSectionId)
+                        refreshSectionData()
+                        saveSuccessToast({ message: res.data.message, update: res.data.update })
+                    }
+                } catch (error) {
+                    if (error.response) {
+                        errorToast(error.response.data.message)
+                    }
                 }
-            } catch (error) {
-                if (error.response) {
-                    errorToast(error.response.data.message)
+            } else {
+                console.log("update section save")
+                try {
+                    const sectionD = {}
+                    formFields.forEach((field) => {
+                        sectionD[field] = newSectionData[field].value
+                    })
+                    sectionD.sectionId = sectionId
+                    let data = {
+                        token: token,
+                        payload: sectionD
+                    }
+                    let res = await updateSection(data);
+                    if (res.data.message) {
+                        refreshSectionData()
+                        saveSuccessToast({ message: res.data.message, update: res.data.update })
+                    }
+                } catch (error) {
+                    if (error.response) {
+                        errorToast(error.response.data.message)
+                    }
                 }
             }
         }
@@ -188,20 +241,39 @@ const Admin = (props) => {
             successToast('Section data refreshed')
         } catch (error) {
             console.log(error)
-            errorToast('Error refreshing section data')
+            errorToast(error.response.data.message)
         }
     }
 
     //GETTING SECTION ID FROM ADD LESSONS TAB
     const [selectedSectionId, setSelectedSectionId] = useState('');
     const [selectedSectionName, setSelectSectionName] = useState('');
+    const [selectedSectionLessonNames, setSelectedSectionLessonNames] = useState('');
 
-    //getting the section id from add lessons tab
-    const handleGetSection = (e) => {
+    //getting the section id from add lessons tab and fetching all lessona names for that section
+    const handleGetSection = async (e) => {
         setSelectSectionName(e.target.value); //set section name to selectSectionName
         let sectionId = sectionData.filter(section => section.title === e.target.value)[0].sectionId;  //get sectionId from sectionData
         setSelectedSectionId(sectionId); //set sectionId to selectedSectionId
-        // console.log(selectedSectionId)
+        let data = {
+            token: token,
+            sectionId: sectionId
+        }
+        try {
+            let res = await fetchLessons(data);
+            setLessonContent(res.data.lessons);
+            if (res.data.message !== 'No lessons found') {
+                let lessons = res.data.lessons
+                let chapterTitles = lessons.map((item) => item.chapter_title);
+                setSelectedSectionLessonNames(chapterTitles)
+            } else {
+                setSelectedSectionLessonNames(['No Lessons found'])
+            }
+        } catch (error) {
+            if (error.response) {
+                errorToast(error.response.data.message)
+            }
+        }
     }
 
     //initial data when add lesson is rendered
@@ -273,7 +345,7 @@ const Admin = (props) => {
         let updatedHighLightWordList, updatedHighlightWordData
         switch (editMode) {
             case 'add':
-                console.log("add : add highlight")
+                console.log("add tab: add highlight")
                 updatedHighLightWordList = highlightWordList
                 updatedHighlightWordData = [...newHighlightWordData]
 
@@ -284,7 +356,7 @@ const Admin = (props) => {
                 setNewHighlightWordData(updatedHighlightWordData)
                 break;
             case 'edit':
-                console.log("edit : remove highlight")
+                console.log("edit tab: remove highlight")
                 updatedHighLightWordList = highlightWordListToUpdate
                 updatedHighlightWordData = [...highlightWordDataToUpdate]
 
@@ -307,7 +379,7 @@ const Admin = (props) => {
 
         switch (editMode) {
             case 'add':
-                console.log("add : remove highlight")
+                console.log("add tab: remove highlight")
                 updatedHighlightWordData = [...newHighlightWordData]
                 updatedHighlightWordList = [...highlightWordList]
 
@@ -326,7 +398,7 @@ const Admin = (props) => {
                 setHighlightWordList(updatedHighlightWordList)
                 break;
             case 'edit':
-                console.log("edit : remove highlight")
+                console.log("edit tab: remove highlight")
                 updatedHighlightWordData = [...highlightWordDataToUpdate]
                 updatedHighlightWordList = [...highlightWordListToUpdate]
 
@@ -505,7 +577,7 @@ const Admin = (props) => {
 
 
         if (lessonId === '') {
-            console.log("initial save")
+            console.log("initial lesson save")
             let payload = {
                 token: token,
                 data: finalLessonData
@@ -514,6 +586,7 @@ const Admin = (props) => {
                 let res = await addLesson(payload)
                 if (res.data.message) {
                     setLessonId(res.data.lessonId)
+                    viewLessons(selectedSectionId)
                     successToast(res.data.message)
                 }
             } catch (err) {
@@ -522,7 +595,7 @@ const Admin = (props) => {
                 }
             }
         } else {
-            console.log("update save")
+            console.log("update lesson save")
             finalLessonData.lessonId = lessonId;
             let payload = {
                 token: token,
@@ -531,6 +604,7 @@ const Admin = (props) => {
             try {
                 let res = await updateLesson(payload)
                 if (res.data.message) {
+                    viewLessons(selectedSectionId)
                     successToast(res.data.message)
                 }
             } catch (err) {
@@ -539,7 +613,6 @@ const Admin = (props) => {
                 }
             }
         }
-        console.log('add : add lesson')
     }
     // ---> ADD ENTIRE LESSON DATA <--- //
 
@@ -551,26 +624,54 @@ const Admin = (props) => {
     const [sectionSkeletonFlag, setSectionSkeletonFlag] = useState(false); //to display skeleton loader
 
     //getting the sectionId from the section data, filtering based on id and passed to UpdateSection
+    //highlight the selected button
+    const [buttonIdState, setButtonIdState] = useState(-1)
+    const buttonIdRef = useRef(0)
     const handleEditGetSection = (e) => {
-        setEditSectionName(e.target.value)
-        setSectionSkeletonFlag(true)
-        let selectedSectionData = sectionData.filter(section => section.title === e.target.value)[0];
-        let sectionId = selectedSectionData.sectionId;
-        delete selectedSectionData._id
-        setSelectedSectionData(selectedSectionData)
-        setSelectedLesson(null)
-        setLessonDataToUpdate()
-        setSlideListToUpdate([])
-        setSlideDataToUpdate([])
-        setHighlightWordListToUpdate([[]])
-        setHighlightWordDataToUpdate([[]])
-        viewLessons(sectionId)
-        console.log(sectionId)
-        const timer = setTimeout(() => {
-            setSectionSkeletonFlag(false)
-        }, 1000);
+        let timer;
+        if (e.target.value !== editSectionName) {
+            let buttonId = parseInt(e.target.id)
+            let buttonIdRefInt = parseInt(buttonIdRef.current)
+            let viewDetailsButton = document.getElementsByClassName('view-section-details-button')
+            if (buttonId !== buttonIdRefInt) {
+                setButtonIdState(buttonId)
+                viewDetailsButton[buttonIdRefInt].classList.remove('selected')
+                viewDetailsButton[buttonId].classList.add('selected')
+                buttonIdRef.current = buttonId
+            } else {
+                setButtonIdState(buttonId)
+                viewDetailsButton[buttonId].classList.add('selected')
+            }
+            setEditSectionName(e.target.value)
+            setSectionSkeletonFlag(true)
+            let selectedSectionData = sectionData.filter(section => section.title === e.target.value)[0];
+            let sectionId = selectedSectionData.sectionId;
+            delete selectedSectionData._id
+            setSelectedSectionData(selectedSectionData)
+            setSelectedLesson(null)
+            setLessonDataToUpdate()
+            setSlideListToUpdate([])
+            setSlideDataToUpdate([])
+            setHighlightWordListToUpdate([[]])
+            setHighlightWordDataToUpdate([[]])
+            viewLessons(sectionId)
+            timer = setTimeout(() => {
+                setSectionSkeletonFlag(false)
+            }, 1000);
+        } else {
+            return;
+        }
         return () => clearTimeout(timer);
     }
+
+    //highlight the selected section button when edit mode changes to edit
+    useEffect(() => {
+        if (editMode === 'edit' && (buttonIdState >=0)) {
+            // console.log("useeffec section")
+            let viewDetailsButton = document.getElementsByClassName('view-section-details-button')
+            viewDetailsButton[buttonIdRef.current].classList.add('selected')
+        }
+    })
 
     //handles the changes in the input fields
     const handleUpdateSectionData = (e) => {
@@ -578,14 +679,12 @@ const Admin = (props) => {
         setSelectedSectionData(prevState => ({
             ...prevState, [name]: value
         }))
-        console.log(name, value)
     }
 
     //handles the submit button to save the section datato db
     const handleUpdateSectionSubmit = async () => {
-        console.log('saved to db ')
         if (selectedSectionData === {}) {
-            console.log('no data')
+            console.log('no section selected')
         } else {
             try {
                 let data = {
@@ -594,6 +693,7 @@ const Admin = (props) => {
                 }
                 let res = await updateSection(data)
                 if (res.data.message) {
+                    refreshSectionData()
                     successToast(res.data.message)
                 }
             } catch (err) {
@@ -609,7 +709,6 @@ const Admin = (props) => {
 
     //fetches the lessons from db based on sectionID
     async function viewLessons(sectionId) {
-        console.log("view lessons for section")
         let data = {
             token: token,
             sectionId: sectionId
@@ -617,9 +716,6 @@ const Admin = (props) => {
         try {
             let res = await fetchLessons(data);
             setLessonContent(res.data.lessons);
-            if (res.data.message) {
-                successToast(res.data.message)
-            }
         } catch (error) {
             if (error.response) {
                 errorToast(error.response.data.message)
@@ -628,6 +724,7 @@ const Admin = (props) => {
     }
 
     //setting the selected lesson data to be displayed in the edit lesson section
+    const [selectedLessonId, setSelectedLessonId] = useState('')
     const [selectedLesson, setSelectedLesson] = useState(null); //all lessons for a specific section
     const [lessonDataToUpdate, setLessonDataToUpdate] = useState() //1 lesson based on selected lesson
     const [slideListToUpdate, setSlideListToUpdate] = useState([]) //slide list for the selected lesson
@@ -638,73 +735,81 @@ const Admin = (props) => {
     const [skeletonFlag, setSkeletonFlag] = useState(false)
 
     //load the single lesson data and initialize the states
+
     const viewLessonContent = (e) => {
-        setSkeletonFlag(true)
-        setSelectedLesson(null)
-        setLessonDataToUpdate()
-        setSlideListToUpdate([])
-        setSlideDataToUpdate([])
-        setHighlightWordListToUpdate([[]])
-        setHighlightWordDataToUpdate([[]])
         let param = e.target.value;
-        const selectedLesson = lessonContent.find(lesson => lesson.lessonId === param)
-        setSelectedLesson(selectedLesson)
+        let timer;
+        if (param !== selectedLessonId) {
+            setSkeletonFlag(true)
+            setSelectedLesson(null)
+            setLessonDataToUpdate()
+            setSlideListToUpdate([])
+            setSlideDataToUpdate([])
+            setHighlightWordListToUpdate([[]])
+            setHighlightWordDataToUpdate([[]])
+            setSelectedLessonId(param)
 
-        //change key values after updating db
-        let lessonData = {
-            'title': selectedLesson.lessonData.title,
-            'lesson_video_url': selectedLesson.lessonData.lesson_video_url,
-            'next_lesson_id': selectedLesson.lessonData.next_lesson_id,
-            'prev_lesson_id': selectedLesson.lessonData.prev_lesson_id,
-            'lesson_logo_url': selectedLesson.lessonData.lesson_logo_url,
-            'sectionId': selectedLesson.sectionId,
-        }
-        setLessonDataToUpdate(lessonData)
+            const selectedLesson = lessonContent.find(lesson => lesson.lessonId === param)
+            setSelectedLesson(selectedLesson)
 
-        let newSlideList = []
-        selectedLesson.lessonData.contents.slides.map((slide, index) => {
-            return newSlideList.push(
-                <SlideBox key={index} count={index} />
-            )
-        })
-        setSlideListToUpdate(newSlideList)
+            //change key values after updating db
+            let lessonData = {
+                'title': selectedLesson.lessonData.title,
+                'lesson_video_url': selectedLesson.lessonData.lesson_video_url,
+                'next_lesson_id': selectedLesson.lessonData.next_lesson_id,
+                'prev_lesson_id': selectedLesson.lessonData.prev_lesson_id,
+                'lesson_logo_url': selectedLesson.lessonData.lesson_logo_url,
+                'sectionId': selectedLesson.sectionId,
+            }
+            setLessonDataToUpdate(lessonData)
 
-        let newSlideData = []
-        selectedLesson.lessonData.contents.slides.map((slide, index) => {
-            return newSlideData.push({
-                "heading": slide.heading,
-                "content_text": slide.content_text,
-                "media_type": slide.media_type,
-                "start_timestamp": slide.start_timestamp,
-                "end_timestamp": slide.end_timestamp,
-                "media_url": slide.media_url,
+            let newSlideList = []
+            selectedLesson.lessonData.contents.slides.map((slide, index) => {
+                return newSlideList.push(
+                    <SlideBox key={index} count={index} />
+                )
             })
-        })
-        setSlideDataToUpdate(newSlideData)
+            setSlideListToUpdate(newSlideList)
 
-        let newHighlightWordList = []
-        selectedLesson.lessonData.contents.slides.map((slide) => {
-            return newHighlightWordList.push(slide.highlightWords.map((word, index) => {
-                return <HighLightWordBox key={index} count={index} />
-            }))
-        })
-        setHighlightWordListToUpdate(newHighlightWordList)
+            let newSlideData = []
+            selectedLesson.lessonData.contents.slides.map((slide, index) => {
+                return newSlideData.push({
+                    "heading": slide.heading,
+                    "content_text": slide.content_text,
+                    "media_type": slide.media_type,
+                    "start_timestamp": slide.start_timestamp,
+                    "end_timestamp": slide.end_timestamp,
+                    "media_url": slide.media_url,
+                })
+            })
+            setSlideDataToUpdate(newSlideData)
 
-        let newHighlightWordData = []
-        selectedLesson.lessonData.contents.slides.map((slide) => {
-            return newHighlightWordData.push(slide.highlightWords.map((word, index) => {
-                return {
-                    "keyword": word.keyword,
-                    "explanation": word.explanation,
-                    "id": word.id,
-                }
-            }))
-        })
-        setHighlightWordDataToUpdate(newHighlightWordData)
+            let newHighlightWordList = []
+            selectedLesson.lessonData.contents.slides.map((slide) => {
+                return newHighlightWordList.push(slide.highlightWords.map((word, index) => {
+                    return <HighLightWordBox key={index} count={index} />
+                }))
+            })
+            setHighlightWordListToUpdate(newHighlightWordList)
 
-        const timer = setTimeout(() => {
-            setSkeletonFlag(false)
-        }, 1000);
+            let newHighlightWordData = []
+            selectedLesson.lessonData.contents.slides.map((slide) => {
+                return newHighlightWordData.push(slide.highlightWords.map((word, index) => {
+                    return {
+                        "keyword": word.keyword,
+                        "explanation": word.explanation,
+                        "id": word.id,
+                    }
+                }))
+            })
+            setHighlightWordDataToUpdate(newHighlightWordData)
+
+            timer = setTimeout(() => {
+                setSkeletonFlag(false)
+            }, 1000);
+        } else {
+            return;
+        }
         return () => clearTimeout(timer);
     }
 
@@ -744,22 +849,149 @@ const Admin = (props) => {
                 errorToast(err.response.data.message)
             }
         }
-        console.log('edit : save lesson')
+        console.log('edit tab : save lesson')
 
     }
 
     // ---> EDIT ENTIRE SECTION DATA <--- //    
 
-    // reset add  lessons to initial state
+    //reset add sectionto initial state
     const resetAddSection = () => {
+        const formFields = Object.keys(newSectionData)
+        let updatedSectionData = { ...newSectionData }
+        formFields.forEach(field => {
+            updatedSectionData = {
+                ...updatedSectionData,
+                [field]: {
+                    ...newSectionData[field],
+                    value: '',
+                    error: false,
+                    helperText: ''
+                }
+            }
+        })
+        setNewSectionData(updatedSectionData)
+        setSectionId('')
         setOpen(false)
-        console.log("reset")
+        console.log("Reset Section")
+    }
+    // reset add  lessons to initial state
+    const resetAddLesson = () => {
+        setOpen(false)
+        console.log("Reset Lesson")
         setNewLessonData(initialLessonData);
         setNewHighlightWordData([[initialHighlightWordData]]);
         setHighlightWordList([[<HighLightWordBox key={0} count={0} />]]);
         setNewSlideData([initialSlideData]);
         setSlideList([<SlideBox key={0} count={0} />]);
         setLessonId('')
+    }
+
+    //handling section delete
+    const [selectedSectionToDelete, setSelectedSectionToDelete] = useState('')
+    const [deleteSectionDialogOpen, setSectionDeleteDialogOpen] = useState(false);
+
+    const setSelectedSectionIdToDelete = (e) => {
+        setSelectedSectionToDelete(e.target.dataset.sectionid)
+        setSectionDeleteDialogOpen(true)
+    }
+
+    const handleSectionDeleteDialogClose = () => {
+        setSectionDeleteDialogOpen(false)
+    }
+
+    const deleteSectionFromEditTab = async (e) => {
+        const sectionIdToDelete = e.target.dataset.contentid;
+        let payload = {
+            token: token,
+            data: {
+                sectionId: sectionIdToDelete
+            }
+        }
+        try {
+            let result = await deleteSection(payload);
+            if (result.data.message) {
+                let removedSectionsList = sectionData.filter(section => section.sectionId !== sectionIdToDelete)
+                setSectionData(removedSectionsList)
+                setSelectedSectionToDelete('')
+                if (sectionIdToDelete === selectedSectionData.sectionId) {
+                    // console.log("loaded content to delete")
+                    setEditSectionName('')
+                    setSelectSectionName('')
+                    setSelectedSectionData({})
+                    setSelectedLesson(null)
+                    setLessonDataToUpdate()
+                    setSlideListToUpdate([])
+                    setSlideDataToUpdate([])
+                    setHighlightWordListToUpdate([[]])
+                    setHighlightWordDataToUpdate([[]])
+                } else if (sectionIdToDelete === sectionId) {
+                    // console.log("just save section = just deleted action")
+                    setNewSectionData(initialSectionData)
+                    setSectionId('')
+                } else {
+                    // console.log("other content to delete")
+                }
+                successToast(result.data.message)
+            }
+        } catch (err) {
+            if (err.response) {
+                errorToast(err.response.data.message)
+            }
+        }
+        console.log("delete section clicked")
+        setSectionDeleteDialogOpen(false)
+    }
+
+
+    //handling lesson delete
+    const [selectedLessonToDelete, setSelectedLessonToDelete] = useState('')
+    const [deleteLessonDialogOpen, setLessonDeleteDialogOpen] = useState(false);
+
+    const setSelectedLessonIdToDelete = (e) => {
+        setSelectedLessonToDelete(e.target.dataset.lessonid)
+        setLessonDeleteDialogOpen(true)
+    }
+
+    const handleLessonDeleteDialogClose = () => {
+        setLessonDeleteDialogOpen(false)
+    }
+
+    const deleteLessonFromEditTab = async (e) => {
+        const lessonIdToDelete = e.target.dataset.contentid;
+        let payload = {
+            token: token,
+            data: {
+                lessonId: lessonIdToDelete,
+                sectionId: selectedSectionData.sectionId
+            }
+        }
+
+        try {
+            let result = await deleteLesson(payload);
+            if (result.data.message) {
+                let removedLessonsList = lessonContent.filter(lesson => lesson.lessonId !== lessonIdToDelete)
+                setLessonContent(removedLessonsList)
+                setSelectedLessonToDelete('')
+                if (lessonIdToDelete === selectedLesson?.lessonId) {
+                    console.log('selected saved lesson to delete')
+                    resetAddLesson()
+                    setSelectedLesson(null)
+                } else if (lessonIdToDelete === lessonId) {
+                    console.log("just save lesson = just deleted action")
+                    resetAddLesson()
+                } else {
+                    console.log('other content to delete')
+                }
+                successToast(result.data.message)
+            }
+        } catch (err) {
+            if (err.response) {
+                errorToast(err.response.data.message)
+            }
+        }
+        console.log("delete lesson clicked")
+        setLessonDeleteDialogOpen(false)
     }
 
     return (
@@ -770,10 +1002,12 @@ const Admin = (props) => {
             <Box className='add-content'>
                 <NewLessonDialog
                     open={open}
+                    resetDialogTitle={resetDialogTitle}
                     handleClose={handleClose}
+                    resetAddLesson={resetAddLesson}
                     resetAddSection={resetAddSection}
                 />
-                <Typography variant='h2'  textAlign='start' className='add-content-title'>Add Content</Typography>
+                <Typography variant='h2' textAlign='start' className='add-content-title'>Add Content</Typography>
                 <Box className='add-content-box'>
                     <Box className='edit-add-box'>
                         <Box className='add-edit-button-box'>
@@ -822,6 +1056,7 @@ const Admin = (props) => {
                                     <Box className='slected-type-box'>
                                         {documentType === 'sections' ?
                                             <AddSection
+                                                handleNewLessonDialog={handleNewLessonDialog}
                                                 newSectionData={newSectionData}
                                                 handleNewSectionData={handleNewSectionData}
                                                 handleSectionSubmit={handleSectionSubmit}
@@ -833,6 +1068,7 @@ const Admin = (props) => {
                                                 mode={editMode}
                                                 handleNewLessonDialog={handleNewLessonDialog}
                                                 sectionData={sectionData}
+                                                selectedSectionLessonNames={selectedSectionLessonNames}
                                                 handleGetSection={handleGetSection}
                                                 selectedSectionName={selectedSectionName}
                                                 newLessonData={newLessonData}
@@ -854,94 +1090,146 @@ const Admin = (props) => {
                                 </Box>
                                 :
                                 <Box className='edit-items-container'>
-                                    <Typography variant='h4' color='white' textAlign='start' className='add-content-title'>Edit</Typography>
-                                    <Box sx={{ marginTop: '20px' }}>
-                                        <Box sx={{ width: '60%' }}>
-                                            <FormControl fullWidth>
-                                                <InputLabel id="select-section-edit-label">Select a Section</InputLabel>
-                                                <Select
-                                                    onChange={(e) => handleEditGetSection(e)}
-                                                    labelId="select-section-edit"
-                                                    id="select-section-edit"
-                                                    value={editSectionName}
-                                                    label="Media Type"
-                                                >
-                                                    {sectionData && sectionData.map((section, index) => {
-                                                        return (
-                                                            <MenuItem key={index} value={`${section.title}`}>{section.title}</MenuItem>
-                                                        )
-                                                    })}
-                                                </Select>
-                                            </FormControl>
+                                    <Typography variant='h4' color='white' textAlign='start' className='add-content-title'>All Sections</Typography>
+                                    <Box sx={{ marginTop: '20px' }} className='sectionNames'>
+                                        <Box className='all-sections'>
+                                            <DeleteDialog
+                                                open={deleteSectionDialogOpen}
+                                                handleClose={handleSectionDeleteDialogClose}
+                                                handleDelete={deleteSectionFromEditTab}
+                                                id={selectedSectionToDelete}
+                                                type='section'
+                                            />
+                                            {sectionData && sectionData.map((section, index) => {
+                                                return (
+                                                    <Box key={index} className='single-section-box'>
+                                                        <Typography variant='h6' color='white' textAlign='start' >{section.title}</Typography>
+                                                        <Box display='flex' flexDirection='row' gap='20px'>
+                                                            <Button
+                                                                className='view-section-details-button'
+                                                                value={section.title}
+                                                                onClick={(e) => handleEditGetSection(e)}
+                                                                size='small'
+                                                                id={index}
+                                                                sx={{
+                                                                    width: '120px',
+                                                                    ':hover': {
+                                                                        color: 'black !important',
+                                                                        backgroundColor: '#d11d1d !important',
+                                                                        transition: '0.5s'
+                                                                    },
+                                                                    backgroundColor: `${theme.palette.secondary.main}`
+                                                                }}
+                                                            >View Details</Button>
+                                                            <Box>
+                                                                <IconButton
+                                                                    data-sectionid={section.sectionId}
+                                                                    sx={{ height: '25px', width: '25px' }}
+                                                                    onClick={(e) => setSelectedSectionIdToDelete(e)}>
+                                                                    <DeleteOutlineOutlinedIcon sx={{ pointerEvents: 'none' }} />
+                                                                </IconButton>
+                                                            </Box>
+                                                        </Box>
+                                                    </Box>
+                                                )
+                                            })}
                                         </Box>
-                                        <Box>
+                                        <Box className='selectedsectionData'>
                                             {sectionSkeletonFlag && <Skeleton variant="rectangular" width='100%' height='600px' />}
                                             {Object.keys(selectedSectionData).length !== 0 && !sectionSkeletonFlag &&
-                                                <UpdateSection
-                                                    selectedSectionData={selectedSectionData}
-                                                    handleUpdateSectionData={handleUpdateSectionData}
-                                                    handleUpdateSectionSubmit={handleUpdateSectionSubmit}
-                                                />}
+                                                <Box className='section-and-lesson-box-for-edit'>
+                                                    <UpdateSection
+                                                        selectedSectionData={selectedSectionData}
+                                                        handleUpdateSectionData={handleUpdateSectionData}
+                                                        handleUpdateSectionSubmit={handleUpdateSectionSubmit}
+                                                    />
+                                                    <Box className='selectedsectionalllessons'>
+                                                        {editSectionName &&
+                                                            <Box className='lessons-list-box'>
+                                                                <Divider sx={{ marginTop: '10px', marginBottom: '30px' }} />
+                                                                <Box className='lessons-list-box-action'>
+                                                                    {lessonContent === undefined && Object.keys(selectedSectionData).length !== 0
+                                                                        ?
+                                                                        <Typography variant='h4' color='white' textAlign='center' className='add-content-title'>No Lessons Available</Typography>
+                                                                        :
+                                                                        <Typography variant='h4' color='white' textAlign='start' className='add-content-title'>Lessons for {selectedSectionData.title}</Typography>
+                                                                    }
+                                                                </Box>
+                                                                <Box className='lesson-title'>
+                                                                    <DeleteDialog
+                                                                        open={deleteLessonDialogOpen}
+                                                                        handleClose={handleLessonDeleteDialogClose}
+                                                                        handleDelete={deleteLessonFromEditTab}
+                                                                        id={selectedLessonToDelete}
+                                                                    />
+                                                                    <Box className='all-lesson'>
+                                                                        {lessonContent && lessonContent.map((lesson, index) => {
+                                                                            return (
+                                                                                <Box key={index} className='single-lesson-box'>
+                                                                                    <Typography variant='h6' color='white' textAlign='start' >{lesson.chapter_title}</Typography>
+                                                                                    <Box display='flex' flexDirection='row' gap='20px'>
+                                                                                        <Button
+                                                                                            className='view-lesson-details-button'
+                                                                                            value={lesson.lessonId}
+                                                                                            onClick={(e) => viewLessonContent(e)}
+                                                                                            size='small'
+                                                                                            id={index}
+                                                                                            sx={{
+                                                                                                width: '120px',
+                                                                                                ':hover': {
+                                                                                                    color: 'black !important',
+                                                                                                    backgroundColor: '#d11d1d !important',
+                                                                                                    transition: '0.5s'
+                                                                                                },
+                                                                                                backgroundColor: `${theme.palette.secondary.main}`
+                                                                                            }}
+                                                                                        >View </Button>
+                                                                                        <Box>
+                                                                                            <IconButton
+                                                                                                data-lessonid={lesson.lessonId}
+                                                                                                sx={{ height: '25px', width: '25px' }}
+                                                                                                onClick={(e) => setSelectedLessonIdToDelete(e)}>
+                                                                                                <DeleteOutlineOutlinedIcon sx={{ pointerEvents: 'none' }} />
+                                                                                            </IconButton>
+                                                                                        </Box>
+                                                                                    </Box>
+                                                                                </Box>
+                                                                            )
+                                                                        })
+                                                                        }
+                                                                    </Box>
+                                                                </Box>
+                                                                <Divider sx={{ marginTop: '30px', marginBottom: '10px' }} />
+                                                                <Box className='lesson-content-box'>
+                                                                    <Box className='single-lesson-content'>
+                                                                        {skeletonFlag && <Skeleton variant="rectangular" width='100%' height='600px' />}
+                                                                        {selectedLesson && !skeletonFlag &&
+                                                                            <AddLesson
+                                                                                mode={editMode}
+                                                                                newLessonData={lessonDataToUpdate}
+                                                                                handleLessonDataChange={handleLessonDataChange}
+                                                                                handlelessonSave={handleUpdateLessonSave}
+                                                                                slideList={slideListToUpdate}
+                                                                                handleAddSlide={handleAddSlide}
+                                                                                handleRemoveSlide={handleRemoveSlide}
+                                                                                newSlideData={slideDataToUpdate}
+                                                                                handleSlideDataChange={handleSlideDataChange}
+                                                                                highlightWordList={highlightWordListToUpdate}
+                                                                                handleAddHighlightWord={handleAddHighlightWord}
+                                                                                handleRemoveHighlightWord={handleRemoveHighlightWord}
+                                                                                newHighlightWordData={highlightWordDataToUpdate}
+                                                                                handleHighlightWordDataChange={handleHighlightWordDataChange}
+                                                                            />
+                                                                        }
+                                                                    </Box>
+                                                                </Box>
+                                                            </Box>
+                                                        }
+                                                    </Box>
+                                                </Box>
+                                            }
                                         </Box>
                                     </Box>
-                                    {editSectionName &&
-                                        <Box className='lessons-list-box'>
-                                            <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} />
-                                            <Box className='lessons-list-box-action'>
-                                                <Typography variant='h4' color='white' textAlign='start' className='add-content-title'>Lessons for {selectedSectionData.title}</Typography>
-                                            </Box>
-                                            <Box className='lesson-title'>
-                                                <Box className='all-lesson'>
-                                                    {lessonContent && lessonContent.map((lesson, index) => {
-                                                        return (
-                                                            <Box key={index} className='single-lesson-box'>
-                                                                <Typography variant='h5' color='white' textAlign='start' >{lesson.chapter_title}</Typography>
-                                                                <Button
-                                                                    value={lesson.lessonId}
-                                                                    onClick={(e) => viewLessonContent(e)}
-                                                                    size='small'
-                                                                    sx={{
-                                                                        width: '150px',
-                                                                        ':hover': {
-                                                                            color: 'black !important',
-                                                                            backgroundColor: '#d11d1d !important',
-                                                                            transition: '0.5s'
-                                                                        },
-                                                                        backgroundColor: `${theme.palette.secondary.main}`
-                                                                    }}
-                                                                >View </Button>
-                                                            </Box>
-                                                        )
-                                                    })
-                                                    }
-                                                </Box>
-                                            </Box>
-                                            <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} />
-                                            <Box className='lesson-content-box'>
-                                                <Box className='single-lesson-content'>
-                                                    {skeletonFlag && <Skeleton variant="rectangular" width='100%' height='600px' />}
-                                                    {selectedLesson && !skeletonFlag &&
-                                                        <AddLesson
-                                                            mode={editMode}
-                                                            newLessonData={lessonDataToUpdate}
-                                                            handleLessonDataChange={handleLessonDataChange}
-                                                            handlelessonSave={handleUpdateLessonSave}
-                                                            slideList={slideListToUpdate}
-                                                            handleAddSlide={handleAddSlide}
-                                                            handleRemoveSlide={handleRemoveSlide}
-                                                            newSlideData={slideDataToUpdate}
-                                                            handleSlideDataChange={handleSlideDataChange}
-                                                            highlightWordList={highlightWordListToUpdate}
-                                                            handleAddHighlightWord={handleAddHighlightWord}
-                                                            handleRemoveHighlightWord={handleRemoveHighlightWord}
-                                                            newHighlightWordData={highlightWordDataToUpdate}
-                                                            handleHighlightWordDataChange={handleHighlightWordDataChange}
-                                                        />
-                                                    }
-                                                </Box>
-                                            </Box>
-                                        </Box>
-                                    }
                                 </Box>
                             }
                         </Box>

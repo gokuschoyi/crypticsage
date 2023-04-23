@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './Login.css'
-import { Box, Typography, TextField, Button, IconButton, Grid, Alert, CircularProgress, useTheme } from '@mui/material'
+import { Box, Typography, TextField, Button, IconButton, Grid, Alert, CircularProgress } from '@mui/material'
 import Collapse from '@mui/material/Collapse';
 import { CloseIcon, FacebookIcon } from '../../dashboard/global/Icons';
 import Logo from '../../../assets/logoNew.png'
@@ -17,7 +17,6 @@ const Login = (props) => {
     const { switchState } = props
     const navigate = useNavigate()
     const dispatch = useDispatch()
-    const theme = useTheme()
     const redirectToHome = () => {
         navigate('/')
     }

@@ -73,14 +73,14 @@ const Topbar = (props) => {
             if (!toggleSmallScreenSidebar) {
                 let sidebar = document.getElementsByClassName('sidebar')[0]
                 let content = document.getElementsByClassName('content')[0]
-                
+
                 if (sidebar === undefined || content === undefined) {
                     smallScreenSidebarLoad.current = false
                     console.log("undefined")
                     return
                 } else {
                     smallScreenSidebarLoad.current = true // Set the mount state to true after the first run
-                    
+
                     sidebar.classList.remove('show-sidebar');
                     content.style.setProperty('--marginLeft', '0px !important');
                     handleToggleSmallScreenSidebar()
@@ -95,7 +95,7 @@ const Topbar = (props) => {
         if (toggleSmallScreenSidebar) {
             let sidebar = document.getElementsByClassName('sidebar')[0]
             let content = document.getElementsByClassName('content')[0]
-            
+
             sidebar.classList.add('show-sidebar');
             content.style.setProperty('--marginLeft', '80px!important');
             handleToggleSmallScreenSidebar()
@@ -104,7 +104,7 @@ const Topbar = (props) => {
         } else {
             let sidebar = document.getElementsByClassName('sidebar')[0]
             let content = document.getElementsByClassName('content')[0]
-            
+
             sidebar.classList.remove('show-sidebar');
             content.style.setProperty('--marginLeft', '0px !important');
             handleToggleSmallScreenSidebar()
@@ -233,7 +233,10 @@ const Topbar = (props) => {
         >
             {sm && (
                 <Box display="flex">
-                    <IconButton className={smallScreenToggleState ? 'remove-rotate-icon' : 'rotate-icon'} sx={{ color: `${theme.palette.secondary.main}` }} onClick={(e) => showSidebar(e)}>
+                    <IconButton
+                        className={smallScreenToggleState ? 'remove-rotate-icon' : 'rotate-icon'}
+                        sx={{ color: `${theme.palette.secondary.main}` }}
+                        onClick={(e) => showSidebar(e)}>
                         <ArrowForwardIcon />
                     </IconButton>
                 </Box>

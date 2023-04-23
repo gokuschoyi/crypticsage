@@ -19,6 +19,7 @@ const AddLesson = (props) => {
         mode, //working
         handleNewLessonDialog,
         sectionData, // for add mode
+        selectedSectionLessonNames, // for add mode
         handleGetSection, // for add mode
         selectedSectionName, // for add mode
         newLessonData, //working
@@ -50,14 +51,14 @@ const AddLesson = (props) => {
     return (
         <Box className='add-lesson-box'>
             <Box className='add-lesson-data-header'>
-                <Typography variant='h4' color='white' textAlign='start' className='add-content-subtitle'>{mode === 'add' ? 'Add Lesson' : 'Edit Lesson'}</Typography>
+                <Typography variant='h4' color='white' textAlign='start' className='add-content-subtitle'>{mode === 'add' ? 'Add Lesson' : `Edit Lesson ${newLessonData.title}`}</Typography>
                 {mode === 'add' &&
                     <Box display='flex' flexDirection='row' gap='20px'>
                         <Button
                             onClick={(e) => handlelessonSave(e)}
                             size='small'
                             sx={{
-                                width: '150px',
+                                width: '100px',
                                 ':hover': {
                                     color: 'black !important',
                                     backgroundColor: '#d11d1d !important',
@@ -67,10 +68,11 @@ const AddLesson = (props) => {
                             }}
                         >Save</Button>
                         <Button
+                            value="addlesson"
                             onClick={(e) => handleNewLessonDialog(e)}
                             size='small'
                             sx={{
-                                width: '150px',
+                                width: '100px',
                                 ':hover': {
                                     color: 'black !important',
                                     backgroundColor: '#d11d1d !important',
@@ -84,29 +86,52 @@ const AddLesson = (props) => {
             </Box>
             <Box className='section-selector'>
                 {mode === 'add' &&
-                    <Box sx={{ width: '60%' }}>
-                        <FormControl fullWidth>
-                            <InputLabel id="document-type-label">Select a Section</InputLabel>
-                            <Select
-                                onChange={(e) => handleGetSection(e)}
-                                labelId="document-type"
-                                id="document-type"
-                                value={selectedSectionName}
-                                label="Media Type"
-                            >
-                                {sectionData && sectionData.map((section, index) => {
-                                    return (
-                                        <MenuItem key={index} value={`${section.title}`}>{section.title}</MenuItem>
-                                    )
-                                })}
-                            </Select>
-                        </FormControl>
+                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Box className='formcontrol-select-box'>
+                            <FormControl fullWidth >
+                                <InputLabel id="document-type-label">Select a Section</InputLabel>
+                                <Select
+                                    onChange={(e) => handleGetSection(e)}
+                                    labelId="document-type"
+                                    id="document-type"
+                                    value={selectedSectionName}
+                                    label="Media Type"
+                                >
+                                    {sectionData && sectionData.map((section, index) => {
+                                        return (
+                                            <MenuItem key={index} value={`${section.title}`}>{section.title}</MenuItem>
+                                        )
+                                    })}
+                                </Select>
+                            </FormControl>
+                        </Box>
+
+                        {selectedSectionName &&
+                            <Box className='add-lessontab-lesson-names'>
+                                <Typography variant='h4' color='white' textAlign='start' className='add-content-subtitle'>All lessons in this section</Typography>
+                                <Box>
+                                    <ul>
+                                        {selectedSectionLessonNames && selectedSectionLessonNames.map((lesson, index) => {
+                                            return (
+                                                <Box key={index} className='lesson-name-box'>
+                                                    <li key={index}>
+                                                        <Box className='available-lesson-box'>
+                                                            <Typography variant='h5' color='white' textAlign='start' className='add-content-lesson-item'>{lesson}</Typography>
+                                                        </Box>
+                                                    </li>
+                                                </Box>
+                                            )
+                                        })}
+                                    </ul>
+                                </Box>
+                            </Box>
+                        }
                     </Box>
                 }
                 <Box className='new-lwsson-box'>
                     <Box className='lesson-title flex-row'>
                         <Typography variant='h5' color='white' textAlign='start' className='header-width-lesson'>Lesson Title : </Typography>
-                        <TextField size='small' name='title' value={newLessonData.title} onChange={(e) => handleLessonDataChange(e)} sx={inputStyleLesson} className='lesson-title-input' />
+                        <TextField size='small' variant='outlined' name='title' value={newLessonData.title} onChange={(e) => handleLessonDataChange(e)} sx={inputStyleLesson} className='lesson-title-input' />
                     </Box>
                     <Box className='flex-row'>
                         <Typography variant='h5' color='white' textAlign='start' className='header-width-lesson'>Slide Media URL : </Typography>
@@ -149,7 +174,7 @@ const AddLesson = (props) => {
                         })}
                     </Box>
                 </Box>
-                <Box sx={{marginTop:'40px'}}>
+                <Box sx={{ marginTop: '40px' }}>
                     <Button
                         onClick={handlelessonSave}
                         size='small'

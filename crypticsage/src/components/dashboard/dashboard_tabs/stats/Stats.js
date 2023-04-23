@@ -504,8 +504,8 @@ const Stats = (props) => {
                                     <Box>
                                         <Autocomplete
                                             size='small'
+                                            disableClearable={true}
                                             className='tokenSelector-autocomplete'
-
                                             value={inputValue}
                                             onChange={(event, newInputValue) => handleInputChange(event, newInputValue)}
                                             id="controllable-states-demo"
@@ -523,7 +523,6 @@ const Stats = (props) => {
                                                 }}
                                                 {...params}
                                                 label="Select a Token"
-
                                                 color="secondary"
                                             />}
                                         />

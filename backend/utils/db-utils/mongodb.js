@@ -6,26 +6,7 @@ const { OAuth2Client } = require('google-auth-library');
 
 const { connect, close } = require('./db-conn')
 
-const sortAndGroupLessons = (lessonArray) => {
-    const sortedLessons = lessonArray.sort((a, b) => {
-        if (a.section_id < b.section_id) {
-            return -1;
-        } else if (a.section_id > b.section_id) {
-            return 1;
-        }
-        return 0;
-    });
-
-    const groupedLessons = {};
-    sortedLessons.forEach((lesson) => {
-        if (!groupedLessons[lesson.section_id]) {
-            groupedLessons[lesson.section_id] = [];
-        }
-        groupedLessons[lesson.section_id].push(lesson);
-    });
-
-    return groupedLessons;
-};
+const { sortAndGroupLessons } = require('./helpers');
 
 const makeUserLessonStatus = async () => {
     const db = await connect();
@@ -92,7 +73,7 @@ const createNewUser = async (req, res) => {
                         },
                         config.tokenKey,
                         {
-                            expiresIn: '4h'
+                            expiresIn: '8h'
                         }
                     );
                     try {
@@ -158,7 +139,7 @@ const createNewUser = async (req, res) => {
                         },
                         config.tokenKey,
                         {
-                            expiresIn: '4h'
+                            expiresIn: '8h'
                         }
                     );
                     try {
@@ -219,7 +200,7 @@ const createNewUser = async (req, res) => {
                     },
                     config.tokenKey,
                     {
-                        expiresIn: '4h'
+                        expiresIn: '8h'
                     }
                 );
                 try {
@@ -270,7 +251,7 @@ const loginUser = async (req, res) => {
                         },
                         config.tokenKey,
                         {
-                            expiresIn: '4h'
+                            expiresIn: '8h'
                         }
                     );
                     if (decryptedPassword) {
@@ -325,7 +306,7 @@ const loginUser = async (req, res) => {
                             },
                             config.tokenKey,
                             {
-                                expiresIn: '4h'
+                                expiresIn: '8h'
                             }
                         );
                         let userData = {};
@@ -371,7 +352,7 @@ const loginUser = async (req, res) => {
                         },
                         config.tokenKey,
                         {
-                            expiresIn: '4h'
+                            expiresIn: '8h'
                         }
                     );
                     let userData = {};
@@ -416,11 +397,23 @@ const addSection = async (req, res) => {
     const { title, content, url } = req.body;
     try {
         const db = await connect();
-        const userCollection = await db.collection('sections');
+        const sectionCollection = await db.collection('sections');
         sectionId = uuidv4();
-        await userCollection.insertOne({ title, content, url, sectionId });
+        let result = await sectionCollection.insertOne({ title, content, url, sectionId });
+        let insertedSectionId = result.insertedId;
+        let insertedSectionData = await sectionCollection.findOne({ _id: insertedSectionId });
+        let createdSectionId = insertedSectionData.sectionId
+
+        const allUserCollection = await db.collection('users')
+        const userCollection = await db.collection('users').find().toArray();
+        for (const user of userCollection) {
+            await allUserCollection.updateOne(
+                { _id: user._id },
+                { $set: { [`lesson_status.${createdSectionId}`]: [] } }
+            )
+        }
         await close(db);
-        res.status(200).json({ message: "Section added successfully" });
+        res.status(200).json({ message: "Section added successfully", createdSectionId, update:false });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Section creation failed" });
@@ -440,11 +433,37 @@ const updateSection = async (req, res) => {
         else {
             await userCollection.updateOne({ sectionId }, { $set: { title, content, url } });
             await close(db);
-            res.status(200).json({ message: "Section updated successfully" });
+            res.status(200).json({ message: "Section updated successfully", update: true });
         }
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Section update failed" });
+    }
+}
+
+const deleteSection = async (req, res) => {
+    const { sectionId } = req.body;
+    try {
+        const db = await connect();
+        const sectionCollection = await db.collection('sections')
+        const result = sectionCollection.deleteOne({ sectionId: sectionId });
+
+        const lessonsCollection = await db.collection('lessons')
+        const lessonsResult = lessonsCollection.deleteMany({ sectionId: sectionId });
+
+        const allUserCollection = await db.collection('users')
+        const userCollection = await db.collection('users').find().toArray();
+        for (const user of userCollection) {
+            await allUserCollection.updateOne(
+                { _id: user._id },
+                { $unset: { [`lesson_status.${sectionId}`]: "" } }
+            )
+        }
+        await close(db);
+        res.status(200).json({ message: "Section deleted successfully" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Section deletion failed" });
     }
 }
 
@@ -477,11 +496,37 @@ const addLesson = async (req, res) => {
         }
 
         const db = await connect();
-        const userCollection = await db.collection('lessons');
-        const result = await userCollection.insertOne(data);
+        const lessonsCollection = await db.collection('lessons');
+        const result = await lessonsCollection.insertOne(data);
         let insertedId = result.insertedId;
-        let insertedLessonData = await userCollection.find({ _id: insertedId }).toArray();
+        let insertedLessonData = await lessonsCollection.find({ _id: insertedId }).toArray();
         let lessonId = insertedLessonData[0].lessonId;
+        let lesson_status = {
+            section_id: sectionId,
+            lesson_id: lessonId,
+            lesson_name: lessonData.title,
+            lesson_start: false,
+            lesson_progress: 1,
+            lesson_complete: false,
+        }
+        const allUserCollection = await db.collection('users')
+        const userCollection = await db.collection('users').find().toArray();
+        for (const user of userCollection) {
+            if (sectionId in user.lesson_status) {
+                console.log("Lesson status key exists");
+                await allUserCollection.updateOne(
+                    { _id: user._id },
+                    { $push: { [`lesson_status.${sectionId}`]: lesson_status } }
+                );
+            } else {
+                console.log("Lesson status key does not exist");
+                await collection.updateOne(
+                    { _id: user._id },
+                    { $set: { [`lesson_status.${sectionId}`]: [lesson_status] } }
+                );
+            }
+        }
+
         await close(db);
         res.status(200).json({ message: "Lesson added successfully", lessonId });
     } catch (err) {
@@ -507,6 +552,33 @@ const updateLesson = async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Lesson update failed" });
+    }
+}
+
+const deleteLesson = async (req, res) => {
+    const { lessonId, sectionId } = req.body;
+    try {
+        const db = await connect();
+        const lessonsCollection = await db.collection('lessons');
+        const result = await lessonsCollection.deleteOne({ lessonId: lessonId });
+
+        const allUserCollection = await db.collection('users')
+        const userCollection = await db.collection('users').find().toArray();
+        for (const user of userCollection) {
+            if (sectionId in user.lesson_status) {
+                console.log("Lesson status key exists");
+                await allUserCollection.updateOne(
+                    { _id: user._id },
+                    { $pull: { [`lesson_status.${sectionId}`]: { lesson_id: lessonId } } }
+                )
+            } else {
+                console.log("Lesson status key not present")
+            }
+        }
+        res.status(200).json({ message: "Lesson deleted successfully", result });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Lesson deletion failed" });
     }
 }
 
@@ -710,9 +782,11 @@ module.exports = {
     getSections,
     addSection,
     updateSection,
+    deleteSection,
     getLessons,
     addLesson,
     updateLesson,
+    deleteLesson,
     getQuizQuestions,
     addQuizQuestions,
     updateQuizQuestions,

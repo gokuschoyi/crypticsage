@@ -17,6 +17,30 @@
   padding-top: 20px;
 }
 
+.add-lessontab-lesson-names {
+  margin-top: 20px;
+  width: 50%;
+}
+
+.lesson-name-box {
+  margin: 5px 0px 5px 0px;
+}
+
+.available-lesson-box {
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.available-lesson-box:hover {
+  background-color: var(--mui-palette-primary-light);
+  border-radius: 10px;
+}
+
+.add-content-lesson-item {
+  margin-left: 10px !important;
+  margin-right: 10px !important;
+}
+
 .lesson-title {
   margin-top: 30px;
 }
@@ -33,8 +57,7 @@
 }
 
 .slide-padding {
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding:10px;
 }
 
 .header-width {
@@ -46,15 +69,28 @@
 }
 
 .margin-for-header {
-  margin-top: 10px !important;
+  margin-top: 15px !important;
 }
 
 .highlight-word-box {
   display: flex;
   flex-direction: row;
 }
-.mediaTypePadding{
+.mediaTypePadding {
   padding-top: 0px;
+}
+
+.formcontrol-select-box {
+  width: 50%;
+}
+
+@media screen and (max-width: 1200px) {
+  .formcontrol-select-box {
+    width: 70%;
+  }
+  .add-lessontab-lesson-names {
+    width: 70%;
+  }
 }
 
 @media screen and (max-width: 900px) {
@@ -66,16 +102,22 @@
   .header-width {
     padding-left: 10px;
   }
-  .highlightwordbox{
-    width:100% !important;
+  .highlightwordbox {
+    width: 100% !important;
   }
-  .mediaTypePadding{
+  .mediaTypePadding {
     padding-top: 10px;
   }
-  .add-lesson-data-header{
+  .add-lesson-data-header {
     height: auto;
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+  }
+  .formcontrol-select-box {
+    width: 100%;
+  }
+  .add-lessontab-lesson-names {
+    width: 100%;
   }
 }

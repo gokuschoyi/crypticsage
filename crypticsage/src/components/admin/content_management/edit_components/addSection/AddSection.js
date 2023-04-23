@@ -6,12 +6,10 @@ import {
     Typography,
     TextField,
     Button,
-    IconButton,
     useTheme
 } from '@mui/material'
-import { ReplayIcon } from '../../../../dashboard/global/Icons'
 const AddSection = (props) => {
-    const { newSectionData, handleNewSectionData, handleSectionSubmit, sectionData, refreshSectionData } = props
+    const { handleNewLessonDialog, newSectionData, handleNewSectionData, handleSectionSubmit, sectionData} = props
     const theme = useTheme()
     const inputStyleSection = {
         width: 'fill-available',
@@ -20,7 +18,7 @@ const AddSection = (props) => {
             color: 'white !important',
         },
         '& label': {
-            color: 'red',
+            color: 'white',
         }
     }
 
@@ -30,6 +28,35 @@ const AddSection = (props) => {
                 <Grid item xs={12} sm={12} md={8} lg={8} order={{ xs: 2, md: 1 }}>
                     <Box className='add-section-data-header'>
                         <Typography variant='h4' color='white' textAlign='start' className='add-content-subtitle'>Add Sections</Typography>
+                        <Box display='flex' flexDirection='row' gap='20px'>
+                            <Button
+                                onClick={handleSectionSubmit}
+                                size='small'
+                                sx={{
+                                    width: '100px',
+                                    ':hover': {
+                                        color: 'black !important',
+                                        backgroundColor: '#d11d1d !important',
+                                        transition: '0.5s'
+                                    },
+                                    backgroundColor: `${theme.palette.secondary.main}`
+                                }}
+                            >Save</Button>
+                            <Button
+                                value="addsection"
+                                onClick={(e) => handleNewLessonDialog(e)}
+                                size='small'
+                                sx={{
+                                    width: '100px',
+                                    ':hover': {
+                                        color: 'black !important',
+                                        backgroundColor: '#d11d1d !important',
+                                        transition: '0.5s'
+                                    },
+                                    backgroundColor: `${theme.palette.secondary.main}`
+                                }}
+                            >New Section</Button>
+                        </Box>
                     </Box>
                     <Box className='add-section-data'>
                         <TextField
@@ -39,7 +66,7 @@ const AddSection = (props) => {
                             error={newSectionData.title.error}
                             helperText={newSectionData.title.helperText}
                             sx={inputStyleSection}
-                            id="outlined-basic"
+                            id="add-section-title"
                             label="Section Title"
                             variant="outlined"
                             className='add-section-data-title'
@@ -68,31 +95,16 @@ const AddSection = (props) => {
                             error={newSectionData.url.error}
                             helperText={newSectionData.url.helperText}
                             sx={inputStyleSection}
-                            id="outlined-basic"
+                            id="add-section-url"
                             label="Section Image URL"
                             variant="outlined"
                             className='add-section-data-image'
                         />
-                        <Button
-                            size='small'
-                            sx={{
-                                width: '200px',
-                                ':hover': {
-                                    color: 'black !important',
-                                    backgroundColor: '#d11d1d !important',
-                                    transition: '0.5s'
-                                },
-                                backgroundColor: `${theme.palette.secondary.main}`
-                            }}
-                            onClick={handleSectionSubmit}>Submit</Button>
                     </Box>
                 </Grid>
                 <Grid item xs={12} sm={12} md={4} lg={4} order={{ xs: 1, md: 2 }}>
                     <Box className='refresh-sections'>
                         <Typography variant='h4' color='white' textAlign='start' className='add-content-subtitle'>Available Sections</Typography>
-                        <IconButton className='refreshIcon' onClick={refreshSectionData}>
-                            <ReplayIcon />
-                        </IconButton>
                     </Box>
                     <Box className='add-content-sections'>
                         <ul>

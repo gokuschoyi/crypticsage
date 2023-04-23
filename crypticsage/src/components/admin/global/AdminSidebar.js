@@ -5,6 +5,7 @@ import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import CSLogo from '../../../assets/csLogo.png'
 import './GolbalStyle.css'
 import {
     HomeOutlinedIcon,
@@ -19,16 +20,24 @@ const AdminSidebar = () => {
     const theme = useTheme();
     const navigate = useNavigate();
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    const md = useMediaQuery(theme.breakpoints.down('md'));
     const dispatch = useDispatch();
     const { adminSidebarTab } = useSelector(state => state.adminSidebar);
     const { collapseSidebar, collapsed } = useProSidebar();
 
     //add sm to dep to triggrer collapseSidebar
     useEffect(() => {
-        if (sm) {
-            collapseSidebar();
+        if (md) {
+            if (!collapsed) {
+                collapseSidebar();
+            }
         }
-    }, [collapseSidebar])
+        if (sm) {
+            if (!collapsed) {
+                collapseSidebar();
+            }
+        }
+    }, [collapseSidebar, md, sm])
 
     useEffect(() => {
         const content = document.getElementsByClassName('admin-content')[0];
@@ -54,10 +63,11 @@ const AdminSidebar = () => {
         dispatch(setAdminSidebarState(name));
         console.log(name)
     }
+    const mode = 'dark'
 
     return (
-        <div style={{ display: 'flex', height: '100%', position: 'fixed' }}>
-            <Sidebar defaultCollapsed={true} width="300px" style={{ height: '100vh' }} rootStyles={{
+        <div className="admin-sidebar" style={{ display: 'flex', height: '100%', position: 'fixed' }}>
+            <Sidebar transitionDuration={700} defaultCollapsed={true} width="300px" style={{ height: '100vh' }} rootStyles={{
                 [`.ps-sidebar-container`]: {
                     backgroundColor: `${theme.palette.background.default}`,
                 },
@@ -88,16 +98,29 @@ const AdminSidebar = () => {
                         </Box>
                     ) : (
                         <Box
+                            backgroundColor={sm ? `${theme.palette.primary.newBlack}` : ''}
                             textAlign="center"
+                            justifyContent='center'
+                            alignItems='center'
+                            display='flex'
                             sx={{ height: '72px' }}
                         >
-                            <IconButton sx={{ marginTop: '20%', color: `${theme.palette.text.primary}` }} onClick={() => collapseSidebar()}>
-                                <MenuOutlinedIcon />
-                            </IconButton>
+                            {!sm ? (
+                                <IconButton sx={{ marginTop: '20%', color: `${theme.palette.text.primary}` }} onClick={() => collapseSidebar()}>
+                                    <MenuOutlinedIcon />
+                                </IconButton>)
+                                :
+                                (
+                                    <img
+                                        onClick={(e) => { e.preventDefault(); navigate('/dashboard') }}
+                                        style={{ filter: `${mode === 'dark' ? 'invert(1)' : ''}` }}
+                                        className="smallscreen-logo" height="45px" alt='logo' src={CSLogo}></img>
+                                )
+                            }
                         </Box>
                     )}
 
-                    <Box className="admin-menu-icon-holder" paddingLeft={collapsed ? undefined : "0%"} paddingTop={collapsed ? '20px' : '24px'}>
+                    <Box className="admin-menu-icon-holder" paddingLeft={collapsed ? undefined : "0%"} >
                         <MenuItem
                             active={adminSidebarTab === "adminDashboard"}
                             style={{

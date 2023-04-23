@@ -11,3 +11,26 @@
   transition: all 0.2s ease-in-out;
 }
 
+.admin-sidebar {
+  transform: translateX(0px);
+  transition: all 0.7s ease-in-out;
+}
+
+.hide-admin-sidebar {
+  transform: translateX(-80px);
+}
+
+.show-admin-sidebar {
+  transform: translateX(0px) !important;
+}
+
+.admin-topbar{
+  padding:16px;
+}
+
+@media screen and (max-width: 600px) {
+  .admin-sidebar {
+    transform: translateX(-80px);
+  }
+  
+}

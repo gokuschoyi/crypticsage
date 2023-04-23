@@ -8,9 +8,11 @@ const {
     getSections,
     addSection,
     updateSection,
+    deleteSection,
     getLessons,
     addLesson,
     updateLesson,
+    deleteLesson,
     getQuizQuestions,
     addQuizQuestions,
     updateQuizQuestions,
@@ -42,6 +44,16 @@ router.post('/update_section', verify, async (req, res) => {
     }
 })
 
+router.post('/delete_section', verify, async (req, res) => {
+    console.log("Delete section request received");
+    const { sectionId } = req.body;
+    if (sectionId === '') {
+        return res.status(500).json({ message: "Section Id is required" });
+    } else {
+        deleteSection(req, res);
+    }
+})
+
 router.post('/get_lessons', verify, async (req, res) => {
     console.log("Get lessons request received");
     const { sectionId } = req.body;
@@ -69,6 +81,16 @@ router.post('/update_lesson', verify, async (req, res) => {
         return res.status(500).json({ message: "Section Id is required" });
     } else {
         updateLesson(req, res);
+    }
+})
+
+router.post('/delete_lesson', verify, async (req, res) => {
+    console.log("Delete lesson request received");
+    const { lessonId } = req.body;
+    if (!lessonId) {
+        return res.status(500).json({ message: "Lesson Id is required" });
+    } else {
+        deleteLesson(req, res);
     }
 })
 
