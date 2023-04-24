@@ -24,6 +24,10 @@
   padding-top: 60px !important;
 }
 
+.banner-text {
+  font-size: 50px !important;
+}
+
 .grid-col-button-left {
   width: 150px;
 }
@@ -32,15 +36,20 @@
   .grid-col-left {
     padding-left: 0px;
   }
-  .banner-text{
+  .banner-text {
     font-size: 40px !important;
   }
-  .banner-grid-container{
+  .banner-grid-container {
     padding: 30px !important ;
     padding-top: 60px !important;
   }
-  .grid-col-left{
-    padding-left:20px !important;
+  .grid-col-left {
+    padding-left: 20px !important;
+  }
+  .banner-animation-model {
+    width: 400px !important;
+    height: 400px !important;
+    transition: all 0.5s ease-in-out;
   }
 }
 
@@ -49,10 +58,11 @@
   justify-content: center !important;
 }
 
-.banner-animation-model{
+.banner-animation-model {
+  transition: all 0.5s ease-in-out;
   width: 500px;
-  height:500px;
-  display:flex;
+  height: 500px;
+  display: flex;
   justify-content: center;
   align-items: center;
 }

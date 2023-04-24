@@ -5,22 +5,22 @@
 }
 
 .testimonial-card {
-  width: 600px;
   display: flex;
   flex-direction: row;
   padding: 10px;
   box-shadow: 15px 12px 6px 3px rgba(0, 0, 0, 0.494) !important;
+  border-radius: 10px !important;
 }
 
 .testimonial-box {
   padding: 2rem;
 }
 
-@media screen and (max-width: 1200px) {
+/* @media screen and (max-width: 1200px) {
   .testimonial-card {
     width: 1000px;
   }
-}
+} */
 
 @media screen and (max-width: 900px) {
   .testimonial-box {

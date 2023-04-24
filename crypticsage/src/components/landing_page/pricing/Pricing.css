@@ -10,11 +10,16 @@
   margin-top: 60px;
   padding-bottom: 10rem;
 }
+
+.pricing-card {
+  width: 800px;
+}
+
 .padding-price {
   padding: 2rem;
 }
 
-.get-to-top{
+.get-to-top {
   display: flex;
   justify-content: flex-end;
   margin-right: 20px;
@@ -25,14 +30,16 @@
   .pricing-box {
     padding: 4rem;
   }
+  .pricing-card {
+    width: 100%;
+  }
 }
 
-
 @media screen and (max-width: 600px) {
-  .pricing-box{
+  .pricing-box {
     padding: 20px;
   }
-  .pricing-card{
-    padding:0;
+  .pricing-card {
+    padding: 0;
   }
 }

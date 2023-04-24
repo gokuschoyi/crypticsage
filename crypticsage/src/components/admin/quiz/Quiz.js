@@ -7,6 +7,7 @@ import AddQuiz from './quiz_components/addQuiz/AddQuiz'
 import { Success, Error } from '../../dashboard/global/CustomToasts'
 import QuestionBox from './quiz_components/addQuiz/QuestionBox';
 import OptionBox from './quiz_components/addQuiz/OptionBox';
+import NewLessonDialog from './quiz_components/addQuiz/NewQuizDialog';
 import {
     Box,
     useTheme,
@@ -46,6 +47,7 @@ const Quiz = (props) => {
 
     const [sectionData, setSectionData] = useState([]);
     const [selectedSection, setSelectedSection] = useState('');
+    const [selectedSectionId, setSelectedSectionId] = useState('');
 
     const [lessonData, setLessonData] = useState([]);
     const [selectedLesson, setSelectedLesson] = useState('');
@@ -103,6 +105,7 @@ const Quiz = (props) => {
                 setSelectedSection(e.target.value);
                 setSelectedLesson([])
                 sectionId = sectionData.filter(section => section.title === e.target.value)[0].sectionId
+                setSelectedSectionId(sectionId)
                 data = {
                     token: token,
                     sectionId: sectionId
@@ -396,6 +399,7 @@ const Quiz = (props) => {
     }
 
     const finalData = {
+        'sectionId': '',
         'quizId': '',
         'lessonId': '',
         'quizTitle': '',
@@ -406,6 +410,7 @@ const Quiz = (props) => {
     //save quiz data
     const [quizId, setQuizId] = useState('');
     const handleLessonSave = async (e) => {
+        finalData.sectionId = selectedSectionId;
         finalData.lessonId = selectedLessonId;
         finalData.quizTitle = titleAndDescription.quizTitle;
         finalData.quizDescription = titleAndDescription.quizDescription;
@@ -548,6 +553,25 @@ const Quiz = (props) => {
 
     // ---> EDIT ENTIRE QUESTION DATA <--- //
 
+    const [open, setOpen] = useState(false);
+    const handleNewQuizDialog = () => {
+        setOpen(true);
+    }
+    const handleCloseQuiz = () => {
+        setOpen(false);
+    }
+
+    const resetQuiz = () => {
+        console.log("reset quiz")
+        setOpen(false)
+        /* setTitleAndDescription({ 'quizTitle': '', 'quizDescription': '' })
+        setQuestionBoxList([])
+        setQuestionData([])
+        setOptionBoxList([])
+        setOptionData([])
+        setQuizId('') */
+    }
+
     return (
         <Box className='admin-dashboard-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
@@ -579,6 +603,12 @@ const Quiz = (props) => {
                 <Box className='quiz-add-edit-box'>
                     {quizMode === 'add' ?
                         <Box className='quiz-add-box'>
+                            <NewLessonDialog 
+                                open={open}
+                                heading="Are you sure"
+                                handleCloseQuiz={handleCloseQuiz}
+                                resetQuiz={resetQuiz}
+                            />
                             <AddQuiz
                                 value="Add Quiz"
                                 mode={quizMode}
@@ -588,6 +618,7 @@ const Quiz = (props) => {
                                 lessonData={lessonData}
                                 selectedLesson={selectedLesson}
                                 handleSelectedLesson={handleSelectedLesson}
+                                handleNewQuizDialog={handleNewQuizDialog}
                                 quizData={quizDataU}
                                 titleAndDescription={titleAndDescription}
                                 handleTitleAndDescription={handleTitleAndDescription}

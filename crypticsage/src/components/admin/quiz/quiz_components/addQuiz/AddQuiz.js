@@ -23,6 +23,7 @@ const AddQuiz = (props) => {
         lessonData, //done
         selectedLesson, //done
         handleSelectedLesson, //done
+        handleNewQuizDialog,
         quizData, //done
         selectedQuiz, //done
         handleSelectedQuiz, //done
@@ -110,103 +111,15 @@ const AddQuiz = (props) => {
                 }
             </Box>
             {selectedLesson.length > 0 && mode === 'add' &&
-                <Box>
-                    <Box className='quiz-title'>
-                        <Typography sx={{ width: '150px', paddingBottom: '10px' }} variant='h5' color='white' textAlign='start' >Quiz Title : </Typography>
-                        <TextField
-                            onChange={(e) => handleTitleAndDescription(e)}
-                            value={titleAndDescription.quizTitle}
-                            size='small'
-                            name='quizTitle'
-                            fullWidth />
-                    </Box>
-                    <Box className='quiz-title'>
-                        <Typography sx={{ width: '150px', paddingBottom: '10px' }} variant='h5' color='white' textAlign='start' >Quiz Description : </Typography>
-                        <TextField
-                            onChange={(e) => handleTitleAndDescription(e)}
-                            value={titleAndDescription.quizDescription}
-                            size='small'
-                            name='quizDescription'
-                            fullWidth />
-                    </Box>
-                    <Box className='add-questions'>
-                        <Typography variant='h5' color='white' textAlign='start' >Add Questions</Typography>
-                        <Button
-                            onClick={(e) => addQuestion(e)}
-                            size='small'
-                            sx={{
-                                width: '150px',
-                                ':hover': {
-                                    color: 'black !important',
-                                    backgroundColor: '#d11d1d !important',
-                                    transition: '0.5s'
-                                },
-                                backgroundColor: `${theme.palette.secondary.main}`
-                            }}
-                        >Add Question</Button>
-                    </Box>
-                    {questionBoxList && questionBoxList.map((questionBox, index) => {
-                        return (
-                            React.cloneElement(questionBox, {
-                                key: index,
-                                removeQuestionBox: removeQuestionBox,
-                                handleQuestionBoxData: handleQuestionBoxData,
-                                questionData: questionData,
-                                optionBoxList: optionBoxList,
-                                addNewOption: addNewOption,
-                                removeOptions: removeOptions,
-                                handleOptionsBoxData: handleOptionsBoxData,
-                                optionData: optionData,
-                            })
-                        )
-                    })
-                    }
-                    <Box sx={{ marginTop: '40px' }}>
-                        <Button
-                            onClick={handleLessonSave}
-                            size='small'
-                            sx={{
-                                width: '150px',
-                                ':hover': {
-                                    color: 'black !important',
-                                    backgroundColor: '#d11d1d !important',
-                                    transition: '0.5s'
-                                },
-                                backgroundColor: `${theme.palette.secondary.main}`
-                            }}
-                        >Save</Button>
-                    </Box>
-                </Box>
-            }
-            <Box sx={{ paddingTop: '20px' }}>
-                {skeletonFlag && <Skeleton variant="rectangular" width='100%' height='600px' />}
-                {selectedQuiz && quizData.length > 0 && mode === 'edit' && !skeletonFlag &&
-                    <Box>
-                        <Box className='quiz-title'>
-                            <Typography sx={{ width: '150px', paddingBottom: '10px' }} variant='h5' color='white' textAlign='start' >Quiz Title : </Typography>
-                            <TextField
-                                onChange={(e) => handleTitleAndDescription(e)}
-                                value={titleAndDescription.quizTitle}
-                                size='small'
-                                name='quizTitle'
-                                fullWidth />
-                        </Box>
-                        <Box className='quiz-title'>
-                            <Typography sx={{ width: '150px', paddingBottom: '10px' }} variant='h5' color='white' textAlign='start' >Quiz Description : </Typography>
-                            <TextField
-                                onChange={(e) => handleTitleAndDescription(e)}
-                                value={titleAndDescription.quizDescription}
-                                size='small'
-                                name='quizDescription'
-                                fullWidth />
-                        </Box>
-                        <Box className='add-questions'>
-                            <Typography variant='h5' color='white' textAlign='start' >Add Questions</Typography>
+                <Box mt={4}>
+                    <Box p={2} display='flex' flexDirection='row' justifyContent='space-between'>
+                        <Typography variant='h4' color='white' textAlign='start' >{selectedLesson}</Typography>
+                        <Box display='flex' flexDirection='row' gap='20px'>
                             <Button
-                                onClick={(e) => addQuestion(e)}
+                                onClick={handleLessonSave}
                                 size='small'
                                 sx={{
-                                    width: '150px',
+                                    width: '100px',
                                     ':hover': {
                                         color: 'black !important',
                                         backgroundColor: '#d11d1d !important',
@@ -214,7 +127,118 @@ const AddQuiz = (props) => {
                                     },
                                     backgroundColor: `${theme.palette.secondary.main}`
                                 }}
-                            >Add Question</Button>
+                            >Save</Button>
+                            <Button
+                                value="addlesson"
+                                onClick={handleNewQuizDialog}
+                                size='small'
+                                sx={{
+                                    width: '100px',
+                                    ':hover': {
+                                        color: 'black !important',
+                                        backgroundColor: '#d11d1d !important',
+                                        transition: '0.5s'
+                                    },
+                                    backgroundColor: `${theme.palette.secondary.main}`
+                                }}
+                            >New Quiz</Button>
+                        </Box>
+                    </Box>
+                    <Box>
+                        <Box p={2}>
+                            <Box className='quiz-title'>
+                                <Typography sx={{ width: '150px', paddingBottom: '10px' }} variant='h5' color='white' textAlign='start' >Quiz Title : </Typography>
+                                <TextField
+                                    onChange={(e) => handleTitleAndDescription(e)}
+                                    value={titleAndDescription.quizTitle}
+                                    size='small'
+                                    name='quizTitle'
+                                    fullWidth />
+                            </Box>
+                            <Box className='quiz-title'>
+                                <Typography sx={{ width: '150px', paddingBottom: '10px' }} variant='h5' color='white' textAlign='start' >Quiz Description : </Typography>
+                                <TextField
+                                    onChange={(e) => handleTitleAndDescription(e)}
+                                    value={titleAndDescription.quizDescription}
+                                    size='small'
+                                    name='quizDescription'
+                                    fullWidth />
+                            </Box>
+                            <Box className='add-questions'>
+                                <Typography variant='h5' color='white' textAlign='start' >Add Questions</Typography>
+                                <Button
+                                    onClick={(e) => addQuestion(e)}
+                                    size='small'
+                                    sx={{
+                                        width: '150px',
+                                        ':hover': {
+                                            color: 'black !important',
+                                            backgroundColor: '#d11d1d !important',
+                                            transition: '0.5s'
+                                        },
+                                        backgroundColor: `${theme.palette.secondary.main}`
+                                    }}
+                                >Add Question</Button>
+                            </Box>
+                        </Box>
+                        {questionBoxList && questionBoxList.map((questionBox, index) => {
+                            return (
+                                React.cloneElement(questionBox, {
+                                    key: index,
+                                    removeQuestionBox: removeQuestionBox,
+                                    handleQuestionBoxData: handleQuestionBoxData,
+                                    questionData: questionData,
+                                    optionBoxList: optionBoxList,
+                                    addNewOption: addNewOption,
+                                    removeOptions: removeOptions,
+                                    handleOptionsBoxData: handleOptionsBoxData,
+                                    optionData: optionData,
+                                })
+                            )
+                        })
+                        }
+                    </Box>
+                </Box>
+            }
+            <Box sx={{ paddingTop: '20px' }}>
+                {skeletonFlag && <Skeleton variant="rectangular" width='100%' height='600px' />}
+                {selectedQuiz && quizData.length > 0 && mode === 'edit' && !skeletonFlag &&
+                    <Box>
+                        <Box p={2}>
+                            <Box className='quiz-title'>
+                                <Typography sx={{ width: '150px', paddingBottom: '10px' }} variant='h5' color='white' textAlign='start' >Quiz Title : </Typography>
+                                <TextField
+                                    onChange={(e) => handleTitleAndDescription(e)}
+                                    value={titleAndDescription.quizTitle}
+                                    size='small'
+                                    name='quizTitle'
+                                    fullWidth />
+                            </Box>
+                            <Box className='quiz-title'>
+                                <Typography sx={{ width: '150px', paddingBottom: '10px' }} variant='h5' color='white' textAlign='start' >Quiz Description : </Typography>
+                                <TextField
+                                    onChange={(e) => handleTitleAndDescription(e)}
+                                    value={titleAndDescription.quizDescription}
+                                    size='small'
+                                    name='quizDescription'
+                                    fullWidth />
+                            </Box>
+                            <Box className='add-questions'>
+                                <Typography variant='h5' color='white' textAlign='start' >Add Questions</Typography>
+                                <Button
+                                    onClick={(e) => addQuestion(e)}
+                                    size='small'
+                                    sx={{
+                                        width: '150px',
+                                        ':hover': {
+                                            color: 'black !important',
+                                            backgroundColor: '#d11d1d !important',
+                                            transition: '0.5s'
+                                        },
+                                        backgroundColor: `${theme.palette.secondary.main}`
+                                    }}
+                                >Add Question</Button>
+                            </Box>
                         </Box>
                         {questionBoxList && questionBoxList.map((questionBox, index) => {
                             return (

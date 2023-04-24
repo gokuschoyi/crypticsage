@@ -6,7 +6,7 @@ const CourseDetails = () => {
         <Box id="course" className="course-container" >
             <Typography sx={{color:'white'}} fontWeight={300} fontSize="50px" letterSpacing="5px" variant="h1" pt={18}>COURSE DETAILS</Typography>
             <Box className="course-box">
-                <Card className='course-card' sx={{ display: 'flex', backgroundColor:'#121212', flexDirection: 'column', width: '1000px', textAlign: 'start' }}>
+                <Card className='course-card' sx={{ display: 'flex', backgroundColor:'#121212', flexDirection: 'column', textAlign: 'start' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                         <Typography variant="h4" fontWeight={400} className="padding-course" color="white">
                             The course will be divided into several modules, each covering a specific aspect of the financial market. For example:

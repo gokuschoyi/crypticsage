@@ -19,7 +19,7 @@ function selectWords(words) {
 
 console.log(selectWords(wordList))
 
-function Word({ children, ...props }) {
+function Word({ children, setSelectedWord, handleOpenWordMeaning, ...props }) {
     const color = new THREE.Color()
     const fontProps = { font: '/MontserratBlack-3zOvZ.ttf', fontSize: 2, letterSpacing: 0.05, lineHeight: 1, 'material-toneMapped': false }
     const ref = useRef()
@@ -49,7 +49,9 @@ function Word({ children, ...props }) {
         onPointerOut={out}
         onClick={(e) => {
             e.stopPropagation()
-            console.log(ref.current._private_text)
+            handleOpenWordMeaning()
+            setSelectedWord(ref.current._private_text)
+            // console.log(ref.current._private_text)
         }
         }
         {...props}
@@ -59,7 +61,7 @@ function Word({ children, ...props }) {
 }
 
 function Cloud(props) {
-    const { count, radius } = props
+    const { count, radius, setSelectedWord, handleOpenWordMeaning } = props
     const tempBuffer = useRef([]);
 
 
@@ -76,10 +78,10 @@ function Cloud(props) {
 
     const words = useMemo(() => generatePosition({ count, radius }), [count, radius])
     // console.log(words.map(([pos, word], index) => <Word key={index} position={pos} children={word} />))
-    return words.map(([pos, word], index) => <Word key={index} position={pos} children={word} />)
+    return words.map(([pos, word], index) => <Word key={index} position={pos} children={word} setSelectedWord={setSelectedWord} handleOpenWordMeaning={handleOpenWordMeaning} />)
 }
 
-function WordlGlobeMesh() {
+function WordlGlobeMesh(props) {
     /* const options = useMemo(() => {
         return {
             x: { value: 0, min: 0, max: Math.PI * 2, step: 0.01 },
@@ -91,7 +93,7 @@ function WordlGlobeMesh() {
     }, []) */
     // const pA = useControls('Points', options)
     const CloudRef = useMemo(() => {
-        return <Cloud count={7} radius={20} />
+        return <Cloud count={7} radius={20} setSelectedWord={props.setSelectedWord} handleOpenWordMeaning={props.handleOpenWordMeaning} />
     }, [])
     // console.log(<Cloud count={7} radius={20} />)
     // console.log("______________________________")
@@ -117,12 +119,12 @@ function WordlGlobeMesh() {
     )
 }
 
-export default function WordCloud() {
+export default function WordCloud(props) {
     return (
         <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 35], fov: 90 }}>
             <ambientLight intensity={0.5} />
             <spotLight position={[0, 0, 50]} angle={0.3} penumbra={1} intensity={2} castShadow />
-            <WordlGlobeMesh />
+            <WordlGlobeMesh setSelectedWord={props.setSelectedWord} handleOpenWordMeaning={props.handleOpenWordMeaning} />
         </Canvas>
     )
 }

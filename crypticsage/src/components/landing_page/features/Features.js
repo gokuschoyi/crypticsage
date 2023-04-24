@@ -8,10 +8,10 @@ const Features = () => {
         return (
             <Card className="features-card" sx={{ textAlign: 'start', backgroundColor:'#121212' }}>
                 <CardContent sx={{ flex: '1 0 auto' }}>
-                    <Typography variant="h3" fontWeight={400} color="#fafafa" className="padding">
+                    <Typography variant="h3" fontWeight={400} color="#fafafa" className="padding-feature">
                         {title}
                     </Typography>
-                    <Typography variant="h4" fontWeight={300} color="#fafafa" className="padding">
+                    <Typography variant="h4" fontWeight={300} color="#fafafa" className="padding-feature">
                         {subtitle}
                     </Typography>
                     <Typography textAlign="justify" variant="h6" fontWeight={300} color="#fafafa" >
@@ -22,8 +22,8 @@ const Features = () => {
                 <Box className='features-image-container'>
                     <CardMedia
                         component="img"
-                        sx={{ width: 151 }}
-                        image="https://source.unsplash.com/random"
+                        
+                        image="https://picsum.photos/400/500"
                         alt="Live from space album cover"
                     />
                 </Box>
@@ -37,7 +37,7 @@ const Features = () => {
                 <Grid justifyContent="center" container p={8} spacing={{ xs: 2, md: 3, lg: 5 }} className="features-grid">
                     {FEATURES_DATA.map((item, index) => {
                         return (
-                            <Grid className='grid-item-container' sx={{ display: 'flex', justifyContent: 'center' }} item xs={12} sm={12} md={12} lg={6} key={index}>
+                            <Grid className='grid-item-container' sx={{ display: 'flex', justifyContent: 'center' }} item xs={12} sm={12} md={6} lg={6} key={index}>
                                 <CustomCard key={index} title={item.title} subtitle={item.subtitle} content={item.content} />
                             </Grid>
                         )
