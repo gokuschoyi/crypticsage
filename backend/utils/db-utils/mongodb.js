@@ -6,29 +6,9 @@ const { OAuth2Client } = require('google-auth-library');
 
 const { connect, close } = require('./db-conn')
 
-const { sortAndGroupLessons } = require('./helpers');
+const { makeAllStatusForUser } = require('./helpers');
 
 // <--- User Operations ---> //
-const makeUserLessonStatus = async () => {
-    const db = await connect();
-    const lessonCollection = await db.collection('lessons');
-    const lessons = await lessonCollection.find({}).toArray();
-    const userLessonStatus = [];
-    lessons.forEach(lesson => {
-        userLessonStatus.push({
-            section_id: lesson.sectionId,
-            lesson_id: lesson.lessonId,
-            lesson_name: lesson.chapter_title,
-            lesson_start: false,
-            lesson_progress: 1,
-            lesson_completed: false,
-        })
-    });
-    const groupedLessons = sortAndGroupLessons(userLessonStatus);
-    close();
-    return groupedLessons;
-}
-
 const createNewUser = async (req, res) => {
     const { signup_type } = req.body;
     let token = '';
@@ -40,16 +20,17 @@ const createNewUser = async (req, res) => {
                 return res.status(400).json({ message: "Please fill all the fields" });
             }
             else {
-                const db = await connect();
-                const userCollection = await db.collection('users');
+                const db = await connect("createNewUser - registration");
+                const userCollection = db.collection('users');
                 const filterEmail = { email: email }
                 const user = await userCollection.find(filterEmail).toArray();
                 if (user.length > 0) {
-                    close();
+                    close("createNewUser - registration");
                     return res.status(400).json({ message: "User already exists" });
                 }
                 else {
                     const hashedPassword = await bcrypt.hash(password, 10);
+                    let allStatus = await makeAllStatusForUser();
                     userData = {
                         displayName: userName,
                         email: email,
@@ -65,7 +46,8 @@ const createNewUser = async (req, res) => {
                             collapsedSidebar: true,
                         },
                         signup_type: 'registration',
-                        lesson_status: await makeUserLessonStatus()
+                        lesson_status: allStatus.lessonStatus,
+                        quiz_status: allStatus.quizStatus,
                     }
                     token = jwt.sign(
                         {
@@ -79,7 +61,6 @@ const createNewUser = async (req, res) => {
                     );
                     try {
                         await userCollection.insertOne(userData);
-                        close();
                         delete userData.password;
                         userData.accessToken = token;
                         res.status(200).json({ message: "User created successfully", data: userData });
@@ -87,6 +68,8 @@ const createNewUser = async (req, res) => {
                     catch (err) {
                         console.log(err);
                         res.status(500).json({ message: "User creation failed" });
+                    } finally {
+                        close("createNewUser - registration");
                     }
                 }
             }
@@ -105,16 +88,16 @@ const createNewUser = async (req, res) => {
                     });
                     const payload = ticket.getPayload();
 
-                    const db = await connect();
-                    const userCollection = await db.collection('users');
+                    const db = await connect("createNewUser - google");
+                    const userCollection = db.collection('users');
                     const filterEmail = { email: payload.email }
                     const user = await userCollection.find(filterEmail).toArray();
 
                     if (user.length > 0) {
-                        close();
                         return res.status(400).json({ message: "User already exists, Signin with your google account" });
                     }
                     else {
+                        let allStatus = await makeAllStatusForUser();
                         userData = {
                             displayName: payload.given_name,
                             email: payload.email,
@@ -130,7 +113,8 @@ const createNewUser = async (req, res) => {
                                 collapsedSidebar: true,
                             },
                             signup_type: signup_type,
-                            lesson_status: await makeUserLessonStatus()
+                            lesson_status: allStatus.lessonStatus,
+                            quiz_status: allStatus.quizStatus,
                         }
                     }
                     const token = jwt.sign(
@@ -145,7 +129,7 @@ const createNewUser = async (req, res) => {
                     );
                     try {
                         await userCollection.insertOne(userData);
-                        close();
+                        close("createNewUser - google");
                         delete userData.password;
                         userData.accessToken = token;
                         res.status(200).json({ message: "User created successfully", data: userData });
@@ -153,6 +137,8 @@ const createNewUser = async (req, res) => {
                     catch (err) {
                         console.log(err);
                         res.status(500).json({ message: "User creation failed" });
+                    } finally {
+                        close("createNewUser - google");
                     }
                 } catch (err) {
                     console.log(err);
@@ -166,16 +152,16 @@ const createNewUser = async (req, res) => {
                 res.status(400).json({ message: "Invalid credentials, please try again" });
             }
             else {
-                const db = await connect();
-                const userCollection = await db.collection('users');
+                const db = await connect("createNewUser - facebook");
+                const userCollection = db.collection('users');
                 const filterEmail = { email: userInfo.email }
                 const user = await userCollection.find(filterEmail).toArray();
 
                 if (user.length > 0) {
-                    close();
                     return res.status(400).json({ message: "User already exists, Signin with your google account" });
                 }
                 else {
+                    let allStatus = await makeAllStatusForUser();
                     userData = {
                         displayName: userInfo.first_name,
                         email: userInfo.email,
@@ -191,7 +177,8 @@ const createNewUser = async (req, res) => {
                             collapsedSidebar: true,
                         },
                         signup_type: 'facebook',
-                        lesson_status: await makeUserLessonStatus()
+                        lesson_status: allStatus.lessonStatus,
+                        quiz_status: allStatus.quizStatus,
                     }
                 }
                 const token = jwt.sign(
@@ -206,7 +193,7 @@ const createNewUser = async (req, res) => {
                 );
                 try {
                     await userCollection.insertOne(userData);
-                    close();
+                    close("createNewUser - facebook");
                     delete userData.password;
                     userData.accessToken = token;
                     res.status(200).json({ message: "User created successfully", data: userData });
@@ -214,6 +201,8 @@ const createNewUser = async (req, res) => {
                 catch (err) {
                     console.log(err);
                     res.status(500).json({ message: "User creation failed" });
+                } finally {
+                    close("createNewUser - facebook");
                 }
             }
             break;
@@ -234,10 +223,18 @@ const loginUser = async (req, res) => {
                 res.status(400).json({ message: "Please fill all the fields" });
             }
             else {
-                const db = await connect();
-                const userCollection = await db.collection('users');
+                const db = await connect("loginUser - emailpassword");
+                const userCollection = db.collection('users');
                 const filterEmail = { email: email }
-                const user = await userCollection.find(filterEmail).toArray();
+                const user = [];
+                try {
+                    user = await userCollection.find(filterEmail).toArray();
+                } catch (err) {
+                    console.log(err);
+                    res.status(500).json({ message: "User does not exist or email is wrong" });
+                } finally {
+                    close("loginUser - emailpassword");
+                }
                 if (user.length === 0) {
                     res.status(400).json({ message: "User does not exist or email is wrong" });
                 }
@@ -268,10 +265,10 @@ const loginUser = async (req, res) => {
                         userData.signup_type = user[0].signup_type;
                         userData.admin_status = admin_status;
                         userData.lesson_status = user[0].lesson_status;
+
                         res.status(200).json({ message: "User login successful", data: userData });
                     }
                     else {
-                        close();
                         res.status(400).json({ message: "wrong password" });
                     }
                 }
@@ -291,12 +288,13 @@ const loginUser = async (req, res) => {
                     });
                     const payload = ticket.getPayload();
                     let email = payload.email;
-                    const db = await connect();
-                    const userCollection = await db.collection('users');
+                    const db = await connect("loginUser - google");
+                    const userCollection = db.collection('users');
                     const filterEmail = { email: email }
                     const user = await userCollection.find(filterEmail).toArray();
                     if (user.length === 0) {
                         res.status(400).json({ message: "There is no account associated with your email. Register first" });
+                        close("loginUser - google");
                     }
                     else {
                         admin_status = adminList.includes(email);
@@ -322,11 +320,12 @@ const loginUser = async (req, res) => {
                         userData.signup_type = user[0].signup_type;
                         userData.admin_status = admin_status;
                         userData.lesson_status = user[0].lesson_status;
+                        close("loginUser - google");
                         res.status(200).json({ message: "User login successful", data: userData });
                     }
                 }
                 catch (err) {
-                    console.log(err);
+                    close("loginUser - google");
                     res.status(500).json({ message: "Could not verify your credentials" });
                 }
             }
@@ -337,12 +336,13 @@ const loginUser = async (req, res) => {
                 res.status(400).json({ message: "Invalid credentials, please try again" });
             }
             else {
-                const db = await connect();
-                const userCollection = await db.collection('users');
+                const db = await connect("loginUser - facebook");
+                const userCollection = db.collection('users');
                 const filterEmail = { email: facebook_email }
                 const user = await userCollection.find(filterEmail).toArray();
                 if (user.length === 0) {
                     res.status(400).json({ message: "There is no account associated with your email. Register first" });
+                    close("loginUser - facebook");
                 }
                 else {
                     admin_status = adminList.includes(facebook_email);
@@ -368,7 +368,9 @@ const loginUser = async (req, res) => {
                     userData.signup_type = user[0].signup_type;
                     userData.admin_status = admin_status;
                     userData.lesson_status = user[0].lesson_status;
+                    close("loginUser - facebook");
                     res.status(200).json({ message: "User login successful", data: userData });
+
                 }
             }
             break;
@@ -380,83 +382,87 @@ const loginUser = async (req, res) => {
 const verifyPassword = async (req, res) => {
     const { uid, password } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('users');
+        const db = await connect("verifyPassword");
+        const userCollection = db.collection('users');
         const user = await userCollection.find({ 'uid': uid }).toArray();
         const hashedPassword = user[0].password;
         const validPassword = await bcrypt.compare(password, hashedPassword);
         if (validPassword) {
             res.status(200).json({ message: "Password verified successfully", validPassword });
-            await close(db);
         } else {
             res.status(500).json({ message: "Incorrect Password", validPassword });
         }
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Password verification failed" });
+    } finally {
+        close("verifyPassword");
     }
 }
 
 const updatePassword = async (req, res) => {
     const { uid, password } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('users');
+        const db = await connect("updatePassword");
+        const userCollection = db.collection('users');
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await userCollection.updateOne({ 'uid': uid }, { $set: { 'password': hashedPassword } });
         if (user) {
             res.status(200).json({ message: "Password updated successfully", status: true });
-            await close(db);
         } else {
             res.status(500).json({ message: "Password updation failed" });
         }
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Password updation failed" });
+    } finally {
+        close("updatePassword");
     }
 }
 
 const updateProfilePicture = async (req, res) => {
     const { uid, profileImage } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('users');
+        const db = await connect("updateProfilePicture");
+        const userCollection = db.collection('users');
         const user = await userCollection.updateOne({ 'uid': uid }, { $set: { 'profile_image': profileImage } });
         if (user) {
             res.status(200).json({ message: "Profile image updated successfully", status: true });
-            await close(db);
         } else {
             res.status(500).json({ message: "Profile image updation failed" });
         }
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Profile image updation failed" });
+    } finally {
+        close("updateProfilePicture");
     }
 }
 
 const updateUserData = async (req, res) => {
     const { uid, userData } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('users');
+        const db = await connect("updateUserData");
+        const userCollection = db.collection('users');
         const user = await userCollection.updateOne({ 'uid': uid }, { $set: { 'displayName': userData.displayName, 'mobile_number': userData.mobile_number } });
         if (user) {
             res.status(200).json({ message: "User data updated successfully", status: true });
-            await close(db);
         } else {
             res.status(500).json({ message: "User data updation failed" });
         }
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "User data updation failed" });
+    } finally {
+        close("updateUserData");
     }
 }
 
 const updateUserPreference = async (req, res) => {
     const { uid, preferences } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('users');
+        const db = await connect("updateUserPreference");
+        const userCollection = db.collection('users');
         const user = await userCollection.updateOne(
             { 'uid': uid },
             {
@@ -469,21 +475,22 @@ const updateUserPreference = async (req, res) => {
         );
         if (user) {
             res.status(200).json({ message: "Preferences updated successfully", status: true });
-            await close(db);
         } else {
             res.status(500).json({ message: "Preferences updation failed" });
         }
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Preferences updation failed" });
+    } finally {
+        close("updateUserPreference");
     }
 }
 
 const updateUserLessonStatus = async (req, res) => {
     const { uid, lesson_status } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('users');
+        const db = await connect("updateUserLessonStatus");
+        const userCollection = db.collection('users');
         const user = await userCollection.updateOne(
             { "uid": uid },
             {
@@ -504,13 +511,14 @@ const updateUserLessonStatus = async (req, res) => {
             lessonStatus = await userCollection.find({ "uid": uid }).toArray();
             lessonStatus = lessonStatus[0].lesson_status;
             res.status(200).json({ message: "User lesson status updated successfully", status: true, lessonStatus });
-            await close(db);
         } else {
             res.status(500).json({ message: "User lesson status updation failed" });
         }
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "User lesson status updation failed" });
+    } finally {
+        close("updateUserLessonStatus");
     }
 }
 // <--- User Operations ---> //
@@ -518,10 +526,9 @@ const updateUserLessonStatus = async (req, res) => {
 // <--- Sections ---> //
 const getSections = async (req, res) => {
     try {
-        const db = await connect();
-        const userCollection = await db.collection('sections');
-        const sections = await userCollection.find({}).toArray();
-        await close(db);
+        const db = await connect("getSections");
+        const sectionsCollection = db.collection('sections');
+        const sections = await sectionsCollection.find({}).toArray();
         if (sections.length === 0) {
             res.status(200).json({ message: "No sections found" });
         } else {
@@ -530,21 +537,23 @@ const getSections = async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Sections fetch failed" });
+    } finally {
+        close("getSections");
     }
 }
 
 const addSection = async (req, res) => {
     const { title, content, url } = req.body;
     try {
-        const db = await connect();
-        const sectionCollection = await db.collection('sections');
+        const db = await connect("addSection");
+        const sectionCollection = db.collection('sections');
         sectionId = uuidv4();
         let result = await sectionCollection.insertOne({ title, content, url, sectionId });
         let insertedSectionId = result.insertedId;
         let insertedSectionData = await sectionCollection.findOne({ _id: insertedSectionId });
         let createdSectionId = insertedSectionData.sectionId
 
-        const allUserCollection = await db.collection('users')
+        const allUserCollection = db.collection('users')
         const userCollection = await db.collection('users').find().toArray();
         for (const user of userCollection) {
             await allUserCollection.updateOne(
@@ -552,46 +561,47 @@ const addSection = async (req, res) => {
                 { $set: { [`lesson_status.${createdSectionId}`]: [] } }
             )
         }
-        await close(db);
         res.status(200).json({ message: "Section added successfully", createdSectionId, update: false });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Section creation failed" });
+    } finally {
+        close("addSection");
     }
 }
 
 const updateSection = async (req, res) => {
     const { title, content, url, sectionId } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('sections');
-        let section = await userCollection.findOne({ sectionId });
+        const db = await connect("updateSection");
+        const sectionsCollection = db.collection('sections');
+        let section = await sectionsCollection.findOne({ sectionId });
         if (section === null) {
-            await close(db);
             res.status(500).json({ message: "Section not found" });
         }
         else {
-            await userCollection.updateOne({ sectionId }, { $set: { title, content, url } });
-            await close(db);
+            await sectionsCollection.updateOne({ sectionId }, { $set: { title, content, url } });
             res.status(200).json({ message: "Section updated successfully", update: true });
         }
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Section update failed" });
+    } finally {
+        close("updateSection");
     }
 }
 
 const deleteSection = async (req, res) => {
     const { sectionId } = req.body;
     try {
-        const db = await connect();
-        const sectionCollection = await db.collection('sections')
+        const db = await connect("deleteSection");
+        const sectionCollection = db.collection('sections')
         const result = sectionCollection.deleteOne({ sectionId: sectionId });
 
-        const lessonsCollection = await db.collection('lessons')
+        const lessonsCollection = db.collection('lessons')
         const lessonsResult = lessonsCollection.deleteMany({ sectionId: sectionId });
 
-        const allUserCollection = await db.collection('users')
+        const allUserCollection = db.collection('users')
         const userCollection = await db.collection('users').find().toArray();
         for (const user of userCollection) {
             await allUserCollection.updateOne(
@@ -599,11 +609,12 @@ const deleteSection = async (req, res) => {
                 { $unset: { [`lesson_status.${sectionId}`]: "" } }
             )
         }
-        await close(db);
         res.status(200).json({ message: "Section deleted successfully" });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Section deletion failed" });
+    } finally {
+        close("deleteSection");
     }
 }
 // <--- Sections ---> //
@@ -612,10 +623,9 @@ const deleteSection = async (req, res) => {
 const getLessons = async (req, res) => {
     const { sectionId } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('lessons');
-        const lessons = await userCollection.find({ 'sectionId': sectionId }).toArray();
-        await close(db);
+        const db = await connect("getLessons");
+        const lessonsCollection = db.collection('lessons');
+        const lessons = await lessonsCollection.find({ 'sectionId': sectionId }).toArray();
         if (lessons.length === 0) {
             res.status(200).json({ message: "No lessons found" });
         } else {
@@ -624,6 +634,8 @@ const getLessons = async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Lessons fetch failed" });
+    } finally {
+        close("getLessons");
     }
 }
 
@@ -637,8 +649,8 @@ const addLesson = async (req, res) => {
             lessonId: uuidv4()
         }
 
-        const db = await connect();
-        const lessonsCollection = await db.collection('lessons');
+        const db = await connect("addLesson");
+        const lessonsCollection = db.collection('lessons');
         const result = await lessonsCollection.insertOne(data);
         let insertedId = result.insertedId;
         let insertedLessonData = await lessonsCollection.find({ _id: insertedId }).toArray();
@@ -651,7 +663,7 @@ const addLesson = async (req, res) => {
             lesson_progress: 1,
             lesson_complete: false,
         }
-        const allUserCollection = await db.collection('users')
+        const allUserCollection = db.collection('users')
         const userCollection = await db.collection('users').find().toArray();
         for (const user of userCollection) {
             if (sectionId in user.lesson_status) {
@@ -668,43 +680,43 @@ const addLesson = async (req, res) => {
                 );
             }
         }
-
-        await close(db);
         res.status(200).json({ message: "Lesson added successfully", lessonId });
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Lesson creation failed" });
+    } finally {
+        close("addLesson");
     }
 }
 
 const updateLesson = async (req, res) => {
     const { chapter_title, sectionId, lessonData, lessonId } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('lessons');
-        let lesson = await userCollection.findOne({ lessonId });
+        const db = await connect("updateLesson");
+        const lessonsCollection = db.collection('lessons');
+        let lesson = await lessonsCollection.findOne({ lessonId });
         if (lesson === null) {
-            await close(db);
             res.status(500).json({ message: "Lesson not found" });
         } else {
-            await userCollection.updateOne({ lessonId }, { $set: { chapter_title, sectionId, lessonData } });
-            await close(db)
+            await lessonsCollection.updateOne({ lessonId }, { $set: { chapter_title, sectionId, lessonData } });
             res.status(200).json({ message: "Lesson updated successfully" });
         }
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Lesson update failed" });
+    } finally {
+        close("updateLesson")
     }
 }
 
 const deleteLesson = async (req, res) => {
     const { lessonId, sectionId } = req.body;
     try {
-        const db = await connect();
-        const lessonsCollection = await db.collection('lessons');
+        const db = await connect("deleteLesson");
+        const lessonsCollection = db.collection('lessons');
         const result = await lessonsCollection.deleteOne({ lessonId: lessonId });
 
-        const allUserCollection = await db.collection('users')
+        const allUserCollection = db.collection('users')
         const userCollection = await db.collection('users').find().toArray();
         for (const user of userCollection) {
             if (sectionId in user.lesson_status) {
@@ -721,6 +733,8 @@ const deleteLesson = async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Lesson deletion failed" });
+    } finally {
+        close("deleteLesson");
     }
 }
 // <--- Lessons ---> //
@@ -730,10 +744,9 @@ const deleteLesson = async (req, res) => {
 const getQuizQuestions = async (req, res) => {
     const { lessonId } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('quiz');
-        const quizQuestions = await userCollection.find({ 'lessonId': lessonId }).toArray();
-        await close(db);
+        const db = await connect("getQuizQuestions");
+        const quizCollection = db.collection('quiz');
+        const quizQuestions = await quizCollection.find({ 'lessonId': lessonId }).toArray();
         if (quizQuestions.length === 0) {
             res.status(200).json({ message: "No quiz questions found", status: false });
         } else {
@@ -742,39 +755,76 @@ const getQuizQuestions = async (req, res) => {
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Quiz questions fetch failed" });
+    } finally {
+        close("getQuizQuestions");
     }
 }
 
 const addQuizQuestions = async (req, res) => {
     const { quizData } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('quiz');
+        const db = await connect("addQuizQuestions");
+        const quizCollection = db.collection('quiz');
         quizData.quizId = uuidv4();
-        const result = await userCollection.insertOne(quizData);
+        const result = await quizCollection.insertOne(quizData);
         let insertedId = result.insertedId;
-        let insertedQuizData = await userCollection.find({ _id: insertedId }).toArray();
+        let insertedQuizData = await quizCollection.find({ _id: insertedId }).toArray();
         let quizId = insertedQuizData[0].quizId;
-        await close(db);
+
+        const allUserCollection = db.collection('users')
+        const { sectionId, lessonId } = quizData;
+        const quizObject = {
+            section_id: sectionId,
+            lesson_id: lessonId,
+            quiz_id: quizId,
+            quiz_name: insertedQuizData[0].quizTitle,
+            quiz_completed_date: "",
+            quiz_score: "",
+            quiz_completed: false,
+        };
+
+        const AUCollection = allUserCollection.find({})
+        while (await AUCollection.hasNext()) {
+            const user = await AUCollection.next();
+            if (!user.quiz_status[sectionId]) {
+                // Create a new object for the section ID if it doesn't exist
+                user.quiz_status[sectionId] = {};
+            }
+            // Check if the lesson ID exists in the quiz_status object
+            if (!user.quiz_status[sectionId][lessonId]) {
+                // Create a new epmty array for the lesson ID if it doesn't exist
+                user.quiz_status[sectionId][lessonId] = [];
+            }
+            // Add the new quiz object to the quizzes array
+            user.quiz_status[sectionId][lessonId].push(quizObject);
+            // Update the document in the collection
+            await allUserCollection.updateOne(
+                { _id: user._id },
+                { $set: { quiz_status: user.quiz_status } }
+            );
+        }
         res.status(200).json({ message: "Quiz question added successfully", quizId });
+
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Quiz question creation failed" });
+    } finally {
+        close("addQuizQuestions");
     }
 }
 
 const updateQuizQuestions = async (req, res) => {
     const { quizId, quizTitle, quizDescription, questions } = req.body;
     try {
-        const db = await connect();
-        const userCollection = await db.collection('quiz');
+        const db = await connect("updateQuizQuestions");
+        const userCollection = db.collection('quiz');
         let quiz = await userCollection.findOne({ quizId });
         if (quiz === null) {
-            await close(db);
+            close("updateQuizQuestions");
             res.status(500).json({ message: "Quiz question not found" });
         } else {
             await userCollection.updateOne({ quizId }, { $set: { quizTitle, quizDescription, questions } });
-            await close(db);
+            close("updateQuizQuestions");
             res.status(200).json({ message: "Quiz question updated successfully" });
         }
     } catch (err) {
@@ -782,11 +832,39 @@ const updateQuizQuestions = async (req, res) => {
         res.status(500).json({ message: "Quiz question update failed" });
     }
 }
+
+const deleteQuizQuestion = async (req, res) => {
+    const { sectionId, lessonId, quizId } = req.body;
+    try {
+        const db = await connect("deleteQuizQuestion");
+        const quizCollection = db.collection('quiz');
+        await quizCollection.deleteOne({ quizId: quizId });
+
+        let resuw = []
+        const allUserCollection = db.collection('users')
+        const AUCollection = allUserCollection.find({})
+        while (await AUCollection.hasNext()) {
+            const user = await AUCollection.next();
+            let resultw = await allUserCollection.updateOne(
+                { _id: user._id },
+                { $pull: { [`quiz_status.${sectionId}.${lessonId}`]: { quiz_id: quizId } } }
+            )
+            resuw.push(resultw)
+
+        }
+
+        res.status(200).json({ message: "Quiz question deleted successfully", resuw });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Quiz question deletion failed" });
+    } finally {
+        close("deleteQuizQuestion");
+    }
+}
 // <--- Quiz ---> //
 
 
 module.exports = {
-    makeUserLessonStatus,
     createNewUser,
     loginUser,
     getSections,
@@ -800,6 +878,7 @@ module.exports = {
     getQuizQuestions,
     addQuizQuestions,
     updateQuizQuestions,
+    deleteQuizQuestion,
     verifyPassword,
     updatePassword,
     updateProfilePicture,

@@ -68,7 +68,7 @@ export const updatUserLessonStatus = async (data) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const response = await axios.post(`${baseUrl}/content/update_userLessonStatus`, payload, config, {
+    const response = await axios.post(`${baseUrl}/user/update_userLessonStatus`, payload, config, {
         withCredentials: true
     })
     return response;

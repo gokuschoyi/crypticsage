@@ -129,3 +129,15 @@ export const fetchQuizData = async (data) => {
     })
     return response;
 }
+
+export const deleteQuizData = async (data) => {
+    let token = data.token;
+    let payload = data.data
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/content/delete_quizquestion`, payload, config, {
+        withCredentials: true
+    })
+    return response;
+}

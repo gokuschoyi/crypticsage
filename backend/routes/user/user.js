@@ -7,7 +7,8 @@ const {
     updatePassword,
     updateProfilePicture,
     updateUserData,
-    updateUserPreference
+    updateUserPreference,
+    updateUserLessonStatus,
 } = require('../../utils/db-utils/mongodb')
 
 router.post('/verify_password', verify, async (req, res) => {
@@ -57,6 +58,16 @@ router.post('/update_preferences', verify, async (req, res) => {
         res.status(500).json({ message: "Invalid request" });
     } else {
         updateUserPreference(req, res)
+    }
+})
+
+router.post('/update_userLessonStatus', verify, async (req, res) => {
+    console.log("Update user lesson status request received");
+    const { uid } = req.body;
+    if (!uid) {
+        return res.status(500).json({ message: "User Id is required" });
+    } else {
+        updateUserLessonStatus(req, res);
     }
 })
 

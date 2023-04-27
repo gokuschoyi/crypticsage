@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const { connect, close } = require('../../utils/db-utils/db-conn')
 const verify = require('../auth/verifyToken')
 const { v4: uuidv4 } = require('uuid');
 
@@ -16,7 +15,7 @@ const {
     getQuizQuestions,
     addQuizQuestions,
     updateQuizQuestions,
-    updateUserLessonStatus
+    deleteQuizQuestion,
 } = require('../../utils/db-utils/mongodb')
 
 router.post('/get_sections', verify, async (req, res) => {
@@ -124,13 +123,13 @@ router.post('/update_quizquestion', verify, async (req, res) => {
     }
 })
 
-router.post('/update_userLessonStatus', verify, async (req, res) => {
-    console.log("Update user lesson status request received");
-    const { uid } = req.body;
-    if (!uid) {
-        return res.status(500).json({ message: "User Id is required" });
+router.post('/delete_quizquestion', verify, async (req, res) => {
+    console.log("Delete quiz question request received");
+    const { quizId, lessonId, sectionId } = req.body;
+    if (!quizId || !lessonId || !sectionId) {
+        return res.status(500).json({ message: "Quiz Id is required" });
     } else {
-        updateUserLessonStatus(req, res);
+        deleteQuizQuestion(req, res);
     }
 })
 

@@ -11,7 +11,7 @@ const app = express();
 
 const authentication = require('./routes/auth/authRoute')
 const fetchCryptoData = require('./utils/crypto/fetchCryptoData');
-const { makeUserLessonStatus } = require('./utils/db-utils/mongodb');
+const { makeAllStatusForUser } = require('./utils/db-utils/helpers');
 
 const log = (req, res, next) => {
     console.log('_____________________________________________________');
@@ -27,7 +27,7 @@ app.use(log);
 
 app.post('/', verify, async (req, res) => {
     console.log('Verify request received');
-    let dat = await makeUserLessonStatus();
+    let dat = await makeAllStatusForUser();
     res.status(200).json({ message: "Verified", dat });
 })
 

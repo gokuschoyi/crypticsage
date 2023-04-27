@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux';
 import './Quiz.css'
 import { useOutletContext } from "react-router-dom";
@@ -7,13 +7,14 @@ import AddQuiz from './quiz_components/addQuiz/AddQuiz'
 import { Success, Error } from '../../dashboard/global/CustomToasts'
 import QuestionBox from './quiz_components/addQuiz/QuestionBox';
 import OptionBox from './quiz_components/addQuiz/OptionBox';
-import NewLessonDialog from './quiz_components/addQuiz/NewQuizDialog';
+import NewQuizDialog from './quiz_components/addQuiz/NewQuizDialog';
+import DeleteQuizDialog from './quiz_components/addQuiz/DeleteQuizDialog';
 import {
     Box,
     useTheme,
     Typography,
 } from '@mui/material'
-import { fetchSections, fetchLessons, fetchQuizData, addQuizData, updateQuizData } from '../../../api/db';
+import { fetchSections, fetchLessons, fetchQuizData, addQuizData, updateQuizData, deleteQuizData } from '../../../api/db';
 const Quiz = (props) => {
     const { title, subtitle } = props;
     const theme = useTheme();
@@ -31,28 +32,34 @@ const Quiz = (props) => {
     }
 
     //initial fetch of all sections
+    const isLoaded = useRef(false);
     useEffect(() => {
-        let data = {
-            token: token
+        if (!isLoaded.current) {
+            isLoaded.current = true;
+            let data = {
+                token: token
+            }
+            fetchSections(data)
+                .then(res => {
+                    setSectionData(res.data.sections);
+                    setSectionDataU(res.data.sections);
+                })
+                .catch(error => {
+                    console.error(error);
+                })
         }
-        fetchSections(data)
-            .then(res => {
-                setSectionData(res.data.sections);
-                setSectionDataU(res.data.sections);
-            })
-            .catch(error => {
-                console.error(error);
-            })
     }, [token]);
 
     const [sectionData, setSectionData] = useState([]);
     const [selectedSection, setSelectedSection] = useState('');
     const [selectedSectionId, setSelectedSectionId] = useState('');
+    const [selectedSectionIdU, setSelectedSectionIdU] = useState('');
 
     const [lessonData, setLessonData] = useState([]);
     const [selectedLesson, setSelectedLesson] = useState('');
 
     const [selectedLessonId, setSelectedLessonId] = useState('');
+    const [selectedLessonIdU, setSelectedLessonIdU] = useState('');
 
     // saving lessonID to state
     const handleSelectedLesson = async (e) => {
@@ -62,6 +69,7 @@ const Quiz = (props) => {
             switch (quizMode) {
                 case 'add':
                     setSelectedLesson(e.target.value);
+                    setQuizId('')
                     lessonId = lessonData.filter(lesson => lesson.chapter_title === e.target.value)[0].lessonId
                     setSelectedLessonId(lessonId)
                     break;
@@ -72,6 +80,7 @@ const Quiz = (props) => {
                     setSelectedLessonU(e.target.value);
                     let name = e.target.value;
                     lessonId = lessonDataU.filter(lesson => lesson.chapter_title === name)[0].lessonId
+                    setSelectedLessonIdU(lessonId)
                     try {
                         let data = {
                             token: token,
@@ -126,6 +135,7 @@ const Quiz = (props) => {
                 setSelectedSectionU(e.target.value)
                 setSelectedLessonU([])
                 sectionId = sectionDataU.filter(section => section.title === e.target.value)[0].sectionId
+                setSelectedSectionIdU(sectionId)
                 data = {
                     token: token,
                     sectionId: sectionId
@@ -134,7 +144,7 @@ const Quiz = (props) => {
                     let res = await fetchLessons(data);
                     setLessonDataU(res.data.lessons);
                     if (res.data.message) {
-                        Success(res.data.message)
+                        // Success(res.data.message)
                     }
                 } catch (error) {
                     if (error.response) {
@@ -150,7 +160,7 @@ const Quiz = (props) => {
     // ---> ADD ENTIRE QUESTION DATA <--- //
 
     const initialQuestionData = {
-        'question': 'what is uo?',
+        'question': '',
         'options': [],
         'correctAnswer': ''
     }
@@ -428,10 +438,19 @@ const Quiz = (props) => {
                 token: token,
                 payload: CombData
             }
+            console.log(selectedSectionU, selectedLessonU)
             try {
                 let res = await addQuizData(data);
                 setQuizId(res.data.quizId);
                 Success(res.data.message);
+                if (selectedSectionU !== '' && selectedLessonU !== '') {
+                    let data = {
+                        token: token,
+                        lessonId: selectedLessonIdU
+                    }
+                    let resQuiz = await fetchQuizData(data);
+                    setQuizDataU(resQuiz.data.quizQuestions);
+                }
             } catch (err) {
                 if (err.response) {
                     Error(err.response.data.message);
@@ -459,7 +478,7 @@ const Quiz = (props) => {
 
     // ---> EDIT ENTIRE QUESTION DATA <--- //
 
-    const [sectionDataU, setSectionDataU] = useState(sectionData)
+    const [sectionDataU, setSectionDataU] = useState([])
     const [selectedSectionU, setSelectedSectionU] = useState('')
 
     const [lessonDataU, setLessonDataU] = useState([])
@@ -483,6 +502,7 @@ const Quiz = (props) => {
     const handleSelectedQuiz = (e) => {
         setSkeletonFlag(true)
         setSelectedQuiz(e.target.value)
+        console.log(e.target.value)
         let quizId = quizDataU.filter(quiz => quiz.quizTitle === e.target.value)[0].quizId
         setQuizIdU(quizId)
         let quizData = quizDataU.filter(quiz => quiz.quizTitle === e.target.value)
@@ -561,15 +581,71 @@ const Quiz = (props) => {
         setOpen(false);
     }
 
-    const resetQuiz = () => {
-        console.log("reset quiz")
-        setOpen(false)
-        /* setTitleAndDescription({ 'quizTitle': '', 'quizDescription': '' })
-        setQuestionBoxList([])
-        setQuestionData([])
-        setOptionBoxList([])
-        setOptionData([])
-        setQuizId('') */
+    const resetQuiz = ({ modeType, resetId }) => {
+        if (modeType === 'add') {
+            console.log("reset quiz", modeType)
+            setOpen(false)
+            setTitleAndDescription({ 'quizTitle': '', 'quizDescription': '' })
+            setQuestionBoxList([<QuestionBox key={0} count={0} />])
+            setQuestionData([initialQuestionData])
+            setOptionBoxList([[<OptionBox key={0} count={0} />, <OptionBox key={1} count={1} />, <OptionBox key={2} count={2} />]])
+            setOptionData([[{ 'option': '' }, { 'option': '' }, { 'option': '' }]])
+            setQuizId('')
+        } else if (modeType === 'edit') {
+            console.log("reset quiz", modeType)
+            if (quizIdU === resetId) {
+                console.log("view id and delete id match")
+                setDeleteOpen(false)
+                setTitleAndDescriptionU({ 'quizTitle': '', 'quizDescription': '' })
+                setQuestionBoxListU([])
+                setQuestionDataU([])
+                setOptionBoxListU([])
+                setOptionDataU([])
+                setQuizIdU('')
+                setSelectedQuiz('')
+            } else {
+                console.log("view id and delete id dont match")
+                setDeleteOpen(false)
+            }
+        }
+    }
+
+    const [selectedQuizIdToDelete, setSelectedQuizIdToDelete] = useState('')
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const handleOpenDeleteDialog = (e) => {
+        // console.log(e.target.dataset.quizid)
+        setSelectedQuizIdToDelete(e.target.dataset.quizid)
+        setDeleteOpen(true);
+    }
+    const handleCloseDeleteQuiz = () => {
+        setDeleteOpen((prev) => !prev);
+    }
+    const removeQuizFromDb = async (e) => {
+        e.preventDefault();
+        console.log("delete yes clicked")
+        const deleteQuizAPIData = {
+            "sectionId": selectedSectionIdU,
+            "lessonId": selectedLessonIdU,
+            "quizId": selectedQuizIdToDelete,
+        }
+        const payload = {
+            token: token,
+            data: deleteQuizAPIData
+        }
+        try {
+            let res = await deleteQuizData(payload)
+            if (res.data.message) {
+                resetQuiz({ modeType: 'edit', resetId: selectedQuizIdToDelete })
+                Success(res.data.message)
+            }
+        } catch (err) {
+            if (err.response) {
+                Error(err.response.data.message)
+            }
+        }
+        let lessonDataAfterDelete = quizDataU.filter((quiz) => quiz.quizId !== selectedQuizIdToDelete)
+        setQuizDataU(lessonDataAfterDelete)
+        setDeleteOpen(false)
     }
 
     return (
@@ -603,7 +679,7 @@ const Quiz = (props) => {
                 <Box className='quiz-add-edit-box'>
                     {quizMode === 'add' ?
                         <Box className='quiz-add-box'>
-                            <NewLessonDialog 
+                            <NewQuizDialog
                                 open={open}
                                 heading="Are you sure"
                                 handleCloseQuiz={handleCloseQuiz}
@@ -612,6 +688,7 @@ const Quiz = (props) => {
                             <AddQuiz
                                 value="Add Quiz"
                                 mode={quizMode}
+                                quizId={quizId}
                                 sectionData={sectionData}
                                 selectedSection={selectedSection}
                                 handleSelectedSection={handleSelectedSection}
@@ -637,9 +714,17 @@ const Quiz = (props) => {
                         </Box>
                         :
                         <Box className='quiz-edit-box'>
+                            <DeleteQuizDialog
+                                open={deleteOpen}
+                                heading='Are you sure, Irreversible action'
+                                handleCloseDeleteQuiz={handleCloseDeleteQuiz}
+                                selectedQuizIdToDelete={selectedQuizIdToDelete}
+                                removeQuizFromDb={removeQuizFromDb}
+                                quizIdToRemove={selectedQuizIdToDelete}
+                            />
                             <AddQuiz
-                                mode={quizMode}
                                 value="Update Quiz"
+                                mode={quizMode}
                                 skeletonFlag={skeletonFlag}
                                 sectionData={sectionDataU}
                                 selectedSection={selectedSectionU}
@@ -650,6 +735,7 @@ const Quiz = (props) => {
                                 quizData={quizDataU}
                                 selectedQuiz={selectedQuiz}
                                 handleSelectedQuiz={handleSelectedQuiz}
+                                handleOpenDeleteDialog={handleOpenDeleteDialog}
                                 titleAndDescription={titleAndDescriptionU}
                                 handleTitleAndDescription={handleTitleAndDescription}
                                 questionBoxList={questionBoxListU}

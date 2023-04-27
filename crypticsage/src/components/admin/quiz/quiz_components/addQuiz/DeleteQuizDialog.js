@@ -10,8 +10,8 @@ import {
     useTheme,
     Button
 } from '@mui/material'
-const NewLessonDialog = (props) => {
-    const { open, heading, handleCloseQuiz, resetQuiz } = props
+const DeleteQuizDialog = (props) => {
+    const { open, heading, handleCloseDeleteQuiz, selectedQuizIdToDelete, removeQuizFromDb } = props
     const { collapsed } = useProSidebar();
     const theme = useTheme()
     const buttonStyle = {
@@ -30,7 +30,7 @@ const NewLessonDialog = (props) => {
             }}
             open={open}
             keepMounted
-            onClose={handleCloseQuiz}
+            onClose={handleCloseDeleteQuiz}
             maxWidth='sm'
             aria-describedby="alert-dialog-slide-description"
         >
@@ -46,11 +46,11 @@ const NewLessonDialog = (props) => {
                 </Box>
             </DialogContent>
             <DialogActions sx={{ paddingRight: '25px' }}>
-                <Button sx={buttonStyle} onClick={(e) => resetQuiz({ modeType: 'add', resetId: '' })} >YES</Button>
-                <Button sx={buttonStyle} onClick={handleCloseQuiz}>CLOSE</Button>
+                <Button sx={buttonStyle} id={selectedQuizIdToDelete} onClick={(e) => removeQuizFromDb(e)} >YES</Button>
+                <Button sx={buttonStyle} onClick={handleCloseDeleteQuiz}>CLOSE</Button>
             </DialogActions>
         </Dialog>
     )
 }
 
-export default NewLessonDialog
+export default DeleteQuizDialog
