@@ -1,22 +1,49 @@
 .MuiAccordion-root {
-  margin-bottom: 20px !important;
+  margin-bottom: 10px !important;
 }
 
 .quiz-question-holder {
   display: grid;
-  grid-auto-columns: 1fr;
+  grid-template-columns: 6fr 1fr;
   grid-auto-flow: column;
 }
 
-.quiz-topic {
+.quiz-details-flex-box {
   display: flex;
-  text-align: start;
+  flex-direction: row;
   align-items: center;
 }
-.quiz-number{
-    align-items: center;
-    display: flex;
-    justify-content: center;
+
+.quiz-status-holder {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: stretch;
+  margin-left: 30px;
+}
+
+.quiz-topic > h6 {
+  width: 180px;
+  color: var(--mui-palette-primary-newWhite);
+  text-align: start;
+}
+
+.quiz-completed-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quiz-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quiz-date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .quiz-action {
@@ -25,9 +52,67 @@
   align-items: center;
 }
 
-@media screen and (max-width: 600px) {
-  .MuiAccordionSummary-content {
-    justify-content: space-around !important;
-    transition: all 0.3s ease-in-out !important;
+.quiz-questions {
+  display:flex;
+  align-items: flex-start;
+  flex-direction: column;
+  border-radius: 10px;
+  height:250px;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+}
+
+.quiz-question{
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height:250px;
+}
+
+.user-quiz-options{
+  display:flex;
+  flex-direction: column;
+  padding: 4px 16px;
+}
+
+.MuiAccordion-root.Mui-expanded {
+  margin: 0px !important;
+}
+
+.quiz-collection:not(:last-child) {
+  padding-bottom: 20px;
+}
+
+/* .quiz-question:not(:last-child) {
+  padding-bottom: 20px;
+} */
+
+.quiz-question-holder:not(:last-child) {
+  padding-bottom: 20px;
+}
+
+.quiz-result-container{
+  display:flex;
+  flex-direction: column;
+}
+
+@media screen and (max-width: 900px) {
+  .quiz-question-holder {
+    grid-template-columns: 6fr 2fr;
+  }
+  .quiz-details-flex-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .quiz-status-holder {
+    margin-left: 0px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .quiz-action {
+    align-items: flex-start;
+  }
+  .quiz-topic > h6 {
+    width: 100%;
   }
 }

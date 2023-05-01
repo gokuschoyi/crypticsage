@@ -90,6 +90,91 @@ const makeAllStatusForUser = async () => {
     }
 }
 
+const transformQuizData = async (userQuizStatus, quizCollection) => {
+    const result = []
+    //converting user status to array
+    for (const sectionId in userQuizStatus) {
+        const section = userQuizStatus[sectionId];
+
+        // Loop through each lesson in the section
+        for (const lessonId in section) {
+            const lesson = section[lessonId];
+
+            // Loop through each quiz in the lesson
+            for (const quiz of lesson) {
+                // Add the quiz object to the result array
+                result.push(quiz);
+            }
+        }
+    }
+
+    //adding the user status to quiz collection 
+    const updatedQuizCollection = quizCollection.map((quiz) => {
+        const userQuiz = result.find((userQuiz) => userQuiz.quiz_id === quiz.quizId);
+        if (userQuiz) {
+            quiz.quiz_completed = userQuiz.quiz_completed;
+            quiz.quiz_completed_date = userQuiz.quiz_completed_date;
+            quiz.quiz_score = userQuiz.quiz_score;
+            quiz.quiz_total = userQuiz.quiz_total;
+        } else {
+            quiz.quiz_completed = false;
+            quiz.quiz_completed_date = "";
+            quiz.quiz_score = "";
+            quiz.quiz_total = "";
+        }
+        return quiz;
+    })
+
+    //transforming quiz collection to required format
+    const outputObject = {
+        quizzes: []
+    };
+    for (let i = 0; i < updatedQuizCollection.length; i++) {
+        const quiz = updatedQuizCollection[i];
+        const sectionName = quiz.sectionName;
+        const sectionId = quiz.sectionId;
+        const lessonId = quiz.lessonId;
+        const lessonName = quiz.lessonName;
+        const quizId = quiz.quizId;
+        const quizTitle = quiz.quizTitle;
+        const quizCompleted = quiz.quiz_completed;
+        const quizCompletedDate = quiz.quiz_completed_date;
+        const quizScore = quiz.quiz_score;
+        const quizTotal = quiz.quiz_total;
+
+        let section = outputObject.quizzes.find(section => section.sectionName === sectionName);
+        if (!section) {
+            section = {
+                sectionName,
+                sectionId,
+                lessons: []
+            };
+            outputObject.quizzes.push(section);
+        }
+
+        let lesson = section.lessons.find(lesson => lesson.lessonName === lessonName && lesson.lessonID === lessonId);
+        if (!lesson) {
+            lesson = {
+                lessonName,
+                lessonID: lessonId,
+                allQuizzes: []
+            };
+            section.lessons.push(lesson);
+        }
+
+        lesson.allQuizzes.push({
+            quizId,
+            quizTitle,
+            quizCompleted,
+            quizCompletedDate,
+            quizScore,
+            quizTotal
+        });
+    }
+    return { outputObject };
+}
+
 module.exports = {
-    makeAllStatusForUser
+    makeAllStatusForUser,
+    transformQuizData
 }

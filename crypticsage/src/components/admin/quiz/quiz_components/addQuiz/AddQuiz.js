@@ -49,7 +49,7 @@ const AddQuiz = (props) => {
     } = props;
     const theme = useTheme();
 
-    console.log(selectedQuiz)
+    // console.log(selectedQuiz)
 
     return (
         <Box>

@@ -73,3 +73,39 @@ export const updatUserLessonStatus = async (data) => {
     })
     return response;
 }
+
+export const getInitialQuizDataForUser = async (data) => {
+    let token = data.token;
+    let payload = data.payload
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/user/get_initial_quiz_data_for_user`, payload, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
+export const getQuizQuestions = async (data) => {
+    let token = data.token;
+    let payload = data.payload
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/user/getQuiz`, payload, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
+export const submitQuizResults = async (data) => {
+    let token = data.token;
+    let payload = data.payload
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/user/submitQuiz`, payload, config, {
+        withCredentials: true
+    })
+    return response;
+}

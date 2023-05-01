@@ -6,7 +6,7 @@ const { OAuth2Client } = require('google-auth-library');
 
 const { connect, close } = require('./db-conn')
 
-const { makeAllStatusForUser } = require('./helpers');
+const { makeAllStatusForUser, transformQuizData } = require('./helpers');
 
 // <--- User Operations ---> //
 const createNewUser = async (req, res) => {
@@ -521,6 +521,103 @@ const updateUserLessonStatus = async (req, res) => {
         close("updateUserLessonStatus");
     }
 }
+
+const getInitialQuizDataForUser = async (req, res) => {
+    const { uid } = req.body;
+    try {
+        const db = await connect("getInitialQuizDataForUser");
+        const user = await db.collection('users').find({ "uid": uid }).toArray();
+        let userQuizStatus = user[0].quiz_status
+        const quizCollection = await db.collection('quiz').find({}).toArray();
+        let transformedQuizData = await transformQuizData(userQuizStatus, quizCollection);
+        transformedQuizData = transformedQuizData.outputObject.quizzes
+        res.status(200).json({ message: "Quiz data fetched successfully", transformedQuizData });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Quiz data fetch failed" });
+    } finally {
+        close("getInitialQuizDataForUser");
+    }
+}
+
+const getQuiz = async (req, res) => {
+    const { quizId } = req.body;
+    try {
+        const db = await connect("getQuiz");
+        const quizCollection = db.collection('quiz');
+        let selectedQuiz = await quizCollection.find({ "quizId": quizId }).toArray()
+        if (selectedQuiz.length === 0) {
+            res.status(200).json({ message: "No quiz found" });
+        } else {
+            updatedQuiz = selectedQuiz[0].questions.map((ques, index) => {
+                const { correctAnswer, ...updatedQuestion } = ques
+                return (
+                    updatedQuestion
+                )
+            })
+            selectedQuiz[0].questions = updatedQuiz
+            res.status(200).json({ message: "Quiz fetched successfully", selectedQuiz });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Quiz fetch failed" });
+    } finally {
+        close("getQuiz");
+    }
+}
+
+const submitQuiz = async (req, res) => {
+    const { uid, sectionId, lessonId, quizId, quizData } = req.body;
+    try {
+        const db = await connect("submitQuiz");
+        const quiz = await db.collection('quiz').find({ quizId: quizId }).toArray()
+        let score = 0
+        let total = 0
+        quiz[0].questions.forEach((question) => {
+            quizData.userSelection.forEach((selection) => {
+                if (question.question_id === selection.question_id) {
+                    total = total + 1
+                    if (question.correctAnswer === selection.selectedOption) {
+                        score = score + 1
+                    }
+                }
+            })
+        })
+        console.log(score)
+        let data = {
+            score:score, 
+            total:total,
+            quizTitle:quiz[0].quizTitle,
+        }
+        const userCollection = db.collection('users');
+        const user = await userCollection.updateOne(
+            { uid: uid },
+            {
+                $set: {
+                    [`quiz_status.${sectionId}.${lessonId}.$[inner].quiz_completed_date`]: new Date().toLocaleString(),
+                    [`quiz_status.${sectionId}.${lessonId}.$[inner].quiz_score`]: score,
+                    [`quiz_status.${sectionId}.${lessonId}.$[inner].quiz_completed`]: true,
+                    [`quiz_status.${sectionId}.${lessonId}.$[inner].quiz_total`]: total,
+                }
+            },
+            {
+                arrayFilters: [
+                    { "inner.section_id": sectionId, "inner.lesson_id": lessonId, "inner.quiz_id": quizId }
+                ]
+            }
+        );
+        if (user.acknowledged) {
+            res.status(200).json({ message: "Quiz submitted successfully", status: true, data });
+        } else {
+            res.status(500).json({ message: "Quiz submission failed" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Quiz submission failed" });
+    } finally {
+        close("submitQuiz");
+    }
+}
 // <--- User Operations ---> //
 
 // <--- Sections ---> //
@@ -766,6 +863,9 @@ const addQuizQuestions = async (req, res) => {
         const db = await connect("addQuizQuestions");
         const quizCollection = db.collection('quiz');
         quizData.quizId = uuidv4();
+        quizData.questions.map((question) => {
+            question.question_id = uuidv4();
+        })
         const result = await quizCollection.insertOne(quizData);
         let insertedId = result.insertedId;
         let insertedQuizData = await quizCollection.find({ _id: insertedId }).toArray();
@@ -867,6 +967,15 @@ const deleteQuizQuestion = async (req, res) => {
 module.exports = {
     createNewUser,
     loginUser,
+    verifyPassword,
+    updatePassword,
+    updateProfilePicture,
+    updateUserData,
+    updateUserPreference,
+    updateUserLessonStatus,
+    getInitialQuizDataForUser,
+    getQuiz,
+    submitQuiz,
     getSections,
     addSection,
     updateSection,
@@ -879,10 +988,4 @@ module.exports = {
     addQuizQuestions,
     updateQuizQuestions,
     deleteQuizQuestion,
-    verifyPassword,
-    updatePassword,
-    updateProfilePicture,
-    updateUserData,
-    updateUserPreference,
-    updateUserLessonStatus,
 }

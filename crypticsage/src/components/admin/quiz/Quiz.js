@@ -123,7 +123,7 @@ const Quiz = (props) => {
                     let res = await fetchLessons(data);
                     setLessonData(res.data.lessons);
                     if (res.data.message) {
-                        Success(res.data.message)
+                        // Success(res.data.message)
                     }
                 } catch (error) {
                     if (error.response) {
@@ -410,8 +410,10 @@ const Quiz = (props) => {
 
     const finalData = {
         'sectionId': '',
-        'quizId': '',
+        'sectionName': '',
         'lessonId': '',
+        'lessonName': '',
+        'quizId': '',
         'quizTitle': '',
         'quizDescription': '',
         'questions': []
@@ -421,7 +423,9 @@ const Quiz = (props) => {
     const [quizId, setQuizId] = useState('');
     const handleLessonSave = async (e) => {
         finalData.sectionId = selectedSectionId;
+        finalData.sectionName = selectedSection;
         finalData.lessonId = selectedLessonId;
+        finalData.lessonName = selectedLesson;
         finalData.quizTitle = titleAndDescription.quizTitle;
         finalData.quizDescription = titleAndDescription.quizDescription;
         let combinedData = [];

@@ -1,124 +1,174 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useOutletContext } from "react-router-dom";
 import Header from '../../global/Header';
-import { Box, Typography, Button, useTheme, Grid, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Box } from '@mui/material';
 import './Quiz.css'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import QUIZ_DATA from './QuizData';
-
-import Slide from '@mui/material/Slide';
+import TakeQuiz from './quiz_component/TakeQuiz';
+import AllQuizzes from './quiz_component/AllQuizzes';
+import { useSelector } from 'react-redux';
+import { getInitialQuizDataForUser, getQuizQuestions, submitQuizResults } from '../../../../api/user'
 
 const Quiz = (props) => {
-    const theme = useTheme();
+    const { accessToken, uid } = useSelector(state => state.auth)
     const { title, subtitle } = props
+    const [titleDesc, setTitleDesc] = useState({ title: title, subtitle: subtitle })
 
+    //handles close of dri=opdown when clicked on main page
     const [setTest] = useOutletContext();
     const hide = () => {
         setTest(true);
     }
 
-    const [expanded, setExpanded] = React.useState(false);
-
+    //handle dropdown for each lesson
+    const [expanded, setExpanded] = useState(false);
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     };
 
-    const mountedStyle = { animation: "inAnimation 350ms ease-in" };
-    const unmountedStyle = {
-        animation: "outAnimation 370ms ease-out",
-        animationFillMode: "forwards"
+    //switch between quiz main page and single quiz page
+    const [showQuiz, setShowQuiz] = useState(false)
+    const handleShowQuiz = () => {
+        setShowQuiz((prev) => !prev)
+    }
+
+    //go back to quiz main page
+    const goBackToQuiz = () => {
+        setTitleDesc({ title: title, subtitle: subtitle })
+        setShowQuiz(false)
+        setQuizResult()
+        setOptionsValue([])
+        setSelectedQuizData([])
+    }
+
+    //get initial quizzes data for user useRef to run the fetch only once
+    const isLoaded = useRef(false)
+    const [initialQuizData, setInitialQuizData] = useState([])
+    useEffect(() => {
+        if (!isLoaded.current) {
+            isLoaded.current = true
+            let data = {
+                token: accessToken,
+                payload: {
+                    uid: uid
+                }
+            }
+            getInitialQuizDataForUser(data)
+                .then((res) => {
+                    setInitialQuizData(res.data.transformedQuizData)
+                })
+                .catch((err) => {
+                    console.log(err)
+                })
+        }
+    })
+
+    //selected quiz data (1 quiz data). Transforms the data to add index to each question and creates a new optionsValue array
+    //to store the selected option for each question
+    const [qid, setQid] = useState()
+    const [selectedQuizData, setSelectedQuizData] = useState([])
+
+    const loadQuiz = (e) => {
+        const { value } = e.target
+        setQid(value)
+        handleShowQuiz()
+        const data = {
+            token: accessToken,
+            payload: {
+                quizId: value
+            }
+        }
+        getQuizQuestions(data)
+            .then((res) => {
+                let quiz = res.data.selectedQuiz
+                let sortedQuestions = quiz[0].questions.sort(() => Math.random() - 0.5)
+                quiz[0] = { ...quiz[0], questions: sortedQuestions }
+                setSelectedQuizData(quiz)
+                setTitleDesc({ title: quiz[0].quizTitle, subtitle: '' })
+                let optionsData = quiz[0].questions.map((ques, ind) => {
+                    const { question, question_id } = ques
+                    return {
+                        question_id,
+                        question,
+                        selectedOption: ''
+                    }
+                })
+                setOptionsValue(optionsData)
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }
+
+    //optionsValue array to store the selected option for each question
+    const [optionValue, setOptionsValue] = useState([])
+    const handleOptionsChange = (event) => {
+        const { name, value } = event.target
+        const updatedOptions = optionValue.map((option) => {
+            if (option.question_id === name) {
+                return { ...option, selectedOption: value };
+            } else {
+                return option;
+            }
+        });
+        setOptionsValue(updatedOptions)
     };
 
-    const [qid, setQid] = React.useState()
+    // console.log("selected quiz data", selectedQuizData, optionValue)
 
-    const takeQuiz = (e) => {
-        const { value } = e.target
-        setQid(JSON.parse(value))
-    }
-    // console.log(qid)
-
-    const Quiz = (props) => {
-        const { title, quizID, index } = props
-        const value = {
-            'quizID': quizID,
-            'lesson': title
+    //submit quiz to db and get the score
+    const [quizResult, setQuizResult] = useState()
+    const submitQuiz = async () => {
+        let data = {
+            token: accessToken,
+            payload: {
+                uid: uid,
+                sectionId: selectedQuizData[0].sectionId,
+                lessonId: selectedQuizData[0].lessonId,
+                quizId: selectedQuizData[0].quizId,
+                quizData: {
+                    userSelection: optionValue,
+                }
+            }
         }
-        return (
-            <Box className='quiz-question-holder' key={index}>
-                <Box className='quiz-topic'>
-                    <Typography variant='h6'>{title}</Typography>
-                </Box>
-                <Box className='quiz-number'>
-                    <Typography variant='h6'>{quizID} : {index + 1}</Typography>
-                </Box>
-                <Box className='quiz-action'>
-                    <Button
-                        value={JSON.stringify(value)}
-                        onClick={(e) => takeQuiz(e)}
-                        variant="text"
-                        style={{
-                            color: `#000000`,
-                            backgroundColor: 'red',
-                            margin: '5px'
-                        }}
-                        sx={{
-                            ':hover': {
-                                color: `black !important`,
-                                backgroundColor: 'white !important',
-                            },
-                        }}>Take Quiz</Button>
-                </Box>
-            </Box>
-        )
+        await submitQuizResults(data)
+            .then((res) => {
+                if (res.data.status) {
+                    isLoaded.current = false
+                    setQuizResult(res.data)
+                    console.log("Quiz submitted successfully")
+                }
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+        // console.log(optionValue, score)
     }
 
     return (
         <Box className='quiz-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
-                <Header title={title} subtitle={subtitle} />
+                <Header title={titleDesc.title} subtitle={titleDesc.subtitle} />
             </Box>
             <Box className='quiz-cards-container'>
-                <Grid className='quiz-grid-container' container spacing={2} justifyContent='center'>
-                    <Grid className='quiz-grid-card' item xs={11} sm={11} md={10} lg={10}>
-                        {QUIZ_DATA.map((lessons, index) => {
-                            return (
-                                <Slide key={index} direction="up" timeout={500} in={true} >
-                                    <Accordion
-                                        TransitionProps={{ unmountOnExit: true }}
-                                        expanded={expanded === `panel${index}`}
-                                        onChange={handleChange(`panel${index}`)}
-                                    >
-                                        <AccordionSummary
-                                            sx={{
-                                                color: `${theme.palette.secondary.main}`,
-                                                '.MuiAccordionSummary-content': {
-                                                    textAlign: 'start',
-                                                    alignItems: 'center',
-                                                    transition: 'all 0.3s ease-in-out',
-                                                }
-                                            }}
-                                            expandIcon={<ExpandMoreIcon />}
-                                            aria-controls="panel1bh-content"
-                                            id="panel1bh-header"
-                                        >
-                                            <Typography sx={{ width: '33%', flexShrink: 0 }}>
-                                                {lessons.lesson}
-                                            </Typography>
-
-                                        </AccordionSummary>
-                                        <AccordionDetails style={expanded === `panel${index}` ? mountedStyle : unmountedStyle}>
-                                            {lessons.chapters.map((lesson, index) => {
-                                                return (
-                                                    <Quiz key={index} title={lesson.title} quizID={lesson.quizID} index={index} />
-                                                )
-                                            })}
-                                        </AccordionDetails>
-                                    </Accordion>
-                                </Slide>
-                            )
-                        })}
-                    </Grid>
-                </Grid>
+                {!showQuiz &&
+                    <AllQuizzes
+                        loadQuiz={loadQuiz}
+                        qid={qid}
+                        initialQuizData={initialQuizData}
+                        expanded={expanded}
+                        handleChange={handleChange}
+                    />
+                }
+                {showQuiz &&
+                    <TakeQuiz
+                        optionValue={optionValue}
+                        handleOptionsChange={handleOptionsChange}
+                        selectedQuizData={selectedQuizData}
+                        goBackToQuiz={goBackToQuiz}
+                        submitQuiz={submitQuiz}
+                        quizResult={quizResult}
+                    />
+                }
             </Box>
         </Box>
     )
