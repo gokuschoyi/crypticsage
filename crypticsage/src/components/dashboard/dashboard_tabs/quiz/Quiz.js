@@ -116,8 +116,10 @@ const Quiz = (props) => {
     // console.log("selected quiz data", selectedQuizData, optionValue)
 
     //submit quiz to db and get the score
+    const [resultLoaderFlag, setResultLoaderFlag] = useState(false)
     const [quizResult, setQuizResult] = useState()
     const submitQuiz = async () => {
+        setResultLoaderFlag(true)
         let data = {
             token: accessToken,
             payload: {
@@ -135,6 +137,7 @@ const Quiz = (props) => {
                 if (res.data.status) {
                     isLoaded.current = false
                     setQuizResult(res.data)
+                    setResultLoaderFlag(false)
                     console.log("Quiz submitted successfully")
                 }
             })
@@ -161,6 +164,7 @@ const Quiz = (props) => {
                 }
                 {showQuiz &&
                     <TakeQuiz
+                        resultLoaderFlag={resultLoaderFlag}
                         optionValue={optionValue}
                         handleOptionsChange={handleOptionsChange}
                         selectedQuizData={selectedQuizData}

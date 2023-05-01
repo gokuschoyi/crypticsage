@@ -89,7 +89,7 @@ const AllQuizzes = (props) => {
             </Box>
         )
     }
-    console.log(initialQuizData)
+    // console.log(initialQuizData)
     return (
         <Box className='all-quizzez-container'>
             <Grid className='quiz-grid-container' container spacing={2} justifyContent='center'>
@@ -128,7 +128,7 @@ const AllQuizzes = (props) => {
                                                             aria-controls="panel1bh-content"
                                                             id="panel1bh-header"
                                                         >
-                                                            <Typography sx={{ width: '33%', flexShrink: 0 }}>
+                                                            <Typography sx={{ flexShrink: 0 }}>
                                                                 {lesson.lessonName}
                                                             </Typography>
                                                         </AccordionSummary>

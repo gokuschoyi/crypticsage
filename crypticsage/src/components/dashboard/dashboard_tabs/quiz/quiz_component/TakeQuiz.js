@@ -8,7 +8,6 @@ import {
     FormControlLabel,
     RadioGroup,
     Radio,
-    CircularProgress,
     Skeleton,
     useTheme,
 } from '@mui/material'
@@ -16,7 +15,7 @@ import { red } from '@mui/material/colors';
 
 const TakeQuiz = (props) => {
     const theme = useTheme()
-    const { optionValue, handleOptionsChange, selectedQuizData, goBackToQuiz, submitQuiz, quizResult } = props
+    const { resultLoaderFlag, optionValue, handleOptionsChange, selectedQuizData, goBackToQuiz, submitQuiz, quizResult } = props
 
     const OptionsBox = (props) => {
         const { options, questionId } = props
@@ -65,10 +64,22 @@ const TakeQuiz = (props) => {
         questionsList.scrollBy(0, -questionsList.offsetHeight);
     }
     // console.log("selected quiz data", selectedQuizData, quizQuestionCounter)
-
+    // console.log("quiz result", quizResult?.status)
     return (
         <Box className='take-quiz-container'>
-            {quizResult?.status ?
+            {resultLoaderFlag &&
+                <Grid className='quiz-questions-container' container spacing={2} justifyContent='center'>
+                    <Grid className='quiz-questions-card' item xs={11} sm={11} md={10} lg={10}>
+                        <Typography variant='h3' textAlign='start' sx={{ color: `${theme.palette.secondary.main}`, padding: '4px 16px' }}>Your Quiz Results</Typography>
+                        <Skeleton sx={{ bgcolor: '#585050', margin: '4px 16px' }} mb={1} variant="rounded" width={250} height={40} />
+                        <Skeleton sx={{ bgcolor: '#585050', margin: '4px 16px' }} variant="rounded" width={200} height={40} />
+                        <Box display='flex' justifyContent='center'>
+                            <Skeleton sx={{ bgcolor: '#585050', margin: '4px 16px' }} variant="rounded" width={200} height={40} />
+                        </Box>
+                    </Grid>
+                </Grid>
+            }
+            {quizResult?.status === true &&
                 <Grid className='quiz-questions-container' container spacing={2} justifyContent='center'>
                     <Grid className='quiz-questions-card' item xs={11} sm={11} md={10} lg={10}>
                         <Box className='quiz-result-container'>
@@ -91,7 +102,8 @@ const TakeQuiz = (props) => {
                         </Box>
                     </Grid>
                 </Grid>
-                :
+            }
+            {quizResult?.status === undefined && !resultLoaderFlag &&
                 <Grid className='quiz-questions-container' container spacing={2} justifyContent='center'>
                     <Grid className='quiz-questions-card' item xs={11} sm={11} md={10} lg={10}>
                         {selectedQuizData.length === 0 ?
