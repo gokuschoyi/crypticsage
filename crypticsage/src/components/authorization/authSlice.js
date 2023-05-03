@@ -5,6 +5,7 @@ const initialState = {
     displayName: '',
     email: '',
     emailVerified: '',
+    passwordEmptyFlag: '',
     uid: '',
     preferences: {},
     mobile_number: '',
@@ -22,6 +23,7 @@ const authSlice = createSlice({
             state.displayName = action.payload.displayName;
             state.email = action.payload.email;
             state.emailVerified = action.payload.emailVerified;
+            state.passwordEmptyFlag = action.payload.passwordEmptyFlag;
             state.uid = action.payload.uid;
             state.preferences = action.payload.preferences;
             state.mobile_number = action.payload.mobile_number;

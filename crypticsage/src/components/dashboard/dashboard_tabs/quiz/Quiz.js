@@ -48,9 +48,6 @@ const Quiz = (props) => {
             isLoaded.current = true
             let data = {
                 token: accessToken,
-                payload: {
-                    uid: uid
-                }
             }
             getInitialQuizDataForUser(data)
                 .then((res) => {
@@ -123,7 +120,6 @@ const Quiz = (props) => {
         let data = {
             token: accessToken,
             payload: {
-                uid: uid,
                 sectionId: selectedQuizData[0].sectionId,
                 lessonId: selectedQuizData[0].lessonId,
                 quizId: selectedQuizData[0].quizId,

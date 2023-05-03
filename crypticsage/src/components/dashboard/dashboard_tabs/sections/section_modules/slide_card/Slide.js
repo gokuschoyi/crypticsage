@@ -125,7 +125,6 @@ const SlideComponent = (props) => {
         let data = {
             token: token,
             payload: {
-                "uid": uid,
                 "lesson_status": lessonState,
             }
         }

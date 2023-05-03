@@ -80,7 +80,14 @@ const SectionCard = (props) => {
             </Box>
             <Box className='section-cards-container'>
                 {sections.length === 0
-                    ? <CircularProgress />
+                    ?
+                    <Grid container justifyContent='center'>
+                        <Grid item xs={11} sm={11} md={11} lg={11} justifyContent='center'>
+                            <Box sx={{ display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
+                                <CircularProgress size='30px' sx={{ color: 'red' }}/>
+                            </Box>
+                        </Grid>
+                    </Grid>
                     :
                     <Grid container className='section-grid-container' justifyContent='start'>
                         {sections && sections.map(({ title, sectionId, content, section_status }, index) => {

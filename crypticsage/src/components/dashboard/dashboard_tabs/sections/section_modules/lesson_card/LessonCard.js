@@ -6,7 +6,7 @@ import { Box, IconButton, Button, CircularProgress, Grid, CardContent, Typograph
 const LessonCard = (props) => {
     const { lessons, sectionId, sectionName, goBackToSections, openSlide } = props
     const theme = useTheme()
-    
+
     /* useEffect(() => {
         if (md === false) {
             const textElement = document.querySelectorAll('.lesson-title-box span')
@@ -43,7 +43,7 @@ const LessonCard = (props) => {
                     <Typography variant="h5" className='rolling' component='span' sx={{ color: 'white', width: 'fill-available', cursor: 'pointer' }}>
                         {title}
                     </Typography>
-                    <Typography variant="h5"  sx={{ color: 'white', width: 'fill-available', cursor: 'pointer' }}>
+                    <Typography variant="h5" sx={{ color: 'white', width: 'fill-available', cursor: 'pointer' }}>
                         {completed ? 'Completed' : 'Not Completed'}
                     </Typography>
                 </CardContent>
@@ -84,16 +84,22 @@ const LessonCard = (props) => {
                         }}>Go Back</Button>
                 </Box>
             </Box>
-            <Box pl={2} pr={3}>
-                {lessons.length === 0
-                    ? <CircularProgress />
+            <Box>
+                {lessons.length === 0 ?
+                    <Grid container justifyContent='center'>
+                        <Grid item xs={11} sm={11} md={11} lg={11} justifyContent='center'>
+                            <Box sx={{ display: 'flex', justifyContent:'center', overflow: 'hidden' }}>
+                                <CircularProgress size='30px' sx={{ color: 'red' }} />
+                            </Box>
+                        </Grid>
+                    </Grid>
                     :
                     <Grid container justifyContent='center'>
                         {lessons && lessons.map((lesson, index) => {
                             return (
                                 <Grid item xs={11} sm={4} md={3} lg={2} key={index}>
                                     <LessonsBox title={lesson.chapter_title} lessonId={lesson.lessonId} completed={lesson.lesson_status.lesson_completed
-                                    }/>
+                                    } />
                                 </Grid>
                             )
                         })}

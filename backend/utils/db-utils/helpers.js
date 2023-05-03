@@ -1,4 +1,7 @@
 const { connect, close } = require('./db-conn')
+const csv = require('csv-parser');
+const fs = require('fs');
+
 const sortAndGroupLessons = (lessonArray) => {
     const sortedLessons = lessonArray.sort((a, b) => {
         if (a.section_id < b.section_id) {
@@ -174,7 +177,51 @@ const transformQuizData = async (userQuizStatus, quizCollection) => {
     return { outputObject };
 }
 
+const processUploadedCsv = async (req) => {
+    let final={}
+    try {
+        await Promise.all(req.files.map((file) => {
+            let headersProcessed = false;
+            let headers = {};
+            let results = [];
+            return new Promise((resolve, reject) => {
+                fs.createReadStream(file.path)
+                    .pipe(csv())
+                    .on('data', (data) => {
+                        if (!headersProcessed) {
+                            headersProcessed = true;
+                            Object.keys(data).map((header) => {
+                                headers[header] = header
+                            })
+                        }
+                        let obj = {}
+                        for (const [key, value] of Object.entries(data)) {
+                            obj[headers[key]] = value;
+                        }
+                        results.push(obj);
+                    })
+                    .on('end', () => {
+                        const regex = /-\d+.*$/;
+                        let trimmed = file.originalname.replace(regex, '')
+                        final[trimmed] = results
+                        resolve()
+                    })
+                    .on('error', (error) => {
+                        reject(error);
+                    });
+            })
+        }))
+        return final
+    } catch (err) {
+        console.log(err);
+        return err
+    } finally {
+        console.log("finally for process upload")
+    }
+}
+
 module.exports = {
     makeAllStatusForUser,
-    transformQuizData
+    transformQuizData,
+    processUploadedCsv
 }

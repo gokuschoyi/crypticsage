@@ -52,7 +52,6 @@ const BasicSettings = () => {
             let data = {
                 token: user.accessToken,
                 payload: {
-                    uid: user.uid,
                     profileImage: base64
                 }
             }
@@ -136,7 +135,6 @@ const BasicSettings = () => {
             let data = {
                 token: user.accessToken,
                 payload: {
-                    uid: user.uid,
                     password: currentPassword.currentPassword.value
                 }
             }
@@ -196,7 +194,6 @@ const BasicSettings = () => {
                 let data = {
                     token: user.accessToken,
                     payload: {
-                        uid: user.uid,
                         password: newPassword.newPassword.value
                     }
                 }
@@ -233,7 +230,6 @@ const BasicSettings = () => {
                 let data = {
                     token: user.accessToken,
                     payload: {
-                        uid: user.uid,
                         userData: {
                             displayName: userDetails.displayName.value,
                             mobile_number: userDetails.mobileNumber.value
@@ -288,7 +284,6 @@ const BasicSettings = () => {
             let data = {
                 token: user.accessToken,
                 payload: {
-                    uid: user.uid,
                     preferences: editedPreferences
                 }
             }
@@ -448,44 +443,47 @@ const BasicSettings = () => {
                 </Grid>
                 <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                     <Box className='change-password-box'>
-                        <Box className='change-password-box-info' display='flex' flexDirection='column' alignItems='start'>
-                            <Typography variant='h5' color='secondary'>Change Password</Typography>
-                            <Typography variant='body2' color='secondary'>Enter your current password to verify your identity</Typography>
-                        </Box>
                         <Box className='basic-settings-input-container'>
-                            <Box display='flex' alignItems='baseline' justifyContent='space-between'>
-                                <TextField
-                                    fullWidth
-                                    onChange={(e) => handlePasswordChange(e)} name='currentPassword' value={currentPassword.currentPassword.value}
-                                    id="outlined-adornment-password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    error={currentPassword.currentPassword.error}
-                                    helperText={currentPassword.currentPassword.helperText}
-                                    label="Current Password"
-                                    size='small'
-                                    InputProps={{
-                                        endAdornment:
-                                            <InputAdornment position="end">
-                                                <IconButton
-                                                    aria-label="toggle password visibility"
-                                                    onClick={handleClickShowPassword}
-                                                    onMouseDown={handleMouseDownPassword}
-                                                    edge="end"
-                                                >
-                                                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                                                </IconButton>
-                                            </InputAdornment>
-                                    }}
-                                />
-
-                                <Button
-                                    onClick={verifyCurrentPassword} size='small'
-                                    variant="text"
-                                    style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginLeft: '10px' }}
-                                    sx={{ ':hover': { color: `black !important`, backgroundColor: 'white !important', } }}
-                                >Submit</Button>
-                            </Box>
-                            {passwordCorrect &&
+                            {!(user.passwordEmptyFlag) &&
+                                <Box>
+                                    <Box className='change-password-box-info' display='flex' flexDirection='column' alignItems='start'>
+                                        <Typography variant='h5' color='secondary'>Change Password</Typography>
+                                        <Typography variant='body2' color='secondary'>Enter your current password to verify your identity</Typography>
+                                    </Box>
+                                    <Box display='flex' alignItems='baseline' justifyContent='space-between'>
+                                        <TextField
+                                            fullWidth
+                                            onChange={(e) => handlePasswordChange(e)} name='currentPassword' value={currentPassword.currentPassword.value}
+                                            id="outlined-adornment-password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            error={currentPassword.currentPassword.error}
+                                            helperText={currentPassword.currentPassword.helperText}
+                                            label="Current Password"
+                                            size='small'
+                                            InputProps={{
+                                                endAdornment:
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            aria-label="toggle password visibility"
+                                                            onClick={handleClickShowPassword}
+                                                            onMouseDown={handleMouseDownPassword}
+                                                            edge="end"
+                                                        >
+                                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                            }}
+                                        />
+                                        <Button
+                                            onClick={verifyCurrentPassword} size='small'
+                                            variant="text"
+                                            style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginLeft: '10px' }}
+                                            sx={{ ':hover': { color: `black !important`, backgroundColor: 'white !important', } }}
+                                        >Submit</Button>
+                                    </Box>
+                                </Box>
+                            }
+                            {(passwordCorrect || user.passwordEmptyFlag) &&
                                 <Box className='reset-password-box'>
                                     <Box sx={{ marginTop: '10px', marginBottom: '10px' }}>
                                         <Typography textAlign='start' variant='h5' color='secondary'>Enter your new password</Typography>

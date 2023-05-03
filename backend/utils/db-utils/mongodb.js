@@ -3,10 +3,13 @@ const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require('google-auth-library');
-
 const { connect, close } = require('./db-conn')
 
-const { makeAllStatusForUser, transformQuizData } = require('./helpers');
+const {
+    makeAllStatusForUser,
+    transformQuizData,
+    processUploadedCsv
+} = require('./helpers');
 
 // <--- User Operations ---> //
 const createNewUser = async (req, res) => {
@@ -226,52 +229,55 @@ const loginUser = async (req, res) => {
                 const db = await connect("loginUser - emailpassword");
                 const userCollection = db.collection('users');
                 const filterEmail = { email: email }
-                const user = [];
+                let user = [];
                 try {
                     user = await userCollection.find(filterEmail).toArray();
+                    if (user.length === 0) {
+                        res.status(400).json({ message: "User does not exist or email is wrong" });
+                    }
+                    else {
+                        const hashedPassword = user[0].password;
+                        const decryptedPassword = await bcrypt.compare(password, hashedPassword);
+                        if (!decryptedPassword) {
+                            res.status(400).json({ message: "Password is wrong" });
+                        } else {
+                            admin_status = adminList.includes(email);
+                            const token = jwt.sign(
+                                {
+                                    email: user[0].email,
+                                    user_name: user[0].user_name,
+                                    uid: user[0].uid
+                                },
+                                config.tokenKey,
+                                {
+                                    expiresIn: '8h'
+                                }
+                            );
+
+                            let userData = {};
+                            userData.email = user[0].email;
+                            userData.displayName = user[0].displayName;
+                            userData.emailVerified = user[0].emailVerified;
+                            userData.uid = user[0].uid;
+                            userData.profile_image = user[0].profile_image;
+                            userData.preferences = user[0].preferences;
+                            userData.mobile_number = user[0].mobile_number;
+                            userData.accessToken = token;
+                            userData.signup_type = user[0].signup_type;
+                            userData.admin_status = admin_status;
+                            userData.lesson_status = user[0].lesson_status;
+                            userData.passwordEmptyFlag = user[0].password === '' ? true : false;
+
+                            res.status(200).json({ message: "User login successful", data: userData });
+                        }
+                    }
                 } catch (err) {
                     console.log(err);
                     res.status(500).json({ message: "User does not exist or email is wrong" });
                 } finally {
                     close("loginUser - emailpassword");
                 }
-                if (user.length === 0) {
-                    res.status(400).json({ message: "User does not exist or email is wrong" });
-                }
-                else {
-                    admin_status = adminList.includes(email);
-                    const hashedPassword = user[0].password;
-                    const decryptedPassword = await bcrypt.compare(password, hashedPassword);
-                    const token = jwt.sign(
-                        {
-                            email: user[0].email,
-                            user_name: user[0].user_name
-                        },
-                        config.tokenKey,
-                        {
-                            expiresIn: '8h'
-                        }
-                    );
-                    if (decryptedPassword) {
-                        let userData = {};
-                        userData.email = user[0].email;
-                        userData.displayName = user[0].displayName;
-                        userData.emailVerified = user[0].emailVerified;
-                        userData.uid = user[0].uid;
-                        userData.profile_image = user[0].profile_image;
-                        userData.preferences = user[0].preferences;
-                        userData.mobile_number = user[0].mobile_number;
-                        userData.accessToken = token;
-                        userData.signup_type = user[0].signup_type;
-                        userData.admin_status = admin_status;
-                        userData.lesson_status = user[0].lesson_status;
 
-                        res.status(200).json({ message: "User login successful", data: userData });
-                    }
-                    else {
-                        res.status(400).json({ message: "wrong password" });
-                    }
-                }
             }
             break;
         case 'google':
@@ -301,7 +307,8 @@ const loginUser = async (req, res) => {
                         const token = jwt.sign(
                             {
                                 email: payload.email,
-                                given_name: payload.given_name
+                                user_name: payload.given_name,
+                                uid: user[0].uid
                             },
                             config.tokenKey,
                             {
@@ -320,13 +327,16 @@ const loginUser = async (req, res) => {
                         userData.signup_type = user[0].signup_type;
                         userData.admin_status = admin_status;
                         userData.lesson_status = user[0].lesson_status;
-                        close("loginUser - google");
+                        userData.passwordEmptyFlag = user[0].password === '' ? true : false;
+
                         res.status(200).json({ message: "User login successful", data: userData });
                     }
                 }
                 catch (err) {
-                    close("loginUser - google");
+                    console.log(err)
                     res.status(500).json({ message: "Could not verify your credentials" });
+                } finally {
+                    close("loginUser - google");
                 }
             }
             break;
@@ -349,7 +359,8 @@ const loginUser = async (req, res) => {
                     const token = jwt.sign(
                         {
                             email: user[0].email,
-                            given_name: user[0].user_name
+                            guser_name: user[0].user_name,
+                            uid: user[0].uid
                         },
                         config.tokenKey,
                         {
@@ -368,9 +379,9 @@ const loginUser = async (req, res) => {
                     userData.signup_type = user[0].signup_type;
                     userData.admin_status = admin_status;
                     userData.lesson_status = user[0].lesson_status;
+                    userData.passwordEmptyFlag = user[0].password === '' ? true : false;
                     close("loginUser - facebook");
                     res.status(200).json({ message: "User login successful", data: userData });
-
                 }
             }
             break;
@@ -380,17 +391,24 @@ const loginUser = async (req, res) => {
 }
 
 const verifyPassword = async (req, res) => {
-    const { uid, password } = req.body;
+    const { password } = req.body;
     try {
+        let uid = res.locals.data.uid
         const db = await connect("verifyPassword");
         const userCollection = db.collection('users');
         const user = await userCollection.find({ 'uid': uid }).toArray();
         const hashedPassword = user[0].password;
-        const validPassword = await bcrypt.compare(password, hashedPassword);
-        if (validPassword) {
-            res.status(200).json({ message: "Password verified successfully", validPassword });
+        let validPassword = false;
+        if (hashedPassword === '' && (user[0].signup_type === 'google' || user[0].signup_type === 'facebook')) {
+            validPassword = true
+            res.status(200).json({ message: 'no password set', validPassword })
         } else {
-            res.status(500).json({ message: "Incorrect Password", validPassword });
+            validPassword = await bcrypt.compare(password, hashedPassword);
+            if (validPassword) {
+                res.status(200).json({ message: "Password verified successfully", validPassword });
+            } else {
+                res.status(500).json({ message: "Incorrect Password", validPassword });
+            }
         }
     } catch (err) {
         console.log(err);
@@ -401,8 +419,9 @@ const verifyPassword = async (req, res) => {
 }
 
 const updatePassword = async (req, res) => {
-    const { uid, password } = req.body;
+    const { password } = req.body;
     try {
+        let uid = res.locals.data.uid
         const db = await connect("updatePassword");
         const userCollection = db.collection('users');
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -421,8 +440,9 @@ const updatePassword = async (req, res) => {
 }
 
 const updateProfilePicture = async (req, res) => {
-    const { uid, profileImage } = req.body;
+    const { profileImage } = req.body;
     try {
+        let uid = res.locals.data.uid
         const db = await connect("updateProfilePicture");
         const userCollection = db.collection('users');
         const user = await userCollection.updateOne({ 'uid': uid }, { $set: { 'profile_image': profileImage } });
@@ -440,8 +460,9 @@ const updateProfilePicture = async (req, res) => {
 }
 
 const updateUserData = async (req, res) => {
-    const { uid, userData } = req.body;
+    const { userData } = req.body;
     try {
+        let uid = res.locals.data.uid
         const db = await connect("updateUserData");
         const userCollection = db.collection('users');
         const user = await userCollection.updateOne({ 'uid': uid }, { $set: { 'displayName': userData.displayName, 'mobile_number': userData.mobile_number } });
@@ -459,8 +480,9 @@ const updateUserData = async (req, res) => {
 }
 
 const updateUserPreference = async (req, res) => {
-    const { uid, preferences } = req.body;
+    const { preferences } = req.body;
     try {
+        let uid = res.locals.data.uid
         const db = await connect("updateUserPreference");
         const userCollection = db.collection('users');
         const user = await userCollection.updateOne(
@@ -487,8 +509,9 @@ const updateUserPreference = async (req, res) => {
 }
 
 const updateUserLessonStatus = async (req, res) => {
-    const { uid, lesson_status } = req.body;
+    const { lesson_status } = req.body;
     try {
+        let uid = res.locals.data.uid
         const db = await connect("updateUserLessonStatus");
         const userCollection = db.collection('users');
         const user = await userCollection.updateOne(
@@ -523,8 +546,8 @@ const updateUserLessonStatus = async (req, res) => {
 }
 
 const getInitialQuizDataForUser = async (req, res) => {
-    const { uid } = req.body;
     try {
+        let uid = res.locals.data.uid
         const db = await connect("getInitialQuizDataForUser");
         const user = await db.collection('users').find({ "uid": uid }).toArray();
         let userQuizStatus = user[0].quiz_status
@@ -567,8 +590,9 @@ const getQuiz = async (req, res) => {
 }
 
 const submitQuiz = async (req, res) => {
-    const { uid, sectionId, lessonId, quizId, quizData } = req.body;
+    const { sectionId, lessonId, quizId, quizData } = req.body;
     try {
+        let uid = res.locals.data.uid
         const db = await connect("submitQuiz");
         const quiz = await db.collection('quiz').find({ quizId: quizId }).toArray()
         let score = 0
@@ -585,9 +609,9 @@ const submitQuiz = async (req, res) => {
         })
         console.log(score)
         let data = {
-            score:score, 
-            total:total,
-            quizTitle:quiz[0].quizTitle,
+            score: score,
+            total: total,
+            quizTitle: quiz[0].quizTitle,
         }
         const userCollection = db.collection('users');
         const user = await userCollection.updateOne(
@@ -617,6 +641,19 @@ const submitQuiz = async (req, res) => {
     } finally {
         close("submitQuiz");
     }
+}
+
+const processFileUpload = async (req, res) => {
+    let finalResult;
+    try {
+        finalResult = await processUploadedCsv(req)
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ message: "File upload failed" });
+    } finally {
+        res.status(200).json({ message: "File uploaded successfully", finalResult });
+    }
+
 }
 // <--- User Operations ---> //
 
@@ -976,6 +1013,7 @@ module.exports = {
     getInitialQuizDataForUser,
     getQuiz,
     submitQuiz,
+    processFileUpload,
     getSections,
     addSection,
     updateSection,

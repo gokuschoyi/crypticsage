@@ -5,7 +5,7 @@ import Collapse from '@mui/material/Collapse';
 import { CloseIcon, FacebookIcon } from '../../dashboard/global/Icons';
 import Logo from '../../../assets/logoNew.png'
 import { useNavigate } from 'react-router-dom';
-import Animation from '../animation/Animation';
+// import Animation from '../animation/Animation';
 
 import { LoginSocialFacebook } from "reactjs-social-login";
 import { GoogleLogin } from '@react-oauth/google';
@@ -74,6 +74,7 @@ const Login = (props) => {
                     'displayName': result.data.data.displayName,
                     'email': result.data.data.email,
                     'emailVerified': result.data.data.emailVerified,
+                    'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
                     'photoUrl': result.data.data.profile_image || '',
                     'uid': result.data.data.uid,
                     'preferences': result.data.data.preferences || {},
@@ -89,8 +90,7 @@ const Login = (props) => {
                 setIsLoading(false)
                 if (err.response) {
                     setError(err.response.data.message)
-                }
-                if (err.name === 'AxiosError') {
+                } else if (err.name === 'AxiosError') {
                     setError("Server is down. Please try again later")
                 }
             }
@@ -110,6 +110,7 @@ const Login = (props) => {
                 'displayName': result.data.data.displayName,
                 'email': result.data.data.email,
                 'emailVerified': result.data.data.emailVerified,
+                'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
                 'photoUrl': result.data.data.profile_image || '',
                 'uid': result.data.data.uid,
                 'preferences': result.data.data.preferences || {},
@@ -125,8 +126,7 @@ const Login = (props) => {
             setIsLoading(false)
             if (err.response) {
                 setError(err.response.data.message)
-            }
-            if (err.name === 'AxiosError') {
+            } else if (err.name === 'AxiosError') {
                 setError("Server is down. Please try again later")
             }
         }
@@ -145,6 +145,7 @@ const Login = (props) => {
                 'displayName': result.data.data.displayName,
                 'email': result.data.data.email,
                 'emailVerified': result.data.data.emailVerified,
+                'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
                 'photoUrl': result.data.data.profile_image || '',
                 'uid': result.data.data.uid,
                 'preferences': result.data.data.preferences || {},
@@ -160,8 +161,7 @@ const Login = (props) => {
             setIsLoading(false)
             if (err.response) {
                 setError(err.response.data.message)
-            }
-            if (err.name === 'AxiosError') {
+            } else if (err.name === 'AxiosError') {
                 setError("Server is down. Please try again later")
             }
         }

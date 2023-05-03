@@ -1,6 +1,29 @@
 const express = require('express')
 const router = express.Router()
+const fs = require('fs');
+
 const verify = require('../auth/verifyToken')
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        if (!req.body || !req.body.uid) {
+            cb(new Error('Missing folderName parameter in request body.'));
+        } else {
+            let foldrPath = `./user_uploads/${req.body.uid}`;
+            if (!fs.existsSync(foldrPath)) {
+                fs.mkdirSync(foldrPath);
+            }
+            cb(null, `${foldrPath}`)
+        }
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname)
+    }
+})
+const upload = multer({
+    storage: storage
+});
 
 const {
     verifyPassword,
@@ -12,12 +35,13 @@ const {
     getInitialQuizDataForUser,
     getQuiz,
     submitQuiz,
+    processFileUpload
 } = require('../../utils/db-utils/mongodb')
 
 router.post('/verify_password', verify, async (req, res) => {
     console.log("Verify password request received");
-    const { uid, password } = req.body;
-    if (!uid || !password) {
+    const { password } = req.body;
+    if (!password) {
         res.status(500).json({ message: "Invalid request" });
     } else {
         verifyPassword(req, res)
@@ -26,8 +50,8 @@ router.post('/verify_password', verify, async (req, res) => {
 
 router.post('/update_password', verify, async (req, res) => {
     console.log("Update password request received");
-    const { uid, password } = req.body;
-    if (!uid || !password) {
+    const { password } = req.body;
+    if (!password) {
         res.status(500).json({ message: "Invalid request" });
     } else {
         updatePassword(req, res)
@@ -36,8 +60,8 @@ router.post('/update_password', verify, async (req, res) => {
 
 router.post('/update_profileimage', verify, async (req, res) => {
     console.log("Update profile image request received");
-    const { uid, profileImage } = req.body;
-    if (!uid || !profileImage) {
+    const { profileImage } = req.body;
+    if (!profileImage) {
         res.status(500).json({ message: "Invalid request" });
     } else {
         updateProfilePicture(req, res)
@@ -46,8 +70,8 @@ router.post('/update_profileimage', verify, async (req, res) => {
 
 router.post('/update_userdata', verify, async (req, res) => {
     console.log("Update user data request received");
-    const { uid, userData } = req.body;
-    if (!uid || !userData) {
+    const { userData } = req.body;
+    if (!userData) {
         res.status(500).json({ message: "Invalid request" });
     } else {
         updateUserData(req, res)
@@ -56,8 +80,8 @@ router.post('/update_userdata', verify, async (req, res) => {
 
 router.post('/update_preferences', verify, async (req, res) => {
     console.log("Update preferences request received");
-    const { uid, preferences } = req.body;
-    if (!uid || !preferences) {
+    const { preferences } = req.body;
+    if (!preferences) {
         res.status(500).json({ message: "Invalid request" });
     } else {
         updateUserPreference(req, res)
@@ -66,8 +90,8 @@ router.post('/update_preferences', verify, async (req, res) => {
 
 router.post('/update_userLessonStatus', verify, async (req, res) => {
     console.log("Update user lesson status request received");
-    const { uid } = req.body;
-    if (!uid) {
+    const { lesson_status } = req.body;
+    if (!lesson_status) {
         return res.status(500).json({ message: "User Id is required" });
     } else {
         updateUserLessonStatus(req, res);
@@ -76,12 +100,7 @@ router.post('/update_userLessonStatus', verify, async (req, res) => {
 
 router.post('/get_initial_quiz_data_for_user', verify, async (req, res) => {
     console.log("Get initial quiz data for user request received");
-    const { uid } = req.body;
-    if (!uid) {
-        return res.status(500).json({ message: "User Id is required" });
-    } else {
-        getInitialQuizDataForUser(req, res)
-    }
+    getInitialQuizDataForUser(req, res)
 })
 
 router.post('/getQuiz', verify, async (req, res) => {
@@ -96,12 +115,19 @@ router.post('/getQuiz', verify, async (req, res) => {
 
 router.post('/submitQuiz', verify, async (req, res) => {
     console.log("Submit quiz request received");
-    const { uid, sectionId, lessonId, quizId, quizData } = req.body;
-    if (!uid || !sectionId || !lessonId || !quizId || !quizData) {
+    const { sectionId, lessonId, quizId, quizData } = req.body;
+    if (!sectionId || !lessonId || !quizId || !quizData) {
         return res.status(500).json({ message: "Quiz Id is required" });
     } else {
         submitQuiz(req, res)
     }
 })
 
+router.post('/upload_log_files', verify, upload.array('file', 3), async (req, res) => {
+    if (!req.files.length === 0) {
+        return res.status(500).json({ message: 'No files were uploaded.' });
+    } else {
+        processFileUpload(req, res)
+    }
+})
 module.exports = router
