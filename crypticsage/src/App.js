@@ -18,9 +18,9 @@ import LoginSkeleton from "./components/authorization/LoginSkeleton";
 import LandingPage from './pages/landing_page/LandingPage';
 import Dashboard from "./pages/dashboard/Dashboard";
 import TabRoutes from "./components/dashboard/Routes";
+import Admin from './pages/admin/Admin';
 import AdminRoutes from "./components/admin/Routes";
 const Auth = lazy(() => import('./pages/auth/Auth'));
-const Admin = lazy(() => import('./pages/admin/Admin'));
 
 function App() {
   const [theme, colorMode] = useMode();
