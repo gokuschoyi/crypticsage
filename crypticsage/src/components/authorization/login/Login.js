@@ -184,7 +184,7 @@ const Login = (props) => {
 
     return (
         <Box className='login-container'>
-            <Box className='logo-container' ml={2} mt={2}>
+            <Box className='logo-container' sx={{ marginLeft: '31px', marginTop: '22px' }}>
                 <img src={Logo} alt="logo" className="logo" onClick={redirectToHome} />
             </Box>
             <Box className='alert-box-container' display='flex' justifyContent='center'>

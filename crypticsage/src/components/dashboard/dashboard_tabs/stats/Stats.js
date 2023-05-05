@@ -23,7 +23,6 @@ import "swiper/css";
 import CoinChart from './CoinChart';
 import Header from '../../global/Header';
 
-
 import {
     Box,
     Typography,
@@ -457,7 +456,33 @@ const Stats = (props) => {
         )
     }
 
-
+    const UploadTradingViewDataCard = (props) => {
+        const { title, subtitle, buttonName } = props
+        return (
+            <Box
+                className='card-trading-view-data hover'
+            >
+                <Box className='info-box'>
+                    <Typography variant='h4' textAlign='start' gutterBottom>
+                        {title} :
+                    </Typography>
+                    <Typography sx={{ fontSize: 16, fontWeight: '300', textAlign: 'left' }} gutterBottom>
+                        {subtitle}
+                    </Typography>
+                </Box>
+                <Box className='action-box'>
+                    <Button onClick={showToast} className='card-button' sx={{
+                        ':hover': {
+                            color: 'black !important',
+                            backgroundColor: 'red !important',
+                            transition: '0.5s'
+                        },
+                        backgroundColor: `${theme.palette.primary.main}`
+                    }} size="small">{buttonName}</Button>
+                </Box>
+            </Box>
+        )
+    }
 
     return (
         <Box className='stat-container' onClick={hide}>
@@ -494,16 +519,15 @@ const Stats = (props) => {
                                 }
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
-                                <CustomLongCard title='Upload Trading-View data' subtitle='Upload your Trading View data for analysis' content='Make an entry to your Journal' buttonName="UPLOAD" />
-
+                                <UploadTradingViewDataCard title='Upload Trading-View Files' subtitle='Upload your Trading View Files' buttonName="UPLOAD" />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
                                 <Swiper
                                     centeredSlides={true}
-                                    autoplay={{
+                                    /* autoplay={{
                                         delay: 2500,
                                         disableOnInteraction: false,
-                                    }}
+                                    }} */ /* weird ws call in network tab. Check Later*/
                                     loop={true}
                                     pagination={{
                                         clickable: true,
@@ -604,7 +628,7 @@ const Stats = (props) => {
                         }
                     </Grid>
                 </Grid>
-                <Grid container spacing={2}>
+                <Grid container spacing={2} pt={4}>
                     <Grid item xs={12} sm={12} md={12} lg={6}>
                         {Object.keys(wordOfTheDay).length !== 0 &&
                             <CustomLongCard

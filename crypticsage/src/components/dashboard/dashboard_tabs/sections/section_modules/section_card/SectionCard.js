@@ -92,7 +92,7 @@ const SectionCard = (props) => {
                     <Grid container className='section-grid-container' justifyContent='start'>
                         {sections && sections.map(({ title, sectionId, content, section_status }, index) => {
                             return (
-                                <Grid item xs={11} sm={11} md={6} lg={4} xl={3} className='section-grid-card' key={index}>
+                                <Grid item xs={11} sm={11} md={6} lg={4} xl={4} className='section-grid-card' key={index}>
                                     {CustomCard2({ title, content, sectionId, section_status })}
                                 </Grid>
                             )

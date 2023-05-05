@@ -1,12 +1,26 @@
-import Dashboard from './dashboard/Dashboard';
-import ContentManagement from './content_management/ContentManagement';
-import Quiz from './quiz/Quiz';
+import React, { Suspense, lazy } from "react";
 import { Route } from "react-router-dom";
 
+const Dashboard = lazy(() => import('./dashboard/Dashboard'));
+const ContentManagement = lazy(() => import('./content_management/ContentManagement'));
+const Quiz = lazy(() => import('./quiz/Quiz'));
+
 const AdminRoutes = [
-    <Route key='admin-dashboard' index element={<Dashboard title='Admin Dashboard' subtitle='Explore the various stats here' />} />,
-    <Route key='content_management' path='content_management' element={<ContentManagement title='test' subtitle='testing' />} />,
-    <Route key='quiz' path='quiz' element={<Quiz title='Quiz' subtitle='Create and manage quizzes' />} />,
+    <Route key='admin-dashboard' index element={
+        <Suspense fallback={<div>Loading Admin Dashboard</div>}>
+            <Dashboard title='Admin Dashboard' subtitle='Explore the various stats here' />
+        </Suspense>
+    } />,
+    <Route key='content_management' path='content_management' element={
+        <Suspense fallback={<div>Loading Content Management</div>}>
+            <ContentManagement title='test' subtitle='testing' />
+        </Suspense>
+    } />,
+    <Route key='quiz' path='quiz' element={
+        <Suspense fallback={<div>Loading Quiz Manager</div>}>
+            <Quiz title='Quiz' subtitle='Create and manage quizzes' />
+        </Suspense>
+    } />,
 ]
 
 export default AdminRoutes;
