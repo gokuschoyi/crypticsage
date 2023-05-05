@@ -34,7 +34,8 @@ import {
     TextField,
     FormControlLabel,
     Checkbox,
-    Skeleton
+    Skeleton,
+    CircularProgress
 } from '@mui/material';
 
 const Stats = (props) => {
@@ -167,7 +168,7 @@ const Stats = (props) => {
         let coinChartGridBox = document.getElementsByClassName('coin-chart-grid-box')[0];
         let tokenSelector = document.getElementsByClassName('token-selector-box')[0];
         let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
-        if(height < 0) {
+        if (height < 0) {
             height = 500;
         }
         let coinChartBox = document.getElementsByClassName('coin-chart-box')[0];
@@ -330,19 +331,34 @@ const Stats = (props) => {
         });
     };
 
+    const recentLessonAndQuiz = useSelector(state => state.stats.recent_lesson_quiz)
+
+    function shortenDate(dateString) {
+        const [date, time] = dateString.split(", ");
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        // eslint-disable-next-line no-unused-vars
+        const [amPm, timeZone] = time.split(" ");
+        const [day, month] = date.split("/");
+        let MM = months[(parseInt(month) - 1)]
+        const [hour, minute] = time.split(/:| /);
+        const formattedDate = `${day} ${MM} : ${hour}:${minute} ${timeZone.toUpperCase()}`;
+        return formattedDate;
+    }
+
     const CustomCard = (props) => {
-        const { title, subtitle, value, buttonName } = props
+        const { title, date, value, buttonName } = props
+        let formattedDate = shortenDate(date)
         return (
             <Box className='card-holder hover'>
                 <Box className='info-box'>
-                    <Typography sx={{ fontSize: 20, fontWeight: '500', textAlign: 'left' }} gutterBottom>
+                    <Typography variant='h3' textAlign='start' gutterBottom>
                         {title} :
                     </Typography>
-                    <Typography sx={{ fontSize: 50, fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} gutterBottom>
+                    <Typography variant='h4' fontWeight='400' textAlign='start' gutterBottom>
                         {value}
                     </Typography>
                     <Typography sx={{ fontSize: 16, fontWeight: '300', textAlign: 'left' }} gutterBottom>
-                        {subtitle}
+                        {formattedDate}
                     </Typography>
                 </Box>
                 <Box className='action-box'>
@@ -369,7 +385,7 @@ const Stats = (props) => {
                     <Typography sx={{ fontSize: 20, fontWeight: '500', textAlign: 'left' }} gutterBottom>
                         {title} :
                     </Typography>
-                    <Typography sx={{ fontSize: 40, fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} gutterBottom>
+                    <Typography sx={{ fontSize: 20, fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} gutterBottom>
                         {content}
                     </Typography>
                     <Typography sx={{ fontSize: 16, fontWeight: '300', textAlign: 'left' }} gutterBottom>
@@ -441,6 +457,8 @@ const Stats = (props) => {
         )
     }
 
+
+
     return (
         <Box className='stat-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
@@ -452,13 +470,32 @@ const Stats = (props) => {
                     <Grid item xs={12} sm={12} md={12} lg={6} xl={12}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3} className='single-card-grid'>
-                                <CustomCard title='Recent Chapter' subtitle='Features' value='6/30' buttonName="GO TO LESSON 6" />
+                                {recentLessonAndQuiz.mostRecentLesson === undefined
+                                    ?
+                                    <CircularProgress color="success" />
+                                    :
+                                    <CustomCard
+                                        title='Recent Chapter'
+                                        value={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentLesson.lesson_name}
+                                        date={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentLesson.lesson_completed_date}
+                                        buttonName="GO TO LESSON 6" />
+                                }
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
-                                <CustomCard title='Recent Quiz' subtitle='Technical Analysis Quiz 2' value='8/45' buttonName="GO TO QUIZ" />
+                                {recentLessonAndQuiz.mostRecentQuiz === undefined
+                                    ?
+                                    <CircularProgress color="success" />
+                                    :
+                                    <CustomCard
+                                        title='Recent Quiz'
+                                        value={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentQuiz.quiz_name}
+                                        date={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentQuiz.quiz_completed_date}
+                                        buttonName="GO TO QUIZ" />
+                                }
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
-                                <CustomCard title='New Challenge' subtitle='Technical Analysis Quiz 2' buttonName="GO TO CHALLENGE" />
+                                <CustomLongCard title='Upload Trading-View data' subtitle='Upload your Trading View data for analysis' content='Make an entry to your Journal' buttonName="UPLOAD" />
+
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
                                 <Swiper

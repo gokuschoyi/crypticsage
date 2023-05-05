@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import './Signup.css'
-import { Box, Typography, TextField, Button, IconButton, Grid, Alert, useTheme } from '@mui/material'
+import { Box, Typography, TextField, Button, IconButton, Grid, Alert, useTheme, CircularProgress } from '@mui/material'
 import Collapse from '@mui/material/Collapse';
 import Logo from '../../../assets/logoNew.png'
 import { CloseIcon, FacebookIcon } from '../../dashboard/global/Icons';
 import { useNavigate } from 'react-router-dom';
 import Animation from '../animation/Animation';
 import { SignupUser } from '../../../api/auth';
-import { useDispatch } from 'react-redux';
-import { setAuthState } from '../authSlice';
 
 import { LoginSocialFacebook } from "reactjs-social-login";
 import { GoogleLogin } from '@react-oauth/google';
 
 const Signup = (props) => {
-    const { switchState } = props
+    const { switchState, setSignupSuccessMessage } = props
     const theme = useTheme();
-    const dispatch = useDispatch()
     const navigate = useNavigate()
 
     const [open, setOpen] = React.useState(false);
@@ -131,6 +128,8 @@ const Signup = (props) => {
         }
     }, [error])
 
+    const [isLodaing, setIsLoading] = useState(false)
+
     const signupUser = async () => {
         const formFields = Object.keys(signupData)
         let newSignupData = { ...signupData }
@@ -144,29 +143,20 @@ const Signup = (props) => {
         setSignupData(newSignupData)
         const isNotEmpty = Object.values(newSignupData).every(field => field.value !== '')
         const isAllValid = allErrorsFalse(signupData)
-        // console.log(isNotEmpty, isAllValid)
         if (isNotEmpty && isAllValid) {
             try {
+                setIsLoading(true)
                 const userData = {}
                 formFields.forEach(field => {
                     userData[field] = signupData[field].value
                 })
                 userData.signup_type = 'registration'
-                // console.log(userData)
                 const result = await SignupUser(userData)
-                const userDataRedux = {
-                    'accessToken': result.data.data.accessToken,
-                    'displayName': result.data.data.displayName,
-                    'email': result.data.data.email,
-                    'emailVerified': result.data.data.emailVerified,
-                    'photoUrl': result.data.data.profile_image || '',
-                    'uid': result.data.data.uid,
-                    'preferences': result.data.data.preferences,
-                }
-                dispatch(setAuthState(userDataRedux))
-                navigate('/dashboard')
+                setSignupSuccessMessage(result.data.message)
+                setIsLoading(false)
+                switchState()
             } catch (error) {
-                console.log(error)
+                setIsLoading(false)
                 if (error.response) {
                     setError(error.response.data.message)
                 } else {
@@ -184,20 +174,13 @@ const Signup = (props) => {
             signup_type: 'google',
         }
         try {
+            setIsLoading(true)
             const result = await SignupUser(userData)
-            const userDataRedux = {
-                'accessToken': result.data.data.accessToken,
-                'displayName': result.data.data.displayName,
-                'email': result.data.data.email,
-                'emailVerified': result.data.data.emailVerified,
-                'photoUrl': result.data.data.profile_image || '',
-                'uid': result.data.data.uid,
-                'preferences': result.data.data.preferences,
-            }
-            dispatch(setAuthState(userDataRedux))
-            navigate('/dashboard')
+            setSignupSuccessMessage(result.data.message)
+            setIsLoading(false)
+            switchState()
         } catch (error) {
-            console.log(error)
+            setIsLoading(false)
             if (error.response) {
                 setError(error.response.data.message)
             } else {
@@ -212,20 +195,13 @@ const Signup = (props) => {
             userInfo: response.data
         }
         try {
+            setIsLoading(true)
             const result = await SignupUser(userData)
-            const userDataRedux = {
-                'accessToken': result.data.data.accessToken,
-                'displayName': result.data.data.displayName,
-                'email': result.data.data.email,
-                'emailVerified': result.data.data.emailVerified,
-                'photoUrl': result.data.data.profile_image || '',
-                'uid': result.data.data.uid,
-                'preferences': result.data.data.preferences,
-            }
-            dispatch(setAuthState(userDataRedux))
-            navigate('/dashboard')
+            setSignupSuccessMessage(result.data.message)
+            setIsLoading(false)
+            switchState()
         } catch (error) {
-            console.log(error)
+            setIsLoading(false)
             if (error.response) {
                 setError(error.response.data.message)
             } else {
@@ -235,7 +211,6 @@ const Signup = (props) => {
     };
 
     const errorMessage = (error) => {
-        console.log(error);
         setError(error)
     };
 
@@ -276,6 +251,7 @@ const Signup = (props) => {
                             <Box className="signup-container-left">
                                 <Box className="login-title">
                                     <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Signup</Typography>
+                                    <CircularProgress color="secondary" size='30px' style={{ display: isLodaing ? 'block' : 'none' }} />
                                 </Box>
                                 <Box className="input-filed-box" display="flex" flexDirection="column">
                                     <TextField

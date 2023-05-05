@@ -11,7 +11,8 @@ const initialState = {
         fourH: { timePeriod: '4', timeFrame: 'hour', checked: false },
         oneD: { timePeriod: '24', timeFrame: 'hour', checked: false },
     },
-    wordOfTheDay: {}
+    wordOfTheDay: {},
+    recent_lesson_quiz: {}
 }
 
 const statsSlice = createSlice({
@@ -33,6 +34,10 @@ const statsSlice = createSlice({
         },
         setWordOfTheDay: (state, action) => {
             state.wordOfTheDay = action.payload;
+        }
+        ,
+        setRecentLessonAndQuizStatus: (state, action) => {
+            state.recent_lesson_quiz = action.payload;
         },
         resetStatsState: (state) => {
             state.cryptoDataAutoComplete = [];
@@ -46,6 +51,7 @@ const statsSlice = createSlice({
                 oneD: { timePeriod: '24', timeFrame: 'hour', checked: false },
             };
             state.wordOfTheDay = {};
+            state.recent_lesson_quiz = {};
         }
     }
 })
@@ -57,6 +63,7 @@ export const {
     setSelectedCoinData,
     setTimePeriod,
     setWordOfTheDay,
+    setRecentLessonAndQuizStatus,
     resetStatsState,
 } = actions;
 export default reducer;

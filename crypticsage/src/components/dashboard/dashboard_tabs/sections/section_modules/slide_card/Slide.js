@@ -7,19 +7,20 @@ import { useOutletContext } from "react-router-dom";
 import { ChevronRightIcon, ExpandMoreIcon } from '../../../../global/Icons';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { setSections, setLessons, setCounter, incrementCounter, decrementCounter, setLessonStartedFlag, setLessonCompleteFlag } from '../../SectionSlice'
+import { setSections, setLessons, setCounter, setLessonStartedFlag, setLessonCompleteFlag } from '../../SectionSlice'
 import { setUserLessonStatus } from '../../../../../authorization/authSlice'
 import WordDialog from './WordDialog'
-import { updatUserLessonStatus } from '../../../../../../api/user'
+import { updatUserLessonStatus, getLatestLessonAndQuizResults } from '../../../../../../api/user'
 
 import Video from '../../../../../../assets/lessons/candleStick.mp4'
+
+import { setRecentLessonAndQuizStatus } from '../../../stats/StatsSlice';
 
 const SlideComponent = (props) => {
     const { lessons } = props
     const theme = useTheme();
     const dispatch = useDispatch();
     const token = useSelector(state => state.auth.accessToken)
-    const uid = useSelector(state => state.auth.uid)
     const { slides, counter } = useSelector(state => state.section);
     const sectionData = useSelector(state => state.section.sections)
     const lessonsData = useSelector(state => state.section.lessons)
@@ -163,6 +164,14 @@ const SlideComponent = (props) => {
                         }
                     })
                     dispatch(setLessons(combinedLessonArray))
+                })
+            let updateStats = {
+                token: token,
+            }
+            await getLatestLessonAndQuizResults(updateStats)
+                .then((res) => {
+                    dispatch(setRecentLessonAndQuizStatus(res.data.recentLessonQuizStatus))
+                    console.log(res.data)
                 })
         } catch (err) {
             console.log(err)

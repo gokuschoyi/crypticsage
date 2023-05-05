@@ -6,8 +6,14 @@ const Auth = () => {
     const switchState = () => {
         setIsLogin(!isLogin)
     }
+
+    const [signupSuccessMessage, setSignupSuccessMessage] = useState('')
     return (
-        isLogin ? <Login switchState={switchState} /> : <Signup switchState={switchState} />
+        isLogin
+            ?
+            <Login switchState={switchState} signupSuccessMessage={signupSuccessMessage} setSignupSuccessMessage={setSignupSuccessMessage} />
+            :
+            <Signup switchState={switchState} setSignupSuccessMessage={setSignupSuccessMessage} />
     )
 }
 

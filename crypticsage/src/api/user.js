@@ -109,3 +109,15 @@ export const submitQuizResults = async (data) => {
     })
     return response;
 }
+
+export const getLatestLessonAndQuizResults = async (data) => {
+    let token = data.token;
+    let payload = data.payload
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/user/get_recent_lesson_and_quiz`, payload, config, {
+        withCredentials: true
+    })
+    return response;
+}

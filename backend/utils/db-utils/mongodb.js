@@ -8,13 +8,13 @@ const { connect, close } = require('./db-conn')
 const {
     makeAllStatusForUser,
     transformQuizData,
-    processUploadedCsv
+    processUploadedCsv,
+    getRecentLessonAndQuiz
 } = require('./helpers');
 
 // <--- User Operations ---> //
 const createNewUser = async (req, res) => {
     const { signup_type } = req.body;
-    let token = '';
     let userData = {};
     switch (signup_type) {
         case 'registration':
@@ -52,24 +52,11 @@ const createNewUser = async (req, res) => {
                         lesson_status: allStatus.lessonStatus,
                         quiz_status: allStatus.quizStatus,
                     }
-                    token = jwt.sign(
-                        {
-                            email: email,
-                            user_name: userName
-                        },
-                        config.tokenKey,
-                        {
-                            expiresIn: '8h'
-                        }
-                    );
                     try {
                         await userCollection.insertOne(userData);
-                        delete userData.password;
-                        userData.accessToken = token;
-                        res.status(200).json({ message: "User created successfully", data: userData });
+                        res.status(200).json({ message: "Account created successfully" });
                     }
                     catch (err) {
-                        console.log(err);
                         res.status(500).json({ message: "User creation failed" });
                     } finally {
                         close("createNewUser - registration");
@@ -97,7 +84,7 @@ const createNewUser = async (req, res) => {
                     const user = await userCollection.find(filterEmail).toArray();
 
                     if (user.length > 0) {
-                        return res.status(400).json({ message: "User already exists, Signin with your google account" });
+                        return res.status(400).json({ message: "Account already exists, Signin with your google account" });
                     }
                     else {
                         let allStatus = await makeAllStatusForUser();
@@ -120,31 +107,16 @@ const createNewUser = async (req, res) => {
                             quiz_status: allStatus.quizStatus,
                         }
                     }
-                    const token = jwt.sign(
-                        {
-                            email: payload.email,
-                            given_name: payload.given_name
-                        },
-                        config.tokenKey,
-                        {
-                            expiresIn: '8h'
-                        }
-                    );
                     try {
                         await userCollection.insertOne(userData);
-                        close("createNewUser - google");
-                        delete userData.password;
-                        userData.accessToken = token;
-                        res.status(200).json({ message: "User created successfully", data: userData });
+                        res.status(200).json({ message: "Account created successfully" });
                     }
                     catch (err) {
-                        console.log(err);
                         res.status(500).json({ message: "User creation failed" });
                     } finally {
                         close("createNewUser - google");
                     }
                 } catch (err) {
-                    console.log(err);
                     res.status(500).json({ message: "Invalid credentials" });
                 }
             }
@@ -184,25 +156,11 @@ const createNewUser = async (req, res) => {
                         quiz_status: allStatus.quizStatus,
                     }
                 }
-                const token = jwt.sign(
-                    {
-                        email: userInfo.email,
-                        given_name: userInfo.first_name
-                    },
-                    config.tokenKey,
-                    {
-                        expiresIn: '8h'
-                    }
-                );
                 try {
                     await userCollection.insertOne(userData);
-                    close("createNewUser - facebook");
-                    delete userData.password;
-                    userData.accessToken = token;
-                    res.status(200).json({ message: "User created successfully", data: userData });
+                    res.status(200).json({ message: "Account created successfully" });
                 }
                 catch (err) {
-                    console.log(err);
                     res.status(500).json({ message: "User creation failed" });
                 } finally {
                     close("createNewUser - facebook");
@@ -253,6 +211,9 @@ const loginUser = async (req, res) => {
                                     expiresIn: '8h'
                                 }
                             );
+                            let lesson_status = user[0].lesson_status
+                            let quiz_status = user[0].quiz_status
+                            let recent_lesson_quiz = await getRecentLessonAndQuiz(lesson_status, quiz_status)
 
                             let userData = {};
                             userData.email = user[0].email;
@@ -268,11 +229,10 @@ const loginUser = async (req, res) => {
                             userData.lesson_status = user[0].lesson_status;
                             userData.passwordEmptyFlag = user[0].password === '' ? true : false;
 
-                            res.status(200).json({ message: "User login successful", data: userData });
+                            res.status(200).json({ message: "User login successful", data: userData, recent_lesson_quiz });
                         }
                     }
                 } catch (err) {
-                    console.log(err);
                     res.status(500).json({ message: "User does not exist or email is wrong" });
                 } finally {
                     close("loginUser - emailpassword");
@@ -315,6 +275,10 @@ const loginUser = async (req, res) => {
                                 expiresIn: '8h'
                             }
                         );
+                        let lesson_status = user[0].lesson_status
+                        let quiz_status = user[0].quiz_status
+                        let recent_lesson_quiz = await getRecentLessonAndQuiz(lesson_status, quiz_status)
+
                         let userData = {};
                         userData.email = user[0].email;
                         userData.displayName = user[0].displayName;
@@ -329,11 +293,10 @@ const loginUser = async (req, res) => {
                         userData.lesson_status = user[0].lesson_status;
                         userData.passwordEmptyFlag = user[0].password === '' ? true : false;
 
-                        res.status(200).json({ message: "User login successful", data: userData });
+                        res.status(200).json({ message: "User login successful", data: userData, recent_lesson_quiz });
                     }
                 }
                 catch (err) {
-                    console.log(err)
                     res.status(500).json({ message: "Could not verify your credentials" });
                 } finally {
                     close("loginUser - google");
@@ -367,6 +330,10 @@ const loginUser = async (req, res) => {
                             expiresIn: '8h'
                         }
                     );
+                    let lesson_status = user[0].lesson_status
+                    let quiz_status = user[0].quiz_status
+                    let recent_lesson_quiz = await getRecentLessonAndQuiz(lesson_status, quiz_status)
+
                     let userData = {};
                     userData.email = user[0].email;
                     userData.displayName = user[0].displayName;
@@ -381,7 +348,7 @@ const loginUser = async (req, res) => {
                     userData.lesson_status = user[0].lesson_status;
                     userData.passwordEmptyFlag = user[0].password === '' ? true : false;
                     close("loginUser - facebook");
-                    res.status(200).json({ message: "User login successful", data: userData });
+                    res.status(200).json({ message: "User login successful", data: userData, recent_lesson_quiz });
                 }
             }
             break;
@@ -411,7 +378,6 @@ const verifyPassword = async (req, res) => {
             }
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Password verification failed" });
     } finally {
         close("verifyPassword");
@@ -432,7 +398,6 @@ const updatePassword = async (req, res) => {
             res.status(500).json({ message: "Password updation failed" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Password updation failed" });
     } finally {
         close("updatePassword");
@@ -452,7 +417,6 @@ const updateProfilePicture = async (req, res) => {
             res.status(500).json({ message: "Profile image updation failed" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Profile image updation failed" });
     } finally {
         close("updateProfilePicture");
@@ -472,7 +436,6 @@ const updateUserData = async (req, res) => {
             res.status(500).json({ message: "User data updation failed" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "User data updation failed" });
     } finally {
         close("updateUserData");
@@ -501,7 +464,6 @@ const updateUserPreference = async (req, res) => {
             res.status(500).json({ message: "Preferences updation failed" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Preferences updation failed" });
     } finally {
         close("updateUserPreference");
@@ -521,6 +483,7 @@ const updateUserLessonStatus = async (req, res) => {
                     [`lesson_status.${lesson_status.section_id}.$[inner].lesson_start`]: lesson_status.lesson_start,
                     [`lesson_status.${lesson_status.section_id}.$[inner].lesson_progress`]: lesson_status.lesson_progress,
                     [`lesson_status.${lesson_status.section_id}.$[inner].lesson_completed`]: lesson_status.lesson_completed,
+                    [`lesson_status.${lesson_status.section_id}.$[inner].lesson_completed_date`]: new Date().toLocaleString(),
                 }
             },
             {
@@ -538,7 +501,6 @@ const updateUserLessonStatus = async (req, res) => {
             res.status(500).json({ message: "User lesson status updation failed" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "User lesson status updation failed" });
     } finally {
         close("updateUserLessonStatus");
@@ -556,7 +518,7 @@ const getInitialQuizDataForUser = async (req, res) => {
         transformedQuizData = transformedQuizData.outputObject.quizzes
         res.status(200).json({ message: "Quiz data fetched successfully", transformedQuizData });
     } catch (err) {
-        console.log(err);
+        console.log(err)
         res.status(500).json({ message: "Quiz data fetch failed" });
     } finally {
         close("getInitialQuizDataForUser");
@@ -582,7 +544,6 @@ const getQuiz = async (req, res) => {
             res.status(200).json({ message: "Quiz fetched successfully", selectedQuiz });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Quiz fetch failed" });
     } finally {
         close("getQuiz");
@@ -636,11 +597,24 @@ const submitQuiz = async (req, res) => {
             res.status(500).json({ message: "Quiz submission failed" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Quiz submission failed" });
     } finally {
         close("submitQuiz");
     }
+}
+
+const getRecentLessonAndQuizStatus = async (req, res) => {
+    try {
+        let uid = res.locals.data.uid
+        const db = await connect("getRecentLessonAndQuizStatus");
+        const user = await db.collection('users').find({ "uid": uid }).toArray();
+        let lessonStatus = user[0].lesson_status
+        let quizStatus = user[0].quiz_status
+        let recentLessonQuizStatus = await getRecentLessonAndQuiz(lessonStatus, quizStatus)
+        res.status(200).json({ message: "Recent lesson and quiz status fetched successfully", recentLessonQuizStatus });
+    } catch (err) {
+        res.status(500).json({ message: "Recent lesson and quiz status fetch failed" });
+    } // no finaly cause it closes the connection for the next process
 }
 
 const processFileUpload = async (req, res) => {
@@ -648,7 +622,6 @@ const processFileUpload = async (req, res) => {
     try {
         finalResult = await processUploadedCsv(req)
     } catch (err) {
-        console.log(err)
         res.status(500).json({ message: "File upload failed" });
     } finally {
         res.status(200).json({ message: "File uploaded successfully", finalResult });
@@ -669,7 +642,6 @@ const getSections = async (req, res) => {
             res.status(200).json({ message: "Sections fetched successfully", sections });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Sections fetch failed" });
     } finally {
         close("getSections");
@@ -697,7 +669,6 @@ const addSection = async (req, res) => {
         }
         res.status(200).json({ message: "Section added successfully", createdSectionId, update: false });
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Section creation failed" });
     } finally {
         close("addSection");
@@ -718,7 +689,6 @@ const updateSection = async (req, res) => {
             res.status(200).json({ message: "Section updated successfully", update: true });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Section update failed" });
     } finally {
         close("updateSection");
@@ -745,7 +715,6 @@ const deleteSection = async (req, res) => {
         }
         res.status(200).json({ message: "Section deleted successfully" });
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Section deletion failed" });
     } finally {
         close("deleteSection");
@@ -766,7 +735,6 @@ const getLessons = async (req, res) => {
             res.status(200).json({ message: "Lessons fetched successfully", lessons });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Lessons fetch failed" });
     } finally {
         close("getLessons");
@@ -816,7 +784,6 @@ const addLesson = async (req, res) => {
         }
         res.status(200).json({ message: "Lesson added successfully", lessonId });
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Lesson creation failed" });
     } finally {
         close("addLesson");
@@ -836,7 +803,6 @@ const updateLesson = async (req, res) => {
             res.status(200).json({ message: "Lesson updated successfully" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Lesson update failed" });
     } finally {
         close("updateLesson")
@@ -865,7 +831,6 @@ const deleteLesson = async (req, res) => {
         }
         res.status(200).json({ message: "Lesson deleted successfully", result });
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Lesson deletion failed" });
     } finally {
         close("deleteLesson");
@@ -887,7 +852,6 @@ const getQuizQuestions = async (req, res) => {
             res.status(200).json({ message: "Quiz questions fetched successfully", quizQuestions, status: true });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Quiz questions fetch failed" });
     } finally {
         close("getQuizQuestions");
@@ -943,7 +907,6 @@ const addQuizQuestions = async (req, res) => {
         res.status(200).json({ message: "Quiz question added successfully", quizId });
 
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Quiz question creation failed" });
     } finally {
         close("addQuizQuestions");
@@ -965,7 +928,6 @@ const updateQuizQuestions = async (req, res) => {
             res.status(200).json({ message: "Quiz question updated successfully" });
         }
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Quiz question update failed" });
     }
 }
@@ -992,7 +954,6 @@ const deleteQuizQuestion = async (req, res) => {
 
         res.status(200).json({ message: "Quiz question deleted successfully", resuw });
     } catch (err) {
-        console.log(err);
         res.status(500).json({ message: "Quiz question deletion failed" });
     } finally {
         close("deleteQuizQuestion");
@@ -1013,6 +974,7 @@ module.exports = {
     getInitialQuizDataForUser,
     getQuiz,
     submitQuiz,
+    getRecentLessonAndQuizStatus,
     processFileUpload,
     getSections,
     addSection,

@@ -35,6 +35,7 @@ const {
     getInitialQuizDataForUser,
     getQuiz,
     submitQuiz,
+    getRecentLessonAndQuizStatus,
     processFileUpload
 } = require('../../utils/db-utils/mongodb')
 
@@ -121,6 +122,11 @@ router.post('/submitQuiz', verify, async (req, res) => {
     } else {
         submitQuiz(req, res)
     }
+})
+
+router.post('/get_recent_lesson_and_quiz', verify, async (req, res) => {
+    console.log("Get recent lesson and quiz request received");
+    getRecentLessonAndQuizStatus(req, res)
 })
 
 router.post('/upload_log_files', verify, upload.array('file', 3), async (req, res) => {

@@ -5,12 +5,14 @@ import { Box } from '@mui/material';
 import './Quiz.css'
 import TakeQuiz from './quiz_component/TakeQuiz';
 import AllQuizzes from './quiz_component/AllQuizzes';
-import { useSelector } from 'react-redux';
-import { getInitialQuizDataForUser, getQuizQuestions, submitQuizResults } from '../../../../api/user'
+import { useSelector, useDispatch } from 'react-redux';
+import { getInitialQuizDataForUser, getQuizQuestions, submitQuizResults, getLatestLessonAndQuizResults } from '../../../../api/user'
+import { setRecentLessonAndQuizStatus } from '../stats/StatsSlice'
 
 const Quiz = (props) => {
     const { accessToken, uid } = useSelector(state => state.auth)
     const { title, subtitle } = props
+    const dispatch = useDispatch()
     const [titleDesc, setTitleDesc] = useState({ title: title, subtitle: subtitle })
 
     //handles close of dri=opdown when clicked on main page
@@ -139,6 +141,14 @@ const Quiz = (props) => {
             })
             .catch((err) => {
                 console.log(err)
+            })
+        let updateStats = {
+            token: accessToken,
+        }
+        await getLatestLessonAndQuizResults(updateStats)
+            .then((res) => {
+                dispatch(setRecentLessonAndQuizStatus(res.data.recentLessonQuizStatus))
+                console.log(res.data)
             })
         // console.log(optionValue, score)
     }

@@ -13,8 +13,9 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useDispatch } from 'react-redux';
 import { setAuthState } from '../authSlice';
 import { LoginUser } from '../../../api/auth';
+import { setRecentLessonAndQuizStatus } from '../../dashboard/dashboard_tabs/stats/StatsSlice'
 const Login = (props) => {
-    const { switchState } = props
+    const { switchState, setSignupSuccessMessage, signupSuccessMessage } = props
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const redirectToHome = () => {
@@ -34,9 +35,16 @@ const Login = (props) => {
     const { email, password } = loginData
 
     const hideError = () => {
-        setOpen(false);
+        setSignupSuccessMessage('')
         setError('')
+        setOpen(false);
     }
+
+    useEffect(() => {
+        if (signupSuccessMessage !== '') {
+            setError(signupSuccessMessage)
+        }
+    }, [signupSuccessMessage])
 
     useEffect(() => {
         if (error !== '') {
@@ -75,15 +83,16 @@ const Login = (props) => {
                     'email': result.data.data.email,
                     'emailVerified': result.data.data.emailVerified,
                     'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
-                    'photoUrl': result.data.data.profile_image || '',
                     'uid': result.data.data.uid,
                     'preferences': result.data.data.preferences || {},
                     'mobile_number': result.data.data.mobile_number || '',
                     'admin_status': result.data.data.admin_status,
-                    'user_lesson_status': result.data.data.lesson_status || {}
+                    'user_lesson_status': result.data.data.lesson_status || {},
+                    'photoUrl': result.data.data.profile_image || '',
                 }
                 localStorage.setItem('userTheme', userData.preferences.theme)
                 dispatch(setAuthState(userData))
+                dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
                 setIsLoading(false)
                 navigate('/dashboard')
             } catch (err) {
@@ -111,15 +120,16 @@ const Login = (props) => {
                 'email': result.data.data.email,
                 'emailVerified': result.data.data.emailVerified,
                 'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
-                'photoUrl': result.data.data.profile_image || '',
                 'uid': result.data.data.uid,
                 'preferences': result.data.data.preferences || {},
                 'mobile_number': result.data.data.mobile_number || '',
                 'admin_status': result.data.data.admin_status,
-                'user_lesson_status': result.data.data.lesson_status || {}
+                'user_lesson_status': result.data.data.lesson_status || {},
+                'photoUrl': result.data.data.profile_image || '',
             }
             localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
+            dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
             setIsLoading(false)
             navigate('/dashboard')
         } catch (err) {
@@ -146,15 +156,16 @@ const Login = (props) => {
                 'email': result.data.data.email,
                 'emailVerified': result.data.data.emailVerified,
                 'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
-                'photoUrl': result.data.data.profile_image || '',
                 'uid': result.data.data.uid,
                 'preferences': result.data.data.preferences || {},
                 'mobile_number': result.data.data.mobile_number || '',
                 'admin_status': result.data.data.admin_status,
-                'user_lesson_status': result.data.data.lesson_status || {}
+                'user_lesson_status': result.data.data.lesson_status || {},
+                'photoUrl': result.data.data.profile_image || '',
             }
             localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
+            dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
             setIsLoading(false)
             navigate('/dashboard')
         } catch (err) {
@@ -171,8 +182,6 @@ const Login = (props) => {
         console.log(error);
     };
 
-
-
     return (
         <Box className='login-container'>
             <Box className='logo-container' ml={2} mt={2}>
@@ -181,7 +190,7 @@ const Login = (props) => {
             <Box className='alert-box-container' display='flex' justifyContent='center'>
                 <Box className='alert-box' sx={{ width: '400px' }}>
                     <Collapse in={open}>
-                        <Alert severity="error"
+                        <Alert severity={signupSuccessMessage === '' ? 'error' : 'success'}
                             action={
                                 <IconButton
                                     aria-label="close"
