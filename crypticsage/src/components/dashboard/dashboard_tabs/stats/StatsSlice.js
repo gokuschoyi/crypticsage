@@ -5,6 +5,7 @@ const initialState = {
     selectedCoinName: '',
     selectedTokenName: '',
     selectedCoinData: [],
+    selectedTokenUrl: '',
     timePeriod: {
         thirtyM: { timePeriod: '30', timeFrame: 'minute', checked: false },
         twoH: { timePeriod: '2', timeFrame: 'hour', checked: true },
@@ -27,7 +28,8 @@ const statsSlice = createSlice({
             state.selectedTokenName = action.payload.tokenName
         },
         setSelectedCoinData: (state, action) => {
-            state.selectedCoinData = action.payload;
+            state.selectedCoinData = action.payload.historicalData;
+            state.selectedTokenUrl = action.payload.tokenUrl;
         },
         setTimePeriod: (state, action) => {
             state.timePeriod = action.payload;

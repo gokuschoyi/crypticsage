@@ -33,10 +33,13 @@ const makeUserLessonStatus = async () => {
             section_id: lesson.sectionId,
             lesson_id: lesson.lessonId,
             lesson_name: lesson.chapter_title,
+            next_chapter_id: lesson.next_chapter_id,
+            prev_chapter_id: lesson.prev_chapter_id,
+            parent_section_id: lesson.parent_chapter_id,
             lesson_start: false,
             lesson_progress: 1,
             lesson_completed: false,
-            lesson_completed_date: ''
+            lesson_completed_date: '',
         })
     });
     const groupedLessons = sortAndGroupLessons(userLessonStatus);
@@ -224,13 +227,16 @@ const processUploadedCsv = async (req) => {
 const getRecentLessonAndQuiz = async (lessonStatus, quizStatus) => {
     const allLesson = Object.values(lessonStatus)
         .flat()
-        .sort((a, b) => {
-            return new Date(b.lesson_completed_date) - new Date(a.lesson_completed_date);
-        });
-    const mostRecentLesson = allLesson[0];
+        .filter(lesson => lesson.lesson_completed_date !== '');
+
+    if (allLesson.length > 0) {
+        allLesson.sort((a, b) => new Date(b.lesson_completed_date) - new Date(a.lesson_completed_date));
+    }
+
+    const mostRecentLesson = allLesson.length > 0 ? allLesson[0] : {};
 
     let latestDate = null;
-    let mostRecentQuiz = null;
+    let mostRecentQuiz = {};
     try {
         for (const sectionId in quizStatus) {
             const lesson = quizStatus[sectionId];

@@ -30,7 +30,7 @@
   cursor: pointer;
 }
 
-.card-trading-view-data{
+.card-trading-view-data {
   color: var(--mui-palette-secondary-main) !important;
   background-color: var(--mui-palette-background-card);
   border: 2px solid;
@@ -162,6 +162,8 @@
 }
 
 .coin-chart-box {
+  display: flex;
+  justify-content: center;
   height: var(--height);
 }
 
@@ -196,15 +198,25 @@
   cursor: pointer;
 }
 
+@media screen and (min-width: 1535px) {
+  .coin-chart-box {
+    height: 450px;
+  }
+}
+
 @media screen and (max-width: 1200px) {
   .coin-chart-box {
     height: 450px;
   }
 }
 
-@media screen and (max-width: 600px){
-  .token-selector{
+@media screen and (max-width: 600px) {
+  .token-selector {
     display: flex;
     flex-direction: column !important;
+  }
+  .coin-chart-box {
+    display: flex;
+    justify-content: center;
   }
 }

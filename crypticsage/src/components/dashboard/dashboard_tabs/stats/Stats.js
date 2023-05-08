@@ -20,7 +20,7 @@ import { Autoplay, Pagination } from "swiper";
 import "swiper/css/pagination";
 import "swiper/css";
 
-import CoinChart from './CoinChart';
+import NewCoinChart from './NewCoinChart';
 import Header from '../../global/Header';
 
 import {
@@ -34,7 +34,6 @@ import {
     FormControlLabel,
     Checkbox,
     Skeleton,
-    CircularProgress
 } from '@mui/material';
 
 const Stats = (props) => {
@@ -159,11 +158,9 @@ const Stats = (props) => {
         }
     })
 
-    const [skWidth, setSkWidth] = useState(0);
-    const [skHeight, setSkHeight] = useState(0);
-
     //set height ofchart container and skeleton
-    useEffect(() => {
+    /* useEffect(() => {
+        console.log("set height of chart container and skeleton")
         let coinChartGridBox = document.getElementsByClassName('coin-chart-grid-box')[0];
         let tokenSelector = document.getElementsByClassName('token-selector-box')[0];
         let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
@@ -176,6 +173,15 @@ const Stats = (props) => {
         setSkHeight(sHeight)
         setSkWidth(sWidth)
         coinChartBox.style.setProperty('--height', `${height}px`)
+    }, []) */
+
+    useEffect(() => {
+        let coinChartGridBox = document.getElementsByClassName('coin-chart-grid-box')[0];
+        let tokenSelector = document.getElementsByClassName('token-selector-box')[0];
+        let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
+        let coinChartBox = document.getElementsByClassName('coin-chart-box')[0];
+        coinChartBox.style.setProperty('--height', `${height}px`)
+        console.log("set height of coin chart box", height)
     }, [])
 
     //resize event for chart container and skeleton
@@ -184,11 +190,8 @@ const Stats = (props) => {
         let tokenSelector = document.getElementsByClassName('token-selector-box')[0];
         let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
         let coinChartBox = document.getElementsByClassName('coin-chart-box')[0];
-        let sHeight = coinChartBox.clientHeight * 0.8;
-        let sWidth = coinChartBox.clientWidth * 0.8;
-        setSkHeight(sHeight)
-        setSkWidth(sWidth)
         coinChartBox.style.setProperty('--height', `${height}px`)
+        console.log("set height of coin chart box resize", height)
     }
     useEffect(() => {
         window.addEventListener('resize', handleResize);
@@ -249,7 +252,7 @@ const Stats = (props) => {
                     getHistoricalData(data).then((res) => {
                         dispatch(setSelectedCoinName({ coinName: inputValue, tokenName: selectedTokenName }))
                         setChartData(res.data.historicalData.Data.Data)
-                        dispatch(setSelectedCoinData(res.data.historicalData.Data.Data))
+                        dispatch(setSelectedCoinData({ historicalData: res.data.historicalData.Data.Data, tokenUrl: res.data.url }))
                     })
 
                 } catch (e) {
@@ -265,6 +268,7 @@ const Stats = (props) => {
 
 
     const [chartData, setChartData] = useState([])
+    let tokenUrl = useSelector((state) => state.stats.selectedTokenUrl)
     const [error, setError] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
 
@@ -313,7 +317,7 @@ const Stats = (props) => {
             try {
                 let res = await getHistoricalData(data)
                 setChartData(res.data.historicalData.Data.Data)
-                dispatch(setSelectedCoinData(res.data.historicalData.Data.Data))
+                dispatch(setSelectedCoinData({ historicalData: res.data.historicalData.Data.Data, tokenUrl: res.data.url }))
             } catch (e) {
                 console.log(e)
             }
@@ -333,15 +337,17 @@ const Stats = (props) => {
     const recentLessonAndQuiz = useSelector(state => state.stats.recent_lesson_quiz)
 
     function shortenDate(dateString) {
-        const [date, time] = dateString.split(", ");
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        // eslint-disable-next-line no-unused-vars
-        const [amPm, timeZone] = time.split(" ");
-        const [day, month] = date.split("/");
-        let MM = months[(parseInt(month) - 1)]
-        const [hour, minute] = time.split(/:| /);
-        const formattedDate = `${day} ${MM} : ${hour}:${minute} ${timeZone.toUpperCase()}`;
-        return formattedDate;
+        if (dateString === '') { return '' } else {
+            const [date, time] = dateString.split(", ");
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            // eslint-disable-next-line no-unused-vars
+            const [amPm, timeZone] = time.split(" ");
+            const [day, month] = date.split("/");
+            let MM = months[(parseInt(month) - 1)]
+            const [hour, minute] = time.split(/:| /);
+            const formattedDate = `${day} ${MM} : ${hour}:${minute} ${timeZone.toUpperCase()}`;
+            return formattedDate;
+        }
     }
 
     const CustomCard = (props) => {
@@ -483,6 +489,9 @@ const Stats = (props) => {
             </Box>
         )
     }
+    function isEmptyObject(obj) {
+        return Object.keys(obj).length === 0;
+    }
 
     return (
         <Box className='stat-container' onClick={hide}>
@@ -492,12 +501,16 @@ const Stats = (props) => {
             <Box className='stat-cards-container'>
                 <div className="item-bg"></div>
                 <Grid container spacing={4}>
-                    <Grid item xs={12} sm={12} md={12} lg={6} xl={12}>
+                    <Grid item xs={12} sm={12} md={12} lg={6} xl={12} display='flex' alignItems='center'>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3} className='single-card-grid'>
-                                {recentLessonAndQuiz.mostRecentLesson === undefined
+                                {isEmptyObject(recentLessonAndQuiz.mostRecentLesson) === true
                                     ?
-                                    <CircularProgress color="success" />
+                                    <CustomCard
+                                        title='Welcome to CrypticSage'
+                                        value=""
+                                        date={new Date().toLocaleString('au')}
+                                        buttonName="Start" />
                                     :
                                     <CustomCard
                                         title='Recent Chapter'
@@ -507,9 +520,13 @@ const Stats = (props) => {
                                 }
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
-                                {recentLessonAndQuiz.mostRecentQuiz === undefined
+                                {isEmptyObject(recentLessonAndQuiz.mostRecentQuiz) === true
                                     ?
-                                    <CircularProgress color="success" />
+                                    <CustomCard
+                                        title='Take your first Quiz'
+                                        value=""
+                                        date={new Date().toLocaleString('au')}
+                                        buttonName="Start" />
                                     :
                                     <CustomCard
                                         title='Recent Quiz'
@@ -619,11 +636,11 @@ const Stats = (props) => {
                         </Box>
                         {chartData.length === 0 ?
                             <Box className='coin-chart-box' alignItems='center' justifyContent='center' display='flex'>
-                                <Skeleton variant="rounded" width={skWidth} height={skHeight} />
+                                <Skeleton variant="rounded" sx={{bgcolor:'#3f3f40'}} width="80%" height="80%" />
                             </Box>
                             :
                             <Box className='coin-chart-box'>
-                                <CoinChart chartData={chartData} />
+                                <NewCoinChart chartData={chartData} tokenUrl={tokenUrl} />
                             </Box>
                         }
                     </Grid>
