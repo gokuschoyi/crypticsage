@@ -159,29 +159,13 @@ const Stats = (props) => {
     })
 
     //set height ofchart container and skeleton
-    /* useEffect(() => {
-        console.log("set height of chart container and skeleton")
-        let coinChartGridBox = document.getElementsByClassName('coin-chart-grid-box')[0];
-        let tokenSelector = document.getElementsByClassName('token-selector-box')[0];
-        let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
-        if (height < 0) {
-            height = 500;
-        }
-        let coinChartBox = document.getElementsByClassName('coin-chart-box')[0];
-        let sHeight = coinChartBox.clientHeight * 0.8;
-        let sWidth = coinChartBox.clientWidth * 0.8;
-        setSkHeight(sHeight)
-        setSkWidth(sWidth)
-        coinChartBox.style.setProperty('--height', `${height}px`)
-    }, []) */
-
     useEffect(() => {
         let coinChartGridBox = document.getElementsByClassName('coin-chart-grid-box')[0];
         let tokenSelector = document.getElementsByClassName('token-selector-box')[0];
         let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
         let coinChartBox = document.getElementsByClassName('coin-chart-box')[0];
         coinChartBox.style.setProperty('--height', `${height}px`)
-        console.log("set height of coin chart box", height)
+        // console.log("set height of coin chart box", height)
     }, [])
 
     //resize event for chart container and skeleton
@@ -191,7 +175,7 @@ const Stats = (props) => {
         let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
         let coinChartBox = document.getElementsByClassName('coin-chart-box')[0];
         coinChartBox.style.setProperty('--height', `${height}px`)
-        console.log("set height of coin chart box resize", height)
+        // console.log("set height of coin chart box resize", height)
     }
     useEffect(() => {
         window.addEventListener('resize', handleResize);
@@ -335,6 +319,7 @@ const Stats = (props) => {
     };
 
     const recentLessonAndQuiz = useSelector(state => state.stats.recent_lesson_quiz)
+    // console.log(recentLessonAndQuiz)
 
     function shortenDate(dateString) {
         if (dateString === '') { return '' } else {
@@ -490,6 +475,9 @@ const Stats = (props) => {
         )
     }
     function isEmptyObject(obj) {
+        if (typeof obj !== 'object' || obj === null) {
+            return true; // Treat non-object values as empty
+        }
         return Object.keys(obj).length === 0;
     }
 
@@ -509,7 +497,7 @@ const Stats = (props) => {
                                     <CustomCard
                                         title='Welcome to CrypticSage'
                                         value=""
-                                        date={new Date().toLocaleString('au')}
+                                        date={new Date().toLocaleString('au', {  hour12: true })}
                                         buttonName="Start" />
                                     :
                                     <CustomCard
@@ -525,7 +513,7 @@ const Stats = (props) => {
                                     <CustomCard
                                         title='Take your first Quiz'
                                         value=""
-                                        date={new Date().toLocaleString('au')}
+                                        date={new Date().toLocaleString('au', {  hour12: true })}
                                         buttonName="Start" />
                                     :
                                     <CustomCard
@@ -636,7 +624,7 @@ const Stats = (props) => {
                         </Box>
                         {chartData.length === 0 ?
                             <Box className='coin-chart-box' alignItems='center' justifyContent='center' display='flex'>
-                                <Skeleton variant="rounded" sx={{bgcolor:'#3f3f40'}} width="80%" height="80%" />
+                                <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
                             </Box>
                             :
                             <Box className='coin-chart-box'>

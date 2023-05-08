@@ -125,7 +125,7 @@ const NewCoinChart = (props) => {
         })
         return () => {
             // Cleanup the chart on unmount
-            console.log('unmounting')
+            // console.log('unmounting')
             chart.destroy();
         };
     }, [formattedData, sm, tokenUrl, chartData])
