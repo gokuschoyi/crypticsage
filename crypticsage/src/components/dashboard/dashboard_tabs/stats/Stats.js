@@ -34,6 +34,7 @@ import {
     FormControlLabel,
     Checkbox,
     Skeleton,
+    Switch
 } from '@mui/material';
 
 const Stats = (props) => {
@@ -481,6 +482,12 @@ const Stats = (props) => {
         return Object.keys(obj).length === 0;
     }
 
+    const [checked, setChecked] = React.useState(false);
+
+    const handleChange = (event) => {
+        setChecked(event.target.checked);
+    };
+
     return (
         <Box className='stat-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
@@ -497,7 +504,7 @@ const Stats = (props) => {
                                     <CustomCard
                                         title='Welcome to CrypticSage'
                                         value=""
-                                        date={new Date().toLocaleString('au', {  hour12: true })}
+                                        date={new Date().toLocaleString('au', { hour12: true })}
                                         buttonName="Start" />
                                     :
                                     <CustomCard
@@ -513,7 +520,7 @@ const Stats = (props) => {
                                     <CustomCard
                                         title='Take your first Quiz'
                                         value=""
-                                        date={new Date().toLocaleString('au', {  hour12: true })}
+                                        date={new Date().toLocaleString('au', { hour12: true })}
                                         buttonName="Start" />
                                     :
                                     <CustomCard
@@ -595,31 +602,54 @@ const Stats = (props) => {
                                     </Box>
                                 }
                             </Box>
-                            <Box className='time-period-checkbox'>
-                                <FormControlLabel
-                                    value="30m"
-                                    control={<Checkbox name='thirtyM' onChange={handleTimePeriodChange} checked={timePeriod.thirtyM.checked} color='secondary' />}
-                                    label="30m"
-                                    labelPlacement="start"
-                                />
-                                <FormControlLabel
-                                    value="2h"
-                                    control={<Checkbox name='twoH' onChange={handleTimePeriodChange} checked={timePeriod.twoH.checked} color='secondary' />}
-                                    label="2h"
-                                    labelPlacement="start"
-                                />
-                                <FormControlLabel
-                                    value="4h"
-                                    control={<Checkbox name='fourH' onChange={handleTimePeriodChange} checked={timePeriod.fourH.checked} color='secondary' />}
-                                    label="4h"
-                                    labelPlacement="start"
-                                />
-                                <FormControlLabel
-                                    value="1D"
-                                    control={<Checkbox name='oneD' onChange={handleTimePeriodChange} checked={timePeriod.oneD.checked} color='secondary' />}
-                                    label="1D"
-                                    labelPlacement="start"
-                                />
+                            <Box className='time-period-toggleGrid-box'>
+                                <Box className='time-period-checkbox'>
+                                    <FormControlLabel
+                                        value="30m"
+                                        control={<Checkbox name='thirtyM' onChange={handleTimePeriodChange} checked={timePeriod.thirtyM.checked} color='secondary' />}
+                                        label="30m"
+                                        labelPlacement="start"
+                                    />
+                                    <FormControlLabel
+                                        value="2h"
+                                        control={<Checkbox name='twoH' onChange={handleTimePeriodChange} checked={timePeriod.twoH.checked} color='secondary' />}
+                                        label="2h"
+                                        labelPlacement="start"
+                                    />
+                                    <FormControlLabel
+                                        value="4h"
+                                        control={<Checkbox name='fourH' onChange={handleTimePeriodChange} checked={timePeriod.fourH.checked} color='secondary' />}
+                                        label="4h"
+                                        labelPlacement="start"
+                                    />
+                                    <FormControlLabel
+                                        value="1D"
+                                        control={<Checkbox name='oneD' onChange={handleTimePeriodChange} checked={timePeriod.oneD.checked} color='secondary' />}
+                                        label="1D"
+                                        labelPlacement="start"
+                                    />
+                                </Box>
+                                <Box className='toggle-grid-toggler'>
+                                    <FormControlLabel
+                                        value="top"
+                                        control={
+                                            <Switch
+                                                sx={{
+                                                    '& .MuiSwitch-track': {
+                                                        backgroundColor: '#e3d1d1'
+                                                    }
+                                                }}
+                                                checked={checked}
+                                                color="warning"
+                                                onChange={handleChange}
+                                                inputProps={{ 'aria-label': 'controlled' }}
+                                            />
+                                        }
+                                        label="GridLine"
+                                        labelPlacement="top"
+                                    />
+
+                                </Box>
                             </Box>
                         </Box>
                         {chartData.length === 0 ?
@@ -628,13 +658,13 @@ const Stats = (props) => {
                             </Box>
                             :
                             <Box className='coin-chart-box'>
-                                <NewCoinChart chartData={chartData} tokenUrl={tokenUrl} />
+                                <NewCoinChart chartData={chartData} tokenUrl={tokenUrl} gridLineToggle={checked}/>
                             </Box>
                         }
                     </Grid>
                 </Grid>
                 <Grid container spacing={2} pt={4}>
-                    <Grid item xs={12} sm={12} md={12} lg={6}>
+                    <Grid item xs={12} sm={12} md={12} lg={12}>
                         {Object.keys(wordOfTheDay).length !== 0 &&
                             <CustomLongCard
                                 title='WORD OF THE DAY'
@@ -644,15 +674,13 @@ const Stats = (props) => {
                             />
                         }
                     </Grid>
-                    <Grid item xs={12} sm={12} md={12} lg={6}>
+                    <Grid item xs={12} sm={12} md={6} lg={6}>
                         <CustomLongCard title='IN-COMPLETE JOURNAL ENTRY' subtitle='20/10/2022' content='Complete your last entry' buttonName="GO TO JOURNAL" />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={12} lg={6}>
+                    <Grid item xs={12} sm={12} md={6} lg={6}>
                         <CustomLongCard title='JOURNAL ENTRY' subtitle='20/10/2022' content='Make an entry to your Journal' buttonName="GO TO JOURNAL" />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={12} lg={6}>
-                        <CustomLongCard title='Upload Trading-View data' subtitle='Upload your Trading View data for analysis' content='Make an entry to your Journal' buttonName="UPLOAD" />
-                    </Grid>
+
                 </Grid>
             </Box>
         </Box >

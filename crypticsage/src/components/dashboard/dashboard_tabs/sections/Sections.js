@@ -11,12 +11,15 @@ import LessonCard from './section_modules/lesson_card/LessonCard';
 import SlideCard from './section_modules/slide_card/SlideCard';
 
 import { fetchSections, fetchLessons } from '../../../../api/db';
+import { useParams } from 'react-router-dom';
 
 const Sections = (props) => {
     const [setTest] = useOutletContext();
     const hide = () => {
         setTest(true);
     }
+    const { lessonId,chapterId } = useParams();
+    console.log(lessonId,chapterId)
     const dispatch = useDispatch();
     const { title, subtitle } = props
     const token = useSelector(state => state.auth.accessToken)

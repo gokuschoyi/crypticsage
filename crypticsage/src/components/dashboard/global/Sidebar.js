@@ -137,14 +137,14 @@ const SidebarC = () => {
                         </Typography>
 
                         <MenuItem
-                            active={sidebarTab === "lessons"}
+                            active={sidebarTab === "sections"}
                             style={{
-                                backgroundColor: sidebarTab === "lessons" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
-                                color: sidebarTab === "lessons" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
+                                backgroundColor: sidebarTab === "sections" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: sidebarTab === "sections" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
                             }}
-                            onClick={() => handleOnClick("lessons")}
+                            onClick={() => handleOnClick("sections")}
                             icon={<LibraryBooksOutlinedIcon />}
-                            component={<Link to="lessons" />}
+                            component={<Link to="sections" />}
                             className="menu-item"
                         >
                             <Typography>Lessons</Typography>

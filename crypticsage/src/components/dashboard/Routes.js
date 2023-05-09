@@ -18,8 +18,8 @@ const TabRoutes = [
             <Stats title="Stats" subtitle="Explore your stats" />
         </Suspense>
     } />,
-    <Route key='lessons' path="lessons" element={
-        <Suspense fallback={<div>Loading Lessons...</div>}>
+    <Route key='sections' path="sections/:lessonId?/:chapterId?" element={
+        <Suspense fallback={<div>Loading Sections...</div>}>
             <Sections title="Sections" subtitle="Explore various chapters" />
         </Suspense>
     } />,

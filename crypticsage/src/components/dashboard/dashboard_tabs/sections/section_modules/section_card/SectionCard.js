@@ -28,7 +28,7 @@ const SectionCard = (props) => {
     }
 
     const CustomCard2 = (props) => {
-        const { title, content, sectionId, section_status } = props
+        const { title, content, sectionId, section_status, index } = props
         const lessonData = {
             'sectionName': title,
             'sectionId': sectionId
@@ -37,7 +37,7 @@ const SectionCard = (props) => {
             <Box className="section-card" sx={{ backgroundColor: `${theme.palette.primary.dark}` }}>
                 <Box className='text-holder section-grid-card-padding'>
                     <Typography className='section-title' variant="h3" fontWeight={400} color="white">
-                        {title}
+                        {(index + 1) + " : " + title}
                     </Typography>
                     <Typography textAlign="justify" variant="h6" fontWeight={300} color="white"  >
                         {content}
@@ -84,7 +84,7 @@ const SectionCard = (props) => {
                     <Grid container justifyContent='center'>
                         <Grid item xs={11} sm={11} md={11} lg={11} justifyContent='center'>
                             <Box sx={{ display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
-                                <CircularProgress size='30px' sx={{ color: 'red' }}/>
+                                <CircularProgress size='30px' sx={{ color: 'red' }} />
                             </Box>
                         </Grid>
                     </Grid>
@@ -93,7 +93,7 @@ const SectionCard = (props) => {
                         {sections && sections.map(({ title, sectionId, content, section_status }, index) => {
                             return (
                                 <Grid item xs={11} sm={11} md={6} lg={4} xl={4} className='section-grid-card' key={index}>
-                                    {CustomCard2({ title, content, sectionId, section_status })}
+                                    {CustomCard2({ title, content, sectionId, section_status, index })}
                                 </Grid>
                             )
                         })}

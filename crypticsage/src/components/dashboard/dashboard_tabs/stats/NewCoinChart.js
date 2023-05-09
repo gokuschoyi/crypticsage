@@ -6,7 +6,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material';
 
 const NewCoinChart = (props) => {
-    const { chartData, tokenUrl } = props;
+    const { chartData, tokenUrl, gridLineToggle } = props;
     const theme = useTheme();
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const [formattedData, setFormattedData] = useState([])
@@ -59,13 +59,13 @@ const NewCoinChart = (props) => {
                 responsive: true,
                 aspectRatio: sm && 1,
                 resizeDelay: 100,
-                elements:{
-                    point:{
+                elements: {
+                    point: {
                         radius: 4,
-                        pointStyle:'triangle',
+                        pointStyle: 'triangle',
                         hoverRadius: 8,
                     },
-                    line:{
+                    line: {
                         tension: 0.2,
                     }
                 },
@@ -86,6 +86,9 @@ const NewCoinChart = (props) => {
                             display: true,
                             labelString: 'Time',
                         },
+                        grid: {
+                            color: gridLineToggle ? '#969696' : '', // Set the desired color for x-axis grid lines
+                        }
                     },
                     y: {
                         beginAtZero: false,
@@ -94,6 +97,9 @@ const NewCoinChart = (props) => {
                             display: true,
                             labelString: 'Open Value',
                         },
+                        grid: {
+                            color: gridLineToggle ? '#969696' : '', // Set the desired color for y-axis grid lines
+                        }
                     },
                 },
                 plugins: {
@@ -101,7 +107,8 @@ const NewCoinChart = (props) => {
                         callbacks: {
                             label: (context) => {
                                 const dataPoint = context.dataset.data[context.dataIndex];
-                                return `${fsym}: ${dataPoint}`;
+                                const label = context.dataset.label;
+                                return `${fsym} ${label}: ${dataPoint}`;
                             },
                         },
                     },
@@ -128,7 +135,7 @@ const NewCoinChart = (props) => {
             // console.log('unmounting')
             chart.destroy();
         };
-    }, [formattedData, sm, tokenUrl, chartData])
+    }, [formattedData, sm, tokenUrl, chartData, gridLineToggle])
     return (
         <canvas ref={chartRef} className='chart-canvas' />
     )
