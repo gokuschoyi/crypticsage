@@ -3,10 +3,12 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
     counter: 0,
     sections: [],
-    sectionFlag: true,
+    sectionId: '',
     lessons: [],
-    lessonFlag: false,
+    lessonId: '',
     slides: {},
+    sectionFlag: true,
+    lessonFlag: false,
     slideFlag: false,
 }
 
@@ -28,8 +30,8 @@ const sectionSlice = createSlice({
         resetCounter: (state) => {
             state.counter = 0;
         },
-        setSectionFlag: (state, action) => {
-            state.sectionFlag = action.payload;
+        setSectionId: (state, action) => {
+            state.sectionId = action.payload;
         },
         setSections: (state, action) => {
             state.sections = action.payload;
@@ -40,11 +42,20 @@ const sectionSlice = createSlice({
         clearLessons: (state) => {
             state.lessons = [];
         },
-        setLessonFlag: (state, action) => {
-            state.lessonFlag = action.payload;
+        setLessonId: (state, action) => {
+            state.lessonId = action.payload;
+        },
+        resetLessonId: (state) => {
+            state.lessonId = '';
         },
         setSlides: (state, action) => {
             state.slides = action.payload;
+        },
+        setSectionFlag: (state, action) => {
+            state.sectionFlag = action.payload;
+        },
+        setLessonFlag: (state, action) => {
+            state.lessonFlag = action.payload;
         },
         setSlideFlag: (state, action) => {
             state.slideFlag = action.payload;
@@ -58,10 +69,12 @@ const sectionSlice = createSlice({
         resetSectionState: (state) => {
             state.counter = 0;
             state.sections = [];
-            state.sectionFlag = true;
+            state.sectionId = '';
             state.lessons = [];
-            state.lessonFlag = false;
+            state.lessonId = '';
             state.slides = {};
+            state.sectionFlag = true;
+            state.lessonFlag = false;
             state.slideFlag = false;
         }
     }
@@ -69,6 +82,9 @@ const sectionSlice = createSlice({
 
 const { reducer, actions } = sectionSlice;
 export const {
+    setSectionId,
+    setLessonId,
+    resetLessonId,
     setSectionFlag,
     setLessonFlag,
     setSlideFlag,

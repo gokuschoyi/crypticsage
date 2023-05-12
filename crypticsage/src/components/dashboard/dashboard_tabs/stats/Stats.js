@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import {
     setCryptoDataAutoComplete,
@@ -8,7 +8,9 @@ import {
     setTimePeriod,
     setWordOfTheDay
 } from './StatsSlice.js';
-import { toast } from 'react-toastify';
+
+import { setLessonFlag, setSectionFlag } from '../sections/SectionSlice'
+import { setSidebarState } from '../../global/SideBarSlice'
 
 import './Stats.css'
 
@@ -41,6 +43,7 @@ const Stats = (props) => {
     const { title, subtitle } = props
     const theme = useTheme();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [setTest] = useOutletContext();
     const hide = () => {
         setTest(true);
@@ -309,18 +312,19 @@ const Stats = (props) => {
         }
     }
 
-    const showToast = () => {
-        toast.success('Hello World jdjdj', {
-            data: {
-                title: 'Hello World Again',
-                text: 'We are here again with another article'
-            },
-            toastId: `hello-world${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}`,
-        });
+    //set sectionId in redux store
+    const redirectToLesson = () => {
+        dispatch(setSidebarState("sections"))
+        dispatch(setSectionFlag(false))
+        dispatch(setLessonFlag(true))
+        navigate('sections/5119f37b-ef44-4272-a536-04af51ef4bbc')
     };
+    const redirectToQuiz = () => {
+        dispatch(setSidebarState("quiz"))
+        navigate('quiz/2c4a5ef5-8ab4-409c-8b0f-4d8b2c063fe1')
+    }
 
     const recentLessonAndQuiz = useSelector(state => state.stats.recent_lesson_quiz)
-    // console.log(recentLessonAndQuiz)
 
     function shortenDate(dateString) {
         if (dateString === '') { return '' } else {
@@ -337,7 +341,7 @@ const Stats = (props) => {
     }
 
     const CustomCard = (props) => {
-        const { title, date, value, buttonName } = props
+        const { title, date, value, buttonName, buttonHandler } = props
         let formattedDate = shortenDate(date)
         return (
             <Box className='card-holder hover'>
@@ -353,7 +357,7 @@ const Stats = (props) => {
                     </Typography>
                 </Box>
                 <Box className='action-box'>
-                    <Button onClick={showToast} className='card-button' sx={{
+                    <Button onClick={buttonHandler} className='card-button' sx={{
                         ':hover': {
                             color: 'black !important',
                             backgroundColor: 'red !important',
@@ -463,7 +467,7 @@ const Stats = (props) => {
                     </Typography>
                 </Box>
                 <Box className='action-box'>
-                    <Button onClick={showToast} className='card-button' sx={{
+                    <Button className='card-button' sx={{
                         ':hover': {
                             color: 'black !important',
                             backgroundColor: 'red !important',
@@ -506,12 +510,15 @@ const Stats = (props) => {
                                         value=""
                                         date={new Date().toLocaleString('au', { hour12: true })}
                                         buttonName="Start" />
+
                                     :
                                     <CustomCard
                                         title='Recent Chapter'
                                         value={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentLesson.lesson_name}
                                         date={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentLesson.lesson_completed_date}
-                                        buttonName="GO TO LESSON 6" />
+                                        buttonName="NEXT LESSON"
+                                        buttonHandler={redirectToLesson}
+                                    />
                                 }
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
@@ -521,13 +528,15 @@ const Stats = (props) => {
                                         title='Take your first Quiz'
                                         value=""
                                         date={new Date().toLocaleString('au', { hour12: true })}
-                                        buttonName="Start" />
+                                        buttonName="START" />
                                     :
                                     <CustomCard
                                         title='Recent Quiz'
                                         value={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentQuiz.quiz_name}
                                         date={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentQuiz.quiz_completed_date}
-                                        buttonName="GO TO QUIZ" />
+                                        buttonName="GO TO QUIZ"
+                                        buttonHandler={redirectToQuiz}
+                                    />
                                 }
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
@@ -658,7 +667,7 @@ const Stats = (props) => {
                             </Box>
                             :
                             <Box className='coin-chart-box'>
-                                <NewCoinChart chartData={chartData} tokenUrl={tokenUrl} gridLineToggle={checked}/>
+                                <NewCoinChart chartData={chartData} tokenUrl={tokenUrl} gridLineToggle={checked} />
                             </Box>
                         }
                     </Grid>

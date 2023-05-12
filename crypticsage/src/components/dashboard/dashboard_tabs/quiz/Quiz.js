@@ -6,14 +6,19 @@ import './Quiz.css'
 import TakeQuiz from './quiz_component/TakeQuiz';
 import AllQuizzes from './quiz_component/AllQuizzes';
 import { useSelector, useDispatch } from 'react-redux';
-import { getInitialQuizDataForUser, getQuizQuestions, submitQuizResults, getLatestLessonAndQuizResults } from '../../../../api/user'
-import { setRecentLessonAndQuizStatus } from '../stats/StatsSlice'
+import { getInitialQuizDataForUser } from '../../../../api/user'
+import { useParams, useNavigate } from 'react-router-dom';
+import { setTransformedData } from './QuizSlice';
 
 const Quiz = (props) => {
-    const { accessToken, uid } = useSelector(state => state.auth)
+    const { accessToken } = useSelector(state => state.auth)
     const { title, subtitle } = props
     const dispatch = useDispatch()
+    const navigate = useNavigate();
+    const params = useParams()
+    const { quizId } = params;
     const [titleDesc, setTitleDesc] = useState({ title: title, subtitle: subtitle })
+    const [qid, setQid] = useState()
 
     //handles close of dri=opdown when clicked on main page
     const [setTest] = useOutletContext();
@@ -27,131 +32,33 @@ const Quiz = (props) => {
         setExpanded(isExpanded ? panel : false);
     };
 
-    //switch between quiz main page and single quiz page
-    const [showQuiz, setShowQuiz] = useState(false)
-    const handleShowQuiz = () => {
-        setShowQuiz((prev) => !prev)
-    }
-
     //go back to quiz main page
     const goBackToQuiz = () => {
         setTitleDesc({ title: title, subtitle: subtitle })
-        setShowQuiz(false)
-        setQuizResult()
-        setOptionsValue([])
-        setSelectedQuizData([])
+        navigate(`/dashboard/quiz`)
     }
 
     //get initial quizzes data for user useRef to run the fetch only once
+    const reduxTransformedData = useSelector(state => state.quiz.transformedData)
     const isLoaded = useRef(false)
-    const [initialQuizData, setInitialQuizData] = useState([])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        if (!isLoaded.current) {
+        if (!isLoaded.current && reduxTransformedData.length === 0) {
             isLoaded.current = true
             let data = {
                 token: accessToken,
             }
             getInitialQuizDataForUser(data)
                 .then((res) => {
-                    setInitialQuizData(res.data.transformedQuizData)
+                    dispatch(setTransformedData(res.data.transformedQuizData))
                 })
                 .catch((err) => {
                     console.log(err)
                 })
+        } else {
+            return
         }
     })
-
-    //selected quiz data (1 quiz data). Transforms the data to add index to each question and creates a new optionsValue array
-    //to store the selected option for each question
-    const [qid, setQid] = useState()
-    const [selectedQuizData, setSelectedQuizData] = useState([])
-
-    const loadQuiz = (e) => {
-        const { value } = e.target
-        setQid(value)
-        handleShowQuiz()
-        const data = {
-            token: accessToken,
-            payload: {
-                quizId: value
-            }
-        }
-        getQuizQuestions(data)
-            .then((res) => {
-                let quiz = res.data.selectedQuiz
-                let sortedQuestions = quiz[0].questions.sort(() => Math.random() - 0.5)
-                quiz[0] = { ...quiz[0], questions: sortedQuestions }
-                setSelectedQuizData(quiz)
-                setTitleDesc({ title: quiz[0].quizTitle, subtitle: '' })
-                let optionsData = quiz[0].questions.map((ques, ind) => {
-                    const { question, question_id } = ques
-                    return {
-                        question_id,
-                        question,
-                        selectedOption: ''
-                    }
-                })
-                setOptionsValue(optionsData)
-            })
-            .catch((err) => {
-                console.log(err)
-            })
-    }
-
-    //optionsValue array to store the selected option for each question
-    const [optionValue, setOptionsValue] = useState([])
-    const handleOptionsChange = (event) => {
-        const { name, value } = event.target
-        const updatedOptions = optionValue.map((option) => {
-            if (option.question_id === name) {
-                return { ...option, selectedOption: value };
-            } else {
-                return option;
-            }
-        });
-        setOptionsValue(updatedOptions)
-    };
-
-    // console.log("selected quiz data", selectedQuizData, optionValue)
-
-    //submit quiz to db and get the score
-    const [resultLoaderFlag, setResultLoaderFlag] = useState(false)
-    const [quizResult, setQuizResult] = useState()
-    const submitQuiz = async () => {
-        setResultLoaderFlag(true)
-        let data = {
-            token: accessToken,
-            payload: {
-                sectionId: selectedQuizData[0].sectionId,
-                lessonId: selectedQuizData[0].lessonId,
-                quizId: selectedQuizData[0].quizId,
-                quizData: {
-                    userSelection: optionValue,
-                }
-            }
-        }
-        await submitQuizResults(data)
-            .then((res) => {
-                if (res.data.status) {
-                    isLoaded.current = false
-                    setQuizResult(res.data)
-                    setResultLoaderFlag(false)
-                    console.log("Quiz submitted successfully")
-                }
-            })
-            .catch((err) => {
-                console.log(err)
-            })
-        let updateStats = {
-            token: accessToken,
-        }
-        await getLatestLessonAndQuizResults(updateStats)
-            .then((res) => {
-                dispatch(setRecentLessonAndQuizStatus(res.data.recentLessonQuizStatus))
-                console.log(res.data)
-            })
-        // console.log(optionValue, score)
-    }
 
     return (
         <Box className='quiz-container' onClick={hide}>
@@ -159,24 +66,20 @@ const Quiz = (props) => {
                 <Header title={titleDesc.title} subtitle={titleDesc.subtitle} />
             </Box>
             <Box className='quiz-cards-container'>
-                {!showQuiz &&
+                {quizId === undefined &&
                     <AllQuizzes
-                        loadQuiz={loadQuiz}
                         qid={qid}
-                        initialQuizData={initialQuizData}
                         expanded={expanded}
                         handleChange={handleChange}
                     />
                 }
-                {showQuiz &&
+                {quizId !== undefined &&
                     <TakeQuiz
-                        resultLoaderFlag={resultLoaderFlag}
-                        optionValue={optionValue}
-                        handleOptionsChange={handleOptionsChange}
-                        selectedQuizData={selectedQuizData}
+                        isLoaded={isLoaded}
+                        setQid={setQid}
+                        quizId={quizId}
+                        setTitleDesc={setTitleDesc}
                         goBackToQuiz={goBackToQuiz}
-                        submitQuiz={submitQuiz}
-                        quizResult={quizResult}
                     />
                 }
             </Box>

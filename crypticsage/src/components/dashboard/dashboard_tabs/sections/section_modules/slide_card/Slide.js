@@ -89,7 +89,7 @@ const SlideComponent = (props) => {
 
     useEffect(() => {
         if (slideCounter === 0 && videoContent !== null) {
-            console.log(slideVideoStartTime, slideVideoEndTime)
+            // console.log(slideVideoStartTime, slideVideoEndTime)
             videoContent.currentTime = 0;
             videoContent.play();
             videoContent.ontimeupdate = function () {

@@ -29,6 +29,10 @@
   animation: rolling-text 6s linear infinite;
 }
 
+.goback-bottom{
+  margin:40px 00px;
+}
+
 
 @keyframes rolling-text {
   0% {

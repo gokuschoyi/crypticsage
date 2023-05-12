@@ -8,6 +8,7 @@ import { resetSectionState } from '../dashboard_tabs/sections/SectionSlice';
 import { handleReduxToggleSmallScreenSidebar, resetSidebarState } from "./SideBarSlice";
 import { resetAuthState } from "../../authorization/authSlice";
 import { resetStatsState } from '../dashboard_tabs/stats/StatsSlice.js';
+import { resetTransformedData } from "../dashboard_tabs/quiz/QuizSlice";
 import { useSelector, useDispatch } from 'react-redux';
 import InputBase from "@mui/material/InputBase";
 import {
@@ -124,6 +125,7 @@ const Topbar = (props) => {
         dispatch(resetSectionState());
         dispatch(resetSidebarState());
         dispatch(resetStatsState());
+        dispatch(resetTransformedData());
     }
 
     const userContainer = () => {

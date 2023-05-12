@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
     Box,
     Grid,
@@ -12,10 +12,127 @@ import {
     useTheme,
 } from '@mui/material'
 import { red } from '@mui/material/colors';
+import { submitQuizResults, getLatestLessonAndQuizResults, getQuizQuestions } from '../../../../../api/user';
+import { setRecentLessonAndQuizStatus } from '../../stats/StatsSlice'
+import { resetTransformedData } from '../QuizSlice';
+import { useSelector, useDispatch } from 'react-redux';
 
 const TakeQuiz = (props) => {
     const theme = useTheme()
-    const { resultLoaderFlag, optionValue, handleOptionsChange, selectedQuizData, goBackToQuiz, submitQuiz, quizResult } = props
+    const { isLoaded, setQid, quizId, setTitleDesc, goBackToQuiz } = props
+    const { accessToken } = useSelector(state => state.auth)
+    const dispatch = useDispatch()
+    
+    const [quizQuestionCounter, setQuizQuestionCounter] = useState(0)
+    const questionsRef = useRef(null)
+    const incrementQuizQuestionCounter = () => {
+        setQuizQuestionCounter((prev) => prev + 1)
+        const questionsList = questionsRef.current;
+        questionsList.scrollBy(0, questionsList.offsetHeight);
+    }
+    const decrementQuizQuestionCounter = () => {
+        setQuizQuestionCounter((prev) => prev - 1)
+        const questionsList = questionsRef.current;
+        questionsList.scrollBy(0, -questionsList.offsetHeight);
+    }
+
+    //selected quiz data (1 quiz data). useRef to run the fetch only once
+    //timer is used to prevent mongodb from closing parallel connections
+    const QQRef = useRef(false)
+    const [selectedQuizData, setSelectedQuizData] = useState([])
+    useEffect(() => {
+        let timer;
+        timer = setInterval(() => {
+            if (!QQRef.current) {
+                QQRef.current = true
+                setQid(quizId)
+                const data = {
+                    token: accessToken,
+                    payload: {
+                        quizId: quizId
+                    }
+                }
+
+                getQuizQuestions(data)
+                    .then((res) => {
+                        let quiz = res.data.selectedQuiz
+                        let sortedQuestions = quiz[0].questions.sort(() => Math.random() - 0.5)
+                        quiz[0] = { ...quiz[0], questions: sortedQuestions }
+                        setSelectedQuizData(quiz)
+                        setTitleDesc({ title: quiz[0].quizTitle, subtitle: '' })
+                        let optionsData = quiz[0].questions.map((ques, ind) => {
+                            const { question, question_id } = ques
+                            return {
+                                question_id,
+                                question,
+                                selectedOption: ''
+                            }
+                        })
+                        setOptionsValue(optionsData)
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+            }
+        }, 200)
+        return (() => {
+            clearInterval(timer)
+        })
+    })
+
+    //optionsValue array to store the selected option for each question
+    const [optionValue, setOptionsValue] = useState([])
+    const handleOptionsChange = (event) => {
+        const { name, value } = event.target
+        const updatedOptions = optionValue.map((option) => {
+            if (option.question_id === name) {
+                return { ...option, selectedOption: value };
+            } else {
+                return option;
+            }
+        });
+        setOptionsValue(updatedOptions)
+    };
+
+    //submit quiz to db and get the score
+    const [resultLoaderFlag, setResultLoaderFlag] = useState(false)
+    const [quizResult, setQuizResult] = useState()
+    const submitQuiz = async () => {
+        setResultLoaderFlag(true)
+        let data = {
+            token: accessToken,
+            payload: {
+                sectionId: selectedQuizData[0].sectionId,
+                lessonId: selectedQuizData[0].lessonId,
+                quizId: selectedQuizData[0].quizId,
+                quizData: {
+                    userSelection: optionValue,
+                }
+            }
+        }
+        await submitQuizResults(data)
+            .then((res) => {
+                if (res.data.status) {
+                    isLoaded.current = false
+                    dispatch(resetTransformedData())
+                    setQuizResult(res.data)
+                    setResultLoaderFlag(false)
+                    console.log("Quiz submitted successfully")
+                }
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+        let updateStats = {
+            token: accessToken,
+        }
+        await getLatestLessonAndQuizResults(updateStats)
+            .then((res) => {
+                dispatch(setRecentLessonAndQuizStatus(res.data.recentLessonQuizStatus))
+                console.log(res.data)
+            })
+        // console.log(optionValue, score)
+    }
 
     const OptionsBox = (props) => {
         const { options, questionId } = props
@@ -51,20 +168,6 @@ const TakeQuiz = (props) => {
         )
     }
 
-    const [quizQuestionCounter, setQuizQuestionCounter] = useState(0)
-    const questionsRef = useRef(null)
-    const incrementQuizQuestionCounter = () => {
-        setQuizQuestionCounter((prev) => prev + 1)
-        const questionsList = questionsRef.current;
-        questionsList.scrollBy(0, questionsList.offsetHeight);
-    }
-    const decrementQuizQuestionCounter = () => {
-        setQuizQuestionCounter((prev) => prev - 1)
-        const questionsList = questionsRef.current;
-        questionsList.scrollBy(0, -questionsList.offsetHeight);
-    }
-    // console.log("selected quiz data", selectedQuizData, quizQuestionCounter)
-    // console.log("quiz result", quizResult?.status)
     return (
         <Box className='take-quiz-container'>
             {resultLoaderFlag &&

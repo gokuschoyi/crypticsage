@@ -1,12 +1,61 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Box, Grid, Typography, useTheme, IconButton, CircularProgress, LinearProgress } from '@mui/material'
 import Header from '../../../../global/Header'
 import './SectionCard.css'
 import { KeyboardDoubleArrowRightOutlinedIcon } from '../../../../global/Icons'
-const SectionCard = (props) => {
-    const { title, subtitle, sections, openLesson } = props
-    const theme = useTheme()
 
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchSections } from '../../../../../../api/db'
+import { setSections, setSectionId } from '../../SectionSlice'
+import { useNavigate } from 'react-router-dom';
+
+const SectionCard = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const theme = useTheme()
+    const token = useSelector(state => state.auth.accessToken)
+    const { sections } = useSelector(state => state.section)
+    const allStatus = useSelector(state => state.auth.user_lesson_status)
+
+    /* const resetReduxSectinoIdRef = useRef(false)
+    useEffect(() => {
+        if (!resetReduxSectinoIdRef.current) {
+            resetReduxSectinoIdRef.current = true
+            dispatch(setSectionId(""))
+        }
+    }) */
+    
+    // Fetch sections from the database
+    const fetchSectionMounted = useRef(false)
+    useEffect(() => {
+        if (!fetchSectionMounted.current) { // Only run if the component is mounted
+            fetchSectionMounted.current = true // Set the mount state to true after the first run
+            if (sections.length === 0) {
+                let data = {
+                    token: token
+                }
+                fetchSections(data)
+                    .then(res => {
+                        let sect = res.data.sections;
+                        const combinedArray = sect.map(section => {
+                            const sectionId = section.sectionId;
+                            if (allStatus[sectionId]) {
+                                return {
+                                    ...section,
+                                    section_status: allStatus[sectionId]
+                                };
+                            } else {
+                                return section;
+                            }
+                        });
+                        dispatch(setSections(combinedArray))
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    })
+            }
+        }
+    }, [sections, dispatch, token, allStatus])
 
     function calculatePercentageCompleted(lessonsArray) {
         // Initialize counters
@@ -27,12 +76,14 @@ const SectionCard = (props) => {
         return Math.round(percentageCompleted);
     }
 
+    const openLesson = (sectionId) => {
+        const sectionUrl = `/dashboard/sections/${sectionId}`;
+        dispatch(setSectionId(sectionId))
+        navigate(sectionUrl);
+    };
+
     const CustomCard2 = (props) => {
         const { title, content, sectionId, section_status, index } = props
-        const lessonData = {
-            'sectionName': title,
-            'sectionId': sectionId
-        }
         return (
             <Box className="section-card" sx={{ backgroundColor: `${theme.palette.primary.dark}` }}>
                 <Box className='text-holder section-grid-card-padding'>
@@ -46,8 +97,7 @@ const SectionCard = (props) => {
                 <Box className='section-grid-card-padding button-progress'>
                     <Box className='section-button-container'>
                         <IconButton aria-label="delete"
-                            onClick={(e) => openLesson(e)}
-                            value={JSON.stringify(lessonData)}
+                            onClick={(e) => openLesson(sectionId)}
                             variant="text"
                             style={{ color: `#000000`, backgroundColor: 'red', margin: '5px' }}
                             sx={{
@@ -76,7 +126,7 @@ const SectionCard = (props) => {
     return (
         <React.Fragment>
             <Box height='100%' width='-webkit-fill-available'>
-                <Header title={title} subtitle={subtitle} />
+                <Header title='Sections' subtitle='Explore various lessons' />
             </Box>
             <Box className='section-cards-container'>
                 {sections.length === 0

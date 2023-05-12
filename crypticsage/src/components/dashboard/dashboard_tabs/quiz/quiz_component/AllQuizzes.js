@@ -12,10 +12,14 @@ import {
 } from '@mui/material'
 import Slide from '@mui/material/Slide';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const AllQuizzes = (props) => {
     const theme = useTheme()
-    const { loadQuiz, qid, initialQuizData, expanded, handleChange } = props
+    const navigate = useNavigate()
+    const { qid, expanded, handleChange } = props
+    const reduxTransformedData = useSelector(state => state.quiz.transformedData)
 
     //styles for dropdown
     const mountedStyle = { animation: "inAnimation 350ms ease-in" };
@@ -34,6 +38,11 @@ const AllQuizzes = (props) => {
         const [hour, minute] = time.split(/:| /);
         const formattedDate = `${day} ${MM} : ${hour}:${minute} ${timeZone.toUpperCase()}`;
         return formattedDate;
+    }
+
+    const loadQuiz = (quizId) => {
+        let quizUrl = `/dashboard/quiz/${quizId}`
+        navigate(quizUrl)
     }
 
     const Quiz = (props) => {
@@ -70,8 +79,7 @@ const AllQuizzes = (props) => {
                 </Box>
                 <Box className='quiz-action'>
                     <Button
-                        value={quizID}
-                        onClick={(e) => loadQuiz(e)}
+                        onClick={(e) => loadQuiz(quizID)}
                         variant="text"
                         style={{
                             color: qid === quizID ? 'white' : 'black',
@@ -94,13 +102,13 @@ const AllQuizzes = (props) => {
         <Box className='all-quizzez-container'>
             <Grid className='quiz-grid-container' container spacing={2} justifyContent='center'>
                 <Grid className='quiz-grid-card' item xs={11} sm={11} md={10} lg={10} xl={10}>
-                    {initialQuizData.length === 0 ?
+                    {reduxTransformedData.length === 0 ?
                         <Box>
                             <Skeleton sx={{ bgcolor: '#585050' }} variant="rounded" width='100%' height='600px' />
                         </Box>
                         :
                         <Box>
-                            {initialQuizData.map((section, index) => {
+                            {reduxTransformedData.map((section, index) => {
                                 return (
                                     <Slide key={index} direction="up" timeout={500} in={true} >
                                         <Box className='quiz-collection'>
