@@ -42,7 +42,7 @@ const LessonCard = () => {
             let secName = sections.filter(section => section.sectionId === sectId)[0].title
             setSectionName(secName)
             try {
-                if (lessons[0].sectionId === sectId) {
+                if (lessons[0]?.sectionId === sectId) {
                     console.log("same section fetch")
                     return
                 } else {
