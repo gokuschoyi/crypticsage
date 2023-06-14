@@ -273,7 +273,7 @@ const Login = (props) => {
                                     </Box>
                                     <Box className="icon-box">
                                         <Box className="footer-icon" alignItems='center' display='flex'>
-                                            <GoogleLogin shape='pill' type='icon' onSuccess={googleLoginSuccess} onError={errorMessage} state_cookie_domain='single-host-origin' />
+                                            <GoogleLogin shape='pill' type='icon' onSuccess={googleLoginSuccess} onError={errorMessage} state_cookie_domain='single-host-origin'  />
                                         </Box>
                                         <Box className="footer-icon">
                                             <LoginSocialFacebook

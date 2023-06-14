@@ -15,6 +15,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
+import { shortenDate } from '../../../../../utils/Utils';
+
 const AllQuizzes = (props) => {
     const theme = useTheme()
     const navigate = useNavigate()
@@ -27,18 +29,6 @@ const AllQuizzes = (props) => {
         animation: "outAnimation 370ms ease-out",
         animationFillMode: "forwards"
     };
-
-    function shortenDate(dateString) {
-        const [date, time] = dateString.split(", ");
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        // eslint-disable-next-line no-unused-vars
-        const [amPm, timeZone] = time.split(" ");
-        const [day, month] = date.split("/");
-        let MM = months[(parseInt(month) - 1)]
-        const [hour, minute] = time.split(/:| /);
-        const formattedDate = `${day} ${MM} : ${hour}:${minute} ${timeZone.toUpperCase()}`;
-        return formattedDate;
-    }
 
     const loadQuiz = (quizId) => {
         let quizUrl = `/dashboard/quiz/${quizId}`

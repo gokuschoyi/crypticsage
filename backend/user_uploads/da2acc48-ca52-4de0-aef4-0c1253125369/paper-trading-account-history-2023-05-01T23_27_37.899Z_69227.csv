@@ -1,0 +1,51 @@
+Time,Balance Before,Balance After,P&L,Action
+2023-01-21 09:20:09,92 375.89,92 367.62,-8.27,"Commission for: Close short position for symbol BYBIT:ETHUSD.P at price 1653.70 for 10 shares. Position AVG Price was 1555.500000, currency: USD, point value: 1.000000"
+2023-01-21 09:20:09,93 357.89,92 375.89,-982.00,"Close short position for symbol BYBIT:ETHUSD.P at price 1653.70 for 10 shares. Position AVG Price was 1555.500000, currency: USD, point value: 1.000000"
+2023-01-20 23:40:51,93 365.67,93 357.89,-7.78,Commission for: Enter position for symbol BYBIT:ETHUSD.P at price 1555.50 for 10 shares
+2023-01-19 03:44:44,93 396.30,93 365.67,-30.63,"Commission for: Close long position for symbol BITSTAMP:BTCUSD at price 20420.00 for 3 shares. Position AVG Price was 21259.000000, currency: USD, point value: 1.000000"
+2023-01-19 03:44:44,95 913.30,93 396.30,-2 517.00,"Close long position for symbol BITSTAMP:BTCUSD at price 20420.00 for 3 shares. Position AVG Price was 21259.000000, currency: USD, point value: 1.000000"
+2023-01-18 10:11:39,95 945.19,95 913.30,-31.89,Commission for: Enter position for symbol BITSTAMP:BTCUSD at price 21259.00 for 3 shares
+2023-01-17 09:59:28,95 946.86,95 945.19,-1.67,"Commission for: Close long position for symbol BINANCE:AVAXUSDT at price 16.72 for 200 shares. Position AVG Price was 21.480000, currency: USDT, rate: 1.000060, last updated rate on 2023-01-16T22:16:02Z, point value: 1.000000"
+2023-01-17 09:59:28,96 898.92,95 946.86,-952.06,"Close long position for symbol BINANCE:AVAXUSDT at price 16.72 for 200 shares. Position AVG Price was 21.480000, currency: USDT, rate: 1.000060, last updated rate on 2023-01-16T22:16:02Z, point value: 1.000000"
+2023-01-17 09:59:26,96 902.87,96 898.92,-3.95,"Commission for: Close short position for symbol BYBIT:ETHUSD.P at price 1580.15 for 5 shares. Position AVG Price was 1545.050000, currency: USD, point value: 1.000000"
+2023-01-17 09:59:26,97 078.37,96 902.87,-175.50,"Close short position for symbol BYBIT:ETHUSD.P at price 1580.15 for 5 shares. Position AVG Price was 1545.050000, currency: USD, point value: 1.000000"
+2023-01-17 09:59:25,97 110.17,97 078.37,-31.80,"Commission for: Close short position for symbol BITSTAMP:BTCUSD at price 21202.00 for 3 shares. Position AVG Price was 21215.000000, currency: USD, point value: 1.000000"
+2023-01-17 09:59:25,97 071.17,97 110.17,+39.00,"Close short position for symbol BITSTAMP:BTCUSD at price 21202.00 for 3 shares. Position AVG Price was 21215.000000, currency: USD, point value: 1.000000"
+2023-01-16 14:02:58,97 102.99,97 071.17,-31.82,Commission for: Enter position for symbol BITSTAMP:BTCUSD at price 21215.00 for 3 shares
+2023-01-16 13:23:13,97 135.05,97 102.99,-32.05,"Commission for: Close short position for symbol BITSTAMP:BTCUSD at price 21369.00 for 3 shares. Position AVG Price was 20819.000000, currency: USD, point value: 1.000000"
+2023-01-16 13:23:13,98 785.05,97 135.05,-1 650.00,"Close short position for symbol BITSTAMP:BTCUSD at price 21369.00 for 3 shares. Position AVG Price was 20819.000000, currency: USD, point value: 1.000000"
+2023-01-16 09:22:09,98 788.91,98 785.05,-3.86,Commission for: Enter position for symbol BYBIT:ETHUSD.P at price 1545.05 for 5 shares
+2023-01-16 09:21:19,98 820.14,98 788.91,-31.23,Commission for: Enter position for symbol BITSTAMP:BTCUSD at price 20819.00 for 3 shares
+2022-12-16 20:00:39,98 823.14,98 820.14,-3.00,"Commission for: Close long position for symbol BYBIT:ETHUSD.P at price 1201.25 for 5 shares. Position AVG Price was 1261.350000, currency: USD, point value: 1.000000"
+2022-12-16 20:00:39,99 123.64,98 823.14,-300.50,"Close long position for symbol BYBIT:ETHUSD.P at price 1201.25 for 5 shares. Position AVG Price was 1261.350000, currency: USD, point value: 1.000000"
+2022-12-12 10:46:58,99 126.79,99 123.64,-3.15,Commission for: Enter position for symbol BYBIT:ETHUSD.P at price 1261.35 for 5 shares
+2022-12-09 11:01:41,99 129.99,99 126.79,-3.20,"Commission for: Close short position for symbol BYBIT:ETHUSD.P at price 1279.85 for 5 shares. Position AVG Price was 1227.050000, currency: USD, point value: 1.000000"
+2022-12-09 11:01:41,99 393.99,99 129.99,-264.00,"Close short position for symbol BYBIT:ETHUSD.P at price 1279.85 for 5 shares. Position AVG Price was 1227.050000, currency: USD, point value: 1.000000"
+2022-12-07 19:52:25,99 397.06,99 393.99,-3.07,Commission for: Enter position for symbol BYBIT:ETHUSD.P at price 1227.05 for 5 shares
+2022-11-29 19:56:58,99 401.18,99 397.06,-4.12,"Commission for: Close long position for symbol BITSTAMP:BTCUSD at price 16492.00 for 0.5 shares. Position AVG Price was 16171.000000, currency: USD, point value: 1.000000"
+2022-11-29 19:56:58,99 240.68,99 401.18,+160.50,"Close long position for symbol BITSTAMP:BTCUSD at price 16492.00 for 0.5 shares. Position AVG Price was 16171.000000, currency: USD, point value: 1.000000"
+2022-11-29 11:44:50,99 244.73,99 240.68,-4.04,Commission for: Enter position for symbol BITSTAMP:BTCUSD at price 16171.00 for 0.5 shares
+2022-11-20 19:41:06,99 247.73,99 244.73,-3.01,"Commission for: Close long position for symbol BYBIT:ETHUSD.P at price 1203.05 for 5 shares. Position AVG Price was 1216.600000, currency: USD, point value: 1.000000"
+2022-11-20 19:41:06,99 315.48,99 247.73,-67.75,"Close long position for symbol BYBIT:ETHUSD.P at price 1203.05 for 5 shares. Position AVG Price was 1216.600000, currency: USD, point value: 1.000000"
+2022-11-20 11:22:58,99 318.53,99 315.48,-3.04,Commission for: Enter position for symbol BYBIT:ETHUSD.P at price 1216.60 for 5 shares
+2022-11-15 13:18:06,99 321.67,99 318.53,-3.15,"Commission for: Close short position for symbol BYBIT:ETHUSD.P at price 1259.65 for 5 shares. Position AVG Price was 1220.800000, currency: USD, point value: 1.000000"
+2022-11-15 13:18:06,99 515.92,99 321.67,-194.25,"Close short position for symbol BYBIT:ETHUSD.P at price 1259.65 for 5 shares. Position AVG Price was 1220.800000, currency: USD, point value: 1.000000"
+2022-11-15 09:29:58,99 518.98,99 515.92,-3.05,Commission for: Enter position for symbol BYBIT:ETHUSD.P at price 1220.80 for 5 shares
+2022-11-09 05:17:04,99 524.52,99 518.98,-5.55,"Commission for: Close long position for symbol BYBIT:ETHUSD.P at price 1386.45 for 8 shares. Position AVG Price was 1470.615625, currency: USD, point value: 1.000000"
+2022-11-09 05:17:04,100 197.85,99 524.52,-673.33,"Close long position for symbol BYBIT:ETHUSD.P at price 1386.45 for 8 shares. Position AVG Price was 1470.615625, currency: USD, point value: 1.000000"
+2022-11-08 16:13:39,100 207.62,100 197.85,-9.77,"Commission for: Close long position for symbol BITSTAMP:BTCUSD at price 19535.00 for 1 shares. Position AVG Price was 19968.000000, currency: USD, point value: 1.000000"
+2022-11-08 16:13:39,100 640.62,100 207.62,-433.00,"Close long position for symbol BITSTAMP:BTCUSD at price 19535.00 for 1 shares. Position AVG Price was 19968.000000, currency: USD, point value: 1.000000"
+2022-11-08 15:11:28,100 650.60,100 640.62,-9.98,Commission for: Enter position for symbol BITSTAMP:BTCUSD at price 19968.00 for 1 shares
+2022-10-31 12:43:23,100 653.75,100 650.60,-3.15,Commission for: Enter position for symbol BYBIT:ETHUSD.P at price 1575.00 for 4 shares
+2022-10-31 09:21:54,100 664.04,100 653.75,-10.29,"Commission for: Close long position for symbol BITSTAMP:BTCUSD at price 20581.00 for 1 shares. Position AVG Price was 20232.000000, currency: USD, point value: 1.000000"
+2022-10-31 09:21:54,100 315.04,100 664.04,+349.00,"Close long position for symbol BITSTAMP:BTCUSD at price 20581.00 for 1 shares. Position AVG Price was 20232.000000, currency: USD, point value: 1.000000"
+2022-10-30 12:45:53,100 318.27,100 315.04,-3.23,"Commission for: Close long position for symbol BYBIT:ETHUSD.P at price 1613.85 for 4 shares. Position AVG Price was 1366.231250, currency: USD, point value: 1.000000"
+2022-10-30 12:45:53,99 327.79,100 318.27,+990.48,"Close long position for symbol BYBIT:ETHUSD.P at price 1613.85 for 4 shares. Position AVG Price was 1366.231250, currency: USD, point value: 1.000000"
+2022-10-28 23:30:16,99 330.01,99 327.79,-2.22,Commission for: Enter position for symbol BYBIT:ETHUSD.P at price 1477.70 for 3 shares
+2022-10-28 18:19:36,99 340.12,99 330.01,-10.12,Commission for: Enter position for symbol BITSTAMP:BTCUSD at price 20232.00 for 1 shares
+2022-10-26 19:11:02,99 343.90,99 340.12,-3.78,"Commission for: Close long position for symbol BYBIT:ETHUSD.P at price 1511.80 for 5 shares. Position AVG Price was 1299.350000, currency: USD, point value: 1.000000"
+2022-10-26 19:11:02,98 281.65,99 343.90,+1 062.25,"Close long position for symbol BYBIT:ETHUSD.P at price 1511.80 for 5 shares. Position AVG Price was 1299.350000, currency: USD, point value: 1.000000"
+2022-10-22 13:33:13,98 287.50,98 281.65,-5.85,Commission for: Enter position for symbol BYBIT:ETHUSD.P at price 1299.35 for 9 shares
+2022-10-22 13:32:55,98 288.15,98 287.50,-0.65,Commission for: Enter position for symbol BYBIT:ETHUSD.P at price 1299.35 for 1 shares
+2022-10-07 23:51:31,98 297.93,98 288.15,-9.78,"Commission for: Close long position for symbol BITSTAMP:BTCUSD at price 19554.00 for 1 shares. Position AVG Price was 20012.000000, currency: USD, point value: 1.000000"
+2022-10-07 23:51:31,98 755.93,98 297.93,-458.00,"Close long position for symbol BITSTAMP:BTCUSD at price 19554.00 for 1 shares. Position AVG Price was 20012.000000, currency: USD, point value: 1.000000"

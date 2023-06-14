@@ -39,6 +39,8 @@ import {
     Switch
 } from '@mui/material';
 
+import { shortenDate } from '../../../../utils/Utils.js';
+
 const Stats = (props) => {
     const { title, subtitle } = props
     const theme = useTheme();
@@ -325,20 +327,6 @@ const Stats = (props) => {
     }
 
     const recentLessonAndQuiz = useSelector(state => state.stats.recent_lesson_quiz)
-
-    function shortenDate(dateString) {
-        if (dateString === '') { return '' } else {
-            const [date, time] = dateString.split(", ");
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-            // eslint-disable-next-line no-unused-vars
-            const [amPm, timeZone] = time.split(" ");
-            const [day, month] = date.split("/");
-            let MM = months[(parseInt(month) - 1)]
-            const [hour, minute] = time.split(/:| /);
-            const formattedDate = `${day} ${MM} : ${hour}:${minute} ${timeZone.toUpperCase()}`;
-            return formattedDate;
-        }
-    }
 
     const CustomCard = (props) => {
         const { title, date, value, buttonName, buttonHandler } = props

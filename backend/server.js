@@ -3,15 +3,21 @@ var cors = require('cors')
 const bodyParser = require('body-parser');
 const logger = require('./middleware/logger/Logger');
 const config = require('./config');
+
 const verify = require('./routes/auth/verifyToken');
-const contentManager = require('./routes/content/contentManager');
-const user = require('./routes/user/user');
+const authentication = require('./routes/auth/authRoute')
+const contentManager = require('./routes/content/contentManagerRoute');
+const fetchCryptoData = require('./routes/crypto-stocks/cryptoStocksRoute');
+const user = require('./routes/user/userRoute');
 
 const app = express();
 
-const authentication = require('./routes/auth/authRoute')
-const fetchCryptoData = require('./utils/crypto/fetchCryptoData');
-const { makeAllStatusForUser } = require('./utils/db-utils/helpers');
+ // const schedule = require('node-schedule');
+ // const job = schedule.scheduleJob('*/10 * * * * *', function () {
+ //     console.log('The answer to life, the universe, and everything!');
+ // });
+
+const { makeAllStatusForUser } = require('./utils/helpers');
 
 const log = (req, res, next) => {
     console.log('_____________________________________________________');

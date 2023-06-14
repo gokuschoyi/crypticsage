@@ -1,4 +1,5 @@
 .section-card {
+  width:100%;
   /* padding: 15px 10px 20px 20px !important; */
   border-radius: 20px !important;
   margin: 15px !important;
@@ -7,6 +8,10 @@
   flex-direction: column;
   justify-content: space-between;
   text-align: start;
+}
+
+.section-title-box{
+  height:80px;
 }
 
 .section-title {

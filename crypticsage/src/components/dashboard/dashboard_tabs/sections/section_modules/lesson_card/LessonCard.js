@@ -1,13 +1,15 @@
 import React, { useEffect, useRef } from 'react'
 import Header from '../../../../global/Header'
 import './LessonCard.css'
-import { KeyboardDoubleArrowRightOutlinedIcon } from '../../../../global/Icons'
+import { KeyboardDoubleArrowRightOutlinedIcon, CheckOutlinedIcon, CloseIcon } from '../../../../global/Icons'
 import { Box, IconButton, Button, CircularProgress, Grid, CardContent, Typography, CardActions, useTheme } from '@mui/material'
 
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchLessons } from '../../../../../../api/db'
 import { setLessons, clearLessons, setSectionId, setLessonId } from '../../SectionSlice'
 import { useNavigate, useParams } from 'react-router-dom';
+
+import { shortenDate, capitalizeFirstLetter } from '../../../../../../utils/Utils'
 
 const LessonCard = () => {
     const params = useParams();
@@ -87,28 +89,54 @@ const LessonCard = () => {
     }
 
     //animation delay for lesson title
-    useEffect(() => {
+    /* useEffect(() => {
         const textElement = document.querySelectorAll('.lesson-title-box span')
         textElement.forEach((element) => {
             const delay = Math.random() * 5;
             element.classList.add('animate-text')
             element.style.animationDelay = `${delay}s`
         })
-    })
+    }) */
 
     const LessonsBox = (props) => {
-        const { title, lessonId, completed } = props
+        const { title, lessonId, completed, date } = props
         return (
-            <Box className='lessons-container-box ' sx={{ backgroundColor: `${theme.palette.primary.light}`, borderRadius: '10px' }}>
+            <Box className='lessons-container-box' sx={{ backgroundColor: `${theme.palette.primary.light}`, borderRadius: '10px' }}>
                 <CardContent className='text lesson-title-box' sx={{ width: 'fill-available' }}>
-                    <Typography variant="h5" className='rolling' component='span' sx={{ color: 'white', width: 'fill-available', cursor: 'pointer' }}>
-                        {title}
+                    <Typography variant="h5" className='rolling title' component='span' textAlign='start' sx={{ color: 'white' }}>
+                        {capitalizeFirstLetter(title)}
                     </Typography>
-                    <Typography variant="h5" sx={{ color: 'white', width: 'fill-available', cursor: 'pointer' }}>
-                        {completed ? 'Completed' : 'Not Completed'}
-                    </Typography>
+                    <Box className='status-box'>
+                        {completed
+                            ?
+                            (
+                                <Box className='status'>
+                                    <Box className='completed-status-box'>
+                                        <Typography variant="h6" textAlign='start' sx={{ color: 'white' }}>
+                                            Completed
+                                        </Typography>
+                                        <CheckOutlinedIcon sx={{ color: `${theme.palette.success.main}` }} />
+                                    </Box>
+                                    <Typography variant="body1" textAlign='start' sx={{ color: 'white' }}>
+                                        {shortenDate(date)}
+                                    </Typography>
+                                </Box>
+                            )
+                            :
+                            (
+                                <Box className='status'>
+                                    <Box className='completed-status-box'>
+                                        <Typography variant="h6" textAlign='start' sx={{ color: 'white' }}>
+                                            Not Completed
+                                        </Typography>
+                                        <CloseIcon sx={{ color: `${theme.palette.error.main}` }} />
+                                    </Box>
+                                </Box>
+                            )
+                        }
+                    </Box>
                 </CardContent>
-                <CardActions sx={{ width: 'fill-available', justifyContent: 'center' }}>
+                <CardActions sx={{ width: '20%', justifyContent: 'center' }}>
                     <IconButton
                         onClick={(e) => openSlide(lessonId)}
                         variant="outlined"
@@ -157,9 +185,13 @@ const LessonCard = () => {
                     <Grid container justifyContent='center'>
                         {lessons && lessons.map((lesson, index) => {
                             return (
-                                <Grid item xs={11} sm={4} md={3} lg={2} key={index}>
-                                    <LessonsBox title={lesson.chapter_title} lessonId={lesson.lessonId} completed={lesson.lesson_status.lesson_completed
-                                    } />
+                                <Grid item xs={11} sm={11} md={9} lg={10} xl={11} key={index}>
+                                    <LessonsBox
+                                        title={lesson.chapter_title}
+                                        lessonId={lesson.lessonId}
+                                        completed={lesson.lesson_status.lesson_completed}
+                                        date={lesson.lesson_status.lesson_completed_date}
+                                    />
                                 </Grid>
                             )
                         })}

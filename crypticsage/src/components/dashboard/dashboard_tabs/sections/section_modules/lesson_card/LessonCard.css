@@ -1,11 +1,20 @@
 .lessons-container-box {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   margin: 10px;
+  transition: all 0.3s linear;
+}
+
+.lessons-container-box:hover {
+  transform: scale(1.05);
+  transition: all 0.3s linear;
 }
 
 .lesson-title-box {
+  display: flex;
+  flex-direction: row;
+  width: 80%;
   position: relative;
   overflow: hidden;
   white-space: nowrap;
@@ -14,23 +23,24 @@
 .lesson-title-box span {
   display: inline-block;
   position: relative;
-  transition: all 2s linear;
+  transition: all 0.3s linear;
 }
 
-.lesson-title-box:hover span {
-  scale:1.2;
-}
+/* .lesson-title-box:hover span {
+  transform: translate(5%, 0%);
+  scale: 1.1;
+} */
 
-.lesson-card-icon{
+.lesson-card-icon {
   pointer-events: none;
 }
 
 .animate-text {
-  animation: rolling-text 6s linear infinite;
+  animation: rolling-text 8s linear infinite;
 }
 
-.goback-bottom{
-  margin:40px 00px;
+.goback-bottom {
+  margin: 40px 00px;
 }
 
 
@@ -38,7 +48,50 @@
   0% {
     transform: translateX(-100%);
   }
+
+  90% {
+    opacity: 1;
+  }
+
   100% {
-    transform: translateX(100%);
+    transform: translateX(70%);
+    opacity: 0;
+  }
+}
+
+.title {
+  width: 80%;
+  cursor: pointer;
+}
+
+.status-box {
+  width: 20%;
+  cursor: pointer;
+}
+
+.status {
+  display: flex;
+  flex-direction: column;
+}
+
+.completed-status-box {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+@media screen and (max-width: 1200px) {
+  .lesson-title-box {
+    flex-direction: column;
+  }
+
+  .title {
+    width: 100%;
+  }
+
+  .status-box {
+    width: 50%;
   }
 }

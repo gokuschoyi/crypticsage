@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { createNewUser, loginUser } = require('../../utils/db-utils/mongodb')
+const { createNewUser, loginUser } = require('../../utils/db-utils/user-db')
 
 router.post('/signup', async (req, res) => {
     console.log("Signup request received");
