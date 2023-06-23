@@ -2,6 +2,9 @@ const { MongoClient } = require('mongodb');
 const config = require('../config');
 const client = new MongoClient(config.mongoUri);
 
+// ssh -L 27017:localhost:27017 yadu@10.0.0.121 
+// to link remote mongo to local instead of ssh
+
 const connect = async (EPMessage) => {
     try {
         let db;

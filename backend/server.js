@@ -8,6 +8,7 @@ const verify = require('./routes/auth/verifyToken');
 const authentication = require('./routes/auth/authRoute')
 const contentManager = require('./routes/content/contentManagerRoute');
 const fetchCryptoData = require('./routes/crypto-stocks/cryptoStocksRoute');
+const fetchIndicators = require('./routes/indicators/indicatorsRoute');
 const user = require('./routes/user/userRoute');
 
 const app = express();
@@ -20,7 +21,7 @@ const app = express();
 const { makeAllStatusForUser } = require('./utils/helpers');
 
 const log = (req, res, next) => {
-    console.log('_____________________________________________________');
+    console.log('_________________________REQUEST RECEIVED____________________________');
     next();
 }
 
@@ -40,6 +41,8 @@ app.post('/', verify, async (req, res) => {
 app.use('/auth', authentication);
 
 app.use('/crypto', fetchCryptoData);
+
+app.use('/indicators', fetchIndicators);
 
 app.use('/content', contentManager);
 

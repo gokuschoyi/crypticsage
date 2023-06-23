@@ -208,7 +208,7 @@ const loginUser = async (req, res) => {
                                 },
                                 config.tokenKey,
                                 {
-                                    expiresIn: '8h'
+                                    expiresIn: '1d'
                                 }
                             );
                             let lesson_status = user[0].lesson_status
@@ -272,7 +272,7 @@ const loginUser = async (req, res) => {
                             },
                             config.tokenKey,
                             {
-                                expiresIn: '8h'
+                                expiresIn: '1d'
                             }
                         );
                         let lesson_status = user[0].lesson_status
@@ -297,6 +297,7 @@ const loginUser = async (req, res) => {
                     }
                 }
                 catch (err) {
+                    console.log(err)
                     res.status(500).json({ message: "Could not verify your credentials" });
                 } finally {
                     close("loginUser - google");
@@ -327,7 +328,7 @@ const loginUser = async (req, res) => {
                         },
                         config.tokenKey,
                         {
-                            expiresIn: '8h'
+                            expiresIn: '1d'
                         }
                     );
                     let lesson_status = user[0].lesson_status

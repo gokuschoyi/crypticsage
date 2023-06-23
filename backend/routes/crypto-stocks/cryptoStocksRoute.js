@@ -11,8 +11,16 @@ const {
 const {
     initialSaveHistoricalDataYFinance,
     updateHistoricalDataYFinance,
-    initialSaveHistoricalDataBinance
-} = require('../../utils/crypto/historicalData')
+} = require('../../utils/crypto/yFinanceHistoricalData')
+
+const {
+    initialSaveHistoricalDataBinance,
+    checkJobCompletition,
+} = require('../../utils/crypto/binanceHistoricalData')
+
+const {
+    fetchTokenData,
+} = require('../../utils/crypto/indicatorDataPrep')
 
 router.post('/getCryptoData', verify, async (req, res) => {
     console.log("Get crypto data request received");
@@ -55,6 +63,16 @@ router.post('/initialSaveHistoricalDataBinance', verify, async (req, res) => {
     }
 })
 
+router.post('/check-job-completition', verify, async (req, res) => {
+    console.log("Check job completition request received");
+    try {
+        checkJobCompletition(req, res)
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Internal server error" })
+    }
+})
+
 // yFinance historical data
 router.post('/initialSaveHistoricalDataYFinance', verify, async (req, res) => {
     console.log("Initial save for historical data (YFinance)");
@@ -70,6 +88,21 @@ router.post('/updateHistoricalDataYFinance', verify, async (req, res) => {
     console.log("Update historical data (YFinance) request received");
     try {
         updateHistoricalDataYFinance(req, res)
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Internal server error" })
+    }
+})
+
+//data prep and processing
+router.post('/fetchTokenData', verify, async (req, res) => {
+    console.log("Fetch token data request received");
+    const { dataSource, tokenName, period } = req.body
+    try {
+        let result = await fetchTokenData(dataSource, tokenName, period )
+        // console.log(result)
+        let resLength = result.length
+        res.status(200).json({ message: "Token data fetched successfully", result , resLength})
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Internal server error" })

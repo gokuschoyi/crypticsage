@@ -20,7 +20,7 @@ const getHistoricalDataYFinance = async (params) => {
     console.log("----------------------------------------------")
     for (let i = 0; i < result.length; i++) {
         result[i] = {
-            date: new Date(result[i].date).getTime(),
+            openTime: new Date(result[i].date).getTime(),
             open: result[i].open,
             high: result[i].high,
             low: result[i].low,
@@ -120,55 +120,6 @@ const insertYFinanceData = async (props) => {
 
 
 // Binance API //
-/* {
-    "ticker_name": "ETHUSDT",
-    "from": "01-01-2016", // MM-DD-YYYY
-    "to": "12-30-2016", // MM-DD-YYYY
-    "period": "" // 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d, 3d, 1w */
-
-const getHistoricalDataBinance = async (params) => {
-    const { ticker_name, from, to, period } = params
-
-    var startDate = new Date(from).getTime();
-    var endDate = new Date(to).getTime();
-    console.log("startDate", startDate, "endDate", endDate);
-
-    var divisions = divideTimePeriod(startDate, endDate, period, limit = 1000)
-
-    let data = []
-    for (let i = 0; i < divisions.length; i++) {
-        console.log("Fetching batch ", i + 1, "of ", divisions.length, " batches")
-        let start = divisions[i].start
-        let end = divisions[i].end
-        let url = `https://api.binance.com/api/v3/klines?symbol=${ticker_name}&interval=${period}&startTime=${start}&endTime=${end}&limit=1000`
-        let response = await axios.get(url)
-        data = [...data, ...response.data]
-    }
-
-    for (let i = 0; i < data.length; i++) {
-        if (i % 100 === 0) {
-            console.log("Processing data ", i + 1, "of ", data.length, " data")
-        }
-        data[i] = {
-            openTime: data[i][0],
-            open: data[i][1],
-            high: data[i][2],
-            low: data[i][3],
-            close: data[i][4],
-            volume: data[i][5],
-            closeTime: data[i][6],
-            quoteAssetVolume: data[i][7],
-            trades: data[i][8],
-            takerBaseAssetVolume: data[i][9],
-            takerQuoteAssetVolume: data[i][10],
-        }
-    }
-    if (data.length > 0) {
-        return data
-    } else {
-        res.status(200).json({ message: `No data found for token - ${ticker_name} Binance` })
-    }
-}
 
 const periodToMilliseconds = (period) => {
     switch (period) {
@@ -209,7 +160,6 @@ const divideTimePeriod = (startTime, endTime, period, limit) => {
     const duration = endTime - startTime; // in milliseconds
     const periodInMilliseconds = periodToMilliseconds(period);
     const numberOfDivisions = Math.ceil(duration / (limit * periodInMilliseconds));
-    console.log("Total no of calls to the API", numberOfDivisions)
     const divisions = [];
 
     for (let i = 0; i < numberOfDivisions; i++) {
@@ -228,6 +178,105 @@ const formatBinaceDate = (dateString) => {
     return formattedDate;
 }
 
+/* {
+    "ticker_name": "ETHUSDT",
+    "from": "01-01-2016", // MM-DD-YYYY
+    "to": "12-30-2016", // MM-DD-YYYY
+    "period": "" // 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d, 3d, 1w */
+
+const getHistoricalDataBinance = async (params) => {
+    const { ticker_name, from, to, period } = params
+
+    var startDate = new Date(from).getTime();
+    var endDate = new Date(to).getTime();
+
+    var divisions = divideTimePeriod(startDate, endDate, period, limit = 1000)
+    console.log("Total no of calls to the API", divisions)
+
+    let data = []
+    for (let i = 0; i < divisions.length; i++) {
+        console.log("Fetching batch ", i + 1, "of ", divisions.length, " batches")
+        let start = divisions[i].start
+        let end = divisions[i].end
+        let url = `https://api.binance.com/api/v3/klines?symbol=${ticker_name}&interval=${period}&startTime=${start}&endTime=${end}&limit=1000`
+        let response = await axios.get(url)
+        data = [...data, ...response.data]
+    }
+
+    for (let i = 0; i < data.length; i++) {
+        if (i % 100 === 0) {
+            console.log("Processing data ", i + 1, "of ", data.length, " data")
+        }
+        data[i] = {
+            openTime: data[i][0],
+            open: data[i][1],
+            high: data[i][2],
+            low: data[i][3],
+            close: data[i][4],
+            volume: data[i][5],
+            closeTime: data[i][6],
+            quoteAssetVolume: data[i][7],
+            trades: data[i][8],
+            takerBaseAssetVolume: data[i][9],
+            takerQuoteAssetVolume: data[i][10],
+        }
+    }
+    if (data.length > 0) {
+        return data
+    } else {
+        res.status(200).json({ message: `No data found for token - ${ticker_name} Binance` })
+    }
+}
+
+const insertBinanceData = async (props) => {
+    const { ticker_name, period, tokenData } = props
+    const db = await connect("insertBinanceData");
+    const binanceCollection = db.collection("binance");
+
+    // Check if the ticker already exists in the database
+    const existingTicker = await binanceCollection.findOne({ ticker_name });
+    if (existingTicker) {
+        let isDataForPeriodAvailable = existingTicker.data[period] ? true : false;
+        if (isDataForPeriodAvailable) {
+            let latestTickerDataInDb = existingTicker.data[period][0].openTime;
+            let latestTickerDataFromBinance = tokenData.filter((data) => data.openTime > latestTickerDataInDb);
+            
+            // check if the latestTickerDataFromBinance is not empty and then update the document
+            if (latestTickerDataFromBinance.length !== 0) {
+                console.log("new document count" , latestTickerDataFromBinance.length)
+                // Update the existing document with the new token data for the respective period filtered by latestTickerDataInDb
+                const updateResult = await binanceCollection.updateOne(
+                    { ticker_name },
+                    {
+                        $push: { [`data.${period}`]: { $each: latestTickerDataFromBinance, $position: 0 } },
+                        $set: { lastUpdated: new Date().toLocaleString() }
+                    }
+                );
+                return updateResult;
+            } else {
+                return { message: `No new data found for token - ${ticker_name} ${period}, Binance` }
+            }
+        } else {
+            const updateResult = await binanceCollection.updateOne(
+                { ticker_name },
+                { $set: { [`data.${period}`]: tokenData, lastUpdated: new Date().toLocaleString() } }
+            );
+            return updateResult;
+        }
+    } else {
+        // Insert a new document (ticker object) for the ticker with the token data
+        const tickerData = {
+            ticker_name,
+            lastUpdated: new Date().toLocaleString(),
+            data: {
+                [period]: tokenData
+            }
+        };
+        const insertResult = await binanceCollection.insertOne(tickerData);
+        return insertResult;
+    }
+}
+
 module.exports = {
     getHistoricalDataYFinance,
     formatLocaleDate,
@@ -235,6 +284,8 @@ module.exports = {
     formatLocaleToYFinanceDate,
     convertToISODateTime,
     insertYFinanceData,
-    getHistoricalDataBinance,
     formatBinaceDate,
+    periodToMilliseconds,
+    getHistoricalDataBinance,
+    insertBinanceData
 }

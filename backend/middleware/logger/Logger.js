@@ -7,4 +7,4 @@ morgan.token('local-time', (req, res) => {
     return new Date().toLocaleString('au');
 });
 
-module.exports = morgan(':remote-addr - :remote-user [:local-time] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', { stream: accessLogStream });
+module.exports = morgan(':remote-addr - :remote-user [:local-time] :total-time :method ":url HTTP/:http-version" :status :res[content-length] :referrer :user-agent', { stream: accessLogStream });
