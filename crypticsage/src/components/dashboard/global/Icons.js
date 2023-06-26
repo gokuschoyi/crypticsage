@@ -55,6 +55,8 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
+import CandlestickChartIcon from '@mui/icons-material/CandlestickChart';
+
 export { 
     LightModeOutlinedIcon, 
     DarkModeOutlinedIcon, 
@@ -102,5 +104,6 @@ export {
     Visibility,
     VisibilityOff,
     RemoveIcon,
-    ArrowForwardIcon
+    ArrowForwardIcon,
+    CandlestickChartIcon
 }

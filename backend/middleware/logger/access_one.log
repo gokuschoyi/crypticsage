@@ -2317,3 +2317,55 @@
 ::1 - - [23/06/2023, 2:29:04 pm] 24.372 POST "/indicators/get-atr HTTP/1.1" 200 27053 "-" "PostmanRuntime/7.32.2"
 ::1 - - [23/06/2023, 2:30:14 pm] 22.508 POST "/indicators/get-atr HTTP/1.1" 200 27053 - "PostmanRuntime/7.32.2"
 ::1 - - [23/06/2023, 2:30:28 pm] 28.063 POST "/indicators/get-atr HTTP/1.1" 200 27053 - PostmanRuntime/7.32.2
+::1 - - [23/06/2023, 2:56:17 pm] 177.185 POST "/indicators/get-atr HTTP/1.1" 200 27053 - PostmanRuntime/7.32.2
+::1 - - [23/06/2023, 3:37:27 pm] 545.565 POST "/indicators/get-atr HTTP/1.1" 200 27053 - PostmanRuntime/7.32.2
+::1 - - [24/06/2023, 12:00:08 pm] 166.364 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.2
+::1 - - [24/06/2023, 12:00:24 pm] 949.757 POST "/indicators/get-atr HTTP/1.1" 200 27053 - PostmanRuntime/7.32.2
+::1 - - [24/06/2023, 12:07:03 pm] 17.502 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 12:08:47 pm] 4.612 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 12:08:57 pm] 17.117 POST "/indicators/get-atr HTTP/1.1" 200 27053 - PostmanRuntime/7.32.2
+::1 - - [24/06/2023, 12:09:21 pm] 12.200 POST "/indicators/get-atr HTTP/1.1" 200 27053 - PostmanRuntime/7.32.3
+::1 - - [24/06/2023, 12:11:06 pm] 1.652 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 12:15:14 pm] 17.501 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 12:15:47 pm] 2.222 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 12:22:41 pm] 19.537 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 12:23:15 pm] 18.866 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 12:54:51 pm] 1310.407 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 12:54:51 pm] 6.078 POST "/crypto/wordOfTheDay HTTP/1.1" 200 272 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 12:54:52 pm] 1427.925 POST "/crypto/getCryptoData HTTP/1.1" 200 6156 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 12:54:54 pm] 1425.732 POST "/crypto/getHistoricalData HTTP/1.1" 200 88016 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 12:59:28 pm] 14.669 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 1:00:26 pm] 13.616 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 1:01:59 pm] 2.344 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [24/06/2023, 3:35:59 pm] 273.886 POST "/indicators/get-atr HTTP/1.1" 200 27053 - PostmanRuntime/7.32.3
+::1 - - [24/06/2023, 10:03:39 pm] 269.704 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [24/06/2023, 10:03:51 pm] 230.419 POST "/indicators/get-atr HTTP/1.1" 200 27053 - PostmanRuntime/7.32.3
+::1 - - [24/06/2023, 10:34:27 pm] 400.821 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [25/06/2023, 9:38:13 am] 395.039 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [25/06/2023, 10:14:08 am] 220.035 POST "/indicators/get-atr HTTP/1.1" 200 27053 - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 10:14:14 am] 193.661 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 10:48:57 am] 483.866 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [25/06/2023, 10:48:57 am] 6.089 POST "/crypto/wordOfTheDay HTTP/1.1" 200 305 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [25/06/2023, 10:48:58 am] 1079.566 POST "/crypto/getCryptoData HTTP/1.1" 200 6285 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [25/06/2023, 10:49:00 am] 1347.633 POST "/crypto/getHistoricalData HTTP/1.1" 200 88016 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [25/06/2023, 11:16:32 am] 172.995 POST "/content/get_sections HTTP/1.1" 200 2634 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [25/06/2023, 11:24:33 am] 4.582 POST "/user/getQuiz HTTP/1.1" 500 33 - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 11:26:49 am] 237.387 POST "/ HTTP/1.1" 200 7068 - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 11:33:06 am] 17.790 POST "/test HTTP/1.1" 200 31 - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 11:33:45 am] 14.205 POST "/test HTTP/1.1" 200 31 - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 11:52:14 am] 19.094 POST "/test HTTP/1.1" 200 44 - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 11:54:09 am] 16.446 POST "/test HTTP/1.1" 200 357 - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 11:54:23 am] 5.888 POST "/test HTTP/1.1" 500 2844 - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 11:54:52 am] 17.893 POST "/test HTTP/1.1" 200 357 - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 11:55:00 am] 3.373 POST "/test HTTP/1.1" 200 357 - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 11:59:30 am] 441.641 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [25/06/2023, 11:59:46 am] - POST "/indicators/get-atr HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [25/06/2023, 6:00:32 pm] 398.862 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [25/06/2023, 6:22:51 pm] 374.020 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [25/06/2023, 6:23:42 pm] 117.729 POST "/content/get_lessons HTTP/1.1" 200 24669 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [26/06/2023, 9:48:01 am] 407.903 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [26/06/2023, 9:48:51 am] 232.093 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [26/06/2023, 9:48:51 am] 7.561 POST "/crypto/wordOfTheDay HTTP/1.1" 200 322 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [26/06/2023, 9:48:52 am] 1214.567 POST "/crypto/getCryptoData HTTP/1.1" 200 6196 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [26/06/2023, 9:48:54 am] 1696.025 POST "/crypto/getHistoricalData HTTP/1.1" 200 88015 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [26/06/2023, 9:54:51 am] 477.293 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36

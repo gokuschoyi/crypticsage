@@ -15,7 +15,8 @@ import {
     ScheduleIcon,
     ExitToAppOutlinedIcon,
     SettingsOutlinedIcon,
-    AdminPanelSettingsIcon
+    AdminPanelSettingsIcon,
+    CandlestickChartIcon
 } from "./Icons";
 import { setSidebarState } from "./SideBarSlice";
 
@@ -162,6 +163,20 @@ const SidebarC = () => {
                             className="menu-item"
                         >
                             <Typography>Journal</Typography>
+                        </MenuItem>
+
+                        <MenuItem
+                            active={sidebarTab === "indicators"}
+                            style={{
+                                backgroundColor: sidebarTab === "indicators" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: sidebarTab === "indicators" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
+                            }}
+                            onClick={() => handleOnClick("indicators")}
+                            icon={<CandlestickChartIcon />}
+                            component={<Link to="indicators" />}
+                            className="menu-item"
+                        >
+                            <Typography>Indicators</Typography>
                         </MenuItem>
 
                         <MenuItem

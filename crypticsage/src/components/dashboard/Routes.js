@@ -6,6 +6,7 @@ import StatsSkeleton from "./dashboard_tabs/stats/StatsSkeleton";
 const Stats = lazy(() => import("./dashboard_tabs/stats/Stats"));
 const Sections = lazy(() => import("./dashboard_tabs/sections/Sections"));
 const Journal = lazy(() => import("./dashboard_tabs/journal/Journal"));
+const Indicators = lazy(() => import("./dashboard_tabs/indicators/Indicators"));
 const Quiz = lazy(() => import("./dashboard_tabs/quiz/Quiz"));
 const Glossary = lazy(() => import("./dashboard_tabs/glossary/Glossary"));
 const Schedule = lazy(() => import("./dashboard_tabs/schedule/Schedule"));
@@ -45,6 +46,11 @@ const TabRoutes = [
     <Route key='journal' path="journal" element={
         <Suspense fallback={<div>Loading Journal...</div>}>
             <Journal title="Journal" subtitle="Explore your journal" />
+        </Suspense>
+    } />,
+    <Route key='indicators' path="indicators" element={
+        <Suspense fallback={<div>Loading Indicators...</div>}>
+            <Indicators />
         </Suspense>
     } />,
     <Route key='quiz' path="quiz/:quizId?" element={

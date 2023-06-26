@@ -29,3 +29,4 @@ crypticsage/ yarn-error.log*
 /backend/.env
 /backend/crypticsage_key.json
 /backend/middleware/logger/access.log
+.vscode/tasks.json

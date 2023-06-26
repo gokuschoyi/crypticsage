@@ -9,8 +9,8 @@ const {
     HOST_URL,
     MONGO_URI,
     TOKEN_SECRET_KEY,
-    GOOGLE_OAUTH_CLIENT_ID
-
+    GOOGLE_OAUTH_CLIENT_ID,
+    SOCKET_PORT,
 } = process.env;
 
 assert(PORT, 'PORT is required');
@@ -18,6 +18,7 @@ assert(HOST, 'HOST is required');
 
 module.exports = {
     port: PORT,
+    wsPort : SOCKET_PORT,
     host: HOST,
     url: HOST_URL,
     mongoUri: MONGO_URI,

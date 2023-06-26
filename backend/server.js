@@ -1,5 +1,6 @@
 const express = require('express');
 var cors = require('cors')
+const { wsServer } = require('./websocket')
 const bodyParser = require('body-parser');
 const logger = require('./middleware/logger/Logger');
 const config = require('./config');
@@ -11,17 +12,18 @@ const fetchCryptoData = require('./routes/crypto-stocks/cryptoStocksRoute');
 const fetchIndicators = require('./routes/indicators/indicatorsRoute');
 const user = require('./routes/user/userRoute');
 
+const http = require('http');
 const app = express();
 
- // const schedule = require('node-schedule');
- // const job = schedule.scheduleJob('*/10 * * * * *', function () {
- //     console.log('The answer to life, the universe, and everything!');
- // });
+// const schedule = require('node-schedule');
+// const job = schedule.scheduleJob('*/10 * * * * *', function () {
+//     console.log('The answer to life, the universe, and everything!');
+// });
 
 const { makeAllStatusForUser } = require('./utils/helpers');
 
 const log = (req, res, next) => {
-    console.log('_________________________REQUEST RECEIVED____________________________');
+    console.log('_________________________REQUEST RECEIVEDD____________________________');
     next();
 }
 
@@ -49,5 +51,18 @@ app.use('/content', contentManager);
 app.use('/user', user);
 
 app.listen(config.port, () => {
-    console.log(`Server listening on port ${config.port}`);
+    console.log(`Express server listening on port ${config.port}`);
+});
+
+// Attach the WebSocket server to a separate HTTP server
+const wsHttpServer = http.createServer(wsServer);
+wsHttpServer.listen(config.wsPort, () => {
+    console.log(`WebSocket server is running on port ${config.wsPort}`);
+});
+
+// Upgrade HTTP requests to WebSocket
+wsHttpServer.on('upgrade', (request, socket, head) => {
+    wsServer.handleUpgrade(request, socket, head, (ws) => {
+        wsServer.emit('connection', ws, request);
+    });
 });

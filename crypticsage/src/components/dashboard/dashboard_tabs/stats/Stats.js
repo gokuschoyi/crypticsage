@@ -480,10 +480,30 @@ const Stats = (props) => {
         setChecked(event.target.checked);
     };
 
+    const wsRef = useRef(false)
+    const user_uid = useSelector(state => state.auth.uid)
+
+    useEffect(() => {
+        if (!wsRef.current) {
+            wsRef.current = true
+            console.log(user_uid)
+            const ws = new WebSocket('ws://localhost:8081')
+            ws.onmessage = (event) => {
+                console.log(event)
+                document.getElementById('w-socket').innerHTML +=
+                    'Message from server: ' + event.data + "<br>";
+            };
+            setTimeout(() => {
+                ws.send(`${user_uid}`);
+            }, 1000)
+        }
+    })
+
     return (
         <Box className='stat-container' onClick={hide}>
             <Box height='100%' width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
+                <Box id="w-socket"></Box>
             </Box>
             <Box className='stat-cards-container'>
                 <div className="item-bg"></div>
