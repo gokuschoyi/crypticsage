@@ -31,3 +31,23 @@ export const getWordOfTheDay = async (data) => {
     const response = await axios.post(`${baseUrl}/crypto/wordOfTheDay`, { withCredentials: true }, config)
     return response;
 }
+
+export const getLatestCryptoData = async (data) => {
+    let token = data.token;
+    let tokenName = data.tokenName;
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/crypto/get-latest-crypto-data`, { token, tokenName }, config)
+    return response;
+}
+
+export const getLatestStocksData = async (data) => {
+    let token = data.token;
+    let tokenName = data.tokenName;
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/crypto/get-latest-stocks-data`, { token, tokenName }, config)
+    return response;
+}

@@ -11,6 +11,8 @@ import adminSidebarSlice from './components/admin/global/AdminSidebarSiice.js';
 import statsSlice from './components/dashboard/dashboard_tabs/stats/StatsSlice.js';
 import quizSlice from './components/dashboard/dashboard_tabs/quiz/QuizSlice.js';
 
+import IndicatorsSlice from './components/dashboard/dashboard_tabs/indicators/IndicatorsSlice.js';
+
 const reducer = combineReducers({
     settings: settingsSlice,
     sidebar: sideBarSlice,
@@ -19,6 +21,7 @@ const reducer = combineReducers({
     adminSidebar: adminSidebarSlice,
     stats: statsSlice,
     quiz: quizSlice,
+    indicators: IndicatorsSlice,
 })
 
 const persistConfig = {

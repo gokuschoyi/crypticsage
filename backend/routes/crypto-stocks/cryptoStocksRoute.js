@@ -5,6 +5,8 @@ const verify = require('../auth/verifyToken')
 const {
     getCryptoData,
     getHistoricalData,
+    getLatestCryptoData,
+    getLatestStocksData,
     wordOfTheDay,
 } = require('../../utils/crypto/fetchCryptoData')
 
@@ -36,6 +38,26 @@ router.post('/getHistoricalData', verify, async (req, res) => {
     console.log("Get historical data request received");
     try {
         getHistoricalData(req, res)
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Internal server error" })
+    }
+})
+
+router.post('/get-latest-crypto-data', verify, async (req, res) => {
+    console.log("Get latest token data request received");
+    try {
+        getLatestCryptoData(req, res)
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Internal server error" })
+    }
+})
+
+router.post('/get-latest-stocks-data', verify, async (req, res) => {
+    console.log("Get latest token data request received");
+    try {
+        getLatestStocksData(req, res)
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Internal server error" })
@@ -99,10 +121,10 @@ router.post('/fetchTokenData', verify, async (req, res) => {
     console.log("Fetch token data request received");
     const { dataSource, tokenName, period } = req.body
     try {
-        let result = await fetchTokenData(dataSource, tokenName, period )
+        let result = await fetchTokenData(dataSource, tokenName, period)
         // console.log(result)
         let resLength = result.length
-        res.status(200).json({ message: "Token data fetched successfully", result , resLength})
+        res.status(200).json({ message: "Token data fetched successfully", result, resLength })
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Internal server error" })

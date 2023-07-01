@@ -33,6 +33,53 @@ const getHistoricalDataYFinance = async (params) => {
 }
 
 
+const getYfinanceQuotes = async (symbols) => {
+    console.log("Fetching quotes for ", symbols)
+    try {
+        let result = await yahooFinance.quote({
+            symbols: symbols,
+            modules: ['price', 'summaryDetail', 'earnings', 'defaultKeyStatistics', 'financialData']
+        }, function (err) {
+            console.log(err);
+        });
+        let data = []
+        for (item in symbols) {
+            let symbol = symbols[item]
+            let tokenData = {
+                "symbol": symbol,
+                "open": result[symbol].summaryDetail?.open || "N/A",
+                "high": result[symbol].summaryDetail?.dayHigh || "N/A",
+                "low": result[symbol].summaryDetail?.dayLow || "N/A",
+                "divident_rate": result[symbol].summaryDetail?.dividendRate || "N/A",
+                "divident_yield": result[symbol].summaryDetail?.dividendYield || "N/A",
+                "five_year_avg_dividend_yield": result[symbol].summaryDetail?.fiveYearAvgDividendYield || "N/A",
+                "market_cap": result[symbol].summaryDetail?.marketCap || "N/A",
+                "fiftyTwoWeekLow": result[symbol].summaryDetail?.fiftyTwoWeekLow || "N/A",
+                "fiftyTwoWeekHigh": result[symbol].summaryDetail?.fiftyTwoWeekHigh || "N/A",
+                "enterpriseValue": result[symbol].defaultKeyStatistics?.enterpriseValue || "N/A",
+                "pegRatio": result[symbol].defaultKeyStatistics?.pegRatio || "N/A",
+                "currentQuarterEstimate": result[symbol].earnings?.earningsChart.currentQuarterEstimate || "N/A",
+                "financial_chart": result[symbol].earnings?.financialsChart.yearly || "N/A",
+                "short_name": result[symbol].price.shortName || "N/A",
+                "total_cash": result[symbol].financialData?.totalCash || "N/A",
+                "ebitda": result[symbol].financialData?.ebitda || "N/A",
+                "total_debt": result[symbol].financialData?.totalDebt || "N/A",
+                "total_revenue": result[symbol].financialData?.totalRevenue || "N/A",
+                "debt_to_equity": result[symbol].financialData?.debtToEquity || "N/A",
+                "gross_profit": result[symbol].financialData?.grossProfits || "N/A",
+                "free_cashflow": result[symbol].financialData?.freeCashflow || "N/A",
+                "operating_cashflow": result[symbol].financialData?.operatingCashflow || "N/A",
+                "rev_growth": result[symbol].financialData?.revenueGrowth || "N/A",
+            }
+            console.log(result[symbol].financialData?.currentPrice)
+            data.push(tokenData)
+        }
+        return data
+    } catch (err) {
+        console.log("Error in getYfinanceQuotes", err)
+    }
+}
+
 // converts locale date to iso date time
 // 13/06/2023, 4:18:46 pm to 2023-06-13T16:18:46.000Z 
 const convertToISODateTime = (dateString) => {
@@ -240,10 +287,10 @@ const insertBinanceData = async (props) => {
         if (isDataForPeriodAvailable) {
             let latestTickerDataInDb = existingTicker.data[period][0].openTime;
             let latestTickerDataFromBinance = tokenData.filter((data) => data.openTime > latestTickerDataInDb);
-            
+
             // check if the latestTickerDataFromBinance is not empty and then update the document
             if (latestTickerDataFromBinance.length !== 0) {
-                console.log("new document count" , latestTickerDataFromBinance.length)
+                console.log("new document count", latestTickerDataFromBinance.length)
                 // Update the existing document with the new token data for the respective period filtered by latestTickerDataInDb
                 const updateResult = await binanceCollection.updateOne(
                     { ticker_name },
@@ -279,6 +326,7 @@ const insertBinanceData = async (props) => {
 
 module.exports = {
     getHistoricalDataYFinance,
+    getYfinanceQuotes,
     formatLocaleDate,
     formatYFinanceDate,
     formatLocaleToYFinanceDate,

@@ -19,7 +19,7 @@ const SlideCard = lazy(() => import("./dashboard_tabs/sections/section_modules/s
 const TabRoutes = [
     <Route key='stats' index element={
         <Suspense fallback={<StatsSkeleton />}>
-            <Stats title="Stats" subtitle="Explore your stats" />
+            <Stats title="Dashboard" subtitle="Explore your stats here" />
         </Suspense>
     } />,
     <Route key='sections' path="sections" element={

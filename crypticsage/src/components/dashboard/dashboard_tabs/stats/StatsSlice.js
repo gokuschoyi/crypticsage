@@ -7,10 +7,9 @@ const initialState = {
     selectedCoinData: [],
     selectedTokenUrl: '',
     timePeriod: {
-        thirtyM: { timePeriod: '30', timeFrame: 'minute', checked: false },
-        twoH: { timePeriod: '2', timeFrame: 'hour', checked: true },
-        fourH: { timePeriod: '4', timeFrame: 'hour', checked: false },
-        oneD: { timePeriod: '24', timeFrame: 'hour', checked: false },
+        minute: { timePeriod: '30', timeFrame: 'minute', checked: false },
+        hour: { timePeriod: '2', timeFrame: 'hour', checked: true },
+        day: { timePeriod: '24', timeFrame: 'day', checked: false },
     },
     wordOfTheDay: {},
     recent_lesson_quiz: {}
@@ -47,13 +46,13 @@ const statsSlice = createSlice({
             state.selectedCoinName = '';
             state.selectedTokenName = '';
             state.timePeriod = {
-                thirtyM: { timePeriod: '30', timeFrame: 'minute', checked: false },
-                twoH: { timePeriod: '2', timeFrame: 'hour', checked: true },
-                fourH: { timePeriod: '4', timeFrame: 'hour', checked: false },
-                oneD: { timePeriod: '24', timeFrame: 'hour', checked: false },
+                minute: { timePeriod: '30', timeFrame: 'minute', checked: false },
+                hour: { timePeriod: '2', timeFrame: 'hour', checked: true },
+                day: { timePeriod: '24', timeFrame: 'day', checked: false },
             };
             state.wordOfTheDay = {};
             state.recent_lesson_quiz = {};
+            state.selectedTokenUrl = '';
         }
     }
 })

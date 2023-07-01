@@ -1,0 +1,110 @@
+.chart-container {
+    display: flex;
+    justify-content: center;
+}
+
+.asset-type-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+}
+
+.MuiTabs-flexContainer {
+    gap: 20px;
+}
+
+.MuiTabs-indicator {
+    background-color: red;
+    margin: 9px 0px;
+}
+
+.tab {
+    height: 30px;
+    border: 1px solid white;
+    border-radius: 5px;
+    transition: all 0.2s ease-in-out;
+    min-height: auto;
+}
+
+.tab:hover {
+    transition: all 0.2s ease-in-out;
+    background-color: beige;
+    color: black;
+}
+
+.MuiButtonBase-root.MuiTab-root.Mui-selected {
+    background-color: rgb(219, 211, 208);
+    color: black;
+}
+
+.autocomplete-select-box {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.range-picker-box {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.date-picker>.MuiInputBase-root {
+    height: 37px;
+}
+
+.accordianbox>.MuiPaper-root {
+    background-color: var(--mui-palette-primary-new)
+}
+
+.crypto-details-tabel {
+    min-height: 50vh;
+    background-color: var(--mui-palette-primary-new)
+}
+
+.row-id {
+    cursor: pointer;
+}
+
+.MuiTableCell-root {
+    padding: 12px;
+    font-weight: 600;
+
+}
+
+.MuiTableCell-head {
+    font-size: 14px;
+    border-top: 1px solid var(--mui-palette-TableCell-border);
+}
+
+.MuiTableCell-head>span {
+    display: flex;
+    justify-content: space-between;
+}
+
+.MuiTableRow-root:nth-child(even) {
+    background-color: var(--mui-palette-primary-newBlack);
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.rotate-icon {
+    animation: rotate 2s linear infinite;
+}
+
+@media screen and (max-width: 600px) {
+    .last-updated-date-refresh {
+        display: flex;
+        justify-content: space-between;
+    }
+}
