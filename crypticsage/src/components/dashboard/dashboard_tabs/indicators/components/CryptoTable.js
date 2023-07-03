@@ -119,7 +119,7 @@ const CryptoTable = () => {
                                 <Table stickyHeader aria-label="sticky table" >
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell style={{ borderLeft: '1px solid white', minWidth: '180px' }}>
+                                            <TableCell style={{ borderLeft: '1px solid white', minWidth: '186px' }}>
                                                 <TableSortLabel
                                                     active={orderBy === 'market_cap_rank'}
                                                     direction={orderBy === 'market_cap_rank' ? order : 'asc'}
@@ -129,7 +129,7 @@ const CryptoTable = () => {
                                                 </TableSortLabel>
                                             </TableCell>
                                             <TableCell style={{ minWidth: '90px' }}>MKT CAP</TableCell>
-                                            <TableCell style={{ minWidth: '110px' }}>FD MKT CAP</TableCell>
+                                            <TableCell style={{ minWidth: '108px' }}>FD MKT CAP</TableCell>
                                             <TableCell>PRICE</TableCell>
                                             <TableCell style={{ minWidth: '148px' }}>H / L</TableCell>
                                             <TableCell>MEDIAN</TableCell>
@@ -177,9 +177,9 @@ const CryptoTable = () => {
                                             } = row;
                                             return (
                                                 <TableRow hover key={index} className={`row-id ${index}`}>
-                                                    <TableCell align='left'>
-                                                        <Box display='flex' flexDirection='row' gap='5px'>
-                                                            <Box display='flex' flexDirection='row' gap='5px' alignItems='center'>
+                                                    <TableCell align='left' className='crypto-name'>
+                                                        <Box display='flex' flexDirection='row' gap='5px' className='crypto-content'>
+                                                            <Box display='flex' flexDirection='row' gap='5px' alignItems='center' >
                                                                 <Typography fontSize='10px' fontWeight={600}>{market_cap_rank}</Typography>
                                                                 <img src={image_url} loading='lazy' alt={id} width='20px' height='20px' />
                                                                 {name}

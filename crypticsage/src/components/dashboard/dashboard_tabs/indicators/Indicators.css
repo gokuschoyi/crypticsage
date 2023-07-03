@@ -1,6 +1,11 @@
 .chart-container {
+    height: 60vh;
     display: flex;
     justify-content: center;
+}
+
+.chart-box{
+    height: 60vh;
 }
 
 .asset-type-tab {
@@ -64,14 +69,35 @@
     background-color: var(--mui-palette-primary-new)
 }
 
-.row-id {
+.crypto-name {
     cursor: pointer;
+}
+
+.crypto-name>.crypto-content {
+    transition: all 0.2s ease-in-out;
+}
+
+.crypto-name>.crypto-content:hover {
+    transition: all 0.2s ease-in-out;
+    transform: scale(1.06);
+}
+
+.stocks-name {
+    cursor: pointer;
+}
+
+.stocks-name>.stocks-content {
+    transition: all 0.2s ease-in-out;
+}
+
+.stocks-name>.stocks-content:hover {
+    transition: all 0.2s ease-in-out;
+    transform: scale(1.06);
 }
 
 .MuiTableCell-root {
     padding: 12px;
     font-weight: 600;
-
 }
 
 .MuiTableCell-head {

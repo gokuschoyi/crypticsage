@@ -62,7 +62,11 @@ function Row(props) {
                         {openMore ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
                     </IconButton>
                 </TableCell>
-                <TableCell >{symbol}</TableCell>
+                <TableCell className='stocks-name'>
+                    <Box className='stocks-content'>
+                        {symbol}
+                    </Box>
+                </TableCell>
                 <TableCell >
                     <Box>
                         <Box display='flex' gap='5px'>
@@ -313,7 +317,7 @@ const StocksTable = () => {
                                             </TableCell>
                                             <TableCell style={{ minWidth: '80px' }}>PEG</TableCell>
                                             <TableCell style={{ minWidth: '80px' }}>Q EST</TableCell>
-                                            <TableCell style={{ minWidth: '110px' }}>
+                                            <TableCell style={{ minWidth: '140px' }}>
                                                 <TableSortLabel
                                                     active={orderBy === 'rev_growth'}
                                                     direction={orderBy === 'rev_growth' ? order : 'asc'}

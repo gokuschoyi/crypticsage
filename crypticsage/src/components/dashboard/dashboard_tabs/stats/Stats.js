@@ -175,7 +175,7 @@ const Stats = (props) => {
         return Object.keys(obj).length === 0;
     }
 
-    const wsRef = useRef(false)
+    /* const wsRef = useRef(false)
     const user_uid = useSelector(state => state.auth.uid)
 
     useEffect(() => {
@@ -192,7 +192,7 @@ const Stats = (props) => {
                 ws.send(`${user_uid}`);
             }, 1000)
         }
-    })
+    }) */
 
     return (
         <Box className='stat-container' onClick={hide}>

@@ -12,9 +12,9 @@ const CoinChartBox = () => {
     const SCToken = useSelector(state => state.stats.selectedTokenName)
     const SCData = useSelector(state => state.stats.selectedCoinData)
     const timePeriod = useSelector(state => state.stats.timePeriod)
-    console.log("timePeriod", timePeriod.minute.checked)
-    console.log("timePeriod", timePeriod.hour.checked)
-    console.log("timePeriod", timePeriod.day.checked)
+    // console.log("timePeriod", timePeriod.minute.checked)
+    // console.log("timePeriod", timePeriod.hour.checked)
+    // console.log("timePeriod", timePeriod.day.checked)
     const CDAutoComplete = useSelector(state => state.stats.cryptoDataAutoComplete)
 
     const [chartData, setChartData] = useState([])
