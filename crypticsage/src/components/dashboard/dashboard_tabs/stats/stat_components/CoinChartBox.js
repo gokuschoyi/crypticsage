@@ -22,27 +22,6 @@ const CoinChartBox = () => {
     const [inputValue, setInputValue] = useState('');
     const [selectedTokenName, setSelectedTokenName] = useState('');
 
-    //set height ofchart container and skeleton
-    useEffect(() => {
-        handleResize()
-    }, [])
-
-    //resize event for chart container and skeleton
-    const handleResize = () => {
-        let coinChartGridBox = document.getElementsByClassName('coin-chart-grid-box')[0];
-        let tokenSelector = document.getElementsByClassName('token-selector-box')[0];
-        let height = (coinChartGridBox.clientHeight - tokenSelector.clientHeight) - 40;
-        let coinChartBox = document.getElementsByClassName('coin-chart-box')[0];
-        coinChartBox.style.setProperty('--height', `${height}px`)
-        // console.log("set height of coin chart box resize", height)
-    }
-    useEffect(() => {
-        window.addEventListener('resize', handleResize);
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        }
-    })
-
     // comparing values in redus store for initial fetech of chart data
     //setting initial values for MUI autocomplete and value and options states
     useEffect(() => {
@@ -163,7 +142,7 @@ const CoinChartBox = () => {
     };
 
     return (
-        <Box className='token-chart-container'>
+        <Box className='token-chart-container' display='flex' flexDirection='column' height='100%'>
             <Box className='token-selector-box'>
                 <Box className='token-selector'>
                     <Typography sx={{ fontSize: 26, fontWeight: '600', textAlign: 'left', color: `${theme.palette.secondary.main}`, marginBottom: '0px' }} gutterBottom>Coin</Typography>
@@ -238,7 +217,7 @@ const CoinChartBox = () => {
                 </Box>
             </Box>
             {chartData.length === 0 ?
-                <Box className='coin-chart-box' alignItems='center' justifyContent='center' display='flex'>
+                <Box className='coin-chart-box' height="100%" alignItems='center' justifyContent='center' display='flex'>
                     <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
                 </Box>
                 :

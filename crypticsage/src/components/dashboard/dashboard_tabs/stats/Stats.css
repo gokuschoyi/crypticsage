@@ -18,6 +18,26 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.tool-tip-test {
+  width: 100px;
+  background-color: #ffffff;
+  color: #c93333;
+  position: absolute;
+  /* display: none; */
+  padding: 8px;
+  box-sizing: border-box;
+  font-size: 12px;
+  text-align: left;
+  z-index: 1000;
+  top: 12px;
+  left: 12px;
+  pointer-events: none;
+  border: 1px solid;
+  border-radius: 2px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 .card-holder {
   color: var(--mui-palette-secondary-main) !important;
   border: 2px solid;
@@ -181,16 +201,6 @@
   flex-direction: column;
 }
 
-.coin-chart-box {
-  display: flex;
-  justify-content: center;
-  height: var(--height);
-}
-
-.coin-chart-grid-box {
-  height: var(--heightmain);
-}
-
 .token-selector-box {
   display: flex;
   flex-direction: column;
@@ -225,26 +235,9 @@
   cursor: pointer;
 }
 
-@media screen and (min-width: 1535px) {
-  .coin-chart-box {
-    height: 450px;
-  }
-}
-
-@media screen and (max-width: 1200px) {
-  .coin-chart-box {
-    height: 450px;
-  }
-}
-
 @media screen and (max-width: 600px) {
   .token-selector {
     display: flex;
     flex-direction: column !important;
-  }
-
-  .coin-chart-box {
-    display: flex;
-    justify-content: center;
   }
 }

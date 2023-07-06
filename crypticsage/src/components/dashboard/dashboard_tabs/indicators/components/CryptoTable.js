@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../global/Icons';
 import { getLatestCryptoData } from '../../../../../api/crypto'
@@ -19,8 +20,9 @@ import {
 } from '@mui/material'
 const CryptoTable = () => {
     const theme = useTheme()
-    const tableHeight = 500;
+    const tableHeight = 700;
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     //<------ table logic ------>//
     const token = useSelector(state => state.auth.accessToken);
@@ -83,6 +85,14 @@ const CryptoTable = () => {
             })
     }
 
+    const handleTokenPageLoad = (dataId) => {
+        if (dataId !== null) {
+            navigate(`/dashboard/indicators/crypto/${dataId}`)
+        } else {
+            console.log("no token name present")
+        }
+    }
+
     return (
         <Box className='crypto-container'>
             <Box className='crypto-details-tabel' mr={4} ml={4}>
@@ -95,31 +105,51 @@ const CryptoTable = () => {
                     :
                     (
                         <React.Fragment>
-                            <Box className='last-updated-date-refresh' pl={1} pr={1} height='60px' display='flex' alignItems='center' gap='10px'>
-                                <Box>
-                                    <Box display='flex' flexDirection='row' gap='5px'>
-                                        <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>Last Updated : </Typography>
-                                        <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>{getLastUpdatedTimeString(cryptoData[0].last_updated)}</Typography>
+                            <Box display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' pl={1} pr={1}>
+                                <Box className='last-updated-date-refresh' height='60px' display='flex' alignItems='center' gap='10px'>
+                                    <Box>
+                                        <Box display='flex' flexDirection='row' gap='5px'>
+                                            <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>Last Updated : </Typography>
+                                            <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>{getLastUpdatedTimeString(cryptoData[0].last_updated)}</Typography>
+                                        </Box>
+                                        <Box display='flex' justifyContent='flex-start'>
+                                            <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>{getDateTime(cryptoData[0].last_updated)}</Typography>
+                                        </Box>
                                     </Box>
-                                    <Box display='flex' justifyContent='flex-start'>
-                                        <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>{getDateTime(cryptoData[0].last_updated)}</Typography>
+                                    <Box>
+                                        <IconButton
+                                            aria-label="refresh crypto data"
+                                            size="small"
+                                            onClick={refreshCryptoData}
+                                        >
+                                            <AutorenewIcon id='refresh-icon' sx={{ width: '20px', height: '20px' }} />
+                                        </IconButton>
                                     </Box>
                                 </Box>
-                                <Box>
-                                    <IconButton
-                                        aria-label="refresh crypto data"
-                                        size="small"
-                                        onClick={refreshCryptoData}
-                                    >
-                                        <AutorenewIcon id='refresh-icon' sx={{ width: '20px', height: '20px' }} />
-                                    </IconButton>
+                                <Box className='status-legend' display='flex' flexDirection='column' >
+                                    <Box display='flex' flexDirection='row' gap={'10px'} alignItems='center'>
+                                        <Box height='8px' width='8px'
+                                            style={{
+                                                borderRadius: '8px',
+                                                backgroundColor: 'green'
+                                            }} />
+                                        <Typography fontSize='12px' fontWeight={500}>Data Available</Typography>
+                                    </Box>
+                                    <Box display='flex' flexDirection='row' gap={'10px'} alignItems='center'>
+                                        <Box height='8px' width='8px'
+                                            style={{
+                                                borderRadius: '8px',
+                                                backgroundColor: 'red'
+                                            }} />
+                                        <Typography fontSize='12px' fontWeight={500}>Data Un-Available</Typography>
+                                    </Box>
                                 </Box>
                             </Box>
                             <TableContainer sx={{ maxHeight: tableHeight }}>
                                 <Table stickyHeader aria-label="sticky table" >
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell style={{ borderLeft: '1px solid white', minWidth: '186px' }}>
+                                            <TableCell style={{ borderLeft: '1px solid white', minWidth: '195px' }}>
                                                 <TableSortLabel
                                                     active={orderBy === 'market_cap_rank'}
                                                     direction={orderBy === 'market_cap_rank' ? order : 'asc'}
@@ -129,7 +159,7 @@ const CryptoTable = () => {
                                                 </TableSortLabel>
                                             </TableCell>
                                             <TableCell style={{ minWidth: '90px' }}>MKT CAP</TableCell>
-                                            <TableCell style={{ minWidth: '108px' }}>FD MKT CAP</TableCell>
+                                            <TableCell style={{ minWidth: '100px' }}>FD CAP</TableCell>
                                             <TableCell>PRICE</TableCell>
                                             <TableCell style={{ minWidth: '148px' }}>H / L</TableCell>
                                             <TableCell>MEDIAN</TableCell>
@@ -173,19 +203,41 @@ const CryptoTable = () => {
                                                 change_percentage_24_hrs,
                                                 change_24_hrs,
                                                 change_percentage_day,
-                                                change_day
+                                                change_day,
+                                                matchedSymbol
                                             } = row;
                                             return (
                                                 <TableRow hover key={index} className={`row-id ${index}`}>
                                                     <TableCell align='left' className='crypto-name'>
-                                                        <Box display='flex' flexDirection='row' gap='5px' className='crypto-content'>
-                                                            <Box display='flex' flexDirection='row' gap='5px' alignItems='center' >
-                                                                <Typography fontSize='10px' fontWeight={600}>{market_cap_rank}</Typography>
-                                                                <img src={image_url} loading='lazy' alt={id} width='20px' height='20px' />
-                                                                {name}
+                                                        <Box
+                                                            display='flex'
+                                                            flexDirection='row'
+                                                            alignItems='center'
+                                                            justifyContent='space-between'
+                                                            gap='5px'
+                                                            className={matchedSymbol !== null ? 'crypto-content' : ''}
+                                                            data-id={matchedSymbol !== null ? matchedSymbol : null}
+                                                            onClick={(e) => {
+                                                                const dataId = e.currentTarget.getAttribute('data-id')
+                                                                handleTokenPageLoad(dataId)
+                                                            }}
+                                                        >
+                                                            <Box display='flex' flexDirection='row' gap='5px'>
+                                                                <Box display='flex' flexDirection='row' gap='5px' alignItems='center' >
+                                                                    <Typography fontSize='10px' fontWeight={600}>{market_cap_rank}</Typography>
+                                                                    <img src={image_url} loading='lazy' alt={id} width='15px' height='15px' />
+                                                                    {name}
+                                                                </Box>
+                                                                <Box display='flex' alignItems='center'>
+                                                                    <Typography fontSize='10px' fontWeight={600}>({symbol})</Typography>
+                                                                </Box>
                                                             </Box>
-                                                            <Box display='flex' alignItems='center'>
-                                                                <Typography fontSize='10px' fontWeight={600}>({symbol})</Typography>
+                                                            <Box height='8px' width='8px'
+                                                                style={{
+                                                                    borderRadius: '8px',
+                                                                    backgroundColor: matchedSymbol === null ? 'red' : 'green'
+                                                                }}
+                                                            >
                                                             </Box>
                                                         </Box>
                                                     </TableCell>
@@ -233,7 +285,7 @@ const CryptoTable = () => {
                     )
                 }
             </Box>
-        </Box>
+        </Box >
 
 
 

@@ -16,6 +16,10 @@ const SectionCard = lazy(() => import("./dashboard_tabs/sections/section_modules
 const LessonCard = lazy(() => import("./dashboard_tabs/sections/section_modules/lesson_card/LessonCard"));
 const SlideCard = lazy(() => import("./dashboard_tabs/sections/section_modules/slide_card/SlideCard"));
 
+const CryptoStocksTableModule = lazy(() => import("./dashboard_tabs/indicators/modules/CryptoStocksTableModule"))
+const CryptoModule = lazy(() => import("./dashboard_tabs/indicators/modules/CryptoModule"))
+const StocksModule = lazy(() => import("./dashboard_tabs/indicators/modules/StocksModule"))
+
 const TabRoutes = [
     <Route key='stats' index element={
         <Suspense fallback={<StatsSkeleton />}>
@@ -52,7 +56,24 @@ const TabRoutes = [
         <Suspense fallback={<div>Loading Indicators...</div>}>
             <Indicators />
         </Suspense>
-    } />,
+    } >
+        <Route key='crypto-stocks-table' path="/dashboard/indicators" element={
+            <Suspense fallback={<div>Loading Tables</div>}>
+                <CryptoStocksTableModule />
+            </Suspense>
+        } />,
+        <Route key='crypto-module' path="crypto/:cryptotoken?" element={
+            <Suspense fallback={<div>Loading Crypto Data</div>}>
+                <CryptoModule />
+            </Suspense>
+        } />
+        ,
+        <Route key='stocks-module' path="stocks/:stockstoken?" element={
+            <Suspense fallback={<div>Loading Crypto Data</div>}>
+                <StocksModule />
+            </Suspense>
+        } />
+    </Route>,
     <Route key='quiz' path="quiz/:quizId?" element={
         <Suspense fallback={<div>Loading Quiz...</div>}>
             <Quiz title="Quiz" subtitle="Explore your quiz" />

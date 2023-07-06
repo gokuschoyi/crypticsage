@@ -1,18 +1,32 @@
-.chart-container {
-    height: 60vh;
-    display: flex;
-    justify-content: center;
-}
-
-.chart-box{
-    height: 60vh;
+.tool-tip-indicators {
+    width: 96px;
+    background-color: #fff;
+    color: #000;
+    position: absolute;
+    display: none;
+    padding: 8px;
+    box-sizing: border-box;
+    font-size: 12px;
+    text-align: left;
+    z-index: 1000;
+    top: 12px;
+    left: 12px;
+    pointer-events: none;
+    border-radius: 2px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .asset-type-tab {
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
 
+.chart-container {
+    display: flex;
+    justify-content: center;
+    height: 60vh;
 }
 
 .MuiTabs-flexContainer {

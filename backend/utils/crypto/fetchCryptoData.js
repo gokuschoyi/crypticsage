@@ -69,6 +69,24 @@ const getLatestCryptoData = async (req, res) => {
                 low_24h: token.RAW.USD.LOW24HOUR,
             }
         })
+
+        const testTokenUrl = "https://api.binance.com/api/v3/exchangeInfo"
+        let binanceResult = await axios.get(testTokenUrl)
+        let ress = binanceResult.data.symbols
+        // console.log(binanceResult)
+
+        let finalResult = cryptoData.map((item) => {
+            const matchingSymbol = ress.find(
+                (secondItem) => secondItem.baseAsset === item.symbol
+            );
+            return {
+                ...item,
+                matchedSymbol: matchingSymbol ? matchingSymbol.symbol : null,
+            };
+        })
+
+        cryptoData = finalResult
+
         res.status(200).json({ message: "Get Latest Token Data request success", cryptoData });
     } catch (err) {
         console.log(err);
@@ -79,7 +97,7 @@ const getLatestCryptoData = async (req, res) => {
 const getLatestStocksData = async (req, res) => {
     try {
         // 'AAPL','GOOG','MSFT','IBM','AMZN','ORCL','INTC','QCOM','CSCO','SAP','TSM','BIDU','EMC','HPQ','TXN','ERIC','ASML','YHOO'
-        const yFSymbols = ['AAPL','GOOG','MSFT','IBM','AMZN']
+        const yFSymbols = ['AAPL', 'GOOG', 'MSFT', 'IBM', 'AMZN']
         let yFData = await getYfinanceQuotes(yFSymbols)
         res.status(200).json({ message: "Get Latest Stocks Data request success", yFData });
     } catch (err) {

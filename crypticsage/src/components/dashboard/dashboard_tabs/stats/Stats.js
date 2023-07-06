@@ -26,22 +26,12 @@ import Header from '../../global/Header';
 
 import {
     Box,
-    Typography,
-    Button,
-    useTheme,
     Grid,
-    Autocomplete,
-    TextField,
-    FormControlLabel,
-    Checkbox,
-    Skeleton,
-    Switch
 } from '@mui/material';
 import CoinChartBox from './stat_components/CoinChartBox';
 
 const Stats = (props) => {
     const { title, subtitle } = props
-    const theme = useTheme();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [setTest] = useOutletContext();

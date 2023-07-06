@@ -8,7 +8,22 @@ const DashboardChart = (props) => {
     const chartContainerRef = useRef();
 
     useEffect(() => {
-        // console.log(chartData.length)
+    console.log("from DC chart")
+
+        let chart;
+        let coinChartBox = document.getElementsByClassName('coin-chart-box')[0].getBoundingClientRect()
+        let offsetLeft = Math.round(coinChartBox.left);
+        let offsetTop = Math.round(coinChartBox.top)
+
+        const chartDom = document.getElementsByClassName('chart-holder-box')[0]
+        let cWidth = chartDom.clientWidth;
+        let cHeight = chartDom.clientHeight;
+
+        const tooltipPadding = 10;
+        const tooltip = document.getElementsByClassName('tool-tip')[0]
+        let toolTipXCoOrdinates = 0, toolTipYCoOrdinates = 0;
+
+        let scrollYAxis = window.scrollY
         let fData = chartData.map((chart) => {
             return {
                 time: chart.time,
@@ -19,17 +34,33 @@ const DashboardChart = (props) => {
             }
         })
 
+        // handles dynamic chart resizing and setting values for cHeight and cWidth for tooltip position calculations.
+        // Also gets the charts boundingClientRect to get the offsetLeft and offsetTop values for tooltip
         const handleResize = () => {
-            const chartBoxWidth = document.getElementsByClassName('chart-holder-box')[0].clientWidth;
-            const chartBoxHeight = document.getElementsByClassName('chart-holder-box')[0].clientHeight;
-            // console.log(chartBoxWidth, chartBoxHeight)
-            chart.applyOptions({ width: chartBoxWidth, height: chartBoxHeight });
+            cWidth = chartDom.clientWidth;
+            cHeight = chartDom.clientHeight;
+            chart.applyOptions({ width: cWidth, height: cHeight });
+
+            coinChartBox = document.getElementsByClassName('coin-chart-box')[0].getBoundingClientRect()
+            offsetLeft = Math.round(coinChartBox.left);
+            offsetTop = Math.round(coinChartBox.top)
+
+            scrollYAxis = window.scrollY
         };
 
-        let chart;
+        // gets the global mouse co-ordinates form the document- desktops
+        const calculateMousePosition = (event) => {
+            toolTipXCoOrdinates = event.pageX;
+            toolTipYCoOrdinates = event.pageY;
+        }
+
+        // gets the global mouse co-ordinates form the document- touch devices
+        const handleTouchMove = (event) => {
+            toolTipXCoOrdinates = event.touches[0].pageX;
+            toolTipYCoOrdinates = event.touches[0].pageY;
+        }
+
         if (fData.length > 0) {
-            const cWidth = document.getElementsByClassName('chart-holder-box')[0].clientWidth;
-            const cHeight = document.getElementsByClassName('chart-holder-box')[0].clientHeight;
             // console.log(cWidth, cHeight)
             chart = createChart(chartContainerRef.current, {
                 width: cWidth,
@@ -71,7 +102,12 @@ const DashboardChart = (props) => {
 
             candleStickSeries.setData(fData);
 
-            const tooltip = document.getElementsByClassName('tool-tip')[0]
+            const sma_series = chart.addLineSeries({ color: 'red', lineWidth: 1, title: 'price', pane:1 });
+            const sma_data = chartData
+                .filter((d) => d.open)
+                .map((d) => ({ time: d.time, value: d.open }));
+            sma_series.setData(sma_data);
+
             chart.subscribeCrosshairMove((param) => {
                 if (
                     param.point === undefined ||
@@ -83,6 +119,9 @@ const DashboardChart = (props) => {
                 ) {
                     tooltip.style.display = 'none';
                 } else {
+                    // console.log(param.point)
+                    // console.log({ toolTipXCoOrdinates, offsetLeft, toolTipYCoOrdinates, offsetTop, scrollYAxis })
+
                     const dateStr = new Date(param.time * 1000).toLocaleDateString('en-AU');
                     tooltip.style.display = 'block';
                     const data = param.seriesData.get(candleStickSeries);
@@ -92,28 +131,33 @@ const DashboardChart = (props) => {
                     <div style="font-size: 18px; margin: 4px 0px; color: ${'black'}">${Math.round(100 * price) / 100}</div>
                     <div style="color: ${'black'}">${dateStr}</div>
                     `;
-                    tooltip.style.display = 'block';
-                    let x = param.sourceEvent?.pageX + 10;
-                    let y = param.sourceEvent?.pageY + 10;
-                    if (param.point.x > cWidth - tooltip.clientWidth - 120) {
-                        x = param.sourceEvent?.pageX - tooltip.clientWidth - 10;
+
+                    let diffX = toolTipXCoOrdinates - offsetLeft
+                    if (diffX > cWidth - 150) {
+                        toolTipXCoOrdinates = toolTipXCoOrdinates - (100 + (tooltipPadding * 2))
                     }
-                    if (param.point.y > cHeight - tooltip.clientHeight - 50) {
-                        y = param.sourceEvent?.pageY - tooltip.clientHeight - 10;
+
+                    let diffY = toolTipYCoOrdinates - offsetTop - scrollYAxis
+                    if (diffY > cHeight - 150) {
+                        toolTipYCoOrdinates = toolTipYCoOrdinates - (100 + (tooltipPadding * 2))
                     }
-                    tooltip.style.left = `${x}px`;
-                    tooltip.style.top = `${y}px`;
-                    // console.log("display block", canvasCo, mouseCo)
+                    // console.log(diffX, diffY)
+                    tooltip.style.left = `${toolTipXCoOrdinates + tooltipPadding}px`;
+                    tooltip.style.top = `${toolTipYCoOrdinates + tooltipPadding}px`;
                 }
             })
 
             window.addEventListener('resize', handleResize);
+            chartDom.addEventListener('mousemove', (event) => calculateMousePosition(event))
+            chartDom.addEventListener('touchmove', (event) => handleTouchMove(event))
         }
         return () => {
             window.removeEventListener('resize', handleResize);
+            chartDom.removeEventListener('mousemove', calculateMousePosition)
+            chartDom.removeEventListener('touchmove', handleTouchMove)
             chart.remove();
         };
-    }, [chartData, selectedTokenName])
+    }, [chartData])
 
     return (
         <Box className='chart-holder-box' width="100%" height="100%">
