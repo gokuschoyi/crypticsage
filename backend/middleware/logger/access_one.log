@@ -3408,3 +3408,885 @@
 ::1 - - [06/07/2023, 11:36:01 am] 1393.898 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 10459 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
 ::1 - - [06/07/2023, 11:36:01 am] 1391.539 POST "/crypto/getHistoricalData HTTP/1.1" 200 122596 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
 ::1 - - [06/07/2023, 11:36:11 am] 1605.802 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 10465 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 11:40:21 am] 350.555 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 11:40:21 am] 5.438 POST "/crypto/wordOfTheDay HTTP/1.1" 200 179 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 11:40:23 am] 1174.070 POST "/crypto/getCryptoData HTTP/1.1" 200 6177 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 11:40:24 am] 1387.691 POST "/crypto/getHistoricalData HTTP/1.1" 200 122597 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 11:46:35 am] 1759.011 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 10515 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 11:53:04 am] 1405.437 POST "/crypto/get-latest-crypto-data HTTP/1.1" 400 49 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 11:55:38 am] 1405.766 POST "/crypto/get-latest-crypto-data HTTP/1.1" 400 49 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 11:56:21 am] 1548.027 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 3747 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 11:57:09 am] 3039.153 POST "/crypto/get-latest-crypto-data HTTP/1.1" 400 49 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 11:57:58 am] 3533.199 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 318225 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 11:59:06 am] 3010.063 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 165333 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 12:25:53 pm] 3257.734 POST "/crypto/get-latest-crypto-data HTTP/1.1" 400 49 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 12:27:32 pm] 3620.006 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 51383 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 12:29:50 pm] 3432.442 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48213 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 12:31:15 pm] 3639.711 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48121 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 12:32:59 pm] 1802.407 POST "/crypto/getHistoricalData HTTP/1.1" 200 122590 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 12:33:00 pm] 3087.083 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48310 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 12:37:53 pm] 1376.949 POST "/crypto/getHistoricalData HTTP/1.1" 200 122590 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 12:37:55 pm] 3490.925 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48401 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 12:50:19 pm] 1385.527 POST "/crypto/getHistoricalData HTTP/1.1" 200 122590 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 12:50:22 pm] 3946.395 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 12:50:49 pm] 3498.465 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48408 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:01:40 pm] 1805.049 POST "/crypto/getHistoricalData HTTP/1.1" 200 122583 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:01:42 pm] 3552.836 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48318 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:10:07 pm] 3839.397 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48325 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:26:19 pm] 1807.809 POST "/crypto/getHistoricalData HTTP/1.1" 200 122589 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:26:21 pm] 3359.633 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48312 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:28:03 pm] 4070.889 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48242 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:51:31 pm] 229.651 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3233 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:53:04 pm] 1730.183 POST "/crypto/getHistoricalData HTTP/1.1" 200 122589 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:53:06 pm] 3690.550 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48153 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:53:59 pm] 1441.165 POST "/crypto/getHistoricalData HTTP/1.1" 200 122589 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:54:00 pm] 2964.776 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48211 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:55:39 pm] 1674.777 POST "/crypto/getHistoricalData HTTP/1.1" 200 122589 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:55:41 pm] 3679.474 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48154 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:58:44 pm] 1366.298 POST "/crypto/getHistoricalData HTTP/1.1" 200 122589 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 1:58:46 pm] 3570.177 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48279 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:04:19 pm] 1799.353 POST "/crypto/getHistoricalData HTTP/1.1" 200 122588 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:04:20 pm] 3105.135 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48221 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:05:32 pm] 1663.953 POST "/crypto/getHistoricalData HTTP/1.1" 200 122586 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:05:34 pm] 3471.283 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48301 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:06:13 pm] 1598.233 POST "/crypto/getHistoricalData HTTP/1.1" 200 122588 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:06:14 pm] 3442.104 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48432 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:07:32 pm] 3358.185 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48251 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:08:38 pm] 3438.000 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48244 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:12:00 pm] 1327.767 POST "/crypto/getHistoricalData HTTP/1.1" 200 122589 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:12:03 pm] 3554.299 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48348 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:15:08 pm] 1686.684 POST "/crypto/getHistoricalData HTTP/1.1" 200 122590 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:15:10 pm] 3684.133 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48485 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:21:52 pm] 3139.795 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48326 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:37:05 pm] 3430.560 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48552 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:42:49 pm] 3562.239 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48339 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:43:47 pm] 1367.597 POST "/crypto/getHistoricalData HTTP/1.1" 200 122590 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:43:49 pm] 3828.585 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48505 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:50:32 pm] 1849.657 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 4174 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:50:40 pm] 1834.810 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 4174 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 2:50:46 pm] 2948.537 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48327 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 3:01:26 pm] 5775.591 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48278 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 4:07:59 pm] 214.720 POST "/auth/signup HTTP/1.1" 500 34 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 4:13:13 pm] 1150.327 POST "/auth/signup HTTP/1.1" 200 42 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 4:29:44 pm] 285.135 POST "/auth/signup HTTP/1.1" 400 33 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 4:30:26 pm] 103.214 POST "/auth/signup HTTP/1.1" 400 33 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 4:37:06 pm] 464.420 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 4:38:22 pm] 182.153 POST "/auth/login HTTP/1.1" 200 4831 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 4:38:22 pm] 4.670 POST "/crypto/wordOfTheDay HTTP/1.1" 200 268 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 4:38:24 pm] 1534.875 POST "/crypto/getCryptoData HTTP/1.1" 200 6231 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 4:38:25 pm] 1378.964 POST "/crypto/getHistoricalData HTTP/1.1" 200 122590 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 4:39:38 pm] 159.988 POST "/auth/login HTTP/1.1" 200 4831 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 4:39:38 pm] 4.506 POST "/crypto/wordOfTheDay HTTP/1.1" 200 327 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 4:39:39 pm] 1475.776 POST "/crypto/getCryptoData HTTP/1.1" 200 6239 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 4:39:41 pm] 1342.896 POST "/crypto/getHistoricalData HTTP/1.1" 200 122590 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 4:40:42 pm] 187.596 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 4:43:38 pm] 218.690 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 4:51:14 pm] 233.121 POST "/ HTTP/1.1" 200 7068 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 4:58:18 pm] 334.470 POST "/indicators/get-sma HTTP/1.1" 200 72224 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 5:01:07 pm] 3.317 POST "/auth/forgotPassword HTTP/1.1" 404 159 - PostmanRuntime/7.32.3
+::1 - - [06/07/2023, 7:36:39 pm] 13.276 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [06/07/2023, 7:36:53 pm] 1.984 GET "/ HTTP/1.1" 404 139 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:05:20 am] 311.872 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 11:05:29 am] 223.174 POST "/auth/login HTTP/1.1" 200 31 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 11:05:42 am] 136.211 POST "/auth/login HTTP/1.1" 200 51 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 11:05:52 am] 2.600 POST "/auth/login HTTP/1.1" 400 32 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 11:06:07 am] 1.244 POST "/auth/login HTTP/1.1" 400 40 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 11:06:17 am] 207.942 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 11:06:47 am] 357.789 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 11:07:34 am] 288.650 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 11:08:04 am] 201.802 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 11:08:40 am] 216.396 POST "/auth/login HTTP/1.1" 200 4808 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:08:41 am] 6.513 POST "/crypto/wordOfTheDay HTTP/1.1" 200 217 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:08:42 am] 1568.523 POST "/crypto/getCryptoData HTTP/1.1" 200 6258 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:08:44 am] 1379.407 POST "/crypto/getHistoricalData HTTP/1.1" 200 122599 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:09:02 am] 149.931 POST "/auth/login HTTP/1.1" 200 31 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:13:59 am] 227.985 POST "/auth/login HTTP/1.1" 200 4808 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:13:59 am] 6.630 POST "/crypto/wordOfTheDay HTTP/1.1" 200 276 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:14:00 am] 1324.877 POST "/crypto/getCryptoData HTTP/1.1" 200 6237 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:14:02 am] 1677.148 POST "/crypto/getHistoricalData HTTP/1.1" 200 122598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:14:58 am] 1.322 POST "/auth/login HTTP/1.1" 400 32 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:15:54 am] 25.403 POST "/auth/login HTTP/1.1" 400 32 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:16:07 am] 242.988 POST "/auth/login HTTP/1.1" 400 31 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:16:17 am] 134.359 POST "/auth/login HTTP/1.1" 400 51 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:17:06 am] 187.166 POST "/auth/login HTTP/1.1" 402 51 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:17:50 am] 270.232 POST "/auth/login HTTP/1.1" 402 31 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:26:19 am] 494.590 POST "/auth/login HTTP/1.1" 200 5598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:26:20 am] 10.266 POST "/crypto/wordOfTheDay HTTP/1.1" 200 305 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:26:21 am] 1103.237 POST "/crypto/getCryptoData HTTP/1.1" 200 6259 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:26:23 am] 1691.474 POST "/crypto/getHistoricalData HTTP/1.1" 200 122600 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:26:43 am] 161.106 POST "/auth/login HTTP/1.1" 200 4808 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:26:44 am] 4.900 POST "/crypto/wordOfTheDay HTTP/1.1" 200 278 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:26:45 am] 1364.195 POST "/crypto/getCryptoData HTTP/1.1" 200 6256 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:26:47 am] 1352.904 POST "/crypto/getHistoricalData HTTP/1.1" 200 122600 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 11:34:59 am] 270.471 POST "/auth/signup HTTP/1.1" 200 42 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 11:55:58 am] 378.848 POST "/auth/signup HTTP/1.1" 500 34 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 12:00:04 pm] 263.209 POST "/auth/signup HTTP/1.1" 500 34 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 12:00:59 pm] 299.783 POST "/auth/signup HTTP/1.1" 500 34 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 12:03:11 pm] 320.866 POST "/auth/signup HTTP/1.1" 200 42 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 12:04:51 pm] 718.205 POST "/auth/signup HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:05:28 pm] 229.157 POST "/auth/signup HTTP/1.1" 400 33 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:06:23 pm] 1097.922 POST "/auth/signup HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:07:54 pm] 2553.979 POST "/auth/signup HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:16:47 pm] 1452.713 POST "/auth/signup HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:19:31 pm] 241.736 POST "/auth/login HTTP/1.1" 200 4808 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:19:31 pm] 4.495 POST "/crypto/wordOfTheDay HTTP/1.1" 200 237 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:19:33 pm] 1419.466 POST "/crypto/getCryptoData HTTP/1.1" 200 6228 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:19:34 pm] 1769.862 POST "/crypto/getHistoricalData HTTP/1.1" 200 122598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:21:19 pm] 1220.730 POST "/auth/login HTTP/1.1" 200 4949 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:21:19 pm] 4.051 POST "/crypto/wordOfTheDay HTTP/1.1" 200 274 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:21:21 pm] 1453.151 POST "/crypto/getCryptoData HTTP/1.1" 200 6254 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:21:23 pm] 2082.015 POST "/crypto/getHistoricalData HTTP/1.1" 200 122598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:27:46 pm] 502.569 POST "/auth/login HTTP/1.1" 200 4949 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:27:46 pm] 7.401 POST "/crypto/wordOfTheDay HTTP/1.1" 200 207 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:27:47 pm] 1345.108 POST "/crypto/getCryptoData HTTP/1.1" 200 6267 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:27:49 pm] 1690.561 POST "/crypto/getHistoricalData HTTP/1.1" 200 122597 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:28:20 pm] 7.841 POST "/auth/login HTTP/1.1" 400 26 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:29:33 pm] 713.141 POST "/auth/login HTTP/1.1" 200 4923 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:29:33 pm] 5.507 POST "/crypto/wordOfTheDay HTTP/1.1" 200 288 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:29:34 pm] 1467.999 POST "/crypto/getCryptoData HTTP/1.1" 200 6261 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:30:06 pm] 91.033 POST "/auth/login HTTP/1.1" 200 4923 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:30:06 pm] 4.729 POST "/crypto/wordOfTheDay HTTP/1.1" 200 252 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:30:07 pm] 1066.525 POST "/crypto/getCryptoData HTTP/1.1" 200 6262 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:30:09 pm] 1345.945 POST "/crypto/getHistoricalData HTTP/1.1" 200 122597 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:31:06 pm] 295.573 POST "/auth/login HTTP/1.1" 200 4949 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:31:07 pm] 5.534 POST "/crypto/wordOfTheDay HTTP/1.1" 200 274 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:31:08 pm] 1099.458 POST "/crypto/getCryptoData HTTP/1.1" 200 6247 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:31:09 pm] 1536.983 POST "/crypto/getHistoricalData HTTP/1.1" 200 122598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:35:23 pm] 27.554 POST "/auth/login HTTP/1.1" 400 54 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:37:01 pm] 129.447 POST "/auth/login HTTP/1.1" 400 76 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:37:29 pm] 145.259 POST "/auth/login HTTP/1.1" 400 76 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:37:58 pm] 1392.629 POST "/auth/login HTTP/1.1" 400 76 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:40:06 pm] 37.329 POST "/auth/login HTTP/1.1" 400 54 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:40:59 pm] 545.012 POST "/auth/login HTTP/1.1" 200 4949 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:40:59 pm] 6.188 POST "/crypto/wordOfTheDay HTTP/1.1" 200 322 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:41:01 pm] 1619.759 POST "/crypto/getCryptoData HTTP/1.1" 200 6247 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:41:02 pm] 1545.321 POST "/crypto/getHistoricalData HTTP/1.1" 200 122598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:44:23 pm] 596.859 POST "/auth/login HTTP/1.1" 200 4949 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:44:23 pm] 5.963 POST "/crypto/wordOfTheDay HTTP/1.1" 200 274 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:44:24 pm] 1574.919 POST "/crypto/getCryptoData HTTP/1.1" 200 6253 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:44:26 pm] 1881.784 POST "/crypto/getHistoricalData HTTP/1.1" 200 122598 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 12:45:39 pm] 497.743 POST "/auth/login HTTP/1.1" 200 4949 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 12:45:45 pm] 132.269 POST "/auth/login HTTP/1.1" 400 54 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 12:46:04 pm] 1.071 POST "/auth/login HTTP/1.1" 400 40 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 12:46:19 pm] 1398.300 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 12:48:33 pm] 2010.879 POST "/auth/signup HTTP/1.1" 400 69 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 12:48:40 pm] 369.903 POST "/auth/signup HTTP/1.1" 400 54 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 12:56:50 pm] 807.343 POST "/ HTTP/1.1" 200 7068 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:01:21 pm] 30.391 POST "/user/upload_log_files HTTP/1.1" 200 221 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:04:59 pm] 28.110 POST "/user/upload_log_files HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:05:16 pm] 15.949 POST "/user/upload_log_files HTTP/1.1" 200 221 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:06:26 pm] 30.639 POST "/user/upload_log_files HTTP/1.1" 200 221 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:07:06 pm] 39.090 POST "/user/upload_log_files HTTP/1.1" 200 221 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:08:01 pm] 35.938 POST "/user/upload_log_files HTTP/1.1" 200 221 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:09:24 pm] 45.546 POST "/user/upload_log_files HTTP/1.1" 200 221 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:13:12 pm] 36.696 POST "/user/upload_log_files HTTP/1.1" 200 221 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:14:52 pm] 37.274 POST "/user/upload_log_files HTTP/1.1" 200 221 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:16:19 pm] 40.527 POST "/user/upload_log_files HTTP/1.1" 200 221 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:17:03 pm] 6.799 POST "/user/upload_log_files HTTP/1.1" 200 221 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:22:34 pm] 26.842 POST "/user/upload_log_files HTTP/1.1" 500 2522 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:23:13 pm] - POST "/user/upload_log_files HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:23:43 pm] 55.963 POST "/user/upload_log_files HTTP/1.1" 200 24877 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:25:28 pm] 55.693 POST "/user/upload_log_files HTTP/1.1" 200 24877 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:25:46 pm] 9.907 POST "/user/upload_log_files HTTP/1.1" 500 2509 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:25:55 pm] 28.990 POST "/user/upload_log_files HTTP/1.1" 200 24877 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:27:41 pm] 237.804 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:35:28 pm] 443.915 POST "/auth/login HTTP/1.1" 200 4949 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 1:35:28 pm] 8.047 POST "/crypto/wordOfTheDay HTTP/1.1" 200 278 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 1:35:29 pm] 1114.289 POST "/crypto/getCryptoData HTTP/1.1" 200 6258 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 1:35:31 pm] 1342.095 POST "/crypto/getHistoricalData HTTP/1.1" 200 122599 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 1:39:03 pm] 238.940 POST "/user/verify_password HTTP/1.1" 500 42 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:40:10 pm] 199.122 POST "/user/verify_password HTTP/1.1" 500 42 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:40:57 pm] 703.673 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:42:08 pm] 790.103 POST "/user/verify_password HTTP/1.1" 500 42 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:43:23 pm] 310.101 POST "/user/verify_password HTTP/1.1" 500 42 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:43:36 pm] 218.251 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:48:07 pm] 15.509 POST "//user/update_password HTTP/1.1" 404 161 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:48:21 pm] 878.685 POST "/user/update_password HTTP/1.1" 200 57 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:49:19 pm] 219.837 POST "/auth/login HTTP/1.1" 400 31 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:49:24 pm] 224.711 POST "/auth/login HTTP/1.1" 200 4808 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:50:12 pm] 6.646 POST "/user/verify_password HTTP/1.1" 400 28 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:50:40 pm] 2451.418 POST "/user/verify_password HTTP/1.1" 400 54 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:50:51 pm] 907.650 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:55:26 pm] 991.483 POST "/user/update_profileimage HTTP/1.1" 200 62 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 1:56:24 pm] 154.313 POST "/user/update_profileimage HTTP/1.1" 200 62 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 1:57:02 pm] 3.930 POST "/user/update_profileimage HTTP/1.1" 400 32 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:00:10 pm] 223.301 POST "/user/update_userdata HTTP/1.1" 200 58 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:00:31 pm] 3.683 POST "/user/update_userdata HTTP/1.1" 500 29 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:01:07 pm] 841.386 POST "/user/update_userdata HTTP/1.1" 200 58 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:04:06 pm] 128.123 POST "/user/update_preferences HTTP/1.1" 200 60 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:04:44 pm] 2.228 POST "//user/update_preferences HTTP/1.1" 404 164 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:04:49 pm] 108.139 POST "/user/update_preferences HTTP/1.1" 200 60 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:07:34 pm] 224.126 POST "/content/get_sections HTTP/1.1" 200 2634 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:07:36 pm] 158.454 POST "/content/get_lessons HTTP/1.1" 200 24669 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:08:08 pm] 1400.180 POST "/user/update_userLessonStatus HTTP/1.1" 200 4236 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:08:08 pm] 92.815 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 448 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:10:12 pm] 1147.664 POST "/user/update_userLessonStatus HTTP/1.1" 200 4256 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:10:12 pm] 69.862 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 442 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:17:31 pm] 931.908 POST "/auth/login HTTP/1.1" 400 31 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:17:34 pm] 238.817 POST "/auth/login HTTP/1.1" 200 38934 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:17:35 pm] 6.787 POST "/crypto/wordOfTheDay HTTP/1.1" 200 341 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:17:36 pm] 1263.009 POST "/crypto/getCryptoData HTTP/1.1" 200 6260 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:17:38 pm] 1730.091 POST "/crypto/getHistoricalData HTTP/1.1" 200 122599 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:22:00 pm] 742.716 POST "/user/getQuiz HTTP/1.1" 200 849 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:23:04 pm] 119.889 POST "/user/getQuiz HTTP/1.1" 200 849 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:24:49 pm] 803.412 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3165 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:24:54 pm] 105.395 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:25:01 pm] 750.716 POST "/user/submitQuiz HTTP/1.1" 200 118 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:25:01 pm] 107.178 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 417 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:25:01 pm] 159.808 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3199 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:31:13 pm] 677.463 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:32:10 pm] 3.430 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:32:22 pm] 197.408 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3199 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:34:35 pm] 916.917 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 417 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:36:55 pm] 44.893 POST "/user/upload_log_files HTTP/1.1" 200 32 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:38:30 pm] - POST "/user/upload_log_files HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:39:08 pm] 57.843 POST "/user/upload_log_files HTTP/1.1" 200 24877 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:40:58 pm] 57.745 POST "/user/upload_log_files HTTP/1.1" 200 24877 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 2:45:32 pm] 172.265 POST "/content/get_sections HTTP/1.1" 200 2634 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:45:36 pm] 162.702 POST "/content/get_lessons HTTP/1.1" 200 24669 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:45:49 pm] 226.441 POST "/user/update_userLessonStatus HTTP/1.1" 200 4236 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:45:49 pm] 77.579 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 732 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:46:15 pm] 301.604 POST "/auth/login HTTP/1.1" 200 39553 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:46:15 pm] 4.714 POST "/crypto/wordOfTheDay HTTP/1.1" 200 278 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:46:17 pm] 1190.437 POST "/crypto/getCryptoData HTTP/1.1" 200 6240 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:46:18 pm] 1693.415 POST "/crypto/getHistoricalData HTTP/1.1" 200 122597 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:46:32 pm] 185.117 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3199 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:46:33 pm] 151.557 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 2:46:39 pm] 157.096 POST "/content/get_sections HTTP/1.1" 200 2634 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 3:00:05 pm] 16.213 POST "/content/get_sections HTTP/1.1" 404 160 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 3:00:25 pm] 19.796 POST "/content/get_sections HTTP/1.1" 404 160 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 3:00:53 pm] 167.488 POST "/content/get_sections HTTP/1.1" 200 2634 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 3:01:03 pm] 78.179 POST "/content/get_sections HTTP/1.1" 200 2634 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:05:03 pm] 127.398 POST "/content/add_section HTTP/1.1" 500 37 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:05:45 pm] 196.149 POST "/content/add_section HTTP/1.1" 400 37 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:06:01 pm] 816.225 POST "/content/add_section HTTP/1.1" 200 113 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:06:10 pm] 184.489 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 3:06:35 pm] 3.117 POST "/content/add_section HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:06:56 pm] 20.690 POST "/content/add_section HTTP/1.1" 400 56 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:07:15 pm] 24.375 POST "/content/add_section HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:07:51 pm] 1769.497 POST "/content/add_section HTTP/1.1" 200 113 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:12:09 pm] 19.495 POST "/content/update_section HTTP/1.1" 404 162 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:12:23 pm] 20.267 POST "/content/update_section HTTP/1.1" 400 36 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:12:47 pm] 700.118 POST "/content/update_section HTTP/1.1" 200 56 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:16:01 pm] 16.139 POST "/content/delete_section HTTP/1.1" 404 162 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:16:23 pm] 19.535 POST "/content/delete_section HTTP/1.1" 400 36 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:16:31 pm] 355.274 POST "/content/delete_section HTTP/1.1" 200 42 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:16:41 pm] 265.221 POST "/content/add_section HTTP/1.1" 200 113 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:20:38 pm] 377.171 POST "/content/get_lessons HTTP/1.1" 200 24669 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:21:02 pm] 101.011 POST "/content/get_lessons HTTP/1.1" 200 24669 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 3:26:50 pm] 391.630 POST "/content/add_lesson HTTP/1.1" 200 89 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:32:19 pm] 32.437 POST "/content/add_lesson HTTP/1.1" 400 45 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:33:39 pm] 212.682 POST "/content/update_lesson HTTP/1.1" 200 41 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:34:54 pm] 96.143 POST "/content/update_lesson HTTP/1.1" 200 41 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:35:24 pm] 212.699 POST "/content/update_lesson HTTP/1.1" 200 41 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:38:29 pm] 19.618 POST "/content/delete_lesson HTTP/1.1" 400 35 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:38:33 pm] 232.851 POST "/content/delete_lesson HTTP/1.1" 200 89 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:38:56 pm] 1068.718 POST "/content/add_lesson HTTP/1.1" 200 89 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:41:21 pm] 250.990 POST "/user/getQuiz HTTP/1.1" 200 849 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:42:10 pm] 150.359 POST "/content/get_quizquestions HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:42:31 pm] 102.530 POST "/content/get_quizquestions HTTP/1.1" 200 580 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:47:30 pm] 777.280 POST "/content/add_quizquestion HTTP/1.1" 200 94 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:52:51 pm] 176.841 POST "/content/update_quizquestion HTTP/1.1" 200 48 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:56:08 pm] 357.276 POST "/content/delete_quizquestion HTTP/1.1" 200 523 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:57:17 pm] 1537.708 POST "/content/delete_quizquestion HTTP/1.1" 200 523 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 3:59:05 pm] 205.066 POST "/content/delete_quizquestion HTTP/1.1" 400 40 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 4:02:49 pm] 1920.178 POST "/content/add_quizquestion HTTP/1.1" 200 94 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 4:05:27 pm] 875.024 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:05:29 pm] 90.872 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:05:38 pm] 82.151 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:05:40 pm] 82.113 POST "/content/get_quizquestions HTTP/1.1" 200 703 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:05:58 pm] 116.108 POST "/content/get_lessons HTTP/1.1" 200 987 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:06:00 pm] 130.485 POST "/content/get_quizquestions HTTP/1.1" 200 580 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:06:57 pm] 258.714 POST "/auth/login HTTP/1.1" 200 40042 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:06:57 pm] 6.227 POST "/crypto/wordOfTheDay HTTP/1.1" 200 217 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:06:59 pm] 1594.291 POST "/crypto/getCryptoData HTTP/1.1" 200 6223 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:07:00 pm] 1340.755 POST "/crypto/getHistoricalData HTTP/1.1" 200 122597 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:07:01 pm] 132.950 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3470 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:12:16 pm] 148.573 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3470 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 4:26:00 pm] 1083.930 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:26:06 pm] 117.480 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:26:34 pm] 550.733 POST "/content/add_quizquestion HTTP/1.1" 200 94 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:27:09 pm] 101.399 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:27:11 pm] 167.883 POST "/content/get_quizquestions HTTP/1.1" 200 1205 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:27:22 pm] 162.982 POST "/content/update_quizquestion HTTP/1.1" 200 48 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:29:17 pm] 751.377 POST "/content/add_quizquestion HTTP/1.1" 200 94 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 4:30:01 pm] 220.528 POST "/auth/login HTTP/1.1" 200 40042 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:30:02 pm] 3.197 POST "/crypto/wordOfTheDay HTTP/1.1" 200 266 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:30:03 pm] 1088.637 POST "/crypto/getCryptoData HTTP/1.1" 200 6263 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:30:04 pm] 312.220 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3678 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:30:04 pm] 1674.670 POST "/crypto/getHistoricalData HTTP/1.1" 200 122600 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:30:44 pm] 195.378 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3678 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 4:31:56 pm] 77.775 POST "/content/delete_quizquestion HTTP/1.1" 400 40 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 4:32:34 pm] 774.826 POST "/content/delete_quizquestion HTTP/1.1" 200 523 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 4:35:38 pm] 81.860 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:35:44 pm] 1708.846 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:36:03 pm] 983.069 POST "/auth/login HTTP/1.1" 200 40042 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:36:03 pm] 4.692 POST "/crypto/wordOfTheDay HTTP/1.1" 200 272 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:36:04 pm] 1504.499 POST "/crypto/getCryptoData HTTP/1.1" 200 6241 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:36:06 pm] 131.409 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:36:06 pm] 1752.428 POST "/crypto/getHistoricalData HTTP/1.1" 200 122600 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:36:13 pm] 660.756 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:36:14 pm] 115.178 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:36:23 pm] 90.185 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:36:24 pm] 111.938 POST "/content/get_quizquestions HTTP/1.1" 200 583 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:36:38 pm] 126.546 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3539 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [07/07/2023, 4:44:52 pm] 198.555 POST "/ HTTP/1.1" 200 7675 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 4:46:51 pm] 14.002 POST "/user/getQuiz HTTP/1.1" 500 2977 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 4:47:19 pm] 159.906 POST "/user/getQuiz HTTP/1.1" 200 849 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 4:47:23 pm] 219.751 POST "/ HTTP/1.1" 200 7675 - PostmanRuntime/7.32.3
+::1 - - [07/07/2023, 5:01:31 pm] 78.309 POST "/user/wordOfTheDay HTTP/1.1" 200 318 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 10:17:28 am] 396.087 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 10:17:44 am] 8.699 POST "/user/wordOfTheDay HTTP/1.1" 200 207 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 10:54:16 am] 22.246 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 21 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:18:13 am] 116.431 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 36 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:21:32 am] 201.694 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 500 56 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:22:23 am] 123.366 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 36 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:24:47 am] 153.481 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 36 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:25:08 am] 217.329 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 36 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:26:06 am] 265.069 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 36 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:28:14 am] 193.373 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 36 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:40:52 am] 4001.309 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:41:44 am] 3802.032 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:42:14 am] 4038.314 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:43:34 am] 3743.734 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:48:45 am] 3759.980 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:50:10 am] 3560.344 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:51:00 am] 3752.440 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:51:31 am] 3822.473 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:51:51 am] 1589.182 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 400 56 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:52:37 am] 3910.770 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:55:10 am] 3968.459 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:59:11 am] 3481.763 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:59:23 am] 885.737 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 400 56 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 11:59:58 am] 3623.442 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:02:42 pm] 3942.450 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:04:11 pm] 1960.485 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 36 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:07:14 pm] 1776.033 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 71565 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:09:28 pm] 1877.508 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 71567 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:09:55 pm] 1990.910 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 71567 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:11:12 pm] 1751.072 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 71565 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:11:45 pm] 1763.053 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 71567 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:13:00 pm] 1811.149 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 71565 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:13:57 pm] 1942.255 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 71567 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:14:25 pm] 1694.391 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 71565 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:14:41 pm] 1804.255 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 71567 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:15:32 pm] 1968.499 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 71567 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:15:58 pm] 2156.883 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 65210 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:19:40 pm] 1804.117 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 65208 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:25:36 pm] 1854.367 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 65210 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:27:40 pm] 1749.458 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 65307 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:31:36 pm] 2589.544 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 65307 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:36:36 pm] 358.376 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 400 56 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:37:36 pm] 595.553 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 400 56 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:38:49 pm] 2377.239 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:40:22 pm] 2157.365 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:42:51 pm] 886.530 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 400 56 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 12:43:14 pm] 2231.973 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 1:21:36 pm] 148.074 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 336 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 1:25:24 pm] 2912.396 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 1:26:24 pm] 2323.155 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 1:39:39 pm] 380.637 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2106 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 1:41:42 pm] 142.984 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2100 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 1:42:05 pm] 199.061 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2106 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 1:45:21 pm] 212.747 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2130 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 1:48:20 pm] 2871.301 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 1:49:48 pm] 131.659 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2155 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 1:58:38 pm] 230.055 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2155 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:02:28 pm] 360.058 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 400 56 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:03:46 pm] 2637.134 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:06:22 pm] 3173.475 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:08:19 pm] 2638.935 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:10:10 pm] 1688.957 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:10:25 pm] 2324.521 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:10:51 pm] 1812.292 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:11:40 pm] 1937.953 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:12:00 pm] 101.847 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2164 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:18:24 pm] 191.488 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2164 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:19:59 pm] 219.061 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2164 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:20:35 pm] 197.893 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2164 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:21:30 pm] 2140.364 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:22:02 pm] 112.432 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2173 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:24:45 pm] 220.691 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2173 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:25:21 pm] 1003.827 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2173 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:25:43 pm] 184.083 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2173 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:34:32 pm] 154.155 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2173 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:34:47 pm] 234.211 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2173 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:35:29 pm] 1304.728 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2173 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:36:26 pm] 212.420 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2173 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:39:59 pm] 204.847 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2173 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:40:34 pm] 183.573 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2281 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:40:49 pm] 747.858 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2470 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:48:18 pm] 2384.564 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2470 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:50:57 pm] 210.047 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2470 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:53:09 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:54:10 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:55:02 pm] 129.854 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2822 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:56:16 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:59:12 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 2:59:56 pm] 746.924 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2470 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:04:19 pm] 108.848 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2470 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:07:32 pm] 386.724 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2485 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:07:53 pm] 327.674 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2485 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:08:23 pm] 350.385 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2485 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:11:00 pm] 413.996 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 2485 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:13:39 pm] 2388.849 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6776 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:14:18 pm] 1852.577 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6965 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:30:19 pm] 2481.413 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6965 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:31:19 pm] 2414.669 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6965 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:32:37 pm] 2338.349 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 10077 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:33:10 pm] 3012.217 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 10023 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:33:40 pm] 2863.303 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 9888 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:37:40 pm] 2855.483 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 9888 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:38:18 pm] 2220.161 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 9510 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:38:52 pm] 2831.913 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 9510 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:40:48 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:41:10 pm] 3295.075 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 9441 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:42:48 pm] 3404.217 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 9441 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:47:00 pm] 4035.107 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 9971 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:48:17 pm] 2213.014 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 8772 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:53:48 pm] 3717.651 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 8772 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:54:08 pm] 2424.909 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 8772 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:57:20 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 3:59:35 pm] 2327.982 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 7055 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:00:15 pm] 2460.199 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6965 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:01:15 pm] 2538.212 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6965 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:01:43 pm] 2606.283 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6965 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:13:28 pm] 1818.187 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 10356 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:25:38 pm] 1814.348 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6304 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:31:15 pm] 2246.177 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6304 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:31:56 pm] 2022.712 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6304 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:32:14 pm] 2048.805 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6304 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:37:15 pm] 2384.096 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 6439 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:38:23 pm] 1672.686 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 3080 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:40:51 pm] 1903.780 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 3080 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:42:03 pm] 2142.752 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 3080 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:46:29 pm] 2152.268 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:49:32 pm] 3523.070 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [10/07/2023, 4:50:22 pm] 1869.562 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 3865 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:27:08 pm] 291.689 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:27:54 pm] 1643.417 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 4270 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:41:30 pm] 2277.308 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:41:52 pm] 126.381 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 46 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:44:22 pm] 3155.157 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:44:36 pm] 1566.431 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 4270 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:48:57 pm] 2112.417 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:49:33 pm] 1982.972 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:54:40 pm] 2249.168 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 4270 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:57:09 pm] 3894.237 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:57:20 pm] 2378.521 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 4405 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 12:59:22 pm] 1894.414 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:02:30 pm] 1610.992 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:07:53 pm] 1887.615 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:17:26 pm] 1800.349 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:18:10 pm] 1970.934 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:19:41 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:20:27 pm] 2137.688 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:21:35 pm] 1956.711 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:25:03 pm] 2016.043 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:25:30 pm] 1883.514 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:25:50 pm] 1800.485 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:36:24 pm] 1897.763 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:37:09 pm] 1989.410 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:38:25 pm] 2473.220 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:38:58 pm] 1845.265 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:39:58 pm] 1873.817 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:41:58 pm] 2000.816 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:42:28 pm] 1917.324 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:43:10 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:44:05 pm] 1970.649 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:47:12 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:53:00 pm] 1862.681 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:53:48 pm] 1951.947 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:54:45 pm] 2076.062 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:55:06 pm] 1934.609 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:55:48 pm] 1868.683 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 1:58:25 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:00:23 pm] 2020.280 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:00:46 pm] 1836.399 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:01:26 pm] 1815.178 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:03:06 pm] 1830.753 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:04:04 pm] 1723.813 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:11:34 pm] 1753.665 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:13:23 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:14:25 pm] 2454.890 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:15:43 pm] 1828.731 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:23:15 pm] 1931.907 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:23:36 pm] 1912.596 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:26:17 pm] 1823.712 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:26:33 pm] 1913.591 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:31:00 pm] 1991.400 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:32:01 pm] 2379.278 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:34:09 pm] 1918.337 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:34:32 pm] 1932.941 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:37:30 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:38:16 pm] 1805.294 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:38:52 pm] 1967.476 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:39:01 pm] 2199.824 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:45:29 pm] 3431.361 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:46:24 pm] 2206.726 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:46:58 pm] 1814.676 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:47:29 pm] 2390.755 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:48:01 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:48:14 pm] 1962.422 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 2:48:36 pm] 2037.180 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 636 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 3:07:53 pm] 2985.254 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 3:08:02 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 3:08:39 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 3:09:27 pm] 2646.891 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 9006 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 3:10:29 pm] 87.377 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 46 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 3:14:17 pm] - POST "/historicalData/update_historical_yFinance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 3:16:20 pm] 172.928 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 933 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 3:17:58 pm] 2258.819 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 158 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 3:18:10 pm] 2297.448 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 9006 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 3:18:42 pm] 192.780 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 780 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 3:46:40 pm] 247.938 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 780 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:16:22 pm] 103.188 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:19:13 pm] 27.923 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:20:47 pm] 20.746 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:33:00 pm] 245.046 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:34:08 pm] 284.322 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:35:18 pm] - POST "/historicalData/save_binance_data HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:35:45 pm] 268.055 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:37:29 pm] 520.178 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:44:34 pm] 168.762 POST "/historicalData/init_binance HTTP/1.1" 200 33 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:44:47 pm] 327.074 POST "/historicalData/init_binance HTTP/1.1" 200 124 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:44:55 pm] 85.911 POST "/historicalData/init_binance HTTP/1.1" 200 79 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:47:05 pm] 75.715 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:52:16 pm] 29.340 POST "/historicalData/get_completition_status HTTP/1.1" 200 400 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:52:35 pm] 91.071 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:52:45 pm] 10.490 POST "/historicalData/get_completition_status HTTP/1.1" 200 400 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:53:23 pm] 111.548 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:56:00 pm] 97.422 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:56:43 pm] 108.850 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:57:31 pm] 155.251 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:58:27 pm] 110.724 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:58:47 pm] 108.368 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 4:59:33 pm] 102.082 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 5:00:09 pm] 155.808 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 5:00:50 pm] 120.258 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 5:03:26 pm] 19.728 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 5:03:37 pm] 10.992 POST "/historicalData/get_completition_status HTTP/1.1" 200 400 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 5:06:04 pm] 29.069 POST "/historicalData/get_completition_status HTTP/1.1" 200 400 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 5:06:10 pm] 91.394 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 5:06:42 pm] 8.923 POST "/historicalData/get_completition_status HTTP/1.1" 200 400 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 5:07:30 pm] 102.812 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 5:07:40 pm] 105.870 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 5:11:06 pm] 31.388 POST "/crypto/initialSaveHistoricalDataBinance HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 5:11:24 pm] 12.780 POST "/historicalData/get_completition_status HTTP/1.1" 200 400 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 6:52:20 pm] 111.561 POST "/historicalData/save_binance_data HTTP/1.1" 200 161 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 6:52:32 pm] 10.928 POST "/historicalData/get_completition_status HTTP/1.1" 200 402 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 6:53:01 pm] 7.159 POST "/historicalData/get_completition_status HTTP/1.1" 200 402 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:02:58 pm] - POST "/historicalData/test_insert HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:03:01 pm] 761.842 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:06:47 pm] 20.173 POST "/historicalData/test_insert HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:07:06 pm] - POST "/historicalData/test_insert HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:10:48 pm] 39.209 POST "/historicalData/test_insert HTTP/1.1" 200 26 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:29:53 pm] 207.506 POST "/historicalData/init_binance HTTP/1.1" 200 172 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:30:20 pm] 110.027 POST "/historicalData/init_binance HTTP/1.1" 200 320 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:31:34 pm] 219.433 POST "/historicalData/init_binance HTTP/1.1" 200 460 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:32:06 pm] 156.154 POST "/historicalData/init_binance HTTP/1.1" 200 320 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:32:28 pm] 194.021 POST "/historicalData/init_binance HTTP/1.1" 200 320 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:33:19 pm] 129.673 POST "/historicalData/init_binance HTTP/1.1" 200 320 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:39:37 pm] 220.232 POST "/historicalData/init_binance HTTP/1.1" 200 582 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:43:50 pm] 173.347 POST "/historicalData/init_binance HTTP/1.1" 200 172 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:44:02 pm] 47.892 POST "/historicalData/init_binance HTTP/1.1" 200 320 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:44:24 pm] 171.179 POST "/historicalData/init_binance HTTP/1.1" 200 460 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:54:11 pm] 171.026 POST "/historicalData/test_insert HTTP/1.1" 200 128 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:54:44 pm] 117.213 POST "/historicalData/test_insert HTTP/1.1" 200 128 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:56:45 pm] 31.430 POST "/historicalData/test_insert HTTP/1.1" 200 128 - PostmanRuntime/7.32.3
+::1 - - [11/07/2023, 7:56:51 pm] 16.598 POST "/historicalData/test_insert HTTP/1.1" 200 128 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:07:20 am] 289.479 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:07:40 am] 68.269 POST "/historicalData/init_binance HTTP/1.1" 200 172 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:08:12 am] 218.722 POST "/historicalData/init_binance HTTP/1.1" 200 460 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:15:06 am] 182.822 POST "/historicalData/test_insert HTTP/1.1" 200 227 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:15:50 am] 47.378 POST "/historicalData/test_insert HTTP/1.1" 200 40 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:15:58 am] 107.577 POST "/historicalData/test_insert HTTP/1.1" 200 227 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:18:14 am] 154.780 POST "/historicalData/test_insert HTTP/1.1" 200 229 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:19:02 am] 937.562 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:20:13 am] 764.337 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:20:38 am] 190.305 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:21:20 am] 172.451 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:24:05 am] 213.080 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:24:18 am] 220.368 POST "/historicalData/test_insert HTTP/1.1" 200 265 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:24:47 am] 219.992 POST "/historicalData/test_insert HTTP/1.1" 200 235 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:25:31 am] 1489.506 POST "/historicalData/test_insert HTTP/1.1" 200 235 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:25:50 am] 147.685 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:25:59 am] 32.554 POST "/historicalData/test_insert HTTP/1.1" 200 235 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:26:04 am] 117.282 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:33:49 am] 236.303 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:34:03 am] 183.438 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:34:09 am] 97.316 POST "/historicalData/test_insert HTTP/1.1" 200 48 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:35:37 am] 175.563 POST "/historicalData/test_insert HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:35:49 am] 116.848 POST "/historicalData/test_insert HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:36:18 am] 237.119 POST "/historicalData/test_insert HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:36:40 am] 203.504 POST "/historicalData/test_insert HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:37:04 am] 201.903 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:37:12 am] 15.437 POST "/historicalData/test_insert HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:37:31 am] 139.238 POST "/historicalData/test_insert HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:38:18 am] 211.169 POST "/historicalData/test_insert HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:38:48 am] 148.078 POST "/historicalData/test_insert HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:38:54 am] 52.450 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:38:59 am] 119.585 POST "/historicalData/test_insert HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:39:07 am] 222.884 POST "/historicalData/test_insert HTTP/1.1" 200 48 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:39:41 am] 127.469 POST "/historicalData/test_insert HTTP/1.1" 200 48 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:40:27 am] 83.334 POST "/historicalData/test_insert HTTP/1.1" 200 234 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:41:16 am] 114.267 POST "/historicalData/test_insert HTTP/1.1" 200 235 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:41:27 am] 77.971 POST "/historicalData/test_insert HTTP/1.1" 200 48 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:42:11 am] 88.121 POST "/historicalData/test_insert HTTP/1.1" 200 235 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:47:35 am] 126.218 POST "/historicalData/test_insert HTTP/1.1" 200 235 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:54:29 am] 224.323 POST "/historicalData/test_insert HTTP/1.1" 200 328 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 10:59:37 am] 187.555 POST "/historicalData/test_insert HTTP/1.1" 200 709 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:00:14 am] 198.128 POST "/historicalData/test_insert HTTP/1.1" 200 772 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:01:13 am] 35.144 POST "/historicalData/test_insert HTTP/1.1" 200 391 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:01:25 am] 40.086 POST "/historicalData/test_insert HTTP/1.1" 200 772 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:02:03 am] 1095.656 POST "/historicalData/test_insert HTTP/1.1" 200 63 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:04:38 am] 112.852 POST "/historicalData/save_binance_data HTTP/1.1" 200 356 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:04:53 am] 28.055 POST "/historicalData/get_completition_status HTTP/1.1" 200 1098 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:06:51 am] 109.238 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:07:06 am] 12.803 POST "/historicalData/get_completition_status HTTP/1.1" 200 687 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:08:42 am] 50.691 POST "/historicalData/init_binance HTTP/1.1" 200 172 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:08:59 am] 24.402 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:13:04 am] 200.296 POST "/historicalData/init_binance HTTP/1.1" 200 172 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:13:13 am] 83.378 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:16:58 am] 102.320 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:17:28 am] 114.247 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:19:01 am] 30.751 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:25:14 am] 176.590 POST "/historicalData/init_binance HTTP/1.1" 200 172 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:35:46 am] 140.212 POST "/historicalData/init_binance HTTP/1.1" 200 172 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:36:32 am] 78.185 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:41:42 am] 765.695 POST "/historicalData/init_binance HTTP/1.1" 200 172 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:41:49 am] 66.353 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:43:46 am] 102.621 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:44:41 am] 91.289 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:44:54 am] 13.692 POST "/historicalData/get_completition_status HTTP/1.1" 200 522 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:45:55 am] 254.275 POST "/historicalData/init_binance HTTP/1.1" 200 172 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:46:08 am] 84.501 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:46:40 am] 15.744 POST "/historicalData/get_completition_status HTTP/1.1" 200 522 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:50:42 am] 153.426 POST "/historicalData/init_binance HTTP/1.1" 200 172 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:50:46 am] 69.712 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:50:59 am] 12.160 POST "/historicalData/get_completition_status HTTP/1.1" 200 870 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:53:08 am] 13.310 POST "/historicalData/get_completition_status HTTP/1.1" 200 870 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:53:14 am] 16.562 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 11:53:27 am] 15.363 POST "/historicalData/get_completition_status HTTP/1.1" 200 666 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 12:37:58 pm] 21.143 POST "/historicalData/get_completition_status HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 12:38:28 pm] 76.017 POST "/historicalData/save_binance_data HTTP/1.1" 200 239 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 12:41:57 pm] 274.471 POST "/historicalData/test_insert HTTP/1.1" 200 26 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 12:42:37 pm] 295.814 POST "/historicalData/test_insert HTTP/1.1" 200 26 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 12:43:38 pm] 342.850 POST "/historicalData/test_insert HTTP/1.1" 200 128 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 12:48:12 pm] 394.613 POST "/historicalData/test_insert HTTP/1.1" 200 26 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 12:48:23 pm] 372.959 POST "/historicalData/test_insert HTTP/1.1" 200 26 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 12:48:43 pm] 299.323 POST "/historicalData/test_insert HTTP/1.1" 200 26 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 12:50:04 pm] 570.412 POST "/historicalData/test_insert HTTP/1.1" 200 26 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 12:50:11 pm] 779.452 POST "/historicalData/test_insert HTTP/1.1" 200 26 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:04:43 pm] 549.563 POST "/historicalData/test_insert HTTP/1.1" 200 128 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:06:04 pm] 212.685 POST "/historicalData/init_binance HTTP/1.1" 200 172 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:07:00 pm] 78.335 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:07:15 pm] 13.732 POST "/historicalData/get_completition_status HTTP/1.1" 200 870 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:08:22 pm] 242.580 POST "/historicalData/save_binance_data HTTP/1.1" 200 239 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:08:35 pm] 15.928 POST "/historicalData/get_completition_status HTTP/1.1" 200 875 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:11:57 pm] 134.145 POST "/historicalData/save_binance_data HTTP/1.1" 200 434 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:12:19 pm] 23.153 POST "/historicalData/get_completition_status HTTP/1.1" 200 1839 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:15:30 pm] 114.881 POST "/historicalData/save_binance_data HTTP/1.1" 200 512 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:15:53 pm] 26.079 POST "/historicalData/get_completition_status HTTP/1.1" 200 2033 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:18:45 pm] 107.008 POST "/historicalData/save_binance_data HTTP/1.1" 200 356 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:21:14 pm] 21.015 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:21:30 pm] 2480.054 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 609 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:22:17 pm] 26.963 POST "/historicalData/save_binance_data HTTP/1.1" 200 356 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:22:33 pm] 22.591 POST "/historicalData/get_completition_status HTTP/1.1" 200 1299 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:25:12 pm] 15.708 POST "/historicalData/get_completition_status HTTP/1.1" 400 60 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:25:16 pm] 23.514 POST "/historicalData/get_completition_status HTTP/1.1" 200 1299 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:29:33 pm] 121.031 POST "/historicalData/save_binance_data HTTP/1.1" 200 356 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:29:51 pm] 20.814 POST "/historicalData/get_completition_status HTTP/1.1" 200 1299 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:36:13 pm] 96.553 POST "/historicalData/save_binance_data HTTP/1.1" 200 356 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:39:03 pm] 103.029 POST "/historicalData/save_binance_data HTTP/1.1" 200 356 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:40:35 pm] 124.641 POST "/historicalData/save_binance_data HTTP/1.1" 200 668 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:40:50 pm] 39.366 POST "/historicalData/get_completition_status HTTP/1.1" 200 1989 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:42:23 pm] 102.325 POST "/historicalData/save_binance_data HTTP/1.1" 200 434 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:48:37 pm] 94.813 POST "/historicalData/save_binance_data HTTP/1.1" 200 512 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 1:53:45 pm] 37.114 POST "/historicalData/get_completition_status HTTP/1.1" 200 2131 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:07:16 pm] 24.321 POST "/historicalData/get_historical HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:10:16 pm] 22.518 POST "/historicalData/get_historical HTTP/1.1" 200 34 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:11:33 pm] 21.858 POST "/historicalData/get_historical HTTP/1.1" 200 34 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:11:46 pm] 8.439 POST "/historicalData/get_historical HTTP/1.1" 200 34 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:12:19 pm] 24.531 POST "/historicalData/get_historical HTTP/1.1" 200 34 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:13:06 pm] 23.502 POST "/historicalData/get_historical HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:14:13 pm] 25.331 POST "/historicalData/get_historical HTTP/1.1" 200 47 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:45:55 pm] 170.311 POST "/historicalData/save_binance_data HTTP/1.1" 200 356 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:46:47 pm] 120.270 POST "/historicalData/save_binance_data HTTP/1.1" 200 512 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:47:08 pm] 28.502 POST "/historicalData/get_completition_status HTTP/1.1" 200 2135 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:51:52 pm] 144.731 POST "/historicalData/save_binance_data HTTP/1.1" 200 1136 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 2:55:53 pm] 54.399 POST "/historicalData/get_completition_status HTTP/1.1" 200 5477 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 3:04:15 pm] 174.350 POST "/historicalData/save_binance_data HTTP/1.1" 200 1136 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 3:05:33 pm] 56.588 POST "/historicalData/get_completition_status HTTP/1.1" 200 5655 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 3:19:10 pm] 144.467 POST "/historicalData/save_binance_data HTTP/1.1" 200 1136 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 3:21:49 pm] 147.840 POST "/historicalData/save_binance_data HTTP/1.1" 200 1136 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 3:24:11 pm] 184.438 POST "/historicalData/save_binance_data HTTP/1.1" 200 1136 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 3:28:32 pm] 144.350 POST "/historicalData/save_binance_data HTTP/1.1" 200 1136 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 3:30:09 pm] 45.430 POST "/historicalData/get_completition_status HTTP/1.1" 200 4415 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 3:45:44 pm] 152.914 POST "/historicalData/save_binance_data HTTP/1.1" 200 1136 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 3:52:59 pm] 147.461 POST "/historicalData/save_binance_data HTTP/1.1" 200 1136 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 3:53:42 pm] 52.406 POST "/historicalData/get_completition_status HTTP/1.1" 200 4419 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 3:59:13 pm] 139.784 POST "/historicalData/save_binance_data HTTP/1.1" 200 902 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:00:02 pm] 134.914 POST "/historicalData/save_binance_data HTTP/1.1" 200 902 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:01:55 pm] 133.444 POST "/historicalData/save_binance_data HTTP/1.1" 200 902 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:03:31 pm] 129.994 POST "/historicalData/save_binance_data HTTP/1.1" 200 902 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:04:39 pm] 118.619 POST "/historicalData/save_binance_data HTTP/1.1" 200 590 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:05:45 pm] 106.319 POST "/historicalData/save_binance_data HTTP/1.1" 200 590 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:07:47 pm] 117.438 POST "/historicalData/save_binance_data HTTP/1.1" 200 590 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:08:11 pm] 94.511 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:10:47 pm] 97.480 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:11:43 pm] 125.997 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:12:40 pm] 96.294 POST "/historicalData/save_binance_data HTTP/1.1" 200 200 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:35:02 pm] 92.255 POST "/historicalData/save_binance_data HTTP/1.1" 200 278 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:35:31 pm] 23.312 POST "/historicalData/get_completition_status HTTP/1.1" 200 1087 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:40:09 pm] 101.045 POST "/historicalData/save_binance_data HTTP/1.1" 200 356 - PostmanRuntime/7.32.3
+::1 - - [12/07/2023, 4:57:34 pm] 137.504 POST "/historicalData/save_binance_data HTTP/1.1" 200 746 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 10:10:00 am] 332.653 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 10:10:16 am] 1157.602 POST "/crypto/getCryptoData HTTP/1.1" 200 6193 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 10:10:50 am] 1342.530 POST "/crypto/getHistoricalData HTTP/1.1" 200 122583 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 10:11:24 am] 2934.579 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 47949 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 10:11:51 am] 2242.351 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 10:45:56 am] 36.646 POST "/crypto/get-latest-stocks-data HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 10:46:26 am] 371.869 POST "/crypto/get-latest-stocks-data HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 10:47:36 am] 349.780 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 10:49:09 am] 299.018 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 10:53:34 am] 3688.314 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 609 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 10:54:19 am] 180.367 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:02:52 am] 2339.693 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 2476 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:03:11 am] 359.856 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:08:50 am] 62.891 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:13:29 am] 41.659 POST "/crypto/get-latest-stocks-data HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:14:03 am] 81.953 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:14:26 am] 70.627 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:15:03 am] 51.896 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:15:51 am] 56.481 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:18:34 am] 45.070 POST "/crypto/get-latest-stocks-data HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:23:20 am] 48.510 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:23:57 am] 2015.635 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 2476 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 11:28:32 am] 298.171 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 64 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:21:09 pm] 44.328 POST "/crypto/get-latest-stocks-data HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:21:32 pm] 38.366 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 217 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:24:19 pm] 44.746 POST "/crypto/get-latest-stocks-data HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:24:28 pm] 49.825 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 229 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:29:15 pm] 270.783 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 52 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:29:25 pm] 278.454 POST "/crypto/get-latest-stocks-data HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:29:34 pm] 265.335 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 9787 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:30:25 pm] 234.092 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 9744 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:36:35 pm] 257.337 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 79 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:41:38 pm] 272.954 POST "/crypto/get-latest-stocks-data HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:42:07 pm] 249.437 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 9846 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:42:26 pm] 177.756 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 9846 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:43:04 pm] 272.458 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 170 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:46:07 pm] 264.844 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 284 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 12:50:04 pm] 271.321 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 332 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:10:58 pm] 276.633 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 1292 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:12:53 pm] 258.644 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 1267 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:13:09 pm] 269.509 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 1268 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:13:30 pm] 338.025 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 1243 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:13:54 pm] 249.136 POST "/crypto/get-latest-stocks-data HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:15:50 pm] 462.017 POST "/crypto/get-latest-stocks-data HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:17:03 pm] 287.489 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 1239 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:18:36 pm] 261.550 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 1243 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:18:49 pm] 254.760 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 1235 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:19:01 pm] 267.075 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 1243 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:21:23 pm] 33.941 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 64 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:23:35 pm] 38.603 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 64 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:24:00 pm] 43.399 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 64 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:24:19 pm] 56.678 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 64 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:26:32 pm] 579.734 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 3751 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:35:52 pm] 613.519 POST "/auth/login HTTP/1.1" 200 39829 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:35:53 pm] 3.669 POST "/crypto/wordOfTheDay HTTP/1.1" 404 159 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:35:54 pm] 1123.373 POST "/crypto/getCryptoData HTTP/1.1" 200 6188 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:35:55 pm] 1324.865 POST "/crypto/getHistoricalData HTTP/1.1" 200 122576 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:37:35 pm] 119.485 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:37:36 pm] 4.108 POST "/user/wordOfTheDay HTTP/1.1" 200 307 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:37:45 pm] 1358.737 POST "/crypto/getHistoricalData HTTP/1.1" 200 122579 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:37:46 pm] 2993.139 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48331 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:38:00 pm] 468.617 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 3751 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:38:38 pm] 468.681 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 3751 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:38:46 pm] 2914.907 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48190 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:38:48 pm] 643.711 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 3751 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:39:25 pm] 357.062 POST "/auth/login HTTP/1.1" 200 39829 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:39:25 pm] 4.995 POST "/user/wordOfTheDay HTTP/1.1" 200 227 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:39:26 pm] 1077.078 POST "/crypto/getCryptoData HTTP/1.1" 200 6175 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:39:28 pm] 1317.640 POST "/crypto/getHistoricalData HTTP/1.1" 200 122580 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:40:18 pm] 600.998 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3505 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:40:23 pm] 94.825 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:40:30 pm] 71.295 POST "/user/submitQuiz HTTP/1.1" 200 118 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:40:30 pm] 742.945 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 726 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:40:30 pm] 778.715 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3539 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:40:38 pm] 1318.050 POST "/crypto/getHistoricalData HTTP/1.1" 200 122579 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:40:40 pm] 3030.006 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48352 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:40:42 pm] 74.392 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:40:45 pm] 174.429 POST "/content/get_lessons HTTP/1.1" 200 24669 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:40:58 pm] 167.464 POST "/user/update_userLessonStatus HTTP/1.1" 200 4765 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:40:58 pm] 80.881 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 726 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 1:42:27 pm] 647.378 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 3751 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:51:28 pm] 42.528 POST "/user/wordOfTheDay HTTP/1.1" 200 266 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:53:41 pm] 3070.214 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48222 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 1:59:21 pm] 1443.766 POST "/crypto/getHistoricalData HTTP/1.1" 200 122578 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:11:41 pm] 34.009 POST "/crypto/fetchTokenData HTTP/1.1" 404 161 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:11:55 pm] 2.470 POST "/indicator/fetchTokenData HTTP/1.1" 404 164 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:12:16 pm] - POST "/indicators/fetchTokenData HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:14:02 pm] - POST "/indicators/fetchTokenData HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:18:06 pm] - POST "/indicators/fetchTokenData HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:21:28 pm] 808.291 POST "/indicators/fetchTokenData HTTP/1.1" 200 8728 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:22:49 pm] 769.760 POST "/indicators/fetchTokenData HTTP/1.1" 200 12019 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:23:27 pm] 698.535 POST "/indicators/fetchTokenData HTTP/1.1" 200 103013 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:44:59 pm] 125.186 POST "/indicators/fetchTokenData HTTP/1.1" 400 29 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:45:57 pm] 158.922 POST "/indicators/fetchTokenData HTTP/1.1" 400 29 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:47:06 pm] 32.982 POST "/indicators/fetchTokenData HTTP/1.1" 400 32 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:47:12 pm] 210.791 POST "/indicators/fetchTokenData HTTP/1.1" 200 103013 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:47:46 pm] 6.053 POST "/indicators/get-sma HTTP/1.1" 404 158 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:50:56 pm] 161.743 POST "/indicators/get-sma HTTP/1.1" 200 8728 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:59:44 pm] 334.365 POST "/indicators/fetchTokenData HTTP/1.1" 200 102980 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 2:59:59 pm] 355.320 POST "/indicators/get-sma HTTP/1.1" 400 65 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:01:48 pm] 41.104 POST "/indicators/get-sma HTTP/1.1" 400 65 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:02:18 pm] 172.551 POST "/indicators/get-sma HTTP/1.1" 200 16139 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:02:40 pm] 11.673 POST "/indicators/get-sma HTTP/1.1" 200 16139 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:09:42 pm] 36.104 POST "/historicalData/save_binance_data HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:09:54 pm] 105.152 POST "/historicalData/save_binance_data HTTP/1.1" 200 746 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:10:20 pm] 35.150 POST "/historicalData/get_completition_status HTTP/1.1" 200 3735 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:13:53 pm] 11.109 POST "/indicators/get-sma HTTP/1.1" 200 16139 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:14:09 pm] 109.572 POST "/indicators/get-sma HTTP/1.1" 200 17267 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:16:24 pm] 44.159 POST "/indicators/get-sma HTTP/1.1" 200 17267 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:18:15 pm] 43.522 POST "/indicators/get-sma HTTP/1.1" 200 17267 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:18:43 pm] 36.714 POST "/indicators/get-sma HTTP/1.1" 200 17267 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:22:16 pm] 189.970 POST "/indicators/get-sma HTTP/1.1" 200 52089 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:25:47 pm] 38.144 POST "/indicators/get-ema HTTP/1.1" 200 20593 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:28:32 pm] 47.427 POST "/indicators/get-ema HTTP/1.1" 200 20593 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:33:18 pm] 220.991 POST "/indicators/get-bollinger-bands HTTP/1.1" 200 8163 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:33:33 pm] 21.813 POST "/indicators/get-bollinger-bands HTTP/1.1" 200 49889 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:34:19 pm] 43.811 POST "/indicators/get-bollinger-bands HTTP/1.1" 200 49889 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:35:22 pm] 38.662 POST "/indicators/get-bollinger-bands HTTP/1.1" 200 49889 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:45:12 pm] 74.367 POST "/indicators/get-ichimoku-cloud HTTP/1.1" 200 58827 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:47:19 pm] 42.781 POST "/indicators/get-ichimoku-cloud HTTP/1.1" 200 59041 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:50:10 pm] 47.099 POST "/indicators/get-rsi HTTP/1.1" 200 46629 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:52:14 pm] 40.684 POST "/indicators/get-rsi HTTP/1.1" 200 46539 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:52:35 pm] 237.890 POST "/indicators/get-rsi HTTP/1.1" 200 46629 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:54:48 pm] 44.729 POST "/indicators/get-rsi HTTP/1.1" 200 46539 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:55:14 pm] 46.504 POST "/indicators/get-rsi HTTP/1.1" 200 46539 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:57:25 pm] 47.172 POST "/indicators/get-macd HTTP/1.1" 200 60206 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 3:58:52 pm] 45.337 POST "/indicators/get-macd HTTP/1.1" 200 60027 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 4:01:47 pm] 53.062 POST "/indicators/get-atr HTTP/1.1" 200 39302 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 4:02:26 pm] 81.524 POST "/indicators/get-atr HTTP/1.1" 200 39221 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 4:04:52 pm] 461.048 POST "/auth/login HTTP/1.1" 200 40133 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:04:52 pm] 6.272 POST "/user/wordOfTheDay HTTP/1.1" 200 266 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:04:53 pm] 1085.314 POST "/crypto/getCryptoData HTTP/1.1" 200 6178 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:04:55 pm] 1325.831 POST "/crypto/getHistoricalData HTTP/1.1" 200 122582 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:05:01 pm] 146.497 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:05:05 pm] 1417.374 POST "/crypto/getHistoricalData HTTP/1.1" 200 122582 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:05:07 pm] 3162.896 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48172 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:05:14 pm] 4061.521 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48252 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:05:18 pm] 508.047 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 3751 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:05:23 pm] 202.680 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3539 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:05:32 pm] 76.869 POST "/user/update_preferences HTTP/1.1" 200 60 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:05:40 pm] 151.048 POST "/user/update_preferences HTTP/1.1" 200 60 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:06:12 pm] 1422.159 POST "/crypto/getHistoricalData HTTP/1.1" 200 120291 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:06:15 pm] 1410.993 POST "/crypto/getHistoricalData HTTP/1.1" 200 124951 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:06:27 pm] 1548.479 POST "/crypto/getHistoricalData HTTP/1.1" 200 122581 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36
+::1 - - [13/07/2023, 4:15:53 pm] 46.144 POST "/indicators/get-sma HTTP/1.1" 200 52089 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 4:16:15 pm] 37.517 POST "/indicators/get-sma HTTP/1.1" 200 52089 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 4:16:29 pm] 660.310 POST "/indicators/get-sma HTTP/1.1" 200 52089 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 4:27:38 pm] 133.298 POST "/historicalData/save_binance_data HTTP/1.1" 200 746 - PostmanRuntime/7.32.3
+::1 - - [13/07/2023, 4:27:56 pm] 30.451 POST "/historicalData/get_completition_status HTTP/1.1" 200 3735 - PostmanRuntime/7.32.3

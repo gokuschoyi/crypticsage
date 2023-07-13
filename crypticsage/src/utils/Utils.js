@@ -18,7 +18,7 @@ export const capitalizeFirstLetter = (string) => {
 
 // convert large number to K, M, B, T
 export const convert = (n) => {
-    if (n < 1e3) return n;
+    if (n < 1e3) return n.toFixed(4);
     if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + "K";
     if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(1) + "M";
     if (n >= 1e9 && n < 1e12) return +(n / 1e9).toFixed(1) + "B";
@@ -47,8 +47,27 @@ export const getLastUpdatedTimeString = (lastUpdated) => {
 export const getDateTime = (timestamp) => {
     const nDate = new Date(timestamp * 1000).toLocaleString();
     const [date, timeAndTimeZone] = nDate.split(", ");
-    const [m,d,y] = date.split("/");
+    const [m, d, y] = date.split("/");
     const newDate = `${d}/${m}/${y}`;
     const finalDate = `${newDate}, ${timeAndTimeZone}`;
     return finalDate
+}
+
+export const getCurrencySymbol = (currency) => {
+    switch (currency.toUpperCase()) {
+        case 'USD':
+            return '$';
+        case 'AUD':
+            return '$';
+        case 'NZD':
+            return '$';
+        case 'CAD':
+            return '$';
+        case 'EUR':
+            return '€';
+        case 'JPY':
+            return '¥';
+        default:
+            return '';
+    }
 }

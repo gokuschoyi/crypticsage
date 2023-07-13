@@ -4,13 +4,14 @@ const { wsServer } = require('./websocket')
 const bodyParser = require('body-parser');
 const logger = require('./middleware/logger/Logger');
 const config = require('./config');
+const { verifyToken } = require('./middleware/verify-token')
 
-const verify = require('./routes/auth/verifyToken');
 const authentication = require('./routes/auth/authRoute')
-const contentManager = require('./routes/content/contentManagerRoute');
-const fetchCryptoData = require('./routes/crypto-stocks/cryptoStocksRoute');
-const fetchIndicators = require('./routes/indicators/indicatorsRoute');
 const user = require('./routes/user/userRoute');
+const contentManager = require('./routes/content/contentManagerRoute');
+const historicalData = require('./routes/historical-data/historicalDataRoute')
+const fetchCryptoData = require('./routes/crypto-stocks/cryptoStocksRoute');
+const indicators = require('./routes/indicators/indicatorsRoute');
 
 const http = require('http');
 const app = express();
@@ -20,10 +21,10 @@ const app = express();
 //     console.log('The answer to life, the universe, and everything!');
 // });
 
-const { makeAllStatusForUser } = require('./utils/helpers');
+const { makeAllStatusForUser } = require('./utils/user/user-util');
 
 const log = (req, res, next) => {
-    console.log('_________________________REQUEST RECEIVEDD____________________________');
+    console.log('_________________________REQUEST RECEIVED____________________________', req.originalUrl);
     next();
 }
 
@@ -34,7 +35,7 @@ app.use(bodyParser.json());
 app.use(logger)
 app.use(log);
 
-app.post('/', verify, async (req, res) => {
+app.post('/', verifyToken, async (req, res) => {
     console.log('Verify request received');
     let dat = await makeAllStatusForUser();
     res.status(200).json({ message: "Verified", dat });
@@ -42,13 +43,15 @@ app.post('/', verify, async (req, res) => {
 
 app.use('/auth', authentication);
 
-app.use('/crypto', fetchCryptoData);
+app.use('/user', verifyToken, user);
 
-app.use('/indicators', fetchIndicators);
+app.use('/content', verifyToken, contentManager);
 
-app.use('/content', contentManager);
+app.use('/historicalData', verifyToken, historicalData)
 
-app.use('/user', user);
+app.use('/crypto', verifyToken, fetchCryptoData)
+
+app.use('/indicators', verifyToken, indicators);
 
 app.listen(config.port, () => {
     console.log(`Express server listening on port ${config.port}`);

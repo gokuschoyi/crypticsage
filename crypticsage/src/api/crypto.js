@@ -28,7 +28,7 @@ export const getWordOfTheDay = async (data) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const response = await axios.post(`${baseUrl}/crypto/wordOfTheDay`, { withCredentials: true }, config)
+    const response = await axios.post(`${baseUrl}/user/wordOfTheDay`, { withCredentials: true }, config)
     return response;
 }
 
