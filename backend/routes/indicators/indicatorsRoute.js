@@ -5,6 +5,9 @@ const IController = require('../../controllers/indicator-controller')
 
 router.post('/fetchTokenData', IController.getTokenData)
 router.post('/get-sma', handleTokenRedisStorage, IController.calculateSMA)
+router.post('/get-new-sma', handleTokenRedisStorage, IController.calculateNewSMA)
+
+
 /* router.post('/get-ema', IController.handleTokenRedisStorage, IController.calculateEMA)
 router.post('/get-bollinger-bands', IController.handleTokenRedisStorage, IController.calculateBollingerBands)
 router.post('/get-ichimoku-cloud', IController.handleTokenRedisStorage, IController.calculateIchimokuCloud)

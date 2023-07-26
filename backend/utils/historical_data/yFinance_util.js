@@ -3,8 +3,9 @@ const { connect } = require('../../services/db-conn')
 
 // new Date 10/07/2023, 12:19:38 pm to yyyy-mm-dd
 const formatDateForYFinance = (param) => {
+    // console.log(" Date param", param)
     const [date, tz] = param.split(', ');
-    const [day, month, year] = date.split('/')
+    const [month, day, year] = date.split('/')
     const formattedDate = `${year}-${month}-${day}`;
     return formattedDate;
 }
@@ -14,6 +15,7 @@ const formatDateForYFinance = (param) => {
     "from": "2012-01-01", // YYYY-MM-DD
     "to": "2012-06-30", // YYYY-MM-DD
     "period": "" // '1d' (daily), '1wk' (weekly), '1mo' (monthly), "1d", "1wk", "1mo"
+    Valid intervals: [1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo] but only 1 week data per request
 } */
 
 const getHistoricalYFinanceData = async (params) => {
@@ -52,6 +54,48 @@ const insertHistoricalYFinanceDate = async (params) => {
         await yFinanceCollection.insertOne(tickerData)
     } catch (err) {
         console.log(err)
+    }
+}
+
+const getAvailableYfTickersInDb = async () => {
+    try {
+        const db = await connect("get available yFinance tickers in db")
+        const yFCollection = db.collection('yFinance_new')
+        const yFTickers = await yFCollection.aggregate([
+            {
+                $project: {
+                    _id: 1,
+                    ticker_name: 1,
+                    data: {
+                        $objectToArray: "$data"
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    ticker_name: 1,
+                    data: {
+                        $arrayToObject: {
+                            $map: {
+                                input: "$data",
+                                as: "period",
+                                in: {
+                                    k: "$$period.k",
+                                    v: {
+                                        historical: { $cond: [{ $isArray: "$$period.v.historical" }, true, false] }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ]).toArray()
+        return yFTickers
+    } catch (err) {
+        console.log(err)
+        throw err
     }
 }
 
@@ -167,6 +211,7 @@ module.exports = {
     formatDateForYFinance
     , getHistoricalYFinanceData
     , insertHistoricalYFinanceDate
+    , getAvailableYfTickersInDb
     , getYFinanceTickerInfo
     , checkForUpdates
     , insertLatestYFinanceData

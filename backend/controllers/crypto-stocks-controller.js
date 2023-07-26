@@ -53,6 +53,7 @@ const getLatestCryptoData = async (req, res) => {
                 name: token.CoinInfo.FullName,
                 image_url: `https://www.cryptocompare.com${token.CoinInfo.ImageUrl}`,
                 max_supply: token.CoinInfo.MaxSupply,
+                asset_launch_date: token.CoinInfo.AssetLaunchDate,
             }
         })
 

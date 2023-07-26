@@ -1,6 +1,9 @@
 const { connect, close } = require('../services/db-conn');
 const { periodToMilliseconds } = require('../utils/crypto/crypto-stocks-util')
 const { client } = require('../services/redis')
+var talib = require('talib/build/Release/talib')
+
+// console.log("TALib Version: " + talib.version);
 
 // INPUT : dataSource, tokenName, period (Required)
 // dataSource : "binance" or "yFinance"
@@ -162,6 +165,38 @@ const calculateSMA = async (req, res) => {
         })
         modifiedData = modifiedData.reverse();
         res.status(200).json({ message: "SMA calculated successfully", requiredTokenData, modifiedData })
+    }
+}
+
+const calculateNewSMA = async (req, res) => {
+    const { dataSource, tokenName, period } = req.body
+    if (!dataSource || !tokenName || !period) {
+        res.status(400).json({ message: "Missing required parameters" })
+    } else {
+        const cacheKey = `${dataSource}-${tokenName}-${period}`;
+        let requiredTokenData = [];
+        requiredTokenData = await getValuesFromRedis(cacheKey);
+        const d1 = requiredTokenData.map((item) => item.close)
+        var result = talib.execute({
+            name: "SMA",
+            startIdx: 0,
+            endIdx: d1.length - 1,
+            inReal: d1,
+            optInTimePeriod: 10
+        })
+        const fResult =  result.result.outReal
+        const diff = requiredTokenData.length - fResult.length;
+        const emptyArr = [...new Array(diff)].map((d) => null)
+        const d3 = [...emptyArr, ...fResult]
+        requiredTokenData = requiredTokenData.map((item, index) => {
+            return {
+                openTime: new Date(item.openTime).toLocaleString(),
+                open: item.open,
+                close: item.close,
+                sma: d3[index]
+            }
+        })
+        res.status(200).json({ message: "SMA calculated successfully", requiredTokenData })
     }
 }
 
@@ -578,6 +613,7 @@ module.exports = {
     getTokenData,
     fetchTokenData,
     calculateSMA,
+    calculateNewSMA,
     calculateEMA,
     calculateBollingerBands,
     calculateIchimokuCloud,

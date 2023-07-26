@@ -23,6 +23,18 @@ const app = express();
 
 const { makeAllStatusForUser } = require('./utils/user/user-util');
 
+/* var talib = require('talib/build/Release/talib')
+console.log("TALib Version: " + talib.version);
+
+var functions = talib.functions;
+var totalFunctionCount = 0;
+for (i in functions) {
+    totalFunctionCount++;
+    
+}
+var funcDesc = talib.explain("ADX");
+console.log(totalFunctionCount, funcDesc) */
+
 const log = (req, res, next) => {
     console.log('_________________________REQUEST RECEIVED____________________________', req.originalUrl);
     next();
