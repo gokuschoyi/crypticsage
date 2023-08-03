@@ -1,7 +1,7 @@
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 const { connect, close, binanceConnect, binanceClose } = require('../../services/db-conn');
-const { token } = require('morgan');
+// const { token } = require('morgan');
 
 const formatPrintDate = (date) => {
     const formattedDate = new Intl.DateTimeFormat("en-US", {

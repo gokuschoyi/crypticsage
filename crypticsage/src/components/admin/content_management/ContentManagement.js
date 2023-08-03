@@ -190,7 +190,8 @@ const Admin = (props) => {
                     formFields.forEach((field) => {
                         sectionD[field] = newSectionData[field].value
                     })
-                    let res = await addSection(sectionD);
+                    
+                    let res = await addSection({token, sectionD});
                     if (res.data.message) {
                         setSectionId(res.data.createdSectionId)
                         refreshSectionData()
@@ -666,7 +667,7 @@ const Admin = (props) => {
 
     //highlight the selected section button when edit mode changes to edit
     useEffect(() => {
-        if (editMode === 'edit' && (buttonIdState >=0)) {
+        if (editMode === 'edit' && (buttonIdState >= 0)) {
             // console.log("useeffec section")
             let viewDetailsButton = document.getElementsByClassName('view-section-details-button')
             viewDetailsButton[buttonIdRef.current].classList.add('selected')

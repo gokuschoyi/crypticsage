@@ -10,6 +10,7 @@ const storage = multer.diskStorage({
             let foldrPath = `./user_uploads/${req.body.uid}`;
             console.log(foldrPath)
             if (!fs.existsSync(foldrPath)) {
+                console.log("folder doesn't exist")
                 fs.mkdirSync(foldrPath);
             }
             cb(null, `${foldrPath}`)

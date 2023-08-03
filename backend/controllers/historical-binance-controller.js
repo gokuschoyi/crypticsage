@@ -1,10 +1,10 @@
 const { Queue, Worker } = require('bullmq');
 const { close, binanceClose } = require('../services/db-conn')
-const { client } = require('../services/redis')
+const { redisClient } = require('../services/redis')
 
 const HDBUtil = require('../utils/historical_data/binance_util')
 
-const connection = client // Create a Redis connection
+const connection = redisClient // Create a Redis connection
 let IFTaskQueue;
 let UTaskQueue;
 let IFOMTaskQueue;

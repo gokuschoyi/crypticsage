@@ -1,14 +1,5 @@
 const { OAuth2Client } = require('google-auth-library');
-const { connect } = require('./db-conn')
 const config = require('../config');
-
-const getUserByEmail = async (email, connectMessage) => {
-    const db = await connect(connectMessage);
-    const userCollection = db.collection('users');
-    const filterEmail = { email: email }
-    const user = await userCollection.find(filterEmail).toArray();
-    return [user, userCollection]
-}
 
 const verifyGoogleCredentials = async (credentials) => {
     let payload = {};
@@ -21,11 +12,10 @@ const verifyGoogleCredentials = async (credentials) => {
         payload = ticket.getPayload();
         return payload
     } catch (err) {
-        return payload
+        throw new Error("(Google-Auth):Cannot verify your google account")
     }
 }
 
 module.exports = {
-    getUserByEmail,
     verifyGoogleCredentials
 }

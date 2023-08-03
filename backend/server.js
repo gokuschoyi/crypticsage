@@ -6,12 +6,12 @@ const logger = require('./middleware/logger/Logger');
 const config = require('./config');
 const { verifyToken } = require('./middleware/verify-token')
 
-const authentication = require('./routes/auth/authRoute')
-const user = require('./routes/user/userRoute');
-const contentManager = require('./routes/content/contentManagerRoute');
-const historicalData = require('./routes/historical-data/historicalDataRoute')
-const fetchCryptoData = require('./routes/crypto-stocks/cryptoStocksRoute');
-const indicators = require('./routes/indicators/indicatorsRoute');
+const authentication = require('./routes/authRoute')
+const user = require('./routes/userRoute');
+const contentManager = require('./routes/contentManagerRoute');
+const historicalData = require('./routes/historicalDataRoute')
+const fetchCryptoData = require('./routes/cryptoStocksRoute');
+// const indicators = require('./routes/indicators/indicatorsRoute');
 
 const http = require('http');
 const app = express();
@@ -21,7 +21,6 @@ const app = express();
 //     console.log('The answer to life, the universe, and everything!');
 // });
 
-const { makeAllStatusForUser } = require('./utils/user/user-util');
 
 /* var talib = require('talib/build/Release/talib')
 console.log("TALib Version: " + talib.version);
@@ -36,7 +35,8 @@ var funcDesc = talib.explain("ADX");
 console.log(totalFunctionCount, funcDesc) */
 
 const log = (req, res, next) => {
-    console.log('_________________________REQUEST RECEIVED____________________________', req.originalUrl);
+    const date = new Date().toLocaleString();
+    console.log('_________________________REQUEST RECEIVED____________________________', req.originalUrl, " - ", date);
     next();
 }
 
@@ -49,8 +49,7 @@ app.use(log);
 
 app.post('/', verifyToken, async (req, res) => {
     console.log('Verify request received');
-    let dat = await makeAllStatusForUser();
-    res.status(200).json({ message: "Verified", dat });
+    res.status(200).json({ message: "Verified" });
 })
 
 app.use('/auth', authentication);
@@ -63,7 +62,7 @@ app.use('/historicalData', verifyToken, historicalData)
 
 app.use('/crypto', verifyToken, fetchCryptoData)
 
-app.use('/indicators', verifyToken, indicators);
+// app.use('/indicators', verifyToken, indicators); // remove later
 
 app.listen(config.port, () => {
     console.log(`Express server listening on port ${config.port}`);
@@ -72,7 +71,7 @@ app.listen(config.port, () => {
 // Attach the WebSocket server to a separate HTTP server
 const wsHttpServer = http.createServer(wsServer);
 wsHttpServer.listen(config.wsPort, () => {
-    console.log(`WebSocket server is running on port ${config.wsPort}`);
+    console.log(`WebSocket server running on port ${config.wsPort}`);
 });
 
 // Upgrade HTTP requests to WebSocket

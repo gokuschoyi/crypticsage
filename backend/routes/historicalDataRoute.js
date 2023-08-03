@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router()
 
-const HDYFController = require('../../controllers/historical-yf-controller')
-const HDBController = require('../../controllers/historical-binance-controller')
+const HDYFController = require('../controllers/historical-yf-controller')
+const HDBController = require('../controllers/historical-binance-controller')
 
-const BUtil = require('../../utils/historical_data/binance_util')
+const BUtil = require('../utils/historical_data/binance_util')
 
 router.post('/save_initial_yfinance_data', HDYFController.initialSaveHistoricalDataYFinance)
 router.post('/update_historical_yFinance_data', HDYFController.updateHistoricalYFinanceData)

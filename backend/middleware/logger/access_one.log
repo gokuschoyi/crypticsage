@@ -5017,3 +5017,1171 @@
 ::1 - - [7/26/2023, 4:24:32 PM] 934.080 POST "/historicalData/update_historical_binance_data HTTP/1.1" 200 11916 - PostmanRuntime/7.32.3
 ::1 - - [7/26/2023, 4:25:57 PM] 189.103 POST "/historicalData/update_historical_binance_data_one_min HTTP/1.1" 200 1915 - PostmanRuntime/7.32.3
 ::1 - - [7/26/2023, 4:28:08 PM] 829.492 POST "/historicalData/get_duration HTTP/1.1" 200 31 - PostmanRuntime/7.32.3
+::1 - - [7/26/2023, 4:48:11 PM] 154.574 POST "/historicalData/get_duration HTTP/1.1" 200 31 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 10:05:31 AM] 305.675 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 10:05:46 AM] 353.525 POST "/historicalData/update_historical_binance_data HTTP/1.1" 200 11916 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 10:06:28 AM] 190.103 POST "/historicalData/update_historical_binance_data_one_min HTTP/1.1" 200 1915 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 10:07:14 AM] 152.687 POST "/historicalData/get_duration HTTP/1.1" 200 31 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 10:22:04 AM] 1154.147 POST "/crypto/getCryptoData HTTP/1.1" 200 6216 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 10:26:59 AM] 1413.620 POST "/crypto/getHistoricalData HTTP/1.1" 200 122440 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 10:40:47 AM] 3732.283 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48470 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 10:55:55 AM] 3559.489 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48617 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 10:57:38 AM] 3412.783 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48749 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 11:07:58 AM] 27.741 POST "/crypto/test HTTP/1.1" 404 151 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 11:08:24 AM] 40.594 POST "/crypto/testing HTTP/1.1" 200 232 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 11:12:02 AM] 1187.148 POST "/crypto/testing HTTP/1.1" 200 3685115 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 11:13:29 AM] 1147.889 POST "/crypto/testing HTTP/1.1" 200 3669477 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 11:25:50 AM] 1168.565 POST "/crypto/testing HTTP/1.1" 200 3729085 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 11:28:13 AM] 1187.314 POST "/crypto/testing HTTP/1.1" 200 3729402 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 11:53:41 AM] 2744.692 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48589 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 11:58:34 AM] 862.313 POST "/crypto/testing HTTP/1.1" 200 3669486 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 11:59:43 AM] 2786.742 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48354 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:00:18 PM] 2701.989 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48380 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:19:12 PM] 2003.098 POST "/crypto/testing HTTP/1.1" 200 747 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:31:06 PM] 1430.911 POST "/crypto/testing HTTP/1.1" 200 3793 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:32:09 PM] 2337.724 POST "/crypto/testing HTTP/1.1" 200 1942 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:33:54 PM] 2670.693 POST "/crypto/testing HTTP/1.1" 200 427 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:34:14 PM] 1105.794 POST "/crypto/testing HTTP/1.1" 200 2272 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:35:28 PM] 909.797 POST "/crypto/testing HTTP/1.1" 200 2272 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:38:10 PM] 921.455 POST "/crypto/testing HTTP/1.1" 200 2272 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:38:28 PM] 243.948 POST "/crypto/testing HTTP/1.1" 200 2272 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:45:04 PM] 1222.629 POST "/crypto/getCryptoData HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:45:20 PM] 1202.913 POST "/crypto/getCryptoData HTTP/1.1" 200 6179 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:48:04 PM] 1162.024 POST "/crypto/getCryptoData HTTP/1.1" 200 7198 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:49:44 PM] 2485.899 POST "/crypto/testing HTTP/1.1" 200 427 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:50:20 PM] 77.875 POST "/crypto/testing HTTP/1.1" 200 3924 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:56:46 PM] 2231.605 POST "/crypto/testing HTTP/1.1" 200 3924 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:58:33 PM] 3225.222 POST "/crypto/testing HTTP/1.1" 200 992 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 12:58:55 PM] 2246.573 POST "/crypto/testing HTTP/1.1" 200 1116 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:08:21 PM] 137.519 POST "/crypto/testing HTTP/1.1" 200 3961 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:10:26 PM] 173.590 POST "/crypto/testing HTTP/1.1" 200 2272 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:10:41 PM] 184.347 POST "/crypto/testing HTTP/1.1" 200 1942 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:12:30 PM] 227.127 POST "/crypto/testing HTTP/1.1" 200 1000 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:12:38 PM] 180.471 POST "/crypto/testing HTTP/1.1" 200 2309 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:15:10 PM] 1510.184 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 29157 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:16:19 PM] 1185.068 POST "/auth/login HTTP/1.1" 200 40133 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:16:19 PM] 8.203 POST "/user/wordOfTheDay HTTP/1.1" 200 276 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:16:20 PM] 1115.726 POST "/crypto/getCryptoData HTTP/1.1" 200 7219 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:16:22 PM] 1331.059 POST "/crypto/getHistoricalData HTTP/1.1" 200 122435 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:16:29 PM] 1521.497 POST "/crypto/getHistoricalData HTTP/1.1" 200 122435 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:16:29 PM] 1751.490 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 29133 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:17:45 PM] 1579.994 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 29162 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:18:11 PM] 522.770 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 3751 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:18:14 PM] 1461.960 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 29183 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:19:32 PM] 1422.689 POST "/crypto/testing HTTP/1.1" 200 1674 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:19:45 PM] 1445.664 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 29154 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:19:57 PM] 1819.563 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 29191 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:20:01 PM] 461.930 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 3751 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:20:03 PM] 1419.231 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 29166 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:20:24 PM] 1541.141 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 29102 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:25:21 PM] 139.465 POST "/crypto/testing HTTP/1.1" 200 3793 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:25:51 PM] 225.603 POST "/crypto/testing HTTP/1.1" 200 811 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:26:37 PM] 210.720 POST "/crypto/testing HTTP/1.1" 200 3793 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:26:55 PM] 215.322 POST "/crypto/testing HTTP/1.1" 200 3793 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:27:02 PM] 169.860 POST "/crypto/testing HTTP/1.1" 200 3793 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:27:09 PM] 188.616 POST "/crypto/testing HTTP/1.1" 200 2309 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:27:25 PM] 3926.928 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48832 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:27:35 PM] 1716.164 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48757 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:27:52 PM] 464.186 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 3751 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:27:55 PM] 1675.646 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48825 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:28:16 PM] 3554.016 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48809 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:29:30 PM] 1738.213 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 48818 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:35:43 PM] 1798.311 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2226 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:36:06 PM] 1662.239 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 61257 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:37:16 PM] 1161.550 POST "/crypto/testing HTTP/1.1" 200 4340 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:40:33 PM] 1462.620 POST "/crypto/testing HTTP/1.1" 200 992 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:41:39 PM] 2659.646 POST "/crypto/testing HTTP/1.1" 200 2573 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:43:23 PM] 161.107 POST "/crypto/testing HTTP/1.1" 200 2313 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:45:24 PM] 1199.492 POST "/crypto/testing HTTP/1.1" 200 3669690 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 1:48:09 PM] 2535.012 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 68414 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 1:53:58 PM] 1770.027 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 68539 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 3:53:04 PM] 2393.118 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 68403 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/27/2023, 3:59:20 PM] 1234.911 POST "/crypto/testing HTTP/1.1" 200 3669624 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:18:50 PM] 1361.313 POST "/indicators/fetchTokenData HTTP/1.1" 200 1907812 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:19:55 PM] 767.528 POST "/indicators/fetchTokenData HTTP/1.1" 200 60 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:20:33 PM] 176.429 POST "/indicators/fetchTokenData HTTP/1.1" 200 60 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:23:13 PM] 165.453 POST "/indicators/fetchTokenData HTTP/1.1" 200 60 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:23:25 PM] 169.884 POST "/indicators/fetchTokenData HTTP/1.1" 200 60 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:23:36 PM] 196.913 POST "/indicators/fetchTokenData HTTP/1.1" 200 60 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:24:00 PM] 168.972 POST "/indicators/fetchTokenData HTTP/1.1" 200 60 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:24:37 PM] 1657.325 POST "/indicators/fetchTokenData HTTP/1.1" 200 1907812 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:25:38 PM] 4433.794 POST "/indicators/fetchTokenData HTTP/1.1" 200 1907812 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:25:49 PM] 164.148 POST "/indicators/fetchTokenData HTTP/1.1" 200 60 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:26:42 PM] 234.691 POST "/indicators/fetchTokenData HTTP/1.1" 200 67 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:27:09 PM] 2797.288 POST "/indicators/fetchTokenData HTTP/1.1" 200 1907812 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:41:28 PM] 197.551 POST "/indicators/fetchTokenData HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:45:26 PM] 1833.231 POST "/indicators/fetchTokenData HTTP/1.1" 200 1907812 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:46:52 PM] 216.234 POST "/indicators/fetchTokenData HTTP/1.1" 200 1484 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:53:20 PM] 174.959 POST "/indicators/fetchTokenData HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:53:34 PM] 198.350 POST "/indicators/fetchTokenData HTTP/1.1" 200 1536 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:54:21 PM] 87.859 POST "/indicators/fetchTokenData HTTP/1.1" 200 1556 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:55:02 PM] 106.614 POST "/indicators/fetchTokenData HTTP/1.1" 200 1559 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:56:46 PM] 138.698 POST "/indicators/fetchTokenData HTTP/1.1" 200 1536 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:57:20 PM] 274.586 POST "/indicators/fetchTokenData HTTP/1.1" 200 1539 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:57:51 PM] 241.530 POST "/indicators/fetchTokenData HTTP/1.1" 200 1537 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 4:59:30 PM] 1032.132 POST "/indicators/fetchTokenData HTTP/1.1" 200 148651 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 5:00:11 PM] 215.967 POST "/indicators/fetchTokenData HTTP/1.1" 200 1537 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 5:01:07 PM] 175.909 POST "/indicators/fetchTokenData HTTP/1.1" 200 1537 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 5:01:37 PM] 182.999 POST "/indicators/fetchTokenData HTTP/1.1" 200 1536 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 5:02:31 PM] 232.602 POST "/indicators/fetchTokenData HTTP/1.1" 200 1539 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 5:02:41 PM] 94.069 POST "/indicators/fetchTokenData HTTP/1.1" 200 1536 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 5:02:46 PM] 180.851 POST "/indicators/fetchTokenData HTTP/1.1" 200 1536 - PostmanRuntime/7.32.3
+::1 - - [7/27/2023, 5:03:00 PM] 195.769 POST "/indicators/fetchTokenData HTTP/1.1" 200 1539 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 9:56:16 AM] 252.690 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 9:56:35 AM] 197.944 POST "/indicators/fetchTokenData HTTP/1.1" 200 1539 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 9:56:51 AM] 277.653 POST "/indicators/fetchTokenData HTTP/1.1" 200 1539 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:12:47 AM] 289.344 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:13:08 AM] 275.025 POST "/indicators/fetchTokenData HTTP/1.1" 200 1539 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:15:23 AM] 13124.354 POST "/historicalData/update_historical_binance_data HTTP/1.1" 200 11916 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:16:07 AM] 163.084 POST "/historicalData/update_historical_binance_data_one_min HTTP/1.1" 200 1915 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:16:33 AM] 33.551 POST "/indicators/fetchTokenData HTTP/1.1" 200 1535 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:20:37 AM] 2558.436 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2784 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:36:16 AM] 566.483 POST "/crypto/get-latest-stocks-data HTTP/1.1" 200 3745 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:38:53 AM] 1139.855 POST "/crypto/getCryptoData HTTP/1.1" 200 7236 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:40:41 AM] 43.879 POST "/crypto/update_ticker_meta HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:41:40 AM] 2686.429 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2815 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:43:01 AM] 1814.161 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 75716 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:46:00 AM] 1979.552 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 75764 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:47:53 AM] 29.860 POST "/crypto/getHistoricalData HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:48:03 AM] 1416.050 POST "/crypto/getHistoricalData HTTP/1.1" 200 122418 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:48:30 AM] 2.088 POST "/crypto/getHistoricalData HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:48:37 AM] 1343.450 POST "/crypto/getHistoricalData HTTP/1.1" 200 122418 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:55:32 AM] 195.115 POST "/historicalData/get_duration HTTP/1.1" 200 31 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 10:59:32 AM] 224.979 POST "/historicalData/get_duration HTTP/1.1" 200 1272 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 11:14:05 AM] 8484.491 POST "/crypto/update_ticker_meta HTTP/1.1" 200 421 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 11:23:45 AM] 2066.988 POST "/crypto/update_ticker_meta HTTP/1.1" 200 1296 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 11:25:44 AM] 2383.623 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2381 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 11:26:06 AM] 89.761 POST "/historicalData/get_duration HTTP/1.1" 200 31 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 11:27:41 AM] 177.307 POST "/historicalData/get_duration HTTP/1.1" 200 31 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 11:28:46 AM] 28.656 POST "/crypto/testing HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 11:30:17 AM] 113.237 POST "/crypto/testing HTTP/1.1" 200 70 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:20:48 PM] 29.189 POST "/crypto/fetch_token_data HTTP/1.1" 404 163 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:21:05 PM] 2.323 POST "/crypto/fetch_token_data HTTP/1.1" 404 163 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:21:13 PM] 197.263 POST "/crypto/fetch_token_data HTTP/1.1" 200 1535 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:27:13 PM] 154.070 POST "/crypto/fetch_token_data HTTP/1.1" 200 1535 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:36:09 PM] 782.954 POST "/crypto/fetch_token_data HTTP/1.1" 200 1655 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:37:06 PM] 253.135 POST "/crypto/fetch_token_data HTTP/1.1" 200 1735 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:37:40 PM] 970.699 POST "/crypto/fetch_token_data HTTP/1.1" 200 1825 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:39:38 PM] 219.850 POST "/crypto/fetch_token_data HTTP/1.1" 200 1875 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:41:54 PM] 241.478 POST "/crypto/fetch_token_data HTTP/1.1" 200 2265 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:42:35 PM] 136.107 POST "/crypto/fetch_token_data HTTP/1.1" 200 2345 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:44:06 PM] 220.049 POST "/crypto/fetch_token_data HTTP/1.1" 200 1915 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:44:17 PM] 764.972 POST "/crypto/fetch_token_data HTTP/1.1" 200 1865 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:45:32 PM] 815.947 POST "/crypto/fetch_token_data HTTP/1.1" 200 1865 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:45:43 PM] 804.902 POST "/crypto/fetch_token_data HTTP/1.1" 200 1865 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:46:38 PM] 215.811 POST "/crypto/fetch_token_data HTTP/1.1" 200 1865 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:46:44 PM] 194.772 POST "/crypto/fetch_token_data HTTP/1.1" 200 1865 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:47:01 PM] 760.599 POST "/crypto/fetch_token_data HTTP/1.1" 200 1865 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:47:13 PM] 674.623 POST "/crypto/fetch_token_data HTTP/1.1" 200 1865 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:48:05 PM] 205.007 POST "/crypto/fetch_token_data HTTP/1.1" 200 1865 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:49:08 PM] 793.425 POST "/crypto/fetch_token_data HTTP/1.1" 200 1865 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:49:34 PM] 235.158 POST "/crypto/fetch_token_data HTTP/1.1" 200 1871 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:51:01 PM] 782.685 POST "/crypto/fetch_token_data HTTP/1.1" 200 1871 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:52:12 PM] 264.259 POST "/crypto/fetch_token_data HTTP/1.1" 200 2285 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:52:27 PM] 841.837 POST "/crypto/fetch_token_data HTTP/1.1" 200 2185 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:53:59 PM] 147.966 POST "/crypto/fetch_token_data HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:54:10 PM] 771.108 POST "/crypto/fetch_token_data HTTP/1.1" 200 2185 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:55:38 PM] 209.686 POST "/crypto/fetch_token_data HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:56:22 PM] 229.156 POST "/crypto/fetch_token_data HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:56:34 PM] 680.141 POST "/crypto/fetch_token_data HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:57:03 PM] 167.796 POST "/crypto/fetch_token_data HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:57:15 PM] 791.907 POST "/crypto/fetch_token_data HTTP/1.1" 200 2195 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:58:10 PM] 226.856 POST "/crypto/fetch_token_data HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:58:25 PM] 207.933 POST "/crypto/fetch_token_data HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:58:40 PM] 200.699 POST "/crypto/fetch_token_data HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 12:58:55 PM] 672.042 POST "/crypto/fetch_token_data HTTP/1.1" 200 2205 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:02:05 PM] 246.872 POST "/crypto/fetch_token_data HTTP/1.1" 200 1855 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:02:48 PM] 862.422 POST "/crypto/fetch_token_data HTTP/1.1" 200 2205 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:04:21 PM] 922.427 POST "/crypto/fetch_token_data HTTP/1.1" 200 2205 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:05:15 PM] 650.415 POST "/crypto/fetch_token_data HTTP/1.1" 200 2205 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:07:37 PM] 144.685 POST "/crypto/fetch_token_data HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:10:42 PM] 219.586 POST "/crypto/fetch_token_data HTTP/1.1" 200 1881 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:11:06 PM] 225.171 POST "/crypto/fetch_token_data HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:11:22 PM] 1139.075 POST "/crypto/fetch_token_data HTTP/1.1" 200 2195 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:12:56 PM] 1127.129 POST "/crypto/fetch_token_data HTTP/1.1" 200 1881 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:13:32 PM] 1171.245 POST "/crypto/fetch_token_data HTTP/1.1" 200 182511 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:14:32 PM] 189.865 POST "/crypto/fetch_token_data HTTP/1.1" 200 1881 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:14:44 PM] 1343.327 POST "/crypto/fetch_token_data HTTP/1.1" 200 182511 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:15:39 PM] 1162.036 POST "/crypto/fetch_token_data HTTP/1.1" 200 179575 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:16:04 PM] 406.150 POST "/crypto/fetch_token_data HTTP/1.1" 200 213575 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:16:32 PM] 332.056 POST "/crypto/fetch_token_data HTTP/1.1" 200 213575 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:16:41 PM] 940.122 POST "/crypto/fetch_token_data HTTP/1.1" 200 214656 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:17:19 PM] 991.493 POST "/crypto/fetch_token_data HTTP/1.1" 200 180656 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:19:06 PM] 376.638 POST "/crypto/fetch_token_data HTTP/1.1" 200 179575 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:29:00 PM] 29.297 POST "/crypto/fetch_token_data HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:29:21 PM] 2321.742 POST "/crypto/fetch_token_data HTTP/1.1" 200 179575 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:29:35 PM] 195.459 POST "/crypto/fetch_token_data HTTP/1.1" 200 1855 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:30:04 PM] 710.645 POST "/crypto/fetch_token_data HTTP/1.1" 200 73 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:30:11 PM] 148.754 POST "/crypto/fetch_token_data HTTP/1.1" 200 1855 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:38:46 PM] 234.428 POST "/crypto/fetch_token_data HTTP/1.1" 200 1855 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:38:49 PM] 2.648 POST "/crypto/fetch_token_data HTTP/1.1" 200 92 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:39:02 PM] 2.280 POST "/crypto/fetch_token_data HTTP/1.1" 200 92 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:42:13 PM] 67.517 POST "/crypto/fetch_token_data HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:42:36 PM] 7.026 POST "/crypto/fetch_token_data HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:42:55 PM] 26.706 POST "/crypto/fetch_token_data HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:43:11 PM] 31.305 POST "/crypto/fetch_token_data HTTP/1.1" 400 58 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:43:32 PM] 25.862 POST "/crypto/fetch_token_data HTTP/1.1" 400 90 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:43:37 PM] 3.772 POST "/crypto/fetch_token_data HTTP/1.1" 200 92 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:53:17 PM] 23.996 POST "/crypto/fetch_token_data HTTP/1.1" 200 92 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:53:22 PM] 3.245 POST "/crypto/fetch_token_data HTTP/1.1" 400 82 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:53:38 PM] 2.775 POST "/crypto/fetch_token_data HTTP/1.1" 400 91 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:53:46 PM] 3.051 POST "/crypto/fetch_token_data HTTP/1.1" 400 96 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:53:50 PM] 2.179 POST "/crypto/fetch_token_data HTTP/1.1" 200 92 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:54:04 PM] 146.113 POST "/crypto/fetch_token_data HTTP/1.1" 200 1855 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 1:55:19 PM] 195.776 POST "/crypto/fetch_token_data HTTP/1.1" 200 1855 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:05:16 PM] 25.239 POST "/crypto/fetch_token_data HTTP/1.1" 400 91 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:05:34 PM] 28.305 POST "/crypto/fetch_token_data HTTP/1.1" 400 77 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:05:52 PM] 179.467 POST "/crypto/fetch_token_data HTTP/1.1" 400 72 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:06:10 PM] 239.146 POST "/crypto/fetch_token_data HTTP/1.1" 200 14412 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:10:21 PM] 319.268 POST "/crypto/fetch_token_data HTTP/1.1" 200 14412 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:10:49 PM] 286.719 POST "/crypto/fetch_token_data HTTP/1.1" 200 14588 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:11:20 PM] 5.036 POST "/crypto/fetch_token_data HTTP/1.1" 400 91 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:12:01 PM] 1095.253 POST "/crypto/fetch_token_data HTTP/1.1" 200 14588 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:12:45 PM] 28.008 POST "/crypto/fetch_token_data HTTP/1.1" 400 91 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:13:00 PM] 29.395 POST "/crypto/fetch_token_data HTTP/1.1" 400 91 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:13:11 PM] 4.458 POST "/crypto/fetch_token_data HTTP/1.1" 400 96 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:13:20 PM] 249.334 POST "/crypto/fetch_token_data HTTP/1.1" 200 14546 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:13:28 PM] 235.546 POST "/crypto/fetch_token_data HTTP/1.1" 200 16337 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:36:06 PM] 302.077 POST "/crypto/fetch_token_data HTTP/1.1" 400 68 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:36:28 PM] 226.807 POST "/crypto/fetch_token_data HTTP/1.1" 400 68 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:36:45 PM] 234.985 POST "/crypto/fetch_token_data HTTP/1.1" 200 15005 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:37:32 PM] 824.533 POST "/crypto/fetch_token_data HTTP/1.1" 200 16127 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:38:13 PM] 147.456 POST "/crypto/fetch_token_data HTTP/1.1" 200 16337 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:38:21 PM] 176.405 POST "/crypto/fetch_token_data HTTP/1.1" 200 16127 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:38:36 PM] 187.667 POST "/crypto/fetch_token_data HTTP/1.1" 200 16337 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:38:52 PM] 268.704 POST "/crypto/fetch_token_data HTTP/1.1" 200 16384 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:39:31 PM] 322.467 POST "/crypto/fetch_token_data HTTP/1.1" 200 16127 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:41:44 PM] 281.048 POST "/crypto/fetch_token_data HTTP/1.1" 200 16127 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:41:50 PM] 158.678 POST "/crypto/fetch_token_data HTTP/1.1" 200 16111 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:42:01 PM] 85.724 POST "/crypto/fetch_token_data HTTP/1.1" 200 16126 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:43:10 PM] 1459.298 POST "/crypto/fetch_token_data HTTP/1.1" 200 16126 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:43:28 PM] 1543.907 POST "/crypto/fetch_token_data HTTP/1.1" 200 177052 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:43:47 PM] 174.595 POST "/crypto/fetch_token_data HTTP/1.1" 200 17898 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:43:56 PM] 155.974 POST "/crypto/fetch_token_data HTTP/1.1" 200 17893 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:44:03 PM] 237.096 POST "/crypto/fetch_token_data HTTP/1.1" 200 18182 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:50:47 PM] 195.749 POST "/crypto/fetch_token_data HTTP/1.1" 200 18182 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:50:52 PM] 221.332 POST "/crypto/fetch_token_data HTTP/1.1" 200 17893 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:51:56 PM] 227.821 POST "/crypto/fetch_token_data HTTP/1.1" 200 17893 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:52:20 PM] 203.866 POST "/crypto/fetch_token_data HTTP/1.1" 200 17893 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:54:50 PM] 244.111 POST "/crypto/fetch_token_data HTTP/1.1" 200 17893 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:55:25 PM] 912.137 POST "/crypto/fetch_token_data HTTP/1.1" 200 17893 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 2:55:40 PM] 1880.046 POST "/crypto/fetch_token_data HTTP/1.1" 200 177071 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 3:31:48 PM] 1059.346 POST "/crypto/fetch_token_data HTTP/1.1" 200 177071 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 3:42:15 PM] 2.679 POST "/crypto/fetch_token_data HTTP/1.1" 400 96 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 3:42:38 PM] 119.268 POST "/crypto/fetch_token_data HTTP/1.1" 200 11514 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 3:44:14 PM] 159.512 POST "/crypto/fetch_token_data HTTP/1.1" 200 11514 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 3:44:34 PM] 950.498 POST "/crypto/fetch_token_data HTTP/1.1" 200 11514 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 3:45:02 PM] 202.463 POST "/crypto/fetch_token_data HTTP/1.1" 200 11514 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 3:50:39 PM] 26231.491 POST "/historicalData/save_initial_yfinance_data HTTP/1.1" 200 213 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 3:52:02 PM] 21123.800 POST "/historicalData/update_historical_yFinance_data HTTP/1.1" 200 612 - PostmanRuntime/7.32.3
+::1 - - [7/28/2023, 3:52:34 PM] 805.422 POST "/crypto/fetch_token_data HTTP/1.1" 200 15003 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 1:30:48 PM] 282.817 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 1:36:09 PM] 25.961 POST "/indicators/fetchTokenData HTTP/1.1" 404 165 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 1:36:24 PM] 9.488 POST "/crypto/fetch_token_data HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 1:36:29 PM] 326.194 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 1:36:44 PM] 174.959 POST "/crypto/fetch_token_data HTTP/1.1" 200 15003 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:46:14 PM] 20.158 POST "/auth/login HTTP/1.1" 200 42 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:46:21 PM] 3.115 POST "/auth/login HTTP/1.1" 400 40 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:46:30 PM] 1.486 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:46:39 PM] 3.437 POST "/auth/login HTTP/1.1" 400 40 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:46:45 PM] 1.061 POST "/auth/login HTTP/1.1" 200 42 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:47:11 PM] 20.111 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:47:32 PM] 24.341 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:47:36 PM] 1.248 POST "/auth/login HTTP/1.1" 200 42 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:47:55 PM] 1.513 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:48:03 PM] 2.233 POST "/auth/login HTTP/1.1" 200 42 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:48:20 PM] 1.799 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 2:48:28 PM] 1.890 POST "/auth/login HTTP/1.1" 200 42 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 3:14:54 PM] 310.042 POST "/auth/login HTTP/1.1" 400 38 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 3:17:19 PM] 1055.258 POST "/auth/login HTTP/1.1" 200 40040 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 3:18:08 PM] 205.174 POST "/auth/login HTTP/1.1" 200 40040 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 3:18:30 PM] 255.140 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 3:19:30 PM] 222.548 POST "/auth/login HTTP/1.1" 200 40042 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 3:29:53 PM] 473.035 POST "/auth/login HTTP/1.1" 200 40133 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 3:29:53 PM] 4.789 POST "/user/wordOfTheDay HTTP/1.1" 200 303 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 3:29:54 PM] 1089.625 POST "/crypto/getCryptoData HTTP/1.1" 200 7216 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 3:29:56 PM] 1337.223 POST "/crypto/getHistoricalData HTTP/1.1" 200 122401 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 3:31:23 PM] 132.825 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3539 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 3:31:24 PM] 145.465 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 3:37:10 PM] 170.257 POST "/auth/login HTTP/1.1" 400 76 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 3:37:30 PM] 3.773 POST "/auth/signup HTTP/1.1" 400 34 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 6:52:20 PM] - POST "/auth/login HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 6:53:23 PM] 397.377 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 6:56:47 PM] 1038.200 POST "/auth/login HTTP/1.1" 400 35 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 6:57:01 PM] 70.532 POST "/auth/login HTTP/1.1" 400 28 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 6:57:34 PM] 288.650 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 6:57:49 PM] 4.529 POST "/auth/login HTTP/1.1" 400 40 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 6:57:59 PM] 2.398 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 6:58:05 PM] 1.831 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 6:58:08 PM] 217.209 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:02:27 PM] 306.007 POST "/auth/login HTTP/1.1" 400 76 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:02:56 PM] 148.470 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:03:35 PM] 244.614 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:03:40 PM] 320.189 POST "/auth/login HTTP/1.1" 400 76 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:07:23 PM] 43.459 POST "/auth/login HTTP/1.1" 400 76 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:09:53 PM] 416.486 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:11:40 PM] 164.860 POST "/auth/login HTTP/1.1" 400 35 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:11:45 PM] 141.330 POST "/auth/login HTTP/1.1" 200 5161 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:15:14 PM] 28.246 POST "/auth/signup HTTP/1.1" 400 51 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:15:48 PM] 3.425 POST "/auth/signup HTTP/1.1" 400 51 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:16:50 PM] 1.880 POST "/auth/signup HTTP/1.1" 400 51 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:17:01 PM] 442.710 POST "/auth/login HTTP/1.1" 400 76 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:17:45 PM] 38.793 POST "/auth/signup HTTP/1.1" 400 51 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:18:56 PM] 486.968 POST "/auth/signup HTTP/1.1" 400 59 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:19:57 PM] 543.776 POST "/auth/signup HTTP/1.1" 400 59 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:21:02 PM] 481.896 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:21:27 PM] 420.031 POST "/auth/login HTTP/1.1" 200 5300 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:21:56 PM] 1.766 POST "/auth/login HTTP/1.1" 400 40 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:22:04 PM] 172.095 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:22:15 PM] 213.177 POST "/auth/login HTTP/1.1" 200 5300 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:22:46 PM] 161.664 POST "/auth/login HTTP/1.1" 400 76 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:22:59 PM] 12.038 POST "/auth/login HTTP/1.1" 400 76 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:29:59 PM] 225.142 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:32:06 PM] 100.288 POST "/auth/login HTTP/1.1" 400 76 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:33:27 PM] 214.669 POST "/auth/login HTTP/1.1" 400 76 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:33:53 PM] 279.101 POST "/auth/signup HTTP/1.1" 400 69 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:34:07 PM] 532.194 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:36:17 PM] 159.285 POST "/auth/login HTTP/1.1" 400 76 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:37:11 PM] 266.314 POST "/auth/login HTTP/1.1" 200 5161 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:37:16 PM] 585.004 POST "/auth/login HTTP/1.1" 200 5347 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:38:10 PM] 151.529 POST "/auth/login HTTP/1.1" 200 5161 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:38:21 PM] 228.333 POST "/auth/login HTTP/1.1" 200 5347 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:38:36 PM] 401.202 POST "/auth/login HTTP/1.1" 200 5347 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:38:50 PM] 101.727 POST "/auth/login HTTP/1.1" 400 76 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:40:02 PM] 204.853 POST "/auth/login HTTP/1.1" 400 94 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:40:48 PM] 324.315 POST "/auth/login HTTP/1.1" 400 35 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:40:56 PM] 148.251 POST "/auth/login HTTP/1.1" 200 5161 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:41:56 PM] 102.364 POST "/auth/login HTTP/1.1" 400 97 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:42:25 PM] 3.868 POST "/auth/login HTTP/1.1" 400 32 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:42:32 PM] 262.594 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:42:36 PM] 238.852 POST "/auth/login HTTP/1.1" 200 5347 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:43:14 PM] 59.086 POST "/auth/login HTTP/1.1" 400 94 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:44:04 PM] 209.581 POST "/auth/login HTTP/1.1" 400 94 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:44:44 PM] 222.139 POST "/auth/login HTTP/1.1" 200 5322 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:45:07 PM] 370.038 POST "/auth/login HTTP/1.1" 200 5347 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:45:08 PM] 8.871 POST "/user/wordOfTheDay HTTP/1.1" 200 346 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:45:09 PM] 1094.638 POST "/crypto/getCryptoData HTTP/1.1" 200 7220 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:45:10 PM] 1328.527 POST "/crypto/getHistoricalData HTTP/1.1" 200 122398 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:45:22 PM] 123.117 POST "/auth/login HTTP/1.1" 200 5161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:45:22 PM] 5.197 POST "/user/wordOfTheDay HTTP/1.1" 200 240 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:45:24 PM] 1081.140 POST "/crypto/getCryptoData HTTP/1.1" 200 7218 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:45:25 PM] 1334.105 POST "/crypto/getHistoricalData HTTP/1.1" 200 122397 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:45:43 PM] 65.181 POST "/auth/login HTTP/1.1" 400 94 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:45:53 PM] 190.486 POST "/auth/login HTTP/1.1" 400 92 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:46:06 PM] 994.703 POST "/auth/signup HTTP/1.1" 200 117 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:46:16 PM] 90.634 POST "/auth/login HTTP/1.1" 200 5322 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:46:16 PM] 9.443 POST "/user/wordOfTheDay HTTP/1.1" 200 318 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:46:18 PM] 1297.656 POST "/crypto/getCryptoData HTTP/1.1" 200 7183 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:46:19 PM] 1350.205 POST "/crypto/getHistoricalData HTTP/1.1" 200 122398 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:46:29 PM] 1.944 POST "/auth/signup HTTP/1.1" 400 58 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:47:22 PM] 59.508 POST "/auth/signup HTTP/1.1" 400 58 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:48:09 PM] 51.118 POST "/auth/signup HTTP/1.1" 400 58 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:49:17 PM] 54.701 POST "/auth/signup HTTP/1.1" 400 58 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:50:03 PM] 1508.386 POST "/auth/signup HTTP/1.1" 200 117 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:50:14 PM] 449.348 POST "/auth/login HTTP/1.1" 200 5300 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:50:14 PM] 6.027 POST "/user/wordOfTheDay HTTP/1.1" 200 294 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:50:15 PM] 1098.124 POST "/crypto/getCryptoData HTTP/1.1" 200 7207 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:50:17 PM] 1551.299 POST "/crypto/getHistoricalData HTTP/1.1" 200 122398 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:50:37 PM] 1774.051 POST "/auth/login HTTP/1.1" 200 5300 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:50:37 PM] 6.248 POST "/user/wordOfTheDay HTTP/1.1" 200 307 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:50:38 PM] 1062.608 POST "/crypto/getCryptoData HTTP/1.1" 200 7207 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:50:40 PM] 1564.745 POST "/crypto/getHistoricalData HTTP/1.1" 200 122398 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:51:22 PM] 935.765 POST "/content/get_sections HTTP/1.1" 200 3161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:51:23 PM] 155.891 POST "/content/get_lessons HTTP/1.1" 200 24669 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:51:34 PM] 193.217 POST "/user/update_userLessonStatus HTTP/1.1" 200 4586 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:51:36 PM] 1873.241 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:52:51 PM] 224.351 POST "/auth/login HTTP/1.1" 200 5633 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:52:51 PM] 4.251 POST "/user/wordOfTheDay HTTP/1.1" 200 305 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:52:52 PM] 1075.441 POST "/crypto/getCryptoData HTTP/1.1" 200 7222 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:52:53 PM] 1357.346 POST "/crypto/getHistoricalData HTTP/1.1" 200 122398 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 7:56:36 PM] 76.235 POST "/auth/login HTTP/1.1" 400 40 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:57:04 PM] 111.673 POST "/auth/login HTTP/1.1" 400 97 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:57:21 PM] 1326.232 POST "/auth/login HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:57:44 PM] 1018.941 POST "/auth/login HTTP/1.1" 400 35 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:57:50 PM] 940.644 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:58:21 PM] 171.490 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:58:31 PM] 812.110 POST "/auth/signup HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 7:59:20 PM] 267.296 POST "/auth/signup HTTP/1.1" 400 33 - PostmanRuntime/7.32.3
+::1 - - [7/29/2023, 8:01:46 PM] 403.570 POST "/auth/login HTTP/1.1" 200 5633 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 8:01:47 PM] 4.257 POST "/user/wordOfTheDay HTTP/1.1" 200 241 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 8:01:48 PM] 1086.918 POST "/crypto/getCryptoData HTTP/1.1" 200 7236 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/29/2023, 8:01:50 PM] 2197.122 POST "/crypto/getHistoricalData HTTP/1.1" 200 122393 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 9:48:59 AM] 207.625 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 9:50:44 AM] 201.375 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 9:51:54 AM] 203.288 POST "/auth/login HTTP/1.1" 400 47 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 9:52:27 AM] 203.938 POST "/auth/login HTTP/1.1" 400 61 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 9:54:51 AM] 184.028 POST "/auth/login HTTP/1.1" 200 5608 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 9:55:42 AM] 149.518 POST "/auth/login HTTP/1.1" 200 5608 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 9:57:30 AM] 229.927 POST "/auth/signup HTTP/1.1" 400 33 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:02:19 AM] 205.150 POST "/auth/signup HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:04:40 AM] 130.068 POST "/auth/signup HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:05:10 AM] 1445.544 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:10:01 AM] 818.464 POST "/auth/signup HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:10:26 AM] 293.422 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:12:02 AM] 930.691 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:16:39 AM] 1100.880 POST "/auth/signup HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:17:38 AM] 168.946 POST "/auth/signup HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:18:00 AM] 1710.895 POST "/auth/signup HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:19:06 AM] 188.080 POST "/auth/signup HTTP/1.1" 400 67 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:19:40 AM] 126.006 POST "/auth/signup HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:20:30 AM] 149.743 POST "/auth/signup HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:20:51 AM] 2418.461 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:21:28 AM] 321.215 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:22:00 AM] 794.195 POST "/auth/signup HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:25:25 AM] 1.152 POST "/auth/signup HTTP/1.1" 400 77 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:27:32 AM] 1.207 POST "/auth/signup HTTP/1.1" 400 77 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:27:46 AM] 831.628 POST "/auth/signup HTTP/1.1" 400 69 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:28:02 AM] 322.244 POST "/auth/signup HTTP/1.1" 400 69 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:28:25 AM] 950.860 POST "/auth/signup HTTP/1.1" 400 69 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:29:00 AM] 315.769 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:31:34 AM] 904.145 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:32:42 AM] 205.486 POST "/auth/signup HTTP/1.1" 400 66 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:38:52 AM] 439.560 POST "/auth/signup HTTP/1.1" 400 69 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:39:35 AM] 399.406 POST "/auth/signup HTTP/1.1" 400 69 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:40:01 AM] 156.244 POST "/auth/signup HTTP/1.1" 400 61 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:40:08 AM] 233.620 POST "/auth/signup HTTP/1.1" 400 69 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:40:53 AM] 364.791 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:41:25 AM] 181.331 POST "/auth/signup HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:42:10 AM] 165.554 POST "/auth/signup HTTP/1.1" 400 66 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:42:30 AM] 207.270 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:43:09 AM] 385.287 POST "/auth/login HTTP/1.1" 200 40042 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:43:23 AM] 159.171 POST "/auth/login HTTP/1.1" 400 97 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:43:33 AM] 224.984 POST "/auth/login HTTP/1.1" 400 97 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:44:42 AM] 1043.602 POST "/auth/login HTTP/1.1" 200 5300 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:44:58 AM] 4.583 POST "/auth/login HTTP/1.1" 400 32 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:45:08 AM] 329.769 POST "/auth/login HTTP/1.1" 200 5300 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:45:17 AM] 822.826 POST "/auth/login HTTP/1.1" 200 5275 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:45:56 AM] 858.917 POST "/auth/login HTTP/1.1" 200 5275 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:46:59 AM] 211.599 POST "/auth/login HTTP/1.1" 400 35 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:47:04 AM] 242.513 POST "/auth/login HTTP/1.1" 200 5161 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:50:27 AM] 242.380 POST "/auth/login HTTP/1.1" 200 5161 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:50:31 AM] 326.019 POST "/auth/login HTTP/1.1" 200 5300 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 10:50:34 AM] 153.193 POST "/auth/login HTTP/1.1" 200 5275 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:03:44 AM] 214.174 POST "/auth/login HTTP/1.1" 200 5161 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:03:50 AM] 296.056 POST "/auth/login HTTP/1.1" 200 5300 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:03:53 AM] 85.027 POST "/auth/login HTTP/1.1" 200 5275 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:04:30 AM] 309.036 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:04:51 AM] 129.786 POST "/auth/signup HTTP/1.1" 400 66 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:05:01 AM] 212.965 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:05:14 AM] 801.480 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:22:44 AM] 26.383 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:22:54 AM] 4.401 POST "/user/verify_password HTTP/1.1" 400 65 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:22:58 AM] 1.680 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:44:02 AM] 33.573 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:52:50 AM] 33.823 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:54:20 AM] 28.153 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:55:17 AM] 32.626 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:57:32 AM] 31.661 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 11:57:50 AM] 34.656 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:00:04 PM] 33.182 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:00:38 PM] 37.118 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:01:18 PM] 33.663 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:02:03 PM] 41.518 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:02:35 PM] 8.035 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:03:49 PM] 34.926 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:05:08 PM] 5.868 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:07:13 PM] 52.751 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:08:05 PM] 34.277 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:10:04 PM] 45.345 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:10:48 PM] 32.036 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:12:42 PM] 39.964 POST "/user/verify_password HTTP/1.1" 400 83 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:13:13 PM] 34.380 POST "/user/verify_password HTTP/1.1" 200 13 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:13:51 PM] 179.315 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:14:15 PM] 185.641 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:14:35 PM] 202.986 POST "/auth/login HTTP/1.1" 400 61 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:14:47 PM] 823.911 POST "/auth/login HTTP/1.1" 200 5322 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:15:17 PM] 129.389 POST "/user/verify_password HTTP/1.1" 200 81 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:16:00 PM] 1187.479 POST "/user/verify_password HTTP/1.1" 200 82 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:16:11 PM] 979.999 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:16:20 PM] 1112.311 POST "/user/verify_password HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:16:40 PM] 264.768 POST "/user/verify_password HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:17:07 PM] 1219.695 POST "/user/verify_password HTTP/1.1" 200 64 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:17:29 PM] 27.138 POST "/user/verify_password HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:17:36 PM] 112.540 POST "/auth/login HTTP/1.1" 200 5322 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:17:46 PM] 107.793 POST "/user/verify_password HTTP/1.1" 200 82 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:18:04 PM] 770.138 POST "/user/verify_password HTTP/1.1" 200 64 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:18:09 PM] 173.484 POST "/auth/login HTTP/1.1" 200 5161 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:18:18 PM] 742.249 POST "/user/verify_password HTTP/1.1" 200 64 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:18:50 PM] 266.444 POST "/user/verify_password HTTP/1.1" 200 54 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:18:55 PM] 153.970 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:20:05 PM] 709.169 POST "/auth/login HTTP/1.1" 200 5161 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 12:20:06 PM] 6.773 POST "/user/wordOfTheDay HTTP/1.1" 200 305 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 12:20:07 PM] 1188.423 POST "/crypto/getCryptoData HTTP/1.1" 200 7235 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 12:20:09 PM] 1421.600 POST "/crypto/getHistoricalData HTTP/1.1" 200 122388 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 12:20:32 PM] 170.860 POST "/user/verify_password HTTP/1.1" 200 54 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 12:21:55 PM] 812.385 POST "/user/verify_password HTTP/1.1" 200 65 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 12:23:35 PM] 204.307 POST "/user/verify_password HTTP/1.1" 200 54 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:24:36 PM] 796.918 POST "/user/verify_password HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:24:50 PM] 794.513 POST "/user/verify_password HTTP/1.1" 400 50 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:27:20 PM] 225.622 POST "/user/verify_password HTTP/1.1" 200 116 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:27:46 PM] 207.864 POST "/user/verify_password HTTP/1.1" 200 60 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:35:09 PM] 969.324 POST "/user/verify_password HTTP/1.1" 400 45 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:36:10 PM] 1192.252 POST "/user/verify_password HTTP/1.1" 400 45 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:36:59 PM] 219.069 POST "/user/verify_password HTTP/1.1" 400 2 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:37:29 PM] 425.662 POST "/user/verify_password HTTP/1.1" 400 2 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:37:41 PM] 1148.487 POST "/user/verify_password HTTP/1.1" 400 2 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:38:24 PM] 188.238 POST "/user/verify_password HTTP/1.1" 400 14 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:39:36 PM] 262.183 POST "/user/verify_password HTTP/1.1" 400 36 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:40:00 PM] 185.420 POST "/user/verify_password HTTP/1.1" 400 36 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:40:32 PM] 1737.807 POST "/user/verify_password HTTP/1.1" 400 61 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:40:54 PM] 167.396 POST "/user/verify_password HTTP/1.1" 400 61 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:41:09 PM] 757.049 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:41:20 PM] 744.513 POST "/user/verify_password HTTP/1.1" 400 61 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:41:35 PM] 97.929 POST "/user/verify_password HTTP/1.1" 200 82 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:41:53 PM] 733.132 POST "/user/verify_password HTTP/1.1" 400 61 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 12:41:58 PM] 214.528 POST "/user/verify_password HTTP/1.1" 200 65 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 12:46:53 PM] 1275.180 POST "/user/update_password HTTP/1.1" 200 57 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:47:07 PM] 2.901 POST "/user/update_password HTTP/1.1" 400 29 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:47:56 PM] 26.851 POST "/user/update_password HTTP/1.1" 400 38 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:48:17 PM] 29.381 POST "/user/update_password HTTP/1.1" 400 62 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:48:31 PM] 6.733 POST "/user/update_password HTTP/1.1" 200 57 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:57:07 PM] 34.493 POST "/user/update_password HTTP/1.1" 400 53 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:58:18 PM] 236.310 POST "/user/update_password HTTP/1.1" 400 41 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:59:02 PM] 167.760 POST "/user/update_password HTTP/1.1" 200 43 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:59:21 PM] 237.694 POST "/user/update_password HTTP/1.1" 200 43 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:59:33 PM] 823.170 POST "/user/verify_password HTTP/1.1" 200 82 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:59:46 PM] 907.337 POST "/user/verify_password HTTP/1.1" 400 61 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 12:59:52 PM] 157.143 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:00:06 PM] 832.089 POST "/auth/login HTTP/1.1" 200 5322 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:00:22 PM] 762.438 POST "/user/update_password HTTP/1.1" 200 43 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:01:52 PM] 265.964 POST "/user/update_password HTTP/1.1" 200 57 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:01:58 PM] 3.815 POST "/user/update_password HTTP/1.1" 400 62 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:19:07 PM] 25.347 POST "/user/update_profileimage HTTP/1.1" 400 35 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:19:26 PM] 31.547 POST "/user/update_profileimage HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:20:00 PM] 223.739 POST "/user/update_profileimage HTTP/1.1" 200 62 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:20:10 PM] 7.122 POST "/user/update_profileimage HTTP/1.1" 400 72 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:20:49 PM] 140.253 POST "/user/update_profileimage HTTP/1.1" 200 62 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:30:42 PM] 29.125 POST "/user/update_userdata HTTP/1.1" 200 58 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:30:48 PM] 2.637 POST "/user/update_userdata HTTP/1.1" 400 60 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:30:53 PM] 2.641 POST "/user/update_userdata HTTP/1.1" 200 58 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:32:11 PM] 27.154 POST "/user/update_userdata HTTP/1.1" 400 69 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:32:21 PM] 213.733 POST "/user/update_userdata HTTP/1.1" 200 58 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:32:42 PM] 670.554 POST "/user/update_userdata HTTP/1.1" 200 58 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 1:39:25 PM] 268.244 POST "/auth/login HTTP/1.1" 200 39289 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 1:39:25 PM] 6.746 POST "/user/wordOfTheDay HTTP/1.1" 200 217 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 1:39:26 PM] 1162.340 POST "/crypto/getCryptoData HTTP/1.1" 200 7233 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 1:39:28 PM] 1321.378 POST "/crypto/getHistoricalData HTTP/1.1" 200 122389 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 1:39:37 PM] 87.984 POST "/user/update_profileimage HTTP/1.1" 200 62 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 1:44:27 PM] 177.317 POST "/user/update_preferences HTTP/1.1" 200 65 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 1:44:36 PM] 101.404 POST "/user/update_preferences HTTP/1.1" 200 65 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 1:44:43 PM] 158.641 POST "/user/update_preferences HTTP/1.1" 200 65 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:04:02 PM] 217.970 POST "/user/update_userLessonStatus HTTP/1.1" 200 4586 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:05:03 PM] 242.884 POST "/auth/login HTTP/1.1" 200 40497 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:05:03 PM] 5.886 POST "/user/wordOfTheDay HTTP/1.1" 200 342 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:05:04 PM] 1122.609 POST "/crypto/getCryptoData HTTP/1.1" 200 7232 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:05:05 PM] 1330.425 POST "/crypto/getHistoricalData HTTP/1.1" 200 122386 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:05:58 PM] 178.092 POST "/user/update_userLessonStatus HTTP/1.1" 200 4586 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:22:01 PM] 277.377 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:22:17 PM] 295.910 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:22:39 PM] 274.823 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:26:08 PM] 296.923 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:28:00 PM] 1165.858 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 400 43 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:30:45 PM] 225.637 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 400 53 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:31:09 PM] 1754.902 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3505 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:31:56 PM] 243.525 POST "/auth/login HTTP/1.1" 200 40497 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:31:56 PM] 3.849 POST "/user/wordOfTheDay HTTP/1.1" 200 252 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:31:57 PM] 1328.740 POST "/crypto/getCryptoData HTTP/1.1" 200 7224 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:31:59 PM] 1411.688 POST "/crypto/getHistoricalData HTTP/1.1" 200 122384 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:32:02 PM] 124.314 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3505 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:32:27 PM] 86.970 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:32:34 PM] 158.402 POST "/user/submitQuiz HTTP/1.1" 200 118 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:32:34 PM] 101.328 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 724 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:32:34 PM] 170.528 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3538 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:33:20 PM] 873.412 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3538 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:46:04 PM] 158.069 POST "/user/getQuiz HTTP/1.1" 200 849 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:46:42 PM] 218.858 POST "/user/getQuiz HTTP/1.1" 200 849 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:47:16 PM] 163.069 POST "/user/getQuiz HTTP/1.1" 200 849 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 2:47:34 PM] 122.529 POST "/user/getQuiz HTTP/1.1" 200 544 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:47:37 PM] 149.815 POST "/user/submitQuiz HTTP/1.1" 200 118 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:47:38 PM] 807.052 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 724 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:47:38 PM] 874.109 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3571 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:50:18 PM] 169.534 POST "/user/getQuiz HTTP/1.1" 200 862 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:50:26 PM] 116.289 POST "/user/submitQuiz HTTP/1.1" 200 128 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:50:26 PM] 725.195 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 734 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 2:50:26 PM] 783.088 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3604 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:06:24 PM] 207.055 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:06:34 PM] 748.925 POST "/user/submitQuiz HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:06:34 PM] 95.515 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 734 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:07:09 PM] 760.603 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:07:20 PM] 813.092 POST "/user/submitQuiz HTTP/1.1" 200 118 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:07:20 PM] 84.515 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 734 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:07:20 PM] 132.416 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3604 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:08:30 PM] 233.781 POST "/auth/login HTTP/1.1" 200 40790 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:08:31 PM] 7.846 POST "/user/wordOfTheDay HTTP/1.1" 200 217 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:08:32 PM] 1121.778 POST "/crypto/getCryptoData HTTP/1.1" 200 7222 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:08:32 PM] 91.323 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3604 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:08:33 PM] 1407.765 POST "/crypto/getHistoricalData HTTP/1.1" 200 122381 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:08:50 PM] 60.108 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:09:02 PM] 562.422 POST "/user/submitQuiz HTTP/1.1" 200 118 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:09:02 PM] 77.628 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 734 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:09:02 PM] 122.997 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3604 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:11:25 PM] 273.522 POST "/auth/login HTTP/1.1" 200 5348 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:11:25 PM] 3.004 POST "/user/wordOfTheDay HTTP/1.1" 200 274 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:11:27 PM] 1084.827 POST "/crypto/getCryptoData HTTP/1.1" 200 7232 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:11:28 PM] 1331.329 POST "/crypto/getHistoricalData HTTP/1.1" 200 122381 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:11:30 PM] 1341.955 POST "/crypto/getHistoricalData HTTP/1.1" 200 122382 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:11:30 PM] 1755.355 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 73319 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:11:33 PM] 35.758 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3505 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:12:10 PM] 239.380 POST "/auth/login HTTP/1.1" 200 40790 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:12:10 PM] 2.326 POST "/user/wordOfTheDay HTTP/1.1" 200 268 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:12:11 PM] 1055.536 POST "/crypto/getCryptoData HTTP/1.1" 200 7230 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:12:12 PM] 77.991 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3604 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:12:13 PM] 1316.887 POST "/crypto/getHistoricalData HTTP/1.1" 200 122382 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:12:36 PM] 87.987 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:12:43 PM] 76.636 POST "/user/submitQuiz HTTP/1.1" 200 118 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:12:44 PM] 74.280 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 734 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:12:44 PM] 125.007 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3604 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:13:34 PM] 124.356 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:13:41 PM] 75.652 POST "/user/submitQuiz HTTP/1.1" 200 118 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:13:41 PM] 85.421 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 734 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:13:41 PM] 143.383 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3604 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:14:14 PM] 349.263 POST "/user/getQuiz HTTP/1.1" 200 520 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:14:18 PM] 139.280 POST "/user/submitQuiz HTTP/1.1" 200 112 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:14:18 PM] 130.816 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 734 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:14:18 PM] 179.001 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3604 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:18:21 PM] 2.356 POST "/user/submitQuiz HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 3:19:03 PM] 64.499 POST "/user/submitQuiz HTTP/1.1" 200 118 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 3:19:18 PM] 7.515 POST "/user/submitQuiz HTTP/1.1" 400 92 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 3:19:32 PM] 27.290 POST "/user/submitQuiz HTTP/1.1" 400 91 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 3:20:09 PM] 172.075 POST "/user/submitQuiz HTTP/1.1" 200 118 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 3:21:33 PM] 816.658 POST "/user/submitQuiz HTTP/1.1" 200 118 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 3:21:59 PM] 213.896 POST "/user/submitQuiz HTTP/1.1" 200 118 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 3:23:40 PM] 724.100 POST "/user/submitQuiz HTTP/1.1" 200 118 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 3:25:02 PM] 137.075 POST "/user/getQuiz HTTP/1.1" 200 849 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:25:07 PM] 110.815 POST "/user/submitQuiz HTTP/1.1" 200 118 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:25:08 PM] 827.533 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 724 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:25:08 PM] 879.714 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3604 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:25:47 PM] 138.084 POST "/user/getQuiz HTTP/1.1" 200 520 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:25:49 PM] 53.708 POST "/user/submitQuiz HTTP/1.1" 200 112 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:25:49 PM] 69.345 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 718 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:25:49 PM] 121.488 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3637 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [7/31/2023, 3:28:01 PM] 947.703 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 718 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 3:38:37 PM] 152.021 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 718 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 4:22:11 PM] 37.188 POST "/user/upload_log_files HTTP/1.1" 400 108 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 4:23:36 PM] 38.994 POST "/user/upload_log_files HTTP/1.1" 400 108 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 4:38:05 PM] 12.226 POST "/user/upload_log_files HTTP/1.1" 400 108 - PostmanRuntime/7.32.3
+::1 - - [7/31/2023, 4:40:25 PM] 33.389 POST "/user/upload_log_files HTTP/1.1" 200 24877 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:23:15 AM] - POST "/auth/login HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:23:42 AM] 893.405 POST "/auth/login HTTP/1.1" 400 35 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:23:53 AM] 1072.568 POST "/auth/login HTTP/1.1" 200 40774 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:35:10 AM] 269.176 POST "/auth/login HTTP/1.1" 200 40774 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:38:34 AM] 355.958 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:39:08 AM] 344.706 POST "/user/verify_password HTTP/1.1" 400 61 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:39:34 AM] 249.538 POST "/user/verify_password HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:40:31 AM] 220.020 POST "/user/update_password HTTP/1.1" 200 57 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:41:25 AM] 123.321 POST "/user/update_profileimage HTTP/1.1" 200 62 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:43:43 AM] 66.156 POST "/user/update_userdata HTTP/1.1" 200 58 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:45:07 AM] 4.938 POST "/user/update_preferences HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:45:27 AM] 149.297 POST "/user/update_preferences HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:46:49 AM] 223.602 POST "/user/update_userLessonStatus HTTP/1.1" 200 4586 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:49:46 AM] 223.936 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3637 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:50:56 AM] 159.825 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3637 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:52:45 AM] 77.948 POST "/user/getQuiz HTTP/1.1" 200 849 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:55:01 AM] 97.613 POST "/user/submitQuiz HTTP/1.1" 200 118 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 10:55:44 AM] 254.788 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 724 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:16:19 AM] 141.827 POST "/content/get_sections HTTP/1.1" 200 3161 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:17:12 AM] 187.215 POST "/content/get_sections HTTP/1.1" 200 3161 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:17:21 AM] 179.269 POST "/content/get_sections HTTP/1.1" 200 3161 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:17:38 AM] 137.522 POST "/content/get_sections HTTP/1.1" 500 45 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:17:57 AM] 178.728 POST "/content/get_sections HTTP/1.1" 400 45 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:18:35 AM] 151.525 POST "/content/get_sections HTTP/1.1" 400 30 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:18:48 AM] 197.204 POST "/content/get_sections HTTP/1.1" 200 3161 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:45:28 AM] - POST "/content/add_section HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:45:37 AM] - POST "/auth/login HTTP/1.1" - - - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:46:05 AM] 228.910 POST "/auth/login HTTP/1.1" 200 39896 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:46:10 AM] 101.771 POST "/content/add_section HTTP/1.1" 400 45 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 11:50:03 AM] 174.051 POST "/content/add_section HTTP/1.1" 200 113 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 12:10:30 PM] 194.605 POST "/content/add_section HTTP/1.1" 400 38 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 12:12:31 PM] 232.137 POST "/content/add_section HTTP/1.1" 200 515 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 12:13:49 PM] 232.166 POST "/content/add_section HTTP/1.1" 200 113 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 12:16:18 PM] 343.286 POST "/auth/login HTTP/1.1" 200 5432 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:16:24 PM] 104.540 POST "/content/get_sections HTTP/1.1" 200 4254 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:16:36 PM] 225.454 POST "/content/delete_section HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:16:39 PM] 240.015 POST "/content/delete_section HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:17:36 PM] 1.668 POST "/content/add_section HTTP/1.1" 401 33 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:17:50 PM] 1.140 POST "/content/add_section HTTP/1.1" 401 33 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:19:22 PM] 30.593 POST "/content/add_section HTTP/1.1" 401 47 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:20:02 PM] 296.860 POST "/content/add_section HTTP/1.1" 200 113 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 12:27:18 PM] 12.922 POST "/content/add_section HTTP/1.1" 400 97 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:29:30 PM] 4.638 POST "/content/add_section HTTP/1.1" 400 97 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:30:23 PM] 3.697 POST "/content/add_section HTTP/1.1" 400 97 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:31:14 PM] 3.078 POST "/content/add_section HTTP/1.1" 400 97 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:31:53 PM] 147.835 POST "/content/add_section HTTP/1.1" 200 113 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:31:53 PM] 60.678 POST "/content/get_sections HTTP/1.1" 200 3853 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:33:35 PM] 184.369 POST "/content/update_section HTTP/1.1" 200 56 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:33:35 PM] 74.755 POST "/content/get_sections HTTP/1.1" 200 3853 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 12:37:32 PM] 211.048 POST "/content/get_sections HTTP/1.1" 200 3853 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 12:38:41 PM] 215.206 POST "/content/get_sections HTTP/1.1" 200 3853 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 12:39:21 PM] 183.011 POST "/content/get_sections HTTP/1.1" 200 3853 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 12:51:31 PM] 140.207 POST "/content/update_section HTTP/1.1" 200 159 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 12:52:03 PM] 159.170 POST "/content/update_section HTTP/1.1" 200 56 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 12:52:16 PM] 163.744 POST "/content/update_section HTTP/1.1" 400 37 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 12:54:46 PM] 25.518 POST "/content/update_section HTTP/1.1" 400 107 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:07:36 PM] 377.421 POST "/auth/login HTTP/1.1" 200 5432 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:07:38 PM] 151.124 POST "/content/get_sections HTTP/1.1" 200 3903 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:07:44 PM] 93.309 POST "/content/get_lessons HTTP/1.1" 200 30 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:08:27 PM] 5.021 POST "/content/delete_section HTTP/1.1" 400 72 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:09:11 PM] 349.709 POST "/content/delete_section HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:09:29 PM] 111.574 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:10:08 PM] 198.684 POST "/content/add_section HTTP/1.1" 200 113 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:10:08 PM] 62.213 POST "/content/get_sections HTTP/1.1" 200 3843 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:10:14 PM] 186.453 POST "/content/delete_section HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:11:22 PM] 168.168 POST "/content/add_section HTTP/1.1" 200 113 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:11:22 PM] 60.351 POST "/content/get_sections HTTP/1.1" 200 3843 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:12:43 PM] 21.679 POST "/content/delete_section HTTP/1.1" 401 33 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:13:03 PM] 3.500 POST "/content/delete_section HTTP/1.1" 400 107 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:13:09 PM] 392.978 POST "/content/delete_section HTTP/1.1" 200 550 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:20:53 PM] 32.617 POST "/content/delete_section HTTP/1.1" 400 80 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:21:02 PM] 166.083 POST "/content/delete_section HTTP/1.1" 400 56 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:21:15 PM] 306.401 POST "/content/delete_section HTTP/1.1" 200 550 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:27:23 PM] 84.742 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:27:32 PM] 505.416 POST "/content/add_section HTTP/1.1" 200 113 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:27:32 PM] 185.148 POST "/content/get_sections HTTP/1.1" 200 3843 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:29:06 PM] 166.476 POST "/content/update_section HTTP/1.1" 200 56 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:29:25 PM] 80.401 POST "/content/update_section HTTP/1.1" 200 56 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:30:14 PM] 99.942 POST "/content/update_section HTTP/1.1" 200 144 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:31:15 PM] 156.019 POST "/content/update_section HTTP/1.1" 400 56 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:31:26 PM] 122.785 POST "/content/update_section HTTP/1.1" 200 144 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:32:28 PM] 284.229 POST "/content/delete_section HTTP/1.1" 200 42 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:41:07 PM] 178.170 POST "/content/get_sections HTTP/1.1" 400 57 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:42:33 PM] 216.186 POST "/content/get_sections HTTP/1.1" 200 3712 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:45:51 PM] 215.957 POST "/content/get_sections HTTP/1.1" 200 3712 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:46:07 PM] 109.831 POST "/content/get_sections HTTP/1.1" 200 3712 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:48:22 PM] 212.337 POST "/content/get_sections HTTP/1.1" 200 3712 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:51:54 PM] 115.162 POST "/content/get_sections HTTP/1.1" 200 3712 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:52:05 PM] 230.160 POST "/content/get_sections HTTP/1.1" 200 3712 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:52:20 PM] 272.680 POST "/content/get_sections HTTP/1.1" 200 40572 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:54:05 PM] 215.287 POST "/content/get_sections HTTP/1.1" 200 3712 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:56:18 PM] 257.937 POST "/content/get_sections HTTP/1.1" 400 38 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:56:25 PM] 152.460 POST "/content/get_sections HTTP/1.1" 200 40572 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:57:17 PM] 264.164 POST "/content/get_lessons HTTP/1.1" 200 24671 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 1:59:02 PM] 100.065 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:59:03 PM] 108.600 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 1:59:21 PM] 128.771 POST "/content/get_lessons HTTP/1.1" 200 24671 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 2:00:19 PM] 150.341 POST "/content/get_lessons HTTP/1.1" 200 9366 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 2:00:23 PM] 147.019 POST "/content/get_lessons HTTP/1.1" 200 989 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 2:00:52 PM] 257.519 POST "/content/get_lessons HTTP/1.1" 200 24670 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 2:01:00 PM] 132.969 POST "/content/get_lessons HTTP/1.1" 200 9365 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 2:01:03 PM] 154.797 POST "/content/get_lessons HTTP/1.1" 200 24670 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 2:01:37 PM] 201.987 POST "/content/get_lessons HTTP/1.1" 200 9365 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 2:02:29 PM] 216.024 POST "/content/get_lessons HTTP/1.1" 200 24669 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:02:51 PM] 146.319 POST "/content/get_lessons HTTP/1.1" 400 38 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:03:16 PM] 1.893 POST "/content/get_lessons HTTP/1.1" 400 107 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:03:21 PM] 284.705 POST "/content/get_lessons HTTP/1.1" 200 24669 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:06:57 PM] 266.248 POST "/content/get_lessons HTTP/1.1" 200 9364 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 2:23:19 PM] 127.986 POST "/content/get_sections HTTP/1.1" 200 3712 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:23:45 PM] 270.143 POST "/content/add_section HTTP/1.1" 200 113 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:29:45 PM] 20.845 POST "/content/add_section HTTP/1.1" 400 34 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:30:20 PM] 176.900 POST "/content/add_section HTTP/1.1" 400 54 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:30:36 PM] 202.297 POST "/content/add_section HTTP/1.1" 400 54 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:31:49 PM] 324.540 POST "/content/add_section HTTP/1.1" 200 113 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:33:48 PM] 185.742 POST "/content/get_lessons HTTP/1.1" 200 24669 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:52:15 PM] 296.089 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 2:56:12 PM] 188.562 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:00:48 PM] 219.691 POST "/auth/login HTTP/1.1" 200 40022 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:00:55 PM] 183.642 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:01:11 PM] 209.773 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:03:16 PM] 208.525 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:06:34 PM] 151.303 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:09:24 PM] 237.466 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:13:59 PM] 187.435 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:16:03 PM] 32.112 POST "/content/test HTTP/1.1" 404 152 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:16:38 PM] 146.542 POST "/content/test HTTP/1.1" 200 3546 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:17:34 PM] 162.761 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:19:17 PM] 471.141 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:19:36 PM] 192.495 POST "/content/test HTTP/1.1" 200 3546 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:21:16 PM] 184.817 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:23:18 PM] 342.360 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:26:05 PM] 221.508 POST "/auth/signup HTTP/1.1" 400 61 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:27:32 PM] 258.708 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:31:25 PM] 348.593 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:33:38 PM] 600.682 POST "/auth/signup HTTP/1.1" 400 74 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:35:35 PM] 345.432 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:38:11 PM] 553.095 POST "/auth/signup HTTP/1.1" 200 117 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:40:53 PM] 220.180 POST "/content/get_lessons HTTP/1.1" 200 24669 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 3:55:56 PM] 370.514 POST "/auth/login HTTP/1.1" 200 5300 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 3:55:56 PM] 5.048 POST "/user/wordOfTheDay HTTP/1.1" 200 307 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 3:55:57 PM] 1126.345 POST "/crypto/getCryptoData HTTP/1.1" 200 7282 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 3:55:59 PM] 98.237 POST "/content/get_sections HTTP/1.1" 200 4263 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 3:55:59 PM] 1378.471 POST "/crypto/getHistoricalData HTTP/1.1" 200 122389 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 3:56:07 PM] 115.245 POST "/content/get_lessons HTTP/1.1" 200 9364 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 3:56:27 PM] 200.538 POST "/content/add_lesson HTTP/1.1" 200 89 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 3:56:27 PM] 59.876 POST "/content/get_lessons HTTP/1.1" 200 9853 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 3:58:14 PM] 142.471 POST "/content/update_lesson HTTP/1.1" 200 41 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 3:58:14 PM] 78.522 POST "/content/get_lessons HTTP/1.1" 200 9853 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:15:44 PM] 45.713 POST "/content/update_lesson HTTP/1.1" 400 66 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:16:11 PM] 94.352 POST "/content/update_lesson HTTP/1.1" 400 66 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:16:55 PM] 156.934 POST "/content/update_lesson HTTP/1.1" 400 56 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:17:20 PM] 127.253 POST "/content/get_sections HTTP/1.1" 200 4263 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:17:25 PM] 181.446 POST "/content/get_lessons HTTP/1.1" 200 9853 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:17:40 PM] 317.665 POST "/content/add_lesson HTTP/1.1" 200 89 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:17:40 PM] 68.063 POST "/content/get_lessons HTTP/1.1" 200 10331 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:17:47 PM] 167.333 POST "/content/update_lesson HTTP/1.1" 400 56 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:20:42 PM] 223.600 POST "/content/update_lesson HTTP/1.1" 200 41 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:20:42 PM] 94.591 POST "/content/get_lessons HTTP/1.1" 200 10337 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:41:43 PM] 175.684 POST "/content/get_sections HTTP/1.1" 200 4263 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:42:08 PM] 152.064 POST "/content/get_lessons HTTP/1.1" 200 10337 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:43:32 PM] 175.217 POST "/content/delete_lesson HTTP/1.1" 400 85 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:43:49 PM] 197.576 POST "/content/delete_lesson HTTP/1.1" 400 56 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:44:36 PM] 169.058 POST "/content/get_sections HTTP/1.1" 200 4263 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:44:44 PM] 107.738 POST "/content/get_lessons HTTP/1.1" 200 9853 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:44:52 PM] 136.348 POST "/content/get_lessons HTTP/1.1" 200 24669 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:44:57 PM] 178.192 POST "/content/delete_lesson HTTP/1.1" 200 41 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:46:13 PM] 101.104 POST "/content/get_lessons HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:46:24 PM] 184.415 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:46:26 PM] 85.558 POST "/content/get_lessons HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:46:44 PM] 190.081 POST "/content/get_sections HTTP/1.1" 200 4263 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 4:47:02 PM] 111.856 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:47:05 PM] 162.412 POST "/content/get_lessons HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:48:30 PM] 227.354 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:48:32 PM] 186.193 POST "/content/get_lessons HTTP/1.1" 400 46 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:48:53 PM] 114.729 POST "/content/delete_section HTTP/1.1" 400 56 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:48:58 PM] 170.775 POST "/content/delete_section HTTP/1.1" 400 56 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:53:44 PM] 354.501 POST "/content/delete_section HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:54:10 PM] 160.579 POST "/content/get_lessons HTTP/1.1" 200 9853 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:54:15 PM] 262.092 POST "/content/delete_lesson HTTP/1.1" 200 41 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 4:59:58 PM] 211.812 POST "/content/get_quizquestions HTTP/1.1" 200 2292 - PostmanRuntime/7.32.3
+::1 - - [8/1/2023, 5:01:05 PM] 175.034 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 5:01:20 PM] 204.373 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 5:01:25 PM] 119.671 POST "/content/get_lessons HTTP/1.1" 200 9364 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 5:01:40 PM] 193.800 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 5:01:56 PM] 147.072 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 5:01:58 PM] 101.490 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 5:02:03 PM] 197.532 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 5:04:45 PM] 67.817 POST "/content/get_lessons HTTP/1.1" 200 9364 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 5:04:49 PM] 142.172 POST "/content/get_quizquestions HTTP/1.1" 200 1169 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 5:05:16 PM] 280.824 POST "/content/get_quizquestions HTTP/1.1" 200 1115 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/1/2023, 5:05:18 PM] 151.748 POST "/content/get_quizquestions HTTP/1.1" 200 1178 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 10:05:24 AM] 253.365 POST "/content/get_quizquestions HTTP/1.1" 200 2301 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 10:44:05 AM] 408.761 POST "/auth/login HTTP/1.1" 200 5385 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 10:48:58 AM] 303.934 POST "/auth/login HTTP/1.1" 200 5385 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:02:10 AM] 349.535 POST "/auth/login HTTP/1.1" 400 35 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:02:15 AM] 217.337 POST "/auth/login HTTP/1.1" 200 39899 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:06:39 AM] 335.096 POST "/auth/login HTTP/1.1" 200 39899 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 11:14:11 AM] 386.970 POST "/auth/login HTTP/1.1" 200 39899 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 11:19:44 AM] 317.725 POST "/auth/login HTTP/1.1" 200 39584 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 11:26:03 AM] 378.568 POST "/auth/login HTTP/1.1" 200 39584 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 11:33:12 AM] 302.215 POST "/auth/login HTTP/1.1" 200 39584 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 11:35:55 AM] 334.826 POST "/auth/login HTTP/1.1" 200 5010 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 11:38:00 AM] 240.553 POST "/auth/login HTTP/1.1" 200 39584 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 11:38:25 AM] 336.392 POST "/auth/login HTTP/1.1" 200 39584 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 11:40:19 AM] 388.921 POST "/auth/login HTTP/1.1" 200 5010 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:40:19 AM] 9.423 POST "/user/wordOfTheDay HTTP/1.1" 200 255 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:40:20 AM] 1117.131 POST "/crypto/getCryptoData HTTP/1.1" 200 7243 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:40:22 AM] 1387.316 POST "/crypto/getHistoricalData HTTP/1.1" 200 122396 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:40:45 AM] 240.715 POST "/auth/login HTTP/1.1" 200 39584 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:40:45 AM] 6.871 POST "/user/wordOfTheDay HTTP/1.1" 200 240 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:40:46 AM] 1090.000 POST "/crypto/getCryptoData HTTP/1.1" 200 7247 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:40:48 AM] 1348.248 POST "/crypto/getHistoricalData HTTP/1.1" 200 122395 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:41:26 AM] 455.946 POST "/auth/login HTTP/1.1" 200 5010 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:41:26 AM] 12.332 POST "/user/wordOfTheDay HTTP/1.1" 200 237 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:41:28 AM] 1184.219 POST "/crypto/getCryptoData HTTP/1.1" 200 7253 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:41:29 AM] 1446.435 POST "/crypto/getHistoricalData HTTP/1.1" 200 122395 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:42:07 AM] 369.916 POST "/auth/login HTTP/1.1" 200 5010 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:42:07 AM] 5.743 POST "/user/wordOfTheDay HTTP/1.1" 200 266 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:42:08 AM] 1067.306 POST "/crypto/getCryptoData HTTP/1.1" 200 7239 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:42:10 AM] 1355.006 POST "/crypto/getHistoricalData HTTP/1.1" 200 122396 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:42:36 AM] 481.225 POST "/auth/login HTTP/1.1" 200 5010 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 11:43:55 AM] 436.431 POST "/auth/signup HTTP/1.1" 200 117 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:44:13 AM] 293.720 POST "/auth/login HTTP/1.1" 200 5010 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:44:13 AM] 6.123 POST "/user/wordOfTheDay HTTP/1.1" 200 294 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:44:14 AM] 1105.056 POST "/crypto/getCryptoData HTTP/1.1" 200 7255 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:44:16 AM] 1383.832 POST "/crypto/getHistoricalData HTTP/1.1" 200 122395 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:44:54 AM] 491.397 POST "/auth/signup HTTP/1.1" 200 117 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:45:11 AM] 365.848 POST "/auth/login HTTP/1.1" 400 35 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:45:15 AM] 269.572 POST "/auth/login HTTP/1.1" 200 4869 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:45:15 AM] 5.506 POST "/user/wordOfTheDay HTTP/1.1" 200 268 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:45:16 AM] 1111.960 POST "/crypto/getCryptoData HTTP/1.1" 200 7258 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:45:18 AM] 1390.649 POST "/crypto/getHistoricalData HTTP/1.1" 200 122396 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:45:36 AM] 132.749 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:45:41 AM] 223.106 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:45:45 AM] 201.929 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:45:47 AM] 146.546 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:45:48 AM] 129.397 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:45:55 AM] 145.027 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:46:12 AM] 157.621 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:46:26 AM] 155.586 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:46:29 AM] 174.804 POST "/content/get_quizquestions HTTP/1.1" 200 2301 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:46:32 AM] 183.441 POST "/content/get_quizquestions HTTP/1.1" 200 1039 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:47:30 AM] 4.736 POST "/content/add_quizquestion HTTP/1.1" 400 93 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:51:23 AM] 676.675 POST "/content/add_quizquestion HTTP/1.1" 200 94 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:51:23 AM] 305.133 POST "/content/get_quizquestions HTTP/1.1" 200 1755 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:52:51 AM] 130.534 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:53:06 AM] 153.350 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:53:11 AM] 138.272 POST "/content/get_lessons HTTP/1.1" 200 9364 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:53:18 AM] 138.196 POST "/content/get_lessons HTTP/1.1" 200 9364 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:53:59 AM] 1577.312 POST "/content/add_lesson HTTP/1.1" 200 89 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:54:00 AM] 804.543 POST "/content/get_lessons HTTP/1.1" 200 9993 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:54:12 AM] 227.191 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 11:54:13 AM] 110.560 POST "/content/get_lessons HTTP/1.1" 200 9993 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:03:29 PM] 28.146 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:03:29 PM] 1453.753 POST "/crypto/getHistoricalData HTTP/1.1" 200 122398 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:03:30 PM] 1813.520 POST "/crypto/get-latest-crypto-data HTTP/1.1" 400 49 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:03:34 PM] 1346.075 POST "/crypto/getHistoricalData HTTP/1.1" 200 122399 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:03:34 PM] 1773.385 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 73611 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:03:56 PM] 1354.122 POST "/crypto/getHistoricalData HTTP/1.1" 200 122399 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:03:56 PM] 1784.272 POST "/crypto/get-latest-crypto-data HTTP/1.1" 200 73391 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:04:38 PM] 239.774 POST "/auth/login HTTP/1.1" 200 5211 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:04:38 PM] 3.644 POST "/user/wordOfTheDay HTTP/1.1" 200 179 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:04:39 PM] 1079.334 POST "/crypto/getCryptoData HTTP/1.1" 200 7204 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:04:41 PM] 1364.607 POST "/crypto/getHistoricalData HTTP/1.1" 200 122399 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:04:43 PM] 88.823 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:34:17 PM] 267.879 POST "/auth/login HTTP/1.1" 200 5211 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:35:24 PM] 355.212 POST "/auth/login HTTP/1.1" 200 5211 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:35:24 PM] 9.045 POST "/user/wordOfTheDay HTTP/1.1" 200 346 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:35:26 PM] 1236.638 POST "/crypto/getCryptoData HTTP/1.1" 200 7215 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:35:27 PM] 1355.446 POST "/crypto/getHistoricalData HTTP/1.1" 200 122397 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:35:29 PM] 125.526 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:42:09 PM] 309.731 POST "/auth/login HTTP/1.1" 200 5211 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:42:09 PM] 5.446 POST "/user/wordOfTheDay HTTP/1.1" 200 274 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:42:10 PM] 1089.214 POST "/crypto/getCryptoData HTTP/1.1" 200 7211 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:42:12 PM] 1437.914 POST "/crypto/getHistoricalData HTTP/1.1" 200 122398 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:42:15 PM] 138.316 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:45:08 PM] 146.813 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:45:24 PM] 156.873 POST "/user/update_userLessonStatus HTTP/1.1" 200 4497 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:45:24 PM] 87.550 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 133 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:45:48 PM] 94.794 POST "/user/update_preferences HTTP/1.1" 200 65 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:49:50 PM] 388.784 POST "/auth/login HTTP/1.1" 200 5231 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:49:50 PM] 7.092 POST "/user/wordOfTheDay HTTP/1.1" 200 254 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:49:52 PM] 2038.595 POST "/crypto/getCryptoData HTTP/1.1" 200 7237 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:49:54 PM] 1493.979 POST "/crypto/getHistoricalData HTTP/1.1" 200 122398 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:50:16 PM] 142.947 POST "/auth/login HTTP/1.1" 400 61 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 12:50:37 PM] 178.774 POST "/auth/login HTTP/1.1" 200 5070 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:50:37 PM] 7.734 POST "/user/wordOfTheDay HTTP/1.1" 200 355 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:50:38 PM] 1095.961 POST "/crypto/getCryptoData HTTP/1.1" 200 7248 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:50:40 PM] 1581.917 POST "/crypto/getHistoricalData HTTP/1.1" 200 122399 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:50:41 PM] 75.706 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:50:44 PM] 188.239 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:51:03 PM] 172.190 POST "/user/update_userLessonStatus HTTP/1.1" 200 4497 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:51:03 PM] 71.160 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 133 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 12:57:33 PM] 163.550 POST "/auth/login HTTP/1.1" 200 5089 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 12:59:20 PM] 288.588 POST "/auth/login HTTP/1.1" 200 5089 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 1:01:14 PM] 266.213 POST "/auth/login HTTP/1.1" 200 5089 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 1:06:01 PM] 244.924 POST "/auth/login HTTP/1.1" 400 33 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 1:06:18 PM] 254.916 POST "/auth/login HTTP/1.1" 200 5089 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 1:06:32 PM] 233.949 POST "/auth/login HTTP/1.1" 200 5089 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 1:06:58 PM] 194.349 POST "/user/update_userLessonStatus HTTP/1.1" 200 4515 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:06:58 PM] 81.521 POST "/user/get_recent_lesson_and_quiz HTTP/1.1" 200 133 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:07:24 PM] 143.753 POST "/auth/login HTTP/1.1" 200 5107 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 1:09:17 PM] 264.765 POST "/auth/signup HTTP/1.1" 200 117 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:09:39 PM] 239.082 POST "/auth/login HTTP/1.1" 200 5177 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 1:10:19 PM] 251.855 POST "/auth/login HTTP/1.1" 200 5177 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 1:10:26 PM] 252.103 POST "/auth/login HTTP/1.1" 200 5414 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 1:12:40 PM] 276.372 POST "/auth/login HTTP/1.1" 200 5414 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 1:12:58 PM] 261.294 POST "/auth/login HTTP/1.1" 200 5414 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:12:59 PM] 5.942 POST "/user/wordOfTheDay HTTP/1.1" 200 274 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:13:00 PM] 1175.246 POST "/crypto/getCryptoData HTTP/1.1" 200 7194 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:13:01 PM] 1347.636 POST "/crypto/getHistoricalData HTTP/1.1" 200 122398 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:13:11 PM] 358.524 POST "/auth/login HTTP/1.1" 200 5545 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:13:11 PM] 2.903 POST "/user/wordOfTheDay HTTP/1.1" 200 300 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:13:13 PM] 1153.356 POST "/crypto/getCryptoData HTTP/1.1" 200 7206 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:13:14 PM] 1365.294 POST "/crypto/getHistoricalData HTTP/1.1" 200 122398 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:13:31 PM] 162.740 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:13:33 PM] 125.900 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:13:36 PM] 79.928 POST "/content/get_lessons HTTP/1.1" 200 987 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:14:17 PM] 236.620 POST "/content/add_quizquestion HTTP/1.1" 200 94 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:14:59 PM] 161.030 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3733 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:16:23 PM] 143.775 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:16:28 PM] 154.079 POST "/content/get_lessons HTTP/1.1" 200 987 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:16:29 PM] 81.860 POST "/content/get_quizquestions HTTP/1.1" 200 1098 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:29:20 PM] 59.184 POST "/content/update_quizquestion HTTP/1.1" 400 44 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:32:04 PM] 5.042 POST "/content/update_quizquestion HTTP/1.1" 400 44 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:33:17 PM] 36.094 POST "/content/update_quizquestion HTTP/1.1" 400 44 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:33:39 PM] 254.126 POST "/content/update_quizquestion HTTP/1.1" 200 48 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:48:18 PM] 260.314 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:48:21 PM] 137.365 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:48:21 PM] 117.503 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:48:27 PM] 102.826 POST "/content/get_lessons HTTP/1.1" 200 987 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:48:33 PM] 192.216 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:48:35 PM] 130.508 POST "/content/get_lessons HTTP/1.1" 200 987 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:48:37 PM] 54.116 POST "/content/get_quizquestions HTTP/1.1" 200 1052 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 1:49:25 PM] 270.413 POST "/content/delete_quizquestion HTTP/1.1" 200 380 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:30:32 PM] 226.352 POST "/content/get_sections HTTP/1.1" 200 3712 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:30:44 PM] 198.069 POST "/content/add_section HTTP/1.1" 200 113 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:30:44 PM] 62.331 POST "/content/get_sections HTTP/1.1" 200 3843 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:43:14 PM] 243.547 POST "/content/delete_section HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:46:10 PM] 225.721 POST "/content/add_section HTTP/1.1" 200 113 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:46:10 PM] 76.073 POST "/content/get_sections HTTP/1.1" 200 3843 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:46:15 PM] 149.293 POST "/content/get_lessons HTTP/1.1" 400 46 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:46:37 PM] 205.221 POST "/content/add_lesson HTTP/1.1" 200 89 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:46:37 PM] 58.074 POST "/content/get_lessons HTTP/1.1" 200 551 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:47:07 PM] 246.102 POST "/content/add_lesson HTTP/1.1" 200 89 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:47:07 PM] 89.981 POST "/content/get_lessons HTTP/1.1" 200 1052 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:47:12 PM] 143.724 POST "/content/get_lessons HTTP/1.1" 200 1052 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:47:45 PM] 283.819 POST "/content/delete_lesson HTTP/1.1" 200 41 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:52:12 PM] 220.759 POST "/content/get_sections HTTP/1.1" 200 3843 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:52:14 PM] 75.416 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:52:34 PM] 252.567 POST "/content/add_quizquestion HTTP/1.1" 200 94 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:52:40 PM] 247.919 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:52:42 PM] 162.189 POST "/content/get_quizquestions HTTP/1.1" 200 2211 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:53:10 PM] 260.823 POST "/content/delete_quizquestion HTTP/1.1" 200 380 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:54:27 PM] 132.814 POST "/content/get_quizquestions HTTP/1.1" 200 588 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:54:29 PM] 138.742 POST "/content/get_quizquestions HTTP/1.1" 200 591 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:54:32 PM] 107.067 POST "/content/get_quizquestions HTTP/1.1" 400 43 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:54:37 PM] 150.340 POST "/content/get_quizquestions HTTP/1.1" 200 591 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:56:13 PM] 137.542 POST "/content/get_sections HTTP/1.1" 200 3843 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:56:25 PM] 209.942 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:56:30 PM] 159.808 POST "/content/get_lessons HTTP/1.1" 200 9993 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:56:33 PM] 157.009 POST "/content/get_lessons HTTP/1.1" 200 987 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:56:36 PM] 117.664 POST "/content/get_lessons HTTP/1.1" 200 541 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:56:40 PM] 153.300 POST "/content/get_lessons HTTP/1.1" 200 573 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:56:43 PM] 71.629 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:56:48 PM] 115.859 POST "/content/get_lessons HTTP/1.1" 400 46 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:56:57 PM] 211.248 POST "/content/delete_section HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:57:01 PM] 67.479 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 2:57:04 PM] 103.483 POST "/content/get_lessons HTTP/1.1" 200 551 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:00:51 PM] 214.889 POST "/content/get_sections HTTP/1.1" 200 3292 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:00:53 PM] 66.626 POST "/content/get_sections HTTP/1.1" 200 3292 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:03:15 PM] 145.327 POST "/content/get_sections HTTP/1.1" 200 3292 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:03:23 PM] 200.610 POST "/content/get_lessons HTTP/1.1" 200 9993 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:03:26 PM] 108.006 POST "/content/get_quizquestions HTTP/1.1" 200 1178 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:12:10 PM] 216.510 POST "/content/get_sections HTTP/1.1" 200 3292 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:12:40 PM] 217.823 POST "/content/add_section HTTP/1.1" 200 113 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:12:40 PM] 59.871 POST "/content/get_sections HTTP/1.1" 200 3461 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:13:36 PM] 90.604 POST "/content/get_lessons HTTP/1.1" 400 46 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:14:59 PM] 219.892 POST "/auth/login HTTP/1.1" 200 5691 - PostmanRuntime/7.32.3
+::1 - - [8/2/2023, 3:17:07 PM] 441.872 POST "/auth/login HTTP/1.1" 200 5822 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:17:07 PM] 4.266 POST "/user/wordOfTheDay HTTP/1.1" 200 288 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:17:08 PM] 1102.187 POST "/crypto/getCryptoData HTTP/1.1" 200 7198 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:17:10 PM] 1341.314 POST "/crypto/getHistoricalData HTTP/1.1" 200 122397 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:17:31 PM] 224.499 POST "/auth/login HTTP/1.1" 200 5822 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:17:32 PM] 5.539 POST "/user/wordOfTheDay HTTP/1.1" 200 300 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:17:33 PM] 1072.184 POST "/crypto/getCryptoData HTTP/1.1" 200 7214 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:17:35 PM] 1343.966 POST "/crypto/getHistoricalData HTTP/1.1" 200 122396 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:17:47 PM] 86.452 POST "/content/get_sections HTTP/1.1" 200 3461 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:19:50 PM] 108.907 POST "/content/get_sections HTTP/1.1" 200 3461 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:20:13 PM] 163.168 POST "/content/get_lessons HTTP/1.1" 400 46 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:23:56 PM] 294.763 POST "/content/add_lesson HTTP/1.1" 200 89 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:23:56 PM] 74.092 POST "/content/get_lessons HTTP/1.1" 200 565 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:25:55 PM] 347.772 POST "/content/get_lessons HTTP/1.1" 200 9993 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:26:08 PM] 128.394 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:26:11 PM] 135.762 POST "/content/get_lessons HTTP/1.1" 200 565 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:26:37 PM] 173.691 POST "/content/get_sections HTTP/1.1" 200 3461 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:26:40 PM] 154.289 POST "/content/get_lessons HTTP/1.1" 200 565 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:26:57 PM] 277.448 POST "/content/add_quizquestion HTTP/1.1" 200 94 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:31:02 PM] 380.918 POST "/content/get_sections HTTP/1.1" 200 3461 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:31:11 PM] 140.280 POST "/content/get_lessons HTTP/1.1" 200 565 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:31:51 PM] 133.603 POST "/content/update_section HTTP/1.1" 200 144 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:31:51 PM] 67.203 POST "/content/get_sections HTTP/1.1" 200 3471 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:34:29 PM] 219.301 POST "/content/update_lesson HTTP/1.1" 200 143 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:35:54 PM] 217.421 POST "/content/get_sections HTTP/1.1" 200 3471 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:35:57 PM] 94.865 POST "/content/get_lessons HTTP/1.1" 200 634 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:35:59 PM] 133.968 POST "/content/get_quizquestions HTTP/1.1" 200 531 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:36:54 PM] 98.653 POST "/content/update_quizquestion HTTP/1.1" 200 150 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:51:46 PM] 518.275 POST "/content/delete_quizquestion HTTP/1.1" 200 380 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:51:49 PM] 76.755 POST "/content/get_sections HTTP/1.1" 200 3471 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:53:00 PM] 249.947 POST "/content/delete_section HTTP/1.1" 200 42 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:19 PM] 164.370 POST "/content/get_sections HTTP/1.1" 200 3292 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:23 PM] 139.406 POST "/content/get_lessons HTTP/1.1" 200 551 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:25 PM] 88.698 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:27 PM] 214.264 POST "/content/get_lessons HTTP/1.1" 200 541 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:28 PM] 89.723 POST "/content/get_lessons HTTP/1.1" 200 987 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:34 PM] 92.146 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:37 PM] 191.507 POST "/content/get_lessons HTTP/1.1" 200 9993 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:41 PM] 143.474 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:51 PM] 188.394 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:53 PM] 161.327 POST "/content/get_quizquestions HTTP/1.1" 200 2301 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:56 PM] 175.693 POST "/content/get_quizquestions HTTP/1.1" 200 1755 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:55:58 PM] 106.416 POST "/content/get_quizquestions HTTP/1.1" 200 588 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:01 PM] 142.349 POST "/content/get_quizquestions HTTP/1.1" 200 591 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:04 PM] 202.385 POST "/content/get_quizquestions HTTP/1.1" 400 43 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:09 PM] 155.666 POST "/content/get_quizquestions HTTP/1.1" 400 43 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:12 PM] 141.997 POST "/content/get_lessons HTTP/1.1" 200 9993 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:14 PM] 66.171 POST "/content/get_quizquestions HTTP/1.1" 200 1178 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:17 PM] 122.754 POST "/content/get_quizquestions HTTP/1.1" 200 1115 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:19 PM] 89.989 POST "/content/get_quizquestions HTTP/1.1" 400 43 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:25 PM] 161.170 POST "/content/get_lessons HTTP/1.1" 200 987 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:27 PM] 68.519 POST "/content/get_quizquestions HTTP/1.1" 200 570 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:33 PM] 99.429 POST "/content/get_lessons HTTP/1.1" 200 541 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:36 PM] 171.414 POST "/content/get_quizquestions HTTP/1.1" 200 572 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:39 PM] 259.119 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:41 PM] 143.996 POST "/content/get_quizquestions HTTP/1.1" 200 573 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:44 PM] 302.253 POST "/content/get_lessons HTTP/1.1" 200 551 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 3:56:46 PM] 138.653 POST "/content/get_quizquestions HTTP/1.1" 400 43 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 4:07:18 PM] 237.175 POST "/content/get_sections HTTP/1.1" 200 3292 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 4:08:52 PM] 155.790 POST "/content/get_lessons HTTP/1.1" 200 24105 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 4:11:44 PM] 191.573 POST "/content/get_lessons HTTP/1.1" 200 9993 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 4:25:13 PM] 204.488 POST "/content/update_lesson HTTP/1.1" 200 143 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 4:26:38 PM] 103.053 POST "/content/get_lessons HTTP/1.1" 200 9993 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 4:26:48 PM] 249.108 POST "/content/get_lessons HTTP/1.1" 200 23973 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:19:20 PM] 256.787 POST "/content/update_lesson HTTP/1.1" 200 238 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:24:43 PM] 178.992 POST "/content/get_sections HTTP/1.1" 200 3292 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:24:48 PM] 185.270 POST "/content/get_lessons HTTP/1.1" 200 23989 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:25:24 PM] 197.318 POST "/content/get_lessons HTTP/1.1" 200 573 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:25:26 PM] 158.895 POST "/content/get_quizquestions HTTP/1.1" 400 43 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:25:29 PM] 101.345 POST "/content/get_lessons HTTP/1.1" 200 9993 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:25:31 PM] 75.431 POST "/content/get_quizquestions HTTP/1.1" 200 1178 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:32:43 PM] 320.093 POST "/content/update_quizquestion HTTP/1.1" 400 61 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:33:12 PM] 450.402 POST "/content/update_quizquestion HTTP/1.1" 200 150 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:33:49 PM] 368.682 POST "/content/update_quizquestion HTTP/1.1" 200 150 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:41:49 PM] 399.725 POST "/content/update_quizquestion HTTP/1.1" 200 245 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:44:15 PM] 198.905 POST "/content/get_quizquestions HTTP/1.1" 200 1115 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:44:18 PM] 265.655 POST "/content/get_quizquestions HTTP/1.1" 200 1147 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:44:49 PM] 181.818 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3644 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:45:03 PM] 409.319 POST "/auth/login HTTP/1.1" 200 5806 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:45:03 PM] 9.664 POST "/user/wordOfTheDay HTTP/1.1" 200 318 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:45:04 PM] 1161.011 POST "/crypto/getCryptoData HTTP/1.1" 200 7241 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:45:06 PM] 159.511 POST "/user/get_initial_quiz_data_for_user HTTP/1.1" 200 3644 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/2/2023, 7:45:06 PM] 1369.303 POST "/crypto/getHistoricalData HTTP/1.1" 200 122390 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:49:54 AM] 455.574 POST "/auth/login HTTP/1.1" 200 5806 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:49:55 AM] 6.629 POST "/user/wordOfTheDay HTTP/1.1" 200 227 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:49:56 AM] 1113.918 POST "/crypto/getCryptoData HTTP/1.1" 200 7237 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:49:57 AM] 1333.877 POST "/crypto/getHistoricalData HTTP/1.1" 200 122407 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:50:01 AM] 109.776 POST "/content/get_sections HTTP/1.1" 200 3292 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:50:11 AM] 127.938 POST "/content/get_lessons HTTP/1.1" 200 23989 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:50:41 AM] 105.494 POST "/content/get_lessons HTTP/1.1" 200 9993 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:50:45 AM] 116.410 POST "/content/get_lessons HTTP/1.1" 200 987 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:50:49 AM] 140.617 POST "/content/get_lessons HTTP/1.1" 200 541 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:50:53 AM] 165.155 POST "/content/get_lessons HTTP/1.1" 200 573 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:50:56 AM] 121.123 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:50:59 AM] 163.675 POST "/content/get_lessons HTTP/1.1" 200 551 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:51:21 AM] 245.714 POST "/content/add_section HTTP/1.1" 200 113 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:51:21 AM] 60.747 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:51:35 AM] 108.619 POST "/content/get_lessons HTTP/1.1" 200 30 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:52:00 AM] 89.647 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:52:03 AM] 96.080 POST "/content/get_lessons HTTP/1.1" 200 23989 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:52:05 AM] 89.221 POST "/content/get_lessons HTTP/1.1" 200 30 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:52:28 AM] 215.226 POST "/content/get_lessons HTTP/1.1" 200 551 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:52:37 AM] 82.970 POST "/content/get_lessons HTTP/1.1" 200 30 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:52:41 AM] 146.886 POST "/content/get_lessons HTTP/1.1" 200 551 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:52:43 AM] 82.957 POST "/content/get_quizquestions HTTP/1.1" 200 72 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:53:46 AM] 199.548 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:53:49 AM] 123.877 POST "/content/get_lessons HTTP/1.1" 200 551 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 9:53:51 AM] 98.191 POST "/content/get_quizquestions HTTP/1.1" 200 27 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 10:20:53 AM] 168.679 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 10:21:00 AM] 177.379 POST "/content/get_lessons HTTP/1.1" 200 30 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 10:21:05 AM] 64.266 POST "/content/get_lessons HTTP/1.1" 200 30 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 11:57:18 AM] 263.789 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 11:58:20 AM] 170.122 POST "/content/add_section HTTP/1.1" 200 475 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 11:58:20 AM] 61.461 POST "/content/get_sections HTTP/1.1" 200 3725 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:00:44 PM] 159.692 POST "/content/get_lessons HTTP/1.1" 200 30 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:01:22 PM] 150.713 POST "/content/add_lesson HTTP/1.1" 200 175 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:01:22 PM] 63.713 POST "/content/get_lessons HTTP/1.1" 200 731 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:03:08 PM] 218.015 POST "/content/get_lessons HTTP/1.1" 200 4706 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:03:10 PM] 119.996 POST "/content/get_lessons HTTP/1.1" 200 731 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:03:39 PM] 435.767 POST "/content/add_lesson HTTP/1.1" 200 175 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:03:39 PM] 153.836 POST "/content/get_lessons HTTP/1.1" 200 1472 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:07:37 PM] 178.979 POST "/content/get_sections HTTP/1.1" 200 3725 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:07:42 PM] 173.057 POST "/content/get_lessons HTTP/1.1" 200 1472 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:08:13 PM] 254.704 POST "/content/add_lesson HTTP/1.1" 200 451 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:08:13 PM] 67.426 POST "/content/get_lessons HTTP/1.1" 200 2258 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:09:30 PM] 134.797 POST "/content/get_lessons HTTP/1.1" 200 2258 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:09:41 PM] 123.334 POST "/content/update_lesson HTTP/1.1" 200 238 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:10:28 PM] 164.762 POST "/content/get_sections HTTP/1.1" 200 3725 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:10:31 PM] 134.042 POST "/content/get_lessons HTTP/1.1" 200 2311 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:11:27 PM] 205.180 POST "/content/add_quizquestion HTTP/1.1" 200 268 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:12:25 PM] 161.906 POST "/content/add_quizquestion HTTP/1.1" 200 268 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:13:41 PM] 321.358 POST "/content/add_quizquestion HTTP/1.1" 200 268 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:14:31 PM] 200.232 POST "/content/add_quizquestion HTTP/1.1" 200 268 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:14:49 PM] 148.615 POST "/content/update_quizquestion HTTP/1.1" 200 245 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:19:00 PM] 256.159 POST "/content/get_lessons HTTP/1.1" 200 2311 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:19:02 PM] 140.295 POST "/content/get_quizquestions HTTP/1.1" 200 1176 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:19:14 PM] 262.826 POST "/content/delete_quizquestion HTTP/1.1" 200 380 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:20:59 PM] 135.994 POST "/content/get_quizquestions HTTP/1.1" 200 719 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:21:01 PM] 82.554 POST "/content/get_quizquestions HTTP/1.1" 200 564 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:21:03 PM] 144.370 POST "/content/get_quizquestions HTTP/1.1" 200 510 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:21:21 PM] 96.529 POST "/content/get_sections HTTP/1.1" 200 3725 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:21:26 PM] 103.156 POST "/content/get_lessons HTTP/1.1" 200 2311 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:22:11 PM] 162.183 POST "/content/delete_lesson HTTP/1.1" 200 691 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:24:06 PM] 185.905 POST "/content/delete_section HTTP/1.1" 200 452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/3/2023, 12:24:28 PM] 92.834 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36

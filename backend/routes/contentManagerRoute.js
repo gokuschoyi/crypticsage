@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const CMController = require('../../controllers/content-manager-controller')
+const CMController = require('../controllers/contentManagerController')
 
 router.post('/get_sections', CMController.getSections)
 router.post('/add_section', CMController.addSection)

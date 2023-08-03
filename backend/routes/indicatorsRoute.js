@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const { handleTokenRedisStorage } = require('../../utils/redis_util')
-const IController = require('../../controllers/indicator-controller')
+const { handleTokenRedisStorage } = require('../utils/redis_util')
+const IController = require('../controllers/indicator-controller')
 
 router.post('/fetchTokenData', IController.getTokenData)
 router.post('/get-sma', handleTokenRedisStorage, IController.calculateSMA)

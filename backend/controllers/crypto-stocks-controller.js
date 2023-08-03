@@ -1,24 +1,24 @@
 const axios = require('axios');
-const { getYfinanceQuotes } = require('../utils/crypto/crypto-stocks-util')
+const CSUtil = require('../utils/crypto/crypto-stocks-util');
 
-const getCryptoData = async (req, res) => {
+// < - - - - - - - - - - Route Functions - - - - - - - - - - >
+
+// Entry point to fetch and save the latest ticker meta data to DB
+const FASLatestTickerMetaData = async (req, res) => {
+    const { length } = req.body
     try {
-        const cryptoData = await axios.get('https://min-api.cryptocompare.com/data/top/mktcapfull?limit=20&tsym=USD')
-        var filteredCryptoData = cryptoData.data.Data.map((crypto, index) => {
-            return {
-                id: crypto.CoinInfo.Id,
-                symbol: crypto.CoinInfo.Name,
-                name: crypto.CoinInfo.FullName,
-                image_url: `https://www.cryptocompare.com${crypto.CoinInfo.ImageUrl}`,
-                current_price: crypto.RAW.USD.PRICE,
-                market_cap_rank: index + 1,
-                price_change_24h: crypto.RAW.USD.CHANGE24HOUR,
-                price_change_percentage_24h: crypto.RAW.USD.CHANGEPCT24HOUR,
-                last_updated: crypto.RAW.USD.LASTUPDATE,
-                high_24h: crypto.RAW.USD.HIGH24HOUR,
-                low_24h: crypto.RAW.USD.LOW24HOUR,
-            }
-        })
+        let result = await CSUtil.fetchAndSaveLatestTickerMetaDataToDb({ length })
+        res.status(200).json({ message: "Get Crypto Data request success", result });
+    } catch (err) {
+        console.log("ERROR : ", err);
+        res.status(400).json({ message: "Get Crypto Data request error" })
+    }
+}
+
+// Fetches the top tickers by market cap from DB : Slider box on the frontend
+const getCryptoDataByMarketCap = async (req, res) => {
+    try {
+        var filteredCryptoData = await CSUtil.fetchTopTickerByMarketCap({ length: 20 })
         res.status(200).json({ message: "Get Crypto Data request success", cryptoData: filteredCryptoData });
     } catch (err) {
         console.log(err);
@@ -26,8 +26,9 @@ const getCryptoData = async (req, res) => {
     }
 }
 
-const getHistoricalData = async (req, res) => {
-    const { tokenName, timePeriod, timeFrame } = req.body;
+// Fetches the historical data from CryptoCompare(OHLCV) : Ticker chart on the frontend
+const getLatestTickerData = async (req, res) => {
+    const { tokenName, timeFrame } = req.body;
     let limit = 700;
     try {
         let url = `https://min-api.cryptocompare.com/data/v2/histo${timeFrame}?fsym=${tokenName}&tsym=USD&limit=${limit}`
@@ -39,31 +40,20 @@ const getHistoricalData = async (req, res) => {
     }
 }
 
+// Fetches the latest price data from CryptoCompare and Binance : Ticker table on the frontend
 const getLatestCryptoData = async (req, res) => {
     try {
-        const url = "https://min-api.cryptocompare.com/data/top/mktcapfull?limit=20&tsym=USD"
-        let latestTokenData = await axios.get(url)
-        latestTokenData = latestTokenData.data.Data
+        let sTime = performance.now()
 
-        let cryptoData = latestTokenData.map((token, index) => {
-            return {
-                market_cap_rank: index + 1,
-                id: token.CoinInfo.Id,
-                symbol: token.CoinInfo.Name,
-                name: token.CoinInfo.FullName,
-                image_url: `https://www.cryptocompare.com${token.CoinInfo.ImageUrl}`,
-                max_supply: token.CoinInfo.MaxSupply,
-                asset_launch_date: token.CoinInfo.AssetLaunchDate,
-            }
-        })
+        console.time("Fetching ticker meta from db")
+        let cryptoData = await CSUtil.fetchTickerMetaFromDb({ length: "max" })
+        console.timeEnd("Fetching ticker meta from db")
 
-        const tsyms = 'USD,AUD,NZD,CAD,EUR,JPY'
+        console.time("Promise All")
         const symbolKeys = cryptoData.map(item => item.symbol)
         const fsym = symbolKeys.join(',')
-        const priceUrl = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${fsym}&tsyms=${tsyms}`
-        let priceData = await axios.get(priceUrl)
-        let finalPriceData = priceData.data.RAW
-
+        const tsyms = 'USD,AUD,NZD,CAD,EUR,JPY'
+        const { finalPriceData, ress } = await CSUtil.fetchDataFromUrls({ fsym, tsyms })
         const combinedData = cryptoData.map(item => {
             const symbol = item.symbol;
             const prices = {}
@@ -91,11 +81,6 @@ const getLatestCryptoData = async (req, res) => {
             }
         })
 
-        const testTokenUrl = "https://api.binance.com/api/v3/exchangeInfo"
-        let binanceResult = await axios.get(testTokenUrl)
-        let ress = binanceResult.data.symbols
-        // console.log(binanceResult)
-
         let finalResult = combinedData.map((item) => {
             const matchingSymbol = ress.find(
                 (secondItem) => secondItem.baseAsset === item.symbol
@@ -107,19 +92,23 @@ const getLatestCryptoData = async (req, res) => {
         })
 
         cryptoData = finalResult
+        let eTime = performance.now()
+        const formattedTime = CSUtil.formatMillisecond(eTime - sTime)
+        console.timeEnd("Promise All")
+        res.status(200).json({ message: "Get Latest Token Data request success", cryptoData, formattedTime });
 
-        res.status(200).json({ message: "Get Latest Token Data request success", cryptoData });
     } catch (err) {
         console.log(err);
         res.status(400).json({ message: "Get Latest Token Data request error" })
     }
 }
 
+// Fetches the latest price data from Yahoo Finance : Stocks table on the frontend
 const getLatestStocksData = async (req, res) => {
     try {
         // 'AAPL','GOOG','MSFT','IBM','AMZN','ORCL','INTC','QCOM','CSCO','SAP','TSM','BIDU','EMC','HPQ','TXN','ERIC','ASML','YHOO'
         const yFSymbols = ['AAPL', 'GOOG', 'MSFT']
-        let yFData = await getYfinanceQuotes(yFSymbols)
+        let yFData = await CSUtil.getYfinanceQuotes(yFSymbols)
         res.status(200).json({ message: "Get Latest Stocks Data request success", yFData });
     } catch (err) {
         console.log(err);
@@ -127,9 +116,42 @@ const getLatestStocksData = async (req, res) => {
     }
 }
 
+const fetchTickerDataFromDB = async (req, res) => {
+    const { asset_type, ticker_name, period, page_no, items_per_page } = req.body
+    let tResult
+    try {
+        tResult = await CSUtil.fetchTokenData({asset_type, ticker_name, period, page_no, items_per_page})
+        res.status(200).json({ message: "Token Data fetched successfully, Test", tResult })
+    } catch (err) {
+        console.log(err.message)
+        res.status(400).json({ message: "Something went wrong", error: err.message })
+    }
+
+}
+
+// < - - - - - - - - - - Route Functions - - - - - - - - - - >
+
+
+
+const test = async (req, res) => {
+    const { ticker_name } = req.body
+    const tsyms = 'USD,AUD,NZD,CAD,EUR,JPY'
+    const fsym = 'BTC,ETH'
+    // let result = await CSUtil.fetchDataFromUrls({ fsym, tsyms })
+    // let result = await CSUtil.fetchAndSaveLatestTickerMetaDataToDb({ length: 28 })
+    // let result = await CSUtil.fetchTopTickerByMarketCap({ length: 12 })
+    // let cryptoData = await fetchTickerMetaFromDb({ length: 12 })
+    const checkForDupli = await CSUtil.checkTickerMetaDuplicateData({ ticker_name })
+
+    res.status(200).json({ message: "Get Latest Token Data request success", checkForDupli });
+}
+
 module.exports = {
-    getCryptoData,
-    getHistoricalData,
+    FASLatestTickerMetaData,
+    getCryptoDataByMarketCap,
+    getLatestTickerData,
     getLatestCryptoData,
     getLatestStocksData,
+    fetchTickerDataFromDB,
+    test
 }

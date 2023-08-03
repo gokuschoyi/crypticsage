@@ -45,7 +45,10 @@ const SectionCard = () => {
                                     section_status: allStatus[sectionId]
                                 };
                             } else {
-                                return section;
+                                return {
+                                    ...section,
+                                    section_status: []
+                                }
                             }
                         });
                         dispatch(setSections(combinedArray))
@@ -58,6 +61,8 @@ const SectionCard = () => {
     }, [sections, dispatch, token, allStatus])
 
     function calculatePercentageCompleted(lessonsArray) {
+        // console.log(lessonsArray)
+        if(lessonsArray.length === 0) return 0
         // Initialize counters
         let totalLessons = lessonsArray.length;
         let completedLessons = 0;

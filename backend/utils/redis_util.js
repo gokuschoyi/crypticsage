@@ -1,4 +1,4 @@
-const { client } = require('../services/redis')
+const { redisClient } = require('../services/redis')
 
 const { fetchTokenData } = require('../controllers/indicator-controller')
 
@@ -8,7 +8,7 @@ const handleTokenRedisStorage = async (req, res, next) => {
     const { dataSource, tokenName, period } = req.body;
     const cacheKey = `${dataSource}-${tokenName}-${period}`;
     let isTokenDataAvailableInRedis = false;
-    await client.get(cacheKey, (error, result) => {
+    await redisClient.get(cacheKey, (error, result) => {
         if (error) {
             console.error("Error retrieving value from Redis:", error);
         } else if (result) {
@@ -22,8 +22,8 @@ const handleTokenRedisStorage = async (req, res, next) => {
     if (!isTokenDataAvailableInRedis) {
         console.log("Data not in redis Store. Fetching data from MongoDB (Redis Handler)")
         let data = await fetchTokenData(dataSource, tokenName, period);
-        await client.set(cacheKey, JSON.stringify(data));
-        client.expire(cacheKey, 1800);
+        await redisClient.set(cacheKey, JSON.stringify(data));
+        redisClient.expire(cacheKey, 1800);
     } else {
         console.log("Data available in Redis Store. Skipping MongoDB fetch (Redis Handler) ")
     }

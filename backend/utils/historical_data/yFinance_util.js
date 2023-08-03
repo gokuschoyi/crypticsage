@@ -35,7 +35,7 @@ const getHistoricalYFinanceData = async (params) => {
             let unixTime = new Date(token.date).getTime();
             return {
                 ...token,
-                date: unixTime
+                openTime: unixTime
             }
         })
     } catch (err) {

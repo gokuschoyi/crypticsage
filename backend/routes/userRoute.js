@@ -1,8 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const { upload } = require('../../services/multer-storage')
+const { upload } = require('../services/multer-storage')
 
-const UserController = require('../../controllers/user-controller')
+const UserController = require('../controllers/userController')
 
 router.post('/verify_password', UserController.verifyPassword)
 router.post('/update_password', UserController.updatePassword)
@@ -15,6 +15,6 @@ router.post('/getQuiz', UserController.getQuiz)
 router.post('/submitQuiz', UserController.submitQuiz)
 router.post('/get_recent_lesson_and_quiz', UserController.getRecentLessonAndQuizStatus)
 router.post('/wordOfTheDay', UserController.wordOfTheDay)
-router.post('/upload_log_files', upload.array('file', 3), UserController.processFileUpload)
+router.post('/upload_log_files', upload.array('file', 3), UserController.fileUpload)
 
 module.exports = router

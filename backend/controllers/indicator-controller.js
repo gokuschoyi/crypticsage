@@ -1,6 +1,6 @@
 const { connect, close } = require('../services/db-conn');
 const { periodToMilliseconds } = require('../utils/crypto/crypto-stocks-util')
-const { client } = require('../services/redis')
+const { redisClient } = require('../services/redis')
 var talib = require('talib/build/Release/talib')
 
 // console.log("TALib Version: " + talib.version);
@@ -16,12 +16,15 @@ var talib = require('talib/build/Release/talib')
 
 // OUTPUT: arrya of objects with keys: openTime, open, high, low, close, volume
 // requiredColumns = ['openTime', 'open', 'high', 'low', 'close', 'volume'];
-const fetchTokenData = async (dataSource, tokenName, period) => {
+const fetchTokenData = async (dataSource, tokenName, period, page) => {
     console.log(`Fetching data for ${tokenName} with period ${period} from ${dataSource}`)
     try {
         const db = await connect("fetch token data");
         const tokenDataCollection = db.collection(`${dataSource}`);
-        const tokenData = await tokenDataCollection.findOne(
+        // Calculate the skip value based on the page number
+        const itemsPerPage = 10;
+        const skip = (page - 1) * itemsPerPage;
+        /* const tokenData = await tokenDataCollection.findOne(
             {
                 ticker_name: `${tokenName}`,
             },
@@ -44,9 +47,29 @@ const fetchTokenData = async (dataSource, tokenName, period) => {
                     }
                 }
             }
-        )
-        if (tokenData) {
-            return tokenData.data[period].historical
+        ) */
+
+        const tokenData = await tokenDataCollection.aggregate([
+            { $match: { ticker_name: tokenName } },
+            { $project: { _id: 0, [`data.${period}.historical`]: 1 } },
+            { $unwind: `$data.${period}.historical` },
+            { $sort: { [`data.${period}.historical.openTime`]: -1 } },
+            { $skip: skip },
+            { $limit: itemsPerPage },
+            {
+                $project: {
+                    openTime: `$data.${period}.historical.openTime`,
+                    open: `$data.${period}.historical.open`,
+                    high: `$data.${period}.historical.high`,
+                    low: `$data.${period}.historical.low`,
+                    close: `$data.${period}.historical.close`,
+                    volume: `$data.${period}.historical.volume`,
+                },
+            },
+        ]).toArray();
+
+        if (tokenData.length > 0) {
+            return tokenData.reverse()
         } else {
             return ['no data']
         }
@@ -59,10 +82,10 @@ const fetchTokenData = async (dataSource, tokenName, period) => {
 }
 
 const getTokenData = async (req, res) => {
-    const { dataSource, tokenName, period } = req.body
+    const { dataSource, tokenName, period, page } = req.body
     let tResult
     try {
-        tResult = await fetchTokenData(dataSource, tokenName, period)
+        tResult = await fetchTokenData(dataSource, tokenName, period, page)
         res.status(200).json({ message: "Token Data fetched successfully", tResult })
     } catch (err) {
         console.log(err)
@@ -184,7 +207,7 @@ const calculateNewSMA = async (req, res) => {
             inReal: d1,
             optInTimePeriod: 10
         })
-        const fResult =  result.result.outReal
+        const fResult = result.result.outReal
         const diff = requiredTokenData.length - fResult.length;
         const emptyArr = [...new Array(diff)].map((d) => null)
         const d3 = [...emptyArr, ...fResult]
