@@ -248,6 +248,57 @@ const validateDeleteQuizInputs = ({ params }) => {
     }
 }
 
+const validateFetchTickerDataInput = ({ params }) => {
+    try {
+        let { asset_type, ticker_name, period, page_no, items_per_page } = params
+        // Check if any parameter is null or empty
+        if (!asset_type || !ticker_name || !period || !page_no) {
+            throw new Error("Invalid input. Check parameters and try again.");
+        }
+
+        // Check for valid asset_type
+        if (asset_type !== "crypto" && asset_type !== "stocks") {
+            throw new Error("Invalid asset type. Possible values: crypto, stocks");
+        }
+
+        // Check for valid period based on asset_type
+        const cryptoPeriods = ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d", "3d", "1w"];
+        const stocksPeriods = ["1d", "1wk", "1mo"];
+
+        if (asset_type === "crypto" && !cryptoPeriods.includes(period)) {
+            throw new Error("Invalid period for crypto asset type.");
+        }
+
+        if (asset_type === "stocks" && !stocksPeriods.includes(period)) {
+            throw new Error("Invalid period for stocks asset type.");
+        }
+
+        // Check for valid page_no (positive number)
+        if (isNaN(page_no) || page_no <= 0) {
+            throw new Error("Invalid page no. Page no must be a positive number.");
+        }
+
+        let default_pg_length = 80
+        if (isNaN(items_per_page) || items_per_page < 80) {
+            items_per_page = default_pg_length
+        }
+
+        let payload = {
+            asset_type,
+            ticker_name,
+            period,
+            page_no,
+            items_per_page
+        }
+
+        // All parameters are valid, return true or perform further processing
+        return [true, payload];
+    } catch (error) {
+        console.log("Error : ", error.message)
+        throw new Error(error.message)
+    }
+}
+
 
 module.exports = {
     validateLoginInput
@@ -267,5 +318,6 @@ module.exports = {
     , validateAddQuizInputs
     , validateUpdateQuizDataInputs
     , validateDeleteQuizInputs
-    , 
+    , validateFetchTickerDataInput
+    ,
 }  

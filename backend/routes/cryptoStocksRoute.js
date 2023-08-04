@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const CSController = require('../controllers/crypto-stocks-controller')
+const CSController = require('../controllers/cryptoStocksController')
 
 router.post('/update_ticker_meta', CSController.FASLatestTickerMetaData)
 

@@ -1,5 +1,7 @@
-const axios = require('axios');
-const CSUtil = require('../utils/crypto/crypto-stocks-util');
+const CSServices = require('../services/cryptoStocksServices')
+const CSUtil = require('../utils/cryptoStocksUtil');
+const Validator = require('../utils/validator')
+const MDBServices = require('../services/mongoDBServices')
 
 // < - - - - - - - - - - Route Functions - - - - - - - - - - >
 
@@ -7,11 +9,11 @@ const CSUtil = require('../utils/crypto/crypto-stocks-util');
 const FASLatestTickerMetaData = async (req, res) => {
     const { length } = req.body
     try {
-        let result = await CSUtil.fetchAndSaveLatestTickerMetaDataToDb({ length })
+        let result = await CSServices.processFetchAndSaveLatestTickerMetaData({ length })
         res.status(200).json({ message: "Get Crypto Data request success", result });
     } catch (err) {
         console.log("ERROR : ", err);
-        res.status(400).json({ message: "Get Crypto Data request error" })
+        res.status(400).json({ message: "Get Crypto Data request error", error: err.message })
     }
 }
 
@@ -31,9 +33,8 @@ const getLatestTickerData = async (req, res) => {
     const { tokenName, timeFrame } = req.body;
     let limit = 700;
     try {
-        let url = `https://min-api.cryptocompare.com/data/v2/histo${timeFrame}?fsym=${tokenName}&tsym=USD&limit=${limit}`
-        const historicalData = await axios.get(url)
-        res.status(200).json({ message: "Get Historical Data request success", url, historicalData: historicalData.data });
+        let [data, url] = await CSUtil.getLatestOHLCForTicker({ timeFrame, tokenName, limit })
+        res.status(200).json({ message: "Get Historical Data request success", url, historicalData: data });
     } catch (err) {
         console.log(err);
         res.status(400).json({ message: "Get Historical Data request error" })
@@ -43,60 +44,8 @@ const getLatestTickerData = async (req, res) => {
 // Fetches the latest price data from CryptoCompare and Binance : Ticker table on the frontend
 const getLatestCryptoData = async (req, res) => {
     try {
-        let sTime = performance.now()
-
-        console.time("Fetching ticker meta from db")
-        let cryptoData = await CSUtil.fetchTickerMetaFromDb({ length: "max" })
-        console.timeEnd("Fetching ticker meta from db")
-
-        console.time("Promise All")
-        const symbolKeys = cryptoData.map(item => item.symbol)
-        const fsym = symbolKeys.join(',')
-        const tsyms = 'USD,AUD,NZD,CAD,EUR,JPY'
-        const { finalPriceData, ress } = await CSUtil.fetchDataFromUrls({ fsym, tsyms })
-        const combinedData = cryptoData.map(item => {
-            const symbol = item.symbol;
-            const prices = {}
-            const priceDataForToken = finalPriceData[symbol]
-            for (const [key, value] of Object.entries(priceDataForToken)) {
-                let fdMKCap = item.max_supply * value.PRICE
-                prices[key] = {
-                    "market_cap": value.MKTCAP,
-                    "fd_market_cap": fdMKCap > 0 ? fdMKCap : value.MKTCAP,
-                    "current_price": value.PRICE,
-                    "supply": value.SUPPLY,
-                    "last_updated": value.LASTUPDATE,
-                    "median": value.MEDIAN,
-                    "change_24_hrs": value.CHANGE24HOUR,
-                    "change_percentage_24_hrs": value.CHANGEPCT24HOUR,
-                    "change_day": value.CHANGEDAY,
-                    "change_percentage_day": value.CHANGEPCTDAY,
-                    "high_24h": value.HIGH24HOUR,
-                    "low_24h": value.LOW24HOUR,
-                }
-            }
-            return {
-                ...item,
-                prices
-            }
-        })
-
-        let finalResult = combinedData.map((item) => {
-            const matchingSymbol = ress.find(
-                (secondItem) => secondItem.baseAsset === item.symbol
-            );
-            return {
-                ...item,
-                matchedSymbol: matchingSymbol ? matchingSymbol.symbol : null,
-            };
-        })
-
-        cryptoData = finalResult
-        let eTime = performance.now()
-        const formattedTime = CSUtil.formatMillisecond(eTime - sTime)
-        console.timeEnd("Promise All")
+        const [cryptoData, formattedTime] = await CSServices.processGetLatestCryptoData()
         res.status(200).json({ message: "Get Latest Token Data request success", cryptoData, formattedTime });
-
     } catch (err) {
         console.log(err);
         res.status(400).json({ message: "Get Latest Token Data request error" })
@@ -117,12 +66,16 @@ const getLatestStocksData = async (req, res) => {
 }
 
 const fetchTickerDataFromDB = async (req, res) => {
-    const { asset_type, ticker_name, period, page_no, items_per_page } = req.body
-    let tResult
     try {
-        tResult = await CSUtil.fetchTokenData({asset_type, ticker_name, period, page_no, items_per_page})
-        res.status(200).json({ message: "Token Data fetched successfully, Test", tResult })
-    } catch (err) {
+        const params = req.body
+        const [isValidated, payload] = Validator.validateFetchTickerDataInput({ params })
+        if (isValidated) {
+            const { asset_type, ticker_name, period, page_no, items_per_page } = payload
+            const fetchedResults = await CSServices.processFetchTickerDataFromDb({ asset_type, ticker_name, period, page_no, items_per_page })
+            res.status(200).json({ message: "Token Data fetched successfully", fetchedResults })
+        }
+    }
+    catch (err) {
         console.log(err.message)
         res.status(400).json({ message: "Something went wrong", error: err.message })
     }
@@ -141,7 +94,7 @@ const test = async (req, res) => {
     // let result = await CSUtil.fetchAndSaveLatestTickerMetaDataToDb({ length: 28 })
     // let result = await CSUtil.fetchTopTickerByMarketCap({ length: 12 })
     // let cryptoData = await fetchTickerMetaFromDb({ length: 12 })
-    const checkForDupli = await CSUtil.checkTickerMetaDuplicateData({ ticker_name })
+    const checkForDupli = await MDBServices.checkTickerMetaDuplicateData({ ticker_name })
 
     res.status(200).json({ message: "Get Latest Token Data request success", checkForDupli });
 }

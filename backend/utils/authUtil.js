@@ -2,7 +2,6 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const util = require('util');
 const readdir = util.promisify(fs.readdir);
-const MDBServices = require('../services/mongoDBServices')
 
 const transformQuizData = async (userQuizStatus, quizCollection) => {
     const result = []

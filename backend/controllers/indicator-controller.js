@@ -1,5 +1,5 @@
 const { connect, close } = require('../services/db-conn');
-const { periodToMilliseconds } = require('../utils/crypto/crypto-stocks-util')
+const { periodToMilliseconds } = require('../utils/crypto-stocks-util')
 const { redisClient } = require('../services/redis')
 var talib = require('talib/build/Release/talib')
 
