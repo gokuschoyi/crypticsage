@@ -1051,10 +1051,10 @@ const insertBinanceDataToDb = async ({ ticker_name, period, meta, tokenData, all
     }
 ] 
 */
-const getFirstObjectForEachPeriod = async () => {
+const getFirstObjectForEachPeriod = async ({ collection_name }) => {
     try {
-        const db = await connect("Getting first objects for each period")
-        const collection = db.collection('binance');
+        const db = await connect(`Getting first objects for each period, ${collection_name}`)
+        const collection = db.collection(collection_name);
         const result = await collection.aggregate([
             {
                 $project: {
@@ -1116,9 +1116,9 @@ const getFirstObjectForEachPeriod = async () => {
     } catch (error) {
         console.log(error)
         throw new Error(error.message)
-    } finally {
+    } /* finally {
         close("get first objs");
-    }
+    } */
 };
 
 // Updates the Ticker with the latest data
@@ -1433,6 +1433,18 @@ const saveLatestTickerMetaDataToDb = async ({ cryptoData }) => {
     }
 }
 
+const deleteOneMetaData = async ({ symbol }) => {
+    try {
+        const db = await connect("Delete one ticker meta data")
+        const collection = db.collection("binance_ticker_meta")
+        const result = await collection.deleteOne({ symbol: symbol })
+        return result
+    } catch (error) {
+        console.log(error)
+        throw new Error(error.message)
+    }
+}
+
 // Fetches the top tickers from DB based on length: crypticsage/binance-ticker-meta
 // INPUT : length - number of tickers to fetch : { length: 10 } or { length: "max" }
 // OUTPUT : Array of tickers
@@ -1463,7 +1475,7 @@ const fetchTickerMetaFromDb = async ({ length }) => {
         if (length === undefined || length === null || length === 'max' || length === 0 || length === '') {
             length = 1000
         }
-        const db = await connect("Ticker meta fetch and save")
+        const db = await connect("Ticker meta fetch")
         const projectionFields = {
             _id: 0,
             market_cap_rank: 1,
@@ -1631,6 +1643,45 @@ const checkTickerMetaDuplicateData = async ({ ticker_name }) => {
 
 //<------------------------CRYPTO-STOCKS SERVICES-------------------------->
 
+const getDetailsFromBinanceHistorical = async () => {
+    try {
+        const db = await binanceConnect("Getting details from binace historical")
+        const collections = await db.collections()
+
+        const tickerInfo = await Promise.all(collections.map(async (collection) => {
+            const collectionName = collection.collectionName;
+            const aggregationPipeline = [
+                {
+                    $group: {
+                        _id: null,
+                        historical: { $sum: 1 },
+                        firstHistorical: { $first: "$openTime" },
+                        lastHistorical: { $last: "$openTime" }
+                    }
+                }
+            ];
+
+            const result = await collection.aggregate(aggregationPipeline).toArray();
+
+            return {
+                ticker_name: collectionName,
+                [collectionName]: {
+                    historical: result[0].historical,
+                    firstHistorical: result[0].firstHistorical,
+                    lastHistorical: result[0].lastHistorical,
+                    oldestDate: new Date(result[0].firstHistorical).toLocaleString(),
+                    latestDate: new Date(result[0].lastHistorical).toLocaleString(),
+                },
+            };
+        }));
+        return tickerInfo
+    } catch (error) {
+        console.log(error)
+        throw new Error(error.message)
+    }
+}
+
+
 module.exports = {
     getUserByEmail
     , checkUserExists
@@ -1676,8 +1727,10 @@ module.exports = {
     , getData
     , checkDuplicateData
     , saveLatestTickerMetaDataToDb
+    , deleteOneMetaData
     , fetchTickerMetaFromDb
     , fetchTickersFromBinanceHistoricalDb
     , fetchTickersFromCrypticsageBinance
     , checkTickerMetaDuplicateData
+    , getDetailsFromBinanceHistorical
 }

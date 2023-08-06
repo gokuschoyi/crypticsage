@@ -3,6 +3,8 @@ const router = express.Router()
 
 const CMController = require('../controllers/contentManagerController')
 
+router.post('/get_tickers', CMController.getTickersIndb)
+
 router.post('/get_sections', CMController.getSections)
 router.post('/add_section', CMController.addSection)
 router.post('/update_section', CMController.updateSection)

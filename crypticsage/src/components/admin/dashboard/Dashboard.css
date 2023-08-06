@@ -1,0 +1,47 @@
+.admin-dashboard-container {
+    min-height: 100vh;
+}
+
+.admin-controller-stats {
+    min-height: auto;
+}
+
+.stats-box {
+    min-height: 400px;
+}
+
+.token-image-hist-box {
+    width: 25px;
+    height: 25px;
+}
+
+.small-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.small-icon-button {
+    width: 25px;
+    height: 25px;
+}
+
+.hist-title {
+    width: 180px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: start;
+}
+
+.small-screen-font-size {
+    transition: all 0.5s ease;
+}
+
+@media screen and (max-width: 600px) {
+    .small-screen-font-size {
+        transition: all 0.5s ease;
+        font-size: 18px !important;
+        display: flex;
+        align-items: center;
+    }
+}

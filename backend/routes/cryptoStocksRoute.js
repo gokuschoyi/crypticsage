@@ -4,6 +4,7 @@ const router = express.Router()
 const CSController = require('../controllers/cryptoStocksController')
 
 router.post('/update_ticker_meta', CSController.FASLatestTickerMetaData)
+router.post('/delete_ticker_meta', CSController.deleteTickerMeta)
 
 router.post('/getCryptoData', CSController.getCryptoDataByMarketCap)
 router.post('/getHistoricalData', CSController.getLatestTickerData) //change name to getRecentChartData

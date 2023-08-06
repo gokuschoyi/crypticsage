@@ -6304,3 +6304,334 @@
 ::1 - - [8/4/2023, 12:56:26 PM] 21.304 POST "/crypto/fetch_token_data HTTP/1.1" 400 91 - PostmanRuntime/7.32.3
 ::1 - - [8/4/2023, 12:56:38 PM] 4.077 POST "/crypto/fetch_token_data HTTP/1.1" 400 96 - PostmanRuntime/7.32.3
 ::1 - - [8/4/2023, 12:56:42 PM] 205.766 POST "/crypto/fetch_token_data HTTP/1.1" 200 16556 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 1:05:00 PM] 235.045 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 1:11:41 PM] 162.488 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 1:11:44 PM] 57.446 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 1:27:59 PM] 1844.432 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2846 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 1:37:50 PM] 120.117 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 1:44:39 PM] 111.502 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 2:00:10 PM] 121.276 POST "/content/get_tickers HTTP/1.1" 200 5710 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 2:20:38 PM] 720.022 POST "/content/get_tickers HTTP/1.1" 200 3665228 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 2:23:05 PM] 961.282 POST "/content/get_tickers HTTP/1.1" 200 6393 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 2:24:36 PM] 500.900 POST "/content/get_tickers HTTP/1.1" 200 5354 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 2:44:57 PM] 711.422 POST "/content/get_tickers HTTP/1.1" 200 5500 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 2:49:24 PM] 834.796 POST "/content/get_tickers HTTP/1.1" 200 19461 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 2:56:10 PM] 897.221 POST "/content/get_tickers HTTP/1.1" 200 19244 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:00:46 PM] 1194.635 POST "/content/get_tickers HTTP/1.1" 200 19244 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:02:22 PM] 720.326 POST "/content/get_tickers HTTP/1.1" 200 10460 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:03:14 PM] 1068.751 POST "/content/get_tickers HTTP/1.1" 200 10506 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:03:56 PM] 722.283 POST "/content/get_tickers HTTP/1.1" 200 19507 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:04:20 PM] 604.287 POST "/content/get_tickers HTTP/1.1" 200 20546 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:04:55 PM] 1136.719 POST "/content/get_tickers HTTP/1.1" 200 19507 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:05:19 PM] 734.420 POST "/content/get_tickers HTTP/1.1" 200 19290 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:09:26 PM] 824.474 POST "/content/get_tickers HTTP/1.1" 200 19290 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:11:15 PM] 1381.521 POST "/content/get_tickers HTTP/1.1" 200 20657 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:13:12 PM] 736.987 POST "/content/get_tickers HTTP/1.1" 200 14333 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:14:25 PM] 858.294 POST "/content/get_tickers HTTP/1.1" 200 19507 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:15:29 PM] 917.976 POST "/content/get_tickers HTTP/1.1" 200 19290 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:19:24 PM] 817.868 POST "/content/get_tickers HTTP/1.1" 200 19290 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:22:05 PM] 990.154 POST "/content/get_tickers HTTP/1.1" 200 19295 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:27:27 PM] 680.070 POST "/content/get_tickers HTTP/1.1" 200 19290 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:28:07 PM] 806.899 POST "/content/get_tickers HTTP/1.1" 200 19295 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:30:45 PM] 1583.621 POST "/content/get_tickers HTTP/1.1" 200 77603 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:39:21 PM] 1155.999 POST "/content/get_tickers HTTP/1.1" 200 77627 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:39:41 PM] 629.262 POST "/content/get_tickers HTTP/1.1" 200 77627 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:40:27 PM] 937.298 POST "/content/get_tickers HTTP/1.1" 200 14484 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:44:41 PM] 874.582 POST "/content/get_tickers HTTP/1.1" 200 19290 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:45:40 PM] 717.460 POST "/content/get_tickers HTTP/1.1" 200 19290 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:46:56 PM] 1130.714 POST "/content/get_tickers HTTP/1.1" 200 19290 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:49:10 PM] 840.749 POST "/content/get_tickers HTTP/1.1" 200 14350 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:50:08 PM] 919.546 POST "/content/get_tickers HTTP/1.1" 200 19432 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:55:14 PM] 710.799 POST "/content/get_tickers HTTP/1.1" 200 19432 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 3:59:16 PM] 940.404 POST "/content/get_tickers HTTP/1.1" 200 14566 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:00:21 PM] 792.667 POST "/content/get_tickers HTTP/1.1" 200 14350 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:00:47 PM] 777.846 POST "/content/get_tickers HTTP/1.1" 200 19649 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:04:16 PM] 768.620 POST "/content/get_tickers HTTP/1.1" 200 14566 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:04:31 PM] 608.309 POST "/content/get_tickers HTTP/1.1" 200 19432 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:05:51 PM] 752.691 POST "/content/get_tickers HTTP/1.1" 200 19649 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:06:14 PM] 788.226 POST "/content/get_tickers HTTP/1.1" 200 19649 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:06:38 PM] 648.949 POST "/content/get_tickers HTTP/1.1" 200 19649 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:07:18 PM] 820.747 POST "/content/get_tickers HTTP/1.1" 200 77745 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:09:22 PM] 926.760 POST "/content/get_tickers HTTP/1.1" 200 19649 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:10:26 PM] 775.741 POST "/content/get_tickers HTTP/1.1" 200 19649 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:13:55 PM] 1272.781 POST "/content/get_tickers HTTP/1.1" 200 16927 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:14:41 PM] 505.671 POST "/content/get_tickers HTTP/1.1" 200 16927 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:15:17 PM] 1153.117 POST "/content/get_tickers HTTP/1.1" 200 19461 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:16:26 PM] 789.313 POST "/content/get_tickers HTTP/1.1" 200 20006 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:16:47 PM] 765.406 POST "/content/get_tickers HTTP/1.1" 200 20704 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:17:53 PM] 836.839 POST "/content/get_tickers HTTP/1.1" 200 16927 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:19:08 PM] 1302.842 POST "/content/get_tickers HTTP/1.1" 200 16940 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:20:33 PM] 815.229 POST "/content/get_tickers HTTP/1.1" 200 16798 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:22:13 PM] 4001.520 POST "/content/get_tickers HTTP/1.1" 200 16798 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:23:37 PM] 1253.890 POST "/content/get_tickers HTTP/1.1" 200 16816 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:24:01 PM] 1110.809 POST "/content/get_tickers HTTP/1.1" 200 16816 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:24:31 PM] 332.164 POST "/auth/login HTTP/1.1" 200 5848 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:26:15 PM] 783.143 POST "/content/get_tickers HTTP/1.1" 200 16838 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:28:34 PM] 1187.174 POST "/content/get_tickers HTTP/1.1" 200 16871 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:28:59 PM] 602.012 POST "/content/get_tickers HTTP/1.1" 200 16875 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:34:06 PM] 807.423 POST "/content/get_tickers HTTP/1.1" 200 5724 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:34:36 PM] 825.422 POST "/content/get_tickers HTTP/1.1" 200 16875 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:34:54 PM] 650.930 POST "/content/get_tickers HTTP/1.1" 200 19493 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:35:21 PM] 846.469 POST "/content/get_tickers HTTP/1.1" 200 19493 - PostmanRuntime/7.32.3
+::1 - - [8/4/2023, 4:40:37 PM] 1538.081 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:40:37 PM] 717.861 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:40:37 PM] 1593.402 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:40:37 PM] 814.281 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:45:29 PM] 52.424 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:45:29 PM] 1002.468 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:45:30 PM] 586.576 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:45:34 PM] 536.467 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:45:43 PM] 566.525 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:46:56 PM] 691.774 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:49:55 PM] 809.261 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:51:25 PM] 963.303 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:52:15 PM] 147.090 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:52:32 PM] 792.989 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:52:34 PM] 90.861 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:55:46 PM] 209.719 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:55:49 PM] 886.993 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:55:49 PM] 913.082 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:56:11 PM] 567.270 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:56:11 PM] 557.422 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:56:20 PM] 151.445 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:56:22 PM] 587.492 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:56:47 PM] 586.977 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:56:47 PM] 597.124 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:57:01 PM] 118.268 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:57:04 PM] 919.382 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:57:12 PM] 74.286 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 4:57:14 PM] 513.262 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:13:09 PM] 715.202 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:21:47 PM] 803.943 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:21:47 PM] 831.835 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:23:25 PM] 148.590 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:23:26 PM] 820.075 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:23:31 PM] 59.063 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:23:34 PM] 997.830 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:23:38 PM] 110.062 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:23:41 PM] 619.301 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:35:10 PM] 94.390 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:35:14 PM] 1216.998 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:37:03 PM] 122.105 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:37:07 PM] 866.836 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:38:44 PM] 119.465 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/4/2023, 7:38:46 PM] 898.471 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 10:39:09 AM] 501.268 POST "/auth/login HTTP/1.1" 200 5848 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 10:39:12 AM] 785.896 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 10:41:06 AM] 156.054 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 10:41:11 AM] 790.106 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 10:55:22 AM] 142.620 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 10:55:24 AM] 769.095 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 11:30:05 AM] 27701.328 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 11:30:06 AM] 27099.384 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 11:47:15 AM] 235.303 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 11:47:18 AM] 1171.041 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 11:56:08 AM] 67.177 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 11:56:11 AM] 1367.331 POST "/content/get_tickers HTTP/1.1" 200 19493 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 12:30:09 PM] 187.542 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 12:30:11 PM] 1627.057 POST "/content/get_tickers HTTP/1.1" 200 20766 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 12:31:36 PM] 1386.782 POST "/content/get_tickers HTTP/1.1" 200 20766 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 12:33:51 PM] 1374.743 POST "/content/get_tickers HTTP/1.1" 200 20766 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 12:34:00 PM] 1294.374 POST "/content/get_tickers HTTP/1.1" 200 20766 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 12:34:41 PM] 940.532 POST "/content/get_tickers HTTP/1.1" 200 20766 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 1:28:11 PM] 13160.279 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 1:28:12 PM] 11930.816 POST "/content/get_tickers HTTP/1.1" 200 20766 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 1:56:43 PM] 145.629 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 1:56:46 PM] 1181.889 POST "/content/get_tickers HTTP/1.1" 200 24454 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:01:16 PM] 197.642 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:01:20 PM] 1058.133 POST "/content/get_tickers HTTP/1.1" 200 24454 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:01:53 PM] 223.963 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:01:55 PM] 597.997 POST "/content/get_tickers HTTP/1.1" 200 24454 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:03:00 PM] 187.753 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:03:02 PM] 1172.859 POST "/content/get_tickers HTTP/1.1" 200 22858 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:49:54 PM] 143.992 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:54:35 PM] 216.438 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:54:58 PM] 137.073 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:55:00 PM] 787.275 POST "/content/get_tickers HTTP/1.1" 400 53 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:55:36 PM] 210.148 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:55:38 PM] 833.411 POST "/content/get_tickers HTTP/1.1" 400 53 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:57:38 PM] 209.283 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:57:40 PM] 1873.653 POST "/content/get_tickers HTTP/1.1" 400 53 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 2:58:37 PM] 130.318 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 3:00:12 PM] 950.195 POST "/content/get_tickers HTTP/1.1" 400 57 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 3:00:39 PM] 234.331 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 3:01:29 PM] 860.291 POST "/content/get_tickers HTTP/1.1" 400 57 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 3:01:31 PM] 95.344 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 3:02:15 PM] 651.243 POST "/content/get_tickers HTTP/1.1" 400 57 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 3:02:18 PM] 71.248 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:25:45 PM] 1827.630 POST "/content/get_tickers HTTP/1.1" 400 57 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:26:04 PM] 325.650 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:26:48 PM] 1141.226 POST "/content/get_tickers HTTP/1.1" 400 60 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:26:57 PM] 194.415 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:28:13 PM] 91.509 POST "/crypto/testing HTTP/1.1" 200 70 - PostmanRuntime/7.32.3
+::1 - - [8/5/2023, 6:29:02 PM] 142.261 POST "/crypto/testing HTTP/1.1" 200 1288 - PostmanRuntime/7.32.3
+::1 - - [8/5/2023, 6:30:07 PM] 798.223 POST "/content/get_tickers HTTP/1.1" 400 84 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:30:23 PM] 190.861 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:30:25 PM] 565.927 POST "/content/get_tickers HTTP/1.1" 400 57 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:31:07 PM] 238.419 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:31:09 PM] 785.764 POST "/content/get_tickers HTTP/1.1" 400 57 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:31:13 PM] 159.257 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:34:48 PM] 814.897 POST "/content/get_tickers HTTP/1.1" 400 60 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:34:51 PM] 177.266 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:35:40 PM] 29.834 POST "/content/get_tickers HTTP/1.1" 400 60 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:35:43 PM] 80.338 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:36:13 PM] 8.701 POST "/content/get_tickers HTTP/1.1" 400 60 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:36:17 PM] 55.751 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:37:00 PM] 187.178 POST "/crypto/testing HTTP/1.1" 200 2137 - PostmanRuntime/7.32.3
+::1 - - [8/5/2023, 6:37:28 PM] 198.158 POST "/content/get_tickers HTTP/1.1" 400 60 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:37:36 PM] 117.858 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:38:01 PM] 970.229 POST "/content/get_tickers HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:41:11 PM] 193.441 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:41:14 PM] 918.985 POST "/content/get_tickers HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:43:06 PM] 146.560 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:43:08 PM] 1309.167 POST "/content/get_tickers HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:43:33 PM] 197.698 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:43:34 PM] 633.373 POST "/content/get_tickers HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 6:43:44 PM] 143.380 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:06:48 PM] 1269.319 POST "/content/get_tickers HTTP/1.1" 400 37 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:07:40 PM] 513.935 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:07:43 PM] 721.729 POST "/content/get_tickers HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:08:29 PM] 112.928 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:08:31 PM] 1036.638 POST "/content/get_tickers HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:08:52 PM] 82.306 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:08:54 PM] 747.021 POST "/content/get_tickers HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:09:22 PM] 159.631 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:09:23 PM] 611.135 POST "/content/get_tickers HTTP/1.1" 400 38 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:09:27 PM] 106.607 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:09:59 PM] 677.767 POST "/content/get_tickers HTTP/1.1" 200 24938 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:10:03 PM] 92.256 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:10:05 PM] 744.358 POST "/content/get_tickers HTTP/1.1" 200 24938 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:10:22 PM] 922.509 POST "/content/get_tickers HTTP/1.1" 200 24938 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:10:35 PM] 387.375 POST "/auth/login HTTP/1.1" 200 5848 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:10:35 PM] 6.406 POST "/user/wordOfTheDay HTTP/1.1" 200 252 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:10:36 PM] 1103.302 POST "/crypto/getCryptoData HTTP/1.1" 200 7292 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:10:38 PM] 1080.770 POST "/crypto/getHistoricalData HTTP/1.1" 200 122395 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:10:51 PM] 162.754 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:10:54 PM] 907.139 POST "/content/get_tickers HTTP/1.1" 200 24938 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:12:02 PM] 186.380 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:12:04 PM] 1627.189 POST "/content/get_tickers HTTP/1.1" 400 66 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:12:12 PM] 298.002 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:12:14 PM] 897.339 POST "/content/get_tickers HTTP/1.1" 400 296 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:12:25 PM] 177.588 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:13:01 PM] 738.141 POST "/content/get_tickers HTTP/1.1" 400 71 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:13:13 PM] 186.370 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:13:53 PM] 1144.522 POST "/content/get_tickers HTTP/1.1" 200 24910 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:29:42 PM] 229.998 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:29:44 PM] 909.428 POST "/content/get_tickers HTTP/1.1" 200 25200 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:33:59 PM] 184.735 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:34:03 PM] 1227.225 POST "/content/get_tickers HTTP/1.1" 200 8559 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:34:22 PM] 1232.142 POST "/content/get_tickers HTTP/1.1" 200 27152 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:34:44 PM] 221.096 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:34:46 PM] 676.778 POST "/content/get_tickers HTTP/1.1" 200 24887 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:35:54 PM] 190.875 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:35:56 PM] 985.265 POST "/content/get_tickers HTTP/1.1" 400 52 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:36:07 PM] 253.421 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:36:09 PM] 813.719 POST "/content/get_tickers HTTP/1.1" 200 24887 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:36:45 PM] 258.439 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:36:47 PM] 942.383 POST "/content/get_tickers HTTP/1.1" 200 24887 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:38:13 PM] 221.712 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:38:15 PM] 1162.255 POST "/content/get_tickers HTTP/1.1" 200 24887 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:42:44 PM] 208.672 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:42:47 PM] 938.934 POST "/content/get_tickers HTTP/1.1" 200 24810 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:48:48 PM] 172.106 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/5/2023, 7:48:50 PM] 1117.339 POST "/content/get_tickers HTTP/1.1" 200 24810 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 12:17:03 PM] 270.767 POST "/auth/login HTTP/1.1" 400 36 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 12:18:34 PM] 248.347 POST "/auth/login HTTP/1.1" 200 5848 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 12:18:35 PM] 4.119 POST "/user/wordOfTheDay HTTP/1.1" 200 207 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 12:18:36 PM] 1111.830 POST "/crypto/getCryptoData HTTP/1.1" 200 7259 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 12:18:37 PM] 1352.507 POST "/crypto/getHistoricalData HTTP/1.1" 200 122370 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 12:19:00 PM] 933.455 POST "/content/get_tickers HTTP/1.1" 200 24810 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:04:24 PM] 23.594 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:04:26 PM] 796.078 POST "/content/get_tickers HTTP/1.1" 200 24810 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:28:46 PM] 18.614 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:28:49 PM] 905.689 POST "/content/get_tickers HTTP/1.1" 200 24810 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:50:07 PM] 1098.469 POST "/crypto/update_ticker_meta HTTP/1.1" 200 242 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:50:07 PM] 950.793 POST "/content/get_tickers HTTP/1.1" 200 24810 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:50:45 PM] 1458.984 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2908 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:50:46 PM] 432.052 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:51:13 PM] 1398.336 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2939 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:51:14 PM] 1075.935 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:54:39 PM] 1415.747 POST "/crypto/update_ticker_meta HTTP/1.1" 200 242 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 2:54:40 PM] 802.637 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:01:57 PM] 1413.383 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2939 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:01:58 PM] 598.971 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:11:16 PM] 19.740 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:11:18 PM] 893.948 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:15:19 PM] 1488.177 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:17:59 PM] 1506.539 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2939 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:17:59 PM] 799.748 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:21:13 PM] 1462.740 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2939 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:21:14 PM] 884.676 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:23:43 PM] 942.080 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:23:43 PM] 1019.344 POST "/content/get_tickers HTTP/1.1" 400 84 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:23:58 PM] 1058.052 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:24:12 PM] 1420.219 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2939 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:24:13 PM] 600.463 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:27:30 PM] 1118.398 POST "/crypto/update_ticker_meta HTTP/1.1" 200 2939 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:27:30 PM] 722.721 POST "/content/get_tickers HTTP/1.1" 200 25009 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:27:53 PM] 1435.131 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3001 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:27:54 PM] 415.875 POST "/content/get_tickers HTTP/1.1" 200 25222 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:30:33 PM] 1456.972 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3032 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:30:34 PM] 1000.402 POST "/content/get_tickers HTTP/1.1" 200 25222 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:30:40 PM] 1401.413 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3094 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:30:41 PM] 422.677 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:31:03 PM] 1397.145 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:31:04 PM] 429.457 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:31:45 PM] 1128.343 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:31:45 PM] 657.649 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:34:24 PM] 1454.585 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:34:25 PM] 1016.591 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:34:39 PM] 1545.120 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:34:40 PM] 715.322 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:35:47 PM] 1454.251 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 3:35:48 PM] 496.331 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 4:28:27 PM] 1427.231 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 4:29:54 PM] 949.090 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 4:46:10 PM] 1103.506 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 4:51:14 PM] 931.389 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:00:49 PM] 761.376 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:12:55 PM] 815.621 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:12:55 PM] 900.786 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:31:07 PM] 1003.977 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:31:31 PM] 678.749 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:35:26 PM] 692.722 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:35:35 PM] 576.701 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:36:42 PM] 625.735 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:36:49 PM] 951.474 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:37:34 PM] 676.151 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:37:51 PM] 740.034 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:38:22 PM] 658.738 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:38:27 PM] 647.401 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:39:29 PM] 1403.900 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:42:16 PM] 1257.690 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:42:20 PM] 755.823 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:43:33 PM] 636.999 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:44:12 PM] 673.276 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:49:10 PM] 746.544 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:49:16 PM] 1062.367 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:49:54 PM] 651.088 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:50:13 PM] 638.532 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:50:13 PM] 766.156 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:51:18 PM] 895.908 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:51:18 PM] 1048.329 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:52:04 PM] 580.766 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:52:04 PM] 591.724 POST "/content/get_tickers HTTP/1.1" 400 84 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:52:10 PM] 509.545 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:53:22 PM] 1418.898 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:53:22 PM] 1562.476 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:54:44 PM] 781.011 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:59:24 PM] 883.241 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 5:59:24 PM] 988.780 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:00:59 PM] 679.669 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:00:59 PM] 805.841 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:06:27 PM] 900.182 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:08:42 PM] 1384.650 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:08:43 PM] 620.812 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:11:13 PM] 8.191 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:11:16 PM] 985.634 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:11:33 PM] 558.423 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:17:31 PM] 740.678 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:18:26 PM] 502.597 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:21:05 PM] 1409.922 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:21:06 PM] 801.498 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/6/2023, 6:24:38 PM] 664.940 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36

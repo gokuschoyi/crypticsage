@@ -17,6 +17,17 @@ const FASLatestTickerMetaData = async (req, res) => {
     }
 }
 
+const deleteTickerMeta = async (req, res) => {
+    try {
+        const { symbol } = req.body
+        const deletedTickerMeta = await MDBServices.deleteOneMetaData({ symbol })
+        res.status(200).json({ message: "Delete Ticker Meta request success", deletedTickerMeta });
+    } catch (err) {
+        console.log("ERROR : ", err);
+        res.status(400).json({ message: "Get Crypto Data request error", error: err.message })
+    }
+}
+
 // Fetches the top tickers by market cap from DB : Slider box on the frontend
 const getCryptoDataByMarketCap = async (req, res) => {
     try {
@@ -101,6 +112,7 @@ const test = async (req, res) => {
 
 module.exports = {
     FASLatestTickerMetaData,
+    deleteTickerMeta,
     getCryptoDataByMarketCap,
     getLatestTickerData,
     getLatestCryptoData,

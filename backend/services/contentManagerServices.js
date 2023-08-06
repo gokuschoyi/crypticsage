@@ -1,6 +1,66 @@
 const { close } = require('../services/db-conn')
 const MDBServices = require('./mongoDBServices')
+const CMUtil = require('../utils/contentManagerUtil')
 
+const serviceGetTickerStatsFromDb = async () => {
+    try {
+        let tickerMeta = await MDBServices.fetchTickerMetaFromDb({ length: "" })
+        let symbolsFromBinance = await CMUtil.fetchSymbolsFromBinanceAPI()
+
+        let tickerNameAdded = tickerMeta.map((ticker) => {
+            const matched = symbolsFromBinance.find((symbol) => symbol.baseAsset === ticker.symbol && symbol.quoteAsset === "USDT")
+            return {
+                ...ticker,
+                ticker_name: matched ? matched.symbol : null,
+            }
+        })
+
+        let tickerWithNoDataInBinance = tickerNameAdded.filter((item) => item.ticker_name === null)
+        let finalRes = tickerNameAdded.filter((item) => item.ticker_name !== null)
+        let tickersWithHistData = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance' })
+
+        const findMatchingObject = (tickerName) => {
+            return finalRes.find((item) => item.ticker_name === tickerName);
+        };
+
+        // Map over tickersWithHistData and add the matching object from finalRes to the new key "data"
+        let updatedTickersWithHistData = tickersWithHistData.map((tickerData) => {
+            const matchingObject = findMatchingObject(tickerData.ticker_name);
+            if (matchingObject) {
+                return {
+                    meta: matchingObject,
+                    ...tickerData,
+                };
+            }
+            return tickerData;
+        });
+
+        let bHistData = await MDBServices.getDetailsFromBinanceHistorical()
+
+        let totalTickerCountInDb = tickerMeta.length
+        let totalTickersWithDataToFetch = finalRes.length
+
+        updatedTickersWithHistData.map((item) => {
+            let tickerName = item.ticker_name
+            const matchingData = bHistData.find((data) => data.ticker_name === item.ticker_name);
+            if (matchingData) {
+                const newData = { "1m": matchingData[tickerName], ...item.data };
+                item.data = newData;
+            }
+        })
+
+        let tickersWithNoHistData = finalRes.filter(item1 => !tickersWithHistData.map(item2 => item2.ticker_name).includes(item1.ticker_name));
+
+        let yFTickerInfo = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yFinance_new' })
+
+        return [totalTickerCountInDb, totalTickersWithDataToFetch, updatedTickersWithHistData, tickersWithNoHistData, tickerWithNoDataInBinance, yFTickerInfo]
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)
+    } finally {
+        close("Fetch Ticker Stats")
+    }
+}
 
 // Fetches from collection - getSections, getLessons, getQuizQuestions
 // Returns all documents from a collection in the database
@@ -207,7 +267,8 @@ const serviceDeleteQuizFromDb = async ({ quizId, sectionId, lessonId }) => {
 
 
 module.exports = {
-    serviceGetDocuments
+    serviceGetTickerStatsFromDb
+    , serviceGetDocuments
     , serviceAddDocuments
     , serviceUdpateSectionInDb
     , serviceUpdateLessonInDb

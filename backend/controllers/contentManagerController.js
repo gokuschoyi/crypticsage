@@ -2,6 +2,31 @@ const { v4: uuidv4 } = require('uuid');
 const Validator = require('../utils/validator')
 const CMServices = require('../services/contentManagerServices')
 
+// <--- Admin Stats ---> //
+
+const getTickersIndb = async (req, res) => {
+    try {
+        const [totalTickerCountInDb, totalTickersWithDataToFetch, tickersWithHistData, tickersWithNoHistData, tickerWithNoDataInBinance, yFTickerInfo] = await CMServices.serviceGetTickerStatsFromDb()
+        let tickersWithHistDataLength = tickersWithHistData.length
+        let tickersWithNoHistDataLength = tickersWithNoHistData.length
+        res.status(200).json({
+            message: "Tickers fetched successfully",
+            totalTickerCountInDb,
+            totalTickersWithDataToFetch,
+            tickersWithHistDataLength,
+            tickersWithNoHistDataLength,
+            tickersWithHistData,
+            tickersWithNoHistData,
+            tickerWithNoDataInBinance,
+            yFTickerInfo
+        });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+
+// <--- Admin Stats ---> //
 
 // <--- Sections ---> //
 
@@ -232,6 +257,7 @@ const deleteQuizQuestion = async (req, res) => {
 // <--- Quiz ---> //
 
 module.exports = {
+    getTickersIndb,
     getSections,
     addSection,
     updateSection,

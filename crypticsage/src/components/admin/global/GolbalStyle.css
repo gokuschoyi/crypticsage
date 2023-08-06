@@ -25,7 +25,8 @@
 }
 
 .admin-topbar{
-  padding:16px;
+  padding:6px;
+  border-bottom: 1px solid;
 }
 
 @media screen and (max-width: 600px) {

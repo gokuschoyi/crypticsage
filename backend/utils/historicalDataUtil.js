@@ -455,7 +455,7 @@ const fetchHistoricalDataBinance = async ({ ticker_name, period }) => {
 */
 const generateUpdateQueriesForBinanceTickers = async () => {
     try {
-        const latestBinanceTickerStatus = await MDBServices.getFirstObjectForEachPeriod()
+        const latestBinanceTickerStatus = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance' })
         let result = latestBinanceTickerStatus.flatMap((obj) => {
             const ticker_name = obj.ticker_name
             return Object.entries(obj.data).map(([period, { lastHistorical }]) => ({
