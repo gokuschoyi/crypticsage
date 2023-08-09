@@ -29,3 +29,13 @@ export const deleteOneTickerMeta = async ({ token, symbol }) => {
     })
     return response;
 }
+
+export const checkForYFTicker = async ({ token, symbols }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/crypto/find_yf_ticker`, { symbols }, config, {
+        withCredentials: true
+    })
+    return response;
+}

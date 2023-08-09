@@ -6635,3 +6635,126 @@
 ::1 - - [8/6/2023, 6:21:05 PM] 1409.922 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
 ::1 - - [8/6/2023, 6:21:06 PM] 801.498 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
 ::1 - - [8/6/2023, 6:24:38 PM] 664.940 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:21:42 AM] 301.766 POST "/auth/login HTTP/1.1" 200 5848 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:21:48 AM] 1088.836 POST "/content/get_tickers HTTP/1.1" 200 25428 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:22:12 AM] 1389.971 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:22:12 AM] 408.139 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:27:22 AM] 21.347 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:27:24 AM] 908.726 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:27:27 AM] 16.264 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:27:42 AM] 15.946 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:27:44 AM] 383.466 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:48:03 AM] 173.577 POST "/auth/login HTTP/1.1" 200 5848 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:49:27 AM] 144.384 POST "/auth/login HTTP/1.1" 200 5848 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:49:28 AM] 5.787 POST "/user/wordOfTheDay HTTP/1.1" 200 217 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:49:29 AM] 1081.644 POST "/crypto/getCryptoData HTTP/1.1" 200 7235 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:49:31 AM] 1347.345 POST "/crypto/getHistoricalData HTTP/1.1" 200 122366 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:50:03 AM] - POST "/content/get_tickers HTTP/1.1" - - - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:50:06 AM] 637.085 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:54:57 AM] 45.178 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:55:07 AM] 1124.861 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:55:36 AM] 619.271 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:55:41 AM] 1067.652 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 10:59:59 AM] 23.482 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 11:00:01 AM] 746.395 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 11:16:00 AM] 638.161 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 11:16:46 AM] 581.144 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 11:53:24 AM] 45.032 POST "/crypto/find_yf_ticker HTTP/1.1" 404 161 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 11:53:31 AM] 117.848 POST "/crypto/find_yf_ticker HTTP/1.1" 200 50 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 11:54:13 AM] 122.888 POST "/crypto/find_yf_ticker HTTP/1.1" 200 50 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 11:55:50 AM] 129.501 POST "/crypto/find_yf_ticker HTTP/1.1" 200 50 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 11:56:30 AM] 119.081 POST "/crypto/find_yf_ticker HTTP/1.1" 200 50 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 11:58:01 AM] 133.607 POST "/crypto/find_yf_ticker HTTP/1.1" 200 50 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 11:58:29 AM] 141.792 POST "/crypto/find_yf_ticker HTTP/1.1" 200 50 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 11:58:58 AM] 120.390 POST "/crypto/find_yf_ticker HTTP/1.1" 200 50 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 11:59:09 AM] 137.623 POST "/crypto/find_yf_ticker HTTP/1.1" 200 68 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 11:59:31 AM] 135.528 POST "/crypto/find_yf_ticker HTTP/1.1" 200 68 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 11:59:46 AM] 136.248 POST "/crypto/find_yf_ticker HTTP/1.1" 200 50 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:01:55 PM] 460.732 POST "/crypto/find_yf_ticker HTTP/1.1" 200 76 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:02:17 PM] 330.991 POST "/crypto/find_yf_ticker HTTP/1.1" 200 3328 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:02:49 PM] 379.822 POST "/crypto/find_yf_ticker HTTP/1.1" 200 10274 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:05:08 PM] 491.382 POST "/crypto/find_yf_ticker HTTP/1.1" 200 6989 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:05:50 PM] 415.203 POST "/crypto/find_yf_ticker HTTP/1.1" 200 6976 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:06:10 PM] 369.315 POST "/crypto/find_yf_ticker HTTP/1.1" 200 6259 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:07:11 PM] 361.323 POST "/crypto/find_yf_ticker HTTP/1.1" 200 77 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:07:43 PM] 266.778 POST "/crypto/find_yf_ticker HTTP/1.1" 400 104 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:08:40 PM] 365.164 POST "/crypto/find_yf_ticker HTTP/1.1" 400 104 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:09:06 PM] 214.267 POST "/crypto/find_yf_ticker HTTP/1.1" 400 104 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:09:59 PM] 421.999 POST "/crypto/find_yf_ticker HTTP/1.1" 200 65 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:10:39 PM] 274.433 POST "/crypto/find_yf_ticker HTTP/1.1" 200 132 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:10:50 PM] 446.502 POST "/crypto/find_yf_ticker HTTP/1.1" 200 147 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:11:10 PM] 380.105 POST "/crypto/find_yf_ticker HTTP/1.1" 200 147 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:14:08 PM] 1179.298 POST "/crypto/find_yf_ticker HTTP/1.1" 400 80 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:18:30 PM] 5417.362 POST "/crypto/find_yf_ticker HTTP/1.1" 200 381 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:20:59 PM] 4430.562 POST "/crypto/find_yf_ticker HTTP/1.1" 200 381 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:26:04 PM] 4290.608 POST "/crypto/find_yf_ticker HTTP/1.1" 200 380 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:26:45 PM] 202.013 POST "/crypto/find_yf_ticker HTTP/1.1" 200 132 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:26:56 PM] 202.457 POST "/crypto/find_yf_ticker HTTP/1.1" 200 64 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:27:08 PM] 246.548 POST "/crypto/find_yf_ticker HTTP/1.1" 200 63 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:27:30 PM] 215.248 POST "/crypto/find_yf_ticker HTTP/1.1" 200 63 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:27:42 PM] 187.833 POST "/crypto/find_yf_ticker HTTP/1.1" 200 62 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:27:54 PM] 190.984 POST "/crypto/find_yf_ticker HTTP/1.1" 200 63 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:28:05 PM] 354.751 POST "/crypto/find_yf_ticker HTTP/1.1" 200 63 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:28:16 PM] 510.041 POST "/crypto/find_yf_ticker HTTP/1.1" 200 63 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:28:26 PM] 217.848 POST "/crypto/find_yf_ticker HTTP/1.1" 200 63 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:28:36 PM] 196.301 POST "/crypto/find_yf_ticker HTTP/1.1" 200 63 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:28:45 PM] 397.962 POST "/crypto/find_yf_ticker HTTP/1.1" 200 62 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:28:53 PM] 221.544 POST "/crypto/find_yf_ticker HTTP/1.1" 200 63 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:31:23 PM] 416.874 POST "/crypto/find_yf_ticker HTTP/1.1" 200 62 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:32:03 PM] 4688.825 POST "/crypto/find_yf_ticker HTTP/1.1" 200 379 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:33:42 PM] 1156.639 POST "/crypto/find_yf_ticker HTTP/1.1" 400 104 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:34:46 PM] 1280.246 POST "/crypto/find_yf_ticker HTTP/1.1" 200 94443 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:38:12 PM] 1261.485 POST "/crypto/find_yf_ticker HTTP/1.1" 200 94444 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:38:49 PM] 1199.959 POST "/crypto/find_yf_ticker HTTP/1.1" 200 379 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:39:03 PM] 768.100 POST "/crypto/find_yf_ticker HTTP/1.1" 400 434 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:40:05 PM] 792.015 POST "/crypto/find_yf_ticker HTTP/1.1" 200 380 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:41:06 PM] 1451.422 POST "/crypto/find_yf_ticker HTTP/1.1" 200 577 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:41:40 PM] 1345.477 POST "/crypto/find_yf_ticker HTTP/1.1" 200 56479 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:42:27 PM] 1166.002 POST "/crypto/find_yf_ticker HTTP/1.1" 400 107 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:43:04 PM] 1231.543 POST "/crypto/find_yf_ticker HTTP/1.1" 200 21517 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:46:00 PM] 1574.984 POST "/crypto/find_yf_ticker HTTP/1.1" 200 21517 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:46:34 PM] 1175.602 POST "/crypto/find_yf_ticker HTTP/1.1" 200 1143 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:47:00 PM] 1178.837 POST "/crypto/find_yf_ticker HTTP/1.1" 200 6920 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:47:57 PM] 1338.645 POST "/crypto/find_yf_ticker HTTP/1.1" 200 6981 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:49:10 PM] 1232.361 POST "/crypto/find_yf_ticker HTTP/1.1" 200 6920 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:49:22 PM] 1158.768 POST "/crypto/find_yf_ticker HTTP/1.1" 200 1143 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:50:13 PM] 1405.347 POST "/crypto/find_yf_ticker HTTP/1.1" 200 1143 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:50:27 PM] 1276.610 POST "/crypto/find_yf_ticker HTTP/1.1" 200 1082 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:51:14 PM] 1366.745 POST "/crypto/find_yf_ticker HTTP/1.1" 200 781 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:51:48 PM] 1156.928 POST "/crypto/find_yf_ticker HTTP/1.1" 200 1082 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:52:27 PM] 1080.954 POST "/crypto/find_yf_ticker HTTP/1.1" 200 7459 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:53:07 PM] 1272.425 POST "/crypto/find_yf_ticker HTTP/1.1" 200 95336 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:54:26 PM] 1210.364 POST "/crypto/find_yf_ticker HTTP/1.1" 200 1292 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:55:09 PM] 1245.314 POST "/crypto/find_yf_ticker HTTP/1.1" 200 1378 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 12:56:47 PM] 1303.766 POST "/crypto/find_yf_ticker HTTP/1.1" 200 1476 - PostmanRuntime/7.32.3
+::1 - - [8/9/2023, 1:00:48 PM] 496.681 POST "/crypto/find_yf_ticker HTTP/1.1" 200 330 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:01:14 PM] 1727.072 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:01:22 PM] 252.892 POST "/crypto/find_yf_ticker HTTP/1.1" 200 116 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:17:05 PM] 1293.838 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:17:51 PM] 974.666 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:18:15 PM] 297.751 POST "/crypto/find_yf_ticker HTTP/1.1" 200 115 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:19:24 PM] 1283.368 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:19:41 PM] 427.554 POST "/crypto/find_yf_ticker HTTP/1.1" 200 115 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:21:03 PM] 974.410 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:21:12 PM] 263.653 POST "/crypto/find_yf_ticker HTTP/1.1" 200 115 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:21:44 PM] 576.392 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:21:51 PM] 218.998 POST "/crypto/find_yf_ticker HTTP/1.1" 200 115 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:26:39 PM] 19.488 POST "/content/get_sections HTTP/1.1" 200 3447 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:26:43 PM] 956.794 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:26:51 PM] 271.874 POST "/crypto/find_yf_ticker HTTP/1.1" 200 115 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:29:09 PM] 1391.513 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:29:09 PM] 572.272 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:39:38 PM] 1041.147 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:39:38 PM] 1123.812 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:43:31 PM] 1405.630 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:43:32 PM] 605.732 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:48:42 PM] 1398.634 POST "/crypto/update_ticker_meta HTTP/1.1" 200 3125 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:48:43 PM] 1037.981 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:53:18 PM] 666.271 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:53:43 PM] 638.517 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:53:58 PM] 266.118 POST "/crypto/find_yf_ticker HTTP/1.1" 200 115 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:54:15 PM] 271.454 POST "/crypto/find_yf_ticker HTTP/1.1" 200 182 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 1:55:15 PM] 234.828 POST "/crypto/find_yf_ticker HTTP/1.1" 200 182 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 2:06:05 PM] 375.311 POST "/auth/login HTTP/1.1" 200 5848 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 2:06:11 PM] 1806.551 POST "/content/get_tickers HTTP/1.1" 200 25452 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36
+::1 - - [8/9/2023, 2:06:42 PM] 578.703 POST "/crypto/find_yf_ticker HTTP/1.1" 200 115 - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36

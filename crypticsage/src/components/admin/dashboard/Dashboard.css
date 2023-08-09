@@ -1,13 +1,9 @@
-.admin-dashboard-container {
-    min-height: 100vh;
-}
-
 .admin-controller-stats {
     min-height: auto;
 }
 
-.stats-box {
-    min-height: 400px;
+.admin-dash-skeleton {
+    height: 730px;
 }
 
 .token-image-hist-box {
@@ -43,5 +39,11 @@
         font-size: 18px !important;
         display: flex;
         align-items: center;
+    }
+}
+
+@media screen and (max-height: 900px) {
+    .admin-dash-skeleton {
+        height: 640px;
     }
 }

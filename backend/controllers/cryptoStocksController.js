@@ -1,3 +1,4 @@
+const yahooFinance = require('yahoo-finance2').default;
 const CSServices = require('../services/cryptoStocksServices')
 const CSUtil = require('../utils/cryptoStocksUtil');
 const Validator = require('../utils/validator')
@@ -25,6 +26,52 @@ const deleteTickerMeta = async (req, res) => {
     } catch (err) {
         console.log("ERROR : ", err);
         res.status(400).json({ message: "Get Crypto Data request error", error: err.message })
+    }
+}
+
+const findYFTicker = async (req, res) => {
+    try {
+        const { symbols } = req.body
+        // let result = []
+        const promises = symbols.map(async (symbol) => {
+            const ticker = await yahooFinance.search(symbol, {}, { validateResult: false });
+            // console.log(ticker)
+            try {
+                if (!ticker || ticker.count === 0) {
+                    return (
+                        {
+                            available: false,
+                            message: "Ticker does not exist in Yahoo Finance. Check for Typo"
+                        }
+                    );
+                } else {
+                    // console.log(symbol)
+                    return (
+                        {
+                            symbol: symbol,
+                            available: true,
+                            name: ticker.quotes.length !== 0 ? ticker.quotes[0].shortname : null,
+                            count: ticker.count,
+
+                        }
+                    );
+                }
+            } catch (err) {
+                console.log(`ERROR:${symbol}`, err);
+                return (
+                    {
+                        available: false,
+                        message: err.message
+                    }
+                );
+            }
+        });
+        const result = await Promise.all(promises);
+
+        res.status(200).json({ message: "YF Ticker search success", result });
+    } catch (err) {
+        console.log("ERROR : ", err);
+        res.status(400).json({ message: "Get YF Data request error", error: err.message })
     }
 }
 
@@ -66,7 +113,7 @@ const getLatestCryptoData = async (req, res) => {
 // Fetches the latest price data from Yahoo Finance : Stocks table on the frontend
 const getLatestStocksData = async (req, res) => {
     try {
-        // 'AAPL','GOOG','MSFT','IBM','AMZN','ORCL','INTC','QCOM','CSCO','SAP','TSM','BIDU','EMC','HPQ','TXN','ERIC','ASML','YHOO'
+        // '','GOOG','MSFT','IBM','AMZN','ORCL','INTC','QCOM','CSCO','SAP','TSM','BIDU','EMC','HPQ','TXN','ERIC','ASML','YHOO'
         const yFSymbols = ['AAPL', 'GOOG', 'MSFT']
         let yFData = await CSUtil.getYfinanceQuotes(yFSymbols)
         res.status(200).json({ message: "Get Latest Stocks Data request success", yFData });
@@ -113,6 +160,7 @@ const test = async (req, res) => {
 module.exports = {
     FASLatestTickerMetaData,
     deleteTickerMeta,
+    findYFTicker,
     getCryptoDataByMarketCap,
     getLatestTickerData,
     getLatestCryptoData,

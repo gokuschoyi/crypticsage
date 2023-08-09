@@ -4,12 +4,13 @@ import { useOutletContext } from "react-router-dom";
 import AdminHeader from '../global/AdminHeader'
 import { Box, Typography, TextField, Skeleton, Button, Tooltip, IconButton, Grid, Accordion, AccordionSummary, AccordionDetails, Alert, Collapse } from '@mui/material'
 import { useSelector } from 'react-redux'
-import { getHistoricalStatFromDb, refreshTickerMeta, deleteOneTickerMeta } from '../../../api/adminController';
+import { getHistoricalStatFromDb, refreshTickerMeta, deleteOneTickerMeta, checkForYFTicker } from '../../../api/adminController';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import CloseIcon from '@mui/icons-material/Close';
+import Grow from '@mui/material/Grow';
 
 function formatDateDifferenceToNow(targetDate) {
     const now = new Date().getTime();
@@ -322,32 +323,49 @@ const Dashboard = (props) => {
             }) */
     }
 
+    const [stockName, setStockName] = useState('');
+    const [yfStatus, setYfStatus] = useState([]);
+    const [isYfData, setIsYfData] = useState(false)
+
+
+    const handleCheckForStockData = async () => {
+        const parts = stockName.split(',');
+        // const trimmedParts = parts.map(part => { part !== '' return part.trim() });
+        // const trimmedParts = parts.map(part => part !== '' ? part.trim() : part);
+        const trimmedParts = parts.map(part => part.trim()).filter(part => part !== '');
+        const capitalized = trimmedParts.map(part => part.toUpperCase());
+        const checkedYfTickersInfo = await checkForYFTicker({ token, symbols: capitalized });
+        setYfStatus(checkedYfTickersInfo.data.result)
+        setIsYfData(true)
+    }
+    console.log(yfStatus)
+
     return (
         <Box className='admin-dashboard-container' onClick={hide}>
             <AdminHeader title={title} subtitle={subtitle} />
             <Box className='admin-controller-stats' pl={4} pr={4}>
                 {historicalStat === '' ?
                     (
-                        <Skeleton variant="rectangular" animation="wave" height="400px" width="auto" />
+                        <Skeleton className='admin-dash-skeleton' variant="rectangular" animation="wave" width="auto" />
                     )
                     :
                     (
-                        <Box className='stats-box' mb={2}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
-                                    <Box display='flex' justifyContent='flex-start'>
-                                        <Typography variant='h3'>Binance Ticker Info</Typography>
-                                    </Box>
+                        <Box className='main-binance-stats-box' mb={2}>
+                            <Box className='binance-stats-notifications'>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+                                        <Box display='flex' justifyContent='flex-start'>
+                                            <Typography variant='h3'>Binance Ticker Info</Typography>
+                                        </Box>
 
-                                    <Box className='ticker-in-db' display='flex' pt={2} pb={2} flexDirection='column' alignItems='start'>
-                                        <Typography variant='h5'>Total Tickers : {historicalStat.totalTickerCountInDb}</Typography>
-                                        <Typography variant='h5'>Tickers with historical data : {historicalStat.tickersWithHistDataLength}</Typography>
-                                        <Typography variant='h5'>Tickers without historical data : {historicalStat.tickersWithNoHistDataLength}</Typography>
-                                        <Typography variant='h5'>Tickers with no data in Binance : {historicalStat.tickerWithNoDataInBinance.length}</Typography>
-                                    </Box>
-                                </Grid>
-                                <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
-                                    {showMessage &&
+                                        <Box className='ticker-in-db' display='flex' pt={2} pb={2} flexDirection='column' alignItems='start'>
+                                            <Typography variant='h5'>Total Tickers : {historicalStat.totalTickerCountInDb}</Typography>
+                                            <Typography variant='h5'>Tickers with historical data : {historicalStat.tickersWithHistDataLength}</Typography>
+                                            <Typography variant='h5'>Tickers without historical data : {historicalStat.tickersWithNoHistDataLength}</Typography>
+                                            <Typography variant='h5'>Tickers with no data in Binance : {historicalStat.tickerWithNoDataInBinance.length}</Typography>
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
                                         <Box sx={{ width: '100%' }}>
                                             <Collapse in={showMessage}>
                                                 <Alert
@@ -369,9 +387,10 @@ const Dashboard = (props) => {
                                                 </Alert>
                                             </Collapse>
                                         </Box>
-                                    }
+
+                                    </Grid>
                                 </Grid>
-                            </Grid>
+                            </Box>
 
                             <Box className='meta-update-count' display='flex' flexDirection='row' alignItems='center' pt={2} pb={2} gap={2}>
                                 <TextField
@@ -417,140 +436,227 @@ const Dashboard = (props) => {
                                 <Button size='small' color='primary' variant="contained">Search</Button>
                             </Box>
 
-                            <Box className='hist-data-tickers' display='flex' flexDirection='row' justifyContent='space-between' mt={2}>
-                                <Typography variant='h3' className='small-screen-font-size'>Tickers with Historical Data : {historicalStat.tickersWithHistData.length}</Typography>
-                                <Box display='flex' flexDirection='row' gap='5px'>
-                                    <Button size='small' color='primary' variant="contained" >Update All</Button>
-                                    <Tooltip size='small' placement='top' arrow title="Update all the ticker data">
-                                        <IconButton sx={{ width: '30px', height: '30px' }}>
-                                            <InfoOutlinedIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                </Box>
-                            </Box>
-                            {historicalStat.tickersWithHistData.length === 0 ?
-                                (
-                                    <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
-                                        <Typography variant='h5'>No tickers with historical data. Fetch First :P</Typography>
-                                    </Box>
-                                )
-                                :
-                                (
-                                    <Box className='ticker-data-box' p={1} mt={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
-                                        <Grid container spacing={2}>
-                                            {historicalStat.tickersWithHistData.map((ticker, index) => {
-                                                return (
-                                                    <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
-                                                        <TickerWithHisoricalData ticker={ticker} />
-                                                    </Grid>
-                                                )
-                                            }
-                                            )}
-                                        </Grid>
-                                    </Box>
-                                )
-                            }
-
-                            <Box className='no-hist-data-tickers' display='flex' flexDirection='row' justifyContent='space-between' mt={2}>
-                                <Typography variant='h3' className='small-screen-font-size'>Tickers without Historical Data : {historicalStat.tickersWithNoHistData.length}</Typography>
-                                {historicalStat.tickersWithNoHistDataLength !== 0 &&
+                            <Box className='main-hist-data-tickers-box'>
+                                <Box className='hist-data-tickers' display='flex' flexDirection='row' justifyContent='space-between' mt={2}>
+                                    <Typography variant='h3' className='small-screen-font-size'>Tickers with Historical Data : {historicalStat.tickersWithHistData.length}</Typography>
                                     <Box display='flex' flexDirection='row' gap='5px'>
-                                        <Button size='small' color='primary' variant="contained" >Fetch All</Button>
-                                        <Tooltip size='small' placement='top' arrow title="Fetch and save all the ticker data">
+                                        <Button size='small' color='primary' variant="contained" >Update All</Button>
+                                        <Tooltip size='small' placement='top' arrow title="Update all the ticker data">
                                             <IconButton sx={{ width: '30px', height: '30px' }}>
                                                 <InfoOutlinedIcon />
                                             </IconButton>
                                         </Tooltip>
                                     </Box>
+                                </Box>
+                                {historicalStat.tickersWithHistData.length === 0 ?
+                                    (
+                                        <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
+                                            <Typography variant='h5'>No tickers with historical data.</Typography>
+                                        </Box>
+                                    )
+                                    :
+                                    (
+                                        <Box className='ticker-data-box' p={1} mt={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
+                                            <Grid container spacing={2}>
+                                                {historicalStat.tickersWithHistData.map((ticker, index) => {
+                                                    return (
+                                                        <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
+                                                            <TickerWithHisoricalData ticker={ticker} />
+                                                        </Grid>
+                                                    )
+                                                }
+                                                )}
+                                            </Grid>
+                                        </Box>
+                                    )
                                 }
                             </Box>
-                            {historicalStat.tickersWithNoHistData.length === 0 ?
-                                (
-                                    <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
-                                        <Typography variant='h5'>No tickers to fetch</Typography>
-                                    </Box>
-                                )
-                                :
-                                (
-                                    <Box className='ticker-with-no-data-box' p={1} mt={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
-                                        <Grid container spacing={2}>
-                                            {historicalStat.tickersWithNoHistData.map((ticker, index) => {
-                                                return (
-                                                    <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
-                                                        <TickerWithNoHistData ticker={ticker} handleDeleteTickerMeta={handleDeleteTickerMeta} downloadFlag={true} />
-                                                    </Grid>
-                                                )
-                                            })}
+
+                            <Box className='main-no-hist-data-tickers-box'>
+                                <Box className='no-hist-data-tickers' display='flex' flexDirection='row' justifyContent='space-between' mt={2}>
+                                    <Typography variant='h3' className='small-screen-font-size'>Tickers without Historical Data : {historicalStat.tickersWithNoHistData.length}</Typography>
+                                    {historicalStat.tickersWithNoHistDataLength !== 0 &&
+                                        <Box display='flex' flexDirection='row' gap='5px'>
+                                            <Button size='small' color='primary' variant="contained" >Fetch All</Button>
+                                            <Tooltip size='small' placement='top' arrow title="Fetch and save all the ticker data">
+                                                <IconButton sx={{ width: '30px', height: '30px' }}>
+                                                    <InfoOutlinedIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Box>
+                                    }
+                                </Box>
+                                {historicalStat.tickersWithNoHistData.length === 0 ?
+                                    (
+                                        <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
+                                            <Typography variant='h5'>No tickers</Typography>
+                                        </Box>
+                                    )
+                                    :
+                                    (
+                                        <Box className='ticker-with-no-data-box' p={1} mt={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
+                                            <Grid container spacing={2}>
+                                                {historicalStat.tickersWithNoHistData.map((ticker, index) => {
+                                                    return (
+                                                        <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
+                                                            <TickerWithNoHistData ticker={ticker} handleDeleteTickerMeta={handleDeleteTickerMeta} downloadFlag={true} />
+                                                        </Grid>
+                                                    )
+                                                })}
+                                            </Grid>
+                                        </Box>
+                                    )
+                                }
+                            </Box>
+
+                            <Box className='main-no-hist-data-in-binnce-box'>
+                                <Box className='no-hist-data-in-binnce' display='flex' justifyContent='flex-start' mt={2}>
+                                    <Typography variant='h3' className='small-screen-font-size'>Tickers with no data in binance : {historicalStat.tickerWithNoDataInBinance.length}</Typography>
+                                </Box>
+                                {historicalStat.tickerWithNoDataInBinance.length === 0 ?
+                                    (
+                                        <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
+                                            <Typography variant='h5'>All ticker have data that can be fetched from Binance</Typography>
+                                        </Box>
+                                    )
+                                    :
+                                    (
+                                        <Box className='ticker-with-np-data-in-binance' p={1} mt={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
+                                            <Grid container spacing={2}>
+                                                {historicalStat.tickerWithNoDataInBinance.map((ticker, index) => {
+                                                    return (
+                                                        <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
+                                                            <TickerWithNoHistData ticker={ticker} handleDeleteTickerMeta={handleDeleteTickerMeta} downloadFlag={false} />
+                                                        </Grid>
+                                                    )
+                                                })}
+                                            </Grid>
+                                        </Box>
+                                    )
+                                }
+                            </Box>
+
+                            <Box className='main-yFinance-stats-box' pt={4}>
+                                <Box className='yFinance-stats-notifications'>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+                                            <Box className='yFinance-stats-box' display='flex' justifyContent='flex-start' mt={2}>
+                                                <Typography variant='h3' >Y-Finance Ticker Info</Typography>
+                                            </Box>
+                                            <Box className='yfinance-ticker-in-db' display='flex' pt={2} pb={2} flexDirection='column' alignItems='start'>
+                                                <Typography variant='h5'>Total Tickers : {historicalStat.yFTickerInfo.length}</Typography>
+                                                <Typography variant='h5'>Tickers with historical data : {historicalStat.yFTickerInfo.length}</Typography>
+                                            </Box>
                                         </Grid>
-                                    </Box>
-                                )
-                            }
-
-                            <Box className='no-hist-data-in-binnce' display='flex' justifyContent='flex-start' mt={2}>
-                                <Typography variant='h3' className='small-screen-font-size'>Tickers with no data in binance : {historicalStat.tickerWithNoDataInBinance.length}</Typography>
-                            </Box>
-                            {historicalStat.tickerWithNoDataInBinance.length === 0 ?
-                                (
-                                    <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
-                                        <Typography variant='h5'>All ticker have data that can be fetched from Binance</Typography>
-                                    </Box>
-                                )
-                                :
-                                (
-                                    <Box className='ticker-with-np-data-in-binance' p={1} mt={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
-                                        <Grid container spacing={2}>
-                                            {historicalStat.tickerWithNoDataInBinance.map((ticker, index) => {
-                                                return (
-                                                    <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
-                                                        <TickerWithNoHistData ticker={ticker} handleDeleteTickerMeta={handleDeleteTickerMeta} downloadFlag={false} />
-                                                    </Grid>
-                                                )
-                                            })}
+                                        <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
+                                            <Box sx={{ width: '100%' }}>
+                                                <Collapse in={isYfData}>
+                                                    <Alert
+                                                        action={
+                                                            <IconButton
+                                                                aria-label="close"
+                                                                color="inherit"
+                                                                size="small"
+                                                                onClick={() => {
+                                                                    setIsYfData(false);
+                                                                }}
+                                                            >
+                                                                <CloseIcon fontSize="inherit" />
+                                                            </IconButton>
+                                                        }
+                                                        sx={{ mb: 2 }}
+                                                    >
+                                                        {yfStatus.map((status, index) => {
+                                                            return (
+                                                                <Typography variant="h6" key={index} sx={{ mb: 1 }}>
+                                                                    {JSON.stringify(status)}
+                                                                </Typography>
+                                                            )
+                                                        })
+                                                        }
+                                                    </Alert>
+                                                </Collapse>
+                                            </Box>
                                         </Grid>
-                                    </Box>
-                                )
-                            }
-
-                            <Box display='flex' justifyContent='flex-start' mt={2}>
-                                <Typography variant='h3' >Y-Finance Ticker Info</Typography>
-                            </Box>
-                            <Box className='yfinance-ticker-in-db' display='flex' pt={2} pb={2} flexDirection='column' alignItems='start'>
-                                <Typography variant='h5'>Total Tickers : {historicalStat.yFTickerInfo.length}</Typography>
-                                <Typography variant='h5'>Tickers with historical data : {historicalStat.yFTickerInfo.length}</Typography>
-                            </Box>
-
-                            <Box className='yfinance-hist-data-tickers' display='flex' flexDirection='row' justifyContent='space-between' mt={2}>
-                                <Typography variant='h3' className='small-screen-font-size'>Y-Finance Tickers with Historical Data</Typography>
-                                <Box display='flex' flexDirection='row' gap='5px'>
-                                    <Button size='small' color='primary' variant="contained" >Update All</Button>
-                                    <Tooltip size='small' placement='top' arrow title="Update all the ticker data">
-                                        <IconButton>
-                                            <InfoOutlinedIcon />
-                                        </IconButton>
-                                    </Tooltip>
+                                    </Grid>
                                 </Box>
                             </Box>
-                            {historicalStat.yFTickerInfo.length === 0 ?
-                                (
-                                    <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
-                                        <Typography variant='h5'>No YF tickers with historical data. Fetch First :P</Typography>
+
+                            <Box className='yFinance-search-and-update' display='flex' justifyContent='flex-start' gap='10px'>
+                                <TextField
+                                    color='secondary'
+                                    label="Enter stock name"
+                                    value={stockName}
+                                    onChange={(e) => setStockName(e.target.value)}
+                                    id="outlined-size-small"
+                                    size="small"
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            '& fieldset': {
+                                                borderColor: '#E0E3E2',
+                                            }
+                                        }
+                                    }}
+                                />
+                                <Button size='small' color='primary' variant="contained" onClick={handleCheckForStockData} >Check</Button>
+                                <Tooltip placement='top' arrow title="Enter a stock name/names to check if historical data exists or not. If passing multiple names, seperate them with comma.(AAPL,GOOGL)">
+                                    <IconButton>
+                                        <InfoOutlinedIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+
+                            <Box className='main-yfinance-hist-data-tickers-box'>
+                                <Box className='yfinance-hist-data-tickers' display='flex' flexDirection='row' justifyContent='space-between' mt={2}>
+                                    <Typography variant='h3' className='small-screen-font-size'>Y-Finance Tickers with Historical Data</Typography>
+                                    <Box display='flex' flexDirection='row' gap='5px'>
+                                        <Button size='small' color='primary' variant="contained" >Update All</Button>
+                                        <Tooltip size='small' placement='top' arrow title="Update all the ticker data">
+                                            <IconButton>
+                                                <InfoOutlinedIcon />
+                                            </IconButton>
+                                        </Tooltip>
                                     </Box>
-                                )
-                                :
-                                (
-                                    <Box className='ticker-data-box' p={1} mt={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
-                                        <Grid container spacing={2}>
-                                            {historicalStat.yFTickerInfo.map((ticker, index) => {
-                                                return (
-                                                    <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
-                                                        <TickerWithYFHistoricalData ticker={ticker} />
-                                                    </Grid>
-                                                )
-                                            })}
-                                        </Grid>
-                                    </Box>
-                                )
-                            }
+                                </Box>
+                                {historicalStat.yFTickerInfo.length === 0 ?
+                                    (
+                                        <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
+                                            <Typography variant='h5'>No YF tickers with historical data. Fetch First :P</Typography>
+                                        </Box>
+                                    )
+                                    :
+                                    (
+                                        <Box className='ticker-data-box' p={1} mt={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
+                                            <Grid container spacing={2}>
+                                                {historicalStat.yFTickerInfo.map((ticker, index) => {
+                                                    return (
+                                                        <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
+                                                            <TickerWithYFHistoricalData ticker={ticker} />
+                                                        </Grid>
+                                                    )
+                                                })}
+                                            </Grid>
+                                        </Box>
+                                    )
+                                }
+                            </Box>
+
+                            <Accordion TransitionComponent={Grow} TransitionProps={{ unmountOnExit: true }}>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon />}
+                                    aria-controls="yf-panel1a-content"
+                                    id="yf-panel1a-header"
+                                >
+                                    <Typography>Notifications</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+
+                                    <Typography sx={{ mb: 1 }}>
+                                        test
+                                    </Typography>
+
+                                </AccordionDetails>
+                            </Accordion>
 
                         </Box>
                     )
