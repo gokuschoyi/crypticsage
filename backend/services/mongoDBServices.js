@@ -715,6 +715,30 @@ const removeQuizStatusFromUser = async ({ connectMessage, quizId, lessonId, sect
     }
 }
 
+const deleteOneMetaData = async ({ symbol }) => {
+    try {
+        const db = await connect("Delete one ticker meta data")
+        const collection = db.collection("binance_ticker_meta")
+        const result = await collection.deleteOne({ symbol: symbol })
+        return result
+    } catch (error) {
+        console.log(error)
+        throw new Error(error.message)
+    }
+}
+
+const deleteOneYfinanceTickerDromDb = async ({ symbol }) => {
+    try {
+        const db = await connect("Delete one ticker meta data")
+        const collection = db.collection("yFinance_new")
+        const result = await collection.deleteOne({ ticker_name: symbol })
+        return result
+    } catch (error) {
+        console.log(error)
+        throw new Error(error.message)
+    }
+}
+
 
 //<------------------------CONTENT MANAGER SERVICES------------------------>
 
@@ -1260,7 +1284,7 @@ const insertOneMBinanceDataToDb = async ({ ticker_name, token_data }) => {
 
             // console.log(`Inserted batch ${i} of ${noOfBatches}`);
         }
-        console.log('Data insertion complete.');
+        console.log('Data insertion complete.', token_data.length);
         return inserted
     } catch (error) {
         console.log(error)
@@ -1427,18 +1451,6 @@ const saveLatestTickerMetaDataToDb = async ({ cryptoData }) => {
             const insertedResult = await ticker_meta_collection.insertMany(cryptoData)
             return insertedResult
         }
-    } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
-    }
-}
-
-const deleteOneMetaData = async ({ symbol }) => {
-    try {
-        const db = await connect("Delete one ticker meta data")
-        const collection = db.collection("binance_ticker_meta")
-        const result = await collection.deleteOne({ symbol: symbol })
-        return result
     } catch (error) {
         console.log(error)
         throw new Error(error.message)
@@ -1712,6 +1724,8 @@ module.exports = {
     , removeLessonAndQuizStatusFromUsers
     , removeOneLessonAndQuizStatusFromUsers
     , removeQuizStatusFromUser
+    , deleteOneMetaData
+    , deleteOneYfinanceTickerDromDb
     , getAvailableYfTickersInDb
     , insertHistoricalYFinanceDate
     , getYFinanceTickerInfo
@@ -1727,7 +1741,6 @@ module.exports = {
     , getData
     , checkDuplicateData
     , saveLatestTickerMetaDataToDb
-    , deleteOneMetaData
     , fetchTickerMetaFromDb
     , fetchTickersFromBinanceHistoricalDb
     , fetchTickersFromCrypticsageBinance

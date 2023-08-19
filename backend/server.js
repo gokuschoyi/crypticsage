@@ -3,6 +3,7 @@ var cors = require('cors')
 const { wsServer } = require('./websocket')
 const bodyParser = require('body-parser');
 const logger = require('./middleware/logger/Logger');
+const logs = logger.create(__filename.slice(__dirname.length + 1))
 const config = require('./config');
 const { verifyToken } = require('./middleware/verify-token')
 
@@ -35,20 +36,23 @@ var funcDesc = talib.explain("ADX");
 console.log(totalFunctionCount, funcDesc) */
 
 const log = (req, res, next) => {
-    const date = new Date().toLocaleString();
-    console.log('_________________________REQUEST RECEIVED____________________________', req.originalUrl, " - ", date);
+    logs.info(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);
     next();
 }
+
+logs.info('Starting server...');
 
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors({ origin: ['https://crypticsage.netlify.app', 'https://localhost:3001'], credentials: true }))
 app.use(bodyParser.json());
-app.use(logger)
+// app.use(logger)
+
+logger.setupAccessLog(app);
 app.use(log);
 
 app.post('/', verifyToken, async (req, res) => {
-    console.log('Verify request received');
+    logs.info('Verify request received');
     res.status(200).json({ message: "Verified" });
 })
 
@@ -65,13 +69,13 @@ app.use('/crypto', verifyToken, fetchCryptoData)
 // app.use('/indicators', verifyToken, indicators); // remove later
 
 app.listen(config.port, () => {
-    console.log(`Express server listening on port ${config.port}`);
+    logs.info(`Express server listening on port ${config.port}`);
 });
 
 // Attach the WebSocket server to a separate HTTP server
 const wsHttpServer = http.createServer(wsServer);
 wsHttpServer.listen(config.wsPort, () => {
-    console.log(`WebSocket server running on port ${config.wsPort}`);
+    logs.info(`WebSocket server running on port ${config.wsPort}`);
 });
 
 // Upgrade HTTP requests to WebSocket

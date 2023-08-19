@@ -22,7 +22,8 @@ const initialSaveHistoricalDataYFinance = async (req, res) => {
 
 const updateHistoricalYFinanceData = async (req, res) => {
     try {
-        const diffArray = await HDServices.processUpdateHistoricalYFinanceData()
+        const { symbol } = req.body
+        const diffArray = await HDServices.processUpdateHistoricalYFinanceData({ symbol })
         res.status(200).json({ message: 'YF tokens updated', diffArray })
     } catch (error) {
         console.log(error)

@@ -1,3 +1,4 @@
+const log = require('../middleware/logger/Logger').create(__filename.slice(__dirname.length + 1))
 const config = require('../config');
 const jwt = require("jsonwebtoken");
 
@@ -11,11 +12,11 @@ const verifyToken = (req, res, next) => {
         jwt.verify(token, config.tokenKey, (err, decodedToken) => {
             if (err) {
                 res.status(401).json({ message: "Unauthorized access" });
-                console.log("Token expired");
+                log.info("Token expired");
             }
             else {
                 res.locals.data = decodedToken;
-                console.log("Token verified")
+                log.info("Token verified")
                 next();
             }
         })

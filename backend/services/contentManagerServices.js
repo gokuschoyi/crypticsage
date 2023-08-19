@@ -1,8 +1,34 @@
-const { close } = require('../services/db-conn')
-const MDBServices = require('./mongoDBServices')
-const CMUtil = require('../utils/contentManagerUtil')
+const { v4: uuidv4 } = require('uuid');
 
-const serviceGetTickerStatsFromDb = async () => {
+const { Queue, Worker } = require('bullmq');
+const { close } = require('../services/db-conn')
+const { redisClient } = require('../services/redis')
+
+const connection = redisClient
+let update_OneBinanceTicker_Queue
+let update_OneBinanceTicker_oneM_Queue
+
+let fetch_OneBinanceTicker_Queue
+let fetch_OneBinanceTicker_oneM_Queue
+
+const MDBServices = require('./mongoDBServices')
+const HDServices = require('./historicalDataServices')
+const CMUtil = require('../utils/contentManagerUtil')
+const CSUtil = require('../utils/cryptoStocksUtil')
+const HDUtil = require('../utils/historicalDataUtil');
+
+const serviceFetchAndSaveLatestTickerMetaData = async ({ length }) => {
+    try {
+        let cryptoData = await CSUtil.fetchTopTickerByMarketCap({ length })
+        let result = await MDBServices.saveLatestTickerMetaDataToDb({ cryptoData })
+        return result
+    } catch (error) {
+        console.log(error)
+        throw new Error(error.message)
+    }
+}
+
+const serviceGetBinanceTickerStatsFromDb = async () => {
     try {
         let tickerMeta = await MDBServices.fetchTickerMetaFromDb({ length: "" })
         let symbolsFromBinance = await CMUtil.fetchSymbolsFromBinanceAPI()
@@ -51,14 +77,372 @@ const serviceGetTickerStatsFromDb = async () => {
 
         let tickersWithNoHistData = finalRes.filter(item1 => !tickersWithHistData.map(item2 => item2.ticker_name).includes(item1.ticker_name));
 
-        let yFTickerInfo = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yFinance_new' })
-
-        return [totalTickerCountInDb, totalTickersWithDataToFetch, updatedTickersWithHistData, tickersWithNoHistData, tickerWithNoDataInBinance, yFTickerInfo]
+        return [totalTickerCountInDb, totalTickersWithDataToFetch, updatedTickersWithHistData, tickersWithNoHistData, tickerWithNoDataInBinance]
     } catch (error) {
         console.log(error)
         throw new Error(error)
     } finally {
         close("Fetch Ticker Stats")
+    }
+}
+
+const serviceGetYfinanceTickerStatsFromDb = async () => {
+    try {
+        let yFTickerInfo = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yFinance_new' })
+        return yFTickerInfo
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)
+    }
+}
+
+// fullfetch one ticker
+const serviceFetchOneBinanceTicker = async ({ fetchQueries }) => {
+    var totalFetchJobsCount = 0;
+    var completedFetchJobsCount = 0;
+    const finalResult = {}
+    const jobIDs = []
+    const queueName = "Fetch-One-Binance-Ticker>4h"
+    const queueName2 = "Fetch-One-Binance-Ticker-1m"
+
+    try {
+        let greaterThan4h = fetchQueries.map((queries) => {
+            let newDate = new Date().toLocaleString()
+            let [date, time] = newDate.split(", ")
+            let [t, ap] = time.split(" ")
+            return {
+                ...queries,
+                id: `${uuidv4()}_${date}_${t}_${ap}_${queries.ticker_name}_${queries.period}`,
+                jobName: `Fetch-One-Binance-Ticker_${queries.ticker_name}_${queries.period}_FE-Request`
+            }
+        })
+
+        let oneMQuery = {
+            ticker_name: fetchQueries[0].ticker,
+            period: "1m",
+            id: uuidv4(),
+            jobName: `Fetch-One-Binance-Ticker_${fetchQueries[0].ticker}_1m_FE-Request`,
+        }
+
+        try {
+            console.time("Fetch-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
+
+            const fetchOneBinanceTickerQueue = new Queue(queueName, { connection })
+            const fetchOneBinanceTickerWorker = new Worker(queueName, HDUtil.processHistoricalData, { connection })
+
+            const fetchOneBinanceTickerQueue2 = new Queue(queueName2, { connection })
+            const fetchOneBinanceTickerWorker2 = new Worker(queueName2, HDUtil.processOneMHistoricalData, { connection })
+
+            const { ticker_name, period, jobName, id } = oneMQuery
+
+            const job2 = await fetchOneBinanceTickerQueue2.add(
+                jobName,
+                { ticker_name, period },
+                {
+                    removeOnComplete: {
+                        age: 3600, // keep up to 1 min
+                        count: 1000, // keep up to 1000 jobs
+                    },
+                    removeOnFail: {
+                        age: 3600, // keep up to 1 min
+                    },
+                    jobId: id,
+                    delay: 200
+                }
+            )
+
+            fetch_OneBinanceTicker_Queue = fetchOneBinanceTickerQueue
+            fetch_OneBinanceTicker_oneM_Queue = fetchOneBinanceTickerQueue2
+            totalFetchJobsCount = greaterThan4h.length + 1
+
+            const fetchCompletedListener = () => {
+                completedFetchJobsCount++;
+                if (completedFetchJobsCount < totalFetchJobsCount) {
+                    console.log('(WORKER - Fetch >= 4h) Fetch job count :', completedFetchJobsCount);
+                } else {
+                    console.log('(WORKER - Fetch >= 4h) Fetch job count Final Task :', completedFetchJobsCount);
+                    console.timeEnd('Fetch-One-Binance-Ticker-FE-Request - Main Process (>= 4h)');
+                    close("Fetching data (>= 4h)")
+                    fetchOneBinanceTickerWorker.close();
+                    fetchOneBinanceTickerWorker.removeListener('completed', fetchCompletedListener); // Remove the listener
+                }
+            }
+
+            const fetchCompletedListener2 = () => {
+                completedFetchJobsCount++;
+                console.log('(WORKER - Fetch 1m) Fetch job count :', completedFetchJobsCount);
+                fetchOneBinanceTickerWorker2.close();
+                fetchOneBinanceTickerWorker2.removeListener('completed', fetchCompletedListener2); // Remove the listener
+            }
+
+            const failedListener = (job) => {
+                const redisCommand = `hgetall bull:${queueName}:${job.id}`
+                console.log("Update task failed for : ", job.name, " with id : ", job.id)
+                console.log("Check Redis for more info : ", redisCommand)
+            }
+
+            fetchOneBinanceTickerWorker.on('completed', fetchCompletedListener);
+            fetchOneBinanceTickerWorker2.on('completed', fetchCompletedListener2);
+            fetchOneBinanceTickerWorker.on('failed', failedListener);
+
+            // Log any errors that occur in the worker, updates
+            fetchOneBinanceTickerWorker.on('error', err => {
+                // log the error
+                console.error("Error", err);
+            });
+
+            for (const index in greaterThan4h) {
+                const {
+                    jobName,
+                    ticker,
+                    period,
+                    id,
+                    meta
+                } = greaterThan4h[index]
+
+                const job = await fetchOneBinanceTickerQueue.add(
+                    jobName,
+                    { ticker, period, meta },
+                    {
+                        removeOnComplete: {
+                            age: 3600, // keep up to 1 min
+                            count: 1000, // keep up to 1000 jobs
+                        },
+                        removeOnFail: {
+                            age: 3600, // keep up to 1 min
+                        },
+                        jobId: id,
+                    }
+                );
+
+                const jobId = job.id
+                jobIDs.push(jobId)
+            }
+
+            jobIDs.push(job2.id)
+
+            finalResult["check_status_payload"] = {
+                jobIds: jobIDs,
+                type: "fetch-one-ticker_"
+            }
+            finalResult["total_actual_feches"] = greaterThan4h.length + 1
+            finalResult["fetch_queries"] = greaterThan4h.push(oneMQuery)
+
+            const isActive = fetchOneBinanceTickerWorker.isRunning();
+            if (isActive) {
+                const message = "Processing one ticker fetch request"
+                return ({ message, finalResult });
+            } else {
+                fetchOneBinanceTickerWorker.run()
+                const message = "Fetch tasks added to queue. (Initial Fetch)"
+                return ({ message, finalResult });
+            }
+        } catch (error) {
+            console.log(error)
+            throw new Error(error)
+        }
+
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)
+    }
+}
+
+// updates one ticker
+const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
+    var totalUpdateJobsCount = 0;
+    var completedUpdateJobsCount = 0;
+    const finalResult = {}
+    const jobIDs = []
+    const queueName = "Update-One-Binance-Ticker-Queue>4h"
+    const queueName2 = "Update-One-Binance-Ticker-Queue-1m"
+
+    let idNameAdded = updateQueries.map((queries) => {
+        let newDate = new Date().toLocaleString()
+        let [date, time] = newDate.split(", ")
+        let [t, ap] = time.split(" ")
+        return {
+            ...queries,
+            id: `${uuidv4()}_${date}_${t}_${ap}_${queries.ticker_name}_${queries.period}`,
+            jobName: `Update-One-Binance-Ticker_${queries.ticker_name}_${queries.period}_FE-Request`
+        }
+    })
+
+    let added = idNameAdded.filter((item) => item.period !== '1m')
+
+    let oneM = idNameAdded.filter((item) => item.period === '1m')
+
+    try {
+        console.time("Update-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
+
+        const updateOneBinanceTickerQueue = new Queue(queueName, { connection })
+        const updateOneBinanceTickerWorker = new Worker(queueName, HDUtil.processUpdateHistoricalData, { connection })
+
+        const updateOneBinanceTickerQueue2 = new Queue(queueName2, { connection })
+        const updateOneBinanceTickerWorker2 = new Worker(queueName2, HDUtil.processUpdateHistoricalOneMData, { connection })
+
+        update_OneBinanceTicker_Queue = updateOneBinanceTickerQueue
+        update_OneBinanceTicker_oneM_Queue = updateOneBinanceTickerQueue2
+        totalUpdateJobsCount = added.length + oneM.length
+
+        const updateCompletedListener = () => {
+            completedUpdateJobsCount++;
+            if (completedUpdateJobsCount < totalUpdateJobsCount) {
+                console.log('(WORKER - Update >= 4h) Update job count :', completedUpdateJobsCount);
+            } else {
+                console.log('(WORKER - Update >= 4h) Update job count Final Task :', completedUpdateJobsCount);
+                console.timeEnd('Update-One-Binance-Ticker-FE-Request - Main Process (>= 4h)');
+                close("Fetching data (>= 4h)")
+                updateOneBinanceTickerWorker.close();
+                updateOneBinanceTickerWorker.removeListener('completed', updateCompletedListener); // Remove the listener
+            }
+        }
+
+        const updateCompletedListener2 = () => {
+            completedUpdateJobsCount++;
+            console.log('(WORKER - Update 1m) Update job count :', completedUpdateJobsCount);
+            updateOneBinanceTickerWorker2.close();
+            updateOneBinanceTickerWorker2.removeListener('completed', updateCompletedListener2); // Remove the listener
+        }
+
+        const failedListener = (job) => {
+            const redisCommand = `hgetall bull:${queueName}:${job.id}`
+            console.log("Update task failed for : ", job.name, " with id : ", job.id)
+            console.log("Check Redis for more info : ", redisCommand)
+        }
+
+        updateOneBinanceTickerWorker.on('completed', updateCompletedListener);
+        updateOneBinanceTickerWorker2.on('completed', updateCompletedListener2);
+        updateOneBinanceTickerWorker.on('failed', failedListener);
+
+        // Log any errors that occur in the worker, updates
+        updateOneBinanceTickerWorker.on('error', err => {
+            // log the error
+            console.error("Error", err);
+        });
+
+        for (const index in added) {
+            const {
+                ticker_name,
+                period,
+                start,
+                end,
+                id,
+                jobName,
+            } = added[index]
+
+            const job = await updateOneBinanceTickerQueue.add(
+                jobName,
+                { ticker_name, period, start, end },
+                {
+                    removeOnComplete: {
+                        age: 3600, // keep up to 1 hr
+                        count: 1000, // keep up to 1000 jobs
+                    },
+                    removeOnFail: {
+                        age: 3600, // keep up to 1 hr
+                    },
+                    jobId: id,
+                }
+            )
+            const jobId = job.id
+            jobIDs.push(jobId)
+        }
+
+        const { ticker_name, period, start, end, id, jobName } = oneM[0]
+        // console.log(ticker_name, period, start, end, id, jobName)
+        const job2 = await updateOneBinanceTickerQueue2.add(
+            jobName,
+            { ticker_name, period, start, end },
+            {
+                removeOnComplete: {
+                    age: 3600, // keep up to 1 hr
+                    count: 1000, // keep up to 1000 jobs
+                },
+                removeOnFail: {
+                    age: 3600, // keep up to 1 hr
+                },
+                jobId: id,
+                delay: 200
+            }
+        )
+
+        jobIDs.push(job2.id)
+
+        finalResult["check_status_payload"] = {
+            jobIds: jobIDs,
+            type: "update-one-ticker_"
+        }
+        finalResult["total_actual_updates"] = added.length
+        finalResult["update_queries"] = added
+
+        const isActive = updateOneBinanceTickerWorker.isRunning();
+        if (isActive) {
+            const message = "Processing one ticker update request"
+            return ({ message, finalResult });
+        } else {
+            updateOneBinanceTickerWorker.run()
+            const message = "Update tasks added to queue. (Initial Fetch)"
+            return ({ message, finalResult });
+        }
+
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)
+    }
+}
+
+// updates all tickers in the database
+const serviceUpdateAllBinanceTickers = async () => {
+    try {
+        let greaterThan4h = await HDServices.processUpdateBinanceData()
+        let lessThan4h = await HDServices.processUpdateBinanceOneMData()
+        let finalIds = {
+            "1m": lessThan4h.finalResult.check_status_payload,
+            "4h": greaterThan4h.finalResult.check_status_payload
+        }
+        return finalIds
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)
+    }
+}
+
+const serviceCheckOneBinanceTickerJobCompletition = async ({ jobIds, type }) => {
+    try {
+        const processedResults = []
+        switch (type) {
+            case "update-one-ticker_":
+                for (const jobId of jobIds) {
+                    const job = await update_OneBinanceTicker_Queue.getJob(jobId) || await update_OneBinanceTicker_oneM_Queue.getJob(jobId);
+                    if (job !== undefined) {
+                        const result = await job.isCompleted();
+                        const jobName = job.name
+                        processedResults.push({ jobId: jobId, completed: result, jobName: jobName, data: job.returnvalue })
+                    }
+                }
+                message = `Job status for ${type}`
+                data = processedResults
+                break;
+            case "fetch-one-ticker_":
+                for (const jobId of jobIds) {
+                    const job = await fetch_OneBinanceTicker_Queue.getJob(jobId) || await fetch_OneBinanceTicker_oneM_Queue.getJob(jobId);
+                    if (job !== undefined) {
+                        const result = await job.isCompleted();
+                        const jobName = job.name
+                        processedResults.push({ jobId: jobId, completed: result, jobName: jobName, data: job.returnvalue })
+                    }
+                }
+                message = `Job status for ${type}`
+                data = processedResults
+                break;
+            default:
+                return ({ message: "Invalid type", data: [] })
+        }
+        return ({ message, data })
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)
     }
 }
 
@@ -267,7 +651,13 @@ const serviceDeleteQuizFromDb = async ({ quizId, sectionId, lessonId }) => {
 
 
 module.exports = {
-    serviceGetTickerStatsFromDb
+    serviceFetchAndSaveLatestTickerMetaData
+    , serviceGetBinanceTickerStatsFromDb
+    , serviceGetYfinanceTickerStatsFromDb
+    , serviceFetchOneBinanceTicker
+    , serviceUpdateOneBinanceTicker
+    , serviceUpdateAllBinanceTickers
+    , serviceCheckOneBinanceTickerJobCompletition
     , serviceGetDocuments
     , serviceAddDocuments
     , serviceUdpateSectionInDb

@@ -10,8 +10,8 @@ const MDBServices = require('../services/mongoDBServices')
 const formatDateForYFinance = (param) => {
     // console.log(" Date param", param)
     const [date, tz] = param.split(', ');
-    const [month, day, year] = date.split('/')
-    const formattedDate = `${year}-${month}-${day}`;
+    const [d, m, y] = date.split('/')
+    const formattedDate = `${y}-${m}-${d}`;
     return formattedDate;
 }
 
@@ -42,30 +42,45 @@ const getHistoricalYFinanceData = async (params) => {
                 openTime: unixTime
             }
         })
+        return fResult
+    } catch (err) {
+        console.log(err.message, err.code)
+        throw new Error(err)
+    }
+}
+
+const getFirstTradeDate = async ({ symbol }) => {
+    try {
+        const res = await yahooFinance.quote(symbol, {}, { validateResult: false })
+        return res.firstTradeDateMilliseconds
     } catch (err) {
         console.log(err)
+        throw new Error(err.message)
     }
-    return fResult
 }
 
 // takes the last_updated and checks if that ticker needs update or not
 // returns [daysElapsed, from, to]
 const checkForUpdates = async ({ last_updated }) => {
+    let currentDate = new Date().getTime()
+    let lastUpdatedTickerDate = new Date(last_updated).getTime()
+    let timeDiff = currentDate - lastUpdatedTickerDate // Calculate the time difference in milliseconds
+    let daysElapsed = parseFloat((timeDiff / (1000 * 3600 * 24)).toFixed(2)) // Convert milliseconds to days
 
     // Get the current date adjusted for the desired time zone and convert to UTC
     // 2023-07-10T00:00:00.000+00:00 to 10/07/2023, 10:00:00 am
-    const currentDate = new Date();
+    /* const currentDate = new Date();
     const currentUTCDate = new Date(currentDate.toLocaleString('en-US', { timeZone: "UTC" }))
 
     const l_updated = new Date(last_updated); // Convert the GMT time to a Date object
     const lastUpdatedTickerDate = new Date(l_updated.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
 
     const timeDiff = currentUTCDate.getTime() - lastUpdatedTickerDate.getTime(); // Calculate the time difference in milliseconds
-    let daysElapsed = parseFloat((timeDiff / (1000 * 3600 * 24)).toFixed(2)) // Convert milliseconds to days
+    let daysElapsed = parseFloat((timeDiff / (1000 * 3600 * 24)).toFixed(2)) // Convert milliseconds to days */
 
     if (daysElapsed > 0) {
-        let from = formatDateForYFinance(lastUpdatedTickerDate.toLocaleString())
-        let to = formatDateForYFinance(currentUTCDate.toLocaleString())
+        let from = formatDateForYFinance(new Date(last_updated).toLocaleString())
+        let to = formatDateForYFinance(new Date(currentDate).toLocaleString())
         if (from === to) {
             return [daysElapsed = 0]
         }
@@ -120,6 +135,7 @@ const formatPrintDate = (date) => {
 const fetchData = async ({ ticker_name, period, start, end, type }) => {
     let response = [];
     let url = `https://api.binance.com/api/v3/klines?symbol=${ticker_name}&interval=${period}&startTime=${start}&endTime=${end}&limit=1000`;
+    console.log(`Binance ${period} URL : `, url)
     let sTime, eTime, lapsedTime, responseLength
     try {
         sTime = performance.now()
@@ -137,7 +153,7 @@ const fetchData = async ({ ticker_name, period, start, end, type }) => {
         return response
     } catch (error) {
         console.error('Error fetching data:', error);
-        throw error;
+        throw new Error(error)
     }
 };
 
@@ -211,6 +227,86 @@ const divideTimePeriod = (startTime, endTime, period, limit) => {
 }
 
 // <------------------------ 4h, 6h, 8h, 12h, 1d, 3d, 1w  (START) ------------------------> //
+
+async function processHistoricalData(job) {
+    const { ticker, period, meta } = job.data;
+    console.log(`--------------------PROCESS HISTORICAL DATA START ${ticker} with period ${period}-------------------`)
+
+    let params = {
+        ticker_name: ticker,
+        period: period
+    }
+    let historicalData = await fetchHistoricalDataBinance(params); // Fetch the historical data for the ticker and time period
+    let ins
+    if (historicalData.length > 0) {
+        const allTickers = await MDBServices.getAvailableBinanceTickersInDb();
+        ins = await MDBServices.insertBinanceDataToDb({ ticker_name: ticker, period: period, meta: meta, tokenData: historicalData, allTickersInDb: allTickers }); // save historical data to db
+    } else {
+        ins = ['No Data Found']
+    }
+    console.log(`--------------------PROCESS HISTORICAL DATA END ${ticker} with period ${period}-------------------`)
+    return ins; // Return the result
+}
+
+// function for the initialFetchWorker to process initial fetches One Min data
+async function processOneMHistoricalData(job) {
+    const { ticker_name, period } = job.data;
+    console.log(`--------------------PROCESS 1m HISTORICAL DATA START ${ticker_name} with period ${period}-------------------`)
+    let params = {
+        ticker_name: ticker_name,
+        period: period
+    }
+    let fetchedData = await testGetHistoricalDataBinance(params);
+    let ins
+    if (fetchedData.length > 0) {
+        ins = await MDBServices.insertOneMBinanceDataToDb({ ticker_name: ticker_name, token_data: fetchedData })
+    } else {
+        ins = ['No Data Found']
+    }
+    console.log(`--------------------PROCESS 1m HISTORICAL DATA END ${ticker_name} with period ${period}-------------------`)
+    return ins
+}
+
+// Function for the updateWorker to process updates
+const processUpdateHistoricalData = async (job) => {
+    const { ticker_name, period, start, end } = job.data
+    console.log(`--------------------UPDATE HISTORICAL DATA START ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
+
+    let insertResult = []
+    const updateResult = await fetchLatestTickerData({ ticker_name, period, start, end })
+    if (updateResult.length > 0) {
+        insertResult = await MDBServices.updateBinanceDataToDb({ ticker_name, period, tokenData: updateResult })
+        console.log(`--------------------UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
+
+        return insertResult
+    } else {
+        console.log("No new data to update")
+        console.log(`--------------------UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
+        return insertResult = ["No New Data"]
+    }
+
+}
+
+// function for the oneMUpdateWorker to process and update One Min data
+const processUpdateHistoricalOneMData = async (job) => {
+    const { ticker_name, period, start, end } = job.data
+    console.log(`--------------------UPDATE HISTORICAL DATA START ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
+    let params = {
+        ticker_name: ticker_name,
+        period: period,
+        start: start,
+        end: end
+    }
+    const fetchedData = await fetchBinanceHistoricalBetweenPeriods(params)
+    let ins
+    if (fetchedData.length > 0) {
+        ins = await MDBServices.insertOneMBinanceDataToDb({ ticker_name: ticker_name, token_data: fetchedData })
+    } else {
+        ins = ["No new Data"]
+    }
+    console.log(`--------------------UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
+    return ins
+}
 
 // Takes a token count and returns the top tokens by market cap
 // Input : token_count (number)
@@ -763,7 +859,12 @@ const fetchDeatilsForBinanceTokens = async (req, res) => {
 
 module.exports = {
     formatDateForYFinance
+    , processHistoricalData
+    , processOneMHistoricalData
+    , processUpdateHistoricalData
+    , processUpdateHistoricalOneMData
     , getHistoricalYFinanceData
+    , getFirstTradeDate
     , checkForUpdates
     , generateFetchQueriesForBinanceTickers
     , fetchHistoricalDataBinance

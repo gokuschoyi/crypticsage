@@ -3,7 +3,7 @@
 }
 
 .admin-dash-skeleton {
-    height: 730px;
+    height: 300px;
 }
 
 .token-image-hist-box {
@@ -29,8 +29,62 @@
     text-align: start;
 }
 
+
 .small-screen-font-size {
     transition: all 0.5s ease;
+}
+
+.Toastify__toast-theme--dark {
+    background-color: #262727;
+}
+
+.normal-icon {
+    transition: all 0.5s ease;
+}
+
+.rotate-icon {
+    transition: all 0.5s ease;
+    transform: rotate(180deg);
+}
+
+.hist-data-tickers {
+    transition: all 0.5s ease;
+}
+
+.hist-data-tickers_padding {
+    transition: all 0.5s ease;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.no-hist-data-tickers {
+    transition: all 0.5s ease;
+}
+
+.no-hist-data-tickers_padding {
+    transition: all 0.5s ease;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.no-hist-data-in-binnce {
+    transition: all 0.5s ease;
+}
+
+.no-hist-data-in-binnce_padding {
+    transition: all 0.5s ease;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.yfinance-hist-data-tickers {
+    transition: all 0.5s ease;
+}
+
+.yfinance-hist-data-tickers_padding {
+    transition: all 0.5s ease;
+    border-radius: 5px;
+    padding: 10px;
 }
 
 @media screen and (max-width: 600px) {
@@ -42,8 +96,16 @@
     }
 }
 
+@media screen and (max-width : 900px) {
+    
+    .with-hist-data-title{
+        justify-content: space-between;
+    }
+    
+}
+
 @media screen and (max-height: 900px) {
     .admin-dash-skeleton {
-        height: 640px;
+        height: 265px;
     }
 }

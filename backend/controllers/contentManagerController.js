@@ -1,12 +1,84 @@
+const yahooFinance = require('yahoo-finance2').default;
 const { v4: uuidv4 } = require('uuid');
 const Validator = require('../utils/validator')
 const CMServices = require('../services/contentManagerServices')
+const MDBServices = require('../services/mongoDBServices')
+const HDServices = require('../services/historicalDataServices')
 
 // <--- Admin Stats ---> //
 
-const getTickersIndb = async (req, res) => {
+// Entry point to fetch and save the latest ticker meta data to DB
+const FASLatestTickerMetaData = async (req, res) => {
+    const { length } = req.body
     try {
-        const [totalTickerCountInDb, totalTickersWithDataToFetch, tickersWithHistData, tickersWithNoHistData, tickerWithNoDataInBinance, yFTickerInfo] = await CMServices.serviceGetTickerStatsFromDb()
+        let result = await CMServices.serviceFetchAndSaveLatestTickerMetaData({ length })
+        res.status(200).json({ message: "Get Crypto Data request success", result });
+    } catch (err) {
+        console.log("ERROR : ", err);
+        res.status(400).json({ message: "Get Crypto Data request error", error: err.message })
+    }
+}
+
+const deleteTickerMeta = async (req, res) => {
+    try {
+        const { symbol } = req.body
+        const deletedTickerMeta = await MDBServices.deleteOneMetaData({ symbol })
+        res.status(200).json({ message: "Delete Ticker Meta request success", deletedTickerMeta });
+    } catch (err) {
+        console.log("ERROR : ", err);
+        res.status(400).json({ message: "Get Crypto Data request error", error: err.message })
+    }
+}
+
+const findYFTicker = async (req, res) => {
+    try {
+        const { symbols } = req.body
+        // let result = []
+        const promises = symbols.map(async (symbol) => {
+            const ticker = await yahooFinance.search(symbol, {}, { validateResult: false });
+            // console.log(ticker)
+            try {
+                if (!ticker || ticker.count === 0) {
+                    return (
+                        {
+                            available: false,
+                            message: "Ticker does not exist in Yahoo Finance. Check for Typo"
+                        }
+                    );
+                } else {
+                    // console.log(ticker)
+                    return (
+                        {
+                            symbol: symbol,
+                            available: true,
+                            name: ticker.quotes.length !== 0 ? ticker.quotes[0].shortname : null,
+                            count: ticker.count,
+                            quotes: ticker.quotes
+                        }
+                    );
+                }
+            } catch (err) {
+                console.log(`ERROR:${symbol}`, err);
+                return (
+                    {
+                        available: false,
+                        message: err.message
+                    }
+                );
+            }
+        });
+        const result = await Promise.all(promises);
+
+        res.status(200).json({ message: "YF Ticker search success", result });
+    } catch (err) {
+        console.log("ERROR : ", err);
+        res.status(400).json({ message: "Get YF Data request error", error: err.message })
+    }
+}
+
+const getBinanceTickersIndb = async (req, res) => {
+    try {
+        const [totalTickerCountInDb, totalTickersWithDataToFetch, tickersWithHistData, tickersWithNoHistData, tickerWithNoDataInBinance] = await CMServices.serviceGetBinanceTickerStatsFromDb()
         let tickersWithHistDataLength = tickersWithHistData.length
         let tickersWithNoHistDataLength = tickersWithNoHistData.length
         res.status(200).json({
@@ -18,9 +90,87 @@ const getTickersIndb = async (req, res) => {
             tickersWithHistData,
             tickersWithNoHistData,
             tickerWithNoDataInBinance,
-            yFTickerInfo
         });
     } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const getYfinanceTickersIndb = async (req, res) => {
+    try {
+        const yfTickers = await CMServices.serviceGetYfinanceTickerStatsFromDb()
+        res.status(200).json({ message: "Yfinance Tickers fetched successfully", yFTickerInfo: yfTickers });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const fetchOneBinanceTicker = async (req, res) => {
+    try {
+        const { fetchQueries } = req.body
+        let fetchedQueries = await CMServices.serviceFetchOneBinanceTicker({ fetchQueries })
+        res.status(200).json({ message: fetchedQueries.message, finalResult: fetchedQueries.finalResult });
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const updateOneBinanceTicker = async (req, res) => {
+    try {
+        const { updateQueries } = req.body
+        let updatedQueries = await CMServices.serviceUpdateOneBinanceTicker({ updateQueries })
+        res.status(200).json({ message: updatedQueries.message, finalResult: updatedQueries.finalResult });
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const updateAllBinanceTickers = async (req, res) => {
+    try {
+        const finalProcessIds = await CMServices.serviceUpdateAllBinanceTickers()
+        res.status(200).json({ message: "Update All Binance Tickers request success", finalProcessIds });
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const fetchOneYfinanceTicker = async (req, res) => {
+    try {
+        const { symbol } = req.body
+        const periods = ["1d", "1wk", "1mo"]
+        const [uploadStatus, availableTickers, tickers] = await HDServices.processInitialSaveHistoricalDataYFinance({ tickersList: symbol, periods })
+        res.status(200).json({ message: "Yfinance tickers added", uploadStatus, availableTickers, tickers });
+    } catch (error) {
+        console.log(error.message, error.failReason)
+        if (error.failReason === 'No start date') {
+            res.status(200).json({ message: error.message, failReason: error.failReason });
+        } else {
+            res.status(400).json({ message: error.message });
+        }
+    }
+}
+
+const deleteOneYfinanceTicker = async (req, res) => {
+    try {
+        const { symbol } = req.body
+        const deleteStatus = await MDBServices.deleteOneYfinanceTickerDromDb({ symbol })
+        res.status(200).json({ message: "Yfinance tickers deleted", deleteStatus });
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const getProcessStatus = async (req, res) => {
+    try {
+        const { jobIds, type } = req.body
+        const processStatus = await CMServices.serviceCheckOneBinanceTickerJobCompletition({ jobIds, type })
+        res.status(200).json({ message: processStatus.message, status: processStatus.data });
+    } catch (error) {
+        console.log(error)
         res.status(400).json({ message: error.message });
     }
 }
@@ -257,7 +407,17 @@ const deleteQuizQuestion = async (req, res) => {
 // <--- Quiz ---> //
 
 module.exports = {
-    getTickersIndb,
+    FASLatestTickerMetaData,
+    deleteTickerMeta,
+    findYFTicker,
+    getBinanceTickersIndb,
+    getYfinanceTickersIndb,
+    fetchOneBinanceTicker,
+    updateOneBinanceTicker,
+    updateAllBinanceTickers,
+    fetchOneYfinanceTicker,
+    deleteOneYfinanceTicker,
+    getProcessStatus,
     getSections,
     addSection,
     updateSection,

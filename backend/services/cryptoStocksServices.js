@@ -1,16 +1,6 @@
 const CSUtil = require('../utils/cryptoStocksUtil')
 const MDBServices = require('../services/mongoDBServices')
 
-const processFetchAndSaveLatestTickerMetaData = async ({ length }) => {
-    try {
-        let cryptoData = await CSUtil.fetchTopTickerByMarketCap({ length })
-        let result = await MDBServices.saveLatestTickerMetaDataToDb({ cryptoData })
-        return result
-    } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
-    }
-}
 
 const processGetLatestCryptoData = async () => {
     try {
@@ -98,7 +88,6 @@ const processFetchTickerDataFromDb = async ({ asset_type, ticker_name, period, p
 }
 
 module.exports = {
-    processFetchAndSaveLatestTickerMetaData
-    , processGetLatestCryptoData
+    processGetLatestCryptoData
     , processFetchTickerDataFromDb
 }

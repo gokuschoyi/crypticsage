@@ -38,3 +38,17 @@ export const Info = (message) => {
         toastId: `addedit${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}`,
     });
 }
+
+export const Progress = (message) => {
+    return (
+        toast.info(message,
+            {
+                theme: 'dark',
+                width: 350,
+                position: "top-right",
+                autoClose: false,
+                progress: 0,
+                toastId: `addedit${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}`,
+            })
+    )
+}

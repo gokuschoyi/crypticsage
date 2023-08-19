@@ -15,13 +15,12 @@ let UOMTaskQueue;
 const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }) => {
     const connectMessage = "Initial-YF Historical Data Fetch"
     try {
-        const availableTickers = await MDBServices.getAvailableYfTickersInDb({ connectMessage })
-        const tickers = tickersList.filter((ticker) => {
+        let availableTickers = await MDBServices.getAvailableYfTickersInDb({ connectMessage })
+        let tickers = tickersList.filter((ticker) => {
             return !availableTickers.some((obj) => obj.ticker_name === ticker)
         })
         let uploadStatus = {};
         if (tickers.length > 0) {
-            const fromDate = '2010-01-01'
             const toDate = '2023-07-03' // HDUtil.formatDateForYFinance(new Date().toLocaleString())
 
             for (let i = 0; i < tickers.length; i++) {
@@ -29,25 +28,38 @@ const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }
                     ticker_name: tickers[i],
                     data: {}
                 }
-                uploadStatus[tickers[i]] = {}
-                for (let j = 0; j < periods.length; j++) {
-                    let params = {
-                        ticker_name: tickers[i],
-                        from: fromDate,
-                        to: toDate,
-                        period: periods[j]
-                    }
-                    let yFResult = await HDUtil.getHistoricalYFinanceData(params)
-                    if (yFResult.length === 0) {
-                        uploadStatus[tickers[i]][periods[j]] = 0
-                        console.log("No data found for ", tickers[i], " with period ", periods[j])
-                    } else {
-                        uploadStatus[tickers[i]][periods[j]] = yFResult.length
-                        const lastElementInArray = yFResult[yFResult.length - 1]
-                        const lastUpdateDate = new Date(lastElementInArray.date)
-                        tickerData.data[periods[j]] = {
-                            historical: yFResult,
-                            last_updated: lastUpdateDate
+                let fromDate
+                const startDate = await HDUtil.getFirstTradeDate({ symbol: tickers[i] })
+                if (startDate === undefined) {
+                    const customError = new Error(`No start date for ${tickers[i]}`)
+                    customError.failReason = "No start date"
+                    throw customError
+                } else {
+                    const newD = new Date(startDate).toLocaleString()
+                    fromDate = HDUtil.formatDateForYFinance(newD)
+
+                    console.log(fromDate)
+
+                    uploadStatus[tickers[i]] = {}
+                    for (let j = 0; j < periods.length; j++) {
+                        let params = {
+                            ticker_name: tickers[i],
+                            from: fromDate,
+                            to: toDate,
+                            period: periods[j]
+                        }
+                        let yFResult = await HDUtil.getHistoricalYFinanceData(params)
+                        if (yFResult.length === 0) {
+                            uploadStatus[tickers[i]][periods[j]] = 0
+                            console.log("No data found for ", tickers[i], " with period ", periods[j])
+                        } else {
+                            uploadStatus[tickers[i]][periods[j]] = yFResult.length
+                            const lastElementInArray = yFResult[yFResult.length - 1]
+                            const lastUpdateDate = new Date(lastElementInArray.date)
+                            tickerData.data[periods[j]] = {
+                                historical: yFResult,
+                                last_updated: lastUpdateDate
+                            }
                         }
                     }
                 }
@@ -56,18 +68,23 @@ const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }
         }
         return [uploadStatus, availableTickers, tickers]
     } catch (err) {
-        console.log(err)
-        throw new Error(err)
+        throw (err)
     } finally {
         close(connectMessage)
     }
 }
 
-const processUpdateHistoricalYFinanceData = async () => {
+const processUpdateHistoricalYFinanceData = async ({ symbol }) => {
     const connectMessage = "Update-YF Historical Data"
     try {
         let diffArray = []
-        const yfTickers = await MDBServices.getYFinanceTickerInfo({ connectMessage: "Feching ticker data from yFinance" })
+        let yfTickersInDb = await MDBServices.getYFinanceTickerInfo({ connectMessage: "Feching ticker data from yFinance" })
+        let yfTickers
+        if (symbol === 'all') {
+            yfTickers = yfTickersInDb
+        } else {
+            yfTickers = yfTickersInDb.filter((val) => val.ticker_name === symbol)
+        }
         for (const ticker of yfTickers) {
             console.log("-------------------------------------------------------")
             const { _id, period, ticker_name, last_updated, last_historicalData } = ticker
@@ -137,24 +154,6 @@ const processUpdateHistoricalYFinanceData = async () => {
 
 // - - - - - - - - - - - - - Initial fetch for Binance Data (START) - - - - - - - - - - - - - //
 
-// function for the initialFetchWorker to process initial fetches
-async function processHistoricalData(job) {
-    const { ticker, period, meta } = job.data;
-    console.log(`--------------------PROCESS HISTORICAL DATA START ${ticker} with period ${period}-------------------`)
-
-    let params = {
-        ticker_name: ticker,
-        period: period
-    }
-    let historicalData = await HDUtil.fetchHistoricalDataBinance(params); // Fetch the historical data for the ticker and time period
-    const allTickers = await MDBServices.getAvailableBinanceTickersInDb();
-    let ins = await MDBServices.insertBinanceDataToDb({ ticker_name: ticker, period: period, meta: meta, tokenData: historicalData, allTickersInDb: allTickers }); // save historical data to db
-
-    console.log(`--------------------PROCESS HISTORICAL DATA END ${ticker} with period ${period}-------------------`)
-
-    return ins; // Return the result
-}
-
 // Fetching and saving data for 4h, 6h, 8h, 12h, 1d, 3d, 1w
 const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
     var totalJobsCount = 0;
@@ -179,7 +178,7 @@ const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
 
         } else {
             const initialFetchTaskQueue = new Queue(queueName, { connection }); // Create a task queue
-            const initialFetchWorker = new Worker(queueName, processHistoricalData, { connection }); // Start a worker to process the tasks in the task queue
+            const initialFetchWorker = new Worker(queueName, HDUtil.processHistoricalData, { connection }); // Start a worker to process the tasks in the task queue
 
             IFTaskQueue = initialFetchTaskQueue
 
@@ -266,26 +265,6 @@ const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
 
 // - - - - - - - - - - - - - Updates the binance data (START) - - - - - - - - - - - - - //
 
-// Function for the updateWorker to process updates
-async function processUpdateHistoricalData(job) {
-    const { ticker_name, period, start, end } = job.data
-    console.log(`--------------------UPDATE HISTORICAL DATA START ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
-
-    let insertResult = []
-    const updateResult = await HDUtil.fetchLatestTickerData({ ticker_name, period, start, end })
-    if (updateResult.length > 0) {
-        insertResult = await MDBServices.updateBinanceDataToDb({ ticker_name, period, tokenData: updateResult })
-        console.log(`--------------------UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
-
-        return insertResult
-    } else {
-        console.log("No new data to update")
-        console.log(`--------------------UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
-        return insertResult = ["No New Data"]
-    }
-
-}
-
 // Entry point to update Binance Tokens
 const processUpdateBinanceData = async () => {
     var totalUpdateJobsCount = 0;
@@ -298,7 +277,7 @@ const processUpdateBinanceData = async () => {
         const [result, totalNoOfRequiredUpdates] = await HDUtil.generateUpdateQueriesForBinanceTickers()
 
         const updateQueue = new Queue(queueName, { connection })
-        const updateWorker = new Worker(queueName, processUpdateHistoricalData, { connection })
+        const updateWorker = new Worker(queueName, HDUtil.processUpdateHistoricalData, { connection })
 
         UTaskQueue = updateQueue
         const updateQueries = result // full updates now, add slice for partial updates, result.slice(0, 10)
@@ -320,7 +299,7 @@ const processUpdateBinanceData = async () => {
                 console.timeEnd('Update Binance Token - Main Process (>= 4h)');
                 close("Updating data (>= 4h)")
                 updateWorker.close()
-                updateQueue.close()
+                // updateQueue.close()
             }
         });
 
@@ -391,20 +370,6 @@ const processUpdateBinanceData = async () => {
 
 // - - - - - - - - - - - - - Initial fetch for Binance 1m Data (START) - - - - - - - - - - - - - //
 
-// function for the initialFetchWorker to process initial fetches One Min data
-async function processOneMHistoricalData(job) {
-    const { ticker_name, period } = job.data;
-    console.log(`--------------------PROCESS 1m HISTORICAL DATA START ${ticker_name} with period ${period}-------------------`)
-    let params = {
-        ticker_name: ticker_name,
-        period: period
-    }
-    let fetchedData = await HDUtil.testGetHistoricalDataBinance(params);
-    let ins = await MDBServices.insertOneMBinanceDataToDb({ ticker_name: ticker_name, token_data: fetchedData })
-    console.log(`--------------------PROCESS 1m HISTORICAL DATA END ${ticker_name} with period ${period}-------------------`)
-    return ins
-}
-
 // Entry point for Initial save binance Token endpoint One Min data
 const processInitialSaveHistoricalDataBinanceOneM = async () => {
     var totalInitialOneMJobsCount = 0;
@@ -421,7 +386,7 @@ const processInitialSaveHistoricalDataBinanceOneM = async () => {
         const fq = await generateFetchQueries({ tokensToFetch })
 
         const initialOneMQueue = new Queue(queueName, { connection })
-        const initialOneMWorker = new Worker(queueName, processOneMHistoricalData, { connection })
+        const initialOneMWorker = new Worker(queueName, HDUtil.processOneMHistoricalData, { connection })
 
         IFOMTaskQueue = initialOneMQueue
 
@@ -508,23 +473,6 @@ const processInitialSaveHistoricalDataBinanceOneM = async () => {
 
 // - - - - - - - - - - - - - Updates the binance data One Minute (START) - - - - - - - - - - - - - //
 
-// function for the oneMUpdateWorker to process and update One Min data
-async function processUpdateHistoricalOneMData(job) {
-    const { ticker_name, period, start, end } = job.data
-    console.log(`--------------------UPDATE HISTORICAL DATA START ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
-    let params = {
-        ticker_name: ticker_name,
-        period: period,
-        start: start,
-        end: end
-    }
-    const fetchedData = await HDUtil.fetchBinanceHistoricalBetweenPeriods(params)
-    const ins = await MDBServices.insertOneMBinanceDataToDb({ ticker_name: ticker_name, token_data: fetchedData })
-
-    console.log(`--------------------UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
-    return ins
-}
-
 // Entry point for Update binance Token endpoint One Min data
 const processUpdateBinanceOneMData = async () => {
     var totalUpdateOneMJobsCount = 0;
@@ -544,7 +492,7 @@ const processUpdateBinanceOneMData = async () => {
         totalUpdateOneMJobsCount = updateQueries.length
 
         const oneMUpdateQueue = new Queue(queueName, { connection })
-        const oneMUpdateWorker = new Worker(queueName, processUpdateHistoricalOneMData, { connection })
+        const oneMUpdateWorker = new Worker(queueName, HDUtil.processUpdateHistoricalOneMData, { connection })
 
         UOMTaskQueue = oneMUpdateQueue
 
@@ -673,6 +621,18 @@ const serviceCheckJobCompletition = async ({ jobIds, type }) => {
             case "update_1m":
                 for (const jobId of jobIds) {
                     const job = await UOMTaskQueue.getJob(jobId);
+                    if (job !== undefined) {
+                        const result = await job.isCompleted();
+                        const jobName = job.name
+                        processedResults.push({ jobId: jobId, completed: result, jobName: jobName, data: job.returnvalue })
+                    }
+                }
+                message = `Job status for ${type}`
+                data = processedResults
+                break;
+            case "full_update_":
+                for (const jobId of jobIds) {
+                    const job = await UTaskQueue.getJob(jobId) || await UOMTaskQueue.getJob(jobId);
                     if (job !== undefined) {
                         const result = await job.isCompleted();
                         const jobName = job.name
