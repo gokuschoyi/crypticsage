@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const CSUtil = require('../utils/cryptoStocksUtil')
 const MDBServices = require('../services/mongoDBServices')
 
@@ -60,8 +62,9 @@ const processGetLatestCryptoData = async () => {
         return [cryptoData, formattedTime]
 
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -72,18 +75,19 @@ const processFetchTickerDataFromDb = async ({ asset_type, ticker_name, period, p
     }
     try {
         if (asset_type === "crypto" && (period === "2h" || period === "1h" || period === "30m" || period === "15m" || period === "5m" || period === "3m" || period === "1m")) {
-            console.log(`Fetching data for ${ticker_name} with period ${period} from binance_historical`)
+            log.info(`Fetching data for ${ticker_name} with period ${period} from binance_historical`)
             const output = await MDBServices.fetchTickersFromBinanceHistoricalDb({ ticker_name, period, page_no, items_per_page })
             return output
         } else {
             const dataSource = asset_class_db[asset_type]
-            console.log(`Fetching data for ${ticker_name} with period ${period} from crypticsage/${dataSource}`)
+            log.info(`Fetching data for ${ticker_name} with period ${period} from crypticsage/${dataSource}`)
             const output = await MDBServices.fetchTickersFromCrypticsageBinance({ dataSource, ticker_name, period, page_no, items_per_page })
             return output
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 

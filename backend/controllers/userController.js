@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger');
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const Validator = require('../utils/validator');
 const userServices = require('../services/userServices')
 const wodData = require('../data/wodData')
@@ -10,10 +12,12 @@ const verifyPassword = async (req, res) => {
 			const email = res.locals.data.email
 			const password = params.password
 			const [message, validPassword] = await userServices.processVerifyPassword({ email, password });
-			console.log(message, validPassword)
+			log.info({ message, validPassword })
 			res.status(200).json({ message: message, validPassword })
 		}
 	} catch (error) {
+		let formattedError = JSON.stringify(logger.formatError(error))
+		log.error(formattedError)
 		res.status(400).json({ message: error.message, validPassword: false });
 	}
 }
@@ -29,6 +33,8 @@ const updatePassword = async (req, res) => {
 			res.status(200).json({ message: "Password updated successfully", status: true });
 		}
 	} catch (error) {
+		let formattedError = JSON.stringify(logger.formatError(error))
+		log.error(formattedError)
 		res.status(400).json({ message: error.message });
 	}
 }
@@ -44,6 +50,8 @@ const updateProfilePicture = async (req, res) => {
 			res.status(200).json({ message: message, status: uStatus });
 		}
 	} catch (error) {
+		let formattedError = JSON.stringify(logger.formatError(error))
+		log.error(formattedError)
 		res.status(400).json({ message: error.message });
 	}
 }
@@ -59,6 +67,8 @@ const updateUserData = async (req, res) => {
 			res.status(200).json({ message: message, status: uStatus });
 		}
 	} catch (error) {
+		let formattedError = JSON.stringify(logger.formatError(error))
+		log.error(formattedError)
 		res.status(400).json({ message: error.message });
 	}
 }
@@ -74,6 +84,8 @@ const updateUserPreference = async (req, res) => {
 			res.status(200).json({ message: message, status: uStatus });
 		}
 	} catch (error) {
+		let formattedError = JSON.stringify(logger.formatError(error))
+		log.error(formattedError)
 		res.status(400).json({ message: error.message });
 	}
 }
@@ -89,6 +101,8 @@ const updateUserLessonStatus = async (req, res) => {
 			res.status(200).json({ message: message, status: uStatus, lessonStatus: userLessonStatus });
 		}
 	} catch (error) {
+		let formattedError = JSON.stringify(logger.formatError(error))
+		log.error(formattedError)
 		res.status(400).json({ message: error.message });
 	}
 }
@@ -99,7 +113,8 @@ const getInitialQuizDataForUser = async (req, res) => {
 		const quizData = await userServices.processGetInitialQuizDataForUser({ email })
 		res.status(200).json({ message: "Quiz data fetched successfully", transformedQuizData: quizData });
 	} catch (error) {
-		console.log(error)
+		let formattedError = JSON.stringify(logger.formatError(error))
+		log.error(formattedError)
 		res.status(400).json({ message: error.message });
 	}
 }
@@ -114,7 +129,8 @@ const getQuiz = async (req, res) => {
 			res.status(200).json({ message: "Quiz fetched successfully", selectedQuiz });
 		}
 	} catch (error) {
-		console.log(error)
+		let formattedError = JSON.stringify(logger.formatError(error))
+		log.error(formattedError)
 		res.status(400).json({ message: error.message });
 	}
 }
@@ -130,7 +146,8 @@ const submitQuiz = async (req, res) => {
 			res.status(200).json({ message: "Quiz submitted successfully", status: true, data });
 		}
 	} catch (error) {
-		console.log(error)
+		let formattedError = JSON.stringify(logger.formatError(error))
+		log.error(formattedError)
 		res.status(400).json({ message: error.message });
 	}
 }
@@ -141,7 +158,8 @@ const getRecentLessonAndQuizStatus = async (req, res) => {
 		let recentLessonQuizStatus = await userServices.processGetRecentLessonAndQuiz({ email })
 		res.status(200).json({ message: "Recent lesson and quiz status fetched successfully", recentLessonQuizStatus });
 	} catch (error) {
-		console.log(error)
+		let formattedError = JSON.stringify(logger.formatError(error))
+		log.error(formattedError)
 		res.status(400).json({ message: error.message });
 	}
 }
@@ -151,7 +169,8 @@ const fileUpload = async (req, res) => {
 		let finalResult = await userServices.processFileUpload(req)
 		res.status(200).json({ message: "File uploaded successfully", finalResult });
 	} catch (error) {
-		console.log(error)
+		let formattedError = JSON.stringify(logger.formatError(error))
+		log.error(formattedError)
 		res.status(400).json({ message: error.message });
 	}
 }

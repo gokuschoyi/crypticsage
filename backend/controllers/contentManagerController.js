@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const yahooFinance = require('yahoo-finance2').default;
 const { v4: uuidv4 } = require('uuid');
 const Validator = require('../utils/validator')
@@ -13,9 +15,10 @@ const FASLatestTickerMetaData = async (req, res) => {
     try {
         let result = await CMServices.serviceFetchAndSaveLatestTickerMetaData({ length })
         res.status(200).json({ message: "Get Crypto Data request success", result });
-    } catch (err) {
-        console.log("ERROR : ", err);
-        res.status(400).json({ message: "Get Crypto Data request error", error: err.message })
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: "Get Crypto Data request error", error: error.message })
     }
 }
 
@@ -24,9 +27,10 @@ const deleteTickerMeta = async (req, res) => {
         const { symbol } = req.body
         const deletedTickerMeta = await MDBServices.deleteOneMetaData({ symbol })
         res.status(200).json({ message: "Delete Ticker Meta request success", deletedTickerMeta });
-    } catch (err) {
-        console.log("ERROR : ", err);
-        res.status(400).json({ message: "Get Crypto Data request error", error: err.message })
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: "Get Crypto Data request error", error: error.message })
     }
 }
 
@@ -36,7 +40,7 @@ const findYFTicker = async (req, res) => {
         // let result = []
         const promises = symbols.map(async (symbol) => {
             const ticker = await yahooFinance.search(symbol, {}, { validateResult: false });
-            // console.log(ticker)
+            // log.info(ticker)
             try {
                 if (!ticker || ticker.count === 0) {
                     return (
@@ -46,7 +50,7 @@ const findYFTicker = async (req, res) => {
                         }
                     );
                 } else {
-                    // console.log(ticker)
+                    // log.info(ticker)
                     return (
                         {
                             symbol: symbol,
@@ -57,12 +61,13 @@ const findYFTicker = async (req, res) => {
                         }
                     );
                 }
-            } catch (err) {
-                console.log(`ERROR:${symbol}`, err);
+            } catch (error) {
+                let formattedError = JSON.stringify(logger.formatError(error))
+                log.error(`ERROR:${symbol} : ${formattedError}`);
                 return (
                     {
                         available: false,
-                        message: err.message
+                        message: error.message
                     }
                 );
             }
@@ -70,9 +75,10 @@ const findYFTicker = async (req, res) => {
         const result = await Promise.all(promises);
 
         res.status(200).json({ message: "YF Ticker search success", result });
-    } catch (err) {
-        console.log("ERROR : ", err);
-        res.status(400).json({ message: "Get YF Data request error", error: err.message })
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: "Get YF Data request error", error: error.message })
     }
 }
 
@@ -92,6 +98,8 @@ const getBinanceTickersIndb = async (req, res) => {
             tickerWithNoDataInBinance,
         });
     } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: error.message });
     }
 }
@@ -101,6 +109,8 @@ const getYfinanceTickersIndb = async (req, res) => {
         const yfTickers = await CMServices.serviceGetYfinanceTickerStatsFromDb()
         res.status(200).json({ message: "Yfinance Tickers fetched successfully", yFTickerInfo: yfTickers });
     } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: error.message });
     }
 }
@@ -111,7 +121,8 @@ const fetchOneBinanceTicker = async (req, res) => {
         let fetchedQueries = await CMServices.serviceFetchOneBinanceTicker({ fetchQueries })
         res.status(200).json({ message: fetchedQueries.message, finalResult: fetchedQueries.finalResult });
     } catch (error) {
-        console.log(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: error.message });
     }
 }
@@ -122,7 +133,8 @@ const updateOneBinanceTicker = async (req, res) => {
         let updatedQueries = await CMServices.serviceUpdateOneBinanceTicker({ updateQueries })
         res.status(200).json({ message: updatedQueries.message, finalResult: updatedQueries.finalResult });
     } catch (error) {
-        console.log(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: error.message });
     }
 }
@@ -132,7 +144,8 @@ const updateAllBinanceTickers = async (req, res) => {
         const finalProcessIds = await CMServices.serviceUpdateAllBinanceTickers()
         res.status(200).json({ message: "Update All Binance Tickers request success", finalProcessIds });
     } catch (error) {
-        console.log(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: error.message });
     }
 }
@@ -144,7 +157,8 @@ const fetchOneYfinanceTicker = async (req, res) => {
         const [uploadStatus, availableTickers, tickers] = await HDServices.processInitialSaveHistoricalDataYFinance({ tickersList: symbol, periods })
         res.status(200).json({ message: "Yfinance tickers added", uploadStatus, availableTickers, tickers });
     } catch (error) {
-        console.log(error.message, error.failReason)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error({ message: error.message, reason: error.failReason, error: formattedError });
         if (error.failReason === 'No start date') {
             res.status(200).json({ message: error.message, failReason: error.failReason });
         } else {
@@ -159,7 +173,8 @@ const deleteOneYfinanceTicker = async (req, res) => {
         const deleteStatus = await MDBServices.deleteOneYfinanceTickerDromDb({ symbol })
         res.status(200).json({ message: "Yfinance tickers deleted", deleteStatus });
     } catch (error) {
-        console.log(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: error.message });
     }
 }
@@ -170,7 +185,8 @@ const getProcessStatus = async (req, res) => {
         const processStatus = await CMServices.serviceCheckOneBinanceTickerJobCompletition({ jobIds, type })
         res.status(200).json({ message: processStatus.message, status: processStatus.data });
     } catch (error) {
-        console.log(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: error.message });
     }
 }
@@ -187,8 +203,10 @@ const getSections = async (req, res) => {
         const filter = {}
         const sections = await CMServices.serviceGetDocuments({ collectionName, filter })
         res.status(200).json({ message: "Sections fetched successfully", sections });
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 
@@ -211,8 +229,10 @@ const addSection = async (req, res) => {
             let insertedResult = await CMServices.serviceAddDocuments({ connectMessage, collectionName, document })
             res.status(200).json({ message: "Section added successfully", createdSectionId: sectionId, update: false, insertedResult });
         }
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 
@@ -226,8 +246,10 @@ const updateSection = async (req, res) => {
             const update = await CMServices.serviceUdpateSectionInDb({ title, content, url, sectionId })
             res.status(200).json({ message: "Section updated successfully", update: true, update });
         }
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 
@@ -241,8 +263,10 @@ const deleteSection = async (req, res) => {
             let deleted = await CMServices.serviceDeleteSectionFromDb({ sectionId })
             res.status(200).json({ message: "Section deleted successfully", deleted });
         }
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 
@@ -266,8 +290,10 @@ const getLessons = async (req, res) => {
                 res.status(200).json({ message: "Lessons fetched successfully", lessons });
             }
         }
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 
@@ -291,8 +317,10 @@ const addLesson = async (req, res) => {
 
             res.status(200).json({ message: "Lesson added successfully", lessonId, insertedResult });
         }
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 
@@ -306,9 +334,10 @@ const updateLesson = async (req, res) => {
             const update = await CMServices.serviceUpdateLessonInDb({ chapter_title, lessonData, lessonId, sectionId })
             res.status(200).json({ message: "Lesson updated successfully", update });
         }
-    } catch (err) {
-        console.log(err)
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 
@@ -322,8 +351,10 @@ const deleteLesson = async (req, res) => {
             let deleted = await CMServices.serviceDeleteLessonFromDb({ lessonId, sectionId })
             res.status(200).json({ message: "Lesson deleted successfully", deleted });
         }
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 
@@ -347,8 +378,10 @@ const getQuizQuestions = async (req, res) => {
                 res.status(200).json({ message: "Quiz fetched successfully", quizQuestions, status: true });
             }
         }
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 
@@ -369,8 +402,10 @@ const addQuizQuestions = async (req, res) => {
             let insertedResult = await CMServices.serviceAddDocuments({ connectMessage, collectionName, document: quizData })
             res.status(200).json({ message: "Quiz question added successfully", quizId, insertedResult });
         }
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 
@@ -384,8 +419,10 @@ const updateQuizQuestions = async (req, res) => {
             const update = await CMServices.serviceUpdateQuizInDb({ quizId, quizTitle, quizDescription, questions })
             res.status(200).json({ message: "Quiz question updated successfully", update });
         }
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 
@@ -399,8 +436,10 @@ const deleteQuizQuestion = async (req, res) => {
             let deleted = await CMServices.serviceDeleteQuizFromDb({ quizId, sectionId, lessonId })
             res.status(200).json({ message: "Quiz question deleted successfully", deleted });
         }
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: error.message });
     }
 }
 

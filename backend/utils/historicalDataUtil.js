@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const yahooFinance = require('yahoo-finance2').default;
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
@@ -8,7 +10,7 @@ const MDBServices = require('../services/mongoDBServices')
 
 // new Date 10/07/2023, 12:19:38 pm to yyyy-mm-dd
 const formatDateForYFinance = (param) => {
-    // console.log(" Date param", param)
+    // log.info(`Date param : ${param}`)
     const [date, tz] = param.split(', ');
     const [d, m, y] = date.split('/')
     const formattedDate = `${y}-${m}-${d}`;
@@ -33,7 +35,7 @@ const getHistoricalYFinanceData = async (params) => {
     let result;
     let fResult;
     try {
-        console.log("Fetching historical data for ", ticker_name, " from ", from, " to ", to, " with period ", period);
+        log.info(`Fetching historical data for ${ticker_name} from ${from} to ${to}, with period ${period}`);
         result = await yahooFinance.historical(query, queryOptions)
         fResult = result.map((token) => {
             let unixTime = new Date(token.date).getTime();
@@ -43,9 +45,9 @@ const getHistoricalYFinanceData = async (params) => {
             }
         })
         return fResult
-    } catch (err) {
-        console.log(err.message, err.code)
-        throw new Error(err)
+    } catch (error) {
+        log.error({ error: error.message, code: error.code })
+        throw new Error(error)
     }
 }
 
@@ -53,9 +55,10 @@ const getFirstTradeDate = async ({ symbol }) => {
     try {
         const res = await yahooFinance.quote(symbol, {}, { validateResult: false })
         return res.firstTradeDateMilliseconds
-    } catch (err) {
-        console.log(err)
-        throw new Error(err.message)
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -135,7 +138,7 @@ const formatPrintDate = (date) => {
 const fetchData = async ({ ticker_name, period, start, end, type }) => {
     let response = [];
     let url = `https://api.binance.com/api/v3/klines?symbol=${ticker_name}&interval=${period}&startTime=${start}&endTime=${end}&limit=1000`;
-    console.log(`Binance ${period} URL : `, url)
+    log.info(`Binance ${period} URL : ${url}`)
     let sTime, eTime, lapsedTime, responseLength
     try {
         sTime = performance.now()
@@ -149,11 +152,12 @@ const fetchData = async ({ ticker_name, period, start, end, type }) => {
         let sDate = formatPrintDate(start)
         let eDate = formatPrintDate(end)
 
-        console.log(`Fetch type : (${type}) [${ticker_name} with period ${period} from ${sDate} to ${eDate}], Fetch count : ${responseLength}, Time taken : ${lapsedTime}`)
+        log.info(`Fetch type : (${type}) [${ticker_name} with period ${period} from ${sDate} to ${eDate}], Fetch count : ${responseLength}, Time taken : ${lapsedTime}`)
         return response
     } catch (error) {
-        console.error('Error fetching data:', error);
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error({ message: 'Error fetching data', error: formattedError })
+        throw error
     }
 };
 
@@ -230,7 +234,7 @@ const divideTimePeriod = (startTime, endTime, period, limit) => {
 
 async function processHistoricalData(job) {
     const { ticker, period, meta } = job.data;
-    console.log(`--------------------PROCESS HISTORICAL DATA START ${ticker} with period ${period}-------------------`)
+    log.info(`----PROCESS HISTORICAL DATA START ${ticker} with period ${period}----`)
 
     let params = {
         ticker_name: ticker,
@@ -244,14 +248,14 @@ async function processHistoricalData(job) {
     } else {
         ins = ['No Data Found']
     }
-    console.log(`--------------------PROCESS HISTORICAL DATA END ${ticker} with period ${period}-------------------`)
+    log.info(`----PROCESS HISTORICAL DATA END ${ticker} with period ${period}----`)
     return ins; // Return the result
 }
 
 // function for the initialFetchWorker to process initial fetches One Min data
 async function processOneMHistoricalData(job) {
     const { ticker_name, period } = job.data;
-    console.log(`--------------------PROCESS 1m HISTORICAL DATA START ${ticker_name} with period ${period}-------------------`)
+    log.info(`----PROCESS 1m HISTORICAL DATA START ${ticker_name} with period ${period}----`)
     let params = {
         ticker_name: ticker_name,
         period: period
@@ -263,25 +267,25 @@ async function processOneMHistoricalData(job) {
     } else {
         ins = ['No Data Found']
     }
-    console.log(`--------------------PROCESS 1m HISTORICAL DATA END ${ticker_name} with period ${period}-------------------`)
+    log.info(`----PROCESS 1m HISTORICAL DATA END ${ticker_name} with period ${period}----`)
     return ins
 }
 
 // Function for the updateWorker to process updates
 const processUpdateHistoricalData = async (job) => {
     const { ticker_name, period, start, end } = job.data
-    console.log(`--------------------UPDATE HISTORICAL DATA START ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
+    log.info(`----UPDATE HISTORICAL DATA START ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}----`)
 
     let insertResult = []
     const updateResult = await fetchLatestTickerData({ ticker_name, period, start, end })
     if (updateResult.length > 0) {
         insertResult = await MDBServices.updateBinanceDataToDb({ ticker_name, period, tokenData: updateResult })
-        console.log(`--------------------UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
+        log.info(`----UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}----`)
 
         return insertResult
     } else {
-        console.log("No new data to update")
-        console.log(`--------------------UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
+        log.info("No new data to update")
+        log.info(`----UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}----`)
         return insertResult = ["No New Data"]
     }
 
@@ -290,7 +294,7 @@ const processUpdateHistoricalData = async (job) => {
 // function for the oneMUpdateWorker to process and update One Min data
 const processUpdateHistoricalOneMData = async (job) => {
     const { ticker_name, period, start, end } = job.data
-    console.log(`--------------------UPDATE HISTORICAL DATA START ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
+    log.info(`----UPDATE HISTORICAL DATA START ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}----`)
     let params = {
         ticker_name: ticker_name,
         period: period,
@@ -304,7 +308,7 @@ const processUpdateHistoricalOneMData = async (job) => {
     } else {
         ins = ["No new Data"]
     }
-    console.log(`--------------------UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}-------------------`)
+    log.info(`----UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}----`)
     return ins
 }
 
@@ -365,8 +369,9 @@ const getTotalDurationInMarket = async ({ token_count }) => {
 
         return finalResult
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -472,8 +477,9 @@ const generateFetchQueriesForBinanceTickers = async ({ periods, token_count }) =
         console.timeEnd("Total duration to generate initial fetch queries")
         return [fetchQuery, totalNoOfRequiredFetches];
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -565,9 +571,10 @@ const generateUpdateQueriesForBinanceTickers = async () => {
         })
         const totalNoOfRequiredUpdates = result.length
         return [result, totalNoOfRequiredUpdates]
-    } catch (err) {
-        console.log(err)
-        throw err
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -601,9 +608,10 @@ const fetchLatestTickerData = async ({ ticker_name, period, start, end }) => {
             newData = convertedData.filter((item) => item.openTime > start)
         }
         return newData
-    } catch (err) {
-        console.log(err)
-        throw err
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -669,8 +677,9 @@ const getMinuteTokensToFetchAndUpdate = async () => {
 
         return [calculateTokensToFetch, calculateTokensToUpdate]
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -731,11 +740,12 @@ const generateFetchAndUpdateQueries = async () => {
                     })
                 })
             } else {
-                console.log("No tokens to fetch")
+                log.info("No tokens to fetch")
             }
-        } catch (err) {
-            console.log(err)
-            throw err
+        } catch (error) {
+            let formattedError = JSON.stringify(logger.formatError(error))
+            log.error(formattedError)
+            throw error
         }
         return fetchQueries
     }
@@ -761,12 +771,13 @@ const generateFetchAndUpdateQueries = async () => {
                 }
                 return updateQueries
             } else {
-                console.log("No tokens to update")
+                log.info("No tokens to update")
                 return updateQueries
             }
-        } catch (err) {
-            console.log(err)
-            throw err
+        } catch (error) {
+            let formattedError = JSON.stringify(logger.formatError(error))
+            log.error(formattedError)
+            throw error
         }
     }
 
@@ -815,7 +826,7 @@ const testGetHistoricalDataBinance = async ({ ticker_name, period }) => {
 
     const finalData = convertData(data)
 
-    console.log("Fetched count", finalData.length);
+    log.info(`Fetched count", ${finalData.length}`);
     return finalData;
 };
 
@@ -834,8 +845,9 @@ const fetchBinanceHistoricalBetweenPeriods = async ({ ticker_name, period, start
         convertedData = convertedData.slice(1)
         return convertedData
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -851,9 +863,10 @@ const fetchDeatilsForBinanceTokens = async (req, res) => {
         // let tickerData = await MDBServices.getData({ ticker_name })
         let test = await MDBServices.getAvailableBinanceTickersInDb();
         res.status(200).json({ message: "success", test })
-    } catch (err) {
-        console.log(err)
-        res.status(500).json({ message: "failed", data: err })
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error({ message: 'failed', error: formattedError })
+        res.status(500).json({ message: "failed", data: error })
     }
 }
 

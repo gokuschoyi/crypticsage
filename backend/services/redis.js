@@ -1,4 +1,5 @@
-const log = require('../middleware/logger/Logger').create(__filename.slice(__dirname.length + 1))
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const config = require('../config');
 const Redis = require("ioredis");
 // Create a Redis connection
@@ -19,16 +20,17 @@ try {
     redisClient = new Redis(connectionOptions);
 
     redisClient.on('error', (err) => {
-        log.info('Something went wrong, Redis server not running ' + err);
+        log.info(`Something went wrong, Redis server not running ' + ${err.message}`);
     });
 
     redisClient.once('ready', () => {
         log.info('Redis server running on port ' + config.redis_port);
     });
 
-} catch (err) {
-    log.error("Error creating Redis client: ", err.message)
-    throw new Error("Error creating Redis client: ", err.message)
+} catch (error) {
+    let formattedError = JSON.stringify(logger.formatError(error))
+    log.error({ message: 'Error creating Redis client', error: formattedError })
+    throw error
 }
 
 

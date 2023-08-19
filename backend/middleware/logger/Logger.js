@@ -13,7 +13,8 @@ class Logger {
         const APP_LOG_FORMAT = winston.format.printf(
             ({ level, message, label, timestamp }) => {
                 const localTime = new Date(timestamp).toLocaleString()
-                return `${localTime} [${label}] ${level}: ${message}`
+                const capLevel = level.toUpperCase()
+                return `${localTime} [${label}] ${capLevel}: ${message}`
             }
         )
         this.APP_LOG = winston.createLogger({
@@ -58,6 +59,13 @@ class Logger {
         const ACCESS_LOG = morgan(':remote-addr - :remote-user [:local-time] :total-time :method ":url HTTP/:http-version" :status :res[content-length] :referrer :user-agent', { stream: accessLogStream });
         app.use(ACCESS_LOG)
     }
+
+    static formatError(err) {
+        return {
+            message: err.message,
+            stack: err.stack,
+        }
+    }
 }
 
 module.exports = {
@@ -67,6 +75,9 @@ module.exports = {
     setupAccessLog: (app) => {
         Logger.setupAccessLogging(app)
     },
+    formatError: (err) => {
+        return Logger.formatError(err)
+    }
 }
 
 

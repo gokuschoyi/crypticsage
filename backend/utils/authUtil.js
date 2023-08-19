@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const csv = require('csv-parser');
 const fs = require('fs');
 const util = require('util');
@@ -93,7 +95,7 @@ const processUploadedCsv = async (req) => {
     try {
         const folderPath = `user_uploads/${uid}`; // Folder path to read files from
         const files = await readdir(folderPath); // Read files from the folder
-        console.log(files);
+        // log.info(files);
 
         await Promise.all(files.map((filename) => {
             let headersProcessed = false;
@@ -129,9 +131,10 @@ const processUploadedCsv = async (req) => {
             })
         }))
         return final
-    } catch (err) {
-        console.log(err);
-        throw err;
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -167,8 +170,10 @@ const getRecentLessonAndQuiz = async (lessonStatus, quizStatus) => {
             }
         }
         return { mostRecentLesson, mostRecentQuiz }
-    } catch (err) {
-        console.log(err)
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 

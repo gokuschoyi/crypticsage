@@ -19,12 +19,12 @@ const app = express();
 
 // const schedule = require('node-schedule');
 // const job = schedule.scheduleJob('*/10 * * * * *', function () {
-//     console.log('The answer to life, the universe, and everything!');
+//     logs.info('The answer to life, the universe, and everything!');
 // });
 
 
 /* var talib = require('talib/build/Release/talib')
-console.log("TALib Version: " + talib.version);
+logs.info("TALib Version: " + talib.version);
 
 var functions = talib.functions;
 var totalFunctionCount = 0;
@@ -33,7 +33,7 @@ for (i in functions) {
     
 }
 var funcDesc = talib.explain("ADX");
-console.log(totalFunctionCount, funcDesc) */
+logs.info({totalFunctionCount, funcDesc}) */
 
 const log = (req, res, next) => {
     logs.info(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);

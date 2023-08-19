@@ -1,3 +1,6 @@
+const logger = require('../middleware/logger/Logger');
+const log = logger.create(__filename.slice(__dirname.length + 1));
+
 const Validator = require('../utils/validator');
 const authServices = require('../services/authServices')
 
@@ -11,6 +14,8 @@ const loginUser = async (req, res) => {
             res.status(200).json({ message: "User login successful", data: userData, recent_lesson_quiz });
         }
     } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: error.message });
     }
 }
@@ -25,6 +30,8 @@ const signupUser = async (req, res) => {
             res.status(200).json({ message: "Account created successfully", registered });
         }
     } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: error.message });
     }
 }

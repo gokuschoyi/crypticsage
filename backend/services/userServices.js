@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const bcrypt = require('bcrypt');
 const { close } = require('../services/db-conn')
 const MDBServices = require('../services/mongoDBServices');
@@ -40,8 +42,9 @@ const processVerifyPassword = async ({ email, password }) => {
             }
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         await close(connectMessage)
     }
@@ -63,8 +66,9 @@ const processUpdatePassword = async ({ email, newPassword }) => {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await MDBServices.updateUserPasswordByEmail({ email, hashedPassword, connectMessage })
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         await close(connectMessage)
     }
@@ -92,8 +96,9 @@ const processUpdateProfilePicture = async ({ email, profilePicture }) => {
             throw new Error('Profile image update failed')
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         await close(connectMessage)
     }
@@ -121,8 +126,9 @@ const processUpdateUserData = async ({ email, userData }) => {
             throw new Error('User data update failed')
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         await close(connectMessage)
     }
@@ -156,8 +162,9 @@ const processUpdateUserPreferences = async ({ email, preferences }) => {
             throw new Error('User preferences update failed')
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         await close(connectMessage)
     }
@@ -221,8 +228,9 @@ const processUpdateUserLessonStatus = async ({ email, lesson_status }) => {
         const [message, uStatus, userLessonStatus] = updateLessonStatus
         return [message, uStatus, userLessonStatus]
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         await close(connectMessage)
     }
@@ -281,13 +289,14 @@ const processGetInitialQuizDataForUser = async ({ email }) => {
     const connectMessage = "getInitialQuizDataForUser"
     try {
         let user = await MDBServices.getUserByEmail({ email, connectMessage })
-        // console.log(user)
+        // log.info(user)
         let userQuizStatus = user[0].quiz_status
         let transformedQuizData = await MDBServices.getInitialQuizDataForUser({ userQuizStatus, connectMessage })
         return transformedQuizData
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         await close(connectMessage)
     }
@@ -352,8 +361,9 @@ const processGetQuiz = async ({ quizId }) => {
             return selectedQuiz
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         await close(connectMessage)
     }
@@ -416,7 +426,7 @@ const processSubmitQuiz = async ({ email, sectionId, lessonId, quizId, quizData 
                 }
             })
         })
-        console.log(score)
+        log.info(`quiz score : ${score}`)
         let data = {
             score: score,
             total: total,
@@ -429,8 +439,9 @@ const processSubmitQuiz = async ({ email, sectionId, lessonId, quizId, quizData 
             throw new Error('Quiz status update failed')
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         await close(connectMessage)
     }
@@ -477,10 +488,9 @@ const processGetRecentLessonAndQuiz = async ({ email }) => {
         let recentLessonQuizStatus = await AuthUtil.getRecentLessonAndQuiz(lessonStatus, quizStatus)
         return recentLessonQuizStatus
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
-    } finally {
-        close(connectMessage)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -494,8 +504,9 @@ const processFileUpload = async (req) => {
             return finalResult
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 

@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const { Queue, Worker } = require('bullmq');
 const { close, binanceClose } = require('../services/db-conn')
 const { redisClient } = require('../services/redis')
@@ -38,7 +40,7 @@ const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }
                     const newD = new Date(startDate).toLocaleString()
                     fromDate = HDUtil.formatDateForYFinance(newD)
 
-                    console.log(fromDate)
+                    log.info(fromDate)
 
                     uploadStatus[tickers[i]] = {}
                     for (let j = 0; j < periods.length; j++) {
@@ -51,7 +53,7 @@ const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }
                         let yFResult = await HDUtil.getHistoricalYFinanceData(params)
                         if (yFResult.length === 0) {
                             uploadStatus[tickers[i]][periods[j]] = 0
-                            console.log("No data found for ", tickers[i], " with period ", periods[j])
+                            log.info(`No data found for ${tickers[i]} with period ${periods[j]}`)
                         } else {
                             uploadStatus[tickers[i]][periods[j]] = yFResult.length
                             const lastElementInArray = yFResult[yFResult.length - 1]
@@ -67,8 +69,10 @@ const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }
             }
         }
         return [uploadStatus, availableTickers, tickers]
-    } catch (err) {
-        throw (err)
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         close(connectMessage)
     }
@@ -86,7 +90,7 @@ const processUpdateHistoricalYFinanceData = async ({ symbol }) => {
             yfTickers = yfTickersInDb.filter((val) => val.ticker_name === symbol)
         }
         for (const ticker of yfTickers) {
-            console.log("-------------------------------------------------------")
+            log.info("-------------------------------------------------------")
             const { _id, period, ticker_name, last_updated, last_historicalData } = ticker
 
             let updateCount, yFResult, latestTickerDatafromYF, insertData
@@ -95,7 +99,7 @@ const processUpdateHistoricalYFinanceData = async ({ symbol }) => {
 
             if (daysElapsed > 1) {
                 const [daysElapsed, from, to] = cfu
-                console.log(`${ticker_name} with period ${period} needs update from ${(new Date(last_updated).toLocaleString().split(', ')[0])}, days: ${Math.round(daysElapsed)} `)
+                log.info(`${ticker_name} with period ${period} needs update from ${(new Date(last_updated).toLocaleString().split(', ')[0])}, days: ${Math.round(daysElapsed)} `)
                 let params = {}
                 if (period === '1mo') {
                     const [y, m, d] = from.split('-')
@@ -117,7 +121,7 @@ const processUpdateHistoricalYFinanceData = async ({ symbol }) => {
                 yFResult = await HDUtil.getHistoricalYFinanceData(params)
                 latestTickerDatafromYF = yFResult.filter((val) => new Date(val.date).getTime() > new Date(last_historicalData.date).getTime())
                 updateCount = latestTickerDatafromYF.length
-                console.log("New data length", updateCount)
+                log.info(`New data length : ${updateCount}`)
                 if (updateCount > 0) {
                     insertData = await MDBServices.insertLatestYFinanceData({ _id: _id, period: period, data: latestTickerDatafromYF, connectMessage: "Inserting latest YF data" })
                     diffArray.push({
@@ -127,10 +131,10 @@ const processUpdateHistoricalYFinanceData = async ({ symbol }) => {
                         insertData
                     })
                 } else {
-                    console.log("no new data")
+                    log.info("No new data")
                 }
             } else {
-                console.log(`${ticker_name} with period ${period} is upto date : ${daysElapsed}`)
+                log.info(`${ticker_name} with period ${period} is upto date : ${daysElapsed}`)
                 diffArray.push({
                     ticker_name: ticker_name,
                     period: period,
@@ -139,12 +143,13 @@ const processUpdateHistoricalYFinanceData = async ({ symbol }) => {
                     insertData: insertData || 0
                 })
             }
-            console.log("-------------------------------------------------------")
+            log.info("-------------------------------------------------------")
         }
         return diffArray
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         close(connectMessage)
     }
@@ -183,18 +188,18 @@ const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
             IFTaskQueue = initialFetchTaskQueue
 
             // Log any errors that occur in the worker, initial save
-            initialFetchWorker.on('error', err => {
+            initialFetchWorker.on('error', error => {
                 // log the error
-                console.error("Error", err);
+                log.error(error);
             });
 
             // counts the number of completed jobs, initial save
             initialFetchWorker.on('completed', (job) => {
                 completedJobsCount++;
                 if (completedJobsCount < totalJobsCount) {
-                    console.log('(WORKER - Initial fetch >= 4h), Completed job count :', completedJobsCount);
+                    log.info(`(WORKER - Initial fetch >= 4h), Completed job count : ${completedJobsCount}`);
                 } else {
-                    console.log('(WORKER - Initial fetch >= 4h), Completed job count Final Task :', completedJobsCount);
+                    log.info(`(WORKER - Initial fetch >= 4h), Completed job count Final Task : ${completedJobsCount}`);
                     console.timeEnd('Initial fetch - Main Process (>= 4h)');
                     close("Initial save historical data Binance ")
                     initialFetchWorker.close()
@@ -205,8 +210,8 @@ const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
             // console logs the failed tasks in the queue, initial save
             initialFetchWorker.on('failed', (job) => {
                 const redisCommand = `hgetall bull:${queueName}:${job.id}`
-                console.log("Initial fetch task failed for : ", job.name, " with id : ", job.id)
-                console.log("Check Redis for more info : ", redisCommand)
+                log.error(`Initial fetch task failed for : , ${job.name}, with id : , ${job.id}`)
+                log.warn(`Check Redis for more info : ${redisCommand}`)
             });
 
             for (const index in fetchInfo) {
@@ -256,8 +261,9 @@ const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
 
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -284,18 +290,18 @@ const processUpdateBinanceData = async () => {
         totalUpdateJobsCount = updateQueries.length
 
         // Log any errors that occur in the worker, updates
-        updateWorker.on('error', err => {
+        updateWorker.on('error', error => {
             // log the error
-            console.error("Error", err);
+            log.error(error);
         });
 
         // counts the number of completed jobs, updates
         updateWorker.on('completed', () => {
             completedUpdateJobsCount++;
             if (completedUpdateJobsCount < totalUpdateJobsCount) {
-                console.log('(WORKER - Update >= 4h) Update job count :', completedUpdateJobsCount);
+                log.info(`(WORKER - Update >= 4h) Update job count : ${completedUpdateJobsCount}`);
             } else {
-                console.log('(WORKER - Update >= 4h) Update job count Final Task :', completedUpdateJobsCount);
+                log.info(`(WORKER - Update >= 4h) Update job count Final Task : ${completedUpdateJobsCount}`);
                 console.timeEnd('Update Binance Token - Main Process (>= 4h)');
                 close("Updating data (>= 4h)")
                 updateWorker.close()
@@ -306,8 +312,8 @@ const processUpdateBinanceData = async () => {
         // console logs the failed tasks in the queue, updates
         updateWorker.on('failed', (job) => {
             const redisCommand = `hgetall bull:${queueName}:${job.id}`
-            console.log("Update task failed for : ", job.name, " with id : ", job.id)
-            console.log("Check Redis for more info : ", redisCommand)
+            log.error(`Update task failed for : ", ${job.name}, " with id : ", ${job.id}`)
+            log.warn(`Check Redis for more info : ", ${redisCommand}`)
         })
 
         for (const index in updateQueries) {
@@ -356,8 +362,9 @@ const processUpdateBinanceData = async () => {
             return ({ message, finalResult });
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -397,16 +404,16 @@ const processInitialSaveHistoricalDataBinanceOneM = async () => {
         // Log any errors that occur in the worker, initial fetch 1m data
         initialOneMWorker.on('error', err => {
             // log the error
-            console.error("initialOneMWorker Error", err);
+            log.error(`initialOneMWorker Error : ${err}`)
         });
 
         // counts the number of completed jobs, initial fetch 1m data
         initialOneMWorker.on('completed', (job) => {
             completedInitialOneMJobsCount++;
             if (completedInitialOneMJobsCount < totalInitialOneMJobsCount) {
-                console.log('(WORKER - Initial Fetch 1m) Completed job count : ', completedInitialOneMJobsCount);
+                log.info(`(WORKER - Initial Fetch 1m) Completed job count : ${completedInitialOneMJobsCount}`);
             } else {
-                console.log('(WORKER - Initial Fetch 1m) Completed job count Final Task : ', completedInitialOneMJobsCount);
+                log.info(`(WORKER - Initial Fetch 1m) Completed job count Final Task : ${completedInitialOneMJobsCount}`);
                 console.timeEnd('Initial fetch - Main Process (1m)');
                 binanceClose("Saving oneM binance token data")
             }
@@ -415,8 +422,8 @@ const processInitialSaveHistoricalDataBinanceOneM = async () => {
         // console logs the failed tasks in the queue, initial fetch 1m data
         initialOneMWorker.on('failed', (job) => {
             const redisCommand = `hgetall bull:${queueName}:${job.id}`
-            console.log("Initial fetch for 1m task failed for : ", job.name, " with id : ", job.id)
-            console.log("Check Redis for more info : ", redisCommand)
+            log.error(`Initial fetch for 1m task failed for ${job.name} with id : ${job.id}`)
+            log.warn(`Check Redis for more info : ${redisCommand}`)
         })
 
         for (const index in fetchQueries) {
@@ -463,8 +470,9 @@ const processInitialSaveHistoricalDataBinanceOneM = async () => {
             return ({ message, finalResult });
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -497,18 +505,18 @@ const processUpdateBinanceOneMData = async () => {
         UOMTaskQueue = oneMUpdateQueue
 
         // Log any errors that occur in the worker, updates 1m ticker
-        oneMUpdateWorker.on('error', err => {
+        oneMUpdateWorker.on('error', error => {
             // log the error
-            console.error("oneMWorker Error", err);
+            log.error(`oneMWorker Error : ${error}`);
         });
 
         // counts the number of completed jobs, updates 1m ticker
         oneMUpdateWorker.on('completed', (job) => {
             completedUpdateOneMJobsCount++;
             if (completedUpdateOneMJobsCount < totalUpdateOneMJobsCount) {
-                console.log('(WORKER - Update 1m) Completed job count : ', completedUpdateOneMJobsCount);
+                log.info(`(WORKER - Update 1m) Completed job count : ${completedUpdateOneMJobsCount}`);
             } else {
-                console.log('(WORKER - Update 1m) Completed job count Final Task : ', completedUpdateOneMJobsCount);
+                log.info(`(WORKER - Update 1m) Completed job count Final Task : ${completedUpdateOneMJobsCount}`);
                 oneMUpdateWorker.close()
                 console.timeEnd("Update Binance Token - Main Process (1m)")
             }
@@ -517,8 +525,8 @@ const processUpdateBinanceOneMData = async () => {
         // console logs the failed tasks in the queue, updates 1m ticker
         oneMUpdateWorker.on('failed', (job) => {
             const redisCommand = `hgetall bull:${queueName}:${job.id}`
-            console.log("Update 1m task failed for : ", job.name, " with id : ", job.id)
-            console.log("Check Redis for more info : ", redisCommand)
+            log.error(`Update 1m task failed for : ", ${job.name}, " with id : ", ${job.id}`)
+            log.warn(`Check Redis for more info : ", ${redisCommand}`)
         })
 
         for (const index in updateQueries) {
@@ -567,8 +575,9 @@ const processUpdateBinanceOneMData = async () => {
             return ({ message, finalResult });
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -648,8 +657,9 @@ const serviceCheckJobCompletition = async ({ jobIds, type }) => {
         }
         return ({ message, data })
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 

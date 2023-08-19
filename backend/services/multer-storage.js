@@ -1,3 +1,4 @@
+const log = require('../middleware/logger/Logger').create(__filename.slice(__dirname.length + 1))
 const fs = require('fs');
 
 const multer = require('multer');
@@ -8,9 +9,9 @@ const storage = multer.diskStorage({
             cb(new Error('Missing parameter in request body or order of uid is incorrect. (uid should be first in body)'));
         } else {
             let foldrPath = `./user_uploads/${req.body.uid}`;
-            console.log(foldrPath)
+            log.info(foldrPath)
             if (!fs.existsSync(foldrPath)) {
-                console.log("folder doesn't exist")
+                log.info("folder doesn't exist")
                 fs.mkdirSync(foldrPath);
             }
             cb(null, `${foldrPath}`)

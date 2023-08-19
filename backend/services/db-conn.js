@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const { MongoClient } = require('mongodb');
 const config = require('../config');
 
@@ -17,12 +19,12 @@ const connect = async (EPMessage) => {
     try {
         await client.connect();
         const db = client.db("crypticsage");
-        console.log(`Connected to MongoDB - request from ${EPMessage}`);
+        log.info(`Connected to MongoDB (crypticsage DB) - called from ${EPMessage}`);
         return db;
-    } catch (e) {
-        console.log('Error connecting to MongoDB');
-        console.error(e);
-        throw e; // Throw the error for better error handling at the calling code
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error({ message: 'Error connection to MongoDB (crypticsage)', error: formattedError })
+        throw error // Throw the error for better error handling at the calling code
     }
 }
 
@@ -30,11 +32,11 @@ const connect = async (EPMessage) => {
 const close = async (EPMessage) => {
     try {
         await client.close();
-        console.log(`Disconnected from MongoDB - request from ${EPMessage}`);
-    } catch (e) {
-        console.log('Error disconnecting from MongoDB');
-        console.error(e);
-        throw e; // Throw the error for better error handling at the calling code
+        log.info(`Disconnected from MongoDB (crypticsage DB) - called from ${EPMessage}`);
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error({ message: 'Error disconnecting from MongoDB (crypticsage)', error: formattedError })
+        throw error // Throw the error for better error handling at the calling code
     }
 };
 
@@ -43,12 +45,12 @@ const binanceConnect = async (EPMessage) => {
     try {
         await client.connect();
         const db = client.db("binance_historical");
-        console.log(`Connected to MongoDB - request from ${EPMessage}`);
+        log.info(`Connected to MongoDB (binance_historical) - called from ${EPMessage}`);
         return db;
-    } catch (e) {
-        console.log('Error connecting to MongoDB');
-        console.error(e);
-        throw e; // Throw the error for better error handling at the calling code
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error({ message: 'Error connecting to MongoDB (binance_historical)', error: formattedError })
+        throw error // Throw the error for better error handling at the calling code
     }
 };
 
@@ -56,11 +58,11 @@ const binanceConnect = async (EPMessage) => {
 const binanceClose = async (EPMessage) => {
     try {
         await client.close();
-        console.log(`Disconnected from MongoDB - request from ${EPMessage}`);
-    } catch (e) {
-        console.log('Error disconnecting from MongoDB');
-        console.error(e);
-        throw e; // Throw the error for better error handling at the calling code
+        log.info(`Disconnected from MongoDB (binance_historical) - called from ${EPMessage}`);
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error({ message: 'Error disconnecting from MongoDB (binance_historical', error: formattedError })
+        throw error // Throw the error for better error handling at the calling code
     }
 };
 

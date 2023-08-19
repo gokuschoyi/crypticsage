@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const { connect, close, binanceConnect, binanceClose } = require('./db-conn')
 const authUtil = require('../utils/authUtil')
 
@@ -12,8 +14,9 @@ const getUserByEmail = async ({ email, connectMessage }) => {
         const user = await userCollection.find(filterEmail).toArray();
         return user
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -44,8 +47,9 @@ const checkUserExists = async ({ email, connectMessage }) => {
             return true
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -59,8 +63,9 @@ const insertNewUser = async ({ userData }) => {
         const insertResult = await userCollection.insertOne(userData);
         return insertResult
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -88,8 +93,9 @@ const makeUserLessonStatus = async () => {
         const groupedLessons = authUtil.sortAndGroupLessons(userLessonStatus);
         return groupedLessons;
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -132,8 +138,9 @@ const makeUserQuizStatus = async () => {
         });
         return userQuizStatus.quiz_status;
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -147,8 +154,9 @@ const updateUserPasswordByEmail = async ({ email, hashedPassword, connectMessage
         const user = await userCollection.updateOne({ 'email': email }, { $set: { 'password': hashedPassword } });
         return user
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -159,8 +167,9 @@ const updateUserProfilePicture = async ({ email, profilePicture, connectMessage 
         const user = await userCollection.updateOne({ 'email': email }, { $set: { 'profile_image': profilePicture } });
         return user
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -179,8 +188,9 @@ const updateUserData = async ({ email, userData, connectMessage }) => {
             });
         return user
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -200,8 +210,9 @@ const updateUserPreferences = async ({ email, preferences, connectMessage }) => 
         );
         return user
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -236,8 +247,9 @@ const updateUserLessonStatus = async ({ email, lesson_status, connectMessage }) 
             throw new Error("User lesson status update failed")
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -249,8 +261,9 @@ const getInitialQuizDataForUser = async ({ userQuizStatus, connectMessage }) => 
         transformedQuizData = transformedQuizData.outputObject.quizzes
         return transformedQuizData
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -261,8 +274,9 @@ const getQuizDataById = async ({ connectMessage, quizId }) => {
         let selectedQuiz = await quizCollection.find({ "quizId": quizId }).toArray()
         return selectedQuiz
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -288,8 +302,9 @@ const updateQuizStatusForUser = async ({ email, sectionId, lessonId, quizId, sco
         )
         return user
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -331,8 +346,9 @@ const getAllDocumentsFromCollection = async ({ collectionName, filter, connectMe
         const documents = await collection.find(filter).toArray()
         return documents
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -346,8 +362,9 @@ const insertDocumentToCollection = async ({ connectMessage, collectionName, docu
         let result = await sectionCollection.insertOne(document);
         return result
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -369,8 +386,9 @@ const addSectionStatusForUsers = async ({ connectMessage, sectionId }) => {
         }
         return updateStatus
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -383,14 +401,14 @@ const addLessonStatusForUsers = async ({ connectMessage, sectionId, lesson_statu
         const userCollection = await db.collection('users').find().toArray();
         for (const user of userCollection) {
             if (sectionId in user.lesson_status) {
-                // console.log("Lesson status key exists");
+                // log.info("Lesson status key exists");
                 let update = await allUserCollection.updateOne(
                     { _id: user._id },
                     { $push: { [`lesson_status.${sectionId}`]: lesson_status } }
                 );
                 updateStatus.push(update)
             } else {
-                // console.log("Lesson status key does not exist");
+                // log.info("Lesson status key does not exist");
                 let update = await collection.updateOne(
                     { _id: user._id },
                     { $set: { [`lesson_status.${sectionId}`]: [lesson_status] } }
@@ -400,8 +418,9 @@ const addLessonStatusForUsers = async ({ connectMessage, sectionId, lesson_statu
         }
         return updateStatus
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -433,8 +452,9 @@ const addQuizStatusForUsers = async ({ connectMessage, sectionId, lessonId, quiz
         }
         return updated
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -467,8 +487,9 @@ const checkForDocumentInCollection = async ({ collectionName, id, connectMessage
             throw new Error("Document not found / does not exist")
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -482,8 +503,9 @@ const updateSectionData = async ({ connectMessage, title, content, url, sectionI
         let sections = await sectionsCollection.updateOne({ sectionId }, { $set: { title, content, url } });
         return sections
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -495,8 +517,9 @@ const updateLessonData = async ({ connectMessage, chapter_title, lessonData, les
         let lessons = await lessonsCollection.updateOne({ lessonId }, { $set: { chapter_title, lessonData } });
         return lessons
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -525,8 +548,9 @@ const updateLessonNameChangeAcrossUsersStatus = async ({ connectMessage, section
         const updated = await allUserCollection.updateMany(filter, update, options);
         return updated
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -539,8 +563,9 @@ const updateQuizData = async ({ connectMessage, quizId, quizTitle, quizDescripti
         let reqData = await quizzesCollection.findOne({ quizId })
         return [update, reqData]
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -569,8 +594,9 @@ const updateQuizNameChangeAcrossUsersStatus = async ({ connectMessage, sectionId
         const updated = await allUserCollection.updateMany(filter, update, options);
         return updated
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -599,8 +625,9 @@ const deleteOneDocumentFromCollection = async ({ collectionName, id, connectMess
         const result = await collection.deleteOne(filter);
         return result
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -626,8 +653,9 @@ const deleteManyDocumentsFromCollection = async ({ type, collectionName, id, con
         const result = await collection.deleteMany(filter);
         return result
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -654,8 +682,9 @@ const removeLessonAndQuizStatusFromUsers = async ({ sectionId, connectMessage })
         }
         return updatedStatus
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -674,7 +703,7 @@ const removeOneLessonAndQuizStatusFromUsers = async ({ connectMessage, sectionId
                 )
                 updatedStatus.push(removedLessonStatus)
             } else {
-                console.log("Lesson status key not present")
+                log.info("Lesson status key not present")
             }
             if ("quiz_status" in user && sectionId in user.quiz_status && lessonId in user.quiz_status[sectionId]) {
                 // Quiz status key exists
@@ -684,13 +713,14 @@ const removeOneLessonAndQuizStatusFromUsers = async ({ connectMessage, sectionId
                 )
                 updatedStatus.push(removedQuizstatus)
             } else {
-                console.log("Quiz status key not present")
+                log.info("Quiz status key not present")
             }
         }
         return updatedStatus
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -710,8 +740,9 @@ const removeQuizStatusFromUser = async ({ connectMessage, quizId, lessonId, sect
         }
         return deletedStatus
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -722,8 +753,9 @@ const deleteOneMetaData = async ({ symbol }) => {
         const result = await collection.deleteOne({ symbol: symbol })
         return result
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -734,8 +766,9 @@ const deleteOneYfinanceTickerDromDb = async ({ symbol }) => {
         const result = await collection.deleteOne({ ticker_name: symbol })
         return result
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -786,8 +819,9 @@ const getAvailableYfTickersInDb = async ({ connectMessage }) => {
         ]).toArray()
         return yFTickers
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -798,8 +832,9 @@ const insertHistoricalYFinanceDate = async ({ tickerData, connectMessage }) => {
         const yFinanceCollection = db.collection("yFinance_new");
         await yFinanceCollection.insertOne(tickerData)
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -807,7 +842,7 @@ const insertHistoricalYFinanceDate = async ({ tickerData, connectMessage }) => {
 const getYFinanceTickerInfo = async ({ connectMessage }) => {
     let tickers;
     try {
-        console.log("Fetching y-finance token info from db")
+        log.info("Fetching y-finance token info from db")
         const db = await connect(connectMessage);
         const yFinanceCollection = db.collection("yFinance_new");
         const pipeline = [
@@ -849,8 +884,9 @@ const getYFinanceTickerInfo = async ({ connectMessage }) => {
         tickers = await yFinanceCollection.aggregate(pipeline).toArray()
         return tickers;
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -874,8 +910,9 @@ const insertLatestYFinanceData = async ({ _id, period, data, connectMessage }) =
         }
         updateResult = await yFinanceCollection.updateOne(filters, update);
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
     return updateResult.modifiedCount
 }
@@ -974,11 +1011,12 @@ const getAvailableBinanceTickersInDb = async () => {
                 }
             }
         ]).toArray()
-        // console.log(tickersNew[0].data)
+        // log.info(tickersNew[0].data)
         return tickersNew
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -994,11 +1032,11 @@ const insertBinanceDataToDb = async ({ ticker_name, period, meta, tokenData, all
         let existingTickerInDb = allTickersInDb.filter((item) => item.ticker_name === ticker_name)[0]
 
         if (existingTickerInDb) {
-            console.log("Ticker exists in DB");
+            log.info("Ticker exists in DB");
             const historicalDataExists = period in existingTickerInDb.data;
 
             if (historicalDataExists) {
-                console.log("Period for token exists");
+                log.info("Period for token exists");
                 return { message: "No historical update needed" };
             } else {
                 let pushDataToDb;
@@ -1011,16 +1049,16 @@ const insertBinanceDataToDb = async ({ ticker_name, period, meta, tokenData, all
                     pushDataToDb = await binanceCollection.updateOne({ ticker_name }, updateQuery);
                     let eTime = performance.now()
                     let lapsedTime = formatMillisecond(eTime - sTime)
-                    console.log(`Inserted ${ticker_name}, ${period}, with ${tokenData.length} items, Time taken : ${lapsedTime}`)
+                    log.info(`Inserted ${ticker_name}, ${period}, with ${tokenData.length} items, Time taken : ${lapsedTime}`)
                     return pushDataToDb;
                 }
                 else {
-                    console.log(`No data for ${ticker_name}_${period}`, tokenData.length);
+                    log.info(`No data for ${ticker_name}_${period}, length : ${tokenData.length}`);
                     return pushDataToDb = ["No data to push"]
                 }
             }
         } else {
-            console.log(`Ticker ${ticker_name} does not exist. Adding to db`);
+            log.info(`Ticker ${ticker_name} does not exist. Adding to db`);
             const latestDateInData = tokenData[tokenData.length - 1].openTime;
             const newDocument = {
                 ticker_name,
@@ -1035,12 +1073,13 @@ const insertBinanceDataToDb = async ({ ticker_name, period, meta, tokenData, all
             const insertNewObj = await binanceCollection.insertOne(newDocument);
             let eTime = performance.now()
             let lapsedTime = formatMillisecond(eTime - sTime)
-            console.log(`Inserted ${ticker_name}, ${period}, with ${tokenData.length} items, Time taken : ${lapsedTime}`)
+            log.info(`Inserted ${ticker_name}, ${period}, with ${tokenData.length} items, Time taken : ${lapsedTime}`)
             return insertNewObj;
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message) // Propagate the error to the caller
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error // Propagate the error to the caller
     }
 };
 
@@ -1126,7 +1165,7 @@ const getFirstObjectForEachPeriod = async ({ collection_name }) => {
 
         const objectsWithConvertedDate = result.map((obj) => {
             const dataWithConvertedDate = Object.entries(obj.data).reduce((acc, [key, value]) => {
-                // console.log(value)
+                // log.info(value)
                 const oldestDate = new Date(value.firstHistorical).toLocaleString();
                 const latestDate = new Date(value.lastHistorical).toLocaleString();
 
@@ -1138,8 +1177,9 @@ const getFirstObjectForEachPeriod = async ({ collection_name }) => {
 
         return objectsWithConvertedDate;
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } /* finally {
         close("get first objs");
     } */
@@ -1169,10 +1209,11 @@ const updateBinanceDataToDb = async ({ ticker_name, period, tokenData }) => {
         updatedReuslt = await binanceCollection.updateOne(filter, updateQuery)
         let eTime = performance.now()
         let lapsedTime = formatMillisecond(eTime - sTime)
-        console.log(`Updated ${ticker_name} with ${tokenData.length} items, Time taken : ${lapsedTime}`)
+        log.info(`Updated ${ticker_name} with ${tokenData.length} items, Time taken : ${lapsedTime}`)
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
     return updatedReuslt.modifiedCount
 }
@@ -1214,8 +1255,9 @@ const getBinanceTickerNames = async () => {
         ]).toArray()
         return result[0].ticker_names
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -1243,8 +1285,9 @@ const getTickersInBinanceDbMinutes = async () => {
             return []
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -1255,8 +1298,9 @@ const getLatestOneMTickerDataFromDb = async ({ ticker_name }) => {
         const lastDocument = await collection.findOne({}, { sort: { $natural: -1 } })
         return lastDocument
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -1280,15 +1324,16 @@ const insertOneMBinanceDataToDb = async ({ ticker_name, token_data }) => {
             let lapsedTime = formatMillisecond(eTime - sTime)
             let batchNo = i > 0 ? Math.ceil(i / 1000) : 1
             inserted.push({ batch_no: batchNo, inserted: ins.insertedCount, acknowledged: ins.acknowledged })
-            console.log(`Inserted batch ${batchNo} of ${noOfBatches}, Time taken : ${lapsedTime}`)
+            log.info(`Inserted batch ${batchNo} of ${noOfBatches}, Time taken : ${lapsedTime}`)
 
-            // console.log(`Inserted batch ${i} of ${noOfBatches}`);
+            // log.info(`Inserted batch ${i} of ${noOfBatches}`);
         }
-        console.log('Data insertion complete.', token_data.length);
+        log.info(`Data insertion complete. Count: ${token_data.length}`);
         return inserted
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -1316,8 +1361,9 @@ const getData = async ({ ticker_name }) => {
             return ({ message: "No data found" })
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -1342,16 +1388,17 @@ const checkDuplicateData = async ({ ticker_name }) => {
 
         const duplicateGroups = await collection.aggregate(pipeline).toArray();
         if (duplicateGroups.length > 0) {
-            console.log("Duplicate documents found!");
-            console.log("Duplicate groups:", duplicateGroups);
+            log.info("Duplicate documents found!");
+            log.info(`Duplicate groups:", ${duplicateGroups}`);
             return [duplicateGroups, testColl]
         } else {
-            console.log("No duplicate documents based on the openTime key.");
+            log.info("No duplicate documents based on the openTime key.");
             return []
         }
-    } catch (err) {
-        console.log(err)
-        throw err
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -1452,8 +1499,9 @@ const saveLatestTickerMetaDataToDb = async ({ cryptoData }) => {
             return insertedResult
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -1505,8 +1553,9 @@ const fetchTickerMetaFromDb = async ({ length }) => {
         ]).toArray()
         return tickerMeta
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -1554,8 +1603,9 @@ const fetchTickersFromBinanceHistoricalDb = async ({ ticker_name, period, page_n
             return ["No data found in binance_historical"]
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -1612,8 +1662,9 @@ const fetchTickersFromCrypticsageBinance = async ({ dataSource, ticker_name, per
             return output
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -1638,16 +1689,17 @@ const checkTickerMetaDuplicateData = async ({ ticker_name }) => {
 
         const duplicateGroups = await collection.aggregate(pipeline).toArray();
         if (duplicateGroups.length > 0) {
-            console.log("Duplicate documents found!");
-            console.log("Duplicate groups:", duplicateGroups);
+            log.info("Duplicate documents found!");
+            log.info(`Duplicate groups:", ${duplicateGroups}`);
             return [duplicateGroups, testColl]
         } else {
-            console.log("No duplicate documents based on the openTime key.");
+            log.info("No duplicate documents based on the openTime key.");
             return []
         }
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         close("Checking duplicate data")
     }
@@ -1688,8 +1740,9 @@ const getDetailsFromBinanceHistorical = async () => {
         }));
         return tickerInfo
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 

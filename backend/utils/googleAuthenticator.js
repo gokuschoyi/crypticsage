@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const { OAuth2Client } = require('google-auth-library');
 const config = require('../config');
 
@@ -11,8 +13,10 @@ const verifyGoogleCredentials = async (credentials) => {
         });
         payload = ticket.getPayload();
         return payload
-    } catch (err) {
-        throw new Error("(Google-Auth):Cannot verify your google account")
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error({ message: '(Google-Auth):Cannot verify your google account', error: formattedError })
+        throw error
     }
 }
 

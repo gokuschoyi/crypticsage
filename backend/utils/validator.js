@@ -1,3 +1,6 @@
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
+
 const validateLoginInput = ({ login_type, params }) => {
     try {
         if (login_type === undefined || login_type === '') {
@@ -17,11 +20,14 @@ const validateLoginInput = ({ login_type, params }) => {
             if (facebook_email === undefined || facebook_email === '') {
                 throw new Error('Facebook email cannot be empty')
             }
+        } else {
+            throw new Error('Invalid login type')
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -44,11 +50,14 @@ const validateSignupInput = ({ signup_type, params }) => {
             if (userInfo === undefined || userInfo === '') {
                 throw new Error('(VALIDATOR-Signup):Invalid Facebook credentials, please try again')
             }
+        } else {
+            throw new Error('(VALIDATOR-Signup):Invalid signup type')
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -60,8 +69,9 @@ const validateVerifyPasswordInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -73,8 +83,9 @@ const validateNewPasswordInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -86,8 +97,9 @@ const validateProfilePictureInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -99,8 +111,9 @@ const validateUserDataInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -112,8 +125,9 @@ const validateUserPreferenceInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -125,8 +139,9 @@ const validateUserLessonStatusInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -138,8 +153,9 @@ const validateGetQuizInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -151,8 +167,9 @@ const validateSubmitQuizInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -164,8 +181,9 @@ const validateAddSectionInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -177,8 +195,9 @@ const validateUpdateSectionInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -190,8 +209,9 @@ const validateAddLessonInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -203,8 +223,9 @@ const validateDeleteLessonInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -217,8 +238,9 @@ const validateAddQuizInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -230,8 +252,9 @@ const validateUpdateQuizDataInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -243,8 +266,9 @@ const validateDeleteQuizInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -294,8 +318,9 @@ const validateFetchTickerDataInput = ({ params }) => {
         // All parameters are valid, return true or perform further processing
         return [true, payload];
     } catch (error) {
-        console.log("Error : ", error.message)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 

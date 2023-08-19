@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger')
+const log = logger.create(__filename.slice(__dirname.length + 1))
 // const yahooFinance = require('yahoo-finance2').default; // summary quotes not working
 const axios = require('axios');
 const { connect, close } = require('../services/db-conn')
@@ -24,9 +26,10 @@ const fetchDataFromUrls = async ({ fsym, tsyms }) => {
             const ress = binanceResponse.data.symbols
             return { finalPriceData, ress }
         })
-        .catch((err) => {
-            console.log("Error in Fetching", err)
-            throw err
+        .catch((error) => {
+            let formattedError = JSON.stringify(logger.formatError(error))
+            log.error({ message: 'Error in Fetching', error: formattedError })
+            throw error
         })
 }
 
@@ -169,9 +172,10 @@ const fetchTopTickerByMarketCap = async ({ length }) => {
             }
         })
         return cryptoData = filteredCryptoData
-    } catch (err) {
-        console.log("Error CryptoCompare", err);
-        throw err
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error({ message: 'Error CryptoCompare', error: formattedError })
+        throw error
     }
 }
 
@@ -183,8 +187,9 @@ const getLatestOHLCForTicker = async ({ timeFrame, tokenName, limit }) => {
         let data = historicalData.data
         return [data, url]
     } catch (error) {
-        console.log(error)
-        throw new Error(error.message)
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     }
 }
 
@@ -192,7 +197,7 @@ const getLatestOHLCForTicker = async ({ timeFrame, tokenName, limit }) => {
 // INPUT : symbols - array of symbols
 // OUTPUT : finalData - array of objects containing the quotes for the given symbols
 const getYfinanceQuotes = async (symbols) => {
-    console.log("Fetching quotes for ", symbols)
+    log.info(`Fetching quotes for : ${symbols}`)
     let summaryDetail
     const baseYFUrl = "https://query1.finance.yahoo.com/v6/finance/quoteSummary/"
     const modules = ['price', 'summaryDetail', 'earnings', 'defaultKeyStatistics', 'financialData']
@@ -206,9 +211,10 @@ const getYfinanceQuotes = async (symbols) => {
             summaryDetail = result.data.quoteSummary.result[0]
             let transformedData = generateYFObject(symbol, summaryDetail)
             finalData.push(transformedData)
-        } catch (err) {
-            console.log(err)
-            throw err
+        } catch (error) {
+            let formattedError = JSON.stringify(logger.formatError(error))
+            log.error(formattedError)
+            throw error
         }
     }
     return finalData
@@ -235,16 +241,17 @@ const checkTickerMetaDuplicateData = async ({ ticker_name }) => {
 
         const duplicateGroups = await collection.aggregate(pipeline).toArray();
         if (duplicateGroups.length > 0) {
-            console.log("Duplicate documents found!");
-            console.log("Duplicate groups:", duplicateGroups);
+            log.info("Duplicate documents found!");
+            log.info(`Duplicate groups : ${duplicateGroups}`);
             return [duplicateGroups, testColl]
         } else {
-            console.log("No duplicate documents based on the openTime key.");
+            log.info("No duplicate documents based on the openTime key.");
             return []
         }
-    } catch (err) {
-        console.log(err)
-        throw err
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        throw error
     } finally {
         close("checking duplicate data")
     }

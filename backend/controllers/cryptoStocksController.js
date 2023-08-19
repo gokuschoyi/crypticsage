@@ -1,3 +1,5 @@
+const logger = require('../middleware/logger/Logger');
+const log = logger.create(__filename.slice(__dirname.length + 1))
 const CSServices = require('../services/cryptoStocksServices')
 const CSUtil = require('../utils/cryptoStocksUtil');
 const Validator = require('../utils/validator')
@@ -10,8 +12,9 @@ const getCryptoDataByMarketCap = async (req, res) => {
     try {
         var filteredCryptoData = await CSUtil.fetchTopTickerByMarketCap({ length: 20 })
         res.status(200).json({ message: "Get Crypto Data request success", cryptoData: filteredCryptoData });
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: "Get Crypto Data request error" })
     }
 }
@@ -23,8 +26,9 @@ const getLatestTickerData = async (req, res) => {
     try {
         let [data, url] = await CSUtil.getLatestOHLCForTicker({ timeFrame, tokenName, limit })
         res.status(200).json({ message: "Get Historical Data request success", url, historicalData: data });
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: "Get Historical Data request error" })
     }
 }
@@ -34,8 +38,9 @@ const getLatestCryptoData = async (req, res) => {
     try {
         const [cryptoData, formattedTime] = await CSServices.processGetLatestCryptoData()
         res.status(200).json({ message: "Get Latest Token Data request success", cryptoData, formattedTime });
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: "Get Latest Token Data request error" })
     }
 }
@@ -52,8 +57,9 @@ const getLatestStocksData = async (req, res) => {
          */
         let yFData = await CSUtil.getYfinanceQuotes(yFSymbols)
         res.status(200).json({ message: "Get Latest Stocks Data request success", yFData });
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
         res.status(400).json({ message: "Get Latest Stocks Data request error" })
     }
 }
@@ -68,9 +74,10 @@ const fetchTickerDataFromDB = async (req, res) => {
             res.status(200).json({ message: "Token Data fetched successfully", fetchedResults })
         }
     }
-    catch (err) {
-        console.log(err.message)
-        res.status(400).json({ message: "Something went wrong", error: err.message })
+    catch (error) {
+        let formattedError = JSON.stringify(logger.formatError(error))
+        log.error(formattedError)
+        res.status(400).json({ message: "Something went wrong", error: error.message })
     }
 
 }
