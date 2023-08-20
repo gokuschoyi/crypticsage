@@ -35,6 +35,29 @@ for (i in functions) {
 var funcDesc = talib.explain("ADX");
 logs.info({totalFunctionCount, funcDesc}) */
 
+/* let obj = {
+    name: "test",
+    age: 20,
+    sd: 'sdsd'
+}
+try {
+    throw new Error("testing error")
+} catch (err) {
+    logs.warn(err.message)
+
+    logs.error(err.stack)
+}
+logs.info(obj) */
+/* logs.debug(obj)
+logs.info(obj)
+logs.notice(obj)
+logs.warn(obj)
+logs.error(obj)
+logs.crit(obj)
+logs.alert(obj)
+logs.emerg(obj) */
+
+
 const log = (req, res, next) => {
     logs.info(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);
     next();

@@ -187,8 +187,7 @@ const getLatestOHLCForTicker = async ({ timeFrame, tokenName, limit }) => {
         let data = historicalData.data
         return [data, url]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -212,8 +211,7 @@ const getYfinanceQuotes = async (symbols) => {
             let transformedData = generateYFObject(symbol, summaryDetail)
             finalData.push(transformedData)
         } catch (error) {
-            let formattedError = JSON.stringify(logger.formatError(error))
-            log.error(formattedError)
+            log.error(error.stack)
             throw error
         }
     }
@@ -249,8 +247,7 @@ const checkTickerMetaDuplicateData = async ({ ticker_name }) => {
             return []
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close("checking duplicate data")

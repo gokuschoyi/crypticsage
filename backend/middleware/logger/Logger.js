@@ -1,54 +1,131 @@
 var fs = require('fs')
 var morgan = require('morgan')
 const winston = require('winston')
-var path = require('path')
+const { createLogger, format, transports } = winston
+const { combine, label, timestamp, colorize, align, printf, errors } = format;
 
 const APP_LOG_LOG_PATH = `${__dirname}/logs/app.log`
 const ACCESS_LOG_PATH = `${__dirname}/logs/access.log`
 let LOG_LEVEL = 'info'
 
+const syslogColors = {
+    debug: "rainbow",
+    info: "cyan",
+    notice: "white",
+    warn: "yellow",
+    error: "bold red",
+    crit: "inverse yellow",
+    alert: "bold inverse red",
+    emerg: "bold inverse magenta",
+};
+
+const LOG_LEVELS = {
+    debug: 7,
+    info: 6,
+    notice: 5,
+    warn: 4,
+    error: 3,
+    crit: 2,
+    alert: 1,
+    emerg: 0,
+}
+
 class Logger {
     constructor(loggerLabel) {
-        // setting up loggers
-        const APP_LOG_FORMAT = winston.format.printf(
+        // setting up custom loggers
+        const APP_LOG_FORMAT = printf(
             ({ level, message, label, timestamp }) => {
                 const localTime = new Date(timestamp).toLocaleString()
                 const capLevel = level.toUpperCase()
-                return `${localTime} [${label}] ${capLevel}: ${message}`
+                const returnMessage = `${localTime} [${label}] ${capLevel}: ${message}`
+                return returnMessage
             }
         )
-        this.APP_LOG = winston.createLogger({
+
+        // writing to console only with colors
+        const APP_FORMAT = combine(
+            errors({ stack: true }),
+            label({ label: loggerLabel }),
+            timestamp(),
+            APP_LOG_FORMAT,
+            colorize({ all: true, colors: syslogColors }),
+        )
+
+        this.APP_LOG = createLogger({
             level: LOG_LEVEL,
-            format: winston.format.combine(
-                winston.format.label({ label: loggerLabel }),
-                winston.format.timestamp(),
-                APP_LOG_FORMAT
-            ),
+            format: APP_FORMAT,
             transports: [
-                new winston.transports.File({ filename: APP_LOG_LOG_PATH }),
-                new winston.transports.Console(),
+                // new transports.File({ filename: APP_LOG_LOG_PATH }),
+                new transports.Console({ APP_FORMAT }),
             ],
+            levels: LOG_LEVELS
         })
-    }
 
-    info(m) {
-        m = (typeof m === "object") ? JSON.stringify(m) : m
-        this.APP_LOG.info(m)
-    }
+        // writing to file only
+        const LOG_ACCESS_FORMAT = combine(
+            label({ label: loggerLabel }),
+            timestamp(),
+            APP_LOG_FORMAT
+        )
 
-    error(m) {
-        m = (typeof m === "object") ? JSON.stringify(m) : m
-        this.APP_LOG.error(m)
-    }
+        this.APP_LOG_ = createLogger({
+            level: LOG_LEVEL,
+            format: LOG_ACCESS_FORMAT,
+            transports: [
+                new transports.File({ filename: APP_LOG_LOG_PATH }),
+            ],
+            levels: LOG_LEVELS
+        })
 
-    warn(m) {
-        m = (typeof m === "object") ? JSON.stringify(m) : m
-        this.APP_LOG.warn(m)
+
     }
 
     debug(m) {
         m = (typeof m === "object") ? JSON.stringify(m) : m
         this.APP_LOG.debug(m)
+        this.APP_LOG_.debug(m)
+    }
+
+    info(m) {
+        m = (typeof m === "object") ? JSON.stringify(m) : m
+        this.APP_LOG.info(m)
+        this.APP_LOG_.info(m)
+    }
+
+    notice(m) {
+        m = (typeof m === "object") ? JSON.stringify(m) : m
+        this.APP_LOG.notice(m)
+        this.APP_LOG_.notice(m)
+    }
+
+    warn(m) {
+        m = (typeof m === "object") ? JSON.stringify(m) : m
+        this.APP_LOG.warn(m)
+        this.APP_LOG_.warn(m)
+    }
+
+    error(m) {
+        m = (typeof m === "object") ? JSON.stringify(m) : m
+        this.APP_LOG.error(m)
+        this.APP_LOG_.error(m)
+    }
+
+    crit(m) {
+        m = (typeof m === "object") ? JSON.stringify(m) : m
+        this.APP_LOG.crit(m)
+        this.APP_LOG_.crit(m)
+    }
+
+    alert(m) {
+        m = (typeof m === "object") ? JSON.stringify(m) : m
+        this.APP_LOG.alert(m)
+        this.APP_LOG_.alert(m)
+    }
+
+    emerg(m) {
+        m = (typeof m === "object") ? JSON.stringify(m) : m
+        this.APP_LOG.emerg(m)
+        this.APP_LOG_.emerg(m)
     }
 
     static setupAccessLogging(app) {
@@ -79,11 +156,3 @@ module.exports = {
         return Logger.formatError(err)
     }
 }
-
-
-/* var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access_one.log'), { flags: 'a' })
-morgan.token('local-time', (req, res) => {
-    return new Date().toLocaleString('au');
-});
-
-module.exports = morgan(':remote-addr - :remote-user [:local-time] :total-time :method ":url HTTP/:http-version" :status :res[content-length] :referrer :user-agent', { stream: accessLogStream }); */

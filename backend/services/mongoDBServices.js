@@ -14,8 +14,7 @@ const getUserByEmail = async ({ email, connectMessage }) => {
         const user = await userCollection.find(filterEmail).toArray();
         return user
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -47,8 +46,7 @@ const checkUserExists = async ({ email, connectMessage }) => {
             return true
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -63,8 +61,7 @@ const insertNewUser = async ({ userData }) => {
         const insertResult = await userCollection.insertOne(userData);
         return insertResult
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -93,8 +90,7 @@ const makeUserLessonStatus = async () => {
         const groupedLessons = authUtil.sortAndGroupLessons(userLessonStatus);
         return groupedLessons;
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -138,8 +134,7 @@ const makeUserQuizStatus = async () => {
         });
         return userQuizStatus.quiz_status;
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -154,8 +149,7 @@ const updateUserPasswordByEmail = async ({ email, hashedPassword, connectMessage
         const user = await userCollection.updateOne({ 'email': email }, { $set: { 'password': hashedPassword } });
         return user
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -167,8 +161,7 @@ const updateUserProfilePicture = async ({ email, profilePicture, connectMessage 
         const user = await userCollection.updateOne({ 'email': email }, { $set: { 'profile_image': profilePicture } });
         return user
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -188,8 +181,7 @@ const updateUserData = async ({ email, userData, connectMessage }) => {
             });
         return user
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -210,8 +202,7 @@ const updateUserPreferences = async ({ email, preferences, connectMessage }) => 
         );
         return user
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -247,8 +238,7 @@ const updateUserLessonStatus = async ({ email, lesson_status, connectMessage }) 
             throw new Error("User lesson status update failed")
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -261,8 +251,7 @@ const getInitialQuizDataForUser = async ({ userQuizStatus, connectMessage }) => 
         transformedQuizData = transformedQuizData.outputObject.quizzes
         return transformedQuizData
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -274,8 +263,7 @@ const getQuizDataById = async ({ connectMessage, quizId }) => {
         let selectedQuiz = await quizCollection.find({ "quizId": quizId }).toArray()
         return selectedQuiz
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -302,8 +290,7 @@ const updateQuizStatusForUser = async ({ email, sectionId, lessonId, quizId, sco
         )
         return user
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -346,8 +333,7 @@ const getAllDocumentsFromCollection = async ({ collectionName, filter, connectMe
         const documents = await collection.find(filter).toArray()
         return documents
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -362,8 +348,7 @@ const insertDocumentToCollection = async ({ connectMessage, collectionName, docu
         let result = await sectionCollection.insertOne(document);
         return result
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -386,8 +371,7 @@ const addSectionStatusForUsers = async ({ connectMessage, sectionId }) => {
         }
         return updateStatus
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -418,8 +402,7 @@ const addLessonStatusForUsers = async ({ connectMessage, sectionId, lesson_statu
         }
         return updateStatus
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -452,8 +435,7 @@ const addQuizStatusForUsers = async ({ connectMessage, sectionId, lessonId, quiz
         }
         return updated
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -487,8 +469,7 @@ const checkForDocumentInCollection = async ({ collectionName, id, connectMessage
             throw new Error("Document not found / does not exist")
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -503,8 +484,7 @@ const updateSectionData = async ({ connectMessage, title, content, url, sectionI
         let sections = await sectionsCollection.updateOne({ sectionId }, { $set: { title, content, url } });
         return sections
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -517,8 +497,7 @@ const updateLessonData = async ({ connectMessage, chapter_title, lessonData, les
         let lessons = await lessonsCollection.updateOne({ lessonId }, { $set: { chapter_title, lessonData } });
         return lessons
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -548,8 +527,7 @@ const updateLessonNameChangeAcrossUsersStatus = async ({ connectMessage, section
         const updated = await allUserCollection.updateMany(filter, update, options);
         return updated
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -563,8 +541,7 @@ const updateQuizData = async ({ connectMessage, quizId, quizTitle, quizDescripti
         let reqData = await quizzesCollection.findOne({ quizId })
         return [update, reqData]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -594,8 +571,7 @@ const updateQuizNameChangeAcrossUsersStatus = async ({ connectMessage, sectionId
         const updated = await allUserCollection.updateMany(filter, update, options);
         return updated
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -625,8 +601,7 @@ const deleteOneDocumentFromCollection = async ({ collectionName, id, connectMess
         const result = await collection.deleteOne(filter);
         return result
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -653,8 +628,7 @@ const deleteManyDocumentsFromCollection = async ({ type, collectionName, id, con
         const result = await collection.deleteMany(filter);
         return result
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -682,8 +656,7 @@ const removeLessonAndQuizStatusFromUsers = async ({ sectionId, connectMessage })
         }
         return updatedStatus
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -718,8 +691,7 @@ const removeOneLessonAndQuizStatusFromUsers = async ({ connectMessage, sectionId
         }
         return updatedStatus
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -740,8 +712,7 @@ const removeQuizStatusFromUser = async ({ connectMessage, quizId, lessonId, sect
         }
         return deletedStatus
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -753,8 +724,7 @@ const deleteOneMetaData = async ({ symbol }) => {
         const result = await collection.deleteOne({ symbol: symbol })
         return result
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -766,8 +736,7 @@ const deleteOneYfinanceTickerDromDb = async ({ symbol }) => {
         const result = await collection.deleteOne({ ticker_name: symbol })
         return result
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -819,8 +788,7 @@ const getAvailableYfTickersInDb = async ({ connectMessage }) => {
         ]).toArray()
         return yFTickers
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -832,8 +800,7 @@ const insertHistoricalYFinanceDate = async ({ tickerData, connectMessage }) => {
         const yFinanceCollection = db.collection("yFinance_new");
         await yFinanceCollection.insertOne(tickerData)
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -884,8 +851,7 @@ const getYFinanceTickerInfo = async ({ connectMessage }) => {
         tickers = await yFinanceCollection.aggregate(pipeline).toArray()
         return tickers;
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -910,8 +876,7 @@ const insertLatestYFinanceData = async ({ _id, period, data, connectMessage }) =
         }
         updateResult = await yFinanceCollection.updateOne(filters, update);
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
     return updateResult.modifiedCount
@@ -1014,8 +979,7 @@ const getAvailableBinanceTickersInDb = async () => {
         // log.info(tickersNew[0].data)
         return tickersNew
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -1077,8 +1041,7 @@ const insertBinanceDataToDb = async ({ ticker_name, period, meta, tokenData, all
             return insertNewObj;
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error // Propagate the error to the caller
     }
 };
@@ -1177,8 +1140,7 @@ const getFirstObjectForEachPeriod = async ({ collection_name }) => {
 
         return objectsWithConvertedDate;
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } /* finally {
         close("get first objs");
@@ -1211,8 +1173,7 @@ const updateBinanceDataToDb = async ({ ticker_name, period, tokenData }) => {
         let lapsedTime = formatMillisecond(eTime - sTime)
         log.info(`Updated ${ticker_name} with ${tokenData.length} items, Time taken : ${lapsedTime}`)
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
     return updatedReuslt.modifiedCount
@@ -1255,8 +1216,7 @@ const getBinanceTickerNames = async () => {
         ]).toArray()
         return result[0].ticker_names
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -1285,8 +1245,7 @@ const getTickersInBinanceDbMinutes = async () => {
             return []
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -1298,8 +1257,7 @@ const getLatestOneMTickerDataFromDb = async ({ ticker_name }) => {
         const lastDocument = await collection.findOne({}, { sort: { $natural: -1 } })
         return lastDocument
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -1331,8 +1289,7 @@ const insertOneMBinanceDataToDb = async ({ ticker_name, token_data }) => {
         log.info(`Data insertion complete. Count: ${token_data.length}`);
         return inserted
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -1361,8 +1318,7 @@ const getData = async ({ ticker_name }) => {
             return ({ message: "No data found" })
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -1396,8 +1352,7 @@ const checkDuplicateData = async ({ ticker_name }) => {
             return []
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -1499,8 +1454,7 @@ const saveLatestTickerMetaDataToDb = async ({ cryptoData }) => {
             return insertedResult
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -1553,8 +1507,7 @@ const fetchTickerMetaFromDb = async ({ length }) => {
         ]).toArray()
         return tickerMeta
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -1603,8 +1556,7 @@ const fetchTickersFromBinanceHistoricalDb = async ({ ticker_name, period, page_n
             return ["No data found in binance_historical"]
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -1662,8 +1614,7 @@ const fetchTickersFromCrypticsageBinance = async ({ dataSource, ticker_name, per
             return output
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -1697,8 +1648,7 @@ const checkTickerMetaDuplicateData = async ({ ticker_name }) => {
             return []
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close("Checking duplicate data")
@@ -1740,8 +1690,7 @@ const getDetailsFromBinanceHistorical = async () => {
         }));
         return tickerInfo
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }

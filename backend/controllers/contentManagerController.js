@@ -16,8 +16,7 @@ const FASLatestTickerMetaData = async (req, res) => {
         let result = await CMServices.serviceFetchAndSaveLatestTickerMetaData({ length })
         res.status(200).json({ message: "Get Crypto Data request success", result });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: "Get Crypto Data request error", error: error.message })
     }
 }
@@ -28,8 +27,7 @@ const deleteTickerMeta = async (req, res) => {
         const deletedTickerMeta = await MDBServices.deleteOneMetaData({ symbol })
         res.status(200).json({ message: "Delete Ticker Meta request success", deletedTickerMeta });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: "Get Crypto Data request error", error: error.message })
     }
 }
@@ -76,8 +74,7 @@ const findYFTicker = async (req, res) => {
 
         res.status(200).json({ message: "YF Ticker search success", result });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: "Get YF Data request error", error: error.message })
     }
 }
@@ -98,8 +95,7 @@ const getBinanceTickersIndb = async (req, res) => {
             tickerWithNoDataInBinance,
         });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -109,8 +105,7 @@ const getYfinanceTickersIndb = async (req, res) => {
         const yfTickers = await CMServices.serviceGetYfinanceTickerStatsFromDb()
         res.status(200).json({ message: "Yfinance Tickers fetched successfully", yFTickerInfo: yfTickers });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -121,8 +116,7 @@ const fetchOneBinanceTicker = async (req, res) => {
         let fetchedQueries = await CMServices.serviceFetchOneBinanceTicker({ fetchQueries })
         res.status(200).json({ message: fetchedQueries.message, finalResult: fetchedQueries.finalResult });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -133,8 +127,7 @@ const updateOneBinanceTicker = async (req, res) => {
         let updatedQueries = await CMServices.serviceUpdateOneBinanceTicker({ updateQueries })
         res.status(200).json({ message: updatedQueries.message, finalResult: updatedQueries.finalResult });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -144,8 +137,7 @@ const updateAllBinanceTickers = async (req, res) => {
         const finalProcessIds = await CMServices.serviceUpdateAllBinanceTickers()
         res.status(200).json({ message: "Update All Binance Tickers request success", finalProcessIds });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -173,8 +165,7 @@ const deleteOneYfinanceTicker = async (req, res) => {
         const deleteStatus = await MDBServices.deleteOneYfinanceTickerDromDb({ symbol })
         res.status(200).json({ message: "Yfinance tickers deleted", deleteStatus });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -185,8 +176,7 @@ const getProcessStatus = async (req, res) => {
         const processStatus = await CMServices.serviceCheckOneBinanceTickerJobCompletition({ jobIds, type })
         res.status(200).json({ message: processStatus.message, status: processStatus.data });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -204,8 +194,7 @@ const getSections = async (req, res) => {
         const sections = await CMServices.serviceGetDocuments({ collectionName, filter })
         res.status(200).json({ message: "Sections fetched successfully", sections });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -230,8 +219,7 @@ const addSection = async (req, res) => {
             res.status(200).json({ message: "Section added successfully", createdSectionId: sectionId, update: false, insertedResult });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -247,8 +235,7 @@ const updateSection = async (req, res) => {
             res.status(200).json({ message: "Section updated successfully", update: true, update });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -264,8 +251,7 @@ const deleteSection = async (req, res) => {
             res.status(200).json({ message: "Section deleted successfully", deleted });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -291,8 +277,7 @@ const getLessons = async (req, res) => {
             }
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -318,8 +303,7 @@ const addLesson = async (req, res) => {
             res.status(200).json({ message: "Lesson added successfully", lessonId, insertedResult });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -335,8 +319,7 @@ const updateLesson = async (req, res) => {
             res.status(200).json({ message: "Lesson updated successfully", update });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -352,8 +335,7 @@ const deleteLesson = async (req, res) => {
             res.status(200).json({ message: "Lesson deleted successfully", deleted });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -379,8 +361,7 @@ const getQuizQuestions = async (req, res) => {
             }
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -403,8 +384,7 @@ const addQuizQuestions = async (req, res) => {
             res.status(200).json({ message: "Quiz question added successfully", quizId, insertedResult });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -420,8 +400,7 @@ const updateQuizQuestions = async (req, res) => {
             res.status(200).json({ message: "Quiz question updated successfully", update });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -437,8 +416,7 @@ const deleteQuizQuestion = async (req, res) => {
             res.status(200).json({ message: "Quiz question deleted successfully", deleted });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }

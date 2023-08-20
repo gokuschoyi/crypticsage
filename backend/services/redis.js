@@ -20,11 +20,11 @@ try {
     redisClient = new Redis(connectionOptions);
 
     redisClient.on('error', (err) => {
-        log.info(`Something went wrong, Redis server not running ' + ${err.message}`);
+        log.info(`Something went wrong, Redis server not running ${err.message}`);
     });
 
     redisClient.once('ready', () => {
-        log.info('Redis server running on port ' + config.redis_port);
+        log.info(`Redis server running on port : ${config.redis_port}`);
     });
 
 } catch (error) {

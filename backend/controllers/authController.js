@@ -14,8 +14,7 @@ const loginUser = async (req, res) => {
             res.status(200).json({ message: "User login successful", data: userData, recent_lesson_quiz });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }
@@ -30,8 +29,7 @@ const signupUser = async (req, res) => {
             res.status(200).json({ message: "Account created successfully", registered });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: error.message });
     }
 }

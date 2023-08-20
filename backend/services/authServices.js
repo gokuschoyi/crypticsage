@@ -27,8 +27,7 @@ const generateJWTToken = async ({ email, user_name, uid }) => {
         );
         return token
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw new Error("Error generating JWT Token")
     }
 }
@@ -86,8 +85,7 @@ const handleEmailPasswordLogin = async ({ email, password }) => {
             }
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw new Error(error.message)
     } finally {
         close(connectMessage)
@@ -121,8 +119,7 @@ const handleGoogleLogin = async ({ credential }) => {
             }
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw new Error(error.message)
     } finally {
         close(connectMessage)
@@ -150,8 +147,7 @@ const handleFacebookLogin = async ({ facebook_email }) => {
             return [userData, recent_lesson_quiz]
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw new Error(error.message)
     } finally {
         close(connectMessage)
@@ -282,8 +278,7 @@ const handleEmailPasswordSignup = async ({ userName, email, password, mobile_num
             return registered
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw new Error(error.message)
     } finally {
         await close(connectMessage)
@@ -321,8 +316,7 @@ const handleGoogleSignup = async ({ credential }) => {
             }
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw new Error(error.message)
     } finally {
         await close(connectMessage)
@@ -354,8 +348,7 @@ const handleFacebookSignup = async ({ userInfo }) => {
             return registered
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw new Error(error.message)
     } finally {
         await close(connectMessage)

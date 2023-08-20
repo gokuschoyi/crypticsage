@@ -13,8 +13,7 @@ const getCryptoDataByMarketCap = async (req, res) => {
         var filteredCryptoData = await CSUtil.fetchTopTickerByMarketCap({ length: 20 })
         res.status(200).json({ message: "Get Crypto Data request success", cryptoData: filteredCryptoData });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: "Get Crypto Data request error" })
     }
 }
@@ -27,8 +26,7 @@ const getLatestTickerData = async (req, res) => {
         let [data, url] = await CSUtil.getLatestOHLCForTicker({ timeFrame, tokenName, limit })
         res.status(200).json({ message: "Get Historical Data request success", url, historicalData: data });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: "Get Historical Data request error" })
     }
 }
@@ -39,8 +37,7 @@ const getLatestCryptoData = async (req, res) => {
         const [cryptoData, formattedTime] = await CSServices.processGetLatestCryptoData()
         res.status(200).json({ message: "Get Latest Token Data request success", cryptoData, formattedTime });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: "Get Latest Token Data request error" })
     }
 }
@@ -58,8 +55,7 @@ const getLatestStocksData = async (req, res) => {
         let yFData = await CSUtil.getYfinanceQuotes(yFSymbols)
         res.status(200).json({ message: "Get Latest Stocks Data request success", yFData });
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: "Get Latest Stocks Data request error" })
     }
 }
@@ -75,8 +71,7 @@ const fetchTickerDataFromDB = async (req, res) => {
         }
     }
     catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         res.status(400).json({ message: "Something went wrong", error: error.message })
     }
 

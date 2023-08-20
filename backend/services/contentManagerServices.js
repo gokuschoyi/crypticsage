@@ -25,8 +25,7 @@ const serviceFetchAndSaveLatestTickerMetaData = async ({ length }) => {
         let result = await MDBServices.saveLatestTickerMetaDataToDb({ cryptoData })
         return result
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -82,8 +81,7 @@ const serviceGetBinanceTickerStatsFromDb = async () => {
 
         return [totalTickerCountInDb, totalTickersWithDataToFetch, updatedTickersWithHistData, tickersWithNoHistData, tickerWithNoDataInBinance]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close("Fetch Ticker Stats")
@@ -95,8 +93,7 @@ const serviceGetYfinanceTickerStatsFromDb = async () => {
         let yFTickerInfo = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yFinance_new' })
         return yFTickerInfo
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -192,8 +189,7 @@ const serviceFetchOneBinanceTicker = async ({ fetchQueries }) => {
         // Log any errors that occur in the worker, updates
         fetchOneBinanceTickerWorker.on('error', error => {
             // log the error
-            let formattedError = JSON.stringify(logger.formatError(error))
-            log.error(formattedError)
+            log.error(error.stack)
         });
 
         for (const index in greaterThan4h) {
@@ -243,8 +239,7 @@ const serviceFetchOneBinanceTicker = async ({ fetchQueries }) => {
             return ({ message, finalResult });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -319,8 +314,7 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
         // Log any errors that occur in the worker, updates
         updateOneBinanceTickerWorker.on('error', error => {
             // log the error
-            let formattedError = JSON.stringify(logger.formatError(error))
-            log.error(formattedError)
+            log.error(error.stack)
         });
 
         for (const index in added) {
@@ -389,8 +383,7 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
         }
 
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -406,8 +399,7 @@ const serviceUpdateAllBinanceTickers = async () => {
         }
         return finalIds
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -445,8 +437,7 @@ const serviceCheckOneBinanceTickerJobCompletition = async ({ jobIds, type }) => 
         }
         return ({ message, data })
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -473,8 +464,7 @@ const serviceGetDocuments = async ({ collectionName, filter }) => {
         }
         return documents
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close(connectMessage)
@@ -523,8 +513,7 @@ const serviceAddDocuments = async ({ connectMessage, collectionName, document })
         }
         return [insertedResult, statusResult]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close(connectMessage)
@@ -556,8 +545,7 @@ const serviceUdpateSectionInDb = async ({ title, content, url, sectionId }) => {
         const updated = await MDBServices.updateSectionData({ connectMessage, title, content, url, sectionId })
         return updated
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close(connectMessage)
@@ -573,8 +561,7 @@ const serviceUpdateLessonInDb = async ({ chapter_title, lessonData, lessonId, se
         const lessonTitleStatus = await MDBServices.updateLessonNameChangeAcrossUsersStatus({ connectMessage: "Updating lesson name in status", sectionId, lessonId, chapter_title })
         return [updated, lessonTitleStatus]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close(connectMessage)
@@ -591,8 +578,7 @@ const serviceUpdateQuizInDb = async ({ quizId, quizTitle, quizDescription, quest
         const quizTitleStatus = await MDBServices.updateQuizNameChangeAcrossUsersStatus({ connectMessage: "Updating quiz name in status", sectionId, lessonId, quizId, quizTitle })
         return [update, quizTitleStatus]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close(connectMessage)
@@ -619,8 +605,7 @@ const serviceDeleteSectionFromDb = async ({ sectionId }) => {
         const removedLessonAndQuizStatus = await MDBServices.removeLessonAndQuizStatusFromUsers({ sectionId, connectMessage: "Removing lesson and quiz Ssatus" })
         return [deletedSection, deletedLessons, deletedQuiz, removedLessonAndQuizStatus]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close(connectMessage)
@@ -637,8 +622,7 @@ const serviceDeleteLessonFromDb = async ({ lessonId, sectionId }) => {
         const deletedLessonStatusFromUser = await MDBServices.removeOneLessonAndQuizStatusFromUsers({ sectionId, lessonId, connectMessage: "Removing one lesson and quiz status" })
         return [deleteLesson, deletedQuiz, deletedLessonStatusFromUser]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close(connectMessage)
@@ -654,8 +638,7 @@ const serviceDeleteQuizFromDb = async ({ quizId, sectionId, lessonId }) => {
         const deleteQuizStatusFromUser = await MDBServices.removeQuizStatusFromUser({ sectionId, lessonId, quizId, connectMessage: "Removing quiz Status" })
         return [deleteQuiz, deleteQuizStatusFromUser]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close(connectMessage)

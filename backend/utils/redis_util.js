@@ -11,7 +11,7 @@ const handleTokenRedisStorage = async (req, res, next) => {
     let isTokenDataAvailableInRedis = false;
     await redisClient.get(cacheKey, (error, result) => {
         if (error) {
-            log.error(`Error retrieving value from Redis: ${error}`);
+            log.error(`Error retrieving value from Redis: ${error.stack}`);
         } else if (result) {
             isTokenDataAvailableInRedis = true;
             // let data = JSON.parse(result);

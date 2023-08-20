@@ -25,8 +25,7 @@ const validateLoginInput = ({ login_type, params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -55,8 +54,7 @@ const validateSignupInput = ({ signup_type, params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -69,8 +67,7 @@ const validateVerifyPasswordInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -83,8 +80,7 @@ const validateNewPasswordInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -97,8 +93,7 @@ const validateProfilePictureInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -111,8 +106,7 @@ const validateUserDataInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -125,8 +119,7 @@ const validateUserPreferenceInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -139,8 +132,7 @@ const validateUserLessonStatusInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -153,8 +145,7 @@ const validateGetQuizInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -167,8 +158,7 @@ const validateSubmitQuizInput = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -181,8 +171,7 @@ const validateAddSectionInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -195,8 +184,7 @@ const validateUpdateSectionInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -209,8 +197,7 @@ const validateAddLessonInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -223,8 +210,7 @@ const validateDeleteLessonInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -238,8 +224,7 @@ const validateAddQuizInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -252,8 +237,7 @@ const validateUpdateQuizDataInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -266,8 +250,7 @@ const validateDeleteQuizInputs = ({ params }) => {
         }
         return true
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -318,8 +301,7 @@ const validateFetchTickerDataInput = ({ params }) => {
         // All parameters are valid, return true or perform further processing
         return [true, payload];
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }

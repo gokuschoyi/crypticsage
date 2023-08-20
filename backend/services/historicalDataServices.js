@@ -70,8 +70,7 @@ const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }
         }
         return [uploadStatus, availableTickers, tickers]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close(connectMessage)
@@ -147,8 +146,7 @@ const processUpdateHistoricalYFinanceData = async ({ symbol }) => {
         }
         return diffArray
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     } finally {
         close(connectMessage)
@@ -190,7 +188,7 @@ const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
             // Log any errors that occur in the worker, initial save
             initialFetchWorker.on('error', error => {
                 // log the error
-                log.error(error);
+                log.error(error.stack)
             });
 
             // counts the number of completed jobs, initial save
@@ -261,8 +259,7 @@ const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
 
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -292,7 +289,7 @@ const processUpdateBinanceData = async () => {
         // Log any errors that occur in the worker, updates
         updateWorker.on('error', error => {
             // log the error
-            log.error(error);
+            log.error(error.stack)
         });
 
         // counts the number of completed jobs, updates
@@ -362,8 +359,7 @@ const processUpdateBinanceData = async () => {
             return ({ message, finalResult });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -404,7 +400,7 @@ const processInitialSaveHistoricalDataBinanceOneM = async () => {
         // Log any errors that occur in the worker, initial fetch 1m data
         initialOneMWorker.on('error', err => {
             // log the error
-            log.error(`initialOneMWorker Error : ${err}`)
+            log.error(`initialOneMWorker Error : ${err.stack}`)
         });
 
         // counts the number of completed jobs, initial fetch 1m data
@@ -470,8 +466,7 @@ const processInitialSaveHistoricalDataBinanceOneM = async () => {
             return ({ message, finalResult });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -575,8 +570,7 @@ const processUpdateBinanceOneMData = async () => {
             return ({ message, finalResult });
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -657,8 +651,7 @@ const serviceCheckJobCompletition = async ({ jobIds, type }) => {
         }
         return ({ message, data })
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }

@@ -62,8 +62,7 @@ const processGetLatestCryptoData = async () => {
         return [cryptoData, formattedTime]
 
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -85,8 +84,7 @@ const processFetchTickerDataFromDb = async ({ asset_type, ticker_name, period, p
             return output
         }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }

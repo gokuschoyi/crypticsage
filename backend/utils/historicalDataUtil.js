@@ -56,8 +56,7 @@ const getFirstTradeDate = async ({ symbol }) => {
         const res = await yahooFinance.quote(symbol, {}, { validateResult: false })
         return res.firstTradeDateMilliseconds
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -369,8 +368,7 @@ const getTotalDurationInMarket = async ({ token_count }) => {
 
         return finalResult
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -477,8 +475,7 @@ const generateFetchQueriesForBinanceTickers = async ({ periods, token_count }) =
         console.timeEnd("Total duration to generate initial fetch queries")
         return [fetchQuery, totalNoOfRequiredFetches];
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -572,8 +569,7 @@ const generateUpdateQueriesForBinanceTickers = async () => {
         const totalNoOfRequiredUpdates = result.length
         return [result, totalNoOfRequiredUpdates]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -609,8 +605,7 @@ const fetchLatestTickerData = async ({ ticker_name, period, start, end }) => {
         }
         return newData
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -677,8 +672,7 @@ const getMinuteTokensToFetchAndUpdate = async () => {
 
         return [calculateTokensToFetch, calculateTokensToUpdate]
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -743,8 +737,7 @@ const generateFetchAndUpdateQueries = async () => {
                 log.info("No tokens to fetch")
             }
         } catch (error) {
-            let formattedError = JSON.stringify(logger.formatError(error))
-            log.error(formattedError)
+            log.error(error.stack)
             throw error
         }
         return fetchQueries
@@ -775,8 +768,7 @@ const generateFetchAndUpdateQueries = async () => {
                 return updateQueries
             }
         } catch (error) {
-            let formattedError = JSON.stringify(logger.formatError(error))
-            log.error(formattedError)
+            log.error(error.stack)
             throw error
         }
     }
@@ -845,8 +837,7 @@ const fetchBinanceHistoricalBetweenPeriods = async ({ ticker_name, period, start
         convertedData = convertedData.slice(1)
         return convertedData
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }

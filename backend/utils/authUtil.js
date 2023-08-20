@@ -132,8 +132,7 @@ const processUploadedCsv = async (req) => {
         }))
         return final
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
@@ -171,8 +170,7 @@ const getRecentLessonAndQuiz = async (lessonStatus, quizStatus) => {
         }
         return { mostRecentLesson, mostRecentQuiz }
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }

@@ -8,8 +8,7 @@ const fetchSymbolsFromBinanceAPI = async () => {
         const result = await axios.get(binanceURL)
         return result.data.symbols
     } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error(formattedError)
+        log.error(error.stack)
         throw error
     }
 }
