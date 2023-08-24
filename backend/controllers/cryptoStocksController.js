@@ -82,16 +82,16 @@ const fetchTickerDataFromDB = async (req, res) => {
 
 
 const test = async (req, res) => {
-    const { ticker_name } = req.body
+    const { ticker_name, period } = req.body
     const tsyms = 'USD,AUD,NZD,CAD,EUR,JPY'
     const fsym = 'BTC,ETH'
     // let result = await CSUtil.fetchDataFromUrls({ fsym, tsyms })
     // let result = await CSUtil.fetchAndSaveLatestTickerMetaDataToDb({ length: 28 })
     // let result = await CSUtil.fetchTopTickerByMarketCap({ length: 12 })
     // let cryptoData = await fetchTickerMetaFromDb({ length: 12 })
-    const checkForDupli = await MDBServices.checkDuplicateData({ ticker_name })
-
-    res.status(200).json({ message: "Get Latest Token Data request success", checkForDupli });
+    const checkForDupli = await MDBServices.checkForDuplicateInBinanceCrypticSage({ ticker_name, period })
+    let dupliLength = checkForDupli.length
+    res.status(200).json({ message: "Get Latest Token Data request success", dupliLength, checkForDupli });
 }
 
 module.exports = {

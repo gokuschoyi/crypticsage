@@ -2,12 +2,13 @@ import React, { useEffect, useRef } from 'react'
 import { Box } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 const MainChart = (props) => {
-    const { tData } = props;
+    const { tData, symbol } = props;
 
     const chartboxRef = useRef();
     const chartLoadedRef = useRef(false);
 
     useEffect(() => {
+
         console.log("from Main chart")
         let chart;
         let tokenChartBox = document.getElementsByClassName('token-chart-box')[0].getBoundingClientRect()
@@ -22,18 +23,6 @@ const MainChart = (props) => {
         const tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
         let toolTipXCoOrdinates = 0, toolTipYCoOrdinates = 0;
 
-        let scrollYAxis = window.scrollY
-
-        /* let tData = data.map((chart) => {
-            return {
-                time: chart.time,
-                open: chart.open,
-                high: chart.high,
-                low: chart.low,
-                close: chart.close,
-            }
-        }) */
-
         const handleResize = () => {
             cWidth = tokenDom.clientWidth;
             cHeight = tokenDom.clientHeight;
@@ -47,8 +36,6 @@ const MainChart = (props) => {
             scrollYAxis = window.scrollY
         };
 
-        console.log(cWidth, cHeight)
-
         // gets the global mouse co-ordinates form the document- desktops
         const calculateMousePosition = (event) => {
             toolTipXCoOrdinates = event.pageX;
@@ -61,8 +48,12 @@ const MainChart = (props) => {
             toolTipYCoOrdinates = event.touches[0].pageY;
         }
 
+        let scrollYAxis = window.scrollY
         if (tData.length > 0) {
             console.log("data available")
+            console.log(cWidth, cHeight)
+
+            // console.log(tData)
             chart = createChart(chartboxRef.current, {
                 width: cWidth,
                 height: cHeight,
@@ -157,7 +148,7 @@ const MainChart = (props) => {
                     const data = param.seriesData.get(candleStickSeries);
                     const price = data.value !== undefined ? data.value : data.close;
                     tooltip.innerHTML = `
-                    <div style="color: ${'rgba(255, 82, 82, 1)'}">ABC Inc.</div>
+                    <div style="color: ${'rgba(255, 82, 82, 1)'}">${symbol}</div>
                     <div style="font-size: 24px; margin: 4px 0px; color: ${'black'}">${Math.round(100 * price) / 100}</div>
                     <div style="color: ${'black'}">${dateStr}</div>
                     `;

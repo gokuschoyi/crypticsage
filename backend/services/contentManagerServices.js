@@ -1,5 +1,6 @@
 const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
+const { createTimer } = require('../utils/timer')
 const { v4: uuidv4 } = require('uuid');
 
 const { Queue, Worker } = require('bullmq');
@@ -126,7 +127,9 @@ const serviceFetchOneBinanceTicker = async ({ fetchQueries }) => {
     }
 
     try {
-        console.time("Fetch-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
+        const t = createTimer("Fetch-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
+        t.startTimer()
+        // console.time("Fetch-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
 
         const fetchOneBinanceTickerQueue = new Queue(queueName, { connection })
         const fetchOneBinanceTickerWorker = new Worker(queueName, HDUtil.processHistoricalData, { connection })
@@ -162,7 +165,8 @@ const serviceFetchOneBinanceTicker = async ({ fetchQueries }) => {
                 log.info(`(WORKER - Fetch >= 4h) Fetch job count : ${completedFetchJobsCount}`);
             } else {
                 log.info(`(WORKER - Fetch >= 4h) Fetch job count Final Task : ${completedFetchJobsCount}`);
-                console.timeEnd('Fetch-One-Binance-Ticker-FE-Request - Main Process (>= 4h)');
+                t.stopTimer(__filename.slice(__dirname.length + 1))
+                // console.timeEnd('Fetch-One-Binance-Ticker-FE-Request - Main Process (>= 4h)');
                 close("Fetching data (>= 4h)")
                 fetchOneBinanceTickerWorker.close();
                 fetchOneBinanceTickerWorker.removeListener('completed', fetchCompletedListener); // Remove the listener
@@ -269,7 +273,9 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
     let oneM = idNameAdded.filter((item) => item.period === '1m')
 
     try {
-        console.time("Update-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
+        const t= createTimer("Update-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
+        t.startTimer()
+        // console.time("Update-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
 
         const updateOneBinanceTickerQueue = new Queue(queueName, { connection })
         const updateOneBinanceTickerWorker = new Worker(queueName, HDUtil.processUpdateHistoricalData, { connection })
@@ -287,7 +293,8 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
                 log.info(`(WORKER - Update >= 4h) Update job count : ${completedUpdateJobsCount}`);
             } else {
                 log.info(`(WORKER - Update >= 4h) Update job count Final Task : ${completedUpdateJobsCount}`);
-                console.timeEnd('Update-One-Binance-Ticker-FE-Request - Main Process (>= 4h)');
+                t.stopTimer(__filename.slice(__dirname.length + 1))
+                // console.timeEnd('Update-One-Binance-Ticker-FE-Request - Main Process (>= 4h)');
                 close("Fetching data (>= 4h)")
                 updateOneBinanceTickerWorker.close();
                 updateOneBinanceTickerWorker.removeListener('completed', updateCompletedListener); // Remove the listener

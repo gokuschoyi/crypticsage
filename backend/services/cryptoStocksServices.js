@@ -1,18 +1,27 @@
 const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
+const { createTimer } = require('../utils/timer')
 const CSUtil = require('../utils/cryptoStocksUtil')
 const MDBServices = require('../services/mongoDBServices')
 
 
 const processGetLatestCryptoData = async () => {
     try {
-        let sTime = performance.now()
+        const t = createTimer('processGetLatestCryptoData')
+        t.startTimer()
+        // let sTime = performance.now()
 
-        console.time("Fetching ticker meta from db")
+        const t2 = createTimer('Fetching ticker meta from db')
+        t2.startTimer()
+        // console.time("Fetching ticker meta from db")
         let cryptoData = await MDBServices.fetchTickerMetaFromDb({ length: "max" })
-        console.timeEnd("Fetching ticker meta from db")
+        t2.stopTimer(__filename.slice(__dirname.length + 1))
+        // console.timeEnd("Fetching ticker meta from db")
 
-        console.time("Promise All")
+
+        const t3 = createTimer('Promise All')
+        t3.startTimer()
+        // console.time("Promise All")
         const symbolKeys = cryptoData.map(item => item.symbol)
         const fsym = symbolKeys.join(',')
         const tsyms = 'USD,AUD,NZD,CAD,EUR,JPY'
@@ -55,9 +64,11 @@ const processGetLatestCryptoData = async () => {
         })
 
         cryptoData = finalResult
-        let eTime = performance.now()
-        const formattedTime = CSUtil.formatMillisecond(eTime - sTime)
-        console.timeEnd("Promise All")
+        // let eTime = performance.now()
+        // const formattedTime = CSUtil.formatMillisecond(eTime - sTime)
+        const formattedTime = t.calculateTime()
+        t3.stopTimer(__filename.slice(__dirname.length + 1))
+        // console.timeEnd("Promise All")
 
         return [cryptoData, formattedTime]
 

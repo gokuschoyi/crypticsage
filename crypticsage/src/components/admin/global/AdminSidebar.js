@@ -13,6 +13,7 @@ import {
     LibraryBooksOutlinedIcon,
     QuestionMarkIcon,
     SettingsOutlinedIcon,
+    CandlestickChartIcon,
 } from "../../dashboard/global/Icons";
 import { setAdminSidebarState } from "./AdminSidebarSiice";
 
@@ -176,6 +177,20 @@ const AdminSidebar = () => {
                             className="admin-menu-item"
                         >
                             <Typography>Quiz</Typography>
+                        </MenuItem>
+
+                        <MenuItem
+                            active={adminSidebarTab === "indicators"}
+                            style={{
+                                backgroundColor: adminSidebarTab === "indicators" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
+                                color: adminSidebarTab === "indicators" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
+                            }}
+                            onClick={() => handleOnClick("indicators")}
+                            icon={<CandlestickChartIcon />}
+                            component={<Link to="indicators" />}
+                            className="admin-menu-item"
+                        >
+                            <Typography>Indicators</Typography>
                         </MenuItem>
 
 

@@ -2,8 +2,11 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux'
 import './Indicators.css'
+import MainChart from './components/MainChart'
 import {
-    Box
+    Box,
+    Grid,
+    Skeleton
 } from '@mui/material'
 import { useOutletContext } from "react-router-dom";
 import { getHistoricalData } from '../../../../api/crypto'

@@ -1,5 +1,6 @@
 const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
+const { createTimer } = require('../utils/timer')
 const { Queue, Worker } = require('bullmq');
 const { close, binanceClose } = require('../services/db-conn')
 const { redisClient } = require('../services/redis')
@@ -165,7 +166,9 @@ const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
     const jobIDs = []
     const queueName = "Historical-Data-Queue"
     try {
-        console.time("Initial fetch - Main Process (>= 4h)")
+        const t = createTimer('Initial fetch - Main Process (>= 4h)')
+        t.startTimer()
+        // console.time("Initial fetch - Main Process (>= 4h)")
         const periods = ["4h", "6h", "8h", "12h", "1d", "3d", "1w"]
         const [fi, totalNoOfRequiredFetches] = await HDUtil.generateFetchQueriesForBinanceTickers({ periods, token_count })
 
@@ -176,7 +179,8 @@ const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
 
         if (fetchInfo.length === 0) {
             close("Initial save historical data Binance")
-            console.timeEnd("Initial fetch - Main Process (>= 4h)")
+            t.stopTimer(__filename.slice(__dirname.length + 1))
+            // console.timeEnd("Initial fetch - Main Process (>= 4h)")
             return ({ message: "Initial Token Data present. No need to fetch, update data instead" })
 
         } else {
@@ -198,7 +202,8 @@ const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
                     log.info(`(WORKER - Initial fetch >= 4h), Completed job count : ${completedJobsCount}`);
                 } else {
                     log.info(`(WORKER - Initial fetch >= 4h), Completed job count Final Task : ${completedJobsCount}`);
-                    console.timeEnd('Initial fetch - Main Process (>= 4h)');
+                    t.stopTimer(__filename.slice(__dirname.length + 1))
+                    // console.timeEnd('Initial fetch - Main Process (>= 4h)');
                     close("Initial save historical data Binance ")
                     initialFetchWorker.close()
                     initialFetchTaskQueue.close()
@@ -276,7 +281,9 @@ const processUpdateBinanceData = async () => {
     const jobIDs = []
     const queueName = "Update-Historical-Data-Queue"
     try {
-        console.time("Update Binance Token - Main Process (>= 4h)")
+        const t = createTimer('Update Binance Token - Main Process (>= 4h)')
+        t.startTimer()
+        // console.time("Update Binance Token - Main Process (>= 4h)")
         const [result, totalNoOfRequiredUpdates] = await HDUtil.generateUpdateQueriesForBinanceTickers()
 
         const updateQueue = new Queue(queueName, { connection })
@@ -299,7 +306,8 @@ const processUpdateBinanceData = async () => {
                 log.info(`(WORKER - Update >= 4h) Update job count : ${completedUpdateJobsCount}`);
             } else {
                 log.info(`(WORKER - Update >= 4h) Update job count Final Task : ${completedUpdateJobsCount}`);
-                console.timeEnd('Update Binance Token - Main Process (>= 4h)');
+                // console.timeEnd('Update Binance Token - Main Process (>= 4h)');
+                t.stopTimer(__filename.slice(__dirname.length + 1))
                 close("Updating data (>= 4h)")
                 updateWorker.close()
                 // updateQueue.close()
@@ -381,7 +389,9 @@ const processInitialSaveHistoricalDataBinanceOneM = async () => {
     const jobIDs = []
     const queueName = "One-Minute-Historical-Data-Queue"
     try {
-        console.time("Initial fetch - Main Process (1m)")
+        const t = createTimer('Initial fetch - Main Process (1m)')
+        t.startTimer()
+        // console.time("Initial fetch - Main Process (1m)")
         const [calculateTokensToFetch] = await HDUtil.getMinuteTokensToFetchAndUpdate()
         const [generateFetchQueries] = await HDUtil.generateFetchAndUpdateQueries()
 
@@ -410,7 +420,8 @@ const processInitialSaveHistoricalDataBinanceOneM = async () => {
                 log.info(`(WORKER - Initial Fetch 1m) Completed job count : ${completedInitialOneMJobsCount}`);
             } else {
                 log.info(`(WORKER - Initial Fetch 1m) Completed job count Final Task : ${completedInitialOneMJobsCount}`);
-                console.timeEnd('Initial fetch - Main Process (1m)');
+                // console.timeEnd('Initial fetch - Main Process (1m)');
+                t.stopTimer(__filename.slice(__dirname.length + 1))
                 binanceClose("Saving oneM binance token data")
             }
         });
@@ -484,7 +495,9 @@ const processUpdateBinanceOneMData = async () => {
     const jobIDs = []
     const queueName = "Update-One-Minute-Historical-data-Queue"
     try {
-        console.time("Update Binance Token - Main Process (1m)")
+        const t = createTimer('Update Binance Token - Main Process (1m)')
+        t.startTimer()
+        // console.time("Update Binance Token - Main Process (1m)")
         const [cttf, calculateTokensToUpdate] = await HDUtil.getMinuteTokensToFetchAndUpdate()
         const [gfq, generateUpdateQueries] = await HDUtil.generateFetchAndUpdateQueries()
 
@@ -513,7 +526,8 @@ const processUpdateBinanceOneMData = async () => {
             } else {
                 log.info(`(WORKER - Update 1m) Completed job count Final Task : ${completedUpdateOneMJobsCount}`);
                 oneMUpdateWorker.close()
-                console.timeEnd("Update Binance Token - Main Process (1m)")
+                // console.timeEnd("Update Binance Token - Main Process (1m)")
+                t.stopTimer__filename.slice(__dirname.length + 1)()
             }
         });
 

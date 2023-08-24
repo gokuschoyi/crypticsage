@@ -1,5 +1,6 @@
 const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
+const { createTimer } = require('../utils/timer')
 const yahooFinance = require('yahoo-finance2').default;
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
@@ -140,13 +141,16 @@ const fetchData = async ({ ticker_name, period, start, end, type }) => {
     log.info(`Binance ${period} URL : ${url}`)
     let sTime, eTime, lapsedTime, responseLength
     try {
-        sTime = performance.now()
+        const t = createTimer('fetchData')
+        t.startTimer()
+        // sTime = performance.now()
         const responseFromBinance = await axios.get(url);
-        eTime = performance.now()
+        // eTime = performance.now()
 
         response = responseFromBinance.data;
         responseLength = response.length
-        lapsedTime = formatMillisecond(eTime - sTime)
+        // lapsedTime = formatMillisecond(eTime - sTime)
+        lapsedTime = t.calculateTime()
 
         let sDate = formatPrintDate(start)
         let eDate = formatPrintDate(end)
@@ -407,7 +411,9 @@ const getTotalDurationInMarket = async ({ token_count }) => {
 const generateFetchQueriesForBinanceTickers = async ({ periods, token_count }) => {
     const fetchQuery = []
     try {
-        console.time("Total duration to generate initial fetch queries")
+        const t = createTimer("Total duration to generate initial fetch queries")
+        t.startTimer()
+        // console.time("Total duration to generate initial fetch queries")
         const fetchDetailsForBinanceTokens = await getTotalDurationInMarket({ token_count })
         var allTickers = fetchDetailsForBinanceTokens
             .filter((token) => token.token !== null)
@@ -472,7 +478,8 @@ const generateFetchQueriesForBinanceTickers = async ({ periods, token_count }) =
                 }
             }
         }
-        console.timeEnd("Total duration to generate initial fetch queries")
+        // console.timeEnd("Total duration to generate initial fetch queries")
+        t.stopTimer(__filename.slice(__dirname.length + 1))
         return [fetchQuery, totalNoOfRequiredFetches];
     } catch (error) {
         log.error(error.stack)
@@ -510,7 +517,9 @@ const fetchHistoricalDataBinance = async ({ ticker_name, period }) => {
     let data = []
 
     let response
-    console.time("Total time to fetch and convert data")
+    const t = createTimer("Total time to fetch and convert data")
+    t.startTimer()
+    // console.time("Total time to fetch and convert data")
     do {
         response = await fetchData({ ticker_name, period, start, end, type });
 
@@ -522,7 +531,8 @@ const fetchHistoricalDataBinance = async ({ ticker_name, period }) => {
     } while (response.length > 1);
 
     const finalData = convertData(data)
-    console.timeEnd("Total time to fetch and convert data")
+    // console.timeEnd("Total time to fetch and convert data")
+    t.stopTimer(__filename.slice(__dirname.length + 1))
     return finalData;
 };
 

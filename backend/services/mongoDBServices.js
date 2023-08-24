@@ -1,5 +1,6 @@
 const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
+const { createTimer } = require('../utils/timer')
 const { connect, close, binanceConnect, binanceClose } = require('./db-conn')
 const authUtil = require('../utils/authUtil')
 
@@ -992,7 +993,9 @@ const insertBinanceDataToDb = async ({ ticker_name, period, meta, tokenData, all
     const binanceCollection = db.collection("binance");
 
     try {
-        let sTime = performance.now()
+        const t = createTimer('insertBinanceDataToDb')
+        t.startTimer()
+        // let sTime = performance.now()
         let existingTickerInDb = allTickersInDb.filter((item) => item.ticker_name === ticker_name)[0]
 
         if (existingTickerInDb) {
@@ -1011,8 +1014,9 @@ const insertBinanceDataToDb = async ({ ticker_name, period, meta, tokenData, all
                         $set: { [`data.${period}.last_updated`]: new Date(latestDateInData).toLocaleString() },
                     };
                     pushDataToDb = await binanceCollection.updateOne({ ticker_name }, updateQuery);
-                    let eTime = performance.now()
-                    let lapsedTime = formatMillisecond(eTime - sTime)
+                    // let eTime = performance.now()
+                    // let lapsedTime = formatMillisecond(eTime - sTime)
+                    let lapsedTime = t.calculateTime()
                     log.info(`Inserted ${ticker_name}, ${period}, with ${tokenData.length} items, Time taken : ${lapsedTime}`)
                     return pushDataToDb;
                 }
@@ -1035,8 +1039,9 @@ const insertBinanceDataToDb = async ({ ticker_name, period, meta, tokenData, all
                 },
             };
             const insertNewObj = await binanceCollection.insertOne(newDocument);
-            let eTime = performance.now()
-            let lapsedTime = formatMillisecond(eTime - sTime)
+            // let eTime = performance.now()
+            // let lapsedTime = formatMillisecond(eTime - sTime)
+            let lapsedTime = t.calculateTime()
             log.info(`Inserted ${ticker_name}, ${period}, with ${tokenData.length} items, Time taken : ${lapsedTime}`)
             return insertNewObj;
         }
@@ -1167,10 +1172,13 @@ const updateBinanceDataToDb = async ({ ticker_name, period, tokenData }) => {
                 [`data.${period}.last_updated`]: latestDate
             }
         }
-        let sTime = performance.now()
+        const t = createTimer('updateBinanceDataToDb')
+        t.startTimer()
+        // let sTime = performance.now()
         updatedReuslt = await binanceCollection.updateOne(filter, updateQuery)
-        let eTime = performance.now()
-        let lapsedTime = formatMillisecond(eTime - sTime)
+        // let eTime = performance.now()
+        // let lapsedTime = formatMillisecond(eTime - sTime)
+        let lapsedTime = t.calculateTime()
         log.info(`Updated ${ticker_name} with ${tokenData.length} items, Time taken : ${lapsedTime}`)
     } catch (error) {
         log.error(error.stack)
@@ -1276,10 +1284,13 @@ const insertOneMBinanceDataToDb = async ({ ticker_name, token_data }) => {
             const batch = token_data.slice(i, i + batchSize);
 
             // Insert the batch of documents into the collection
-            let sTime = performance.now()
+            const t = createTimer(`insertOneMBinanceDataToDb : batch ${i}`)
+            t.startTimer()
+            // let sTime = performance.now()
             let ins = await collection.insertMany(batch);
-            let eTime = performance.now()
-            let lapsedTime = formatMillisecond(eTime - sTime)
+            // let eTime = performance.now()
+            // let lapsedTime = formatMillisecond(eTime - sTime)
+            let lapsedTime = t.calculateTime()
             let batchNo = i > 0 ? Math.ceil(i / 1000) : 1
             inserted.push({ batch_no: batchNo, inserted: ins.insertedCount, acknowledged: ins.acknowledged })
             log.info(`Inserted batch ${batchNo} of ${noOfBatches}, Time taken : ${lapsedTime}`)
@@ -1404,10 +1415,13 @@ Insert new tickers :
 const saveLatestTickerMetaDataToDb = async ({ cryptoData }) => {
     try {
         const db = await connect("Ticker meta fetch and save")
-        console.time('find')
+        const t = createTimer('Find one ticker meta')
+        t.startTimer()
+        // console.time('find')
         const ticker_meta_collection = db.collection("binance_ticker_meta")
         const collection = await ticker_meta_collection.find().toArray()
-        console.timeEnd('find')
+        // console.timeEnd('find')
+        t.stopTimer(__filename.slice(__dirname.length + 1))
         if (collection.length > 0) {
             // let cryptoData = await fetchTopTickerByMarketCap({ length })
             // Update existing tickers and insert new tickers
@@ -1446,9 +1460,12 @@ const saveLatestTickerMetaDataToDb = async ({ cryptoData }) => {
             }
             return status
         } else {
-            console.time("market fullcap")
+            const t1 = createTimer('market fullcap')
+            t1.startTimer()
+            // console.time("market fullcap")
             // let cryptoData = await fetchTopTickerByMarketCap({ length })
-            console.timeEnd("market fullcap")
+            // console.timeEnd("market fullcap")
+            t1.stopTimer(__filename.slice(__dirname.length + 1))
 
             const insertedResult = await ticker_meta_collection.insertMany(cryptoData)
             return insertedResult
@@ -1519,14 +1536,19 @@ const fetchTickersFromBinanceHistoricalDb = async ({ ticker_name, period, page_n
         const collection = db.collection(`${ticker_name}`)
         // Calculate the number of documents to skip based on the page number and items per page
         const skip = (page_no - 1) * items_per_page;
-        console.time('fetching data from binance_historical')
+        const t = createTimer('Fetching data from binance_historical')
+        t.startTimer()
+        // console.time('fetching data from binance_historical')
         const tokenData = await collection.find({}).sort(sortQuery).skip(skip).limit(items_per_page).toArray();
-        console.timeEnd('fetching data from binance_historical')
+        // console.timeEnd('fetching data from binance_historical')
+        t.stopTimer(__filename.slice(__dirname.length + 1))
         let finalResult = []
 
         if (tokenData.length > 0) {
             let output = {}
-            console.time('Adding date to token data - binance_historical')
+            const t1 = createTimer("Adding date to token data - binance_historical")
+            t1.startTimer()
+            // console.time('Adding date to token data - binance_historical')
             tokenData.reverse()
             tokenData.map((data) => {
                 let obj = {
@@ -1540,7 +1562,8 @@ const fetchTickersFromBinanceHistoricalDb = async ({ ticker_name, period, page_n
                 }
                 finalResult.push(obj)
             })
-            console.timeEnd('Adding date to token data - binance_historical')
+            // console.timeEnd('Adding date to token data - binance_historical')
+            t1.stopTimer(__filename.slice(__dirname.length + 1))
 
             output['ticker_name'] = ticker_name
             output['period'] = period
@@ -1569,7 +1592,9 @@ const fetchTickersFromCrypticsageBinance = async ({ dataSource, ticker_name, per
         // const itemsPerPage = 10;
         const skip = (page_no - 1) * items_per_page;
 
-        console.time('Fetch token data - crypticsage/binance')
+        const t = createTimer('Fetch token data - crypticsage/binance')
+        t.startTimer()
+
         const tokenData = await tokenDataCollection.aggregate([
             { $match: { ticker_name: ticker_name } },
             { $project: { _id: 0, [`data.${period}.historical`]: 1 } },
@@ -1588,11 +1613,13 @@ const fetchTickersFromCrypticsageBinance = async ({ dataSource, ticker_name, per
                 },
             },
         ]).toArray();
-        console.timeEnd('Fetch token data - crypticsage/binance')
+
+        t.stopTimer(__filename.slice(__dirname.length + 1))
 
         if (tokenData.length > 0) {
             let output = {}
-            console.time('Adding date - crypticsage/binance')
+            const t2 = createTimer('Adding date - crypticsage/binance')
+            t2.startTimer()
             tokenData.reverse()
             let converted = tokenData.map((item) => {
                 return {
@@ -1600,7 +1627,7 @@ const fetchTickersFromCrypticsageBinance = async ({ dataSource, ticker_name, per
                     ...item,
                 }
             })
-            console.timeEnd('Adding date - crypticsage/binance')
+            t2.stopTimer(__filename.slice(__dirname.length + 1))
 
             output['ticker_name'] = ticker_name
             output['period'] = period
@@ -1612,6 +1639,8 @@ const fetchTickersFromCrypticsageBinance = async ({ dataSource, ticker_name, per
             output['ticker_data'] = converted
 
             return output
+        } else {
+            throw new Error('No ticker exists with that name')
         }
     } catch (error) {
         log.error(error.stack)
@@ -1695,6 +1724,67 @@ const getDetailsFromBinanceHistorical = async () => {
     }
 }
 
+const checkForDuplicateInBinanceCrypticSage = async ({ ticker_name, period }) => {
+    try {
+        const db = await connect("Checking for duplicate data")
+        const collection = db.collection(`binance`)
+        const pipeline = [
+            {
+                $match: {
+                    "ticker_name": ticker_name,
+                    [`data.${period}.historical`]: { $exists: true } // Replace "4h" with the desired period
+                }
+            },
+            {
+                $unwind: `$data.${period}.historical`
+            },
+            {
+                $group: {
+                    _id: {
+                        ticker_name: "$ticker_name",
+                        period: period,
+                        openTime: `$data.${period}.historical.openTime`
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $match: {
+                    count: { $gt: 1 }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    ticker_name: "$_id.ticker_name",
+                    period: "$_id.period",
+                    openTime: "$_id.openTime",
+                    count: 1
+                }
+            }
+        ];
+
+        let duplicateGroups = await collection.aggregate(pipeline).toArray();
+        if (duplicateGroups.length > 0) {
+            duplicateGroups = duplicateGroups.map((item) => {
+                return {
+                    ...item,
+                    openTime: new Date(item.openTime).toLocaleString()
+                }
+            })
+            log.info("Duplicate documents found!");
+            log.info(`Duplicate groups:", ${JSON.stringify(duplicateGroups)}`);
+            return duplicateGroups
+        } else {
+            log.info("No duplicate documents based on the openTime key.");
+            return []
+        }
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
 
 module.exports = {
     getUserByEmail
@@ -1748,4 +1838,5 @@ module.exports = {
     , fetchTickersFromCrypticsageBinance
     , checkTickerMetaDuplicateData
     , getDetailsFromBinanceHistorical
+    , checkForDuplicateInBinanceCrypticSage
 }

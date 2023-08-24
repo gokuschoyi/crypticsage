@@ -12,6 +12,7 @@ const user = require('./routes/userRoute');
 const contentManager = require('./routes/contentManagerRoute');
 const historicalData = require('./routes/historicalDataRoute')
 const fetchCryptoData = require('./routes/cryptoStocksRoute');
+const indicator = require('./routes/indicatorsRoute')
 // const indicators = require('./routes/indicators/indicatorsRoute');
 
 const http = require('http');
@@ -21,42 +22,6 @@ const app = express();
 // const job = schedule.scheduleJob('*/10 * * * * *', function () {
 //     logs.info('The answer to life, the universe, and everything!');
 // });
-
-
-/* var talib = require('talib/build/Release/talib')
-logs.info("TALib Version: " + talib.version);
-
-var functions = talib.functions;
-var totalFunctionCount = 0;
-for (i in functions) {
-    totalFunctionCount++;
-    
-}
-var funcDesc = talib.explain("ADX");
-logs.info({totalFunctionCount, funcDesc}) */
-
-/* let obj = {
-    name: "test",
-    age: 20,
-    sd: 'sdsd'
-}
-try {
-    throw new Error("testing error")
-} catch (err) {
-    logs.warn(err.message)
-
-    logs.error(err.stack)
-}
-logs.info(obj) */
-/* logs.debug(obj)
-logs.info(obj)
-logs.notice(obj)
-logs.warn(obj)
-logs.error(obj)
-logs.crit(obj)
-logs.alert(obj)
-logs.emerg(obj) */
-
 
 const log = (req, res, next) => {
     logs.info(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);
@@ -88,6 +53,8 @@ app.use('/content', verifyToken, contentManager);
 app.use('/historicalData', verifyToken, historicalData)
 
 app.use('/crypto', verifyToken, fetchCryptoData)
+
+app.use('/indicators', verifyToken, indicator)
 
 // app.use('/indicators', verifyToken, indicators); // remove later
 
