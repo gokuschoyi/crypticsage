@@ -3,6 +3,7 @@ const router = express.Router()
 
 const CMController = require('../controllers/contentManagerController')
 const CMServices = require('../services/contentManagerServices')
+console.log('contentManagerRoute.js')
 
 router.post('/update_ticker_meta', CMController.FASLatestTickerMetaData)
 router.post('/delete_ticker_meta', CMController.deleteTickerMeta)
