@@ -23,9 +23,8 @@ ON FAILURE :
 }
 */
 const processVerifyPassword = async ({ email, password }) => {
-    const connectMessage = "verifyPassword"
     try {
-        const user = await MDBServices.getUserByEmail({ email, connectMessage })
+        const user = await MDBServices.getUserByEmail({ email })
         const hashedPassword = user[0].password;
         let validPassword = false;
         if (hashedPassword === '' && (user[0].signup_type === 'google' || user[0].signup_type === 'facebook')) {
@@ -44,8 +43,6 @@ const processVerifyPassword = async ({ email, password }) => {
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        await close(connectMessage)
     }
 }
 
@@ -60,15 +57,12 @@ ON SUCCESS :
 }
 */
 const processUpdatePassword = async ({ email, newPassword }) => {
-    const connectMessage = "updatePassword"
     try {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await MDBServices.updateUserPasswordByEmail({ email, hashedPassword, connectMessage })
+        await MDBServices.updateUserPasswordByEmail({ email, hashedPassword })
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        await close(connectMessage)
     }
 }
 
@@ -83,9 +77,8 @@ ON SUCCESS :
 }
 */
 const processUpdateProfilePicture = async ({ email, profilePicture }) => {
-    const connectMessage = "updateUserProfilePicture"
     try {
-        const updateResult = await MDBServices.updateUserProfilePicture({ email, profilePicture, connectMessage })
+        const updateResult = await MDBServices.updateUserProfilePicture({ email, profilePicture })
         if (updateResult) {
             message = "Profile image updated successfully"
             uStatus = true
@@ -96,8 +89,6 @@ const processUpdateProfilePicture = async ({ email, profilePicture }) => {
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        await close(connectMessage)
     }
 }
 
@@ -112,9 +103,8 @@ ON SUCCESS :
 }
 */
 const processUpdateUserData = async ({ email, userData }) => {
-    const connectMessage = "updateUserData"
     try {
-        const updateResult = await MDBServices.updateUserData({ email, userData, connectMessage })
+        const updateResult = await MDBServices.updateUserData({ email, userData })
         if (updateResult) {
             message = "User data updated successfully"
             uStatus = true
@@ -125,8 +115,6 @@ const processUpdateUserData = async ({ email, userData }) => {
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        await close(connectMessage)
     }
 }
 
@@ -147,9 +135,8 @@ ON SUCCESS :
 }
 */
 const processUpdateUserPreferences = async ({ email, preferences }) => {
-    const connectMessage = "updateUserPreference"
     try {
-        const updatePreference = await MDBServices.updateUserPreferences({ email, preferences, connectMessage })
+        const updatePreference = await MDBServices.updateUserPreferences({ email, preferences })
         if (updatePreference) {
             message = "User preferences updated successfully"
             uStatus = true
@@ -160,8 +147,6 @@ const processUpdateUserPreferences = async ({ email, preferences }) => {
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        await close(connectMessage)
     }
 }
 
@@ -217,16 +202,13 @@ const processUpdateUserPreferences = async ({ email, preferences }) => {
 }
 */
 const processUpdateUserLessonStatus = async ({ email, lesson_status }) => {
-    const connectMessage = "updateUserLessonStatus"
     try {
-        const updateLessonStatus = await MDBServices.updateUserLessonStatus({ email, lesson_status, connectMessage })
+        const updateLessonStatus = await MDBServices.updateUserLessonStatus({ email, lesson_status })
         const [message, uStatus, userLessonStatus] = updateLessonStatus
         return [message, uStatus, userLessonStatus]
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        await close(connectMessage)
     }
 }
 
@@ -280,18 +262,15 @@ const processUpdateUserLessonStatus = async ({ email, lesson_status }) => {
 }
 */
 const processGetInitialQuizDataForUser = async ({ email }) => {
-    const connectMessage = "getInitialQuizDataForUser"
     try {
-        let user = await MDBServices.getUserByEmail({ email, connectMessage })
+        let user = await MDBServices.getUserByEmail({ email })
         // log.info(user)
         let userQuizStatus = user[0].quiz_status
-        let transformedQuizData = await MDBServices.getInitialQuizDataForUser({ userQuizStatus, connectMessage })
+        let transformedQuizData = await MDBServices.getInitialQuizDataForUser({ userQuizStatus })
         return transformedQuizData
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        await close(connectMessage)
     }
 }
 
@@ -338,9 +317,8 @@ const processGetInitialQuizDataForUser = async ({ email }) => {
 }
 */
 const processGetQuiz = async ({ quizId }) => {
-    const connectMessage = "getQuiz"
     try {
-        let selectedQuiz = await MDBServices.getQuizDataById({ quizId, connectMessage })
+        let selectedQuiz = await MDBServices.getQuizDataById({ quizId })
         if (selectedQuiz.length === 0) {
             throw new Error('Quiz not found')
         } else {
@@ -356,8 +334,6 @@ const processGetQuiz = async ({ quizId }) => {
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        await close(connectMessage)
     }
 }
 
@@ -403,9 +379,8 @@ const processGetQuiz = async ({ quizId }) => {
 }
 */
 const processSubmitQuiz = async ({ email, sectionId, lessonId, quizId, quizData }) => {
-    const connectMessage = "submitQuiz"
     try {
-        let quiz = await MDBServices.getQuizDataById({ quizId, connectMessage })
+        let quiz = await MDBServices.getQuizDataById({ quizId })
         let score = 0
         let total = 0
         quiz[0].questions.forEach((question) => {
@@ -424,7 +399,7 @@ const processSubmitQuiz = async ({ email, sectionId, lessonId, quizId, quizData 
             total: total,
             quizTitle: quiz[0].quizTitle,
         }
-        const updateStatus = await MDBServices.updateQuizStatusForUser({ email, sectionId, lessonId, quizId, score, total, connectMessage })
+        const updateStatus = await MDBServices.updateQuizStatusForUser({ email, sectionId, lessonId, quizId, score, total })
         if (updateStatus.acknowledged) {
             return data
         } else {
@@ -433,8 +408,6 @@ const processSubmitQuiz = async ({ email, sectionId, lessonId, quizId, quizData 
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        await close(connectMessage)
     }
 }
 
@@ -471,9 +444,8 @@ const processSubmitQuiz = async ({ email, sectionId, lessonId, quizId, quizData 
 }
 */
 const processGetRecentLessonAndQuiz = async ({ email }) => {
-    const connectMessage = "getRecentLessonAndQuizStatus"
     try {
-        let user = await MDBServices.getUserByEmail({ email, connectMessage })
+        let user = await MDBServices.getUserByEmail({ email })
         let lessonStatus = user[0].lesson_status
         let quizStatus = user[0].quiz_status
         let recentLessonQuizStatus = await AuthUtil.getRecentLessonAndQuiz(lessonStatus, quizStatus)

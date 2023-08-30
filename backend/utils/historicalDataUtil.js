@@ -9,11 +9,20 @@ const MDBServices = require('../services/mongoDBServices')
 
 // ------------------------------------Y-FINANCE-----------------------------------------//
 
+// new date 12/13/1980, 1:30:00 AM to yyyy-mm-dd 
+const formatDateForProcessInitialSaveHistoricalDataYFinance = (param) => {
+    log.info(`Date param : ${param}`)
+    const [date, tz] = param.split(', ');
+    const [m, d, y] = date.split('/')
+    const formattedDate = `${y}-${m}-${d}`;
+    return formattedDate;
+}
+
 // new Date 10/07/2023, 12:19:38 pm to yyyy-mm-dd
 const formatDateForYFinance = (param) => {
-    // log.info(`Date param : ${param}`)
+    log.info(`Date param : ${param}`)
     const [date, tz] = param.split(', ');
-    const [d, m, y] = date.split('/')
+    const [m, d, y] = date.split('/')
     const formattedDate = `${y}-${m}-${d}`;
     return formattedDate;
 }
@@ -101,28 +110,6 @@ const checkForUpdates = async ({ last_updated }) => {
 
 // -------------------------------------BINANCE------------------------------------------//
 
-const formatMillisecond = (milliseconds) => {
-    if (milliseconds < 1000) {
-        return milliseconds.toFixed(3) + ' ms';
-    } else if (milliseconds < 60000) {
-        return (milliseconds / 1000).toFixed(3) + ' s';
-    } else {
-        const hours = Math.floor(milliseconds / 3600000);
-        const minutes = Math.floor((milliseconds % 3600000) / 60000);
-        const seconds = Math.floor((milliseconds % 60000) / 1000);
-        const remainingMilliseconds = milliseconds % 1000;
-
-        const formattedTime = [
-            hours.toString().padStart(2, '0'),
-            minutes.toString().padStart(2, '0'),
-            seconds.toString().padStart(2, '0'),
-            remainingMilliseconds.toString().padStart(3, '0')
-        ].join(':');
-
-        return formattedTime;
-    }
-}
-
 const formatPrintDate = (date) => {
     const formattedDate = new Intl.DateTimeFormat("en-US", {
         year: "numeric",
@@ -138,18 +125,15 @@ const formatPrintDate = (date) => {
 const fetchData = async ({ ticker_name, period, start, end, type }) => {
     let response = [];
     let url = `https://api.binance.com/api/v3/klines?symbol=${ticker_name}&interval=${period}&startTime=${start}&endTime=${end}&limit=1000`;
-    log.info(`Binance ${period} URL : ${url}`)
-    let sTime, eTime, lapsedTime, responseLength
+    // log.info(`Binance ${period} URL : ${url}`)
+    let lapsedTime, responseLength
     try {
         const t = createTimer('fetchData')
         t.startTimer()
-        // sTime = performance.now()
         const responseFromBinance = await axios.get(url);
-        // eTime = performance.now()
 
         response = responseFromBinance.data;
         responseLength = response.length
-        // lapsedTime = formatMillisecond(eTime - sTime)
         lapsedTime = t.calculateTime()
 
         let sDate = formatPrintDate(start)
@@ -233,7 +217,7 @@ const divideTimePeriod = (startTime, endTime, period, limit) => {
     return divisions;
 }
 
-// <------------------------ 4h, 6h, 8h, 12h, 1d, 3d, 1w  (START) ------------------------> //
+// <------------------------ 1m, 4h, 6h, 8h, 12h, 1d, 3d, 1w  (START) ------------------------> //
 
 async function processHistoricalData(job) {
     const { ticker, period, meta } = job.data;
@@ -243,35 +227,32 @@ async function processHistoricalData(job) {
         ticker_name: ticker,
         period: period
     }
-    let historicalData = await fetchHistoricalDataBinance(params); // Fetch the historical data for the ticker and time period
+
+    let historicalData = []
+    if (period === '1m') {
+        historicalData = await testGetHistoricalDataBinance(params); // Fetch the historical data for 1m period
+    } else {
+        historicalData = await fetchHistoricalDataBinance(params); // Fetch the historical data for the ticker and time period
+    }
+
     let ins
     if (historicalData.length > 0) {
-        const allTickers = await MDBServices.getAvailableBinanceTickersInDb();
-        ins = await MDBServices.insertBinanceDataToDb({ ticker_name: ticker, period: period, meta: meta, tokenData: historicalData, allTickersInDb: allTickers }); // save historical data to db
+        const type = 'crypto'
+        let newIns = await MDBServices.insertHistoricalDataToDb({ type: type, ticker_name: ticker, period: period, token_data: historicalData })
+        let metadata = {
+            oldest: historicalData[0],
+            latest: historicalData[historicalData.length - 1],
+            updatedCount: historicalData.length,
+            metaData: meta
+        }
+        let updateMetaRes = await MDBServices.updateTickerMetaData({ type: type, ticker_name: ticker, period: period, meta: metadata })
+        ins = [newIns, updateMetaRes]
     } else {
         ins = ['No Data Found']
+        log.info("No new data to update")
     }
     log.info(`----PROCESS HISTORICAL DATA END ${ticker} with period ${period}----`)
     return ins; // Return the result
-}
-
-// function for the initialFetchWorker to process initial fetches One Min data
-async function processOneMHistoricalData(job) {
-    const { ticker_name, period } = job.data;
-    log.info(`----PROCESS 1m HISTORICAL DATA START ${ticker_name} with period ${period}----`)
-    let params = {
-        ticker_name: ticker_name,
-        period: period
-    }
-    let fetchedData = await testGetHistoricalDataBinance(params);
-    let ins
-    if (fetchedData.length > 0) {
-        ins = await MDBServices.insertOneMBinanceDataToDb({ ticker_name: ticker_name, token_data: fetchedData })
-    } else {
-        ins = ['No Data Found']
-    }
-    log.info(`----PROCESS 1m HISTORICAL DATA END ${ticker_name} with period ${period}----`)
-    return ins
 }
 
 // Function for the updateWorker to process updates
@@ -279,37 +260,34 @@ const processUpdateHistoricalData = async (job) => {
     const { ticker_name, period, start, end } = job.data
     log.info(`----UPDATE HISTORICAL DATA START ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}----`)
 
-    let insertResult = []
-    const updateResult = await fetchLatestTickerData({ ticker_name, period, start, end })
-    if (updateResult.length > 0) {
-        insertResult = await MDBServices.updateBinanceDataToDb({ ticker_name, period, tokenData: updateResult })
-        log.info(`----UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}----`)
-
-        return insertResult
-    } else {
-        log.info("No new data to update")
-        log.info(`----UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}----`)
-        return insertResult = ["No New Data"]
-    }
-
-}
-
-// function for the oneMUpdateWorker to process and update One Min data
-const processUpdateHistoricalOneMData = async (job) => {
-    const { ticker_name, period, start, end } = job.data
-    log.info(`----UPDATE HISTORICAL DATA START ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}----`)
     let params = {
         ticker_name: ticker_name,
         period: period,
         start: start,
         end: end
     }
-    const fetchedData = await fetchBinanceHistoricalBetweenPeriods(params)
-    let ins
-    if (fetchedData.length > 0) {
-        ins = await MDBServices.insertOneMBinanceDataToDb({ ticker_name: ticker_name, token_data: fetchedData })
+
+    let updateResult = []
+    if (period === '1m') {
+        updateResult = await fetchBinanceHistoricalBetweenPeriods(params)
     } else {
-        ins = ["No new Data"]
+        updateResult = await fetchLatestTickerData(params)
+    }
+
+    let ins
+    if (updateResult.length > 0) {
+        const type = 'crypto'
+        let newIns = await MDBServices.insertHistoricalDataToDb({ type: type, ticker_name: ticker_name, period: period, token_data: updateResult })
+        let metadata = {
+            latest: updateResult[updateResult.length - 1],
+            updatedCount: updateResult.length,
+        }
+        let updateMetaRes = await MDBServices.updateTickerMetaData({ type: type, ticker_name: ticker_name, period: period, meta: metadata })
+        ins = [newIns, updateMetaRes]
+        return ins
+    } else {
+        ins = ["No new data to update"]
+        log.info("No new data to update")
     }
     log.info(`----UPDATE HISTORICAL DATA END ${ticker_name} WITH PERIOD ${period} from ${new Date(start).toLocaleString()} to ${new Date(end).toLocaleString()}----`)
     return ins
@@ -340,7 +318,7 @@ const getTotalDurationInMarket = async ({ token_count }) => {
     if (token_count === 0 || token_count === "" || token_count === null) {
         token_count = 5
     }
-    // console.log("token_count", token_count)
+    console.log("token_count", token_count)
     try {
         const mkt_full_url = `https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${token_count}&tsym=USD`
         let latestTokenData = await axios.get(mkt_full_url)
@@ -413,7 +391,6 @@ const generateFetchQueriesForBinanceTickers = async ({ periods, token_count }) =
     try {
         const t = createTimer("Total duration to generate initial fetch queries")
         t.startTimer()
-        // console.time("Total duration to generate initial fetch queries")
         const fetchDetailsForBinanceTokens = await getTotalDurationInMarket({ token_count })
         var allTickers = fetchDetailsForBinanceTokens
             .filter((token) => token.token !== null)
@@ -427,21 +404,37 @@ const generateFetchQueriesForBinanceTickers = async ({ periods, token_count }) =
                 }
             })
 
-
         const totalNoOfRequiredFetches = allTickers.length * periods.length
-        const availableTickerInDb = await MDBServices.getAvailableBinanceTickersInDb()
+        const tickersIndb = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance_metadata' })
+
+        let availableTickerInDb = tickersIndb.map(ticker => {
+            const tickerName = ticker.ticker_name
+            const data = ticker.data
+
+            // const periods = Object.keys(data)
+            const transformedData = {}
+
+            periods.forEach(period => {
+                transformedData[period] = {
+                    historical: data.hasOwnProperty(period)
+                };
+            });
+
+            return {
+                ticker_name: tickerName,
+                data: transformedData
+            }
+        })
 
         for (const tickerInfo of allTickers) {
             const ticker = tickerInfo.token;
-            const matchedTicker = availableTickerInDb.find(
-                (ticker) => ticker.ticker_name === tickerInfo.token
-            );
+            const matchedTicker = availableTickerInDb.find((ticker) => ticker.ticker_name === tickerInfo.token);
 
             if (matchedTicker) {
-                // console.log("ticker level exists")
+                log.info('Ticker level exists')
                 for (const period of periods) {
                     if (!matchedTicker.data[period]?.historical) {
-                        // console.log("hist data length for period = 0")
+                        log.info('hist data length for period = 0')
                         const id = uuidv4();
                         const jobName = `fetchHistoricalData_${ticker}_${period}`;
                         fetchQuery.push({
@@ -510,7 +503,7 @@ const generateFetchQueriesForBinanceTickers = async ({ periods, token_count }) =
 const fetchHistoricalDataBinance = async ({ ticker_name, period }) => {
     const dayOffset = (3 * 24 * 60 * 60 * 1000) // 3 days, remove after testing
     let toSubtract = periodToMilliseconds(period)
-    let type = "Initial Fetch >=4h"
+    let type = "Initial Fetch"
     // start is the older date and end is the latest date to fetch from
     let end = new Date().getTime() - dayOffset;
     let start = end - (1000 * toSubtract)
@@ -564,7 +557,7 @@ const fetchHistoricalDataBinance = async ({ ticker_name, period }) => {
 */
 const generateUpdateQueriesForBinanceTickers = async () => {
     try {
-        const latestBinanceTickerStatus = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance' })
+        const latestBinanceTickerStatus = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance_metadata' })
         let result = latestBinanceTickerStatus.flatMap((obj) => {
             const ticker_name = obj.ticker_name
             return Object.entries(obj.data).map(([period, { lastHistorical }]) => ({
@@ -606,7 +599,7 @@ const generateUpdateQueriesForBinanceTickers = async () => {
  */
 const fetchLatestTickerData = async ({ ticker_name, period, start, end }) => {
     try {
-        let type = "Update >=4h"
+        let type = "Update"
         let newData = []
         let response = await fetchData({ ticker_name, period, start, end, type })
         if (response.length > 0) {
@@ -618,172 +611,6 @@ const fetchLatestTickerData = async ({ ticker_name, period, start, end }) => {
         log.error(error.stack)
         throw error
     }
-}
-
-// <------------------------ 4h, 6h, 8h, 12h, 1d, 3d, 1w (END) ------------------------> //
-
-
-
-// <----------------------------------------1m-----------------------------------------> //
-
-// Below functions conains 2 functions, one to get the token names that needs full fetch 
-// and the other function returns the token names that needs updates.
-// calculateTokensToFetch() 
-// Input : none
-// Output : [["", ""}], 2]
-/* 
-[
-    [
-        "SOLUSDT",
-        "ETHUSDT",
-        "APTUSDT",
-        "XRPUSDT",
-        "DOGEUSDT"
-    ],
-    5
-]
-
-// calculateTokensToUpdate()
-// Input : none
-// Output : [["", ""}], 2]
-[
-    [
-        "BTCUSDT",
-        "BNBUSDT",
-        "ADAUSDT",
-        "ARBUSDT",
-        "USDCUSDT"
-    ],
-    5
-]
-*/
-const getMinuteTokensToFetchAndUpdate = async () => {
-    try {
-        const tickerInDb = await MDBServices.getBinanceTickerNames()
-        const collections = await MDBServices.getTickersInBinanceDbMinutes()
-
-        const calculateTokensToFetch = () => {
-            let tokensToFetch = []
-            tokensToFetch = tickerInDb.filter((item) => !collections.includes(item));
-            let totalCount = tokensToFetch.length
-            return [tokensToFetch, totalCount]
-        };
-
-        const calculateTokensToUpdate = () => {
-            if (collections.length === 0) {
-                return [tokensToUpdate = [], totalCount = 0]
-            } else {
-                let tokensToUpdate = []
-                tokensToUpdate = tickerInDb.filter((item) => collections.includes(item));
-                let totalCount = tokensToUpdate.length
-                return [tokensToUpdate, totalCount]
-            }
-        }
-
-        return [calculateTokensToFetch, calculateTokensToUpdate]
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-// generate fetch queries for tokens that need full fetch and
-// update queries for tokens that need updates, DB - binance_historical
-// generateFetchQueries()
-// Input : array of token names : ["BTCUSDT", "BNBUSDT", "ADAUSDT", "ARBUSDT", "USDCUSDT"]
-// Output : array of objects with fetch parameters
-/* 
-[
-    {
-        "ticker_name": "SOLUSDT",
-        "period": "1m",
-        "id": "411d3e55-acf2-443b-803f-140e6593dd4e",
-        "jobName": "fetchHistoricalData_One_Min_SOLUSDT_1m"
-    },
-    {
-        "ticker_name": "ETHUSDT",
-        "period": "1m",
-        "id": "801ad120-3b86-435e-ae4d-b94f6a8996a3",
-        "jobName": "fetchHistoricalData_One_Min_ETHUSDT_1m"
-    }
-]
-
-// generateUpdateQueries()
-// Input : array of token names : ["BTCUSDT", "BNBUSDT", "ADAUSDT", "ARBUSDT", "USDCUSDT"]
-// Output : array of objects with update parameters
-[
-    {
-        "ticker_name": "BTCUSDT",
-        "period": "1m",
-        "start": 1690164780000,
-        "end": 1690179094031,
-        "id": "9e8aa18d-a93d-4850-a5db-c46ad18c0726",
-        "jobName": "fetchHistoricalData_One_Min_BTCUSDT_1m"
-    },
-    {
-        "ticker_name": "BNBUSDT",
-        "period": "1m",
-        "start": 1690164360000,
-        "end": 1690179094039,
-        "id": "cb5386b0-e47b-4093-b5af-8e97ff08a69c",
-        "jobName": "fetchHistoricalData_One_Min_BNBUSDT_1m"
-    }
-]
-*/
-const generateFetchAndUpdateQueries = async () => {
-    const generateFetchQueries = async ({ tokensToFetch }) => {
-        const fetchQueries = []
-        try {
-            if (tokensToFetch.length > 0) {
-                tokensToFetch.map((item) => {
-                    fetchQueries.push({
-                        ticker_name: item,
-                        period: "1m",
-                        id: uuidv4(),
-                        jobName: `fetchHistoricalData_One_Min_${item}_1m`,
-                    })
-                })
-            } else {
-                log.info("No tokens to fetch")
-            }
-        } catch (error) {
-            log.error(error.stack)
-            throw error
-        }
-        return fetchQueries
-    }
-
-    const generateUpdateQueries = async ({ tokensToUpdate }) => {
-        const updateQueries = []
-        try {
-            if (tokensToUpdate.length > 0) {
-                for (const index in tokensToUpdate) {
-                    const ticker_name = tokensToUpdate[index]
-                    const lastDocument = await MDBServices.getLatestOneMTickerDataFromDb({ ticker_name })
-                    const latestDate = new Date(lastDocument.openTime).getTime()
-                    const today = new Date().getTime()
-                    // console.log("last document", lastDocument)
-                    updateQueries.push({
-                        ticker_name: tokensToUpdate[index],
-                        period: "1m",
-                        start: latestDate,
-                        end: today,
-                        id: uuidv4(),
-                        jobName: `fetchHistoricalData_One_Min_${tokensToUpdate[index]}_1m`
-                    })
-                }
-                return updateQueries
-            } else {
-                log.info("No tokens to update")
-                return updateQueries
-            }
-        } catch (error) {
-            log.error(error.stack)
-            throw error
-        }
-    }
-
-    return [generateFetchQueries, generateUpdateQueries]
 }
 
 // Fetchs the historical data for the given ticker and period = 1m, 3 loops only for testing
@@ -824,7 +651,7 @@ const testGetHistoricalDataBinance = async ({ ticker_name, period }) => {
             start = end - (1000 * toSubtract)
         }
         count++
-    } while (count < 3);
+    } while (count < 15);
 
     const finalData = convertData(data)
 
@@ -852,31 +679,17 @@ const fetchBinanceHistoricalBetweenPeriods = async ({ ticker_name, period, start
     }
 }
 
-// <----------------------------------------1m-----------------------------------------> //
+
+// <------------------------ 1m, 4h, 6h, 8h, 12h, 1d, 3d, 1w (END) ------------------------> //
+
 
 // -------------------------------------BINANCE------------------------------------------//
 
-
-const fetchDeatilsForBinanceTokens = async (req, res) => {
-    const { ticker_name, period, start, end } = req.body
-    try {
-        // let test = await MDBServices.checkDuplicateData({ ticker_name })
-        // let tickerData = await MDBServices.getData({ ticker_name })
-        let test = await MDBServices.getAvailableBinanceTickersInDb();
-        res.status(200).json({ message: "success", test })
-    } catch (error) {
-        let formattedError = JSON.stringify(logger.formatError(error))
-        log.error({ message: 'failed', error: formattedError })
-        res.status(500).json({ message: "failed", data: error })
-    }
-}
-
 module.exports = {
-    formatDateForYFinance
+    formatDateForProcessInitialSaveHistoricalDataYFinance
+    , formatDateForYFinance
     , processHistoricalData
-    , processOneMHistoricalData
     , processUpdateHistoricalData
-    , processUpdateHistoricalOneMData
     , getHistoricalYFinanceData
     , getFirstTradeDate
     , checkForUpdates
@@ -884,9 +697,6 @@ module.exports = {
     , fetchHistoricalDataBinance
     , generateUpdateQueriesForBinanceTickers
     , fetchLatestTickerData
-    , getMinuteTokensToFetchAndUpdate
-    , generateFetchAndUpdateQueries
     , testGetHistoricalDataBinance
     , fetchBinanceHistoricalBetweenPeriods
-    , fetchDeatilsForBinanceTokens
 }

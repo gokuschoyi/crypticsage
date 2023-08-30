@@ -48,7 +48,7 @@ const getLatestStocksData = async (req, res) => {
         // '','GOOG','MSFT','IBM','AMZN','ORCL','INTC','QCOM','CSCO','SAP','TSM','BIDU','EMC','HPQ','TXN','ERIC','ASML','YHOO'
         // '',GOOGL,MSFT,IBM,AMZN,ORCL,INTC,QCOM,CSCO,SAP,TSM,BIDU,EMC,HPQ,TXN,ERIC,ASML,YHOO
         // AAPL,TSLA,GOOGL,MSFT,TSMC,ORCL,AMZN
-        const symbolsInDb = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yFinance_new' })
+        const symbolsInDb = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yfinance_metadata' })
         let yFSymbols = symbolsInDb.map((symbol) => symbol.ticker_name)
         /* const yFSymbols = ['AAPL', 'GOOG', 'MSFT']
          */
@@ -80,25 +80,10 @@ const fetchTickerDataFromDB = async (req, res) => {
 // < - - - - - - - - - - Route Functions - - - - - - - - - - >
 
 
-
-const test = async (req, res) => {
-    const { ticker_name, period } = req.body
-    const tsyms = 'USD,AUD,NZD,CAD,EUR,JPY'
-    const fsym = 'BTC,ETH'
-    // let result = await CSUtil.fetchDataFromUrls({ fsym, tsyms })
-    // let result = await CSUtil.fetchAndSaveLatestTickerMetaDataToDb({ length: 28 })
-    // let result = await CSUtil.fetchTopTickerByMarketCap({ length: 12 })
-    // let cryptoData = await fetchTickerMetaFromDb({ length: 12 })
-    const checkForDupli = await MDBServices.checkForDuplicateInBinanceCrypticSage({ ticker_name, period })
-    let dupliLength = checkForDupli.length
-    res.status(200).json({ message: "Get Latest Token Data request success", dupliLength, checkForDupli });
-}
-
 module.exports = {
     getCryptoDataByMarketCap,
     getLatestTickerData,
     getLatestCryptoData,
     getLatestStocksData,
     fetchTickerDataFromDB,
-    test
 }

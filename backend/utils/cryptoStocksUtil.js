@@ -218,42 +218,6 @@ const getYfinanceQuotes = async (symbols) => {
     return finalData
 }
 
-const checkTickerMetaDuplicateData = async ({ ticker_name }) => {
-    try {
-        const db = await connect("checking duplicate data")
-        const testColl = await db.listCollections().toArray()
-        const collection = db.collection(`binance_ticker_meta`)
-        const pipeline = [
-            {
-                $group: {
-                    _id: "$market_cap_rank",
-                    count: { $sum: 1 }
-                }
-            },
-            {
-                $match: {
-                    count: { $gt: 1 }
-                }
-            }
-        ];
-
-        const duplicateGroups = await collection.aggregate(pipeline).toArray();
-        if (duplicateGroups.length > 0) {
-            log.info("Duplicate documents found!");
-            log.info(`Duplicate groups : ${duplicateGroups}`);
-            return [duplicateGroups, testColl]
-        } else {
-            log.info("No duplicate documents based on the openTime key.");
-            return []
-        }
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    } finally {
-        close("checking duplicate data")
-    }
-}
-
 // < - - - - - - - - - - Helper Functions - - - - - - - - - - >
 
 module.exports = {
@@ -263,5 +227,4 @@ module.exports = {
     , fetchTopTickerByMarketCap
     , getLatestOHLCForTicker
     , getYfinanceQuotes
-    , checkTickerMetaDuplicateData
 }

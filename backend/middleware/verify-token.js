@@ -6,6 +6,7 @@ const verifyToken = (req, res, next) => {
     const bearerToken = req.headers.authorization;
     const token = bearerToken && bearerToken.split(' ')[1]
     if (token == null) {
+        log.warn("Unauthorized access (Empty Token pssed)")
         res.status(401).json({ message: "Unauthorized access (Empty Token pssed)" });
     }
     else {

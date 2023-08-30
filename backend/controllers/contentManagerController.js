@@ -162,7 +162,8 @@ const fetchOneYfinanceTicker = async (req, res) => {
 const deleteOneYfinanceTicker = async (req, res) => {
     try {
         const { symbol } = req.body
-        const deleteStatus = await MDBServices.deleteOneYfinanceTickerDromDb({ symbol })
+        const type = 'stock'
+        const deleteStatus = await MDBServices.deleteTickerHistDataFromDb({ ticker_name: symbol, type })
         res.status(200).json({ message: "Yfinance tickers deleted", deleteStatus });
     } catch (error) {
         log.error(error.stack)
@@ -205,7 +206,6 @@ const addSection = async (req, res) => {
         const params = req.body
         const isInputValid = Validator.validateAddSectionInputs({ params })
         if (isInputValid) {
-            const connectMessage = "Add Sections"
             const collectionName = 'sections'
             const { title, content, url } = params
             const sectionId = uuidv4();
@@ -215,7 +215,7 @@ const addSection = async (req, res) => {
                 url,
                 sectionId: sectionId,
             }
-            let insertedResult = await CMServices.serviceAddDocuments({ connectMessage, collectionName, document })
+            let insertedResult = await CMServices.serviceAddDocuments({ collectionName, document })
             res.status(200).json({ message: "Section added successfully", createdSectionId: sectionId, update: false, insertedResult });
         }
     } catch (error) {
@@ -288,7 +288,6 @@ const addLesson = async (req, res) => {
         const params = req.body
         const isInputValid = Validator.validateAddLessonInputs({ params })
         if (isInputValid) {
-            const connectMessage = "Add Lesson"
             const collectionName = 'lessons'
             const { chapter_title, sectionId, lessonData } = params
             const lessonId = uuidv4();
@@ -298,7 +297,7 @@ const addLesson = async (req, res) => {
                 lessonData,
                 lessonId: lessonId,
             }
-            let insertedResult = await CMServices.serviceAddDocuments({ connectMessage, collectionName, document })
+            let insertedResult = await CMServices.serviceAddDocuments({ collectionName, document })
 
             res.status(200).json({ message: "Lesson added successfully", lessonId, insertedResult });
         }
@@ -372,7 +371,6 @@ const addQuizQuestions = async (req, res) => {
         const params = req.body
         const isInputValid = Validator.validateAddQuizInputs({ params })
         if (isInputValid) {
-            const connectMessage = "Add Quiz"
             const collectionName = 'quiz'
             const { quizData } = params
             const quizId = uuidv4();
@@ -380,7 +378,7 @@ const addQuizQuestions = async (req, res) => {
             quizData.questions.map((question) => {
                 question.question_id = uuidv4();
             })
-            let insertedResult = await CMServices.serviceAddDocuments({ connectMessage, collectionName, document: quizData })
+            let insertedResult = await CMServices.serviceAddDocuments({ collectionName, document: quizData })
             res.status(200).json({ message: "Quiz question added successfully", quizId, insertedResult });
         }
     } catch (error) {

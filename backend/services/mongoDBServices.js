@@ -1,15 +1,43 @@
+// ssh -L 27017:localhost:27017 yadu@10.0.0.116 
+// to link remote mongo to local instead of ssh
+
 const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
+
+const { MongoClient } = require('mongodb');
+const config = require('../config');
 const { createTimer } = require('../utils/timer')
-const { connect, close, binanceConnect, binanceClose } = require('./db-conn')
 const authUtil = require('../utils/authUtil')
 
+const CRYPTICSAGE_DATABASE_NAME = 'crypticsage'
+const HISTORICAL_DATABASE_NAME = 'historical_data'
+
+const mongoOptions = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+};
+
+// Create a client to the database - global client for all services below
+const client = MongoClient.connect(config.mongoUri, mongoOptions)
+    .then(client => {
+        log.info(`Connected to Mongo database.`)
+        return client
+    })
+    .catch(error => {
+        log.error(error.stack)
+        throw error
+    })
+
+
+const { connect, close, binanceConnect, binanceClose } = require('./db-conn')
+
+
 // Returns a single user object in an array if it exists, otherwise returns an empty array
-// INPUT : email, connectMessage : { email, connectMessage }
+// INPUT : email : { email }
 // OUTPUT : [user]
-const getUserByEmail = async ({ email, connectMessage }) => {
+const getUserByEmail = async ({ email }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
         const filterEmail = { email: email }
         const user = await userCollection.find(filterEmail).toArray();
@@ -21,11 +49,11 @@ const getUserByEmail = async ({ email, connectMessage }) => {
 }
 
 // Returns true if user exists, false if user does not exist
-// INPUT : email, connectMessage : { email, connectMessage }
+// INPUT : email : { email }
 // OUTPUT : boolean
-const checkUserExists = async ({ email, connectMessage }) => {
+const checkUserExists = async ({ email }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
         const pipeline = [
             {
@@ -57,7 +85,7 @@ const checkUserExists = async ({ email, connectMessage }) => {
 // OUTPUT : insertResult
 const insertNewUser = async ({ userData }) => {
     try {
-        const db = await connect("insertNewUser");
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
         const insertResult = await userCollection.insertOne(userData);
         return insertResult
@@ -70,7 +98,7 @@ const insertNewUser = async ({ userData }) => {
 // Generates a new lesson status object for new user
 const makeUserLessonStatus = async () => {
     try {
-        const db = await connect("makeUserLessonStatus");
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const lessonCollection = db.collection('lessons');
         const lessons = await lessonCollection.find({}).toArray();
         const userLessonStatus = [];
@@ -99,7 +127,7 @@ const makeUserLessonStatus = async () => {
 // Generates a new quiz status object for new user
 const makeUserQuizStatus = async () => {
     try {
-        const db = await connect("makeUserQuizStatus");
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const quizCollection = db.collection('quiz');
         const quizzes = await quizCollection.find({}).toArray();
         const userQuizStatus = { quiz_status: {} };
@@ -143,9 +171,9 @@ const makeUserQuizStatus = async () => {
 //<------------------------USER SERVICES------------------------>
 
 
-const updateUserPasswordByEmail = async ({ email, hashedPassword, connectMessage }) => {
+const updateUserPasswordByEmail = async ({ email, hashedPassword }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
         const user = await userCollection.updateOne({ 'email': email }, { $set: { 'password': hashedPassword } });
         return user
@@ -155,9 +183,9 @@ const updateUserPasswordByEmail = async ({ email, hashedPassword, connectMessage
     }
 }
 
-const updateUserProfilePicture = async ({ email, profilePicture, connectMessage }) => {
+const updateUserProfilePicture = async ({ email, profilePicture }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
         const user = await userCollection.updateOne({ 'email': email }, { $set: { 'profile_image': profilePicture } });
         return user
@@ -167,9 +195,9 @@ const updateUserProfilePicture = async ({ email, profilePicture, connectMessage 
     }
 }
 
-const updateUserData = async ({ email, userData, connectMessage }) => {
+const updateUserData = async ({ email, userData }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
         const user = await userCollection.updateOne(
             { 'email': email },
@@ -187,9 +215,9 @@ const updateUserData = async ({ email, userData, connectMessage }) => {
     }
 }
 
-const updateUserPreferences = async ({ email, preferences, connectMessage }) => {
+const updateUserPreferences = async ({ email, preferences }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
         const user = await userCollection.updateOne(
             { 'email': email },
@@ -208,9 +236,9 @@ const updateUserPreferences = async ({ email, preferences, connectMessage }) => 
     }
 }
 
-const updateUserLessonStatus = async ({ email, lesson_status, connectMessage }) => {
+const updateUserLessonStatus = async ({ email, lesson_status }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
         const user = await userCollection.updateOne(
             { "email": email },
@@ -244,9 +272,9 @@ const updateUserLessonStatus = async ({ email, lesson_status, connectMessage }) 
     }
 }
 
-const getInitialQuizDataForUser = async ({ userQuizStatus, connectMessage }) => {
+const getInitialQuizDataForUser = async ({ userQuizStatus }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const quizCollection = await db.collection('quiz').find({}).toArray();
         let transformedQuizData = await authUtil.transformQuizData(userQuizStatus, quizCollection);
         transformedQuizData = transformedQuizData.outputObject.quizzes
@@ -257,9 +285,9 @@ const getInitialQuizDataForUser = async ({ userQuizStatus, connectMessage }) => 
     }
 }
 
-const getQuizDataById = async ({ connectMessage, quizId }) => {
+const getQuizDataById = async ({ quizId }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const quizCollection = db.collection('quiz');
         let selectedQuiz = await quizCollection.find({ "quizId": quizId }).toArray()
         return selectedQuiz
@@ -269,9 +297,9 @@ const getQuizDataById = async ({ connectMessage, quizId }) => {
     }
 }
 
-const updateQuizStatusForUser = async ({ email, sectionId, lessonId, quizId, score, total, connectMessage }) => {
+const updateQuizStatusForUser = async ({ email, sectionId, lessonId, quizId, score, total }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
         const user = await userCollection.updateOne(
             { email: email },
@@ -305,7 +333,7 @@ const updateQuizStatusForUser = async ({ email, sectionId, lessonId, quizId, sco
 
 
 // fetches all the documents from a collection
-// INPUT : collection name, filter, connectMessage
+// INPUT : collection name, filter
 // OUTPUT : array of objects
 /* 
 {
@@ -327,9 +355,9 @@ const updateQuizStatusForUser = async ({ email, sectionId, lessonId, quizId, sco
     ]
 }
 */
-const getAllDocumentsFromCollection = async ({ collectionName, filter, connectMessage }) => {
+const getAllDocumentsFromCollection = async ({ collectionName, filter }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection(collectionName)
         const documents = await collection.find(filter).toArray()
         return documents
@@ -340,11 +368,11 @@ const getAllDocumentsFromCollection = async ({ collectionName, filter, connectMe
 }
 
 // Inserts a new section to the database
-// INPUT : title, content, url, sectionId, connectMessage
+// INPUT : title, content, url, sectionId
 // OUTPUT : result object
-const insertDocumentToCollection = async ({ connectMessage, collectionName, document }) => {
+const insertDocumentToCollection = async ({ collectionName, document }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const sectionCollection = db.collection(collectionName);
         let result = await sectionCollection.insertOne(document);
         return result
@@ -355,11 +383,11 @@ const insertDocumentToCollection = async ({ connectMessage, collectionName, docu
 }
 
 // When a new section is created a new key is added to all the users lesson_status object
-// INPUT : connectMessage, sectionId
+// INPUT : sectionId
 // OUTPUT : result object
-const addSectionStatusForUsers = async ({ connectMessage, sectionId }) => {
+const addSectionStatusForUsers = async ({ sectionId }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const allUserCollection = db.collection('users')
         const userCollection = await db.collection('users').find().toArray();
         let updateStatus = []
@@ -378,10 +406,10 @@ const addSectionStatusForUsers = async ({ connectMessage, sectionId }) => {
 }
 
 // Updates the lesson status for all the users
-const addLessonStatusForUsers = async ({ connectMessage, sectionId, lesson_status }) => {
+const addLessonStatusForUsers = async ({ sectionId, lesson_status }) => {
     try {
         let updateStatus = []
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const allUserCollection = db.collection('users')
         const userCollection = await db.collection('users').find().toArray();
         for (const user of userCollection) {
@@ -409,10 +437,10 @@ const addLessonStatusForUsers = async ({ connectMessage, sectionId, lesson_statu
 }
 
 // Updates the quiz status for all the users
-const addQuizStatusForUsers = async ({ connectMessage, sectionId, lessonId, quizObject }) => {
+const addQuizStatusForUsers = async ({ sectionId, lessonId, quizObject }) => {
     try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         let updated
-        const db = await connect(connectMessage);
         const allUserCollection = db.collection('users')
         const AUCollection = allUserCollection.find({})
         while (await AUCollection.hasNext()) {
@@ -442,9 +470,9 @@ const addQuizStatusForUsers = async ({ connectMessage, sectionId, lessonId, quiz
 }
 
 // fetches a single document from a collection to check if it exists
-// INPUT : collectionName, id of the document, connectMessage
+// INPUT : collectionName, id of the document
 // OUTPUT : document object
-const checkForDocumentInCollection = async ({ collectionName, id, connectMessage }) => {
+const checkForDocumentInCollection = async ({ collectionName, id }) => {
     try {
         let key = ''
         switch (collectionName) {
@@ -461,7 +489,7 @@ const checkForDocumentInCollection = async ({ collectionName, id, connectMessage
                 throw new Error("Invalid collection name")
         }
         filter = { [key]: id }
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection(collectionName);
         const document = await collection.findOne(filter)
         if (document) {
@@ -476,11 +504,11 @@ const checkForDocumentInCollection = async ({ collectionName, id, connectMessage
 }
 
 // Updates a section in the database
-// INPUT : title, content, url, sectionId, connectMessage
+// INPUT : title, content, url, sectionId
 // OUTPUT : result object
-const updateSectionData = async ({ connectMessage, title, content, url, sectionId }) => {
+const updateSectionData = async ({ title, content, url, sectionId }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const sectionsCollection = db.collection('sections');
         let sections = await sectionsCollection.updateOne({ sectionId }, { $set: { title, content, url } });
         return sections
@@ -491,9 +519,9 @@ const updateSectionData = async ({ connectMessage, title, content, url, sectionI
 }
 
 // Updates a lesson in the database
-const updateLessonData = async ({ connectMessage, chapter_title, lessonData, lessonId }) => {
+const updateLessonData = async ({ chapter_title, lessonData, lessonId }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const lessonsCollection = db.collection('lessons');
         let lessons = await lessonsCollection.updateOne({ lessonId }, { $set: { chapter_title, lessonData } });
         return lessons
@@ -503,9 +531,9 @@ const updateLessonData = async ({ connectMessage, chapter_title, lessonData, les
     }
 }
 
-const updateLessonNameChangeAcrossUsersStatus = async ({ connectMessage, sectionId, lessonId, chapter_title }) => {
+const updateLessonNameChangeAcrossUsersStatus = async ({ sectionId, lessonId, chapter_title }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const filter = {
             [`lesson_status.${sectionId}`]: {
                 $elemMatch: {
@@ -534,9 +562,9 @@ const updateLessonNameChangeAcrossUsersStatus = async ({ connectMessage, section
 }
 
 // Updates a quiz in the database
-const updateQuizData = async ({ connectMessage, quizId, quizTitle, quizDescription, questions }) => {
+const updateQuizData = async ({ quizId, quizTitle, quizDescription, questions }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const quizzesCollection = db.collection('quiz');
         let update = await quizzesCollection.updateOne({ quizId }, { $set: { quizTitle, quizDescription, questions } });
         let reqData = await quizzesCollection.findOne({ quizId })
@@ -547,9 +575,9 @@ const updateQuizData = async ({ connectMessage, quizId, quizTitle, quizDescripti
     }
 }
 
-const updateQuizNameChangeAcrossUsersStatus = async ({ connectMessage, sectionId, lessonId, quizId, quizTitle }) => {
+const updateQuizNameChangeAcrossUsersStatus = async ({ sectionId, lessonId, quizId, quizTitle }) => {
     try {
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const filter = {
             [`quiz_status.${sectionId}.${lessonId}`]: {
                 $elemMatch: {
@@ -578,9 +606,9 @@ const updateQuizNameChangeAcrossUsersStatus = async ({ connectMessage, sectionId
 }
 
 // Delete a documetn from a collection
-// INPUT : collectionName, id of the document, connectMessage
+// INPUT : collectionName, id of the document
 // OUTPUT : result object
-const deleteOneDocumentFromCollection = async ({ collectionName, id, connectMessage }) => {
+const deleteOneDocumentFromCollection = async ({ collectionName, id }) => {
     try {
         let key = ''
         switch (collectionName) {
@@ -597,7 +625,7 @@ const deleteOneDocumentFromCollection = async ({ collectionName, id, connectMess
                 throw new Error("Invalid collection name")
         }
         filter = { [key]: id }
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection(collectionName)
         const result = await collection.deleteOne(filter);
         return result
@@ -608,9 +636,9 @@ const deleteOneDocumentFromCollection = async ({ collectionName, id, connectMess
 }
 
 // Delete many documents from a collection
-// INPUT : type, collectionName, id of the document, connectMessage
+// INPUT : type, collectionName, id of the document
 // OUTPUT : result object
-const deleteManyDocumentsFromCollection = async ({ type, collectionName, id, connectMessage }) => {
+const deleteManyDocumentsFromCollection = async ({ type, collectionName, id }) => {
     try {
         let key = ''
         switch (type) {
@@ -624,7 +652,7 @@ const deleteManyDocumentsFromCollection = async ({ type, collectionName, id, con
                 throw new Error("Invalid collection name")
         }
         filter = { [key]: id }
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection(collectionName)
         const result = await collection.deleteMany(filter);
         return result
@@ -635,12 +663,12 @@ const deleteManyDocumentsFromCollection = async ({ type, collectionName, id, con
 }
 
 // When a section is deleted the status of that section, including all lessons and quizz is removed from all the users
-// INPUT : connectMessage, sectionId
+// INPUT : sectionId
 // OUTPUT : result object
-const removeLessonAndQuizStatusFromUsers = async ({ sectionId, connectMessage }) => {
+const removeLessonAndQuizStatusFromUsers = async ({ sectionId }) => {
     try {
         let updatedStatus = []
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const allUserCollection = db.collection('users')
         const userCollection = await db.collection('users').find().toArray();
         for (const user of userCollection) {
@@ -662,10 +690,10 @@ const removeLessonAndQuizStatusFromUsers = async ({ sectionId, connectMessage })
     }
 }
 
-const removeOneLessonAndQuizStatusFromUsers = async ({ connectMessage, sectionId, lessonId }) => {
+const removeOneLessonAndQuizStatusFromUsers = async ({ sectionId, lessonId }) => {
     try {
         let updatedStatus = []
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const allUserCollection = db.collection('users')
         const userCollection = await db.collection('users').find().toArray();
         for (const user of userCollection) {
@@ -697,10 +725,10 @@ const removeOneLessonAndQuizStatusFromUsers = async ({ connectMessage, sectionId
     }
 }
 
-const removeQuizStatusFromUser = async ({ connectMessage, quizId, lessonId, sectionId }) => {
+const removeQuizStatusFromUser = async ({ quizId, lessonId, sectionId }) => {
     try {
         let deletedStatus = []
-        const db = await connect(connectMessage);
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const allUserCollection = db.collection('users')
         const AUCollection = allUserCollection.find({})
         while (await AUCollection.hasNext()) {
@@ -720,21 +748,9 @@ const removeQuizStatusFromUser = async ({ connectMessage, quizId, lessonId, sect
 
 const deleteOneMetaData = async ({ symbol }) => {
     try {
-        const db = await connect("Delete one ticker meta data")
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection("binance_ticker_meta")
         const result = await collection.deleteOne({ symbol: symbol })
-        return result
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-const deleteOneYfinanceTickerDromDb = async ({ symbol }) => {
-    try {
-        const db = await connect("Delete one ticker meta data")
-        const collection = db.collection("yFinance_new")
-        const result = await collection.deleteOne({ ticker_name: symbol })
         return result
     } catch (error) {
         log.error(error.stack)
@@ -751,305 +767,31 @@ const deleteOneYfinanceTickerDromDb = async ({ symbol }) => {
 
 //<------------------------Y-FINANCE SERVICES------------------------>
 
-// returns all the tickers in yFinance individually with time period
-const getAvailableYfTickersInDb = async ({ connectMessage }) => {
+// Deletes all the historical data of a ticker from the db based oon tickername and type : crypto / stock
+const deleteTickerHistDataFromDb = async ({ ticker_name, type }) => {
     try {
-        const db = await connect(connectMessage)
-        const yFCollection = db.collection('yFinance_new')
-        const yFTickers = await yFCollection.aggregate([
-            {
-                $project: {
-                    _id: 1,
-                    ticker_name: 1,
-                    data: {
-                        $objectToArray: "$data"
-                    }
-                }
-            },
-            {
-                $project: {
-                    _id: 1,
-                    ticker_name: 1,
-                    data: {
-                        $arrayToObject: {
-                            $map: {
-                                input: "$data",
-                                as: "period",
-                                in: {
-                                    k: "$$period.k",
-                                    v: {
-                                        historical: { $cond: [{ $isArray: "$$period.v.historical" }, true, false] }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        ]).toArray()
-        return yFTickers
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-// oldest data first saved to db
-const insertHistoricalYFinanceDate = async ({ tickerData, connectMessage }) => {
-    try {
-        const db = await connect(connectMessage)
-        const yFinanceCollection = db.collection("yFinance_new");
-        await yFinanceCollection.insertOne(tickerData)
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-// returns all the tickers in yFinance individually with time period
-const getYFinanceTickerInfo = async ({ connectMessage }) => {
-    let tickers;
-    try {
-        log.info("Fetching y-finance token info from db")
-        const db = await connect(connectMessage);
-        const yFinanceCollection = db.collection("yFinance_new");
-        const pipeline = [
-            {
-                $project: {
-                    _id: 1,
-                    ticker_name: 1,
-                    data: { $objectToArray: "$data" },
-                },
-            },
-            {
-                $project: {
-                    _id: 1,
-                    ticker_name: 1,
-                    data: {
-                        $map: {
-                            input: "$data",
-                            as: "item",
-                            in: {
-                                _id: "$_id",
-                                period: "$$item.k",
-                                ticker_name: "$ticker_name",
-                                last_updated: "$$item.v.last_updated",
-                                last_historicalData: {
-                                    $arrayElemAt: ["$$item.v.historical", -1],
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-            {
-                $unwind: "$data",
-            },
-            {
-                $replaceRoot: { newRoot: "$data" },
-            },
-        ];
-        tickers = await yFinanceCollection.aggregate(pipeline).toArray()
-        return tickers;
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-// insert all new token values to their respective collections
-const insertLatestYFinanceData = async ({ _id, period, data, connectMessage }) => {
-    let updateResult;
-    try {
-        const db = await connect(connectMessage);
-        const yFinanceCollection = db.collection("yFinance_new");
-        const filters = {
-            "_id": _id
-        };
-        let latestDate = new Date(data[data.length - 1].date)
-        const update = {
-            $push: {
-                [`data.${period}.historical`]: { $each: data },
-            },
-            $set: {
-                [`data.${period}.last_updated`]: latestDate,
+        const db = (await client).db(HISTORICAL_DATABASE_NAME)
+        const tickerCollections = await db.listCollections().toArray()
+        let deletedStatus = []
+        for (const collectionInfo of tickerCollections) {
+            const collectionName = collectionInfo.name
+            if (collectionName.startsWith(`${type}_${ticker_name}`)) {
+                const collectionToDelete = db.collection(collectionName)
+                let deleted = await collectionToDelete.drop()
+                deletedStatus.push(deleted)
+                log.info(`Deleted collection ${collectionName}`)
             }
         }
-        updateResult = await yFinanceCollection.updateOne(filters, update);
+        return deletedStatus
     } catch (error) {
         log.error(error.stack)
         throw error
     }
-    return updateResult.modifiedCount
 }
-
 
 //<------------------------Y-FINANCE SERVICES------------------------>
 
 //<------------------------BINANCE SERVICES-------------------------->
-
-const formatMillisecond = (milliseconds) => {
-    if (milliseconds < 1000) {
-        return milliseconds.toFixed(3) + ' ms';
-    } else if (milliseconds < 60000) {
-        return (milliseconds / 1000).toFixed(3) + ' s';
-    } else {
-        const hours = Math.floor(milliseconds / 3600000);
-        const minutes = Math.floor((milliseconds % 3600000) / 60000);
-        const seconds = Math.floor((milliseconds % 60000) / 1000);
-        const remainingMilliseconds = milliseconds % 1000;
-
-        const formattedTime = [
-            hours.toString().padStart(2, '0'),
-            minutes.toString().padStart(2, '0'),
-            seconds.toString().padStart(2, '0'),
-            remainingMilliseconds.toString().padStart(3, '0')
-        ].join(':');
-
-        return formattedTime;
-    }
-}
-
-// Gets all the tickers saved in the db:crypticsage/binance
-// Input : none
-// Output : array of objects from the db formatted accordingly
-/* [
-    {
-        "_id": "64b7737936811988c24f2a32",
-        "ticker_name": "BTCUSDT",
-        "data": {
-            "4h": {
-                "historical": true
-            },
-            "6h": {
-                "historical": true
-            },
-            "8h": {
-                "historical": true
-            },
-            "12h": {
-                "historical": true
-            },
-            "1d": {
-                "historical": true
-            },
-            "3d": {
-                "historical": true
-            },
-            "1w": {
-                "historical": true
-            }
-        }
-    }
-] */
-const getAvailableBinanceTickersInDb = async () => {
-    try {
-        const db = await connect("Fetching available binance tickers in db")
-        const binanceCollection = db.collection('binance')
-        const tickersNew = await binanceCollection.aggregate([
-            {
-                $project: {
-                    _id: 1,
-                    ticker_name: 1,
-                    data: {
-                        $objectToArray: "$data"
-                    }
-                }
-            },
-            {
-                $project: {
-                    _id: 1,
-                    ticker_name: 1,
-                    data: {
-                        $arrayToObject: {
-                            $map: {
-                                input: "$data",
-                                as: "period",
-                                in: {
-                                    k: "$$period.k",
-                                    v: {
-                                        historical: { $cond: [{ $isArray: "$$period.v.historical" }, true, false] }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        ]).toArray()
-        // log.info(tickersNew[0].data)
-        return tickersNew
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-// Insert the initial fetched data to the db:crypticsage/binance
-// Input : ticker_name (string), period (string), meta (object), tokenData (array of ticker object) : { ticker_name, period, meta, tokenData }
-// Output : object with the result of the insert query or messageif no data to insert
-const insertBinanceDataToDb = async ({ ticker_name, period, meta, tokenData, allTickersInDb }) => {
-    const db = await connect("Inserting Binance Data to db");
-    const binanceCollection = db.collection("binance");
-
-    try {
-        const t = createTimer('insertBinanceDataToDb')
-        t.startTimer()
-        // let sTime = performance.now()
-        let existingTickerInDb = allTickersInDb.filter((item) => item.ticker_name === ticker_name)[0]
-
-        if (existingTickerInDb) {
-            log.info("Ticker exists in DB");
-            const historicalDataExists = period in existingTickerInDb.data;
-
-            if (historicalDataExists) {
-                log.info("Period for token exists");
-                return { message: "No historical update needed" };
-            } else {
-                let pushDataToDb;
-                if (tokenData.length > 0) {
-                    const latestDateInData = tokenData[tokenData.length - 1].openTime;
-                    const updateQuery = {
-                        $push: { [`data.${period}.historical`]: { $each: tokenData } },
-                        $set: { [`data.${period}.last_updated`]: new Date(latestDateInData).toLocaleString() },
-                    };
-                    pushDataToDb = await binanceCollection.updateOne({ ticker_name }, updateQuery);
-                    // let eTime = performance.now()
-                    // let lapsedTime = formatMillisecond(eTime - sTime)
-                    let lapsedTime = t.calculateTime()
-                    log.info(`Inserted ${ticker_name}, ${period}, with ${tokenData.length} items, Time taken : ${lapsedTime}`)
-                    return pushDataToDb;
-                }
-                else {
-                    log.info(`No data for ${ticker_name}_${period}, length : ${tokenData.length}`);
-                    return pushDataToDb = ["No data to push"]
-                }
-            }
-        } else {
-            log.info(`Ticker ${ticker_name} does not exist. Adding to db`);
-            const latestDateInData = tokenData[tokenData.length - 1].openTime;
-            const newDocument = {
-                ticker_name,
-                meta,
-                data: {
-                    [period]: {
-                        historical: tokenData,
-                        last_updated: new Date(latestDateInData).toLocaleString(),
-                    },
-                },
-            };
-            const insertNewObj = await binanceCollection.insertOne(newDocument);
-            // let eTime = performance.now()
-            // let lapsedTime = formatMillisecond(eTime - sTime)
-            let lapsedTime = t.calculateTime()
-            log.info(`Inserted ${ticker_name}, ${period}, with ${tokenData.length} items, Time taken : ${lapsedTime}`)
-            return insertNewObj;
-        }
-    } catch (error) {
-        log.error(error.stack)
-        throw error // Propagate the error to the caller
-    }
-};
 
 // Generates an array of objects with latest and oldest date based on latest tokens and data available in the db:crypticsage/binance
 // Input : none
@@ -1082,222 +824,67 @@ const insertBinanceDataToDb = async ({ ticker_name, period, meta, tokenData, all
     }
 ] 
 */
+// fetch the below required data directly from binance_metadata and process accordingly
+
 const getFirstObjectForEachPeriod = async ({ collection_name }) => {
     try {
-        const db = await connect(`Getting first objects for each period, ${collection_name}`)
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection(collection_name);
-        const result = await collection.aggregate([
-            {
-                $project: {
-                    _id: 0,
-                    ticker_name: 1,
-                    data: {
-                        $objectToArray: "$data"
-                    }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    ticker_name: 1,
-                    data: {
-                        $arrayToObject: {
-                            $map: {
-                                input: "$data",
-                                as: "period",
-                                in: {
-                                    k: "$$period.k",
-                                    v: {
-                                        $let: {
-                                            vars: {
-                                                historicalArray: "$$period.v.historical",
-                                                firstHistorical: { $arrayElemAt: ["$$period.v.historical", 0] },
-                                                lastHistorical: { $arrayElemAt: ["$$period.v.historical", -1] }
-                                            },
-                                            in: {
-                                                $mergeObjects: [
-                                                    { historical: { $size: "$$historicalArray" } },
-                                                    { firstHistorical: "$$firstHistorical.openTime" },
-                                                    { lastHistorical: "$$lastHistorical.openTime" }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        ]).toArray();
+        const result = await collection.find({}).toArray();
+        let objectsWithConvertedDate = result.map(item => {
+            const ticker_name = item.ticker_name;
+            const data = {};
 
-        const objectsWithConvertedDate = result.map((obj) => {
-            const dataWithConvertedDate = Object.entries(obj.data).reduce((acc, [key, value]) => {
-                // log.info(value)
-                const oldestDate = new Date(value.firstHistorical).toLocaleString();
-                const latestDate = new Date(value.lastHistorical).toLocaleString();
+            Object.entries(item.data).forEach(([period, periodData]) => {
+                const historical = periodData.ticker_count;
+                const firstHistorical = periodData.oldest_ticker_data.openTime;
+                const lastHistorical = periodData.latest_ticker_data.openTime;
+                const oldestDate = new Date(periodData.oldest_ticker_data.openTime).toLocaleString();
+                const latestDate = new Date(periodData.latest_ticker_data.openTime).toLocaleString();
 
-                return { ...acc, [key]: { ...value, oldestDate, latestDate } };
-            }, {});
+                data[period] = {
+                    historical,
+                    firstHistorical,
+                    lastHistorical,
+                    oldestDate,
+                    latestDate
+                };
+            });
 
-            return { ...obj, data: dataWithConvertedDate };
+            return { ticker_name, data };
         });
-
         return objectsWithConvertedDate;
     } catch (error) {
         log.error(error.stack)
         throw error
-    } /* finally {
-        close("get first objs");
-    } */
+    }
 };
 
-// Updates the Ticker with the latest data
-// Input : ticker_name (string), period (string), tokenData (array of ticker object) : { ticker_name, period, tokenData }
-// Output : return modified count
-const updateBinanceDataToDb = async ({ ticker_name, period, tokenData }) => {
-    let updatedReuslt;
+const insertHistoricalDataToDb = async ({ type, ticker_name, period, token_data }) => {
     try {
-        const db = await connect("Updating data (>= 4h)")
-        const binanceCollection = db.collection("binance")
-        const filter = {
-            "ticker_name": ticker_name
-        }
-        let latestDate = new Date(tokenData[tokenData.length - 1].openTime).toLocaleString()
-        const updateQuery = {
-            $push: {
-                [`data.${period}.historical`]: { $each: tokenData }
-            },
-            $set: {
-                [`data.${period}.last_updated`]: latestDate
-            }
-        }
-        const t = createTimer('updateBinanceDataToDb')
-        t.startTimer()
-        // let sTime = performance.now()
-        updatedReuslt = await binanceCollection.updateOne(filter, updateQuery)
-        // let eTime = performance.now()
-        // let lapsedTime = formatMillisecond(eTime - sTime)
-        let lapsedTime = t.calculateTime()
-        log.info(`Updated ${ticker_name} with ${tokenData.length} items, Time taken : ${lapsedTime}`)
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-    return updatedReuslt.modifiedCount
-}
+        const collection_name = `${type}_${ticker_name}_${period}`;
+        const db = (await client).db(HISTORICAL_DATABASE_NAME)
+        const histCollection = db.collection(collection_name)
 
-// get all the token names collection from db: Crypticsage/binance
-// Input : none
-// Output : array of token names
-/* 
-[
-    "BTCUSDT",
-    "BNBUSDT",
-    "ADAUSDT",
-    "SOLUSDT", 
-    "ETHUSDT",
-    "XRPUSDT",
-    "APTUSDT",
-    "ARBUSDT",
-    "USDCUSDT",
-    "DOGEUSDT"
-]
-*/
-const getBinanceTickerNames = async () => {
-    try {
-        const db = await connect("Get Binance ticker names from db crypticsage/binance")
-        const binanceCollection = db.collection("binance")
-        const result = await binanceCollection.aggregate([
-            {
-                $group: {
-                    _id: null,
-                    ticker_names: { $addToSet: "$ticker_name" }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    ticker_names: 1
-                }
-            }
-        ]).toArray()
-        return result[0].ticker_names
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-// get all collection names from db: binance_historical
-// Input : none
-// Output : array of token names
-/* 
-[
-    "BTCUSDT",
-    "USDCUSDT",
-    "ARBUSDT",
-    "BNBUSDT",
-    "ADAUSDT"
-]
-*/
-const getTickersInBinanceDbMinutes = async () => {
-    try {
-        const db = await binanceConnect("Get all collection names from db binance_historical")
-        const collectionsList = await db.listCollections().toArray()
-        let collectionNames = []
-        if (collectionsList.length > 0) {
-            collectionsList.map((item) => { collectionNames.push(item.name) })
-            return collectionNames
-        } else {
-            return []
-        }
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-const getLatestOneMTickerDataFromDb = async ({ ticker_name }) => {
-    try {
-        const db = await binanceConnect("Get last document from collection - binance_historical")
-        const collection = db.collection(ticker_name)
-        const lastDocument = await collection.findOne({}, { sort: { $natural: -1 } })
-        return lastDocument
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-// Insert the fetched ticker data to the db:binance_historical in batches
-// Input : ticker_name (string), token_data (array of ticker object) : { ticker_name, token_data }
-// Output : object with the result of the mongo insert query
-const insertOneMBinanceDataToDb = async ({ ticker_name, token_data }) => {
-    try {
-        const db = await binanceConnect("Saving oneM binance token data to db")
-        const collection = db.collection(`${ticker_name}`)
         const batchSize = 1000;
         let noOfBatches = Math.ceil(token_data.length / batchSize)
         let inserted = []
+
+        let batchNo = 0; // Initialize batchNo before the loop
+
         for (let i = 0; i < token_data.length; i += batchSize) {
             const batch = token_data.slice(i, i + batchSize);
 
-            // Insert the batch of documents into the collection
-            const t = createTimer(`insertOneMBinanceDataToDb : batch ${i}`)
+            const t = createTimer(`insertOneMBinanceDataToDb : batch ${i}`) // Insert the batch of documents into the collection
             t.startTimer()
-            // let sTime = performance.now()
-            let ins = await collection.insertMany(batch);
-            // let eTime = performance.now()
-            // let lapsedTime = formatMillisecond(eTime - sTime)
+            let ins = await histCollection.insertMany(batch);
             let lapsedTime = t.calculateTime()
-            let batchNo = i > 0 ? Math.ceil(i / 1000) : 1
+
+            batchNo++
             inserted.push({ batch_no: batchNo, inserted: ins.insertedCount, acknowledged: ins.acknowledged })
             log.info(`Inserted batch ${batchNo} of ${noOfBatches}, Time taken : ${lapsedTime}`)
-
-            // log.info(`Inserted batch ${i} of ${noOfBatches}`);
         }
-        log.info(`Data insertion complete. Count: ${token_data.length}`);
+        log.info(`Data for ${ticker_name} inserted. Count: ${token_data.length}`);
         return inserted
     } catch (error) {
         log.error(error.stack)
@@ -1305,242 +892,18 @@ const insertOneMBinanceDataToDb = async ({ ticker_name, token_data }) => {
     }
 }
 
-// <------------------------Random Testing------------------------->
-
-const getData = async ({ ticker_name }) => {
+const fetchTickerHistDataFromDb = async ({ type, ticker_name, period, page_no, items_per_page }) => {
     try {
-        const db = await binanceConnect("Fetching binance token data")
-        const collection = db.collection(`${ticker_name}`)
-        const tokenData = await collection.find({}).toArray()
-        let finalResult = []
-        if (tokenData) {
-            tokenData.map((data) => {
-                let obj = {
-                    openTime: new Date(data.openTime).toLocaleString(),
-                    open: data.open,
-                    high: data.high,
-                    low: data.low,
-                    close: data.close,
-                }
-                finalResult.push(obj)
-            })
-            return finalResult
-        } else {
-            return ({ message: "No data found" })
-        }
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-const checkDuplicateData = async ({ ticker_name }) => {
-    try {
-        const db = await binanceConnect("Checking duplicate data")
-        const testColl = await db.listCollections().toArray()
-        const collection = db.collection(`${ticker_name}`)
-        const pipeline = [
-            {
-                $group: {
-                    _id: "$openTime",
-                    count: { $sum: 1 }
-                }
-            },
-            {
-                $match: {
-                    count: { $gt: 1 }
-                }
-            }
-        ];
-
-        const duplicateGroups = await collection.aggregate(pipeline).toArray();
-        if (duplicateGroups.length > 0) {
-            log.info("Duplicate documents found!");
-            log.info(`Duplicate groups:", ${duplicateGroups}`);
-            return [duplicateGroups, testColl]
-        } else {
-            log.info("No duplicate documents based on the openTime key.");
-            return []
-        }
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-// <------------------------Random Testing------------------------->
-
-//<------------------------BINANCE SERVICES------------------------>
-
-//<------------------------HISTORICAL DATA SERVICES------------------------>
-
-
-
-//<------------------------CRYPTO-STOCKS SERVICES-------------------------->
-
-// Fetches the top tickers from CryptoCompare and saves it to the DB : crypticsage/binance-ticker-meta
-// INPUT : cryptodata from cryptocompare
-// OUTPUT : Array of status based on the operation, insert or update 
-/*
-Update existing tickers : 
-[
-    {
-        "acknowledged": true,
-        "modifiedCount": 1,
-        "upsertedId": null,
-        "upsertedCount": 0,
-        "matchedCount": 1
-    },
-    {
-        "acknowledged": true,
-        "modifiedCount": 1,
-        "upsertedId": null,
-        "upsertedCount": 0,
-        "matchedCount": 1
-    }
-]
-
-Insert new tickers :
-[
-{
-        "acknowledged": true,
-        "insertedId": "64c1e773829fa7a8bd04288e"
-    },
-    {
-        "acknowledged": true,
-        "insertedId": "64c1e773829fa7a8bd04288f"
-    }
-]
-*/
-const saveLatestTickerMetaDataToDb = async ({ cryptoData }) => {
-    try {
-        const db = await connect("Ticker meta fetch and save")
-        const t = createTimer('Find one ticker meta')
-        t.startTimer()
-        // console.time('find')
-        const ticker_meta_collection = db.collection("binance_ticker_meta")
-        const collection = await ticker_meta_collection.find().toArray()
-        // console.timeEnd('find')
-        t.stopTimer(__filename.slice(__dirname.length + 1))
-        if (collection.length > 0) {
-            // let cryptoData = await fetchTopTickerByMarketCap({ length })
-            // Update existing tickers and insert new tickers
-            let status = []
-            for (const tickerData of cryptoData) {
-                const existingTicker = collection.find(
-                    (ticker) => ticker.symbol === tickerData.symbol
-                );
-
-                if (existingTicker) {
-                    // Update existing ticker
-                    let update = await ticker_meta_collection.updateOne(
-                        { symbol: tickerData.symbol },
-                        { $set: tickerData }
-                    );
-                    status.push(update)
-                } else {
-                    // Check if the market_cap_rank exists in the collection
-                    const existingTickerByRank = collection.find(
-                        (ticker) => ticker.market_cap_rank === tickerData.market_cap_rank
-                    );
-
-                    if (existingTickerByRank) {
-                        // Replace the document with the same market_cap_rank
-                        let replace = await ticker_meta_collection.replaceOne(
-                            { market_cap_rank: tickerData.market_cap_rank },
-                            tickerData
-                        );
-                        status.push(replace);
-                    } else {
-                        // Insert new ticker
-                        let insert = await ticker_meta_collection.insertOne(tickerData);
-                        status.push(insert);
-                    }
-                }
-            }
-            return status
-        } else {
-            const t1 = createTimer('market fullcap')
-            t1.startTimer()
-            // console.time("market fullcap")
-            // let cryptoData = await fetchTopTickerByMarketCap({ length })
-            // console.timeEnd("market fullcap")
-            t1.stopTimer(__filename.slice(__dirname.length + 1))
-
-            const insertedResult = await ticker_meta_collection.insertMany(cryptoData)
-            return insertedResult
-        }
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-// Fetches the top tickers from DB based on length: crypticsage/binance-ticker-meta
-// INPUT : length - number of tickers to fetch : { length: 10 } or { length: "max" }
-// OUTPUT : Array of tickers
-/* 
-[
-    {
-        "id": "1182",
-        "symbol": "BTC",
-        "name": "Bitcoin",
-        "max_supply": 20999999.9769,
-        "asset_launch_date": "2009-01-03",
-        "image_url": "https://www.cryptocompare.com/media/37746251/btc.png",
-        "market_cap_rank": 1
-    },
-    {
-        "id": "7605",
-        "symbol": "ETH",
-        "name": "Ethereum",
-        "max_supply": -1,
-        "asset_launch_date": "2015-07-30",
-        "image_url": "https://www.cryptocompare.com/media/37746238/eth.png",
-        "market_cap_rank": 2
-    }
-]
-*/
-const fetchTickerMetaFromDb = async ({ length }) => {
-    try {
-        if (length === undefined || length === null || length === 'max' || length === 0 || length === '') {
-            length = 1000
-        }
-        const db = await connect("Ticker meta fetch")
-        const projectionFields = {
-            _id: 0,
-            market_cap_rank: 1,
-            id: 1,
-            symbol: 1,
-            name: 1,
-            image_url: 1,
-            max_supply: 1,
-            asset_launch_date: 1,
-        };
-        const ticker_meta_collection = db.collection("binance_ticker_meta")
-        const tickerMeta = await ticker_meta_collection.aggregate([
-            { $project: projectionFields },
-            { $limit: length },
-        ]).toArray()
-        return tickerMeta
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-const fetchTickersFromBinanceHistoricalDb = async ({ ticker_name, period, page_no, items_per_page }) => {
-    try {
-        const db = await binanceConnect("Fetching binance token data form binance_historical")
+        const db = (await client).db(HISTORICAL_DATABASE_NAME)
+        const collection_name = `${type}_${ticker_name}_${period}`
+        const collection = db.collection(collection_name)
         const sortQuery = { openTime: -1 }
-        const collection = db.collection(`${ticker_name}`)
+
         // Calculate the number of documents to skip based on the page number and items per page
         const skip = (page_no - 1) * items_per_page;
         const t = createTimer('Fetching data from binance_historical')
         t.startTimer()
-        // console.time('fetching data from binance_historical')
         const tokenData = await collection.find({}).sort(sortQuery).skip(skip).limit(items_per_page).toArray();
-        // console.timeEnd('fetching data from binance_historical')
         t.stopTimer(__filename.slice(__dirname.length + 1))
         let finalResult = []
 
@@ -1584,64 +947,178 @@ const fetchTickersFromBinanceHistoricalDb = async ({ ticker_name, period, page_n
     }
 }
 
-const fetchTickersFromCrypticsageBinance = async ({ dataSource, ticker_name, period, page_no, items_per_page }) => {
+const updateTickerMetaData = async ({ type, ticker_name, period, meta }) => {
     try {
-        const db = await connect("fetch token data");
-        const tokenDataCollection = db.collection(`${dataSource}`);
-        // Calculate the skip value based on the page number
-        // const itemsPerPage = 10;
-        const skip = (page_no - 1) * items_per_page;
+        const collection_name = type === 'crypto' ? 'binance_metadata' : 'yfinance_metadata';
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const collection = db.collection(collection_name)
 
-        const t = createTimer('Fetch token data - crypticsage/binance')
-        t.startTimer()
+        const query = { ticker_name };
+        const existingTicker = await collection.findOne(query);
 
-        const tokenData = await tokenDataCollection.aggregate([
-            { $match: { ticker_name: ticker_name } },
-            { $project: { _id: 0, [`data.${period}.historical`]: 1 } },
-            { $unwind: `$data.${period}.historical` },
-            { $sort: { [`data.${period}.historical.openTime`]: -1 } },
-            { $skip: skip },
-            { $limit: items_per_page },
-            {
-                $project: {
-                    openTime: `$data.${period}.historical.openTime`,
-                    open: `$data.${period}.historical.open`,
-                    high: `$data.${period}.historical.high`,
-                    low: `$data.${period}.historical.low`,
-                    close: `$data.${period}.historical.close`,
-                    volume: `$data.${period}.historical.volume`,
-                },
-            },
-        ]).toArray();
+        let updated
+        if (existingTicker) {
+            log.info(`Ticker ${ticker_name} exist. Updating metadata`);
+            let update;
+            if (existingTicker.data[period]) {
+                log.info(`Period ${period} exists. Updating metadata`)
+                update = {
+                    $set: {
+                        [`data.${period}.latest_ticker_data`]: meta.latest,
+                        [`data.${period}.last_updated`]: new Date().toLocaleString(),
+                        [`data.${period}.ticker_count`]: existingTicker.data[period].ticker_count + meta.updatedCount
+                    }
+                };
+                updated = await collection.updateOne(query, update);
 
-        t.stopTimer(__filename.slice(__dirname.length + 1))
+            } else {
+                log.info(`Period ${period} does not exist. Adding metadata`)
+                update = {
+                    $set: {
+                        [`data.${period}`]: {
+                            oldest_ticker_data: meta.oldest,
+                            latest_ticker_data: meta.latest,
+                            last_updated: new Date().toLocaleString(),
+                            ticker_count: meta.updatedCount
+                        }
+                    }
+                };
+            }
+            updated = await collection.updateOne(query, update);
+            log.info(`Ticker meta for ${ticker_name} updated in ${collection_name}`)
 
-        if (tokenData.length > 0) {
-            let output = {}
-            const t2 = createTimer('Adding date - crypticsage/binance')
-            t2.startTimer()
-            tokenData.reverse()
-            let converted = tokenData.map((item) => {
-                return {
-                    date: new Date(item?.openTime).toLocaleString(),
-                    ...item,
-                }
-            })
-            t2.stopTimer(__filename.slice(__dirname.length + 1))
-
-            output['ticker_name'] = ticker_name
-            output['period'] = period
-            output['page_no'] = page_no
-            output['items_per_page'] = items_per_page
-            output['start_date'] = converted.slice(-1)[0].date
-            output['end_date'] = converted[0].date
-            output['total_count'] = converted.length
-            output['ticker_data'] = converted
-
-            return output
         } else {
-            throw new Error('No ticker exists with that name')
+            log.info(`Ticker meta for ${ticker_name} does not exist. Adding to db`);
+            const newTicker = {
+                ticker_name,
+                meta: meta.metaData,
+                data: {
+                    [period]: {
+                        oldest_ticker_data: meta.oldest,
+                        latest_ticker_data: meta.latest,
+                        last_updated: new Date().toLocaleString(),
+                        ticker_count: meta.updatedCount
+                    }
+                }
+            };
+            updated = await collection.insertOne(newTicker);
+            log.info(`Ticker meta for ${ticker_name} added to ${collection_name}`)
+
         }
+        return updated
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+//<------------------------BINANCE SERVICES------------------------>
+
+//<------------------------HISTORICAL DATA SERVICES------------------------>
+
+
+
+//<------------------------CRYPTO-STOCKS SERVICES-------------------------->
+
+// Fetches the top tickers from CryptoCompare and saves it to the DB : crypticsage/binance-ticker-meta
+// INPUT : cryptodata from cryptocompare
+// OUTPUT : Array of status based on the operation, insert or update 
+/*
+"insert": 
+[
+{
+    "lastErrorObject": {
+        "n": 1,
+        "updatedExisting": true
+    },
+    "value": {
+        "_id": "64eac17691934b84684b0c95",
+        "symbol": "BTC",
+        "asset_launch_date": "2009-01-03",
+        "current_price": 26005.12,
+        "high_24h": 26081.06,
+        "id": "1182",
+        "image_url": "https://www.cryptocompare.com/media/37746251/btc.png",
+        "last_updated": 1693106832,
+        "low_24h": 25964.95,
+        "market_cap_rank": 1,
+        "max_supply": 20999999.9769,
+        "name": "Bitcoin",
+        "price_change_24h": -69.63000000000102,
+        "price_change_percentage_24h": -0.2670399524444185
+    },
+    "ok": 1
+}
+*/
+const saveOrUpdateTickerMeta = async ({ cryptoData }) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const metaCollection = db.collection('binance_ticker_meta')
+
+        let status = []
+        for (const tickerData of cryptoData) {
+            const query = { symbol: tickerData.symbol };
+            const update = { $set: tickerData };
+            const options = { upsert: true };
+
+            let updated = await metaCollection.findOneAndUpdate(query, update, options);
+            status.push(updated)
+            log.info(`Ticker metadata updated for ${tickerData.name}`);
+        }
+        return status
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+// Fetches the top tickers from DB based on length: crypticsage/binance-ticker-meta
+// INPUT : length - number of tickers to fetch : { length: 10 } or { length: "max" }
+// OUTPUT : Array of tickers
+/* 
+[
+    {
+        "id": "1182",
+        "symbol": "BTC",
+        "name": "Bitcoin",
+        "max_supply": 20999999.9769,
+        "asset_launch_date": "2009-01-03",
+        "image_url": "https://www.cryptocompare.com/media/37746251/btc.png",
+        "market_cap_rank": 1
+    },
+    {
+        "id": "7605",
+        "symbol": "ETH",
+        "name": "Ethereum",
+        "max_supply": -1,
+        "asset_launch_date": "2015-07-30",
+        "image_url": "https://www.cryptocompare.com/media/37746238/eth.png",
+        "market_cap_rank": 2
+    }
+]
+*/
+const fetchTickerMetaFromDb = async ({ length }) => {
+    try {
+        if (length === undefined || length === null || length === 'max' || length === 0 || length === '') {
+            length = 1000
+        }
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const projectionFields = {
+            _id: 0,
+            market_cap_rank: 1,
+            id: 1,
+            symbol: 1,
+            name: 1,
+            image_url: 1,
+            max_supply: 1,
+            asset_launch_date: 1,
+        };
+        const ticker_meta_collection = db.collection("binance_ticker_meta")
+        const tickerMeta = await ticker_meta_collection.aggregate([
+            { $project: projectionFields },
+            { $limit: length },
+        ]).toArray()
+        return tickerMeta
     } catch (error) {
         log.error(error.stack)
         throw error
@@ -1650,7 +1127,7 @@ const fetchTickersFromCrypticsageBinance = async ({ dataSource, ticker_name, per
 
 const checkTickerMetaDuplicateData = async ({ ticker_name }) => {
     try {
-        const db = await connect("Checking duplicate data")
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const testColl = await db.listCollections().toArray()
         const collection = db.collection(`binance_ticker_meta`)
         const pipeline = [
@@ -1679,111 +1156,10 @@ const checkTickerMetaDuplicateData = async ({ ticker_name }) => {
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        close("Checking duplicate data")
     }
 }
 
 //<------------------------CRYPTO-STOCKS SERVICES-------------------------->
-
-const getDetailsFromBinanceHistorical = async () => {
-    try {
-        const db = await binanceConnect("Getting details from binace historical")
-        const collections = await db.collections()
-
-        const tickerInfo = await Promise.all(collections.map(async (collection) => {
-            const collectionName = collection.collectionName;
-            const aggregationPipeline = [
-                {
-                    $group: {
-                        _id: null,
-                        historical: { $sum: 1 },
-                        firstHistorical: { $first: "$openTime" },
-                        lastHistorical: { $last: "$openTime" }
-                    }
-                }
-            ];
-
-            const result = await collection.aggregate(aggregationPipeline).toArray();
-
-            return {
-                ticker_name: collectionName,
-                [collectionName]: {
-                    historical: result[0].historical,
-                    firstHistorical: result[0].firstHistorical,
-                    lastHistorical: result[0].lastHistorical,
-                    oldestDate: new Date(result[0].firstHistorical).toLocaleString(),
-                    latestDate: new Date(result[0].lastHistorical).toLocaleString(),
-                },
-            };
-        }));
-        return tickerInfo
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
-
-const checkForDuplicateInBinanceCrypticSage = async ({ ticker_name, period }) => {
-    try {
-        const db = await connect("Checking for duplicate data")
-        const collection = db.collection(`binance`)
-        const pipeline = [
-            {
-                $match: {
-                    "ticker_name": ticker_name,
-                    [`data.${period}.historical`]: { $exists: true } // Replace "4h" with the desired period
-                }
-            },
-            {
-                $unwind: `$data.${period}.historical`
-            },
-            {
-                $group: {
-                    _id: {
-                        ticker_name: "$ticker_name",
-                        period: period,
-                        openTime: `$data.${period}.historical.openTime`
-                    },
-                    count: { $sum: 1 }
-                }
-            },
-            {
-                $match: {
-                    count: { $gt: 1 }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    ticker_name: "$_id.ticker_name",
-                    period: "$_id.period",
-                    openTime: "$_id.openTime",
-                    count: 1
-                }
-            }
-        ];
-
-        let duplicateGroups = await collection.aggregate(pipeline).toArray();
-        if (duplicateGroups.length > 0) {
-            duplicateGroups = duplicateGroups.map((item) => {
-                return {
-                    ...item,
-                    openTime: new Date(item.openTime).toLocaleString()
-                }
-            })
-            log.info("Duplicate documents found!");
-            log.info(`Duplicate groups:", ${JSON.stringify(duplicateGroups)}`);
-            return duplicateGroups
-        } else {
-            log.info("No duplicate documents based on the openTime key.");
-            return []
-        }
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
 
 
 module.exports = {
@@ -1817,26 +1193,12 @@ module.exports = {
     , removeOneLessonAndQuizStatusFromUsers
     , removeQuizStatusFromUser
     , deleteOneMetaData
-    , deleteOneYfinanceTickerDromDb
-    , getAvailableYfTickersInDb
-    , insertHistoricalYFinanceDate
-    , getYFinanceTickerInfo
-    , insertLatestYFinanceData
-    , getAvailableBinanceTickersInDb
-    , insertBinanceDataToDb
+    , deleteTickerHistDataFromDb
     , getFirstObjectForEachPeriod
-    , updateBinanceDataToDb
-    , getBinanceTickerNames
-    , getTickersInBinanceDbMinutes
-    , getLatestOneMTickerDataFromDb
-    , insertOneMBinanceDataToDb
-    , getData
-    , checkDuplicateData
-    , saveLatestTickerMetaDataToDb
+    , saveOrUpdateTickerMeta
     , fetchTickerMetaFromDb
-    , fetchTickersFromBinanceHistoricalDb
-    , fetchTickersFromCrypticsageBinance
     , checkTickerMetaDuplicateData
-    , getDetailsFromBinanceHistorical
-    , checkForDuplicateInBinanceCrypticSage
+    , insertHistoricalDataToDb
+    , fetchTickerHistDataFromDb
+    , updateTickerMetaData
 }

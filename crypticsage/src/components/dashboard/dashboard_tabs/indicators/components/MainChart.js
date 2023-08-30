@@ -8,7 +8,6 @@ const MainChart = (props) => {
     const chartLoadedRef = useRef(false);
 
     useEffect(() => {
-
         console.log("from Main chart")
         let chart;
         let tokenChartBox = document.getElementsByClassName('token-chart-box')[0].getBoundingClientRect()
@@ -127,6 +126,10 @@ const MainChart = (props) => {
                 .map((d) => ({ time: d.time, value: d.close }));
             rsi_series_new.setData(rsi_data_new);
 
+            chart.timeScale().subscribeVisibleLogicalRangeChange((param) => {
+                console.log(param)
+            })
+
             // update tooltip
             chart.subscribeCrosshairMove((param) => {
                 if (
@@ -143,14 +146,27 @@ const MainChart = (props) => {
                     // console.log(param.point)
                     // console.log({ toolTipXCoOrdinates, offsetLeft, toolTipYCoOrdinates, offsetTop, scrollYAxis })
 
-                    const dateStr = new Date(param.time * 1000).toLocaleDateString('en-AU');
+                    const dateStr = new Date(param.time * 1000).toLocaleString('en-AU',
+                        {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: '2-digit',
+                            hour: 'numeric',
+                            minute: 'numeric',
+                            
+                            hour12: true
+                        }
+                    );
                     tooltip.style.display = 'block';
                     const data = param.seriesData.get(candleStickSeries);
-                    const price = data.value !== undefined ? data.value : data.close;
+                    const open = data.value !== undefined ? data.value : data.open;
+
+                    const close = data.close;
                     tooltip.innerHTML = `
                     <div style="color: ${'rgba(255, 82, 82, 1)'}">${symbol}</div>
-                    <div style="font-size: 24px; margin: 4px 0px; color: ${'black'}">${Math.round(100 * price) / 100}</div>
-                    <div style="color: ${'black'}">${dateStr}</div>
+                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">O :${Math.round(100 * open) / 100}</div>
+                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">C :${Math.round(100 * close) / 100}</div>
+                    <div style="color: ${'black'},font-size: 12px;">${dateStr}</div>
                     `;
 
                     let diffX = toolTipXCoOrdinates - offsetLeft
@@ -178,7 +194,7 @@ const MainChart = (props) => {
             tokenDom.removeEventListener('touchmove', handleTouchMove)
             chart.remove();
         }
-    }, [tData])
+    }, [tData, symbol])
 
     return (
         <Box className='chart-cont-dom' width="100%" height="100%" >

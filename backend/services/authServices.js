@@ -62,9 +62,9 @@ const generateUserObjectForLogin = async ({ user, adminStatus, token }) => {
 // INPUT : email, password 
 // OUTPUT : [user, recent_lesson_quiz] 
 const handleEmailPasswordLogin = async ({ email, password }) => {
-    const connectMessage = 'loginUser - emailpassword'
+
     try {
-        const user = await MDBServices.getUserByEmail({ email, connectMessage })
+        const user = await MDBServices.getUserByEmail({ email })
         if (user.length === 0) {
             throw new Error("There is no account associated with your email. Register first. (Username/Password)")
         } else {
@@ -87,8 +87,6 @@ const handleEmailPasswordLogin = async ({ email, password }) => {
     } catch (error) {
         log.error(error.stack)
         throw new Error(error.message)
-    } finally {
-        close(connectMessage)
     }
 }
 
@@ -96,14 +94,13 @@ const handleEmailPasswordLogin = async ({ email, password }) => {
 // INPUT : credential
 // OUTPUT : [user, recent_lesson_quiz]
 const handleGoogleLogin = async ({ credential }) => {
-    const connectMessage = 'loginUser - google'
     try {
         const payload = await verifyGoogleCredentials(credential)
         if (Object.keys(payload).length === 0) {
             throw new Error("Could not verify your google credentials")
         } else {
             let email = payload.email;
-            const user = await MDBServices.getUserByEmail({ email, connectMessage })
+            const user = await MDBServices.getUserByEmail({ email })
             if (user.length === 0) {
                 throw new Error("There is no account associated with your email. Register first. (Google Login)")
             } else {
@@ -121,8 +118,6 @@ const handleGoogleLogin = async ({ credential }) => {
     } catch (error) {
         log.error(error.stack)
         throw new Error(error.message)
-    } finally {
-        close(connectMessage)
     }
 }
 
@@ -130,9 +125,8 @@ const handleGoogleLogin = async ({ credential }) => {
 // INPUT : facebook_email
 // OUTPUT : [user, recent_lesson_quiz]
 const handleFacebookLogin = async ({ facebook_email }) => {
-    const connectMessage = 'loginUser - facebook'
     try {
-        const user = await MDBServices.getUserByEmail({ email: facebook_email, connectMessage })
+        const user = await MDBServices.getUserByEmail({ email: facebook_email })
         if (user.length === 0) {
             throw new Error("There is no account associated with your email. Register first. (Facebook Login)")
         } else {
@@ -149,8 +143,6 @@ const handleFacebookLogin = async ({ facebook_email }) => {
     } catch (error) {
         log.error(error.stack)
         throw new Error(error.message)
-    } finally {
-        close(connectMessage)
     }
 }
 
@@ -255,9 +247,8 @@ const generateUserObjectForSignup = async ({ type, payload }) => {
 // INPUT - { userName, email, password, mobile_number }
 // OUTPUT - registered status
 const handleEmailPasswordSignup = async ({ userName, email, password, mobile_number }) => {
-    const connectMessage = 'createNewUser - registration'
     try {
-        const doesUserExist = await MDBServices.checkUserExists({ email, connectMessage })
+        const doesUserExist = await MDBServices.checkUserExists({ email })
         if (doesUserExist) {
             throw new Error("Email already in use, try logging in")
         } else {
@@ -280,8 +271,6 @@ const handleEmailPasswordSignup = async ({ userName, email, password, mobile_num
     } catch (error) {
         log.error(error.stack)
         throw new Error(error.message)
-    } finally {
-        await close(connectMessage)
     }
 }
 
@@ -289,14 +278,13 @@ const handleEmailPasswordSignup = async ({ userName, email, password, mobile_num
 // INPUT - { credential }
 // OUTPUT - registered status
 const handleGoogleSignup = async ({ credential }) => {
-    const connectMessage = 'createNewUser - google'
     try {
         const googlePayload = await verifyGoogleCredentials(credential)
         if (Object.keys(googlePayload).length === 0) {
             throw new Error("Could not verify your google credentials")
         } else {
             const { email } = googlePayload
-            const doesUserExist = await MDBServices.checkUserExists({ email, connectMessage })
+            const doesUserExist = await MDBServices.checkUserExists({ email })
             if (doesUserExist) {
                 throw new Error("Account already exists, Signin with your google account")
             } else {
@@ -318,8 +306,6 @@ const handleGoogleSignup = async ({ credential }) => {
     } catch (error) {
         log.error(error.stack)
         throw new Error(error.message)
-    } finally {
-        await close(connectMessage)
     }
 }
 
@@ -327,10 +313,9 @@ const handleGoogleSignup = async ({ credential }) => {
 // INPUT - { userInfo }
 // OUTPUT - registered status
 const handleFacebookSignup = async ({ userInfo }) => {
-    const connectMessage = 'createNewUser - facebook'
     try {
         const { email } = userInfo
-        const doesUserExist = await MDBServices.checkUserExists({ email, connectMessage })
+        const doesUserExist = await MDBServices.checkUserExists({ email })
         if (doesUserExist) {
             throw new Error("User already exists, Signin with your google account")
         } else {
@@ -350,8 +335,6 @@ const handleFacebookSignup = async ({ userInfo }) => {
     } catch (error) {
         log.error(error.stack)
         throw new Error(error.message)
-    } finally {
-        await close(connectMessage)
     }
 }
 

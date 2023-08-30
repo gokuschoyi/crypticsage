@@ -4,15 +4,12 @@ const { createTimer } = require('../utils/timer')
 const { v4: uuidv4 } = require('uuid');
 
 const { Queue, Worker } = require('bullmq');
-const { close } = require('../services/db-conn')
 const { redisClient } = require('../services/redis')
 
 const connection = redisClient
-let update_OneBinanceTicker_Queue
-let update_OneBinanceTicker_oneM_Queue
 
+let update_OneBinanceTicker_Queue
 let fetch_OneBinanceTicker_Queue
-let fetch_OneBinanceTicker_oneM_Queue
 
 const MDBServices = require('./mongoDBServices')
 const HDServices = require('./historicalDataServices')
@@ -23,7 +20,7 @@ const HDUtil = require('../utils/historicalDataUtil');
 const serviceFetchAndSaveLatestTickerMetaData = async ({ length }) => {
     try {
         let cryptoData = await CSUtil.fetchTopTickerByMarketCap({ length })
-        let result = await MDBServices.saveLatestTickerMetaDataToDb({ cryptoData })
+        let result = await MDBServices.saveOrUpdateTickerMeta({ cryptoData })
         return result
     } catch (error) {
         log.error(error.stack)
@@ -31,6 +28,7 @@ const serviceFetchAndSaveLatestTickerMetaData = async ({ length }) => {
     }
 }
 
+// needs rework after db changes 
 const serviceGetBinanceTickerStatsFromDb = async () => {
     try {
         let tickerMeta = await MDBServices.fetchTickerMetaFromDb({ length: "" })
@@ -46,7 +44,7 @@ const serviceGetBinanceTickerStatsFromDb = async () => {
 
         let tickerWithNoDataInBinance = tickerNameAdded.filter((item) => item.ticker_name === null)
         let finalRes = tickerNameAdded.filter((item) => item.ticker_name !== null)
-        let tickersWithHistData = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance' })
+        let tickersWithHistData = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance_metadata' })
 
         const findMatchingObject = (tickerName) => {
             return finalRes.find((item) => item.ticker_name === tickerName);
@@ -64,19 +62,8 @@ const serviceGetBinanceTickerStatsFromDb = async () => {
             return tickerData;
         });
 
-        let bHistData = await MDBServices.getDetailsFromBinanceHistorical()
-
         let totalTickerCountInDb = tickerMeta.length
         let totalTickersWithDataToFetch = finalRes.length
-
-        updatedTickersWithHistData.map((item) => {
-            let tickerName = item.ticker_name
-            const matchingData = bHistData.find((data) => data.ticker_name === item.ticker_name);
-            if (matchingData) {
-                const newData = { "1m": matchingData[tickerName], ...item.data };
-                item.data = newData;
-            }
-        })
 
         let tickersWithNoHistData = finalRes.filter(item1 => !tickersWithHistData.map(item2 => item2.ticker_name).includes(item1.ticker_name));
 
@@ -84,14 +71,12 @@ const serviceGetBinanceTickerStatsFromDb = async () => {
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        close("Fetch Ticker Stats")
     }
 }
 
 const serviceGetYfinanceTickerStatsFromDb = async () => {
     try {
-        let yFTickerInfo = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yFinance_new' })
+        let yFTickerInfo = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yfinance_metadata' })
         return yFTickerInfo
     } catch (error) {
         log.error(error.stack)
@@ -105,13 +90,13 @@ const serviceFetchOneBinanceTicker = async ({ fetchQueries }) => {
     var completedFetchJobsCount = 0;
     const finalResult = {}
     const jobIDs = []
-    const queueName = "Fetch-One-Binance-Ticker>4h"
-    const queueName2 = "Fetch-One-Binance-Ticker-1m"
+    const queueName = "Fetch-One-Binance-Ticker"
+
+    let newDate = new Date().toLocaleString()
+    let [date, time] = newDate.split(", ")
+    let [t, ap] = time.split(" ")
 
     let greaterThan4h = fetchQueries.map((queries) => {
-        let newDate = new Date().toLocaleString()
-        let [date, time] = newDate.split(", ")
-        let [t, ap] = time.split(" ")
         return {
             ...queries,
             id: `${uuidv4()}_${date}_${t}_${ap}_${queries.ticker_name}_${queries.period}`,
@@ -119,66 +104,28 @@ const serviceFetchOneBinanceTicker = async ({ fetchQueries }) => {
         }
     })
 
-    let oneMQuery = {
-        ticker_name: fetchQueries[0].ticker,
-        period: "1m",
-        id: uuidv4(),
-        jobName: `Fetch-One-Binance-Ticker_${fetchQueries[0].ticker}_1m_FE-Request`,
-    }
-
     try {
-        const t = createTimer("Fetch-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
+        const t = createTimer("Fetch-One-Binance-Ticker-FE-Request - Main Process")
         t.startTimer()
-        // console.time("Fetch-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
 
         const fetchOneBinanceTickerQueue = new Queue(queueName, { connection })
         const fetchOneBinanceTickerWorker = new Worker(queueName, HDUtil.processHistoricalData, { connection })
 
-        const fetchOneBinanceTickerQueue2 = new Queue(queueName2, { connection })
-        const fetchOneBinanceTickerWorker2 = new Worker(queueName2, HDUtil.processOneMHistoricalData, { connection })
-
-        const { ticker_name, period, jobName, id } = oneMQuery
-
-        const job2 = await fetchOneBinanceTickerQueue2.add(
-            jobName,
-            { ticker_name, period },
-            {
-                removeOnComplete: {
-                    age: 3600, // keep up to 1 min
-                    count: 1000, // keep up to 1000 jobs
-                },
-                removeOnFail: {
-                    age: 3600, // keep up to 1 min
-                },
-                jobId: id,
-                delay: 200
-            }
-        )
-
         fetch_OneBinanceTicker_Queue = fetchOneBinanceTickerQueue
-        fetch_OneBinanceTicker_oneM_Queue = fetchOneBinanceTickerQueue2
         totalFetchJobsCount = greaterThan4h.length + 1
 
         const fetchCompletedListener = () => {
             completedFetchJobsCount++;
             if (completedFetchJobsCount < totalFetchJobsCount) {
-                log.info(`(WORKER - Fetch >= 4h) Fetch job count : ${completedFetchJobsCount}`);
+                log.info(`(WORKER - Fetch Single-Fetch) Fetch job count : ${completedFetchJobsCount}`);
             } else {
-                log.info(`(WORKER - Fetch >= 4h) Fetch job count Final Task : ${completedFetchJobsCount}`);
+                log.info(`(WORKER - Fetch Single-Fetch) Fetch job count Final Task : ${completedFetchJobsCount}`);
                 t.stopTimer(__filename.slice(__dirname.length + 1))
-                // console.timeEnd('Fetch-One-Binance-Ticker-FE-Request - Main Process (>= 4h)');
-                close("Fetching data (>= 4h)")
-                fetchOneBinanceTickerWorker.close();
+                // fetchOneBinanceTickerWorker.close();
                 fetchOneBinanceTickerWorker.removeListener('completed', fetchCompletedListener); // Remove the listener
             }
         }
 
-        const fetchCompletedListener2 = () => {
-            completedFetchJobsCount++;
-            log.info(`(WORKER - Fetch 1m) Fetch job count : ${completedFetchJobsCount}`);
-            fetchOneBinanceTickerWorker2.close();
-            fetchOneBinanceTickerWorker2.removeListener('completed', fetchCompletedListener2); // Remove the listener
-        }
 
         const failedListener = (job) => {
             const redisCommand = `hgetall bull:${queueName}:${job.id}`
@@ -187,7 +134,6 @@ const serviceFetchOneBinanceTicker = async ({ fetchQueries }) => {
         }
 
         fetchOneBinanceTickerWorker.on('completed', fetchCompletedListener);
-        fetchOneBinanceTickerWorker2.on('completed', fetchCompletedListener2);
         fetchOneBinanceTickerWorker.on('failed', failedListener);
 
         // Log any errors that occur in the worker, updates
@@ -199,7 +145,7 @@ const serviceFetchOneBinanceTicker = async ({ fetchQueries }) => {
         for (const index in greaterThan4h) {
             const {
                 jobName,
-                ticker,
+                ticker_name,
                 period,
                 id,
                 meta
@@ -207,7 +153,7 @@ const serviceFetchOneBinanceTicker = async ({ fetchQueries }) => {
 
             const job = await fetchOneBinanceTickerQueue.add(
                 jobName,
-                { ticker, period, meta },
+                { ticker: ticker_name, period, meta },
                 {
                     removeOnComplete: {
                         age: 3600, // keep up to 1 min
@@ -224,14 +170,12 @@ const serviceFetchOneBinanceTicker = async ({ fetchQueries }) => {
             jobIDs.push(jobId)
         }
 
-        jobIDs.push(job2.id)
-
         finalResult["check_status_payload"] = {
             jobIds: jobIDs,
             type: "fetch-one-ticker_"
         }
         finalResult["total_actual_feches"] = greaterThan4h.length + 1
-        finalResult["fetch_queries"] = greaterThan4h.push(oneMQuery)
+        finalResult["fetch_queries"] = greaterThan4h
 
         const isActive = fetchOneBinanceTickerWorker.isRunning();
         if (isActive) {
@@ -254,8 +198,7 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
     var completedUpdateJobsCount = 0;
     const finalResult = {}
     const jobIDs = []
-    const queueName = "Update-One-Binance-Ticker-Queue>4h"
-    const queueName2 = "Update-One-Binance-Ticker-Queue-1m"
+    const queueName = "Update-One-Binance-Ticker-Queue"
 
     let idNameAdded = updateQueries.map((queries) => {
         let newDate = new Date().toLocaleString()
@@ -268,44 +211,29 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
         }
     })
 
-    let added = idNameAdded.filter((item) => item.period !== '1m')
-
-    let oneM = idNameAdded.filter((item) => item.period === '1m')
+    let added = idNameAdded
 
     try {
-        const t= createTimer("Update-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
+        const t = createTimer("Update-One-Binance-Ticker-FE-Request - Main Process")
         t.startTimer()
-        // console.time("Update-One-Binance-Ticker-FE-Request - Main Process (>= 4h)")
 
         const updateOneBinanceTickerQueue = new Queue(queueName, { connection })
         const updateOneBinanceTickerWorker = new Worker(queueName, HDUtil.processUpdateHistoricalData, { connection })
 
-        const updateOneBinanceTickerQueue2 = new Queue(queueName2, { connection })
-        const updateOneBinanceTickerWorker2 = new Worker(queueName2, HDUtil.processUpdateHistoricalOneMData, { connection })
-
         update_OneBinanceTicker_Queue = updateOneBinanceTickerQueue
-        update_OneBinanceTicker_oneM_Queue = updateOneBinanceTickerQueue2
-        totalUpdateJobsCount = added.length + oneM.length
+
+        totalUpdateJobsCount = added.length
 
         const updateCompletedListener = () => {
             completedUpdateJobsCount++;
             if (completedUpdateJobsCount < totalUpdateJobsCount) {
-                log.info(`(WORKER - Update >= 4h) Update job count : ${completedUpdateJobsCount}`);
+                log.info(`(WORKER - Update single ticker) Update job count : ${completedUpdateJobsCount}`);
             } else {
-                log.info(`(WORKER - Update >= 4h) Update job count Final Task : ${completedUpdateJobsCount}`);
+                log.info(`(WORKER - Update single ticker) Update job count Final Task : ${completedUpdateJobsCount}`);
                 t.stopTimer(__filename.slice(__dirname.length + 1))
-                // console.timeEnd('Update-One-Binance-Ticker-FE-Request - Main Process (>= 4h)');
-                close("Fetching data (>= 4h)")
-                updateOneBinanceTickerWorker.close();
+                // updateOneBinanceTickerWorker.close();
                 updateOneBinanceTickerWorker.removeListener('completed', updateCompletedListener); // Remove the listener
             }
-        }
-
-        const updateCompletedListener2 = () => {
-            completedUpdateJobsCount++;
-            log.info(`(WORKER - Update 1m) Update job count : ${completedUpdateJobsCount}`);
-            updateOneBinanceTickerWorker2.close();
-            updateOneBinanceTickerWorker2.removeListener('completed', updateCompletedListener2); // Remove the listener
         }
 
         const failedListener = (job) => {
@@ -315,7 +243,6 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
         }
 
         updateOneBinanceTickerWorker.on('completed', updateCompletedListener);
-        updateOneBinanceTickerWorker2.on('completed', updateCompletedListener2);
         updateOneBinanceTickerWorker.on('failed', failedListener);
 
         // Log any errors that occur in the worker, updates
@@ -352,26 +279,6 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
             jobIDs.push(jobId)
         }
 
-        const { ticker_name, period, start, end, id, jobName } = oneM[0]
-        // log.info({ticker_name, period, start, end, id, jobName})
-        const job2 = await updateOneBinanceTickerQueue2.add(
-            jobName,
-            { ticker_name, period, start, end },
-            {
-                removeOnComplete: {
-                    age: 3600, // keep up to 1 hr
-                    count: 1000, // keep up to 1000 jobs
-                },
-                removeOnFail: {
-                    age: 3600, // keep up to 1 hr
-                },
-                jobId: id,
-                delay: 200
-            }
-        )
-
-        jobIDs.push(job2.id)
-
         finalResult["check_status_payload"] = {
             jobIds: jobIDs,
             type: "update-one-ticker_"
@@ -385,10 +292,9 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
             return ({ message, finalResult });
         } else {
             updateOneBinanceTickerWorker.run()
-            const message = "Update tasks added to queue. (Initial Fetch)"
+            const message = "Update tasks added to queue. (Post fetch update)"
             return ({ message, finalResult });
         }
-
     } catch (error) {
         log.error(error.stack)
         throw error
@@ -396,13 +302,19 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
 }
 
 // updates all tickers in the database
+// check FE for appropriate call to this fuction and make corrections
+/* 
+let finalIds = {
+            "1m": lessThan4h.finalResult.check_status_payload,
+            "4h": greaterThan4h.finalResult.check_status_payload
+        }
+*/
 const serviceUpdateAllBinanceTickers = async () => {
     try {
         let greaterThan4h = await HDServices.processUpdateBinanceData()
-        let lessThan4h = await HDServices.processUpdateBinanceOneMData()
+        // let lessThan4h = await HDServices.processUpdateBinanceOneMData()
         let finalIds = {
-            "1m": lessThan4h.finalResult.check_status_payload,
-            "4h": greaterThan4h.finalResult.check_status_payload
+            "ids": greaterThan4h.finalResult.check_status_payload
         }
         return finalIds
     } catch (error) {
@@ -417,7 +329,7 @@ const serviceCheckOneBinanceTickerJobCompletition = async ({ jobIds, type }) => 
         switch (type) {
             case "update-one-ticker_":
                 for (const jobId of jobIds) {
-                    const job = await update_OneBinanceTicker_Queue.getJob(jobId) || await update_OneBinanceTicker_oneM_Queue.getJob(jobId);
+                    const job = await update_OneBinanceTicker_Queue.getJob(jobId)
                     if (job !== undefined) {
                         const result = await job.isCompleted();
                         const jobName = job.name
@@ -429,7 +341,7 @@ const serviceCheckOneBinanceTickerJobCompletition = async ({ jobIds, type }) => 
                 break;
             case "fetch-one-ticker_":
                 for (const jobId of jobIds) {
-                    const job = await fetch_OneBinanceTicker_Queue.getJob(jobId) || await fetch_OneBinanceTicker_oneM_Queue.getJob(jobId);
+                    const job = await fetch_OneBinanceTicker_Queue.getJob(jobId)
                     if (job !== undefined) {
                         const result = await job.isCompleted();
                         const jobName = job.name
@@ -454,9 +366,8 @@ const serviceCheckOneBinanceTickerJobCompletition = async ({ jobIds, type }) => 
 // INPUT : { collectionName, filter }
 // OUTPUT : [documents]
 const serviceGetDocuments = async ({ collectionName, filter }) => {
-    const connectMessage = "Fetch Documents";
     try {
-        let documents = await MDBServices.getAllDocumentsFromCollection({ collectionName, filter, connectMessage })
+        let documents = await MDBServices.getAllDocumentsFromCollection({ collectionName, filter })
         if (documents.length === 0) {
             switch (collectionName) {
                 case "sections":
@@ -473,22 +384,20 @@ const serviceGetDocuments = async ({ collectionName, filter }) => {
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        close(connectMessage)
     }
 }
 
 // Fetches from collection - addSection, addLesson, addQuizQuestions
 // Adds new document to the database
 // INPUT : { title, content, url }
-const serviceAddDocuments = async ({ connectMessage, collectionName, document }) => {
+const serviceAddDocuments = async ({ collectionName, document }) => {
     try {
-        let insertedResult = await MDBServices.insertDocumentToCollection({ connectMessage, collectionName, document })
+        let insertedResult = await MDBServices.insertDocumentToCollection({ collectionName, document })
         let statusResult = null
         switch (collectionName) {
             case "sections":
                 ({ sectionId } = document)
-                statusResult = await MDBServices.addSectionStatusForUsers({ connectMessage: "Adding section status", sectionId })
+                statusResult = await MDBServices.addSectionStatusForUsers({ sectionId })
                 break;
             case "lessons":
                 ({ sectionId, lessonId, lessonData } = document)
@@ -500,7 +409,7 @@ const serviceAddDocuments = async ({ connectMessage, collectionName, document })
                     lesson_progress: 1,
                     lesson_complete: false,
                 }
-                statusResult = await MDBServices.addLessonStatusForUsers({ connectMessage: "Adding lesson status", sectionId, lesson_status })
+                statusResult = await MDBServices.addLessonStatusForUsers({ sectionId, lesson_status })
                 break;
             case "quiz":
                 ({ sectionId, lessonId, quizId, quizTitle } = document)
@@ -513,7 +422,7 @@ const serviceAddDocuments = async ({ connectMessage, collectionName, document })
                     quiz_score: "",
                     quiz_complete: false,
                 }
-                statusResult = await MDBServices.addQuizStatusForUsers({ connectMessage: "Adding quiz status", sectionId, lessonId, quizObject })
+                statusResult = await MDBServices.addQuizStatusForUsers({ sectionId, lessonId, quizObject })
                 break;
             default:
                 break;
@@ -522,8 +431,6 @@ const serviceAddDocuments = async ({ connectMessage, collectionName, document })
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        close(connectMessage)
     }
 }
 
@@ -546,49 +453,42 @@ const serviceAddDocuments = async ({ connectMessage, collectionName, document })
 }
 */
 const serviceUdpateSectionInDb = async ({ title, content, url, sectionId }) => {
-    const connectMessage = "updateSection"
+
     try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "sections", id: sectionId, connectMessage: "Check for doc" })
-        const updated = await MDBServices.updateSectionData({ connectMessage, title, content, url, sectionId })
+        await MDBServices.checkForDocumentInCollection({ collectionName: "sections", id: sectionId, })
+        const updated = await MDBServices.updateSectionData({ title, content, url, sectionId })
         return updated
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        close(connectMessage)
     }
 }
 
 // updates an existing lesson in the database. Have to add updates to lesson status for users
 const serviceUpdateLessonInDb = async ({ chapter_title, lessonData, lessonId, sectionId }) => {
-    const connectMessage = "updateLesson"
+
     try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "lessons", id: lessonId, connectMessage: "Check for doc" })
-        const updated = await MDBServices.updateLessonData({ connectMessage, chapter_title, lessonData, lessonId })
-        const lessonTitleStatus = await MDBServices.updateLessonNameChangeAcrossUsersStatus({ connectMessage: "Updating lesson name in status", sectionId, lessonId, chapter_title })
+        await MDBServices.checkForDocumentInCollection({ collectionName: "lessons", id: lessonId })
+        const updated = await MDBServices.updateLessonData({ chapter_title, lessonData, lessonId })
+        const lessonTitleStatus = await MDBServices.updateLessonNameChangeAcrossUsersStatus({ sectionId, lessonId, chapter_title })
         return [updated, lessonTitleStatus]
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        close(connectMessage)
     }
 }
 
 // updates an existing quiz in the database. Have to add updates to quiz status for users
 const serviceUpdateQuizInDb = async ({ quizId, quizTitle, quizDescription, questions }) => {
-    const connectMessage = "updateQuizQuestions"
     try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "quiz", id: quizId, connectMessage })
-        const [update, reqData] = await MDBServices.updateQuizData({ quizId, quizTitle, quizDescription, questions, connectMessage: "updting quiz data" })
+        await MDBServices.checkForDocumentInCollection({ collectionName: "quiz", id: quizId })
+        const [update, reqData] = await MDBServices.updateQuizData({ quizId, quizTitle, quizDescription, questions })
         const { sectionId, lessonId } = reqData
-        const quizTitleStatus = await MDBServices.updateQuizNameChangeAcrossUsersStatus({ connectMessage: "Updating quiz name in status", sectionId, lessonId, quizId, quizTitle })
+        const quizTitleStatus = await MDBServices.updateQuizNameChangeAcrossUsersStatus({ sectionId, lessonId, quizId, quizTitle })
         return [update, quizTitleStatus]
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        close(connectMessage)
     }
 }
 
@@ -602,53 +502,45 @@ const serviceUpdateQuizInDb = async ({ quizId, quizTitle, quizDescription, quest
 }
 */
 const serviceDeleteSectionFromDb = async ({ sectionId }) => {
-    const connectMessage = "deleteSection"
-    try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "sections", id: sectionId, connectMessage })
 
-        const deletedSection = await MDBServices.deleteOneDocumentFromCollection({ collectionName: "sections", id: sectionId, connectMessage: "Deleting one section" })
-        const deletedLessons = await MDBServices.deleteManyDocumentsFromCollection({ type: "sectionDelete", collectionName: "lessons", id: sectionId, connectMessage: "Deleting many lessons" })
-        const deletedQuiz = await MDBServices.deleteManyDocumentsFromCollection({ type: "sectionDelete", collectionName: "quiz", id: sectionId, connectMessage: "Deleting many quiz" })
-        const removedLessonAndQuizStatus = await MDBServices.removeLessonAndQuizStatusFromUsers({ sectionId, connectMessage: "Removing lesson and quiz Ssatus" })
+    try {
+        await MDBServices.checkForDocumentInCollection({ collectionName: "sections", id: sectionId })
+
+        const deletedSection = await MDBServices.deleteOneDocumentFromCollection({ collectionName: "sections", id: sectionId })
+        const deletedLessons = await MDBServices.deleteManyDocumentsFromCollection({ type: "sectionDelete", collectionName: "lessons", id: sectionId })
+        const deletedQuiz = await MDBServices.deleteManyDocumentsFromCollection({ type: "sectionDelete", collectionName: "quiz", id: sectionId })
+        const removedLessonAndQuizStatus = await MDBServices.removeLessonAndQuizStatusFromUsers({ sectionId })
         return [deletedSection, deletedLessons, deletedQuiz, removedLessonAndQuizStatus]
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        close(connectMessage)
     }
 }
 
 const serviceDeleteLessonFromDb = async ({ lessonId, sectionId }) => {
-    const connectMessage = "deleteLesson"
     try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "lessons", id: lessonId, connectMessage })
+        await MDBServices.checkForDocumentInCollection({ collectionName: "lessons", id: lessonId })
 
-        const deleteLesson = await MDBServices.deleteOneDocumentFromCollection({ collectionName: "lessons", id: lessonId, connectMessage: "Deleting one lesson" })
-        const deletedQuiz = await MDBServices.deleteManyDocumentsFromCollection({ type: "lessonDelete", collectionName: "quiz", id: lessonId, connectMessage: "Deleting many quiz" })
-        const deletedLessonStatusFromUser = await MDBServices.removeOneLessonAndQuizStatusFromUsers({ sectionId, lessonId, connectMessage: "Removing one lesson and quiz status" })
+        const deleteLesson = await MDBServices.deleteOneDocumentFromCollection({ collectionName: "lessons", id: lessonId })
+        const deletedQuiz = await MDBServices.deleteManyDocumentsFromCollection({ type: "lessonDelete", collectionName: "quiz", id: lessonId })
+        const deletedLessonStatusFromUser = await MDBServices.removeOneLessonAndQuizStatusFromUsers({ sectionId, lessonId })
         return [deleteLesson, deletedQuiz, deletedLessonStatusFromUser]
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        close(connectMessage)
     }
 }
 
 const serviceDeleteQuizFromDb = async ({ quizId, sectionId, lessonId }) => {
-    const connectMessage = "deleteQuizQuestion"
     try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "quiz", id: quizId, connectMessage })
+        await MDBServices.checkForDocumentInCollection({ collectionName: "quiz", id: quizId })
 
-        const deleteQuiz = await MDBServices.deleteOneDocumentFromCollection({ collectionName: "quiz", id: quizId, connectMessage: "Deleting quiz" })
-        const deleteQuizStatusFromUser = await MDBServices.removeQuizStatusFromUser({ sectionId, lessonId, quizId, connectMessage: "Removing quiz Status" })
+        const deleteQuiz = await MDBServices.deleteOneDocumentFromCollection({ collectionName: "quiz", id: quizId })
+        const deleteQuizStatusFromUser = await MDBServices.removeQuizStatusFromUser({ sectionId, lessonId, quizId })
         return [deleteQuiz, deleteQuizStatusFromUser]
     } catch (error) {
         log.error(error.stack)
         throw error
-    } finally {
-        close(connectMessage)
     }
 }
 

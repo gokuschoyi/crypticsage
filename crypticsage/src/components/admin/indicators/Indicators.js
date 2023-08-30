@@ -1,20 +1,61 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
+import { getIndicatorDesc, getHistoricalTickerDataFroDb } from '../../../api/adminController'
 import AdminHeader from '../global/AdminHeader';
 import {
     Box,
     Accordion,
     AccordionSummary,
     AccordionDetails,
+    AccordionActions,
     Typography,
     TextField,
-    Grid
+    Grid,
+    IconButton,
+    Tooltip,
 } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { getIndicatorDesc, getHistoricalTickerDataFroDb } from '../../../api/adminController'
+import CreateIcon from '@mui/icons-material/Create';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 const FunctionContainer = (props) => {
-    const { func } = props
+    const { index, func } = props
+    const optionalInputCopy = func.optInputs
+
+    const [defaultOptionalInputs, setDefaultOptionalInputs] = useState(optionalInputCopy)
+
+    // console.log("Default options : ", func.name, defaultOptionalInputs)
+
+    const handleGenerateQuery = (func_name) => {
+        // console.log(func_name)
+        const transformedInputObject = func.inputs.reduce((result, item) => {
+            result[item.name] = item.type;
+            return result;
+        }, {});
+
+        const transformedOptionalInputs = defaultOptionalInputs.reduce((result, item) => {
+            result[item.name] = item.defaultValue
+            return result;
+        }, {})
+
+
+        let query = {
+            name: func.name,
+            ...transformedInputObject,
+            ...transformedOptionalInputs
+        }
+
+        console.log(query)
+    }
+
+    const handleOptionalInputChange = (e) => {
+        const { name, value } = e.target
+        const updatedOptionalInputs = defaultOptionalInputs.map((input) => {
+            return input.name === name ? { ...input, defaultValue: parseInt(value) } : input
+        })
+        setDefaultOptionalInputs(updatedOptionalInputs)
+        console.log(name, value, updatedOptionalInputs)
+    }
 
     return (
         <Box width='100%' p={'5px'} >
@@ -24,12 +65,19 @@ const FunctionContainer = (props) => {
                     aria-controls="panel1a-content"
                     id="panel1a-header"
                 >
-                    <Box className='function-name' display='flex' flexDirection='row' justifyContent='space-between'>
-                        <Typography variant='h5' sx={{ textAlign: 'start' }}>{func.name}</Typography>
+                    <Box className='function-name' display='flex' flexDirection='row' alignItems='center'>
+                        <Typography variant='h5' sx={{ textAlign: 'start' }}>{index + 1} : {func.name}</Typography>
                     </Box>
                 </AccordionSummary>
+                <AccordionActions>
+                    <IconButton size='small' aria-label="update" color="secondary" onClick={handleGenerateQuery.bind(null, { func_name: func.name })}>
+                        <Tooltip title="Generate query" placement='top'>
+                            <CreateIcon className='small-icon' />
+                        </Tooltip>
+                    </IconButton>
+                </AccordionActions>
                 <AccordionDetails>
-                    <Box pl={1} sx={{ backgroundColor: '#272727' }}>
+                    <Box pl={1} pr={1} pb={1} sx={{ backgroundColor: '#272727' }}>
 
                         <Box className='indicator-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
                             <Typography variant='h5'>INPUTS</Typography>
@@ -41,6 +89,43 @@ const FunctionContainer = (props) => {
                                     </Box>
                                 )
                             })}
+                        </Box>
+
+                        <Box className='indicator-optional-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
+                            <Typography variant='h5'>OPTIONAL INPUTS</Typography>
+                            {defaultOptionalInputs.length === 0 ?
+                                (
+                                    <Typography>None</Typography>
+                                )
+                                :
+                                (
+                                    defaultOptionalInputs && defaultOptionalInputs.map((optionalInput, index) => {
+                                        const { displayName, hint, name, defaultValue } = optionalInput
+                                        return (
+                                            <Box pt={'15px'} key={index} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
+                                                <TextField
+                                                    size='small'
+                                                    id="outlined-controlled"
+                                                    label={displayName}
+                                                    name={name}
+                                                    value={defaultValue}
+                                                    onChange={(handleOptionalInputChange)}
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            '& fieldset': {
+                                                                borderColor: 'white',
+                                                            }
+                                                        }
+                                                    }}
+                                                />
+                                                <Tooltip title={hint} placement='top' sx={{ cursor: 'pointer' }}>
+                                                    <InfoOutlinedIcon className='small-icon' />
+                                                </Tooltip>
+                                            </Box>
+                                        )
+                                    })
+                                )
+                            }
                         </Box>
 
                         <Box className='indicator-outputs' pt={'10px'} sx={{ textAlign: 'start' }}>
@@ -57,29 +142,6 @@ const FunctionContainer = (props) => {
                             })}
                         </Box>
 
-                        <Box className='indicator-optional-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                            <Typography variant='h5'>OPTIONAL INPUTS</Typography>
-                            {func.optInputs.length === 0 ?
-                                (
-                                    <Typography>None</Typography>
-                                )
-                                :
-                                (
-                                    func.optInputs && func.optInputs.map((optionalInputs, index) => {
-                                        return (
-                                            <Box key={index} display='flex' flexDirection='column' gap='5px'>
-                                                <Typography>Hint : {optionalInputs.hint || 'N/A'}</Typography>
-                                                <Typography>Name : {optionalInputs.name || 'N/A'}</Typography>
-                                                <Typography>Display Name : {optionalInputs.displayName || 'N/A'}</Typography>
-                                                <Typography>Default Value : {optionalInputs.defaultValue || 'N/A'}</Typography>
-                                                <Typography>Type : {optionalInputs.type || 'N/A'}</Typography>
-                                            </Box>
-                                        )
-                                    })
-                                )
-                            }
-
-                        </Box>
                     </Box>
                 </AccordionDetails>
             </Accordion>
@@ -88,11 +150,10 @@ const FunctionContainer = (props) => {
 }
 
 const Indicators = (props) => {
-    const { title, subtitle } = props;
     const token = useSelector(state => state.auth.accessToken);
-    const [rawTalibDesc, setRawTalibDesc] = useState([])
-    const [copyRawTalibDesc, setCopyRawTalibDesc] = useState([])
-    const [talibDesc, setTalibDesc] = useState([])
+    // const [copyRawTalibDesc, setCopyRawTalibDesc] = useState([])
+    const [rawTalibDesc, setRawTalibDesc] = useState([]) // copy of grouped talib desc data
+    const [talibDesc, setTalibDesc] = useState([]) // grouped talib desc data
 
     // initial fetch talib descriptions
     const loadedRef = useRef(false)
@@ -103,33 +164,13 @@ const Indicators = (props) => {
             getIndicatorDesc({ token })
                 .then((res) => {
                     setRawTalibDesc(res.data.desc)
-                    setCopyRawTalibDesc(res.data.desc)
+                    setTalibDesc(res.data.desc)
                 })
                 .catch(err => {
                     console.log(err)
                 })
         }
     })
-
-    // grouping the raw data
-    useEffect(() => {
-        if (copyRawTalibDesc.length > 0) {
-            console.log('UE : Grouping the raw data')
-            const grouped = copyRawTalibDesc.reduce((result, func) => {
-                if (!result[func.group]) {
-                    result[func.group] = { group_name: func.group, functions: [func] };
-                } else {
-                    result[func.group].functions.push(func);
-                }
-
-                return result;
-            }, {});
-
-            const groupedArray = Object.values(grouped);
-            // console.log(groupedArray)
-            setTalibDesc(groupedArray)
-        }
-    }, [copyRawTalibDesc])
 
     const [searchTicker, setSearchTicker] = useState('');
     const handleSearchTicker = (e) => {
@@ -137,63 +178,33 @@ const Indicators = (props) => {
         setSearchTicker(e.target.value.toLowerCase())
     }
 
-    // filtering the raw data
+    // filtering/search logic
     useEffect(() => {
-        console.log('UE : Filtering the raw data')
+        console.log('UE : New Filtering Logic')
         let updatedDataCopy = [...rawTalibDesc]
-        const filtered = updatedDataCopy.filter((func) => {
-            return func.name.toLowerCase().includes(searchTicker)
-        })
-        setCopyRawTalibDesc(filtered)
-    }, [searchTicker, rawTalibDesc])
+        const filteredGroups = [];
 
+        for (const group of updatedDataCopy) {
+            const filteredFunctions = group.functions.filter(func =>
+                func.name.toLowerCase().includes(searchTicker)
+            );
 
-
-    // to fetch ticker data
-    const [ticker_name, setTickerName] = useState('BTCUSDT')
-    let defaultFetchValues = {
-        asset_type: 'crypto',
-        ticker_name: ticker_name,
-        period: '1d',
-        page_no: 1,
-        items_per_page: 100
-    }
-
-    // default fetch data
-    const [fetchValues, setFetchValues] = useState(defaultFetchValues)
-
-    // to fetch ticker data
-    const tickerDataRef = useRef(false)
-    useEffect(() => {
-        if (!tickerDataRef.current) {
-            tickerDataRef.current = true
-            getHistoricalTickerDataFroDb({
-                token,
-                payload: {
-                    asset_type: fetchValues.asset_type,
-                    ticker_name: fetchValues.ticker_name,
-                    period: fetchValues.period,
-                    page_no: fetchValues.page_no,
-                    items_per_page: fetchValues.items_per_page
-                }
-            })
-                .then((res) => {
-                    // console.log(res.data.fetchedResults)
-                })
-                .catch(err => {
-                    console.log(err)
-                })
+            if (filteredFunctions.length > 0) {
+                const filteredGroup = {
+                    group_name: group.group_name,
+                    functions: filteredFunctions
+                };
+                filteredGroups.push(filteredGroup);
+            }
         }
-    })
-
-
+        setTalibDesc(filteredGroups)
+        // console.log(filteredGroups)
+    }, [searchTicker, rawTalibDesc])
 
     return (
         <Box className='admin-indicator-container' >
-            <Box height='100%' width='-webkit-fill-available'>
-                <AdminHeader title={title} subtitle={subtitle} />
-            </Box>
-            <Box p={2}>
+
+            <Box className='talib-indicators-box' p={2} >
                 <Box className='search-indicator-box' display='flex' flexDirection='row' alignItems='center' ml={2} pt={2} pb={2} gap={2}>
                     <TextField
                         color='secondary'
@@ -227,11 +238,11 @@ const Indicators = (props) => {
                                         <Typography variant='h5'>({index + 1}) : {group_name} <span style={{ color: 'red' }}>({functions.length})</span></Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
-                                        <Grid container spacing={2} className='indicator-data-container'>
+                                        <Grid container spacing={1} className='indicator-data-container'>
                                             {functions && functions.map((func, index) => {
                                                 return (
-                                                    <Grid key={index} item xs={12} sm={8} md={4} lg={4} xl={4}>
-                                                        <FunctionContainer key={index} func={func} />
+                                                    <Grid key={index} item xs={12} sm={12} md={4} lg={4} xl={4}>
+                                                        <FunctionContainer index={index} key={index} func={func} />
                                                     </Grid>
                                                 )
                                             })}

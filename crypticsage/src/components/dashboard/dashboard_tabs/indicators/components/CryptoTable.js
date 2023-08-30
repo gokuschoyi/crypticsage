@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setCryptoDataRedux, setCryptoPreferencesRedux } from '../IndicatorsSlice'
 import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../global/Icons';
 import { getLatestCryptoData } from '../../../../../api/crypto'
 import { convert, getLastUpdatedTimeString, getDateTime, getCurrencySymbol } from '../../../../../utils/Utils'
@@ -21,19 +22,26 @@ import {
     , Select
     , InputLabel
     , FormControl
+    , Tooltip
 } from '@mui/material'
 const CryptoTable = () => {
     const theme = useTheme()
     const tableHeight = 700;
     const navigate = useNavigate();
 
+    const dispatch = useDispatch();
+
     //<------ table logic ------>//
     const token = useSelector(state => state.auth.accessToken);
+    const cryptoPreferences = useSelector(state => state.indicators.cryptoPreferences);
+    const { currency: rCurr, order: rOrder, orderBy: rOrderBy } = cryptoPreferences
+    const cryptoDataInRedux = useSelector(state => state.indicators.cryptoData);
     const [cryptoData, setCryptoData] = useState([]);
+    // console.log(cryptoPreferences)
 
     const [latestUpdatedDate, setLatestUpdatedDate] = useState('')
 
-    const [currency, setCurrency] = useState('USD')
+    const [currency, setCurrency] = useState(rCurr)
     const [availableCurrencyList, setAvailableCurrencyList] = useState([])
 
     const [open, setOpen] = React.useState(false);
@@ -41,6 +49,7 @@ const CryptoTable = () => {
     const handleCurrencyChange = (event) => {
         if (event.target.value !== '') {
             setCurrency(event.target.value);
+            dispatch(setCryptoPreferencesRedux({ cryptoPreferences: { ...cryptoPreferences, currency: event.target.value } }))
         }
     };
 
@@ -57,11 +66,12 @@ const CryptoTable = () => {
     // get latest crypto data, sets states for available currencyList and latest updated date to latestUpdatedDate
     const loadedRef = useRef(false);
     useEffect(() => {
-        let data = {
-            token: token,
-        }
-        if (!loadedRef.current) {
-            loadedRef.current = true;
+        if (!loadedRef.current && cryptoDataInRedux.length === 0) {
+            console.log('UE : ticker info fetch')
+            loadedRef.current = true
+            let data = {
+                token: token,
+            }
             getLatestCryptoData(data)
                 .then((res) => {
                     setCryptoData(res.data.cryptoData)
@@ -72,18 +82,34 @@ const CryptoTable = () => {
                     }
                     setAvailableCurrencyList(cListArray)
                     setLatestUpdatedDate(cList.USD.last_updated)
+
+                    let data = res.data.cryptoData
+                    dispatch(setCryptoDataRedux({ cryptoData: data }))
                 })
+        } else if (cryptoDataInRedux.length > 0) {
+            console.log('UE : ticker info fetch from redux')
+            setCryptoData(cryptoDataInRedux)
+            const cList = cryptoDataInRedux[0].prices
+            let cListArray = []
+            for (const [key] of Object.entries(cList)) {
+                cListArray.push(key)
+            }
+            setAvailableCurrencyList(cListArray)
+            setLatestUpdatedDate(cList.USD.last_updated)
+        } else {
+            return
         }
-    })
+    }, [cryptoDataInRedux, dispatch, token])
 
     // console.log(currency, availableCurrencyList)
 
-    const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('market_cap_rank');
+    const [order, setOrder] = React.useState(rOrder);
+    const [orderBy, setOrderBy] = React.useState(rOrderBy);
 
     // Sets the order and orderBy states
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
+        dispatch(setCryptoPreferencesRedux({ cryptoPreferences: { ...cryptoPreferences, order: isAsc ? 'desc' : 'asc', orderBy: property } }))
         setOrder(isAsc ? 'desc' : 'asc');
         setOrderBy(property);
     };
@@ -95,19 +121,26 @@ const CryptoTable = () => {
 
     //<------ table logic ------>//
 
-    //useMemo to sort data. Also the vlaue of cryptoData is changed in this hook
-    React.useMemo(() => {
-        const sortedArray = cryptoData.sort((a, b) => {
-            const valueA = a[orderBy] || a.prices[currency][orderBy] || 0
-            const valueB = b[orderBy] || b.prices[currency][orderBy] || 0
-            if (order === 'asc') {
-                return valueA - valueB
-            } else {
-                return valueB - valueA
-            }
-        })
-        return sortedArray;
-    }, [cryptoData, order, orderBy, currency])
+    // sorting logic    
+    useEffect(() => {
+        if (cryptoData.length > 0) {
+            console.log('UE : sorting')
+            const copyCryptoData = [...cryptoData];
+            const sortedArray = copyCryptoData.sort((a, b) => {
+                const valueA = a[orderBy] || a.prices[currency][orderBy] || 0;
+                const valueB = b[orderBy] || b.prices[currency][orderBy] || 0;
+                if (order === 'asc') {
+                    return valueA - valueB;
+                } else {
+                    return valueB - valueA;
+                }
+            });
+            dispatch(setCryptoDataRedux({ cryptoData: sortedArray }))
+            setCryptoData(sortedArray);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [order, orderBy, currency]);
+
 
     // refresh crypto data on click
     const refreshCryptoData = () => {
@@ -119,7 +152,8 @@ const CryptoTable = () => {
         }
         getLatestCryptoData(data)
             .then((res) => {
-                setCryptoData(res.data.cryptoData)
+                let data = res.data.cryptoData
+                dispatch(setCryptoDataRedux({ cryptoData: data }))
                 const cList = res.data.cryptoData[0].prices
                 setLatestUpdatedDate(cList.USD.last_updated)
                 refreshIcon.classList.remove('rotate-icon');
@@ -128,6 +162,7 @@ const CryptoTable = () => {
 
     //reddirect to '/dashboard/indicators/crypto/${dataId}' if matchedSymbol exists
     const handleTokenPageLoad = (dataId) => {
+        console.log(dataId)
         if (dataId !== null) {
             navigate(`/dashboard/indicators/crypto/${dataId}`)
         } else {
@@ -271,7 +306,8 @@ const CryptoTable = () => {
                                                 image_url,
                                                 max_supply,
                                                 prices,
-                                                matchedSymbol
+                                                matchedSymbol,
+                                                dataInDb
                                             } = row;
                                             const {
                                                 market_cap,
@@ -295,8 +331,8 @@ const CryptoTable = () => {
                                                             alignItems='center'
                                                             justifyContent='space-between'
                                                             gap='5px'
-                                                            className={matchedSymbol !== null ? 'crypto-content' : ''}
-                                                            data-id={matchedSymbol !== null ? matchedSymbol : null}
+                                                            className={matchedSymbol !== null && dataInDb ? 'crypto-content' : ''}
+                                                            data-id={matchedSymbol !== null && dataInDb ? matchedSymbol : null}
                                                             onClick={(e) => {
                                                                 const dataId = e.currentTarget.getAttribute('data-id')
                                                                 handleTokenPageLoad(dataId)
@@ -312,13 +348,19 @@ const CryptoTable = () => {
                                                                     <Typography fontSize='10px' fontWeight={600}>({symbol})</Typography>
                                                                 </Box>
                                                             </Box>
-                                                            <Box height='8px' width='8px'
-                                                                style={{
-                                                                    borderRadius: '8px',
-                                                                    backgroundColor: matchedSymbol === null ? 'red' : 'green'
-                                                                }}
-                                                            >
-                                                            </Box>
+                                                            <Tooltip title={matchedSymbol !== null && dataInDb ? 'Data available in Db' : matchedSymbol !== null && !dataInDb ? 'Data unavailable in Db' : 'Data unavailable in binance'} placement='top' arrow>
+                                                                <Box height='8px' width='8px'
+                                                                    style={{
+                                                                        borderRadius: '8px',
+                                                                        backgroundColor: matchedSymbol !== null && dataInDb
+                                                                            ? 'green'
+                                                                            : matchedSymbol !== null && !dataInDb
+                                                                                ? 'orange'
+                                                                                : 'red'
+                                                                    }}
+                                                                >
+                                                                </Box>
+                                                            </Tooltip>
                                                         </Box>
                                                     </TableCell>
                                                     <TableCell>{convert(market_cap)}</TableCell>

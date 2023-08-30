@@ -76,8 +76,6 @@ const fetchTokenData = async (dataSource, tokenName, period, page) => {
     } catch (err) {
         console.log(err)
         throw err
-    } finally {
-        close("fetch token data");
     }
 }
 

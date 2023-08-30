@@ -264,8 +264,8 @@ const validateFetchTickerDataInput = ({ params }) => {
         }
 
         // Check for valid asset_type
-        if (asset_type !== "crypto" && asset_type !== "stocks") {
-            throw new Error("Invalid asset type. Possible values: crypto, stocks");
+        if (asset_type !== "crypto" && asset_type !== "stock") {
+            throw new Error("Invalid asset type. Possible values: crypto, stock");
         }
 
         // Check for valid period based on asset_type

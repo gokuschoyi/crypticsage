@@ -364,7 +364,7 @@ const BinanceTickerInfo = () => {
             getBinanceHistoricalStatFromDb({ token })
                 .then((res) => {
                     setFetchedData(res.data)
-                    setTickerRefreshValue(res.data.totalTickerCountInDb)
+                    setTickerRefreshValue(res.data.totalTickerCountInDb === 0 ? 5 : res.data.totalTickerCountInDb)
                     const data = res.data.tickersWithHistData.map((ticker) => {
                         return {
                             tickerName: ticker.ticker_name,
@@ -538,11 +538,10 @@ const BinanceTickerInfo = () => {
         const updateAllBinTickers = await updateAllBinanceTickers({ token })
         Success(updateAllBinTickers.data.message)
         updateAllRef.current = Progress('Processing update request for all tickers')
-        let process4hIds = updateAllBinTickers.data.finalProcessIds['4h'].jobIds
-        let process1mIds = updateAllBinTickers.data.finalProcessIds['1m'].jobIds
+        let processIds = updateAllBinTickers.data.finalProcessIds.ids.jobIds
 
         let payload = {
-            jobIds: process4hIds.concat(process1mIds),
+            jobIds: processIds,
             type: 'full_update_'
         }
         console.log(payload)
@@ -629,7 +628,7 @@ const BinanceTickerInfo = () => {
 
                 break;
             case "fullfetch":
-                const periods = ["4h", "6h", "8h", "12h", "1d", "3d", "1w"]
+                const periods = ["1m", "4h", "6h", "8h", "12h", "1d", "3d", "1w"]
                 let selectedTickerFull = historicalStat.tickersWithNoHistData
                     .filter((item) => item.ticker_name === ticker_name)[0]
 
@@ -642,12 +641,14 @@ const BinanceTickerInfo = () => {
                 let fetchQueries = []
                 for (const period of periods) {
                     let fetchQuery = {
-                        ticker: ticker_name,
+                        ticker_name: ticker_name,
                         period: period,
                         meta: tickerMeta
                     }
                     fetchQueries.push(fetchQuery)
                 }
+
+                console.log(fetchQueries)
 
                 const fetchedBinanceInfo = await fetchOneBinanceTicker({ token, fetchQueries })
                 Success(fetchedBinanceInfo.data.message)
@@ -674,7 +675,7 @@ const BinanceTickerInfo = () => {
                         }, 0);
                         let progressFPer = Math.ceil(Math.round(totalCompletedCount / status.length * 100))
                         let progFrac = (progressFPer / 100).toFixed(2)
-                        toast.update(updateRef.current, { progress: progFrac })
+                        toast.update(fullfetchRef.current, { progress: progFrac })
                         console.log(`Completed ${totalCompletedCount} out of ${status.length}`);
                     }
                 }, 2000);
@@ -750,6 +751,11 @@ const BinanceTickerInfo = () => {
                                     </Box>
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
+                                    {historicalStat.totalTickerCountInDb === 0 &&
+                                        <Box className='update-all-tickers' display='flex' flexDirection='row' alignItems='center' pt={2} pb={2} gap={2}>
+                                            <Button size='small' color='primary' variant="contained" onClick={handleRefreshTickerMeta} >Fetch Ticker Meta</Button>
+                                        </Box>
+                                    }
                                     PlaceHolder
                                     {/* {binanceChartData && binanceChartData.length === 0 ?
                                         (
@@ -764,29 +770,31 @@ const BinanceTickerInfo = () => {
                             </Grid>
                         </Box>
 
-                        <Box className='meta-update-count' display='flex' flexDirection='row' alignItems='center' pt={2} pb={2} gap={2}>
-                            <TextField
-                                color='secondary'
-                                label="Count"
-                                value={tickerRefreshValue}
-                                onChange={(e) => setTickerRefreshValue(e.target.value)}
-                                id="outlined-size-small"
-                                size="small"
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: '#E0E3E2',
+                        {historicalStat.totalTickerCountInDb !== 0 &&
+                            <Box className='meta-update-count' display='flex' flexDirection='row' alignItems='center' pt={2} pb={2} gap={2}>
+                                <TextField
+                                    color='secondary'
+                                    label="Count"
+                                    value={tickerRefreshValue}
+                                    onChange={(e) => setTickerRefreshValue(e.target.value)}
+                                    id="outlined-size-small"
+                                    size="small"
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            '& fieldset': {
+                                                borderColor: '#E0E3E2',
+                                            }
                                         }
-                                    }
-                                }}
-                            />
-                            <Button size='small' color='primary' variant="contained" onClick={handleRefreshTickerMeta} >Refresh</Button>
-                            <Tooltip placement='top' arrow title="Refresh the tickers in DB. Count is the no of tickers to add or update. If count is more than total tickers, new tickers wil be fetched and added, else existing ticker meta is updated">
-                                <IconButton>
-                                    <InfoOutlinedIcon />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
+                                    }}
+                                />
+                                <Button size='small' color='primary' variant="contained" onClick={handleRefreshTickerMeta} >Refresh</Button>
+                                <Tooltip placement='top' arrow title="Refresh the tickers in DB. Count is the no of tickers to add or update. If count is more than total tickers, new tickers wil be fetched and added, else existing ticker meta is updated">
+                                    <IconButton>
+                                        <InfoOutlinedIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+                        }
 
                         <Box className='search-ticker-box' display='flex' flexDirection='row' alignItems='center' pt={2} pb={2} gap={2}>
                             <TextField
@@ -823,14 +831,16 @@ const BinanceTickerInfo = () => {
                             </Box>
                             {historicalStat.tickersWithHistData.length === 0 ?
                                 (
-                                    <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
-                                        <Typography variant='h5'>No tickers with historical data.</Typography>
-                                    </Box>
+                                    <Collapse in={checkedWithHist}>
+                                        <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
+                                            <Typography variant='h5'>No tickers with historical data.</Typography>
+                                        </Box>
+                                    </Collapse>
                                 )
                                 :
                                 (
                                     <Collapse in={checkedWithHist}>
-                                        <Box className='ticker-data-box' pl={1} pr={1} mt={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
+                                        <Box className='ticker-data-box' pl={1} pr={1} mt={2} pb={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
                                             <Box className='legend-update-collapse' pt={1} pb={1} display='flex' flexDirection='row' justifyContent='flex-end' gap='5px' alignItems='center'>
                                                 <Fade in={checkedWithHist}>
                                                     <Box display='flex' flexDirection='row' justifyContent='center' alignItems='center' gap='5px'>
@@ -938,9 +948,11 @@ const BinanceTickerInfo = () => {
                             </Box>
                             {historicalStat.tickersWithNoHistData.length === 0 ?
                                 (
-                                    <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
-                                        <Typography variant='h5'>No tickers</Typography>
-                                    </Box>
+                                    <Collapse in={checkedNoHist}>
+                                        <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
+                                            <Typography variant='h5'>No tickers</Typography>
+                                        </Box>
+                                    </Collapse>
                                 )
                                 :
                                 (
@@ -970,9 +982,11 @@ const BinanceTickerInfo = () => {
                             </Box>
                             {historicalStat.tickerWithNoDataInBinance.length === 0 ?
                                 (
-                                    <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
-                                        <Typography variant='h5'>All ticker have data that can be fetched from Binance</Typography>
-                                    </Box>
+                                    <Collapse in={checkedNoBinance}>
+                                        <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
+                                            <Typography variant='h5'>All ticker have data that can be fetched from Binance</Typography>
+                                        </Box>
+                                    </Collapse>
                                 )
                                 :
                                 (

@@ -3,22 +3,21 @@ const router = express.Router()
 
 const CMController = require('../controllers/contentManagerController')
 const CMServices = require('../services/contentManagerServices')
-console.log('contentManagerRoute.js')
 
-router.post('/update_ticker_meta', CMController.FASLatestTickerMetaData)
-router.post('/delete_ticker_meta', CMController.deleteTickerMeta)
+router.post('/update_ticker_meta', CMController.FASLatestTickerMetaData) // admin dashboard - update ticker meta data - completed
+router.post('/delete_ticker_meta', CMController.deleteTickerMeta) // admin dashboard - delete ticker meta data - completed
 
-router.post('/find_yf_ticker', CMController.findYFTicker)
+router.post('/find_yf_ticker', CMController.findYFTicker) // admin dashboard - find yfinance ticker - completed
 
-router.post('/get_binance_tickers', CMController.getBinanceTickersIndb)
-router.post('/get_yfinance_tickers', CMController.getYfinanceTickersIndb)
+router.post('/get_binance_tickers', CMController.getBinanceTickersIndb) // admin dashboard - dashborad binance info - completed
+router.post('/get_yfinance_tickers', CMController.getYfinanceTickersIndb) // admin dashboard -  yfinance info -completed
 
-router.post('/update_one_binance_ticker', CMController.updateOneBinanceTicker)
-router.post('/update_all_tickers', CMController.updateAllBinanceTickers)
+router.post('/update_one_binance_ticker', CMController.updateOneBinanceTicker) // admin dashboard - update one binance ticker - completed
+router.post('/update_all_tickers', CMController.updateAllBinanceTickers) // admin dashboard - update all binance tickers - completed
 
-router.post('/fetch_one_binance_ticker', CMController.fetchOneBinanceTicker)
-router.post('/fetch_one_yfinance_ticker', CMController.fetchOneYfinanceTicker)
-router.post('/delete_one_yfinace_ticker', CMController.deleteOneYfinanceTicker)
+router.post('/fetch_one_binance_ticker', CMController.fetchOneBinanceTicker) // fetching ticker data for a single ticker periods - 4h, 6h, 8h, 12h ,1d, 3, 1w - completed
+router.post('/fetch_one_yfinance_ticker', CMController.fetchOneYfinanceTicker)// fetching stock data for a single ticker periods - 1d, 1wk, 1mo - completed
+router.post('/delete_one_yfinace_ticker', CMController.deleteOneYfinanceTicker)// delete one yfinance ticker - completed
 
 router.post('/get_process_status', CMController.getProcessStatus)
 
