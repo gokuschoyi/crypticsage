@@ -29,7 +29,7 @@ const client = MongoClient.connect(config.mongoUri, mongoOptions)
     })
 
 
-const { connect, close, binanceConnect, binanceClose } = require('./db-conn')
+// const { connect, close, binanceConnect, binanceClose } = require('./db-conn')
 
 
 // Returns a single user object in an array if it exists, otherwise returns an empty array

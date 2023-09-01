@@ -699,4 +699,6 @@ module.exports = {
     , fetchLatestTickerData
     , testGetHistoricalDataBinance
     , fetchBinanceHistoricalBetweenPeriods
+    , fetchData
+    , convertData
 }

@@ -34,7 +34,7 @@ const DashboardChart = (props) => {
                 close: chart.close,
             }
         })
-        console.log(chartData)
+        // console.log(chartData)
 
         // handles dynamic chart resizing and setting values for cHeight and cWidth for tooltip position calculations.
         // Also gets the charts boundingClientRect to get the offsetLeft and offsetTop values for tooltip

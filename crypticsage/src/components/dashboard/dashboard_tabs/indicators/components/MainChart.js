@@ -5,7 +5,7 @@ const MainChart = (props) => {
     const { tData, symbol } = props;
 
     const chartboxRef = useRef();
-    const chartLoadedRef = useRef(false);
+    // const chartLoadedRef = useRef(false);
 
     useEffect(() => {
         console.log("from Main chart")
@@ -94,17 +94,19 @@ const MainChart = (props) => {
             candleStickSeries.setData(tData);
 
             //SMA
-            const sma_series = chart.addLineSeries({ color: 'red', lineWidth: 1, title: 'price' });
+            /* const sma_series = chart.addLineSeries({ color: 'red', lineWidth: 1, title: 'price' });
             const sma_data = tData
                 .filter((d) => d.open)
                 .map((d) => ({ time: d.time, value: d.open }));
-            sma_series.setData(sma_data);
+            sma_series.setData(sma_data); */
             //EMA
-            const ema_series = chart.addLineSeries({ color: 'green', lineWidth: 1 });
+
+            /* const ema_series = chart.addLineSeries({ color: 'green', lineWidth: 1 });
             const ema_data = tData
                 .filter((d) => d.high)
                 .map((d) => ({ time: d.time, value: d.high }));
-            ema_series.setData(ema_data);
+            ema_series.setData(ema_data); */
+
             //RSI
             const rsi_series = chart.addLineSeries({
                 color: 'purple',
@@ -112,7 +114,7 @@ const MainChart = (props) => {
                 pane: 1,
             });
             const rsi_data = tData
-                .filter((d) => d.low)
+                .filter((d) => d.high)
                 .map((d) => ({ time: d.time, value: d.low }));
             rsi_series.setData(rsi_data);
 
@@ -122,12 +124,12 @@ const MainChart = (props) => {
                 pane: 2,
             });
             const rsi_data_new = tData
-                .filter((d) => d.close)
+                .filter((d) => d.low)
                 .map((d) => ({ time: d.time, value: d.close }));
             rsi_series_new.setData(rsi_data_new);
 
             chart.timeScale().subscribeVisibleLogicalRangeChange((param) => {
-                console.log(param)
+                // console.log(param)
             })
 
             // update tooltip

@@ -300,19 +300,54 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
         throw error
     }
 }
-
-// updates all tickers in the database
-// check FE for appropriate call to this fuction and make corrections
-/* 
-let finalIds = {
-            "1m": lessThan4h.finalResult.check_status_payload,
-            "4h": greaterThan4h.finalResult.check_status_payload
+const updateDbWithNewTickerInfo = async ({ type, ticker_name, period, token_data }) => {
+    try {
+        await MDBServices.insertHistoricalDataToDb({ type, ticker_name, period, token_data })
+        let metadata = {
+            latest: token_data[token_data.length - 1],
+            updatedCount: token_data.length,
         }
-*/
+        await MDBServices.updateTickerMetaData({ type, ticker_name, period, meta: metadata })
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const serviceGetLatestTickerDataForUser = async ({ updateQueries }) => {
+    try {
+        const { ticker_name, period, start, end } = updateQueries
+        const type = "crypto"
+        let result = await HDUtil.fetchBinanceHistoricalBetweenPeriods({ ticker_name, period, start, end })
+        updateDbWithNewTickerInfo({ type, ticker_name, period, token_data: result })
+        return result
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const serviceUpdateTickerWithOneDataPoint = async ({ fetchQuery }) => {
+    try {
+        const { ticker_name, period, start, end } = fetchQuery
+        const type = "crypto"
+        let result = await HDUtil.fetchData({ ticker_name, period, start, end, type: 'Fetch One Ticker' })
+        let converted = HDUtil.convertData(result)
+        if (converted.length === 0) {
+            log.info(`No data for ${ticker_name} - ${period} - ${start} - ${end}`)
+        } else {
+            updateDbWithNewTickerInfo({ type, ticker_name, period, token_data: converted })
+        }
+        return converted
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
 const serviceUpdateAllBinanceTickers = async () => {
     try {
         let greaterThan4h = await HDServices.processUpdateBinanceData()
-        // let lessThan4h = await HDServices.processUpdateBinanceOneMData()
         let finalIds = {
             "ids": greaterThan4h.finalResult.check_status_payload
         }
@@ -551,6 +586,8 @@ module.exports = {
     , serviceGetYfinanceTickerStatsFromDb
     , serviceFetchOneBinanceTicker
     , serviceUpdateOneBinanceTicker
+    , serviceGetLatestTickerDataForUser
+    , serviceUpdateTickerWithOneDataPoint
     , serviceUpdateAllBinanceTickers
     , serviceCheckOneBinanceTickerJobCompletition
     , serviceGetDocuments

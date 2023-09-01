@@ -132,6 +132,28 @@ const updateOneBinanceTicker = async (req, res) => {
     }
 }
 
+const getLatestTickerDataForUser = async (req, res) => {
+    try {
+        const { updateQueries } = req.body
+        const newTickers = await CMServices.serviceGetLatestTickerDataForUser({ updateQueries })
+        res.status(200).json({ message: "Get Latest Ticker Data request success", newTickers });
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const saveOneTickerDataForUser = async (req, res) => {
+    try {
+        const { fetchQuery } = req.body
+        const updateTickerWithOneDataPoint = await CMServices.serviceUpdateTickerWithOneDataPoint({ fetchQuery })
+        res.status(200).json({ message: "Save One Ticker Data request success", updateTickerWithOneDataPoint });
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: error.message });
+    }
+}
+
 const updateAllBinanceTickers = async (req, res) => {
     try {
         const finalProcessIds = await CMServices.serviceUpdateAllBinanceTickers()
@@ -422,27 +444,29 @@ const deleteQuizQuestion = async (req, res) => {
 // <--- Quiz ---> //
 
 module.exports = {
-    FASLatestTickerMetaData,
-    deleteTickerMeta,
-    findYFTicker,
-    getBinanceTickersIndb,
-    getYfinanceTickersIndb,
-    fetchOneBinanceTicker,
-    updateOneBinanceTicker,
-    updateAllBinanceTickers,
-    fetchOneYfinanceTicker,
-    deleteOneYfinanceTicker,
-    getProcessStatus,
-    getSections,
-    addSection,
-    updateSection,
-    deleteSection,
-    getLessons,
-    addLesson,
-    updateLesson,
-    deleteLesson,
-    getQuizQuestions,
-    addQuizQuestions,
-    updateQuizQuestions,
-    deleteQuizQuestion,
+    FASLatestTickerMetaData
+    , deleteTickerMeta
+    , findYFTicker
+    , getBinanceTickersIndb
+    , getYfinanceTickersIndb
+    , fetchOneBinanceTicker
+    , updateOneBinanceTicker
+    , getLatestTickerDataForUser
+    , saveOneTickerDataForUser
+    , updateAllBinanceTickers
+    , fetchOneYfinanceTicker
+    , deleteOneYfinanceTicker
+    , getProcessStatus
+    , getSections
+    , addSection
+    , updateSection
+    , deleteSection
+    , getLessons
+    , addLesson
+    , updateLesson
+    , deleteLesson
+    , getQuizQuestions
+    , addQuizQuestions
+    , updateQuizQuestions
+    , deleteQuizQuestion
 }

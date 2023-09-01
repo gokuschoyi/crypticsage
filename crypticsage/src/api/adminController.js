@@ -68,6 +68,26 @@ export const updateOneBinanceTicker = async ({ token, updateQueries }) => {
     return response;
 }
 
+export const fetchLatestTickerForUser = async ({ token, updateQueries }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/content/get_latest_ticker_data_for_user`, { updateQueries }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
+export const updateTickerWithOneDataPoint = async ({ token, fetchQuery }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/content/save_one_ticker_data_for_user`, { fetchQuery }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
 export const updateAllBinanceTickers = async ({ token }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }

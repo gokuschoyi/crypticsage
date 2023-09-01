@@ -21,6 +21,9 @@ router.post('/delete_one_yfinace_ticker', CMController.deleteOneYfinanceTicker)/
 
 router.post('/get_process_status', CMController.getProcessStatus)
 
+router.post('/get_latest_ticker_data_for_user', CMController.getLatestTickerDataForUser)
+router.post('/save_one_ticker_data_for_user', CMController.saveOneTickerDataForUser)
+
 router.post('/get_sections', CMController.getSections)
 router.post('/add_section', CMController.addSection)
 router.post('/update_section', CMController.updateSection)

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom';
 import Header from '../../../global/Header';
 import IndicatorDescription from '../components/IndicatorDescription';
-import { getHistoricalTickerDataFroDb } from '../../../../../api/adminController'
-import MainChart from '../components/MainChart';
+import { getHistoricalTickerDataFroDb, fetchLatestTickerForUser } from '../../../../../api/adminController'
+import MainChart from '../components/MainChartCopy';
 import { useSelector } from 'react-redux'
 import {
     Box
@@ -14,6 +14,51 @@ import {
     , Skeleton
     ,
 } from '@mui/material'
+
+const periodToMilliseconds = (period) => {
+    switch (period) {
+        case '1m':
+            return 1000 * 60;
+        case '4h':
+            return 1000 * 60 * 60 * 4;
+        case '6h':
+            return 1000 * 60 * 60 * 6;
+        case '8h':
+            return 1000 * 60 * 60 * 8;
+        case '12h':
+            return 1000 * 60 * 60 * 12;
+        case '1d':
+            return 1000 * 60 * 60 * 24;
+        case '3d':
+            return 1000 * 60 * 60 * 24 * 3;
+        case '1w':
+            return 1000 * 60 * 60 * 24 * 7;
+        default:
+            return 1000 * 60 * 60 * 24;
+    }
+}
+
+const checkForUniqueAndTransform = (data) => {
+    const uniqueData = [];
+    const seenTimes = new Set();
+
+    data.forEach((item) => {
+        if (!seenTimes.has(item.openTime)) {
+            uniqueData.push({
+                time: (item.openTime / 1000),
+                open: parseFloat(item.open),
+                high: parseFloat(item.high),
+                low: parseFloat(item.low),
+                close: parseFloat(item.close)
+            })
+            seenTimes.add(item.openTime);
+        } else {
+            console.log('Duplicate found', item.openTime)
+        }
+    })
+    return uniqueData
+}
+
 const CryptoModule = () => {
     const params = useParams();
     const token = useSelector(state => state.auth.accessToken);
@@ -36,6 +81,7 @@ const CryptoModule = () => {
     console.log(selectedTokenPeriod)
 
     const handlePeriodChange = (newValue) => {
+        setChartData([])
         setSelectedTokenPeriod(newValue);
         setFetchValues({
             asset_type: module,
@@ -61,6 +107,16 @@ const CryptoModule = () => {
     const [chartData, setChartData] = useState([]) // data to be passed to chart
     const [fetchValues, setFetchValues] = useState(defaultFetchValues)
 
+    const checkIfNewTickerFetchIsRequired = (openTime) => {
+        const periodInMilli = periodToMilliseconds(selectedTokenPeriod)
+        const currentTime = new Date().getTime()
+
+        const noOfTickersToFetch = Math.floor((currentTime - openTime) / periodInMilli)
+        // console.log('No to fetch : ', noOfTickersToFetch)
+        // console.log('Latest ticker data time : ', periodInMilli, currentTime - openTime)
+        return noOfTickersToFetch
+    }
+
     // to fetch ticker data
     const tickerDataRef = useRef(false)
     useEffect(() => {
@@ -77,23 +133,41 @@ const CryptoModule = () => {
                 }
             })
                 .then((res) => {
-                    const uniqueData = [];
-                    const seenTimes = new Set();
+                    const dataInDb = res.data.fetchedResults.ticker_data
 
-                    res.data.fetchedResults.ticker_data.forEach((item) => {
-                        if (!seenTimes.has(item.openTime)) {
-                            uniqueData.push({
-                                time: (item.openTime / 1000),
-                                open: parseFloat(item.open),
-                                high: parseFloat(item.high),
-                                low: parseFloat(item.low),
-                                close: parseFloat(item.close)
-                            })
-                            seenTimes.add(item.openTime);
+                    const latestOpenTime = dataInDb[dataInDb.length - 1].openTime
+                    let fetchLength = checkIfNewTickerFetchIsRequired(latestOpenTime)
+                    if (fetchLength > 0) {
+                        let end = new Date()
+                        end.setMinutes(end.getMinutes() - 1)
+                        end.setSeconds(59)
+                        
+                        const updateQueries = {
+                            ticker_name: cryptotoken,
+                            period: selectedTokenPeriod,
+                            start: latestOpenTime,
+                            end: end.getTime(),
                         }
-                    })
-                    console.log('Fetched data length : ', uniqueData.length)
-                    setChartData(uniqueData)
+
+                        fetchLatestTickerForUser({
+                            token,
+                            updateQueries
+                        })
+                            .then((res) => {
+                                const newData = res.data.newTickers
+                                dataInDb.push(...newData)
+                                let converted = checkForUniqueAndTransform(dataInDb)
+                                console.log('Totla fetched data length : ', converted.length, 'New tickers to fetch', fetchLength, 'Fetched : ', newData.length)
+                                setChartData(converted)
+                            })
+                            .catch(err => {
+                                console.log(err)
+                            })
+                    } else {
+                        let converted = checkForUniqueAndTransform(dataInDb)
+                        console.log('Fetched data length : ', converted.length)
+                        setChartData(converted)
+                    }
                 })
                 .catch(err => {
                     console.log(err)
@@ -104,32 +178,56 @@ const CryptoModule = () => {
 
     /* const wsRef = useRef(false)
     useEffect(() => {
-        const lowerCaseSymbol = cryptotoken.toLowerCase()
-        const webSocketConnectionURI = `wss://stream.binance.com:9443/ws/${lowerCaseSymbol}@kline_${selectedTokenPeriod}`
-        console.log("WS connection uri: ", webSocketConnectionURI)
+        if (selectedTokenPeriod === '1m') {
+            console.log('Connecting to binance WS')
+            const lowerCaseSymbol = cryptotoken.toLowerCase()
+            const webSocketConnectionURI = `wss://stream.binance.com:9443/ws/${lowerCaseSymbol}@kline_${selectedTokenPeriod}`
+            console.log("WS connection uri: ", webSocketConnectionURI)
 
-        if (wsRef.current) {
-            wsRef.current.close(); // Close the existing WebSocket connection
+            if (wsRef.current) {
+                wsRef.current.close(); // Close the existing WebSocket connection
+            }
+
+            const ws = new WebSocket(webSocketConnectionURI)
+            wsRef.current = ws; // Store the WebSocket reference in the ref
+
+            ws.onmessage = (e) => {
+                const message = JSON.parse(e.data);
+                let tickerPayload = {
+                    openTime: message.k.t,
+                    open: message.k.o,
+                    high: message.k.h,
+                    low: message.k.l,
+                    close: message.k.c,
+                    volume: message.k.v,
+                    closeTime: message.k.T,
+                    quoteAssetVolume: message.k.q,
+                    trade: message.k.n,
+                    takerBaseAssetVolume: message.k.V,
+                    takerQuoteAssetVolume: message.k.Q,
+                }
+                // console.log(tickerPayload);
+                const latetstTickerOpenTime = chartData[chartData.length - 1].time * 1000
+                if (tickerPayload.openTime > latetstTickerOpenTime) {
+                    console.log('New ticker available', new Date(latetstTickerOpenTime).toLocaleString(), new Date(tickerPayload.openTime).toLocaleString())
+                    
+                } else {
+                    console.log('No new ticker')
+                }
+            };
+
+            ws.onerror = (e) => {
+                console.log(e);
+            };
         }
-
-        const ws = new WebSocket(webSocketConnectionURI)
-        wsRef.current = ws; // Store the WebSocket reference in the ref
-
-        ws.onmessage = (e) => {
-            const message = JSON.parse(e.data);
-            console.log(message);
-        };
-
-        ws.onerror = (e) => {
-            console.log(e);
-        };
 
         return () => {
             if (wsRef.current) {
                 wsRef.current.close(); // Close the WebSocket connection on unmount
             }
         };
-    }, [cryptotoken, selectedTokenPeriod]) */
+
+    }, [chartData, cryptotoken, selectedTokenPeriod]) */
 
     return (
         <Box className='crypto-module-container'>
@@ -176,7 +274,7 @@ const CryptoModule = () => {
                             :
                             (
                                 <Box className='token-chart-box' height="100%">
-                                    <MainChart tData={chartData} symbol={cryptotoken} />
+                                    <MainChart token={token} tData={chartData} symbol={cryptotoken} selectedTokenPeriod={selectedTokenPeriod} />
                                 </Box>
                             )
                         }
