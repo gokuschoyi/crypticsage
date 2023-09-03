@@ -22,8 +22,8 @@ const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }
         let uploadStatus = {};
 
         if (tickers.length > 0) {
-            const formattedDate = HDUtil.formatDateForYFinance(new Date().toLocaleString())
-            log.info(formattedDate)
+            // const formattedDate = HDUtil.formatDateForYFinance(new Date().toLocaleString())
+            // log.info(formattedDate)
 
             const toDate = '2023-07-03' // HDUtil.formatDateForYFinance(new Date().toLocaleString())
             for (let i = 0; i < tickers.length; i++) {
@@ -35,7 +35,7 @@ const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }
                     throw customError
                 } else {
                     const newD = new Date(startDate).toLocaleString()
-                    fromDate = HDUtil.formatDateForProcessInitialSaveHistoricalDataYFinance(newD)
+                    fromDate = HDUtil.formatDateForYFinance(newD)
 
                     log.info(fromDate)
 

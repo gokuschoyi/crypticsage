@@ -18,7 +18,7 @@ router.post('/fetch_token_data', CSController.fetchTickerDataFromDB) // converte
 
 const process = async (req, res) => {
     try {
-        const { cryptoData } = req.body
+        const { openTime, period } = req.body
         // let [inserted, updateMeta] = await MDBServices.insertHistoricalDataToDb({ type, ticker_name, period, token_data })
         // let fObjs = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance_metadata' })
         // let test = await HDServices.processUpdateHistoricalYFinanceData({ symbol: ticker_name })
@@ -33,8 +33,8 @@ const process = async (req, res) => {
         let tickers = tickersList.filter((ticker) => {
             return !fObjs.some((obj) => obj.ticker_name === ticker)
         }) */
-        let fObjs = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance_metadata' })
-        res.status(200).json({ message: "Get Latest Stocks Data request success", fObjs });
+        let test = HDUtil.calculateUpdateTickerEndDate({openTime, period})
+        res.status(200).json({ message: "Get Latest Stocks Data request success", test });
     } catch (error) {
         console.log(error.stack)
         res.status(400).json({ message: "Get Latest Stocks Data request error" })

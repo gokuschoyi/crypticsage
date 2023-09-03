@@ -159,7 +159,7 @@ const Indicators = (props) => {
     const loadedRef = useRef(false)
     useEffect(() => {
         if (!loadedRef.current) {
-            console.log('UE : Fetching talib descriptions')
+            // console.log('UE : Fetching talib descriptions')
             loadedRef.current = true
             getIndicatorDesc({ token })
                 .then((res) => {
@@ -180,7 +180,7 @@ const Indicators = (props) => {
 
     // filtering/search logic
     useEffect(() => {
-        console.log('UE : New Filtering Logic')
+        // console.log('UE : New Filtering Logic')
         let updatedDataCopy = [...rawTalibDesc]
         const filteredGroups = [];
 

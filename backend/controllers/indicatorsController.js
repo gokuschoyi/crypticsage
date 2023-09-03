@@ -24,7 +24,7 @@ const getIndicatorDesc = async (req, res) => {
         return result
     }, {})
     desc = Object.values(grouped)
-    log.info({ totalFunctionCount, funcDesc })
+    // log.info({ totalFunctionCount, funcDesc })
     res.status(200).json({ message: 'talib desc', desc })
 }
 

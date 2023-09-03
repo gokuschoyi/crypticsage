@@ -184,7 +184,7 @@ const CryptoTable = () => {
                     :
                     (
                         <React.Fragment>
-                            <Box display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' pl={1} pr={1}>
+                            <Box className='ticker-currency-last-updated' display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' pl={1} pr={1} pt={1}>
                                 <Box className='currency-selector-date-refresh' display='flex' flexDirection='row' alignItems='center' gap={4}>
                                     <FormControl sx={{ minWidth: 160 }}>
                                         <InputLabel color='secondary' id="demo-controlled-open-select-label">Select Currency</InputLabel>

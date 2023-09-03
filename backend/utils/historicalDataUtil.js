@@ -9,7 +9,7 @@ const MDBServices = require('../services/mongoDBServices')
 
 // ------------------------------------Y-FINANCE-----------------------------------------//
 
-// new date 12/13/1980, 1:30:00 AM to yyyy-mm-dd 
+// new date 12/13/1980, 1:30:00 AM to 1980-12-13 (mm/dd/yyy to yyyy-mm-dd) 
 const formatDateForProcessInitialSaveHistoricalDataYFinance = (param) => {
     log.info(`Date param : ${param}`)
     const [date, tz] = param.split(', ');
@@ -20,9 +20,9 @@ const formatDateForProcessInitialSaveHistoricalDataYFinance = (param) => {
 
 // new Date 10/07/2023, 12:19:38 pm to yyyy-mm-dd
 const formatDateForYFinance = (param) => {
-    log.info(`Date param : ${param}`)
+    log.info(`Date param yf fetch : ${param}`)
     const [date, tz] = param.split(', ');
-    const [m, d, y] = date.split('/')
+    const [d, m, y] = date.split('/')
     const formattedDate = `${y}-${m}-${d}`;
     return formattedDate;
 }
@@ -218,6 +218,30 @@ const divideTimePeriod = (startTime, endTime, period, limit) => {
 }
 
 // <------------------------ 1m, 4h, 6h, 8h, 12h, 1d, 3d, 1w  (START) ------------------------> //
+
+const calculateUpdateTickerEndDate = ({ openTime, period }) => {
+    const periodInMilli = periodToMilliseconds(period)
+    const currentTime = new Date().getTime()
+    let fetchLength = Math.floor((currentTime - openTime) / periodInMilli)
+    log.info(`Fetch length for ${period} : ${fetchLength}`)
+
+    let end
+    switch (period) {
+        case '1m':
+            end = new Date()
+            end.setMinutes(end.getMinutes() - 1)
+            end.setSeconds(59)
+            break;
+        default:
+            let endAdded = new Date(openTime).getTime() + (fetchLength * periodInMilli) - 1000
+            end = new Date(endAdded)
+            break;
+    }
+
+    log.info(`${new Date(openTime).toLocaleString()}, ${new Date(end).toLocaleString()}`)
+    let finalDate = end.getTime()
+    return finalDate
+}
 
 async function processHistoricalData(job) {
     const { ticker, period, meta } = job.data;
@@ -564,7 +588,7 @@ const generateUpdateQueriesForBinanceTickers = async () => {
                 ticker_name,
                 period,
                 start: lastHistorical,
-                end: new Date().getTime(),
+                end: calculateUpdateTickerEndDate({ openTime: lastHistorical, period: period }),
                 id: uuidv4(),
                 jobName: `updateHistoricalData_${ticker_name}_${period}`,
             }))
@@ -689,6 +713,7 @@ module.exports = {
     formatDateForProcessInitialSaveHistoricalDataYFinance
     , formatDateForYFinance
     , processHistoricalData
+    , calculateUpdateTickerEndDate
     , processUpdateHistoricalData
     , getHistoricalYFinanceData
     , getFirstTradeDate

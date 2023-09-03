@@ -147,6 +147,13 @@
     animation: rotate 2s linear infinite;
 }
 
+@media screen and (max-width : 900px) {
+    .ticker-currency-last-updated {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
 @media screen and (max-width: 600px) {
     .last-updated-date-refresh {
         display: flex;

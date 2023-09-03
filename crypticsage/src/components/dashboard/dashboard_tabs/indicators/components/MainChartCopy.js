@@ -2,17 +2,27 @@ import React, { useEffect, useRef } from 'react'
 import { Box } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { updateTickerWithOneDataPoint } from '../../../../../api/adminController'
+import { useSelector, useDispatch } from 'react-redux'
+import { setStreamedTickerDataRedux, resetStreamedTickerDataRedux } from '../modules/CryptoStockModuleSlice'
 const MainChart = (props) => {
     const { token, tData, symbol, selectedTokenPeriod } = props;
-
     const chartboxRef = useRef();
 
-    const latestDateRf = useRef(tData[tData.length - 1].time * 1000 + 60000) // latest time in the fetched data
-    const latestDateRfPlus1Min = useRef()
+    const dispatch = useDispatch()
+    const streamedTickerData = useSelector(state => state.cryptoStockModule.streamedTickerData)
+    const tDataRedux = useSelector(state => state.cryptoStockModule.cryptoDataInDb)
+    // console.log('MainChart', tDataRedux, streamedTickerData)
 
-    const wsRef = useRef(false)
+
+    const latestDateRf = useRef(tData[tData.length - 1].time * 1000 + 60000) // latest time in the fetched data. Data doe not inclusive of this time
+    const candleStickSeriesRef = useRef(null)
+    const rsiSeriesRef = useRef(null)
+    const rsiSeriesNewRef = useRef(null)
+
+    const wsRef = useRef(null)
     useEffect(() => {
-        console.log("from Main chart")
+        console.log("UE : Main chart")
+
         let tokenChartBox = document.getElementsByClassName('token-chart-box')[0].getBoundingClientRect()
         let offsetLeft = Math.round(tokenChartBox.left);
         let offsetTop = Math.round(tokenChartBox.top)
@@ -53,8 +63,7 @@ const MainChart = (props) => {
         let chart
         let scrollYAxis = window.scrollY
 
-        console.log("data available")
-        console.log(cWidth, cHeight)
+        // console.log(cWidth, cHeight)
 
         chart = createChart(chartboxRef.current, {
             width: cWidth,
@@ -89,81 +98,16 @@ const MainChart = (props) => {
 
         chart.timeScale().fitContent();
 
-        const candleStickSeries = chart.addCandlestickSeries({
+        candleStickSeriesRef.current = chart.addCandlestickSeries({
             upColor: 'green',
             downColor: 'red',
             wickVisible: true,
         })
 
-        candleStickSeries.setData(tData);
-
-        if (selectedTokenPeriod === '1m') {
-            console.log('Connecting to binance WS')
-            const lowerCaseSymbol = symbol.toLowerCase()
-            const webSocketConnectionURI = `wss://stream.binance.com:9443/ws/${lowerCaseSymbol}@kline_${selectedTokenPeriod}`
-            console.log("WS connection uri: ", webSocketConnectionURI)
-
-            if (wsRef.current) {
-                wsRef.current.close(); // Close the existing WebSocket connection
-            }
-
-            const ws = new WebSocket(webSocketConnectionURI)
-            wsRef.current = ws; // Store the WebSocket reference in the ref
-
-            ws.onmessage = (e) => {
-                const message = JSON.parse(e.data);
-                let tickerPayload = {
-                    openTime: message.k.t,
-                    open: message.k.o,
-                    high: message.k.h,
-                    low: message.k.l,
-                    close: message.k.c,
-                    volume: message.k.v,
-                    closeTime: message.k.T,
-                    quoteAssetVolume: message.k.q,
-                    trades: message.k.n,
-                    takerBaseAssetVolume: message.k.V,
-                    takerQuoteAssetVolume: message.k.Q,
-                }
-
-                candleStickSeries.update({
-                    time: tickerPayload.openTime / 1000,
-                    open: parseFloat(tickerPayload.open),
-                    high: parseFloat(tickerPayload.high),
-                    low: parseFloat(tickerPayload.low),
-                    close: parseFloat(tickerPayload.close),
-                })
-                rsi_series.update({ time: tickerPayload.openTime / 1000, value: tickerPayload.low })
-                rsi_series_new.update({ time: tickerPayload.openTime / 1000, value: tickerPayload.close })
-
-                if (latestDateRf.current < tickerPayload.openTime) {
-                    // latestDateRfPlus1Min.current = tickerPayload.openTime
-                    const fetchQuery = {
-                        ticker_name: symbol,
-                        period: selectedTokenPeriod,
-                        start: latestDateRf.current,
-                        end: latestDateRf.current + 59000,
-                    }
-                    console.log('New ticker data available. Fetch one ticker', new Date(latestDateRf.current).toLocaleString(), new Date(latestDateRf.current + 59000).toLocaleString(), fetchQuery)
-                    latestDateRf.current = tickerPayload.openTime
-
-                    updateTickerWithOneDataPoint({ token, fetchQuery })
-                        .catch((err) => {
-                            console.log(err)
-                        })
-                } else {
-                    console.log('No new ticker')
-                }
-            };
-
-            ws.onerror = (e) => {
-                console.log(e);
-            };
-        }
-
+        candleStickSeriesRef.current.setData(tData);
 
         //RSI
-        const rsi_series = chart.addLineSeries({
+        rsiSeriesRef.current = chart.addLineSeries({
             color: 'purple',
             lineWidth: 1,
             pane: 1,
@@ -171,9 +115,9 @@ const MainChart = (props) => {
         const rsi_data = tData
             .filter((d) => d.high)
             .map((d) => ({ time: d.time, value: d.low }));
-        rsi_series.setData(rsi_data);
+        rsiSeriesRef.current.setData(rsi_data);
 
-        const rsi_series_new = chart.addLineSeries({
+        rsiSeriesNewRef.current = chart.addLineSeries({
             color: 'red',
             lineWidth: 1,
             pane: 2,
@@ -181,7 +125,7 @@ const MainChart = (props) => {
         const rsi_data_new = tData
             .filter((d) => d.low)
             .map((d) => ({ time: d.time, value: d.close }));
-        rsi_series_new.setData(rsi_data_new);
+        rsiSeriesNewRef.current.setData(rsi_data_new);
 
         chart.timeScale().subscribeVisibleLogicalRangeChange((param) => {
             // console.log(param)
@@ -216,7 +160,7 @@ const MainChart = (props) => {
                     }
                 );
                 tooltip.style.display = 'block';
-                const data = param.seriesData.get(candleStickSeries);
+                const data = param.seriesData.get(candleStickSeriesRef.current);
                 const open = data.value !== undefined ? data.value : data.open;
 
                 const close = data.close;
@@ -251,15 +195,98 @@ const MainChart = (props) => {
         tokenDom.addEventListener('touchmove', (event) => handleTouchMove(event))
 
         return () => {
-            if (wsRef.current) {
-                wsRef.current.close(); // Close the WebSocket connection on unmount
-            }
             window.removeEventListener('resize', handleResize);
             tokenDom.removeEventListener('mousemove', calculateMousePosition)
             tokenDom.removeEventListener('touchmove', handleTouchMove)
             chart.remove();
         }
     }, [tData, symbol, selectedTokenPeriod, token])
+
+    // web socket warning becaue of react strict mode
+    useEffect(() => {
+        const lowerCaseSymbol = symbol.toLowerCase()
+        const webSocketConnectionURI = `wss://stream.binance.com:9443/ws/${lowerCaseSymbol}@kline_${selectedTokenPeriod}`
+
+        const createWebSocket = () => {
+            const ws = new WebSocket(webSocketConnectionURI);
+            wsRef.current = ws;
+
+            ws.onmessage = (e) => {
+                const message = JSON.parse(e.data);
+                const tickerPayload = {
+                    openTime: message.k.t,
+                    open: message.k.o,
+                    high: message.k.h,
+                    low: message.k.l,
+                    close: message.k.c,
+                    volume: message.k.v,
+                    closeTime: message.k.T,
+                    quoteAssetVolume: message.k.q,
+                    trades: message.k.n,
+                    takerBaseAssetVolume: message.k.V,
+                    takerQuoteAssetVolume: message.k.Q,
+                };
+
+                // Update your chart series
+                candleStickSeriesRef.current.update({
+                    time: tickerPayload.openTime / 1000,
+                    open: parseFloat(tickerPayload.open),
+                    high: parseFloat(tickerPayload.high),
+                    low: parseFloat(tickerPayload.low),
+                    close: parseFloat(tickerPayload.close),
+                });
+
+                rsiSeriesRef.current.update({ time: tickerPayload.openTime / 1000, value: tickerPayload.low });
+                rsiSeriesNewRef.current.update({ time: tickerPayload.openTime / 1000, value: tickerPayload.close });
+
+                if (latestDateRf.current < tickerPayload.openTime && selectedTokenPeriod === '1m') {
+                    const fetchQuery = {
+                        ticker_name: symbol,
+                        period: selectedTokenPeriod,
+                        start: latestDateRf.current,
+                        end: latestDateRf.current + 59000,
+                    }
+                    console.log('New ticker data available. Fetch one ticker', new Date(latestDateRf.current).toLocaleString(), new Date(latestDateRf.current + 59000).toLocaleString())
+                    latestDateRf.current = tickerPayload.openTime
+
+                    dispatch(setStreamedTickerDataRedux({
+                        time: tickerPayload.openTime / 1000,
+                        open: parseFloat(tickerPayload.open),
+                        high: parseFloat(tickerPayload.high),
+                        low: parseFloat(tickerPayload.low),
+                        close: parseFloat(tickerPayload.close),
+                    }))
+
+                    updateTickerWithOneDataPoint({ token, fetchQuery })
+                        .catch((err) => {
+                            console.log(err)
+                        })
+                } else {
+                    console.log('Streaming data');
+                }
+            };
+
+            ws.onerror = (e) => {
+                // console.log(e);
+            };
+        };
+
+        if (candleStickSeriesRef.current && rsiSeriesRef.current && rsiSeriesNewRef.current) {
+            // console.log('Connecting to binance WS for ticker data');
+            // if (wsRef.current !== null) {
+            //     // console.log('Closing old WS connection from UE');
+            //     wsRef.current.close(); // Close the existing WebSocket connection
+            // }
+            createWebSocket();
+        }
+
+        return () => {
+            if (wsRef.current) {
+                // console.log('UE : RETURN , Closing WS connection')
+                wsRef.current.close(); // Close the WebSocket connection on unmount
+            }
+        }
+    }, [selectedTokenPeriod, symbol, token, dispatch])
 
     return (
         <Box className='chart-cont-dom' width="100%" height="100%" >

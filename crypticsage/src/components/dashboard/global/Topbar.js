@@ -9,7 +9,8 @@ import { handleReduxToggleSmallScreenSidebar, resetSidebarState } from "./SideBa
 import { resetAuthState } from "../../authorization/authSlice";
 import { resetStatsState } from '../dashboard_tabs/stats/StatsSlice.js';
 import { resetTransformedData } from "../dashboard_tabs/quiz/QuizSlice";
-import {resetIndicatorsState} from '../dashboard_tabs/indicators/IndicatorsSlice'
+import { resetIndicatorsState } from '../dashboard_tabs/indicators/IndicatorsSlice'
+import { resetCryptoStockModule } from '../dashboard_tabs/indicators/modules/CryptoStockModuleSlice'
 import { useSelector, useDispatch } from 'react-redux';
 import InputBase from "@mui/material/InputBase";
 import {
@@ -128,6 +129,7 @@ const Topbar = (props) => {
         dispatch(resetStatsState());
         dispatch(resetTransformedData());
         dispatch(resetIndicatorsState());
+        dispatch(resetCryptoStockModule());
     }
 
     const userContainer = () => {

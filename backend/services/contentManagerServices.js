@@ -201,11 +201,15 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
     const queueName = "Update-One-Binance-Ticker-Queue"
 
     let idNameAdded = updateQueries.map((queries) => {
+        const { ticker_name, period, start } = queries
         let newDate = new Date().toLocaleString()
         let [date, time] = newDate.split(", ")
         let [t, ap] = time.split(" ")
         return {
-            ...queries,
+            ticker_name,
+            period,
+            start,
+            end: HDUtil.calculateUpdateTickerEndDate({ openTime: start, period }),
             id: `${uuidv4()}_${date}_${t}_${ap}_${queries.ticker_name}_${queries.period}`,
             jobName: `Update-One-Binance-Ticker_${queries.ticker_name}_${queries.period}_FE-Request`
         }
