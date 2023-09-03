@@ -221,7 +221,7 @@ const CoinChartBox = () => {
                     <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
                 </Box>
                 :
-                <Box className='coin-chart-box' height="100%">
+                <Box className='coin-chart-box' height="320px">
                     <DashboardChart chartData={chartData} gridLineToggle={checked} selectedTokenName={selectedTokenName} />
                 </Box>
             }
