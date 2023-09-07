@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
-import { getIndicatorDesc, getHistoricalTickerDataFroDb } from '../../../api/adminController'
+import { getIndicatorDesc } from '../../../api/adminController'
 import AdminHeader from '../global/AdminHeader';
 import {
     Box,

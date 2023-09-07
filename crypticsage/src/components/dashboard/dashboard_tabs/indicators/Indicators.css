@@ -17,6 +17,11 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+.tooltip-text{
+    transition: all 0.2s ease-in-out;
+    font-size: 14px;
+}
+
 .asset-type-tab {
     display: flex;
     flex-direction: column;
@@ -158,5 +163,10 @@
     .last-updated-date-refresh {
         display: flex;
         justify-content: space-between;
+    }
+    .tooltip-text{
+        font-size: 12px !important;
+        font-weight: 400 !important;
+        
     }
 }

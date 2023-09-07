@@ -66,7 +66,7 @@ const fetchTickerDataFromDB = async (req, res) => {
         const [isValidated, payload] = Validator.validateFetchTickerDataInput({ params })
         if (isValidated) {
             const { asset_type, ticker_name, period, page_no, items_per_page } = payload
-            const fetchedResults = await CSServices.processFetchTickerDataFromDb({ asset_type, ticker_name, period, page_no, items_per_page })
+            const fetchedResults = await CSServices.processFetchTickerDataFromDb({ asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset:params.new_fetch_offset })
             res.status(200).json({ message: "Token Data fetched successfully", fetchedResults })
         }
     }

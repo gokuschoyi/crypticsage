@@ -136,6 +136,7 @@ const CryptoModule = () => {
     // default fetch data
     const [chartData, setChartData] = useState([]) // data to be passed to chart
     const [fetchValues, setFetchValues] = useState(defaultFetchValues)
+    const [newTickerLength, setNewTickerLength] = useState(0)
 
     // to fetch ticker data
     const tickerDataRef = useRef(false)
@@ -161,8 +162,10 @@ const CryptoModule = () => {
                     const dataInDb = res.data.fetchedResults.ticker_data
                     const latestOpenTime = dataInDb[dataInDb.length - 1].openTime
                     let [fetchLength, end] = checkIfNewTickerFetchIsRequired({ openTime: latestOpenTime, selectedTokenPeriod })
+                    setNewTickerLength(fetchLength)
                     if (fetchLength > 0) {
                         // console.log('UE : Fetching new tickers from binance')
+                        
 
                         const updateQueries = {
                             ticker_name: cryptotoken,
@@ -187,8 +190,8 @@ const CryptoModule = () => {
                                 console.log(err)
                             })
                     } else {
-                        console.log('Up to date : Fetched data length : ', converted.length)
                         converted = checkForUniqueAndTransform(dataInDb)
+                        console.log('Up to date : Fetched data length : ', converted.length)
                         setChartData(converted)
                         dispatch(setCryptoDataInDbRedux(dataInDb))
                     }
@@ -246,6 +249,7 @@ const CryptoModule = () => {
                                 <Box className='token-chart-box' height="100%">
                                     <MainChart
                                         latestTime={chartData[chartData.length - 1].time * 1000 + 60000}
+                                        new_fetch_offset={newTickerLength}
                                         symbol={cryptotoken}
                                         selectedTokenPeriod={selectedTokenPeriod}
                                         module={module}

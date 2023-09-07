@@ -83,9 +83,9 @@ const processGetLatestCryptoData = async () => {
 
 
 // change later to fetch data from historical_data
-const processFetchTickerDataFromDb = async ({ asset_type, ticker_name, period, page_no, items_per_page }) => {
+const processFetchTickerDataFromDb = async ({ asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset }) => {
     try {
-        const fetchedData = await MDBServices.fetchTickerHistDataFromDb({ type: asset_type, ticker_name, period, page_no, items_per_page })
+        const fetchedData = await MDBServices.fetchTickerHistDataFromDb({ type: asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset })
         return fetchedData
     } catch (error) {
         log.error(error.stack)

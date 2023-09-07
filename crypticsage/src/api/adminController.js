@@ -161,8 +161,8 @@ export const getHistoricalTickerDataFroDb = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const { asset_type, ticker_name, period, page_no, items_per_page } = payload;
-    const response = await axios.post(`${baseUrl}/crypto/fetch_token_data`, { asset_type, ticker_name, period, page_no, items_per_page }, config, {
+    const { asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset } = payload;
+    const response = await axios.post(`${baseUrl}/crypto/fetch_token_data`, { asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset }, config, {
         withCredentials: true
     })
     return response;

@@ -70,7 +70,7 @@ const calculateVolumeData = (data) => {
 }
 
 const MainChart = (props) => {
-    const { latestTime, symbol, selectedTokenPeriod, module } = props;
+    const { latestTime,new_fetch_offset, symbol, selectedTokenPeriod, module } = props;
     const token = useSelector(state => state.auth.accessToken);
     const chartboxRef = useRef();
 
@@ -78,6 +78,7 @@ const MainChart = (props) => {
     const streamedTickerData = useSelector(state => state.cryptoStockModule.streamedTickerData)
     const tDataRedux = useSelector(state => state.cryptoStockModule.cryptoDataInDb)
 
+    const newFetchedDataCount = useRef(0)
     const latestDateRf = useRef(latestTime) // latest time in the fetched data. Data doe not inclusive of this time
     const candleStickSeriesRef = useRef(null)
     const candleStickVolumeSeriesRef = useRef(null)
@@ -167,6 +168,7 @@ const MainChart = (props) => {
 
         chart.timeScale().fitContent();
 
+        // Candlestick
         candleStickSeriesRef.current = chart.addCandlestickSeries({
             upColor: 'green',
             downColor: 'red',
@@ -183,6 +185,7 @@ const MainChart = (props) => {
 
         candleStickSeriesRef.current.setData(tData);
 
+        // Volume
         candleStickVolumeSeriesRef.current = chart.addHistogramSeries({
             color: '#26a69a',
             priceFormat: {
@@ -204,7 +207,7 @@ const MainChart = (props) => {
         const volDat = calculateVolumeData(tData)
         candleStickVolumeSeriesRef.current.setData(volDat);
 
-        //RSI
+        // RSI
         rsiSeriesRef.current = chart.addLineSeries({
             color: 'purple',
             lineWidth: 1,
@@ -213,6 +216,7 @@ const MainChart = (props) => {
         const rsi_data = calculateRsiData(tData)
         rsiSeriesRef.current.setData(rsi_data);
 
+        // RSI new
         rsiSeriesNewRef.current = chart.addLineSeries({
             color: 'red',
             lineWidth: 1,
@@ -234,27 +238,33 @@ const MainChart = (props) => {
             };
         }
 
+        let uniqueBarNumbers = [];
+        let lastBarNo = 0
+        let fetchPoint = Math.floor(newDataRef.current.length * 0.2) / -1
+
         // Create a debounced version of your data fetching logic
-        const debouncedFetchData = debounce((barNo) => {
+        const debouncedFetchData = debounce((barNo,candleSticksInVisibleRange) => {
             // Your data fetching logic here
             if (barNo < fetchPoint) {
                 pageNo.current = pageNo.current + 1;
-                // console.log('Fetching more data', barNo, pageNo.current);
+                console.log('Fetching more data', barNo, pageNo.current);
 
-                // Your data fetching code here
+                // Fetch new data query
                 const fetchQuery = {
                     asset_type: module,
                     ticker_name: symbol,
                     period: selectedTokenPeriod,
                     page_no: pageNo.current,
-                    items_per_page: 500
+                    items_per_page: 500,
+                    new_fetch_offset:new_fetch_offset + newFetchedDataCount.current
                 }
+                console.log(fetchQuery)
 
                 getHistoricalTickerDataFroDb({ token, payload: fetchQuery })
                     .then((res) => {
                         const newData = res.data.fetchedResults.ticker_data
                         newDataRef.current = [...newData, ...newDataRef.current]
-                        fetchPoint = Math.floor(newDataRef.current.length * 0.2) / -1
+                        fetchPoint = Math.floor(candleSticksInVisibleRange * 0.2) / -1
                         dispatch(setCryptoDataInDbRedux(newDataRef.current))
                         const uniqueData = checkForUniqueAndTransform(newDataRef.current)
 
@@ -270,21 +280,20 @@ const MainChart = (props) => {
             }
         }, 500); // Adjust the delay as needed (e.g., 1000ms = 1 second)
 
-
-        let uniqueBarNumbers = [];
-        let lastBarNo = 0
-        let fetchPoint = Math.floor(newDataRef.current.length * 0.2) / -1
-
         chart.timeScale().subscribeVisibleLogicalRangeChange((param) => {
+            const {from, to} = param
+            const candleSticksInVisibleRange = Math.floor(to - from) 
+            fetchPoint = Math.floor(candleSticksInVisibleRange * 0.2) / -1
+
             const barsInfo = candleStickSeriesRef.current.barsInLogicalRange(param);
             const { barsBefore } = barsInfo
             const barNo = Math.floor(barsBefore)
-            // console.log(fetchPoint)
+
             // Check if the generated barNo is unique
             if (!uniqueBarNumbers.includes(barNo)) {
                 uniqueBarNumbers.push(barNo);
                 if (barNo < lastBarNo) { // chcking if the chart is moving backwards, left to right
-                    debouncedFetchData(barNo);
+                    debouncedFetchData(barNo,candleSticksInVisibleRange);
                 }
             }
             lastBarNo = barNo
@@ -303,10 +312,6 @@ const MainChart = (props) => {
             ) {
                 tooltip.style.display = 'none';
             } else {
-
-                // console.log(param)
-                // console.log({ toolTipXCoOrdinates, offsetLeft, toolTipYCoOrdinates, offsetTop, scrollYAxis })
-
                 const dateStr = new Date(param.time * 1000).toLocaleString('en-AU',
                     {
                         day: '2-digit',
@@ -314,7 +319,6 @@ const MainChart = (props) => {
                         year: '2-digit',
                         hour: 'numeric',
                         minute: 'numeric',
-
                         hour12: true
                     }
                 );
@@ -329,12 +333,12 @@ const MainChart = (props) => {
                 const low = data.low;
                 tooltip.innerHTML = `
                     <div style="color: ${'rgba(255, 82, 82, 1)'}">${symbol}</div>
-                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">O :${Math.round(100 * open) / 100}</div>
-                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">H :${Math.round(100 * high) / 100}</div>
-                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">L :${Math.round(100 * low) / 100}</div>
-                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">C :${Math.round(100 * close) / 100}</div>
-                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">V :${Math.round(volData.value).toFixed(2)}</div>
-                    <div style="color: ${'black'},font-size: 12px;">${dateStr}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">O :${Math.round(100 * open) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">H :${Math.round(100 * high) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">L :${Math.round(100 * low) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">C :${Math.round(100 * close) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">V :${Math.round(volData.value).toFixed(2)}</div>
+                    <div class-name='tooltip-text' style="color: ${'black'},font-size: 12px;">${dateStr}</div>
                     `;
 
                 let diffX = toolTipXCoOrdinates - offsetLeft
@@ -424,12 +428,14 @@ const MainChart = (props) => {
                         high: parseFloat(tickerPayload.high),
                         low: parseFloat(tickerPayload.low),
                         close: parseFloat(tickerPayload.close),
+                        volume: parseFloat(tickerPayload.volume),
                     }))
 
                     updateTickerWithOneDataPoint({ token, fetchQuery })
                         .catch((err) => {
                             console.log(err)
                         })
+                        newFetchedDataCount.current = newFetchedDataCount.current + 1
                 } else {
                     console.log('Streaming data');
                 }

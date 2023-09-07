@@ -892,15 +892,16 @@ const insertHistoricalDataToDb = async ({ type, ticker_name, period, token_data 
     }
 }
 
-const fetchTickerHistDataFromDb = async ({ type, ticker_name, period, page_no, items_per_page }) => {
+const fetchTickerHistDataFromDb = async ({ type, ticker_name, period, page_no, items_per_page, new_fetch_offset }) => {
     try {
         const db = (await client).db(HISTORICAL_DATABASE_NAME)
         const collection_name = `${type}_${ticker_name}_${period}`
         const collection = db.collection(collection_name)
         const sortQuery = { openTime: -1 }
-
+        
+        new_fetch_offset = new_fetch_offset === undefined ? 0 : new_fetch_offset
         // Calculate the number of documents to skip based on the page number and items per page
-        const skip = (page_no - 1) * items_per_page;
+        const skip = ((page_no - 1) * items_per_page) + new_fetch_offset;
         const t = createTimer('Fetching data from binance_historical')
         t.startTimer()
         const tokenData = await collection.find({}).sort(sortQuery).skip(skip).limit(items_per_page).toArray();
