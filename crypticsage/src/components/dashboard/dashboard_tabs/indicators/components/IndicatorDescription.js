@@ -19,7 +19,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 
 const FunctionContainer = (props) => {
-    const { index, func } = props
+    const { func } = props
     const optionalInputCopy = func.optInputs
 
     const [defaultOptionalInputs, setDefaultOptionalInputs] = useState(optionalInputCopy)
@@ -66,7 +66,7 @@ const FunctionContainer = (props) => {
                     id="panel1a-header"
                 >
                     <Box className='function-name' display='flex' flexDirection='row' alignItems='center'>
-                        <Typography variant='h5' sx={{ textAlign: 'start' }}>{index + 1} : {func.name}</Typography>
+                        <Typography variant='h5' sx={{ textAlign: 'start' }}>{func.name}</Typography>
                     </Box>
                 </AccordionSummary>
                 <AccordionActions>
@@ -174,9 +174,14 @@ const Indicators = (props) => {
 
     const [searchTicker, setSearchTicker] = useState('');
     const handleSearchTicker = (e) => {
-        console.log(e.target.value)
+        // console.log(e.target.value)
         setSearchTicker(e.target.value.toLowerCase())
     }
+
+    const [expanded, setExpanded] = useState(false);
+    const handleAccordianChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+        };
 
     // filtering/search logic
     useEffect(() => {
@@ -197,6 +202,11 @@ const Indicators = (props) => {
                 filteredGroups.push(filteredGroup);
             }
         }
+
+        if(filteredGroups.length === 1){
+            setExpanded(filteredGroups[0].group_name)
+        } 
+
         setTalibDesc(filteredGroups)
         // console.log(filteredGroups)
     }, [searchTicker, rawTalibDesc])
@@ -224,12 +234,12 @@ const Indicators = (props) => {
                     />
                 </Box>
 
-                <Box pl={2} pr={2} className='all-talib-functions'>
+                <Box pl={2} pr={2} className='all-talib-functions' sx={{minHeight:'500px'}}>
                     {talibDesc && talibDesc.map((group, index) => {
                         const { group_name, functions } = group
                         return (
-                            <Box width='100%' pt={1} pb={1} key={index} >
-                                <Accordion TransitionProps={{ unmountOnExit: true }} sx={{ backgroundColor: '#2b2b2b' }}>
+                            <Box width='100%' pt={1} pb={1} key={group_name} >
+                                <Accordion expanded={expanded === `${group_name}`} onChange={handleAccordianChange(`${group_name}`)} TransitionProps={{ unmountOnExit: true }} sx={{ backgroundColor: '#2b2b2b' }}>
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
                                         aria-controls="panel1a-content"
@@ -241,8 +251,8 @@ const Indicators = (props) => {
                                         <Grid container spacing={1} className='indicator-data-container'>
                                             {functions && functions.map((func, index) => {
                                                 return (
-                                                    <Grid key={index} item xs={12} sm={12} md={4} lg={4} xl={4}>
-                                                        <FunctionContainer index={index} key={index} func={func} />
+                                                    <Grid key={func.name} item xs={12} sm={12} md={4} lg={4} xl={4}>
+                                                        <FunctionContainer key={index} func={func} />
                                                     </Grid>
                                                 )
                                             })}

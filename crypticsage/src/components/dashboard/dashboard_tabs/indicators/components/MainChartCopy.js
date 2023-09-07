@@ -1,27 +1,96 @@
 import React, { useEffect, useRef } from 'react'
 import { Box } from '@mui/material'
 import { createChart } from 'lightweight-charts';
-import { updateTickerWithOneDataPoint } from '../../../../../api/adminController'
+import { updateTickerWithOneDataPoint, getHistoricalTickerDataFroDb } from '../../../../../api/adminController'
 import { useSelector, useDispatch } from 'react-redux'
-import { setStreamedTickerDataRedux, resetStreamedTickerDataRedux } from '../modules/CryptoStockModuleSlice'
+import { setStreamedTickerDataRedux, setCryptoDataInDbRedux, resetStreamedTickerDataRedux } from '../modules/CryptoStockModuleSlice'
+
+const checkForUniqueAndTransform = (data) => {
+    const uniqueData = [];
+    const seenTimes = new Set();
+
+    data.forEach((item) => {
+        if (!seenTimes.has(item.openTime)) {
+            uniqueData.push({
+                time: (item.openTime / 1000),
+                open: parseFloat(item.open),
+                high: parseFloat(item.high),
+                low: parseFloat(item.low),
+                close: parseFloat(item.close),
+                volume: parseFloat(item.volume),
+            })
+            seenTimes.add(item.openTime);
+        } else {
+            console.log('Duplicate found', item.openTime)
+        }
+    })
+    return uniqueData
+}
+
+const calculateRsiData = (data) => {
+    const rsi_data = data
+        .filter((d) => d.high)
+        .map((d) => ({ time: d.time, value: d.low }));
+    return rsi_data
+}
+
+const calculateNewRsiData = (data) => {
+    const rsi_data_new = data
+        .filter((d) => d.low)
+        .map((d) => ({ time: d.time, value: d.close }));
+    return rsi_data_new
+}
+
+const calculateVolumeData = (data) => {
+    const volDat = data.filter((d) => d.volume)
+    // Calculate volume movement and set color based on it
+    const volDataWithColor = volDat.map((d, index) => {
+        const currentVolume = d.volume;
+        const previousVolume = index > 0 ? volDat[index - 1].volume : null;
+
+        // Determine color based on volume movement
+        let color = 'neutral'; // Default to neutral color
+        if (previousVolume !== null) {
+            if (currentVolume > previousVolume) {
+                color = 'green'; // Increased volume
+            } else if (currentVolume < previousVolume) {
+                color = 'red'; // Decreased volume
+            }
+        }
+
+        return {
+            time: d.time,
+            value: currentVolume,
+            color: color, // Add the "color" key
+        };
+    });
+
+    return volDataWithColor;
+
+}
+
 const MainChart = (props) => {
-    const { token, tData, symbol, selectedTokenPeriod } = props;
+    const { latestTime, symbol, selectedTokenPeriod, module } = props;
+    const token = useSelector(state => state.auth.accessToken);
     const chartboxRef = useRef();
 
     const dispatch = useDispatch()
     const streamedTickerData = useSelector(state => state.cryptoStockModule.streamedTickerData)
     const tDataRedux = useSelector(state => state.cryptoStockModule.cryptoDataInDb)
-    // console.log('MainChart', tDataRedux, streamedTickerData)
 
-
-    const latestDateRf = useRef(tData[tData.length - 1].time * 1000 + 60000) // latest time in the fetched data. Data doe not inclusive of this time
+    const latestDateRf = useRef(latestTime) // latest time in the fetched data. Data doe not inclusive of this time
     const candleStickSeriesRef = useRef(null)
+    const candleStickVolumeSeriesRef = useRef(null)
     const rsiSeriesRef = useRef(null)
     const rsiSeriesNewRef = useRef(null)
 
     const wsRef = useRef(null)
+    const pageNo = useRef(1)
+    const newDataRef = useRef([...tDataRedux])
     useEffect(() => {
         console.log("UE : Main chart")
+        console.log(tDataRedux.length)
+        let tData = checkForUniqueAndTransform(tDataRedux)
 
         let tokenChartBox = document.getElementsByClassName('token-chart-box')[0].getBoundingClientRect()
         let offsetLeft = Math.round(tokenChartBox.left);
@@ -38,7 +107,7 @@ const MainChart = (props) => {
         const handleResize = () => {
             cWidth = tokenDom.clientWidth;
             cHeight = tokenDom.clientHeight;
-            console.log(cWidth, cHeight)
+            // console.log(cWidth, cHeight)
             chart.applyOptions({ width: cWidth, height: cHeight });
 
             tokenChartBox = document.getElementsByClassName('token-chart-box')[0].getBoundingClientRect()
@@ -104,7 +173,36 @@ const MainChart = (props) => {
             wickVisible: true,
         })
 
+        candleStickSeriesRef.current.priceScale().applyOptions({
+            scaleMargins: {
+                // positioning the price scale for the area series
+                top: 0.1,
+                bottom: 0.4,
+            },
+        });
+
         candleStickSeriesRef.current.setData(tData);
+
+        candleStickVolumeSeriesRef.current = chart.addHistogramSeries({
+            color: '#26a69a',
+            priceFormat: {
+                type: 'volume',
+            },
+            priceScaleId: '',
+            scaleMargins: {
+                top: 0.7, // highest point of the series will be 70% away from the top
+                bottom: 0,
+            },
+        })
+
+        candleStickVolumeSeriesRef.current.priceScale().applyOptions({
+            scaleMargins: {
+                top: 0.7, // highest point of the series will be 70% away from the top
+                bottom: 0,
+            },
+        });
+        const volDat = calculateVolumeData(tData)
+        candleStickVolumeSeriesRef.current.setData(volDat);
 
         //RSI
         rsiSeriesRef.current = chart.addLineSeries({
@@ -112,9 +210,7 @@ const MainChart = (props) => {
             lineWidth: 1,
             pane: 1,
         });
-        const rsi_data = tData
-            .filter((d) => d.high)
-            .map((d) => ({ time: d.time, value: d.low }));
+        const rsi_data = calculateRsiData(tData)
         rsiSeriesRef.current.setData(rsi_data);
 
         rsiSeriesNewRef.current = chart.addLineSeries({
@@ -122,13 +218,76 @@ const MainChart = (props) => {
             lineWidth: 1,
             pane: 2,
         });
-        const rsi_data_new = tData
-            .filter((d) => d.low)
-            .map((d) => ({ time: d.time, value: d.close }));
+        const rsi_data_new = calculateNewRsiData(tData)
         rsiSeriesNewRef.current.setData(rsi_data_new);
 
+        // Define the debounce function
+        function debounce(func, delay) {
+            let timeoutId;
+            return function () {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    func.apply(context, args);
+                }, delay);
+            };
+        }
+
+        // Create a debounced version of your data fetching logic
+        const debouncedFetchData = debounce((barNo) => {
+            // Your data fetching logic here
+            if (barNo < fetchPoint) {
+                pageNo.current = pageNo.current + 1;
+                // console.log('Fetching more data', barNo, pageNo.current);
+
+                // Your data fetching code here
+                const fetchQuery = {
+                    asset_type: module,
+                    ticker_name: symbol,
+                    period: selectedTokenPeriod,
+                    page_no: pageNo.current,
+                    items_per_page: 500
+                }
+
+                getHistoricalTickerDataFroDb({ token, payload: fetchQuery })
+                    .then((res) => {
+                        const newData = res.data.fetchedResults.ticker_data
+                        newDataRef.current = [...newData, ...newDataRef.current]
+                        fetchPoint = Math.floor(newDataRef.current.length * 0.2) / -1
+                        dispatch(setCryptoDataInDbRedux(newDataRef.current))
+                        const uniqueData = checkForUniqueAndTransform(newDataRef.current)
+
+                        candleStickSeriesRef.current.setData(uniqueData)
+                        candleStickVolumeSeriesRef.current.setData(calculateVolumeData(uniqueData))
+                        rsiSeriesRef.current.setData(calculateRsiData(uniqueData))
+                        rsiSeriesNewRef.current.setData(calculateNewRsiData(uniqueData))
+
+                        uniqueBarNumbers = []
+                    })
+            } else {
+                // console.log('No fetch', barNo, pageNo.current, lastBarNo, fetchPoint);
+            }
+        }, 500); // Adjust the delay as needed (e.g., 1000ms = 1 second)
+
+
+        let uniqueBarNumbers = [];
+        let lastBarNo = 0
+        let fetchPoint = Math.floor(newDataRef.current.length * 0.2) / -1
+
         chart.timeScale().subscribeVisibleLogicalRangeChange((param) => {
-            // console.log(param)
+            const barsInfo = candleStickSeriesRef.current.barsInLogicalRange(param);
+            const { barsBefore } = barsInfo
+            const barNo = Math.floor(barsBefore)
+            // console.log(fetchPoint)
+            // Check if the generated barNo is unique
+            if (!uniqueBarNumbers.includes(barNo)) {
+                uniqueBarNumbers.push(barNo);
+                if (barNo < lastBarNo) { // chcking if the chart is moving backwards, left to right
+                    debouncedFetchData(barNo);
+                }
+            }
+            lastBarNo = barNo
         })
 
         // update tooltip
@@ -161,6 +320,8 @@ const MainChart = (props) => {
                 );
                 tooltip.style.display = 'block';
                 const data = param.seriesData.get(candleStickSeriesRef.current);
+                const volData = param.seriesData.get(candleStickVolumeSeriesRef.current);
+                // console.log(volData)
                 const open = data.value !== undefined ? data.value : data.open;
 
                 const close = data.close;
@@ -169,9 +330,10 @@ const MainChart = (props) => {
                 tooltip.innerHTML = `
                     <div style="color: ${'rgba(255, 82, 82, 1)'}">${symbol}</div>
                     <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">O :${Math.round(100 * open) / 100}</div>
-                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">C :${Math.round(100 * close) / 100}</div>
                     <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">H :${Math.round(100 * high) / 100}</div>
                     <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">L :${Math.round(100 * low) / 100}</div>
+                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">C :${Math.round(100 * close) / 100}</div>
+                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">V :${Math.round(volData.value).toFixed(2)}</div>
                     <div style="color: ${'black'},font-size: 12px;">${dateStr}</div>
                     `;
 
@@ -200,7 +362,9 @@ const MainChart = (props) => {
             tokenDom.removeEventListener('touchmove', handleTouchMove)
             chart.remove();
         }
-    }, [tData, symbol, selectedTokenPeriod, token])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [symbol, selectedTokenPeriod])
+
 
     // web socket warning becaue of react strict mode
     useEffect(() => {
@@ -235,6 +399,11 @@ const MainChart = (props) => {
                     low: parseFloat(tickerPayload.low),
                     close: parseFloat(tickerPayload.close),
                 });
+
+                candleStickVolumeSeriesRef.current.update({
+                    time: tickerPayload.openTime / 1000,
+                    value: parseFloat(tickerPayload.volume),
+                })
 
                 rsiSeriesRef.current.update({ time: tickerPayload.openTime / 1000, value: tickerPayload.low });
                 rsiSeriesNewRef.current.update({ time: tickerPayload.openTime / 1000, value: tickerPayload.close });

@@ -51,7 +51,8 @@ const checkForUniqueAndTransform = (data) => {
                 open: parseFloat(item.open),
                 high: parseFloat(item.high),
                 low: parseFloat(item.low),
-                close: parseFloat(item.close)
+                close: parseFloat(item.close),
+                volume: parseFloat(item.volume),
             })
             seenTimes.add(item.openTime);
         } else {
@@ -243,7 +244,12 @@ const CryptoModule = () => {
                             :
                             (
                                 <Box className='token-chart-box' height="100%">
-                                    <MainChart token={token} tData={chartData} symbol={cryptotoken} selectedTokenPeriod={selectedTokenPeriod} />
+                                    <MainChart
+                                        latestTime={chartData[chartData.length - 1].time * 1000 + 60000}
+                                        symbol={cryptotoken}
+                                        selectedTokenPeriod={selectedTokenPeriod}
+                                        module={module}
+                                    />
                                 </Box>
                             )
                         }
