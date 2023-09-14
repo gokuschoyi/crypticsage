@@ -154,23 +154,30 @@ const generateYFObject = (symbol, param) => {
 const fetchTopTickerByMarketCap = async ({ length }) => {
     try {
         let cryptoData = await axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${length}&tsym=USD`)
-        var filteredCryptoData = cryptoData.data.Data.map((crypto, index) => {
-            return {
-                id: crypto.CoinInfo.Id,
-                symbol: crypto.CoinInfo.Name,
-                name: crypto.CoinInfo.FullName,
-                max_supply: crypto.CoinInfo.MaxSupply,
-                asset_launch_date: crypto.CoinInfo.AssetLaunchDate,
-                image_url: `https://www.cryptocompare.com${crypto.CoinInfo.ImageUrl}`,
-                current_price: crypto.RAW.USD.PRICE,
-                market_cap_rank: index + 1,
-                price_change_24h: crypto.RAW.USD.CHANGE24HOUR,
-                price_change_percentage_24h: crypto.RAW.USD.CHANGEPCT24HOUR,
-                last_updated: crypto.RAW.USD.LASTUPDATE,
-                high_24h: crypto.RAW.USD.HIGH24HOUR,
-                low_24h: crypto.RAW.USD.LOW24HOUR,
-            }
+
+        const undefinedRemoved = cryptoData.data.Data.filter((ticker) => {
+            // console.log(ticker.RAW?.USD.PRICE)
+            return ticker.RAW !== undefined;
         })
+
+        const filteredCryptoData = undefinedRemoved.map((crypto, index) => {
+            const { CoinInfo, RAW } = crypto;
+            return {
+                id: CoinInfo.Id,
+                symbol: CoinInfo.Name,
+                name: CoinInfo.FullName,
+                max_supply: CoinInfo.MaxSupply,
+                asset_launch_date: CoinInfo.AssetLaunchDate,
+                image_url: `https://www.cryptocompare.com${CoinInfo.ImageUrl}`,
+                current_price: RAW.USD.PRICE,
+                market_cap_rank: index + 1,
+                price_change_24h: RAW.USD.CHANGE24HOUR,
+                price_change_percentage_24h: RAW.USD.CHANGEPCT24HOUR,
+                last_updated: RAW.USD.LASTUPDATE,
+                high_24h: RAW.USD.HIGH24HOUR,
+                low_24h: RAW.USD.LOW24HOUR,
+            };
+        });
         return cryptoData = filteredCryptoData
     } catch (error) {
         let formattedError = JSON.stringify(logger.formatError(error))

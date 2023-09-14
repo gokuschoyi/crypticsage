@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import Header from '../../../global/Header';
-import IndicatorDescription from '../components/IndicatorDescription';
+import { Indicators } from '../components/IndicatorDescription';
 import { getHistoricalTickerDataFroDb, fetchLatestTickerForUser } from '../../../../../api/adminController'
 import { setCryptoDataInDbRedux, resetStreamedTickerDataRedux } from './CryptoStockModuleSlice'
 import MainChart from '../components/MainChartCopy';
+import SelectedFunctionContainer from '../components/SelectedFunctionContainer';
 import { useSelector } from 'react-redux'
 import {
     Box
@@ -165,7 +166,7 @@ const CryptoModule = () => {
                     setNewTickerLength(fetchLength)
                     if (fetchLength > 0) {
                         // console.log('UE : Fetching new tickers from binance')
-                        
+
 
                         const updateQueries = {
                             ticker_name: cryptotoken,
@@ -202,6 +203,9 @@ const CryptoModule = () => {
         }
     })
 
+    const selectedFunctions = useSelector(state => state.cryptoStockModule.selectedFunctions)
+    const histDataLength = useSelector(state => state.cryptoStockModule.cryptoDataInDb).length
+    
     return (
         <Box className='crypto-module-container'>
             <Box height='100%' width='-webkit-fill-available'>
@@ -235,33 +239,69 @@ const CryptoModule = () => {
                 </Box>
             </Box>
 
-            <Grid container spacing={2} pt={4}>
-                <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className='indicator-chart-grid-box'>
+            <Grid container spacing={2} mt={4} className='indicator-chart-grid-box'>
+                <Grid item xs={12} sm={12} md={12} lg={12} xl={12} >
                     <Box className='chart-container' display='flex' flexDirection='column' height='100%' m={4}>
                         {chartData.length === 0 ?
                             (
-                                <Box className='token-chart-box' height="100%" alignItems='center' justifyContent='center' display='flex'>
+                                <Box className='token-chart-box' minHeight="100%" alignItems='center' justifyContent='center' display='flex'>
                                     <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
                                 </Box>
                             )
                             :
                             (
-                                <Box className='token-chart-box' height="100%">
+                                <Box className='token-chart-box' minHeight="100%">
                                     <MainChart
                                         latestTime={chartData[chartData.length - 1].time * 1000 + 60000}
                                         new_fetch_offset={newTickerLength}
                                         symbol={cryptotoken}
                                         selectedTokenPeriod={selectedTokenPeriod}
                                         module={module}
+                                        fetchValues={fetchValues}
                                     />
                                 </Box>
                             )
                         }
                     </Box>
                 </Grid>
+
+                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                    <Box ml={4} mr={4} mb={2} mt={2}>
+                        <Box pl={1}>
+                            <Typography variant='h4' sx={{ textAlign: 'start', color: 'white' }}>Selected Indicators</Typography>
+                        </Box>
+                        {selectedFunctions.length === 0 ?
+                            (
+                                <Box display='flex' flexDirection='row' justifyContent='flex-start'>
+                                    <Typography variant='h6' sx={{ textAlign: 'start', color: 'white' }}>Select an indicator to view</Typography>
+                                </Box>
+                            )
+                            :
+                            (
+                                <Grid container spacing={2} className='indicator-data-container'>
+                                    {selectedFunctions && selectedFunctions.map((funcRedux, index) => {
+                                        const { name, hint } = funcRedux
+                                        return (
+                                            <Grid key={`${funcRedux.name}${index}`} item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                                {funcRedux.functions.map((func, index) => {
+                                                    return (
+                                                        <SelectedFunctionContainer key={index} func={func} name={name} hint={hint} histDataLength={histDataLength} fetchValues={fetchValues} />
+                                                    )
+                                                })
+                                                }
+                                            </Grid>
+                                        )
+                                    })}
+                                </Grid>
+                            )
+                        }
+
+                    </Box>
+
+                </Grid>
             </Grid>
 
-            <IndicatorDescription symbol={cryptotoken} />
+            <Indicators symbol={cryptotoken} fetchValues={fetchValues} />
         </Box>
     )
 }

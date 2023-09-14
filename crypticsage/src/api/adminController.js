@@ -167,3 +167,13 @@ export const getHistoricalTickerDataFroDb = async ({ token, payload }) => {
     })
     return response;
 }
+
+export const executeTalibFunction = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/indicators/execute_talib_function`, { payload }, config, {
+        withCredentials: true
+    })
+    return response;
+}

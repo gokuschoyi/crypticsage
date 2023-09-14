@@ -898,7 +898,7 @@ const fetchTickerHistDataFromDb = async ({ type, ticker_name, period, page_no, i
         const collection_name = `${type}_${ticker_name}_${period}`
         const collection = db.collection(collection_name)
         const sortQuery = { openTime: -1 }
-        
+
         new_fetch_offset = new_fetch_offset === undefined ? 0 : new_fetch_offset
         // Calculate the number of documents to skip based on the page number and items per page
         const skip = ((page_no - 1) * items_per_page) + new_fetch_offset;
@@ -933,6 +933,52 @@ const fetchTickerHistDataFromDb = async ({ type, ticker_name, period, page_no, i
             output['period'] = period
             output['page_no'] = page_no
             output['items_per_page'] = items_per_page
+            output['start_date'] = finalResult.slice(-1)[0].date
+            output['end_date'] = finalResult[0].date
+            output['total_count'] = finalResult.length
+            output['ticker_data'] = finalResult
+
+            return output
+        } else {
+            return ["No data found in binance_historical"]
+        }
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const fetchTickerHistDataBasedOnCount = async ({ asset_type, ticker_name, period, fetch_count }) => {
+    try {
+        const db = (await client).db(HISTORICAL_DATABASE_NAME)
+        const collection_name = `${asset_type}_${ticker_name}_${period}`
+        const collection = db.collection(collection_name)
+        const sortQuery = { openTime: -1 }
+
+        const tokenData = await collection.find({}).sort(sortQuery).limit(fetch_count).toArray();
+
+        let finalResult = []
+
+        if (tokenData.length > 0) {
+            let output = {}
+            tokenData.reverse()
+
+            tokenData.map((data) => {
+                let obj = {
+                    date: new Date(data.openTime).toLocaleString(),
+                    openTime: data.openTime,
+                    open: data.open,
+                    high: data.high,
+                    low: data.low,
+                    close: data.close,
+                    volume: data.volume,
+                }
+                finalResult.push(obj)
+            })
+
+            output['ticker_name'] = ticker_name
+            output['period'] = period
+            output['fetch_count'] = fetch_count
             output['start_date'] = finalResult.slice(-1)[0].date
             output['end_date'] = finalResult[0].date
             output['total_count'] = finalResult.length
@@ -1201,5 +1247,6 @@ module.exports = {
     , checkTickerMetaDuplicateData
     , insertHistoricalDataToDb
     , fetchTickerHistDataFromDb
+    , fetchTickerHistDataBasedOnCount
     , updateTickerMetaData
 }

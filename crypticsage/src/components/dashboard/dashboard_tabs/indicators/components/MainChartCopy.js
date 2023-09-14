@@ -4,7 +4,6 @@ import { createChart } from 'lightweight-charts';
 import { updateTickerWithOneDataPoint, getHistoricalTickerDataFroDb } from '../../../../../api/adminController'
 import { useSelector, useDispatch } from 'react-redux'
 import { setStreamedTickerDataRedux, setCryptoDataInDbRedux, resetStreamedTickerDataRedux } from '../modules/CryptoStockModuleSlice'
-
 const checkForUniqueAndTransform = (data) => {
     const uniqueData = [];
     const seenTimes = new Set();
@@ -70,12 +69,12 @@ const calculateVolumeData = (data) => {
 }
 
 const MainChart = (props) => {
-    const { latestTime,new_fetch_offset, symbol, selectedTokenPeriod, module } = props;
+    const { latestTime, new_fetch_offset, symbol, selectedTokenPeriod, module } = props;
     const token = useSelector(state => state.auth.accessToken);
     const chartboxRef = useRef();
 
     const dispatch = useDispatch()
-    const streamedTickerData = useSelector(state => state.cryptoStockModule.streamedTickerData)
+    // const streamedTickerData = useSelector(state => state.cryptoStockModule.streamedTickerData)
     const tDataRedux = useSelector(state => state.cryptoStockModule.cryptoDataInDb)
 
     const newFetchedDataCount = useRef(0)
@@ -243,7 +242,7 @@ const MainChart = (props) => {
         let fetchPoint = Math.floor(newDataRef.current.length * 0.2) / -1
 
         // Create a debounced version of your data fetching logic
-        const debouncedFetchData = debounce((barNo,candleSticksInVisibleRange) => {
+        const debouncedFetchData = debounce((barNo, candleSticksInVisibleRange) => {
             // Your data fetching logic here
             if (barNo < fetchPoint) {
                 pageNo.current = pageNo.current + 1;
@@ -256,9 +255,9 @@ const MainChart = (props) => {
                     period: selectedTokenPeriod,
                     page_no: pageNo.current,
                     items_per_page: 500,
-                    new_fetch_offset:new_fetch_offset + newFetchedDataCount.current
+                    new_fetch_offset: new_fetch_offset + newFetchedDataCount.current
                 }
-                console.log(fetchQuery)
+                // console.log(fetchQuery)
 
                 getHistoricalTickerDataFroDb({ token, payload: fetchQuery })
                     .then((res) => {
@@ -281,8 +280,8 @@ const MainChart = (props) => {
         }, 500); // Adjust the delay as needed (e.g., 1000ms = 1 second)
 
         chart.timeScale().subscribeVisibleLogicalRangeChange((param) => {
-            const {from, to} = param
-            const candleSticksInVisibleRange = Math.floor(to - from) 
+            const { from, to } = param
+            const candleSticksInVisibleRange = Math.floor(to - from)
             fetchPoint = Math.floor(candleSticksInVisibleRange * 0.2) / -1
 
             const barsInfo = candleStickSeriesRef.current.barsInLogicalRange(param);
@@ -293,7 +292,7 @@ const MainChart = (props) => {
             if (!uniqueBarNumbers.includes(barNo)) {
                 uniqueBarNumbers.push(barNo);
                 if (barNo < lastBarNo) { // chcking if the chart is moving backwards, left to right
-                    debouncedFetchData(barNo,candleSticksInVisibleRange);
+                    debouncedFetchData(barNo, candleSticksInVisibleRange);
                 }
             }
             lastBarNo = barNo
@@ -435,7 +434,7 @@ const MainChart = (props) => {
                         .catch((err) => {
                             console.log(err)
                         })
-                        newFetchedDataCount.current = newFetchedDataCount.current + 1
+                    newFetchedDataCount.current = newFetchedDataCount.current + 1
                 } else {
                     console.log('Streaming data');
                 }
@@ -464,9 +463,12 @@ const MainChart = (props) => {
     }, [selectedTokenPeriod, symbol, token, dispatch])
 
     return (
-        <Box className='chart-cont-dom' width="100%" height="100%" >
-            <Box ref={chartboxRef}></Box>
-            <Box className='tool-tip-indicators'></Box>
+        <Box sx={{ width: '100%', height: '100%' }}>
+            <Box className='chart-cont-dom' width="100%" height="100%" >
+                <Box ref={chartboxRef}></Box>
+                <Box className='tool-tip-indicators'></Box>
+            </Box>
+            
         </Box>
     )
 }

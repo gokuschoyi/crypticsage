@@ -1,79 +1,23 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { getIndicatorDesc, executeTalibFunction } from '../../../../../api/adminController'
-import { useSelector, useDispatch } from 'react-redux'
-import { setTalibDescription, setFunctionSelectedFlag, setSelectedFunctions } from '../modules/CryptoStockModuleSlice'
-import {
-    Box,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    AccordionActions,
-    Typography,
-    TextField,
-    Grid,
-    IconButton,
-    Tooltip,
-    Autocomplete
-} from "@mui/material";
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, AccordionActions, IconButton, Tooltip, TextField } from '@mui/material'
+import { executeTalibFunction } from '../../../../../api/adminController'
+import { setSelectedFunctions } from '../modules/CryptoStockModuleSlice'
+import { MultiSelect } from './IndicatorDescription'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CreateIcon from '@mui/icons-material/Create';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import CheckIcon from '@mui/icons-material/Check';
 
-const MultiSelect = (props) => {
-    const { inputLabel, selectedInputOptions, handleInputOptions, fieldName, errorFlag, helperText } = props
-    const inputOptions = [
-        "",
-        "high",
-        "low",
-        "open",
-        "close",
-    ]
-    return (
-        <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'40px'}>
-            <Box sx={{ width: '100%' }}>
-                <Autocomplete
-                    size='small'
-                    disableClearable
-                    disablePortal={false}
-                    id={`select-input-${fieldName}`}
-                    options={inputOptions}
-                    value={selectedInputOptions} // Set the selected value
-                    onChange={(event, newValue) => handleInputOptions(fieldName, newValue)} // Handle value change
-                    sx={{ width: 'auto' }}
-                    renderInput={(params) => <TextField {...params}
-                        error={errorFlag}
-                        helperText={helperText}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'white',
-                                }
-                            }
-                        }}
-                        label={`Select a ${inputLabel}`}
-                        color="secondary"
-                    />}
-                />
-            </Box>
-            <Tooltip title={'Select one of the flags to be used for calculation'} placement='top' sx={{ cursor: 'pointer' }}>
-                <InfoOutlinedIcon className='small-icon' />
-            </Tooltip>
-        </Box>
-    )
-}
-
-const FunctionContainer = (props) => {
-    const { func, histDataLength, fetchValues } = props
+const SelectedFunctionContainer = (props) => {
+    const { func, histDataLength, fetchValues, name, hint } = props
     const dispatch = useDispatch()
     const token = useSelector(state => state.auth.accessToken);
     const funcCopy = Object.assign({}, func)
     // console.log(funcCopy)
-    const { group, hint, name, inputs, optInputs, outputs, function_selected_flag } = funcCopy
+    const { inputs, optInputs, outputs } = funcCopy
 
     const [selectedInputOptions, setSelectedInputOptions] = useState(inputs)
     const [defaultOptionalInputs, setDefaultOptionalInputs] = useState(optInputs)
-    const functionSelectedRef = useRef(function_selected_flag)
 
     // handle generate query for each function
     const handleGenerateQuery = (func_name) => {
@@ -131,10 +75,8 @@ const FunctionContainer = (props) => {
             console.log(payload)
             executeTalibFunction({ token, payload })
                 .then((res) => {
-                    console.log(res.data)
-                    dispatch(setFunctionSelectedFlag({ group, name, inputs: selectedInputOptions, optInputs: defaultOptionalInputs }))
-                    dispatch(setSelectedFunctions({ hint, name, inputs: selectedInputOptions, optInputs: defaultOptionalInputs, outputs, function_selected_flag: true, result: res.data.result }))
-                    functionSelectedRef.current = true
+                    console.log(res)
+                    dispatch(setSelectedFunctions({ hint, name, inputs: selectedInputOptions, optInputs: defaultOptionalInputs, outputs, result: res.data.result }))
                 })
                 .catch(err => {
                     console.log(err)
@@ -189,10 +131,8 @@ const FunctionContainer = (props) => {
                 console.log(payload)
                 executeTalibFunction({ token, payload })
                     .then((res) => {
+                        dispatch(setSelectedFunctions({ hint, name, inputs: selectedInputOptions, optInputs: defaultOptionalInputs, outputs, result: res.data.result }))
                         console.log(res.data)
-                        dispatch(setFunctionSelectedFlag({ group, name, inputs: selectedInputOptions, optInputs: defaultOptionalInputs }))
-                        dispatch(setSelectedFunctions({ hint, name, inputs: selectedInputOptions, optInputs: defaultOptionalInputs, outputs, function_selected_flag: true, result: res.data.result }))
-                        functionSelectedRef.current = true
                     })
                     .catch(err => {
                         console.log(err)
@@ -291,24 +231,11 @@ const FunctionContainer = (props) => {
                 <AccordionActions>
                     <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' width='100%' pl={1} pr={1}>
                         <Typography variant='h6' sx={{ textAlign: 'start' }}>{name}</Typography>
-                        {functionSelectedRef.current ?
-                            (
-                                <Box>
-                                    <Tooltip title="Function added" placement='top'>
-                                        <CheckIcon color='success' className='small-icon' />
-                                    </Tooltip>
-                                </Box>
-                            )
-                            :
-                            (
-                                <IconButton size='small' aria-label="update" color="secondary" onClick={handleGenerateQuery.bind(null, { func_name: name })}>
-                                    <Tooltip title="Generate query" placement='top'>
-                                        <CreateIcon className='small-icon' />
-                                    </Tooltip>
-                                </IconButton>
-                            )
-                        }
-
+                        <IconButton size='small' aria-label="update" color="secondary" onClick={handleGenerateQuery.bind(null, { func_name: name })}>
+                            <Tooltip title="Generate query" placement='top'>
+                                <CreateIcon className='small-icon' />
+                            </Tooltip>
+                        </IconButton>
                     </Box>
                 </AccordionActions>
 
@@ -427,138 +354,4 @@ const FunctionContainer = (props) => {
     )
 }
 
-const Indicators = (props) => {
-    const { fetchValues } = props
-    const token = useSelector(state => state.auth.accessToken);
-    const dispatch = useDispatch()
-    const histDataLength = useSelector(state => state.cryptoStockModule.cryptoDataInDb).length
-
-    // const [copyRawTalibDesc, setCopyRawTalibDesc] = useState([])
-    const talibDescriptionRedux = useSelector(state => state.cryptoStockModule.talibDescription);
-    const [rawTalibDesc, setRawTalibDesc] = useState([]) // copy of grouped talib desc data
-    const [talibDesc, setTalibDesc] = useState([]) // grouped talib desc data
-
-    // initial fetch talib descriptions
-    const loadDescRef = useRef(false)
-    useEffect(() => {
-        if (!loadDescRef.current) {
-            loadDescRef.current = true
-            if (talibDescriptionRedux.length === 0) {
-                // console.log('UE : Fetching talib descriptions')
-                getIndicatorDesc({ token })
-                    .then((res) => {
-                        setRawTalibDesc(res.data.desc)
-                        setTalibDesc(res.data.desc)
-                        dispatch(setTalibDescription(res.data.desc))
-                    })
-                    .catch(err => {
-                        console.log(err)
-                    })
-            } else {
-                // console.log('UE : Talib descriptions already present in redux')
-                setRawTalibDesc(talibDescriptionRedux)
-                setTalibDesc(talibDescriptionRedux)
-            }
-        }
-    }, [talibDescriptionRedux, dispatch, token])
-
-    const [searchTicker, setSearchTicker] = useState('');
-    const handleSearchTicker = (e) => {
-        // console.log(e.target.value)
-        setSearchTicker(e.target.value.toLowerCase())
-    }
-
-    const [expanded, setExpanded] = useState(false);
-    const handleAccordianChange = (panel) => (event, isExpanded) => {
-        setExpanded(isExpanded ? panel : false);
-    };
-
-    // filtering/search logic
-    useEffect(() => {
-        // console.log('UE : New Filtering Logic')
-        let updatedDataCopy = [...rawTalibDesc]
-        const filteredGroups = [];
-
-        for (const group of updatedDataCopy) {
-            const filteredFunctions = group.functions.filter(func =>
-                func.name.toLowerCase().includes(searchTicker)
-            );
-
-            if (filteredFunctions.length > 0) {
-                const filteredGroup = {
-                    group_name: group.group_name,
-                    functions: filteredFunctions
-                };
-                filteredGroups.push(filteredGroup);
-            }
-        }
-
-        if (filteredGroups.length === 1) {
-            setExpanded(filteredGroups[0].group_name)
-        }
-
-        setTalibDesc(filteredGroups)
-        // console.log(filteredGroups)
-    }, [searchTicker, rawTalibDesc])
-
-    return (
-        <Box className='admin-indicator-container' >
-
-            <Box className='talib-indicators-box' p={2} >
-                <Box className='search-indicator-box' display='flex' flexDirection='row' alignItems='center' ml={2} pt={2} pb={2} gap={2}>
-                    <TextField
-                        color='secondary'
-                        label="Search indicator"
-                        variant="outlined"
-                        value={searchTicker}
-                        onChange={(e) => handleSearchTicker(e)}
-                        id="outlined-size-small"
-                        size="small"
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: '#E0E3E2',
-                                }
-                            }
-                        }}
-                    />
-                </Box>
-
-                <Box pl={2} pr={2} className='all-talib-functions' sx={{ minHeight: '500px' }}>
-                    {talibDesc && talibDesc.map((group, index) => {
-                        const { group_name, functions } = group
-                        return (
-                            <Box width='100%' pt={1} pb={1} key={group_name} >
-                                <Accordion expanded={expanded === `${group_name}`} onChange={handleAccordianChange(`${group_name}`)} TransitionProps={{ mountOnEnter: true }} sx={{ backgroundColor: '#2b2b2b' }}>
-                                    <AccordionSummary
-                                        expandIcon={<ExpandMoreIcon />}
-                                        aria-controls="panel1a-content"
-                                        id="panel1a-header"
-                                    >
-                                        <Typography variant='h5'>({index + 1}) : {group_name} <span style={{ color: 'red' }}>({functions.length})</span></Typography>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        <Grid container spacing={1} className='indicator-data-container'>
-                                            {functions && functions.map((func, index) => {
-                                                return (
-                                                    <Grid key={func.name} item xs={12} sm={12} md={6} lg={4} xl={4}>
-                                                        <FunctionContainer key={index} func={func} histDataLength={histDataLength} fetchValues={fetchValues} />
-                                                    </Grid>
-                                                )
-                                            })}
-                                        </Grid>
-                                    </AccordionDetails>
-                                </Accordion>
-                            </Box>
-                        )
-                    })}
-                </Box>
-            </Box>
-        </Box >
-    )
-}
-
-export {
-    Indicators,
-    MultiSelect
-}
+export default SelectedFunctionContainer

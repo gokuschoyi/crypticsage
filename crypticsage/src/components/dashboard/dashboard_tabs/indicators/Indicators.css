@@ -17,7 +17,15 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-.tooltip-text{
+.indicator-chart-grid-box {
+    background-color: var(--mui-palette-primary-dark);
+}
+
+.function-accordian {
+    background-color: var(--mui-palette-primary-newBlack);
+}
+
+.tooltip-text {
     transition: all 0.2s ease-in-out;
     font-size: 14px;
 }
@@ -164,9 +172,10 @@
         display: flex;
         justify-content: space-between;
     }
-    .tooltip-text{
+
+    .tooltip-text {
         font-size: 12px !important;
         font-weight: 400 !important;
-        
+
     }
 }
