@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Box } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { updateTickerWithOneDataPoint, getHistoricalTickerDataFroDb } from '../../../../../api/adminController'
@@ -84,9 +84,12 @@ const MainChart = (props) => {
     const rsiSeriesRef = useRef(null)
     const rsiSeriesNewRef = useRef(null)
 
+    const selectedFunctionData = useSelector(state => state.cryptoStockModule.selectedFunctions)
+
     const wsRef = useRef(null)
     const pageNo = useRef(1)
     const newDataRef = useRef([...tDataRedux])
+    const chart = useRef(null)
     useEffect(() => {
         console.log("UE : Main chart")
         console.log(tDataRedux.length)
@@ -108,7 +111,7 @@ const MainChart = (props) => {
             cWidth = tokenDom.clientWidth;
             cHeight = tokenDom.clientHeight;
             // console.log(cWidth, cHeight)
-            chart.applyOptions({ width: cWidth, height: cHeight });
+            chart.current.applyOptions({ width: cWidth, height: cHeight });
 
             tokenChartBox = document.getElementsByClassName('token-chart-box')[0].getBoundingClientRect()
             offsetLeft = Math.round(tokenChartBox.left);
@@ -129,12 +132,12 @@ const MainChart = (props) => {
             toolTipYCoOrdinates = event.touches[0].pageY;
         }
 
-        let chart
+
         let scrollYAxis = window.scrollY
 
         // console.log(cWidth, cHeight)
 
-        chart = createChart(chartboxRef.current, {
+        chart.current = createChart(chartboxRef.current, {
             width: cWidth,
             height: cHeight,
             layout: {
@@ -165,10 +168,10 @@ const MainChart = (props) => {
             }
         });
 
-        chart.timeScale().fitContent();
+        chart.current.timeScale().fitContent();
 
         // Candlestick
-        candleStickSeriesRef.current = chart.addCandlestickSeries({
+        candleStickSeriesRef.current = chart.current.addCandlestickSeries({
             upColor: 'green',
             downColor: 'red',
             wickVisible: true,
@@ -185,7 +188,7 @@ const MainChart = (props) => {
         candleStickSeriesRef.current.setData(tData);
 
         // Volume
-        candleStickVolumeSeriesRef.current = chart.addHistogramSeries({
+        candleStickVolumeSeriesRef.current = chart.current.addHistogramSeries({
             color: '#26a69a',
             priceFormat: {
                 type: 'volume',
@@ -207,7 +210,7 @@ const MainChart = (props) => {
         candleStickVolumeSeriesRef.current.setData(volDat);
 
         // RSI
-        rsiSeriesRef.current = chart.addLineSeries({
+        rsiSeriesRef.current = chart.current.addLineSeries({
             color: 'purple',
             lineWidth: 1,
             pane: 1,
@@ -216,7 +219,7 @@ const MainChart = (props) => {
         rsiSeriesRef.current.setData(rsi_data);
 
         // RSI new
-        rsiSeriesNewRef.current = chart.addLineSeries({
+        rsiSeriesNewRef.current = chart.current.addLineSeries({
             color: 'red',
             lineWidth: 1,
             pane: 2,
@@ -279,7 +282,7 @@ const MainChart = (props) => {
             }
         }, 500); // Adjust the delay as needed (e.g., 1000ms = 1 second)
 
-        chart.timeScale().subscribeVisibleLogicalRangeChange((param) => {
+        chart.current.timeScale().subscribeVisibleLogicalRangeChange((param) => {
             const { from, to } = param
             const candleSticksInVisibleRange = Math.floor(to - from)
             fetchPoint = Math.floor(candleSticksInVisibleRange * 0.2) / -1
@@ -299,7 +302,7 @@ const MainChart = (props) => {
         })
 
         // update tooltip
-        chart.subscribeCrosshairMove((param) => {
+        chart.current.subscribeCrosshairMove((param) => {
             if (
                 param.point === undefined ||
                 !param.time ||
@@ -363,11 +366,115 @@ const MainChart = (props) => {
             window.removeEventListener('resize', handleResize);
             tokenDom.removeEventListener('mousemove', calculateMousePosition)
             tokenDom.removeEventListener('touchmove', handleTouchMove)
-            chart.remove();
+            chart.current.remove();
+            setChartSeriesState([])
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [symbol, selectedTokenPeriod])
 
+    const lineColors = [
+        "#FFAA00",
+        "#DDBB77",
+        "#EECC99",
+        "#CCAACC",
+        "#DDDD88",
+        "#FF9966",
+        "#FFBB88",
+    ]
+
+    const [chartSeriesState, setChartSeriesState] = useState([])
+    useEffect(() => {
+        if (chart.current !== null) {
+            let reduxDataCopy = JSON.parse(JSON.stringify(selectedFunctionData))
+            console.log("loading selectd function chart data")
+            const contentBox = document.getElementsByClassName('selected-function-value-displaybox')[0]
+
+            let functionTitles = ''
+            const chartDataToRender = reduxDataCopy.flatMap((d) => {
+                const name = d.name;
+                const functions = d.functions;
+
+                // Create an array to hold the results
+                const finalResult = functions.map((f) => {
+                    functionTitles = functionTitles + `<div id=${name}${f.differentiatorValue} style="display:flex; flex-direction:row; gap:10px" class='function-title'>${name}_${f.differentiatorValue}<div class=${name}_${f.id}></div></div>`
+                    const convertedData = f.result
+                        .filter((d) => d.outReal !== null)
+                        .map((d) => ({
+                            time: d.time,
+                            value: d.outReal
+                        }))
+                    return {
+                        name: `${name}_${f.id}`,
+                        result: convertedData,
+                        visible: f.show_chart_flag
+                    }
+                });
+                // Return the result for this item in reduxDataCopy
+                return finalResult;
+            });
+
+            contentBox.innerHTML = functionTitles
+
+            chartDataToRender.forEach((func) => {
+                const existingSeries = chartSeriesState.find((series) => series.name === func.name);
+                if (!existingSeries) {
+                    console.log('Not exisiting')
+                    const newSeries = chart.current.addLineSeries({
+                        color: lineColors[Math.floor(Math.random() * lineColors.length)],
+                        lineWidth: 1,
+                        visible: func.visible,
+                        priceLineVisible: false
+                    });
+                    newSeries.setData(func.result);
+                    setChartSeriesState((prevSeries) => [...prevSeries, { name: func.name, series: newSeries }]);
+                } else {
+                    console.log('existing')
+                    existingSeries.series.applyOptions({ visible: func.visible });
+                }
+            });
+
+            const existingSeriesNames = chartSeriesState.map((series) => series.name);
+            const functionsInState = chartDataToRender.map((func) => func.name);
+
+            const deletedFunctions = existingSeriesNames.filter((name) => !functionsInState.includes(name));
+
+            deletedFunctions.forEach((deletedFunctionName) => {
+                const seriesToRemove = chartSeriesState.find((series) => series.name === deletedFunctionName);
+                if (seriesToRemove) {
+                    chart.current.removeSeries(seriesToRemove.series);
+                    // Update chartSeriesState to remove the deleted series
+                    setChartSeriesState((prevSeries) => prevSeries.filter((series) => series.name !== deletedFunctionName))
+                }
+            });
+
+
+            chart.current.subscribeCrosshairMove((param) => {
+                // console.log(param)
+                if (
+                    param.point === undefined ||
+                    !param.time ||
+                    param.point.x < 0 ||
+                    param.point.x > chartboxRef.current.clientWidth ||
+                    param.point.y < 0 ||
+                    param.point.y > chartboxRef.current.clientHeight ||
+                    param.paneIndex !== 0
+                ) {
+                    // console.log('No crosshair data')
+                } else {
+                    chartSeriesState.forEach((series) => {
+                        const seriesValue = param.seriesData.get(series.series)
+                        // console.log(seriesValue)
+                        if (seriesValue !== undefined) {
+                            const divToInsertDataTo = document.getElementsByClassName(`${series.name}`)[0]
+                            divToInsertDataTo.innerHTML = seriesValue.value.toFixed(2)
+                        }
+                    })
+                }
+            })
+
+            // console.log("existing", existingSeriesNames, "in redux", functionsInState, "deleted function", deletedFunctions)
+        }
+    })
 
     // web socket warning becaue of react strict mode
     useEffect(() => {
@@ -436,7 +543,7 @@ const MainChart = (props) => {
                         })
                     newFetchedDataCount.current = newFetchedDataCount.current + 1
                 } else {
-                    console.log('Streaming data');
+                    // console.log('Streaming data');
                 }
             };
 
@@ -468,7 +575,7 @@ const MainChart = (props) => {
                 <Box ref={chartboxRef}></Box>
                 <Box className='tool-tip-indicators'></Box>
             </Box>
-            
+
         </Box>
     )
 }

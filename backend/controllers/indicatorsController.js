@@ -114,7 +114,7 @@ const formatOutputs = ({ ticker_data, talib_result, output_keys }) => {
         const combined = [...emptyArrayWithNull, ...talibResultForKey];
         input_data_copy = input_data_copy.map((item, index) => {
             return {
-                ...item,
+                time: item.openTime / 1000,
                 [key]: combined[index],
             };
         });
@@ -134,7 +134,7 @@ const executeTalibFunction = async (req, res) => {
 
     if (tokenDataFromRedis.ticker_data.length > fetch_count) {
         log.info('Slicing the ticker data as request length is less that redis length')
-        tokenDataFromRedis.ticker_data = tokenDataFromRedis.ticker_data.slice(0, fetch_count)
+        tokenDataFromRedis.ticker_data = tokenDataFromRedis.ticker_data.slice(tokenDataFromRedis.ticker_data.length - 1 - fetch_count, tokenDataFromRedis.ticker_data.length)
     }
 
     // validates the optional input data
@@ -145,7 +145,7 @@ const executeTalibFunction = async (req, res) => {
 
     // final query to be executed
     let finalFuncQuery = addDataToFuncQuery({ func_query: validatedInputData, processed_data: processed })
-    
+
     log.info('Executing talib function')
     // execute the talib function
     var talResult = talib.execute(finalFuncQuery)

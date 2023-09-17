@@ -1,0 +1,9 @@
+.learning-container {
+    width: 100%;
+}
+
+@media screen and (min-width: 1400px) {
+    .learning-container {
+        width: 1200px;
+    }
+}

@@ -134,7 +134,7 @@ const SectionCard = () => {
 
     return (
         <React.Fragment>
-            <Box height='100%' width='-webkit-fill-available'>
+            <Box width='-webkit-fill-available'>
                 <Header title='Sections' subtitle='Explore various lessons' />
             </Box>
             <Box className='section-cards-container'>

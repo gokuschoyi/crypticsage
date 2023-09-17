@@ -128,12 +128,12 @@ const Glossary = (props) => {
 
     return (
         <Box className='glossary-container' onClick={hide}>
-            <Box height='100%' width='-webkit-fill-available'>
+            <Box width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
             </Box>
             <Grid className='glossary-grid-container' container spacing={2} justifyContent='center'>
                 <Grid className='glossary-grid-button' item xs={11} sm={11} md={10} lg={10}>
-                    <Box className='glossary-container'>
+                    <Box className='glossary-container-inner'>
                         <Box className='alphabet-box'>
                             <CustomButton name='A-C' filterValue='A_C' handleFilterChange={handleFilterChange} />
                             <CustomButton name='D-F' filterValue='D_F' handleFilterChange={handleFilterChange} />

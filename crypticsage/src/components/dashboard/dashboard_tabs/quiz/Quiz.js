@@ -62,7 +62,7 @@ const Quiz = (props) => {
 
     return (
         <Box className='quiz-container' onClick={hide}>
-            <Box height='100%' width='-webkit-fill-available'>
+            <Box width='-webkit-fill-available'>
                 <Header title={titleDesc.title} subtitle={titleDesc.subtitle} />
             </Box>
             <Box className='quiz-cards-container'>

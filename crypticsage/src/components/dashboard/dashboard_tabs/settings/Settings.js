@@ -42,7 +42,7 @@ const Settings = (props) => {
 
     return (
         <Box className='settings-container' onClick={hide}>
-            <Box height='100%' width='-webkit-fill-available'>
+            <Box width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
             </Box>
             <Box className='settings-content'>

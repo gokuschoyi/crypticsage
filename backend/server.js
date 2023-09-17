@@ -62,15 +62,19 @@ app.listen(config.port, () => {
     logs.info(`Express server listening on port ${config.port}`);
 });
 
-// Attach the WebSocket server to a separate HTTP server
-const wsHttpServer = http.createServer(wsServer);
-wsHttpServer.listen(config.wsPort, () => {
-    logs.info(`WebSocket server running on port ${config.wsPort}`);
-});
-
-// Upgrade HTTP requests to WebSocket
-wsHttpServer.on('upgrade', (request, socket, head) => {
-    wsServer.handleUpgrade(request, socket, head, (ws) => {
-        wsServer.emit('connection', ws, request);
+if (config.websocketFlag === 'true') {
+    // Attach the WebSocket server to a separate HTTP server
+    const wsHttpServer = http.createServer(wsServer);
+    wsHttpServer.listen(config.wsPort, () => {
+        logs.info(`WebSocket server running on port ${config.wsPort}`);
     });
-});
+
+    // Upgrade HTTP requests to WebSocket
+    wsHttpServer.on('upgrade', (request, socket, head) => {
+        wsServer.handleUpgrade(request, socket, head, (ws) => {
+            wsServer.emit('connection', ws, request);
+        });
+    });
+} else {
+    logs.info('WebSocket flag set to false');
+}

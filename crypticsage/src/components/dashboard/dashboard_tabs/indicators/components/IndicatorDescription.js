@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { getIndicatorDesc, executeTalibFunction } from '../../../../../api/adminController'
 import { useSelector, useDispatch } from 'react-redux'
-import { setTalibDescription, setFunctionSelectedFlag, setSelectedFunctions } from '../modules/CryptoStockModuleSlice'
+import { setTalibDescription, setSelectedFlagInTalibDescription, setSelectedFunctions } from '../modules/CryptoStockModuleSlice'
 import {
     Box,
     Accordion,
@@ -64,7 +64,7 @@ const MultiSelect = (props) => {
 }
 
 const FunctionContainer = (props) => {
-    const { func, histDataLength, fetchValues } = props
+    const { func, group_name, histDataLength, fetchValues } = props
     const dispatch = useDispatch()
     const token = useSelector(state => state.auth.accessToken);
     const funcCopy = Object.assign({}, func)
@@ -132,8 +132,26 @@ const FunctionContainer = (props) => {
             executeTalibFunction({ token, payload })
                 .then((res) => {
                     console.log(res.data)
-                    dispatch(setFunctionSelectedFlag({ group, name, inputs: selectedInputOptions, optInputs: defaultOptionalInputs }))
-                    dispatch(setSelectedFunctions({ hint, name, inputs: selectedInputOptions, optInputs: defaultOptionalInputs, outputs, function_selected_flag: true, result: res.data.result }))
+                    dispatch(setSelectedFlagInTalibDescription(
+                        {
+                            group,
+                            name,
+                            inputs: selectedInputOptions,
+                            optInputs: defaultOptionalInputs
+                        }
+                    ))
+                    dispatch(setSelectedFunctions(
+                        {
+                            hint,
+                            name,
+                            group_name,
+                            inputs: selectedInputOptions,
+                            optInputs: defaultOptionalInputs,
+                            outputs,
+                            function_selected_flag: true,
+                            result: res.data.result
+                        }
+                    ))
                     functionSelectedRef.current = true
                 })
                 .catch(err => {
@@ -190,8 +208,26 @@ const FunctionContainer = (props) => {
                 executeTalibFunction({ token, payload })
                     .then((res) => {
                         console.log(res.data)
-                        dispatch(setFunctionSelectedFlag({ group, name, inputs: selectedInputOptions, optInputs: defaultOptionalInputs }))
-                        dispatch(setSelectedFunctions({ hint, name, inputs: selectedInputOptions, optInputs: defaultOptionalInputs, outputs, function_selected_flag: true, result: res.data.result }))
+                        dispatch(setSelectedFlagInTalibDescription(
+                            {
+                                group,
+                                name,
+                                inputs: selectedInputOptions,
+                                optInputs: defaultOptionalInputs
+                            }
+                        ))
+                        dispatch(setSelectedFunctions(
+                            {
+                                hint,
+                                name,
+                                group_name,
+                                inputs: selectedInputOptions,
+                                optInputs: defaultOptionalInputs,
+                                outputs,
+                                function_selected_flag: true,
+                                result: res.data.result
+                            }
+                        ))
                         functionSelectedRef.current = true
                     })
                     .catch(err => {
@@ -291,7 +327,7 @@ const FunctionContainer = (props) => {
                 <AccordionActions>
                     <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' width='100%' pl={1} pr={1}>
                         <Typography variant='h6' sx={{ textAlign: 'start' }}>{name}</Typography>
-                        {functionSelectedRef.current ?
+                        {function_selected_flag ?
                             (
                                 <Box>
                                     <Tooltip title="Function added" placement='top'>
@@ -436,29 +472,25 @@ const Indicators = (props) => {
     // const [copyRawTalibDesc, setCopyRawTalibDesc] = useState([])
     const talibDescriptionRedux = useSelector(state => state.cryptoStockModule.talibDescription);
     const [rawTalibDesc, setRawTalibDesc] = useState([]) // copy of grouped talib desc data
-    const [talibDesc, setTalibDesc] = useState([]) // grouped talib desc data
+    const [talibDesc, setTalibDesc] = useState(talibDescriptionRedux) // grouped talib desc data
 
     // initial fetch talib descriptions
-    const loadDescRef = useRef(false)
     useEffect(() => {
-        if (!loadDescRef.current) {
-            loadDescRef.current = true
-            if (talibDescriptionRedux.length === 0) {
-                // console.log('UE : Fetching talib descriptions')
-                getIndicatorDesc({ token })
-                    .then((res) => {
-                        setRawTalibDesc(res.data.desc)
-                        setTalibDesc(res.data.desc)
-                        dispatch(setTalibDescription(res.data.desc))
-                    })
-                    .catch(err => {
-                        console.log(err)
-                    })
-            } else {
-                // console.log('UE : Talib descriptions already present in redux')
-                setRawTalibDesc(talibDescriptionRedux)
-                setTalibDesc(talibDescriptionRedux)
-            }
+        if (talibDescriptionRedux.length === 0) {
+            // console.log('UE : Fetching talib descriptions')
+            getIndicatorDesc({ token })
+                .then((res) => {
+                    setRawTalibDesc(res.data.desc)
+                    setTalibDesc(res.data.desc)
+                    dispatch(setTalibDescription(res.data.desc))
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+        } else {
+            // console.log('UE : Talib descriptions already present in redux')
+            setRawTalibDesc(talibDescriptionRedux)
+            setTalibDesc(talibDescriptionRedux)
         }
     }, [talibDescriptionRedux, dispatch, token])
 
@@ -542,7 +574,7 @@ const Indicators = (props) => {
                                             {functions && functions.map((func, index) => {
                                                 return (
                                                     <Grid key={func.name} item xs={12} sm={12} md={6} lg={4} xl={4}>
-                                                        <FunctionContainer key={index} func={func} histDataLength={histDataLength} fetchValues={fetchValues} />
+                                                        <FunctionContainer key={index} group_name={group_name} func={func} histDataLength={histDataLength} fetchValues={fetchValues} />
                                                     </Grid>
                                                 )
                                             })}

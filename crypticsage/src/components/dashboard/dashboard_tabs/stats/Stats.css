@@ -1,3 +1,7 @@
+.stat-container {
+  width: 100%;
+}
+
 .tool-tip {
   width: 96px;
   background-color: #fff;
@@ -233,6 +237,12 @@
 
 .tokenSelector-autocomplete {
   cursor: pointer;
+}
+
+@media screen and (min-width: 1400px) {
+  .stat-container {
+    width: 1200px;
+  }
 }
 
 @media screen and (max-width: 600px) {

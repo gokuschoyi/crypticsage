@@ -186,7 +186,7 @@ const Stats = (props) => {
 
     return (
         <Box className='stat-container' onClick={hide}>
-            <Box height='100%' width='-webkit-fill-available'>
+            <Box width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
                 <Box id="w-socket"></Box>
             </Box>

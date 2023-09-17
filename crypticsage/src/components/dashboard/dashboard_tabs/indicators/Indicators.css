@@ -1,3 +1,10 @@
+.indicators-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .tool-tip-indicators {
     width: 130px;
     background-color: #fff;
@@ -158,6 +165,20 @@
 
 .rotate-icon {
     animation: rotate 2s linear infinite;
+}
+
+.crypto-stocks-table-module {
+    width: 100%;
+}
+
+.crypto-module-container {
+    width: 100%;
+}
+
+@media screen and (min-width: 1400px) {
+    .crypto-stocks-table-module {
+        width: 1200px;
+    }
 }
 
 @media screen and (max-width : 900px) {
