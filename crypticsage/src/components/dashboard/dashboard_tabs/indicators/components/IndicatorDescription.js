@@ -13,7 +13,8 @@ import {
     Grid,
     IconButton,
     Tooltip,
-    Autocomplete
+    Autocomplete,
+    useTheme
 } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CreateIcon from '@mui/icons-material/Create';
@@ -21,6 +22,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CheckIcon from '@mui/icons-material/Check';
 
 const MultiSelect = (props) => {
+    const theme = useTheme()
     const { inputLabel, selectedInputOptions, handleInputOptions, fieldName, errorFlag, helperText } = props
     const inputOptions = [
         "",
@@ -42,12 +44,13 @@ const MultiSelect = (props) => {
                     onChange={(event, newValue) => handleInputOptions(fieldName, newValue)} // Handle value change
                     sx={{ width: 'auto' }}
                     renderInput={(params) => <TextField {...params}
+                        variant="outlined"
                         error={errorFlag}
                         helperText={helperText}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
-                                    borderColor: 'white',
+                                    borderColor: `${theme.palette.text.secondary}`,
                                 }
                             }
                         }}
@@ -64,6 +67,7 @@ const MultiSelect = (props) => {
 }
 
 const FunctionContainer = (props) => {
+    const theme = useTheme()
     const { func, group_name, histDataLength, fetchValues } = props
     const dispatch = useDispatch()
     const token = useSelector(state => state.auth.accessToken);
@@ -326,7 +330,7 @@ const FunctionContainer = (props) => {
 
                 <AccordionActions>
                     <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' width='100%' pl={1} pr={1}>
-                        <Typography variant='h6' sx={{ textAlign: 'start' }}>{name}</Typography>
+                        <Typography variant='h6' fontWeight='bold' sx={{ textAlign: 'start' }}>{name}</Typography>
                         {function_selected_flag ?
                             (
                                 <Box>
@@ -349,10 +353,10 @@ const FunctionContainer = (props) => {
                 </AccordionActions>
 
                 <AccordionDetails>
-                    <Box pl={1} pr={1} pb={1} sx={{ backgroundColor: '#272727' }}>
+                    <Box pl={1} pr={1} pb={1} >
 
                         <Box className='indicator-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                            <Typography variant='h5'>INPUTS</Typography>
+                            <Typography variant='h5' fontWeight='500'>INPUTS</Typography>
                             {selectedInputOptions.length > 0 && selectedInputOptions.map((input, index) => {
                                 const { value, errorFlag, helperText } = input
                                 return (
@@ -391,7 +395,7 @@ const FunctionContainer = (props) => {
                         </Box>
 
                         <Box className='indicator-optional-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                            <Typography variant='h5'>OPTIONAL INPUTS</Typography>
+                            <Typography variant='h5' fontWeight='500'>OPTIONAL INPUTS</Typography>
                             {defaultOptionalInputs.length === 0 ?
                                 (
                                     <Typography>None</Typography>
@@ -415,7 +419,7 @@ const FunctionContainer = (props) => {
                                                     sx={{
                                                         '& .MuiOutlinedInput-root': {
                                                             '& fieldset': {
-                                                                borderColor: 'white',
+                                                                borderColor: `${theme.palette.text.secondary}`,
                                                             }
                                                         }
                                                     }}
@@ -443,7 +447,7 @@ const FunctionContainer = (props) => {
                         </Box>
 
                         <Box className='indicator-outputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                            <Typography variant='h5'>OUTPUTS</Typography>
+                            <Typography variant='h5' fontWeight='500'>OUTPUTS</Typography>
                             {outputs && outputs.map((output, index) => {
                                 return (
                                     <Box key={index} display='flex' flexDirection='column' gap='5px'>
@@ -561,7 +565,7 @@ const Indicators = (props) => {
                         const { group_name, functions } = group
                         return (
                             <Box width='100%' pt={1} pb={1} key={group_name} >
-                                <Accordion expanded={expanded === `${group_name}`} onChange={handleAccordianChange(`${group_name}`)} TransitionProps={{ mountOnEnter: true }} sx={{ backgroundColor: '#2b2b2b' }}>
+                                <Accordion expanded={expanded === `${group_name}`} onChange={handleAccordianChange(`${group_name}`)} TransitionProps={{ mountOnEnter: true }} >
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
                                         aria-controls="panel1a-content"
@@ -573,7 +577,7 @@ const Indicators = (props) => {
                                         <Grid container spacing={1} className='indicator-data-container'>
                                             {functions && functions.map((func, index) => {
                                                 return (
-                                                    <Grid key={func.name} item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                                    <Grid key={func.name} item xs={12} sm={12} md={6} lg={4} xl={3}>
                                                         <FunctionContainer key={index} group_name={group_name} func={func} histDataLength={histDataLength} fetchValues={fetchValues} />
                                                     </Grid>
                                                 )

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Box } from '@mui/material'
+import { Box, useTheme } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { updateTickerWithOneDataPoint, getHistoricalTickerDataFroDb } from '../../../../../api/adminController'
 import { useSelector, useDispatch } from 'react-redux'
@@ -71,7 +71,8 @@ const calculateVolumeData = (data) => {
 const MainChart = (props) => {
     const { latestTime, new_fetch_offset, symbol, selectedTokenPeriod, module } = props;
     const token = useSelector(state => state.auth.accessToken);
-    const chartboxRef = useRef();
+    const theme = useTheme()
+    const chartBackgroundColor = theme.palette.background.default
 
     const dispatch = useDispatch()
     // const streamedTickerData = useSelector(state => state.cryptoStockModule.streamedTickerData)
@@ -372,6 +373,21 @@ const MainChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [symbol, selectedTokenPeriod])
 
+    useEffect(() => {
+        if (chart.current !== undefined || chart.current !== null) {
+            chart.current.applyOptions({
+                layout: {
+                    background: {
+                        type: 'solid',
+                        color: chartBackgroundColor,
+                    },
+                    textColor: 'rgba(255, 255, 255, 0.9)',
+                }
+            })
+        }
+    }, [chartBackgroundColor])
+    const chartboxRef = useRef();
+
     const lineColors = [
         "#FFAA00",
         "#DDBB77",
@@ -403,6 +419,7 @@ const MainChart = (props) => {
                             time: d.time,
                             value: d.outReal
                         }))
+                    console.log(f.result.length)
                     return {
                         name: `${name}_${f.id}`,
                         result: convertedData,
@@ -415,7 +432,10 @@ const MainChart = (props) => {
 
             contentBox.innerHTML = functionTitles
 
-            chartDataToRender.forEach((func) => {
+            const filteredNonZero =  chartDataToRender.filter((func) => func.result.length !== 0)
+            // console.log(filteredNonZero)
+
+            filteredNonZero.forEach((func) => {
                 const existingSeries = chartSeriesState.find((series) => series.name === func.name);
                 if (!existingSeries) {
                     console.log('Not exisiting')
@@ -434,7 +454,7 @@ const MainChart = (props) => {
             });
 
             const existingSeriesNames = chartSeriesState.map((series) => series.name);
-            const functionsInState = chartDataToRender.map((func) => func.name);
+            const functionsInState = filteredNonZero.map((func) => func.name);
 
             const deletedFunctions = existingSeriesNames.filter((name) => !functionsInState.includes(name));
 
@@ -460,19 +480,27 @@ const MainChart = (props) => {
                     param.paneIndex !== 0
                 ) {
                     // console.log('No crosshair data')
-                } else {
-                    chartSeriesState.forEach((series) => {
-                        const seriesValue = param.seriesData.get(series.series)
-                        // console.log(seriesValue)
-                        if (seriesValue !== undefined) {
-                            const divToInsertDataTo = document.getElementsByClassName(`${series.name}`)[0]
-                            divToInsertDataTo.innerHTML = seriesValue.value.toFixed(2)
-                        }
-                    })
+                    return
                 }
+                const seriesDataMap = new Map(param.seriesData);
+                chartSeriesState.forEach((series) => {
+                    const seriesValue = seriesDataMap.get(series.series);
+                    // console.log(seriesValue)
+                    if (seriesValue !== undefined) {
+                        const divToInsertDataTo = document.querySelector(`.${series.name}`);
+                        if (divToInsertDataTo) {
+                            divToInsertDataTo.innerHTML = seriesValue.value.toFixed(2);
+                        }
+                    }
+                })
+
             })
 
             // console.log("existing", existingSeriesNames, "in redux", functionsInState, "deleted function", deletedFunctions)
+        }
+        return () => {
+            console.log('Add : UE RETURN')
+            chart.current.unsubscribeCrosshairMove()
         }
     })
 

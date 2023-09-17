@@ -233,7 +233,7 @@ const Topbar = (props) => {
             className="topbar"
             display="flex"
             sx={{ borderBottom: mode === 'light' ? '1px solid #000000' : '' }}
-            justifyContent="space-between"
+            justifyContent="flex-end"
             p={2}
             backgroundColor={theme.palette.primary.newBlack}
         >
@@ -248,7 +248,7 @@ const Topbar = (props) => {
                 </Box>
             )}
 
-            {/* SEARCH BAR */}
+            {/* SEARCH BAR 
             <Box
                 display="flex"
                 borderRadius="3px"
@@ -268,7 +268,7 @@ const Topbar = (props) => {
                 <IconButton type="button" sx={{ p: 1 }}>
                     <SearchIcon />
                 </IconButton>
-            </Box>
+            </Box> */}
 
             {/* ICONS */}
             <Box display="flex">
@@ -306,7 +306,7 @@ const Topbar = (props) => {
                                 <SettingsOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
                             </IconButton>
                             <IconButton onClick={setToggleUser}>
-                                <PersonOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
+                                {profileImage ? <Avatar sx={{ width: 24, height: 24 }} src={profileImage} /> : <PersonOutlinedIcon />}
                             </IconButton>
                         </Box>
                     )

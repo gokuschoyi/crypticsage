@@ -4,9 +4,7 @@ const UploadTradingViewDataCard = (props) => {
     const { title, subtitle, buttonName } = props
     const theme = useTheme()
     return (
-        <Box
-            className='card-trading-view-data hover'
-        >
+        <Box className='card-trading-view-data hover'>
             <Box className='info-box'>
                 <Typography variant='h4' textAlign='start' gutterBottom>
                     {title} :
@@ -22,7 +20,7 @@ const UploadTradingViewDataCard = (props) => {
                         backgroundColor: 'red !important',
                         transition: '0.5s'
                     },
-                    backgroundColor: `${theme.palette.primary.main}`
+                    backgroundColor: `${theme.palette.background.default}`
                 }} size="small">{buttonName}</Button>
             </Box>
         </Box>

@@ -44,7 +44,7 @@
 
 .card-holder {
   color: var(--mui-palette-secondary-main) !important;
-  border: 2px solid;
+  /* border: 2px solid; */
   padding: 20px !important;
   border-radius: 20px !important;
   /* margin: 15px !important; */
@@ -55,13 +55,13 @@
   position: relative;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
-  background-color: var(--mui-palette-background-card);
+  background-color: var(--mui-palette-background-paper);
 }
 
 .card-holder-long {
   color: var(--mui-palette-secondary-main) !important;
-  background-color: var(--mui-palette-background-card);
-  border: 2px solid;
+  background-color: var(--mui-palette-background-paper);
+  /* border: 2px solid; */
   padding: 20px !important;
   border-radius: 20px !important;
   /* margin: 15px !important; */
@@ -76,8 +76,8 @@
 
 .card-trading-view-data {
   color: var(--mui-palette-secondary-main) !important;
-  background-color: var(--mui-palette-background-card);
-  border: 2px solid;
+  background-color: var(--mui-palette-background-paper);
+  /* border: 2px solid; */
   padding: 20px !important;
   border-radius: 20px !important;
   /* margin: 15px !important; */
@@ -92,10 +92,11 @@
 
 .card-holder-slider {
   color: var(--mui-palette-secondary-main) !important;
+  background-color: var(--mui-palette-background-paper);
   padding: 15px 10px 20px 20px !important;
   border-radius: 20px !important;
   /* margin: 15px !important; */
-  border: 2px solid;
+  /* border: 2px solid; */
   /* min-height: 250px !important; */
   display: flex;
   flex-direction: column;
@@ -111,7 +112,7 @@
 }
 
 .card-button {
-  color: white !important;
+  color: var(--mui-palette-text-primary) !important;
   padding-left: 10px !important;
   padding-right: 10px !important;
   transition: all 0.3s ease-in-out;

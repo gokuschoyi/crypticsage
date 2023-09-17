@@ -15,7 +15,7 @@ import {
     , TextField
     , Grid
     , Skeleton
-    ,
+    , useTheme
 } from '@mui/material'
 
 const periodToMilliseconds = (period) => {
@@ -91,6 +91,7 @@ const checkIfNewTickerFetchIsRequired = ({ openTime, selectedTokenPeriod }) => {
 const CryptoModule = () => {
     const params = useParams();
     const token = useSelector(state => state.auth.accessToken);
+    const theme = useTheme()
     const { cryptotoken } = params;
     const module = window.location.href.split("/dashboard/indicators/")[1].split("/")[0]
 
@@ -209,95 +210,105 @@ const CryptoModule = () => {
     return (
         <Box className='crypto-module-container'>
             <Box width='-webkit-fill-available'>
-                <Header title='Details' />
+                <Header title='Ticker Info' />
             </Box>
 
-            <Box pl={4} display='flex' flexDirection='row' alignItems='center' gap='10px'>
-                <Typography variant='h3' textAlign='start' pt={1} pb={1}>{cryptotoken}</Typography>
-                <Box className='autocomplete-select-box' width='200px'>
-                    <Autocomplete
-                        size='small'
-                        disableClearable
-                        disablePortal={false}
-                        id="selec-stock-select"
-                        options={periods}
-                        value={selectedTokenPeriod} // Set the selected value
-                        onChange={(event, newValue) => handlePeriodChange(newValue)} // Handle value change
-                        sx={{ width: 'auto' }}
-                        renderInput={(params) => <TextField {...params}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    '& fieldset': {
-                                        borderColor: 'white',
-                                    }
-                                }
-                            }}
-                            label="Select a period"
-                            color="secondary"
-                        />}
-                    />
-                </Box>
-            </Box>
+            <Box m={2}>
+                <Grid container className='indicator-chart-grid-box' >
+                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12} pt={2}>
+                        <Box display='flex' flexDirection='column' height='100%'>
+                            <Box pl={2} display='flex' flexDirection='row' alignItems='center' gap='10px'>
+                                <Typography variant='h5' textAlign='start' pt={1} pb={1}>{cryptotoken}</Typography>
+                                <Box className='autocomplete-select-box' width='200px'>
+                                    <Autocomplete
+                                        size='small'
+                                        disableClearable
+                                        disablePortal={false}
+                                        id="selec-stock-select"
+                                        options={periods}
+                                        value={selectedTokenPeriod} // Set the selected value
+                                        onChange={(event, newValue) => handlePeriodChange(newValue)} // Handle value change
+                                        sx={{ width: 'auto' }}
+                                        renderInput={(params) => <TextField {...params}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': {
+                                                        borderColor: `${theme.palette.primary.newWhite} !important`,
+                                                    }
+                                                }
+                                            }}
+                                            label="Select a period"
+                                            color="secondary"
+                                        />}
+                                    />
+                                </Box>
+                            </Box>
 
-            <Grid container spacing={2} mt={4} className='indicator-chart-grid-box'>
-                <Grid item xs={12} sm={12} md={12} lg={12} xl={12} >
-                    <Box display='flex' flexDirection='column' height='100%'>
-                        <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' pl={4} pr={4}></Box>
-                        <Box className='chart-container' display='flex' flexDirection='column' height='100%' m={4}>
-                            {chartData.length === 0 ?
+                            <Grid container className='indicator-chart-grid'>
+                                <Grid item xs={12} sm={12} md={12} lg={10} xl={10}>
+                                    <Box className='chart-container' display='flex' flexDirection='column' height='100%' m={2}>
+                                        {chartData.length === 0 ?
+                                            (
+                                                <Box className='token-chart-box' minHeight="100%" alignItems='center' justifyContent='center' display='flex'>
+                                                    <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
+                                                </Box>
+                                            )
+                                            :
+                                            (
+                                                <Box className='token-chart-box' minHeight="100%">
+                                                    <MainChart
+                                                        latestTime={chartData[chartData.length - 1].time * 1000 + 60000}
+                                                        new_fetch_offset={newTickerLength}
+                                                        symbol={cryptotoken}
+                                                        selectedTokenPeriod={selectedTokenPeriod}
+                                                        module={module}
+                                                        fetchValues={fetchValues}
+                                                    />
+                                                </Box>
+                                            )
+                                        }
+                                    </Box>
+                                </Grid>
+
+                                <Grid item xs={12} sm={12} md={12} lg={2} xl={2}>
+                                    <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' pl={2} pr={2} pt={4}></Box>
+                                </Grid>
+                            </Grid>
+
+                        </Box>
+                    </Grid>
+
+                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                        <Box ml={2} mr={2} mb={2} mt={2}>
+                            <Box pl={1}>
+                                <Typography variant='h4' sx={{ textAlign: 'start' }}>Selected Indicators</Typography>
+                            </Box>
+                            {selectedFunctions.length === 0 ?
                                 (
-                                    <Box className='token-chart-box' minHeight="100%" alignItems='center' justifyContent='center' display='flex'>
-                                        <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
+                                    <Box display='flex' flexDirection='row' justifyContent='flex-start'>
+                                        <Typography variant='h6' pl={1} sx={{ textAlign: 'start' }}>Select an indicator to plot</Typography>
                                     </Box>
                                 )
                                 :
                                 (
-                                    <Box className='token-chart-box' minHeight="100%">
-                                        <MainChart
-                                            latestTime={chartData[chartData.length - 1].time * 1000 + 60000}
-                                            new_fetch_offset={newTickerLength}
-                                            symbol={cryptotoken}
-                                            selectedTokenPeriod={selectedTokenPeriod}
-                                            module={module}
-                                            fetchValues={fetchValues}
-                                        />
-                                    </Box>
+                                    <Grid container className='indicator-data-container'>
+                                        {selectedFunctions && selectedFunctions.map((funcRedux, index) => {
+                                            const { name } = funcRedux
+                                            return (
+                                                <Grid key={`${name}${index}`} item xs={12} sm={12} md={6} lg={4} xl={3}>
+                                                    <SelectedFunctionContainer key={index} funcRedux={funcRedux} histDataLength={histDataLength} fetchValues={fetchValues} />
+                                                </Grid>
+                                            )
+                                        })}
+                                    </Grid>
                                 )
                             }
+
                         </Box>
-                    </Box>
+
+                    </Grid>
                 </Grid>
-
-                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                    <Box ml={4} mr={4} mb={2} mt={2}>
-                        <Box pl={1}>
-                            <Typography variant='h4' sx={{ textAlign: 'start', color: 'white' }}>Selected Indicators</Typography>
-                        </Box>
-                        {selectedFunctions.length === 0 ?
-                            (
-                                <Box display='flex' flexDirection='row' justifyContent='flex-start'>
-                                    <Typography variant='h6' sx={{ textAlign: 'start', color: 'white' }}>Select an indicator to view</Typography>
-                                </Box>
-                            )
-                            :
-                            (
-                                <Grid container spacing={2} className='indicator-data-container'>
-                                    {selectedFunctions && selectedFunctions.map((funcRedux, index) => {
-                                        const { name } = funcRedux
-                                        return (
-                                            <Grid key={`${name}${index}`} item xs={12} sm={12} md={6} lg={4} xl={4}>
-                                                <SelectedFunctionContainer key={index} funcRedux={funcRedux} histDataLength={histDataLength} fetchValues={fetchValues} />
-                                            </Grid>
-                                        )
-                                    })}
-                                </Grid>
-                            )
-                        }
-
-                    </Box>
-
-                </Grid>
-            </Grid>
+            </Box>
 
             <Indicators symbol={cryptotoken} fetchValues={fetchValues} />
         </Box>

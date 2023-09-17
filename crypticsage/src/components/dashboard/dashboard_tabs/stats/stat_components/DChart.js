@@ -1,17 +1,19 @@
 import React, { useEffect, useRef } from 'react'
 import { createChart } from 'lightweight-charts';
-import { Box } from '@mui/material'
+import { Box, useTheme } from '@mui/material'
 
 const DashboardChart = (props) => {
     const { chartData, selectedTokenName, tokenUrl, gridLineToggle } = props;
-    
+    const theme = useTheme();
+    const chartBackgroundColor = theme.palette.background.default
+    console.log(chartBackgroundColor)
 
     const chartContainerRef = useRef();
-
+    const chart = useRef();
     useEffect(() => {
-    console.log("from DC chart")
+        console.log("from DC chart")
 
-        let chart;
+        // let chart;
         let coinChartBox = document.getElementsByClassName('coin-chart-box')[0].getBoundingClientRect()
         let offsetLeft = Math.round(coinChartBox.left);
         let offsetTop = Math.round(coinChartBox.top)
@@ -41,7 +43,7 @@ const DashboardChart = (props) => {
         const handleResize = () => {
             cWidth = chartDom.clientWidth;
             cHeight = chartDom.clientHeight;
-            chart.applyOptions({ width: cWidth, height: cHeight });
+            chart.current.applyOptions({ width: cWidth, height: cHeight });
 
             coinChartBox = document.getElementsByClassName('coin-chart-box')[0].getBoundingClientRect()
             offsetLeft = Math.round(coinChartBox.left);
@@ -64,13 +66,13 @@ const DashboardChart = (props) => {
 
         if (fData.length > 0) {
             // console.log(cWidth, cHeight)
-            chart = createChart(chartContainerRef.current, {
+            chart.current = createChart(chartContainerRef.current, {
                 width: cWidth,
                 height: cHeight,
                 layout: {
                     background: {
                         type: 'solid',
-                        color: '#000000',
+                        color: theme.palette.background.default,
                     },
                     textColor: 'rgba(255, 255, 255, 0.9)',
                 },
@@ -95,22 +97,22 @@ const DashboardChart = (props) => {
                 },
             });
 
-            chart.timeScale().fitContent();
+            chart.current.timeScale().fitContent();
 
-            const candleStickSeries = chart.addCandlestickSeries({
+            const candleStickSeries = chart.current.addCandlestickSeries({
                 upColor: 'green',
                 downColor: 'red',
             });
 
             candleStickSeries.setData(fData);
 
-            const sma_series = chart.addLineSeries({ color: 'red', lineWidth: 1, title: 'price', pane:1 });
+            const sma_series = chart.current.addLineSeries({ color: 'red', lineWidth: 1, title: 'price', pane: 1 });
             const sma_data = chartData
                 .filter((d) => d.open)
                 .map((d) => ({ time: d.time, value: d.open }));
             sma_series.setData(sma_data);
 
-            chart.subscribeCrosshairMove((param) => {
+            chart.current.subscribeCrosshairMove((param) => {
                 if (
                     param.point === undefined ||
                     !param.time ||
@@ -157,9 +159,23 @@ const DashboardChart = (props) => {
             window.removeEventListener('resize', handleResize);
             chartDom.removeEventListener('mousemove', calculateMousePosition)
             chartDom.removeEventListener('touchmove', handleTouchMove)
-            chart.remove();
+            chart.current.remove();
         };
     }, [chartData])
+
+    useEffect(() => {
+        if (chart.current !== undefined || chart.current !== null) {
+            chart.current.applyOptions({
+                layout: {
+                    background: {
+                        type: 'solid',
+                        color: chartBackgroundColor,
+                    },
+                    textColor: 'rgba(255, 255, 255, 0.9)',
+                }
+            })
+        }
+    }, [chartBackgroundColor])
 
     return (
         <Box className='chart-holder-box' width="100%" height="100%">

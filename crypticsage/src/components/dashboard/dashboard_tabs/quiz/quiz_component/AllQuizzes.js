@@ -102,8 +102,8 @@ const AllQuizzes = (props) => {
                                 return (
                                     <Slide key={index} direction="up" timeout={500} in={true} >
                                         <Box className='quiz-collection'>
-                                            <Box sx={{ backgroundColor: `${theme.palette.primary.main}` }}>
-                                                <Typography variant='h4' textAlign='start' sx={{ color: '#ffffff', padding: '4px 16px' }}>{section.sectionName}</Typography>
+                                            <Box sx={{ backgroundColor: `${theme.palette.background.paper}` }} mb={1} pt={1} pb={1}>
+                                                <Typography variant='h4' textAlign='start' sx={{ spadding: '4px 16px' }}>{section.sectionName}</Typography>
                                             </Box>
                                             {section.lessons.map((lesson, index) => {
                                                 return (
@@ -115,14 +115,13 @@ const AllQuizzes = (props) => {
                                                     >
                                                         <AccordionSummary
                                                             sx={{
-                                                                color: '#ffffff',
                                                                 '.MuiAccordionSummary-content': {
                                                                     textAlign: 'start',
                                                                     alignItems: 'start',
                                                                     transition: 'all 0.3s ease-in-out',
                                                                 }
                                                             }}
-                                                            expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+                                                            expandIcon={<ExpandMoreIcon sx={{ color: `${theme.palette.secondary.main}` }} />}
                                                             aria-controls="panel1bh-content"
                                                             id="panel1bh-header"
                                                         >

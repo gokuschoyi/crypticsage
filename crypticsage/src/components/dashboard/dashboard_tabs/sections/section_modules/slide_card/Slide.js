@@ -292,8 +292,8 @@ const SlideComponent = (props) => {
                                 style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '25px', height: '30px' }}
                                 sx={{
                                     ':hover': {
-                                        color: `black !important`,
-                                        backgroundColor: 'white !important',
+                                        color: `${theme.palette.text.primary} !important`,
+                                        backgroundColor: `${theme.palette.background.paper} !important`,
                                     },
                                 }}>PREV</Button>
                         }
@@ -305,8 +305,8 @@ const SlideComponent = (props) => {
                                 style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '25px', height: '30px' }}
                                 sx={{
                                     ':hover': {
-                                        color: `black !important`,
-                                        backgroundColor: 'white !important',
+                                        color: `${theme.palette.text.primary} !important`,
+                                        backgroundColor: `${theme.palette.background.paper} !important`
                                     },
                                 }}>COMPLETE
                             </Button>
@@ -317,8 +317,8 @@ const SlideComponent = (props) => {
                                 style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '25px', height: '30px' }}
                                 sx={{
                                     ':hover': {
-                                        color: `black !important`,
-                                        backgroundColor: 'white !important',
+                                        color: `${theme.palette.text.primary} !important`,
+                                        backgroundColor: `${theme.palette.background.paper} !important`,
                                     },
                                 }}>NEXT
                             </Button>

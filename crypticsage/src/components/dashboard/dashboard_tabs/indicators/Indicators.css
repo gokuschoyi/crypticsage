@@ -25,7 +25,7 @@
 }
 
 .indicator-chart-grid-box {
-    background-color: var(--mui-palette-primary-dark);
+    background-color: var(--mui-palette-background-paper);
 }
 
 .function-accordian {

@@ -101,9 +101,9 @@ const LessonCard = () => {
     const LessonsBox = (props) => {
         const { title, lessonId, completed, date } = props
         return (
-            <Box className='lessons-container-box' sx={{ backgroundColor: `${theme.palette.primary.light}`, borderRadius: '10px' }}>
+            <Box className='lessons-container-box' sx={{ backgroundColor: `${theme.palette.background.paper}`, borderRadius: '10px' }}>
                 <CardContent className='text lesson-title-box' sx={{ width: 'fill-available' }}>
-                    <Typography variant="h5" className='rolling title' component='span' textAlign='start' sx={{ color: 'white' }}>
+                    <Typography variant="h5" className='rolling title' component='span' textAlign='start'>
                         {capitalizeFirstLetter(title)}
                     </Typography>
                     <Box className='status-box'>
@@ -112,12 +112,12 @@ const LessonCard = () => {
                             (
                                 <Box className='status'>
                                     <Box className='completed-status-box'>
-                                        <Typography variant="h6" textAlign='start' sx={{ color: 'white' }}>
+                                        <Typography variant="h6" textAlign='start'>
                                             Completed
                                         </Typography>
                                         <CheckOutlinedIcon sx={{ color: `${theme.palette.success.main}` }} />
                                     </Box>
-                                    <Typography variant="body1" textAlign='start' sx={{ color: 'white' }}>
+                                    <Typography variant="body1" textAlign='start'>
                                         {shortenDate(date)}
                                     </Typography>
                                 </Box>
@@ -126,7 +126,7 @@ const LessonCard = () => {
                             (
                                 <Box className='status'>
                                     <Box className='completed-status-box'>
-                                        <Typography variant="h6" textAlign='start' sx={{ color: 'white' }}>
+                                        <Typography variant="h6" textAlign='start'>
                                             Not Completed
                                         </Typography>
                                         <CloseIcon sx={{ color: `${theme.palette.error.main}` }} />
@@ -144,8 +144,8 @@ const LessonCard = () => {
                         style={{ color: 'white', backgroundColor: 'red', margin: '5px' }}
                         sx={{
                             ':hover': {
-                                color: 'black !important',
-                                backgroundColor: 'white !important'
+                                color: `${theme.palette.text.primary} !important`,
+                                backgroundColor: `${theme.palette.background.paper} !important`
                             }
                         }}>
                         <KeyboardDoubleArrowRightOutlinedIcon className='lesson-card-icon' />
@@ -166,8 +166,8 @@ const LessonCard = () => {
                         style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '20px', height: '30px', width: '80px' }}
                         sx={{
                             ':hover': {
-                                color: `black !important`,
-                                backgroundColor: 'white !important',
+                                color: `${theme.palette.text.primary} !important`,
+                                backgroundColor: `${theme.palette.background.paper} !important`,
                             },
                         }}>Go Back</Button>
                 </Box>
@@ -206,8 +206,8 @@ const LessonCard = () => {
                         style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '20px', height: '30px', width: '80px' }}
                         sx={{
                             ':hover': {
-                                color: `black !important`,
-                                backgroundColor: 'white !important',
+                                color: `${theme.palette.text.primary} !important`,
+                                backgroundColor:  `${theme.palette.background.paper} !important`,
                             },
                         }}>Go Back</Button>
                 </Box>

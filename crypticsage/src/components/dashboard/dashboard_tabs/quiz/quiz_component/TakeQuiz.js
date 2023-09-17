@@ -22,7 +22,7 @@ const TakeQuiz = (props) => {
     const { isLoaded, setQid, quizId, setTitleDesc, goBackToQuiz } = props
     const { accessToken } = useSelector(state => state.auth)
     const dispatch = useDispatch()
-    
+
     const [quizQuestionCounter, setQuizQuestionCounter] = useState(0)
     const questionsRef = useRef(null)
     const incrementQuizQuestionCounter = () => {
@@ -159,7 +159,6 @@ const TakeQuiz = (props) => {
                                         }}
                                     />}
                                 label={option.option}
-                                sx={{ color: 'white' }}
                             />
                         )
                     })}
@@ -200,7 +199,13 @@ const TakeQuiz = (props) => {
                             <Button
                                 onClick={goBackToQuiz}
                                 variant="text"
-                                style={{ color: 'black', backgroundColor: 'white', border: '1px solid black', margin: '5px' }}
+                                style={{
+                                    ':hover': {
+                                        color: `${theme.palette.text.primary} !important`,
+                                        backgroundColor: `${theme.palette.background.paper} !important`
+                                    },
+                                    color: 'black', backgroundColor: 'white', border: '1px solid black', margin: '5px'
+                                }}
                             >Go Back</Button>
                         </Box>
                     </Grid>
@@ -233,18 +238,24 @@ const TakeQuiz = (props) => {
                                         <Button
                                             onClick={goBackToQuiz}
                                             variant="text"
-                                            style={{ color: 'black', backgroundColor: 'white', border: '1px solid black', margin: '5px' }}
+                                            style={{
+                                                color: 'black', backgroundColor: 'white', border: '1px solid black', margin: '5px',
+                                                ':hover': {
+                                                    color: `${theme.palette.text.primary} !important`,
+                                                    backgroundColor: `${theme.palette.background.paper} !important`
+                                                }
+                                            }}
                                         >Go Back</Button>
                                     </Box>
                                 </Box>
-                                <Box className='quiz-questions' ref={questionsRef} mt={2} sx={{ backgroundColor: `${theme.palette.primary.main}` }}>
+                                <Box className='quiz-questions' ref={questionsRef} mt={2} sx={{ backgroundColor: `${theme.palette.background.paper}` }}>
                                     {selectedQuizData[0].questions.map((question, index) => {
                                         return (
                                             <Box key={index} className='quiz-question'>
                                                 <Typography
                                                     variant='h6'
                                                     textAlign='start'
-                                                    sx={{ color: 'white', padding: '4px 16px' }}
+                                                    sx={{ padding: '4px 16px' }}
                                                 >
                                                     {index + 1} - {question.question}
                                                 </Typography>

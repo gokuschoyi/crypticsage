@@ -26,7 +26,7 @@ const CustomCard = (props) => {
                         backgroundColor: 'red !important',
                         transition: '0.5s'
                     },
-                    backgroundColor: `${theme.palette.primary.main}`
+                    backgroundColor: `${theme.palette.background.default}`
                 }} size="small">{buttonName}</Button>
             </Box>
         </Box>

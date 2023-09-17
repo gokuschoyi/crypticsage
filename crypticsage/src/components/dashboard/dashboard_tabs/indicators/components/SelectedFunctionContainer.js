@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, AccordionActions, IconButton, Tooltip, TextField, Autocomplete } from '@mui/material'
+import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, AccordionActions, IconButton, Tooltip, TextField, Autocomplete, useTheme } from '@mui/material'
 import { executeTalibFunction } from '../../../../../api/adminController'
 import {
     setSelectedFunctions
@@ -25,6 +25,7 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 const MAX_FUNCTION_DUPLICATES = 2
 
 const MultiSelect = (props) => {
+    const theme = useTheme()
     const { inputLabel, selectedInputOptions, handleInputOptions, fieldName, errorFlag, helperText, id } = props
     const inputOptions = [
         "",
@@ -46,12 +47,13 @@ const MultiSelect = (props) => {
                     onChange={(event, newValue) => handleInputOptions(fieldName, newValue, id)} // Handle value change
                     sx={{ width: 'auto' }}
                     renderInput={(params) => <TextField {...params}
+                        variant="outlined"
                         error={errorFlag}
                         helperText={helperText}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
-                                    borderColor: 'white',
+                                    borderColor: `${theme.palette.text.secondary}`,
                                 }
                             }
                         }}
@@ -68,6 +70,7 @@ const MultiSelect = (props) => {
 }
 
 const SelectedFunctionContainer = (props) => {
+    const theme = useTheme()
     const { funcRedux, histDataLength, fetchValues } = props
     const { hint, name, group_name, functions, outputs } = funcRedux
     // console.log('funcRes ', functions)
@@ -283,7 +286,7 @@ const SelectedFunctionContainer = (props) => {
 
                 <AccordionActions>
                     <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' width='100%' pl={1} pr={1}>
-                        <Typography variant='h6' sx={{ textAlign: 'start' }}>{name}</Typography>
+                        <Typography variant='h6' fontWeight='bold' sx={{ textAlign: 'start' }}>{name}</Typography>
                         <IconButton disabled={functions.length === MAX_FUNCTION_DUPLICATES} size='small' aria-label="add query" color="secondary" onClick={handleAddIndicator.bind(null, { func_name: name })}>
                             <Tooltip title="Add query" placement='top'>
                                 <AddIcon className='small-icon' />
@@ -296,7 +299,7 @@ const SelectedFunctionContainer = (props) => {
                     {functions.length > 0 && functions.map((func, index) => {
                         const { id, inputs, optInputs, result, show_chart_flag } = func
                         return (
-                            <Box key={index} mt={1} borderRadius={2} pl={1} pr={1} pb={1} sx={{ backgroundColor: '#272727' }}>
+                            <Box key={index} mt={1} borderRadius={2} pl={1} pr={1} pb={1} sx={{ backgroundColor: `${theme.palette.background.paper}` }}>
 
                                 <Box display='flex' justifyContent='space-between' alignItems='center' pl={1} flexDirection='row' pt={'5px'}>
                                     <Box>
@@ -331,7 +334,7 @@ const SelectedFunctionContainer = (props) => {
                                 </Box>
 
                                 <Box className='indicator-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                                    <Typography variant='h5'>INPUTS</Typography>
+                                    <Typography variant='h5' fontWeight='500'>INPUTS</Typography>
                                     {inputs.length > 0 && inputs.map((input, index) => {
                                         const { value, errorFlag, helperText } = input
                                         return (
@@ -371,7 +374,7 @@ const SelectedFunctionContainer = (props) => {
                                 </Box>
 
                                 <Box className='indicator-optional-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                                    <Typography variant='h5'>OPTIONAL INPUTS</Typography>
+                                    <Typography variant='h5' fontWeight='500'>OPTIONAL INPUTS</Typography>
                                     {optInputs.length === 0 ?
                                         (
                                             <Typography>None</Typography>
@@ -395,7 +398,7 @@ const SelectedFunctionContainer = (props) => {
                                                             sx={{
                                                                 '& .MuiOutlinedInput-root': {
                                                                     '& fieldset': {
-                                                                        borderColor: 'white',
+                                                                        borderColor: `${theme.palette.text.secondary}`,
                                                                     }
                                                                 }
                                                             }}
