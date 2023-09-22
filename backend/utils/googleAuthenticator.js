@@ -11,6 +11,7 @@ const verifyGoogleCredentials = async (credentials) => {
             idToken: credentials,
             audience: config.googleOAuthClientId,
         });
+        // @ts-ignore
         payload = ticket.getPayload();
         return payload
     } catch (error) {

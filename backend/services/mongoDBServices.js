@@ -1,6 +1,8 @@
 // ssh -L 27017:localhost:27017 yadu@10.0.0.116 
 // to link remote mongo to local instead of ssh
 
+const types = require('../typedefs')
+
 const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
 
@@ -12,13 +14,9 @@ const authUtil = require('../utils/authUtil')
 const CRYPTICSAGE_DATABASE_NAME = 'crypticsage'
 const HISTORICAL_DATABASE_NAME = 'historical_data'
 
-const mongoOptions = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-};
-
 // Create a client to the database - global client for all services below
-const client = MongoClient.connect(config.mongoUri, mongoOptions)
+const mongoUri = config.mongoUri ?? '';
+const client = MongoClient.connect(mongoUri)
     .then(client => {
         log.info(`Connected to Mongo database.`)
         return client
@@ -29,13 +27,77 @@ const client = MongoClient.connect(config.mongoUri, mongoOptions)
     })
 
 
-// const { connect, close, binanceConnect, binanceClose } = require('./db-conn')
 
-
-// Returns a single user object in an array if it exists, otherwise returns an empty array
-// INPUT : email : { email }
-// OUTPUT : [user]
-const getUserByEmail = async ({ email }) => {
+/**
+ * Retrieves a user by email.
+ * @async
+ * @param {string} email Email of the user to be searched 
+ * @returns {Promise<Array<object>>} An array containing the user object(s) matching the provided email else [].
+ * @example 
+ * // Retrieve user by email
+ * const userEmail = "gokulsangamitrachoyi@gmail.com";
+ * const user = getUserByEmail(userEmail);
+ * console.log(user); // Output: Array containing the user object(s)
+ * user = [
+ *   {
+ *     "_id": "64c9b4dbfaafffb6de7f9be6",
+ *     "displayName": "gokul",
+ *     "email": "gokulchoyi@gmail.com",
+ *     "password": "$2b$10$ghX7mYS2CArpjH7kmEz92.uHOOx4No3FY.clPJljanV7CfY66LAjS",
+ *     "mobile_number": "",
+ *     "profile_image": "",
+ *     "emailVerified": true,
+ *     "date": "8/2/2023, 11:43:55 AM",
+ *     "uid": "45eca875-f8ad-4585-a307-eaa9e6ddbdb6",
+ *     "preferences": {
+ *       "theme": true,
+ *       "dashboardHover": false,
+ *       "collapsedSidebar": true
+ *     },
+ *     "signup_type": "google",
+ *     "lesson_status": {
+ *       "2ab70e1b-3676-4b79-bfb5-57fd448ec98e": [
+ *         {
+ *           "section_id": "2ab70e1b-3676-4b79-bfb5-57fd448ec98e",
+ *           "lesson_id": "8ed93f99-3c37-428c-af92-c322c79b4384",
+ *           "lesson_name": "qwe",
+ *           "next_chapter_id": null,
+ *           "prev_chapter_id": null,
+ *           "parent_section_id": null,
+ *           "lesson_start": false,
+ *           "lesson_progress": 1,
+ *           "lesson_completed": false,
+ *           "lesson_completed_date": ""
+ *         }
+ *       ],
+ *       "5119f37b-ef44-4272-a536-04af51ef4bbc": [
+ *         {}
+ *       ]
+ *     },
+ *     "quiz_status": {
+ *       "5119f37b-ef44-4272-a536-04af51ef4bbc": {
+ *         "a4d32182-98ba-4968-90c3-aa0c27751d55": [
+ *           {
+ *             "section_id": "5119f37b-ef44-4272-a536-04af51ef4bbc",
+ *             "lesson_id": "a4d32182-98ba-4968-90c3-aa0c27751d55",
+ *             "quiz_id": "2c4a5ef5-8ab4-409c-8b0f-4d8b2c063fe1",
+ *             "quiz_name": "Candle Stick Quiz 1",
+ *             "quiz_completed_date": "9/17/2023, 1:31:56 PM",
+ *             "quiz_score": 1,
+ *             "quiz_completed": true,
+ *             "quiz_total": 3
+ *           }
+ *         ],
+ *         "4aa08919-369c-4ab4-93db-bf6e41b5b4fc": [
+ *           {}
+ *         ]
+ *       }
+ *     }
+ *   }
+ * ];
+ *
+ */
+const getUserByEmail = async (email) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
@@ -48,10 +110,18 @@ const getUserByEmail = async ({ email }) => {
     }
 }
 
-// Returns true if user exists, false if user does not exist
-// INPUT : email : { email }
-// OUTPUT : boolean
-const checkUserExists = async ({ email }) => {
+/**
+ * Checking if user exists by email.
+ * @async
+ * @param {string} email Email of the user to be checked
+ * @returns {Promise<boolean>} True if user exists, false if user does not exist
+ * @example
+ * // Check if user exists
+ * const userEmail = "gokulschoyi@gmail.com";
+ * const userExists = checkUserExists(userEmail);
+ * console.log(userExists); // Output: true
+ */
+const checkUserExists = async (email) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
@@ -80,10 +150,40 @@ const checkUserExists = async ({ email }) => {
     }
 }
 
-// Returns the result of the insertOne operation
-// INPUT : userData : { userData }
-// OUTPUT : insertResult
-const insertNewUser = async ({ userData }) => {
+/**
+ * Inserts a new user into the database.
+ * @async
+ * @param {types.User} userData - The user data to be inserted.
+ * @returns {Promise<object>} insertedResult A promise that resolves with the result of the insertion.
+ * @throws {Error} If an error occurs during the insertion process.
+ *
+ * @example
+ * const userData = {
+ *   displayName: 'John Doe',
+ *   email: 'johndoe@example.com',
+ *   password: 'hashedPassword',
+ *   mobile_number: '',
+ *   profile_image: 'https://example.com/profile.jpg',
+ *   emailVerified: false,
+ *   date: new Date().toLocaleString('au'),
+ *   uid: 'uniqueId123',
+ *   preferences: {
+ *     theme: true,
+ *     dashboardHover: true,
+ *     collapsedSidebar: true,
+ *   },
+ *   signup_type: 'facebook',
+ *   lesson_status: {},
+ *   quiz_status: {},
+ * };
+ *
+ *   const result = await insertNewUser(userData);
+ *   result = {
+ *        acknowledged: true,
+ *        insertedId: new ObjectId("650797a1bfe90c585fd21a7d")
+ *     }
+ */
+const insertNewUser = async (userData) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
@@ -95,7 +195,30 @@ const insertNewUser = async ({ userData }) => {
     }
 }
 
-// Generates a new lesson status object for new user
+/**
+ * async function to generate a new lesson status object for new user
+ * @async
+ * @returns {Promise<object>} An object containing lesson data.
+ *
+ * @example
+ * // Sample output:
+ * const lessonData = getLessonData();
+ * // Output:
+ * {
+ *     "2ab70e1b-3676-4b79-bfb5-57fd448ec98e": [
+ *         {
+ *             "section_id": "2ab70e1b-3676-4b79-bfb5-57fd448ec98e",
+ *             "lesson_id": "8ed93f99-3c37-428c-af92-c322c79b4384",
+ *             "lesson_name": "qwe",
+ *             "lesson_start": false,
+ *             "lesson_progress": 1,
+ *             "lesson_completed": false,
+ *             "lesson_completed_date": ""
+ *         }
+ *     ],
+ *     // ... Other lesson data ...
+ * }
+ */
 const makeUserLessonStatus = async () => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
@@ -124,7 +247,33 @@ const makeUserLessonStatus = async () => {
     }
 }
 
-// Generates a new quiz status object for new user
+/**
+ * async function to generate a new quiz status object for new user
+ * @async
+ * @returns {Promise<object>} An object containing quiz data.
+ * 
+ * @example
+ * // Sample output:
+ * const quizData = getQuizData();
+ * // Output:
+ * {
+ * {
+ *  "5119f37b-ef44-4272-a536-04af51ef4bbc": {
+ *    "a4d32182-98ba-4968-90c3-aa0c27751d55": [
+ *     {
+ *         "section_id": "5119f37b-ef44-4272-a536-04af51ef4bbc",
+ *         "lesson_id": "a4d32182-98ba-4968-90c3-aa0c27751d55",
+ *         "quiz_id": "2c4a5ef5-8ab4-409c-8b0f-4d8b2c063fe1",
+ *         "quiz_name": "Candle Stick Quiz 1",
+ *         "quiz_completed_date": "",
+ *         "quiz_score": "",
+ *         "quiz_completed": false
+ *     },
+ *     {}
+ *   ]
+ * },
+ * // ... Other quiz data ...
+ */
 const makeUserQuizStatus = async () => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
@@ -170,8 +319,26 @@ const makeUserQuizStatus = async () => {
 
 //<------------------------USER SERVICES------------------------>
 
-
-const updateUserPasswordByEmail = async ({ email, hashedPassword }) => {
+/**
+ * Updates the password of a user by email.
+ * @async
+ * @param {string} email The email of the user whose password is to be updated.
+ * @param {string} hashedPassword  The hashed password of the user.
+ * @returns {Promise<object>} An object containing the result of the update operation.
+ * @example
+ * const email = "testuser@gmail.com";
+ * const hashedPassword = "$2b$10$ghX7mYS2CArpjH7kmEz92";
+ * const result = updateUserPasswordByEmail(email, hashedPassword);
+ * console.log(result); 
+ * // Output: { 
+ *      acknowledged: true, 
+ *      modifiedCount: 1, 
+ *      upsertedId: null, 
+ *      upsertedCount: 0, 
+ *      matchedCount: 1 
+ * }
+ */
+const updateUserPasswordByEmail = async (email, hashedPassword) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
@@ -183,7 +350,27 @@ const updateUserPasswordByEmail = async ({ email, hashedPassword }) => {
     }
 }
 
-const updateUserProfilePicture = async ({ email, profilePicture }) => {
+/**
+ * Updates the profile picture of a user by email.
+ * @async
+ * @param {string} email The email of the user whose profile picture is to be updated.
+ * @param {string} profilePicture A base64 encoded string of the user's profile picture.
+ * @returns {Promise<object>} An object containing the result of the update operation.
+ * @example
+ * const email = "testuser@gmail.com";
+ * const profilePicture = "data:image/jpeg;base64,";
+ * const result = updateUserProfilePicture(email, profilePicture);
+ * console.log(result); 
+ * // Output: 
+ * { 
+ *      acknowledged: true,
+ *      modifiedCount: 1,
+ *      upsertedId: null, 
+ *      upsertedCount: 0, 
+ *      matchedCount: 1 
+ * }
+ */
+const updateUserProfilePicture = async (email, profilePicture) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
@@ -195,7 +382,37 @@ const updateUserProfilePicture = async ({ email, profilePicture }) => {
     }
 }
 
-const updateUserData = async ({ email, userData }) => {
+/**
+ * @typedef {Object} UserData
+ * @property {string} displayName - The user's display name.
+ * @property {string} mobile_number - The user's mobile number.
+ */
+
+/**
+ * Updates the display name and mobile number of a user by email.
+ * @async 
+ * @param {string} email - The email of the user whose email verification status is to be updated.
+ * @param {UserData} userData - The user data to be updated.
+ * @returns {Promise<object>} A promise that resolves when the update is complete.
+ *
+ * @example
+ * const email = 'example@example.com';
+ * const userData = {
+ *   displayName: 'John Doe',
+ *   mobile_number: '+1234567890',
+ * };
+ * const update = await updateUserProfile(email, updatedUserData);
+ * console.log(update) 
+ * // Output: 
+ * { 
+ *      acknowledged: true, 
+ *      modifiedCount: 1,   
+ *      upsertedId: null,   
+ *      upsertedCount: 0,   
+ *      matchedCount: 1
+ *  }
+ */
+const updateUserData = async (email, userData) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
@@ -215,7 +432,37 @@ const updateUserData = async ({ email, userData }) => {
     }
 }
 
-const updateUserPreferences = async ({ email, preferences }) => {
+/**
+ * @typedef {Object} Preferences
+ * @property {string} dashboardHover - The dashboard hover status.
+ * @property {string} collapsedSidebar - The collapsed sidebar status.
+ */
+
+/**
+ * Updates the preferences of a user by email.
+ * @async
+ * @param {string} email - The email of the user whose preferences are to be updated.
+ * @param {Preferences} preferences - The preferences to be updated.
+ * @returns {Promise<object>} A promise that resolves when the update is complete.
+ * 
+ * @example
+ * const email = 'example@example.com';
+ * const preferences = {
+ *  dashboardHover: true,
+ *  collapsedSidebar: true,
+ * };
+ * const update = await updateUserPreferences(email, preferences);
+ * console.log(update)
+ * // Output:
+ * {
+ *      acknowledged: true,
+ *      modifiedCount: 1,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 1
+ * }
+ */
+const updateUserPreferences = async (email, preferences) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
@@ -236,7 +483,63 @@ const updateUserPreferences = async ({ email, preferences }) => {
     }
 }
 
-const updateUserLessonStatus = async ({ email, lesson_status }) => {
+/**
+ * @typedef {Object} LessonStatus
+ * @property {string} section_id - The section id.
+ * @property {string} lesson_id - The lesson id.
+ * @property {string} lesson_name - The lesson name.
+ * @property {string|null} next_chapter_id - The next chapter id.
+ * @property {string|null} prev_chapter_id - The previous chapter id.
+ * @property {string|null} parent_section_id - The parent section id.
+ * @property {boolean} lesson_start - The lesson start status.
+ * @property {number} lesson_progress - The lesson progress.
+ * @property {boolean} lesson_completed - The lesson completion status.
+ * @property {string} lesson_completed_date - The lesson completion date.
+ */
+
+/**
+ * Update the lesson status of a user by email.
+ * @async
+ * @param {string} email 
+ * @param {LessonStatus} lesson_status 
+ * @returns {Promise<Array>} An array containing the message, status flag and result of the update operation.
+ * @example
+ * const email = 'example@example.com';
+ * const lesson_status = {
+ *    section_id: '5119f37b-ef44-4272-a536-04af51ef4bbc',
+ *    lesson_id: 'a4d32182-98ba-4968-90c3-aa0c27751d55',
+ *    lesson_name: 'Candle Stick Quiz 1',
+ *    next_chapter_id: null,
+ *    prev_chapter_id: null,
+ *    parent_section_id: null,
+ *    lesson_start: true,
+ *    lesson_progress: 1,
+ *    lesson_completed: true,
+ *    lesson_completed_date: ''
+ * };
+ * const update = await updateUserLessonStatus(email, lesson_status);
+ * console.log(update) 
+ * // Output: 
+ * // message : User lesson status updated successfully
+ * // uStatus : true
+ * // userLessonStatus : {
+ * //     '2ab70e1b-3676-4b79-bfb5-57fd448ec98e': [
+ * //          {
+ * //            section_id: '2ab70e1b-3676-4b79-bfb5-57fd448ec98e',
+ * //            lesson_id: '8ed93f99-3c37-428c-af92-c322c79b4384',
+ * //            lesson_name: 'qwe',
+ * //            next_chapter_id: null,
+ * //            prev_chapter_id: null,
+ * //            parent_section_id: null,
+ * //            lesson_start: false,
+ * //            lesson_progress: 1,
+ * //            lesson_completed: false,
+ * //            lesson_completed_date: ''
+ * //          }, {}
+ * //     ], ...
+ * //    }    
+ */
+const updateUserLessonStatus = async (email, lesson_status) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
@@ -261,7 +564,7 @@ const updateUserLessonStatus = async ({ email, lesson_status }) => {
             userLessonStatus = await userCollection.find({ "email": email }).toArray();
             userLessonStatus = userLessonStatus[0].lesson_status;
             let message = "User lesson status updated successfully"
-            uStatus = true
+            let uStatus = true
             return [message, uStatus, userLessonStatus]
         } else {
             throw new Error("User lesson status update failed")
@@ -272,20 +575,47 @@ const updateUserLessonStatus = async ({ email, lesson_status }) => {
     }
 }
 
-const getInitialQuizDataForUser = async ({ userQuizStatus }) => {
+/**
+ * Get the latest quiz status object for a user.
+ * @async
+ * @param {object} userQuizStatus The latest user quiz status object from the user object.
+ * @returns {Promise<Array>} An array containing the quizzes' status for various sections and lessons.
+ */
+const getInitialQuizDataForUser = async (userQuizStatus) => {
     try {
+        let quizzes_array = []
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
-        const quizCollection = await db.collection('quiz').find({}).toArray();
+        
+        const quizCollectionFromDB = await db.collection('quiz').find({}).toArray();
+        
+        const quizCollection = quizCollectionFromDB.map((quiz) => {
+            return {
+                sectionId: quiz.sectionId,
+                sectionName: quiz.sectionName,
+                lessonId: quiz.lessonId,
+                lessonName: quiz.lessonName,
+                quizId: quiz.quizId,
+                quizTitle: quiz.quizTitle,
+                quizDescription: quiz.quizDescription,
+                questions: quiz.questions,
+            }
+        })
         let transformedQuizData = await authUtil.transformQuizData(userQuizStatus, quizCollection);
-        transformedQuizData = transformedQuizData.outputObject.quizzes
-        return transformedQuizData
+        quizzes_array = transformedQuizData.outputObject.quizzes
+        return quizzes_array
     } catch (error) {
         log.error(error.stack)
         throw error
     }
 }
 
-const getQuizDataById = async ({ quizId }) => {
+/**
+ * Fetches the quiz data for a particular quiz id.
+ * @async
+ * @param {string} quizId The quiz id of the quiz to be fetched
+ * @returns {Promise<Array>} An array containing the individual quiz data
+ */
+const getQuizDataById = async (quizId) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const quizCollection = db.collection('quiz');
@@ -297,7 +627,35 @@ const getQuizDataById = async ({ quizId }) => {
     }
 }
 
-const updateQuizStatusForUser = async ({ email, sectionId, lessonId, quizId, score, total }) => {
+/**
+ * Updates the quiz status for a user after a quiz is completed.
+ * @async
+ * @param {string} email The email of the user whose quiz status is to be updated.
+ * @param {string} sectionId The section id of the quiz to be updated.
+ * @param {string} lessonId The lesson id of the quiz to be updated. 
+ * @param {string} quizId The quiz id of the quiz to be updated. 
+ * @param {number} score The score of the quiz to be updated. 
+ * @param {number} total The total score of the quiz to be updated. 
+ * @returns {Promise<object>} An object containing the result of the update operation.
+ * @example
+ * const email = 'testuser@gmail.com';
+ * const sectionId = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const lessonId = 'a4d32182-98ba-4968-90c3-aa0c27751d55';
+ * const quizId = '2c4a5ef5-8ab4-409c-8b0f-4d8b2c063fe1';
+ * const score = 1;
+ * const total = 3;
+ * const result = await updateQuizStatusForUser(email, sectionId, lessonId, quizId, score, total);
+ * console.log(result) 
+ * // Output:
+ * {
+ *      acknowledged: true,
+ *      modifiedCount: 0,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 0
+ * } 
+ */
+const updateQuizStatusForUser = async (email, sectionId, lessonId, quizId, score, total) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const userCollection = db.collection('users');
@@ -317,6 +675,7 @@ const updateQuizStatusForUser = async ({ email, sectionId, lessonId, quizId, sco
                 ]
             }
         )
+        console.log(user)
         return user
     } catch (error) {
         log.error(error.stack)
@@ -331,31 +690,29 @@ const updateQuizStatusForUser = async ({ email, sectionId, lessonId, quizId, sco
 
 //<------------------------CONTENT MANAGER SERVICES------------------------>
 
-
-// fetches all the documents from a collection
-// INPUT : collection name, filter
-// OUTPUT : array of objects
-/* 
-{
-    "sections": [
-        {
-            "_id": "6412d6826ad7375e1c777ada",
-            "title": "Introduction to the market",
-            "content": "The crypto market is relatively new, highly volatile, and has seen tremendous growth in recent years. It is a decentralized digital assets market where investors can buy and sell different type of cryptocurrencies, such as Bitcoin. The stock market, on the other hand, is an established market that has been in existence for centuries where publicly traded companies issue and sell shares of stock that represent ownership in the company. The value of the stock is influenced by factors such as earnings, market trends and global events. Both markets are subject to speculation and can be volatile, but they operate differently and have different underlying assets. Stocks are considered to be more stable than cryptocurrencies, but also tend to have lower potential returns.",
-            "url": "",
-            "sectionId": "5119f37b-ef44-4272-a536-04af51ef4bbc"
-        },
-        {
-            "_id": "6413b75e116bb8075de38fc0",
-            "title": "Fundamental Analysis",
-            "content": "Fundamental analysis is a method of evaluating securities by analyzing underlying factors that affect the security's value. In the stock market, it focus on a company's financial health, management, and industry conditions by analyzing financial statements, assessing the management team and their track record and evaluating the overall health of the industry in which the company operates. In the crypto market, it's use is limited as many cryptocurrencies do not have traditional financials, assets or revenue streams. Instead it focuses on the technology behind the coin, the purpose or utility of the coin and the coin's adoption rate. While fundamental analysis can be a valuable tool in both markets, the approach and focus can be different and in the case of crypto market it's more important due to high failure rates.",
-            "url": "https://picsum.photos/200/300",
-            "sectionId": "f82ec216-5daa-4be3-ae54-a456c85ffbf2"
-        }
-    ]
-}
-*/
-const getAllDocumentsFromCollection = async ({ collectionName, filter }) => {
+/**
+ * Feteches documents from a collection based on the filter parameter
+ * @async
+ * @param {string} collectionName The name of the collection to fetch documents from
+ * @param {Object} filter The filter to apply to the collection
+ * @returns {Promise<array>} An array of documents
+ * @example
+ * const collectionName = 'sections';
+ * const filter = {};
+ * const sections = await getAllDocumentsFromCollection(collectionName, filter);
+ * console.log(sections);
+ * // Output:
+ * [
+ *  {
+ *   "_id": "6412d6826ad7375e1c777ada",
+ *   "title": "Introduction to the market",
+ *      "content": "The crypto market is relatively new, highly volatile, ...",
+ *   "url": "",
+ *   "sectionId": "5119f37b-ef44-4272-a536-04af51ef4bbc"
+ * }, {}, ...
+ * ]
+ */
+const getAllDocumentsFromCollection = async (collectionName, filter) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection(collectionName)
@@ -367,10 +724,28 @@ const getAllDocumentsFromCollection = async ({ collectionName, filter }) => {
     }
 }
 
-// Inserts a new section to the database
-// INPUT : title, content, url, sectionId
-// OUTPUT : result object
-const insertDocumentToCollection = async ({ collectionName, document }) => {
+/**
+ * Inserts a new document to a collection
+ * @async
+ * @param {string} collectionName The name of the collection to insert the document into
+ * @param {Object} document The document to be inserted
+ * @returns {Promise<object>} An object containing the result of the insertion
+ * @example
+ * const collectionName = 'sections';
+ * const document = {
+ *      title: 'Introduction to the market',
+ *      content: 'The crypto market is relatively new, highly volatile, ...',
+ *      url: '',
+ * };
+ * const result = await insertDocumentToCollection(collectionName, document);
+ * console.log(result);
+ * // Output:
+ * {
+ *      acknowledged: true,
+ *      insertedId: new ObjectId("6507b68dddb95bf8d5e0b71e")
+ * }
+ */
+const insertDocumentToCollection = async (collectionName, document) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const sectionCollection = db.collection(collectionName);
@@ -382,10 +757,27 @@ const insertDocumentToCollection = async ({ collectionName, document }) => {
     }
 }
 
-// When a new section is created a new key is added to all the users lesson_status object
-// INPUT : sectionId
-// OUTPUT : result object
-const addSectionStatusForUsers = async ({ sectionId }) => {
+/**
+ * When a new section is created a new key is added to all the users lesson_status object
+ * @async
+ * @param {string} sectionId  The section id of the section to be added
+ * @returns {Promise<array>} An array containing the result of the update operation
+ * @example
+ * const sectionId = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const result = await addSectionStatusForUsers(sectionId);
+ * console.log(result);
+ * // Output:
+ * [
+ * {
+ *      acknowledged: true,
+ *      modifiedCount: 1,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 1
+ * }, {}, ...
+ * ]
+ */
+const addSectionStatusForUsers = async (sectionId) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const allUserCollection = db.collection('users')
@@ -405,8 +797,47 @@ const addSectionStatusForUsers = async ({ sectionId }) => {
     }
 }
 
-// Updates the lesson status for all the users
-const addLessonStatusForUsers = async ({ sectionId, lesson_status }) => {
+/**
+ * @typedef {Object} LessonObjectToDb
+ * @property {string} section_id - The section id.
+ * @property {string} lesson_id - The lesson id.
+ * @property {string} lesson_name - The lesson name.
+ * @property {boolean} lesson_start - The lesson start status.
+ * @property {number} lesson_progress - The lesson progress.
+ * @property {boolean} lesson_complete - The lesson completion status.
+ */
+
+/**
+ * Updates the lesson status for all the users after adding a new lesson
+ * @async
+ * @param {string} sectionId 
+ * @param {LessonObjectToDb} lesson_status 
+ * @returns {Promise<array>} An array containing the result of the update operation
+ * @example
+ * const sectionId = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const lesson_status = {
+ *      section_id: '5119f37b-ef44-4272-a536-04af51ef4bbc',
+ *      lesson_id: 'a4d32182-98ba-4968-90c3-aa0c27751d55',
+ *      lesson_name: 'Candle Stick Quiz 1',
+ *      lesson_start: true,
+ *      lesson_progress: 1,
+ *      lesson_completed: true,
+ * }
+ * const result = await addLessonStatusForUsers(sectionId, lesson_status);
+ * console.log(result);
+ * // Output:
+ * [
+ *  {
+ *      acknowledged: true,
+ *      modifiedCount: 1,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 1
+ *  }, {}, ...
+ * ]
+ * 
+ */
+const addLessonStatusForUsers = async (sectionId, lesson_status) => { // check for irregularities here with updating
     try {
         let updateStatus = []
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
@@ -422,7 +853,7 @@ const addLessonStatusForUsers = async ({ sectionId, lesson_status }) => {
                 updateStatus.push(update)
             } else {
                 // log.info("Lesson status key does not exist");
-                let update = await collection.updateOne(
+                let update = await allUserCollection.updateOne(
                     { _id: user._id },
                     { $set: { [`lesson_status.${sectionId}`]: [lesson_status] } }
                 );
@@ -436,8 +867,48 @@ const addLessonStatusForUsers = async ({ sectionId, lesson_status }) => {
     }
 }
 
-// Updates the quiz status for all the users
-const addQuizStatusForUsers = async ({ sectionId, lessonId, quizObject }) => {
+/**
+ * @typedef {Object} QuizObjectToDb
+ * @property {string} section_id - The section id.
+ * @property {string} lesson_id - The lesson id.
+ * @property {string} quiz_id - The quiz id.
+ * @property {string} quiz_name - The quiz name.
+ * @property {string} quiz_completed_date - The quiz completion date.
+ * @property {string} quiz_score - The quiz score.
+ * @property {boolean} quiz_complete - The quiz completion status.
+ */
+
+/**
+ * Updates the quiz status for all the users after adding a new quiz
+ * @async
+ * @param {string} sectionId 
+ * @param {string} lessonId 
+ * @param {QuizObjectToDb} quizObject 
+ * @returns {Promise<object>} Object containing the result of the update operation
+ * @example
+ * const sectionId = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const lessonId = 'a4d32182-98ba-4968-90c3-aa0c27751d55';
+ * const quizObject = {
+ *      section_id: '5119f37b-ef44-4272-a536-04af51ef4bbc',
+ *      lesson_id: 'a4d32182-98ba-4968-90c3-aa0c27751d55',
+ *      quiz_id: '2c4a5ef5-8ab4-409c-8b0f-4d8b2c063fe1',
+ *      quiz_name: 'Candle Stick Quiz 1',
+ *      quiz_completed_date: '',
+ *      quiz_score: '',
+ *      quiz_completed: false,
+ * }
+ * const result = await addQuizStatusForUsers(sectionId, lessonId, quizObject);
+ * console.log(result);
+ * // Output:
+ * {
+ *      acknowledged: true,
+ *      modifiedCount: 1,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 1
+ * }
+ */
+const addQuizStatusForUsers = async (sectionId, lessonId, quizObject) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         let updated
@@ -445,22 +916,24 @@ const addQuizStatusForUsers = async ({ sectionId, lessonId, quizObject }) => {
         const AUCollection = allUserCollection.find({})
         while (await AUCollection.hasNext()) {
             const user = await AUCollection.next();
-            if (!user.quiz_status[sectionId]) {
-                // Create a new object for the section ID if it doesn't exist
-                user.quiz_status[sectionId] = {};
+            if (user !== null) {
+                if (!user.quiz_status[sectionId]) {
+                    // Create a new object for the section ID if it doesn't exist
+                    user.quiz_status[sectionId] = {};
+                }
+                // Check if the lesson ID exists in the quiz_status object
+                if (!user.quiz_status[sectionId][lessonId]) {
+                    // Create a new epmty array for the lesson ID if it doesn't exist
+                    user.quiz_status[sectionId][lessonId] = [];
+                }
+                // Add the new quiz object to the quizzes array
+                user.quiz_status[sectionId][lessonId].push(quizObject);
+                // Update the document in the collection
+                updated = await allUserCollection.updateOne(
+                    { _id: user._id },
+                    { $set: { quiz_status: user.quiz_status } }
+                );
             }
-            // Check if the lesson ID exists in the quiz_status object
-            if (!user.quiz_status[sectionId][lessonId]) {
-                // Create a new epmty array for the lesson ID if it doesn't exist
-                user.quiz_status[sectionId][lessonId] = [];
-            }
-            // Add the new quiz object to the quizzes array
-            user.quiz_status[sectionId][lessonId].push(quizObject);
-            // Update the document in the collection
-            updated = await allUserCollection.updateOne(
-                { _id: user._id },
-                { $set: { quiz_status: user.quiz_status } }
-            );
         }
         return updated
     } catch (error) {
@@ -469,10 +942,27 @@ const addQuizStatusForUsers = async ({ sectionId, lessonId, quizObject }) => {
     }
 }
 
-// fetches a single document from a collection to check if it exists
-// INPUT : collectionName, id of the document
-// OUTPUT : document object
-const checkForDocumentInCollection = async ({ collectionName, id }) => {
+/**
+ * Checks if a document exists in a collection
+ * @async
+ * @param {string} collectionName  The name of the collection to check
+ * @param {string} id  The id of the document to check
+ * @returns {Promise<object>} An object containing the document if it exists
+ * @example
+ * const collectionName = 'sections';
+ * const id = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const section = await checkForDocumentInCollection(collectionName, id);
+ * console.log(section);
+ * // Output:
+ * {
+ *      "_id": "6412d6826ad7375e1c777ada",
+ *      "title": "Introduction to the market",
+ *      "content": "The crypto market is relatively new, highly volatile, ...",
+ *      "url": "",
+ *      "sectionId": "5119f37b-ef44-4272-a536-04af51ef4bbc"
+ * }
+ */
+const checkForDocumentInCollection = async (collectionName, id) => {
     try {
         let key = ''
         switch (collectionName) {
@@ -488,7 +978,7 @@ const checkForDocumentInCollection = async ({ collectionName, id }) => {
             default:
                 throw new Error("Invalid collection name")
         }
-        filter = { [key]: id }
+        let filter = { [key]: id }
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection(collectionName);
         const document = await collection.findOne(filter)
@@ -503,10 +993,31 @@ const checkForDocumentInCollection = async ({ collectionName, id }) => {
     }
 }
 
-// Updates a section in the database
-// INPUT : title, content, url, sectionId
-// OUTPUT : result object
-const updateSectionData = async ({ title, content, url, sectionId }) => {
+/**
+ * Updates a section in the database
+ * @async
+ * @param {string} title The title of the section 
+ * @param {string} content The content of the section
+ * @param {string} url The url of the section
+ * @param {string} sectionId The section id of the section to be updated
+ * @returns {Promise<object>} An object containing the result of the update operation
+ * @example
+ * const title = 'Introduction to the market';
+ * const content = 'The crypto market is relatively new, highly volatile, ...';
+ * const url = '';
+ * const sectionId = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const result = await updateSectionData(title, content, url, sectionId);
+ * console.log(result);
+ * // Output:
+ * {
+ *      acknowledged: true,
+ *      modifiedCount: 1,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 1
+ * }
+ */
+const updateSectionData = async (title, content, url, sectionId) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const sectionsCollection = db.collection('sections');
@@ -518,8 +1029,34 @@ const updateSectionData = async ({ title, content, url, sectionId }) => {
     }
 }
 
-// Updates a lesson in the database
-const updateLessonData = async ({ chapter_title, lessonData, lessonId }) => {
+/**
+ * Updates a lesson in the database
+ * @async
+ * @param {string} chapter_title 
+ * @param {object} lessonData 
+ * @param {string} lessonId 
+ * @returns {Promise<object>} An object containing the result of the update operation
+ * @example
+ * const chapter_title = 'Candle Stick Quiz 1';
+ * const lessonData = {
+ *      "title": "Candle Stick Quiz 1",
+ *      "content": "The crypto market is relatively new, highly volatile, ...",
+ *      "url": "",
+ *      "lessonId": "a4d32182-98ba-4968-90c3-aa0c27751d55"
+ *  };
+ * const lessonId = 'a4d32182-98ba-4968-90c3-aa0c27751d55';
+ * const result = await updateLessonData(chapter_title, lessonData, lessonId);
+ * console.log(result);
+ * // Output:
+ * {
+ *      acknowledged: true,
+ *      modifiedCount: 1,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 1
+ * }
+ */
+const updateLessonData = async (chapter_title, lessonData, lessonId) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const lessonsCollection = db.collection('lessons');
@@ -531,7 +1068,30 @@ const updateLessonData = async ({ chapter_title, lessonData, lessonId }) => {
     }
 }
 
-const updateLessonNameChangeAcrossUsersStatus = async ({ sectionId, lessonId, chapter_title }) => {
+/**
+ * Updates the lesson status of all the users after a lesson is updated
+ * @async
+ * @param {string} sectionId  The section id of the section to be updated
+ * @param {string} lessonId  The lesson id of the lesson to be updated
+ * @param {string} chapter_title  The chapter title of the lesson to be updated
+ * @returns {Promise<object>} An object containing the result of the update operation
+ * @example
+ * const sectionId = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const lessonId = 'a4d32182-98ba-4968-90c3-aa0c27751d55';
+ * const chapter_title = 'Candle Stick Quiz 1';
+ * const result = await updateLessonNameChangeAcrossUsersStatus(sectionId, lessonId, chapter_title);
+ * console.log(result);
+ * // Output:
+ * {
+ *      acknowledged: true,
+ *      modifiedCount: 5,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 5
+ * }
+ * 
+ */
+const updateLessonNameChangeAcrossUsersStatus = async (sectionId, lessonId, chapter_title) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const filter = {
@@ -554,6 +1114,7 @@ const updateLessonNameChangeAcrossUsersStatus = async ({ sectionId, lessonId, ch
 
         const allUserCollection = db.collection('users')
         const updated = await allUserCollection.updateMany(filter, update, options);
+        console.log(updated)
         return updated
     } catch (error) {
         log.error(error.stack)
@@ -561,8 +1122,62 @@ const updateLessonNameChangeAcrossUsersStatus = async ({ sectionId, lessonId, ch
     }
 }
 
-// Updates a quiz in the database
-const updateQuizData = async ({ quizId, quizTitle, quizDescription, questions }) => {
+/**
+ * Updates a quiz in the database
+ * @async
+ * @param {string} quizId  The quiz id of the quiz to be updated
+ * @param {string} quizTitle  The quiz title of the quiz to be updated
+ * @param {string} quizDescription  The quiz description of the quiz to be updated
+ * @param {Array} questions  The questions of the quiz to be updated
+ * @returns {Promise<array>} An array containing the result of the update operation and the updated quiz data
+ * @example
+ * const quizId = '2c4a5ef5-8ab4-409c-8b0f-4d8b2c063fe1';
+ * const quizTitle = 'Candle Stick Quiz 1';
+ * const quizDescription = 'The crypto market is relatively new, highly volatile, ...';
+ * const questions = [
+ *     {
+ *      {
+ *       "question": "test",
+ *       "options": [
+ *           {
+ *               "option": "a"
+ *           },
+ *           {
+ *               "option": "s"
+ *           },
+ *           {
+ *               "option": "d"
+ *           }
+ *       ],
+ *       "correctAnswer": "d"
+ *  }
+ * ];
+ * 
+ * const result = await updateQuizData(quizId, quizTitle, quizDescription, questions);
+ * console.log(result);
+ * // Output:
+ * [
+ *  {
+ *       acknowledged: true,
+ *       modifiedCount: 1,
+ *       upsertedId: null,
+ *       upsertedCount: 0,
+ *       matchedCount: 1
+ *  },
+ *  {
+ *   _id: new ObjectId("6507be96b6437f017aa45ef8"),
+ *   sectionId: '534413b3-ce75-42cb-b5d7-88db5a65c7eb',
+ *   sectionName: 'test new ',
+ *   lessonId: '40a21934-d949-46e4-b557-bc708f1ac1f9',
+ *   lessonName: 'test',
+ *   quizId: 'eef473fe-a19f-4d96-948c-e3f0a824c30d',
+ *   quizTitle: 'test new',
+ *   quizDescription: 'test',
+ *   questions: [ { question: 'test', options: [Array], correctAnswer: 'd' } ]
+ *  }
+ * ]
+ */
+const updateQuizData = async (quizId, quizTitle, quizDescription, questions) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const quizzesCollection = db.collection('quiz');
@@ -575,7 +1190,31 @@ const updateQuizData = async ({ quizId, quizTitle, quizDescription, questions })
     }
 }
 
-const updateQuizNameChangeAcrossUsersStatus = async ({ sectionId, lessonId, quizId, quizTitle }) => {
+/**
+ * Uodates the quiz name change across all the users
+ * @async
+ * @param {string} sectionId The section id of the section to be updated
+ * @param {string} lessonId The lesson id of the lesson to be updated
+ * @param {string} quizId The quiz id of the quiz to be updated 
+ * @param {string} quizTitle The quiz title of the quiz to be updated 
+ * @returns {Promise<object>} An object containing the result of the update operation
+ * @example
+ * const sectionId = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const lessonId = 'a4d32182-98ba-4968-90c3-aa0c27751d55';
+ * const quizId = '2c4a5ef5-8ab4-409c-8b0f-4d8b2c063fe1';
+ * const quizTitle = 'Candle Stick Quiz 1';
+ * const result = await updateQuizNameChangeAcrossUsersStatus(sectionId, lessonId, quizId, quizTitle);
+ * console.log(result);
+ * // Output:
+ * {
+ *      acknowledged: true,
+ *      modifiedCount: 5,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 5
+ * }
+ */
+const updateQuizNameChangeAcrossUsersStatus = async (sectionId, lessonId, quizId, quizTitle) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const filter = {
@@ -598,6 +1237,7 @@ const updateQuizNameChangeAcrossUsersStatus = async ({ sectionId, lessonId, quiz
 
         const allUserCollection = db.collection('users')
         const updated = await allUserCollection.updateMany(filter, update, options);
+        console.log(updated)
         return updated
     } catch (error) {
         log.error(error.stack)
@@ -605,10 +1245,24 @@ const updateQuizNameChangeAcrossUsersStatus = async ({ sectionId, lessonId, quiz
     }
 }
 
-// Delete a documetn from a collection
-// INPUT : collectionName, id of the document
-// OUTPUT : result object
-const deleteOneDocumentFromCollection = async ({ collectionName, id }) => {
+/**
+ * Deletes a document from a collection based on the id
+ * @async
+ * @param {string} collectionName collection name
+ * @param {string} id id of the document
+ * @returns {Promise<object>} An object containing the result of the deletion operation
+ * @example
+ * const collectionName = 'sections';
+ * const id = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const result = await deleteOneDocumentFromCollection(collectionName, id);
+ * console.log(result);
+ * // Output:
+ * {
+ *      acknowledged: true,
+ *      deletedCount: 1
+ * }
+ */
+const deleteOneDocumentFromCollection = async (collectionName, id) => {
     try {
         let key = ''
         switch (collectionName) {
@@ -624,7 +1278,7 @@ const deleteOneDocumentFromCollection = async ({ collectionName, id }) => {
             default:
                 throw new Error("Invalid collection name")
         }
-        filter = { [key]: id }
+        let filter = { [key]: id }
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection(collectionName)
         const result = await collection.deleteOne(filter);
@@ -635,10 +1289,26 @@ const deleteOneDocumentFromCollection = async ({ collectionName, id }) => {
     }
 }
 
-// Delete many documents from a collection
-// INPUT : type, collectionName, id of the document
-// OUTPUT : result object
-const deleteManyDocumentsFromCollection = async ({ type, collectionName, id }) => {
+/**
+ * Deletes many documents from a collection based on the id
+ * @async
+ * @param {string} type The type of delete operation to be performed
+ * @param {string} collectionName The name of the collection to delete documents from
+ * @param {string} id The id of the document to be deleted
+ * @returns {Promise<object>} An object containing the result of the deletion operation
+ * @example
+ * const type = 'sectionDelete';
+ * const collectionName = 'sections';
+ * const id = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const result = await deleteManyDocumentsFromCollection(type, collectionName, id);
+ * console.log(result);
+ * // Output:
+ * {
+ *      acknowledged: true,
+ *      deletedCount: 1
+ * }
+ */
+const deleteManyDocumentsFromCollection = async (type, collectionName, id) => {
     try {
         let key = ''
         switch (type) {
@@ -651,7 +1321,7 @@ const deleteManyDocumentsFromCollection = async ({ type, collectionName, id }) =
             default:
                 throw new Error("Invalid collection name")
         }
-        filter = { [key]: id }
+        let filter = { [key]: id }
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection(collectionName)
         const result = await collection.deleteMany(filter);
@@ -662,10 +1332,27 @@ const deleteManyDocumentsFromCollection = async ({ type, collectionName, id }) =
     }
 }
 
-// When a section is deleted the status of that section, including all lessons and quizz is removed from all the users
-// INPUT : sectionId
-// OUTPUT : result object
-const removeLessonAndQuizStatusFromUsers = async ({ sectionId }) => {
+/**
+ * Removes the lesson and quiz status from all the users after a section is deleted
+ * @async
+ * @param {string} sectionId The section id of the section to be removed
+ * @returns {Promise<array>} An array containing the result of the deletion operation
+ * @example
+ * const sectionId = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const result = await removeLessonAndQuizStatusFromUsers(sectionId);
+ * console.log(result);
+ * // Output:
+ * [
+ * {
+ *      acknowledged: true,
+ *      modifiedCount: 1,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 1
+ * }, {}, ...
+ * ]
+ */
+const removeLessonAndQuizStatusFromUsers = async (sectionId) => {
     try {
         let updatedStatus = []
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
@@ -690,7 +1377,29 @@ const removeLessonAndQuizStatusFromUsers = async ({ sectionId }) => {
     }
 }
 
-const removeOneLessonAndQuizStatusFromUsers = async ({ sectionId, lessonId }) => {
+/**
+ * Deletes the lessona and quiz status from all the users after a lesson is deleted
+ * @async
+ * @param {string} sectionId The section id to which the lesson belongs
+ * @param {string} lessonId The lesson id of the lesson to be removed
+ * @returns {Promise<array>} An array containing the result of the deletion operation
+ * @example
+ * const sectionId = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const lessonId = 'a4d32182-98ba-4968-90c3-aa0c27751d55';
+ * const result = await removeOneLessonAndQuizStatusFromUsers(sectionId, lessonId);
+ * console.log(result);
+ * // Output:
+ * [
+ * {
+ *      acknowledged: true,
+ *      modifiedCount: 1,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 1
+ * }, {}, ...
+ * ]
+ */
+const removeOneLessonAndQuizStatusFromUsers = async (sectionId, lessonId) => {
     try {
         let updatedStatus = []
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
@@ -725,7 +1434,31 @@ const removeOneLessonAndQuizStatusFromUsers = async ({ sectionId, lessonId }) =>
     }
 }
 
-const removeQuizStatusFromUser = async ({ quizId, lessonId, sectionId }) => {
+/**
+ * Removes a quiz status from all the users after a quiz is deleted
+ * @async
+ * @param {string} quizId Quiz id of the quiz to be removed
+ * @param {string} lessonId Lesson id of the lesson to which the quiz belongs
+ * @param {string} sectionId Section id of the section to which the quiz belongs
+ * @returns {Promise<array>} An array containing the result of the deletion operation
+ * @example
+ * const quizId = '2c4a5ef5-8ab4-409c-8b0f-4d8b2c063fe1';
+ * const lessonId = 'a4d32182-98ba-4968-90c3-aa0c27751d55';
+ * const sectionId = '5119f37b-ef44-4272-a536-04af51ef4bbc';
+ * const result = await removeQuizStatusFromUser(quizId, lessonId, sectionId);
+ * console.log(result);
+ * // Output:
+ * [
+ * {
+ *      acknowledged: true,
+ *      modifiedCount: 1,
+ *      upsertedId: null,
+ *      upsertedCount: 0,
+ *      matchedCount: 1
+ * }, {}, ...
+ * ]
+ */
+const removeQuizStatusFromUser = async (quizId, lessonId, sectionId) => {
     try {
         let deletedStatus = []
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
@@ -734,6 +1467,7 @@ const removeQuizStatusFromUser = async ({ quizId, lessonId, sectionId }) => {
         while (await AUCollection.hasNext()) {
             const user = await AUCollection.next();
             let deleted = await allUserCollection.updateOne(
+                // @ts-ignore
                 { _id: user._id },
                 { $pull: { [`quiz_status.${sectionId}.${lessonId}`]: { quiz_id: quizId } } }
             )
@@ -746,11 +1480,27 @@ const removeQuizStatusFromUser = async ({ quizId, lessonId, sectionId }) => {
     }
 }
 
-const deleteOneMetaData = async ({ symbol }) => {
+/**
+ * Deletes a ticker meta from db:crypticsage/binance_ticker_meta
+ * @async
+ * @param {string} symbol Symbol to be deleted
+ * @returns {Promise<object>} An object containing the result of the deletion operation
+ * @example
+ * const symbol = 'BTCUSDT';
+ * const result = await deleteOneMetaData(symbol);
+ * console.log(result);
+ * // Output:
+ * {
+ *      acknowledged: true,
+ *      deletedCount: 1
+ * }
+ */
+const deleteOneMetaData = async (symbol) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection("binance_ticker_meta")
         const result = await collection.deleteOne({ symbol: symbol })
+        console.log(result)
         return result
     } catch (error) {
         log.error(error.stack)
@@ -767,8 +1517,22 @@ const deleteOneMetaData = async ({ symbol }) => {
 
 //<------------------------Y-FINANCE SERVICES------------------------>
 
-// Deletes all the historical data of a ticker from the db based oon tickername and type : crypto / stock
-const deleteTickerHistDataFromDb = async ({ ticker_name, type }) => {
+/**
+ * Deletes all the historical data of a ticker from the db based on tickername and type : crypto / stock
+ * @param {string} ticker_name The ticker name
+ * @param {string} type crypto | stock 
+ * @returns {Promise<array>} An array containing the result of the deletion operation
+ * @example
+ * const ticker_name = 'BTCUSDT';
+ * const type = 'crypto';
+ * const result = await deleteTickerHistDataFromDb(ticker_name, type);
+ * console.log(result);
+ * // Output:
+ * [
+ *     true, true, ...
+ * ]
+ */
+const deleteTickerHistDataFromDb = async (ticker_name, type) => {
     try {
         const db = (await client).db(HISTORICAL_DATABASE_NAME)
         const tickerCollections = await db.listCollections().toArray()
@@ -793,40 +1557,44 @@ const deleteTickerHistDataFromDb = async ({ ticker_name, type }) => {
 
 //<------------------------BINANCE SERVICES-------------------------->
 
-// Generates an array of objects with latest and oldest date based on latest tokens and data available in the db:crypticsage/binance
-// Input : none
-// Output : array of objects with update parameters for generateUpdateQueriesForBinanceTickers()
-/* 
-[
-    {
-        "ticker_name": "BTCUSDT",
-        "data": {
-            "4h": {
-                "historical": 12993,
-                "firstHistorical": 1502942400000,
-                "lastHistorical": 1690156800000,
-                "oldestDate": "8/17/2017, 2:00:00 PM",
-                "latestDate": "7/24/2023, 10:00:00 AM"
-            }
-        }
-    },
-    {
-        "ticker_name": "XRPUSDT",
-        "data": {
-            "4h": {
-                "historical": 11409,
-                "firstHistorical": 1525420800000,
-                "lastHistorical": 1689739200000,
-                "oldestDate": "5/4/2018, 6:00:00 PM",
-                "latestDate": "7/19/2023, 2:00:00 PM"
-            },
-        }
-    }
-] 
-*/
-// fetch the below required data directly from binance_metadata and process accordingly
-
-const getFirstObjectForEachPeriod = async ({ collection_name }) => {
+/**
+ * Generates an array of objects with latest and oldest date based on latest tokens and data available in the db:crypticsage/binance
+ * @async
+ * @param {string} collection_name The name of the collection to generate the data for. binance_metadata | yfinance_metadata
+ * @returns {Promise<array>} An array of objects with latest and oldest date
+ * @example
+ * const collection_name = 'binance_metadata';
+ * const result = await getFirstObjectForEachPeriod(collection_name);
+ * console.log(result);
+ * // Output:	
+ * [
+ *  {
+ *      "ticker_name": "BTCUSDT",
+ *      "data": {
+ *          "4h": {
+ *              "historical": 12993,
+ *              "firstHistorical": 1502942400000,
+ *              "lastHistorical": 1690156800000,
+ *              "oldestDate": "8/17/2017, 2:00:00 PM",
+ *              "latestDate": "7/24/2023, 10:00:00 AM"
+ *          }
+ *      }
+ *  },
+ *  {
+ *      "ticker_name": "XRPUSDT",
+ *      "data": {
+ *          "4h": {
+ *              "historical": 11409,
+ *              "firstHistorical": 1525420800000,
+ *              "lastHistorical": 1689739200000,
+ *              "oldestDate": "5/4/2018, 6:00:00 PM",
+ *              "latestDate": "7/19/2023, 2:00:00 PM"
+ *          },
+ *      }
+ *  }
+ * ]
+ */
+const getFirstObjectForEachPeriod = async (collection_name) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const collection = db.collection(collection_name);
@@ -860,7 +1628,43 @@ const getFirstObjectForEachPeriod = async ({ collection_name }) => {
     }
 };
 
-const insertHistoricalDataToDb = async ({ type, ticker_name, period, token_data }) => {
+/**
+ * Inserts an array of ticker data to the db:historical_data
+ * @async
+ * @param {string} type crypto | stock
+ * @param {string} ticker_name The ticker name 
+ * @param {string} period 1m | 4h | 6h | 8h | 12h | 1d | 3d | 1w 
+ * @param {array} token_data The array of ticker data to be inserted
+ * @returns {Promise<array>} An array containing the result of the insertion operation
+ * @example
+ * const type = 'crypto';
+ * const ticker_name = 'BTCUSDT';
+ * const period = '4h';
+ * const token_data = [
+ * {
+ *      "openTime": 1502942400000,
+ *      "open": "4261.48000000",
+ *      "high": "4313.62000000",
+ *      "low": "4261.48000000",
+ *      "close": "4285.08000000",
+ *      "volume": "39.89610500",
+ *      "closeTime": 1502956799999,
+ *      "quoteAssetVolume": "171154.47252880",
+ *      "trades": 196
+ * }, ... {}
+ * ];
+ * const result = await insertHistoricalDataToDb(type, ticker_name, period, token_data);
+ * console.log(result);
+ * // Output:
+ * [
+ *      {
+ *           "batch_no": 1,
+ *           "inserted": 1000,
+ *           "acknowledged": true
+ *      }, ...{}
+ * ]
+ */
+const insertHistoricalDataToDb = async (type, ticker_name, period, token_data) => {
     try {
         const collection_name = `${type}_${ticker_name}_${period}`;
         const db = (await client).db(HISTORICAL_DATABASE_NAME)
@@ -892,7 +1696,48 @@ const insertHistoricalDataToDb = async ({ type, ticker_name, period, token_data 
     }
 }
 
-const fetchTickerHistDataFromDb = async ({ type, ticker_name, period, page_no, items_per_page, new_fetch_offset }) => {
+/**
+ * Fetches the ticker data from db:historical_data based on the ticker name, period, page_no and items_per_page
+ * @async
+ * @param {string} type 
+ * @param {string} ticker_name 
+ * @param {string} period 
+ * @param {number} page_no 
+ * @param {number} items_per_page 
+ * @param {number} new_fetch_offset 
+ * @returns {Promise<object>} An object containing the fetched data
+ * @example
+ * const type = 'crypto';
+ * const ticker_name = 'BTCUSDT';
+ * const period = '4h';
+ * const page_no = 1;
+ * const items_per_page = 100;
+ * const new_fetch_offset = 0;
+ * const result = await fetchTickerHistDataFromDb(type, ticker_name, period, page_no, items_per_page, new_fetch_offset);
+ * console.log(result);
+ * // Output:
+ * {
+ *      "ticker_name": "BTCUSDT",
+ *      "period": "4h",
+ *      "page_no": 1,
+ *      "items_per_page": 100,
+ *      "start_date": "8/17/2017, 2:00:00 PM",
+ *      "end_date": "7/24/2023, 10:00:00 AM",
+ *      "total_count": 12993,
+ *      "ticker_data": [
+ *          {
+ *              "date": "7/24/2023, 10:00:00 AM",
+ *              "openTime": 1690156800000,
+ *              "open": "100000.00000000",
+ *              "high": "100000.00000000",
+ *              "low": "100000.00000000",
+ *              "close": "100000.00000000",
+ *              "volume": "0.00000000"
+ *          }, ... {}
+ *      ]
+ * }    
+ */
+const fetchTickerHistDataFromDb = async (type, ticker_name, period, page_no, items_per_page, new_fetch_offset) => {
     try {
         const db = (await client).db(HISTORICAL_DATABASE_NAME)
         const collection_name = `${type}_${ticker_name}_${period}`
@@ -904,6 +1749,7 @@ const fetchTickerHistDataFromDb = async ({ type, ticker_name, period, page_no, i
         const skip = ((page_no - 1) * items_per_page) + new_fetch_offset;
         const t = createTimer('Fetching data from binance_historical')
         t.startTimer()
+        // @ts-ignore
         const tokenData = await collection.find({}).sort(sortQuery).skip(skip).limit(items_per_page).toArray();
         t.stopTimer(__filename.slice(__dirname.length + 1))
         let finalResult = []
@@ -948,13 +1794,52 @@ const fetchTickerHistDataFromDb = async ({ type, ticker_name, period, page_no, i
     }
 }
 
-const fetchTickerHistDataBasedOnCount = async ({ asset_type, ticker_name, period, fetch_count }) => {
+
+/**
+ * Fetched ticker data from db:historical_data based on the ticker name, period and fetch_count
+ * @async
+ * @param {string} asset_type The type of asset : crypto | stock
+ * @param {string} ticker_name The ticker name
+ * @param {string} period The period of the ticker data : 1m | 4h | 6h | 8h | 12h | 1d | 3d | 1w
+ * @param {number} fetch_count The number of data to be fetched
+ * @returns {Promise<object>} An object containing the fetched data
+ * @example
+ * const asset_type = 'crypto';
+ * const ticker_name = 'BTCUSDT';
+ * const period = '4h';
+ * const fetch_count = 100;
+ * const result = await fetchTickerHistDataBasedOnCount(asset_type, ticker_name, period, fetch_count);
+ * console.log(result);
+ * // Output:
+ * {
+ *      "ticker_name": "BTCUSDT",
+ *      "period": "4h",
+ *      "page_no": 1,
+ *      "items_per_page": 100,
+ *      "start_date": "8/17/2017, 2:00:00 PM",
+ *      "end_date": "7/24/2023, 10:00:00 AM",
+ *      "total_count": 12993,
+ *      "ticker_data": [
+ *          {
+ *              "date": "7/24/2023, 10:00:00 AM",
+ *              "openTime": 1690156800000,
+ *              "open": "100000.00000000",
+ *              "high": "100000.00000000",
+ *              "low": "100000.00000000",
+ *              "close": "100000.00000000",
+ *              "volume": "0.00000000"
+ *          }, ... {}
+ *      ]
+ * }    
+ */
+const fetchTickerHistDataBasedOnCount = async (asset_type, ticker_name, period, fetch_count) => {
     try {
         const db = (await client).db(HISTORICAL_DATABASE_NAME)
         const collection_name = `${asset_type}_${ticker_name}_${period}`
         const collection = db.collection(collection_name)
         const sortQuery = { openTime: -1 }
 
+        // @ts-ignore
         const tokenData = await collection.find({}).sort(sortQuery).limit(fetch_count).toArray();
 
         let finalResult = []
@@ -994,7 +1879,34 @@ const fetchTickerHistDataBasedOnCount = async ({ asset_type, ticker_name, period
     }
 }
 
-const updateTickerMetaData = async ({ type, ticker_name, period, meta }) => {
+/**
+ * Updates the ticker meta data in db:crypticsage/binance_metadata after fetching the historical or new data from binance
+ * @async
+ * @param {string} type crypto | stock 
+ * @param {string} ticker_name The ticker name 
+ * @param {string} period 1m | 4h | 6h | 8h | 12h | 1d | 3d | 1w 
+ * @param {object} meta The meta data to be updated 
+ * @returns {Promise<object>} An object containing the result of the update operation
+ * @example
+ * const type = 'crypto';
+ * const ticker_name = 'BTCUSDT';
+ * const period = '4h';
+ * const meta = {
+ *      latest:{} // Latest ticker data
+ *      updatedCount: 100 // Number of tickers updated
+ * }
+ * const result = await updateTickerMetaData(type, ticker_name, period, meta);
+ * console.log(result);
+ * // Output:
+ * {
+ *      "acknowledged": true,
+ *      "modifiedCount": 0,
+ *      "upsertedId": null,
+ *      "upsertedCount": 0,
+ *      "matchedCount": 1
+ * }
+ */
+const updateTickerMetaData = async (type, ticker_name, period, meta) => {
     try {
         const collection_name = type === 'crypto' ? 'binance_metadata' : 'yfinance_metadata';
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
@@ -1067,37 +1979,42 @@ const updateTickerMetaData = async ({ type, ticker_name, period, meta }) => {
 
 //<------------------------CRYPTO-STOCKS SERVICES-------------------------->
 
-// Fetches the top tickers from CryptoCompare and saves it to the DB : crypticsage/binance-ticker-meta
-// INPUT : cryptodata from cryptocompare
-// OUTPUT : Array of status based on the operation, insert or update 
-/*
-"insert": 
-[
-{
-    "lastErrorObject": {
-        "n": 1,
-        "updatedExisting": true
-    },
-    "value": {
-        "_id": "64eac17691934b84684b0c95",
-        "symbol": "BTC",
-        "asset_launch_date": "2009-01-03",
-        "current_price": 26005.12,
-        "high_24h": 26081.06,
-        "id": "1182",
-        "image_url": "https://www.cryptocompare.com/media/37746251/btc.png",
-        "last_updated": 1693106832,
-        "low_24h": 25964.95,
-        "market_cap_rank": 1,
-        "max_supply": 20999999.9769,
-        "name": "Bitcoin",
-        "price_change_24h": -69.63000000000102,
-        "price_change_percentage_24h": -0.2670399524444185
-    },
-    "ok": 1
-}
-*/
-const saveOrUpdateTickerMeta = async ({ cryptoData }) => {
+/**
+ * Fetches the top tickers from DB based on length: crypticsage/binance-ticker-meta
+ * @async
+ * @param {array} cryptoData The array of ticker data (cryptodata from cryptocompare)
+ * @returns {Promise<array>} Array of status based on the operation, insert or update 
+ * @example
+ * const cryptoData = [
+ * {},..{}
+ * ];
+ * const result = await saveOrUpdateTickerMeta(cryptoData);
+ * console.log(result);
+ * // Output:
+ * [
+ *   {
+ *      lastErrorObject: { n: 1, updatedExisting: true },
+ *      value: {
+ *          _id: new ObjectId("64eea42b91934b84684ce880"),
+ *          symbol: 'BTC',
+ *          asset_launch_date: '2009-01-03',
+ *          current_price: 27411.81,
+ *          high_24h: 28169.48,
+ *          id: '1182',
+ *          image_url: 'https://www.cryptocompare.com/media/37746251/btc.png',
+ *          last_updated: 1693363675,
+ *          low_24h: 25911.7,
+ *          market_cap_rank: 1,
+ *          max_supply: 20999999.9769,
+ *          name: 'Bitcoin',
+ *          price_change_24h: 1326.7900000000009,
+ *          price_change_percentage_24h: 5.086405914199034
+ *      },
+ *      ok: 1
+ *   , ...{}
+ * ]
+ */
+const saveOrUpdateTickerMeta = async (cryptoData) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const metaCollection = db.collection('binance_ticker_meta')
@@ -1119,32 +2036,38 @@ const saveOrUpdateTickerMeta = async ({ cryptoData }) => {
     }
 }
 
-// Fetches the top tickers from DB based on length: crypticsage/binance-ticker-meta
-// INPUT : length - number of tickers to fetch : { length: 10 } or { length: "max" }
-// OUTPUT : Array of tickers
-/* 
-[
-    {
-        "id": "1182",
-        "symbol": "BTC",
-        "name": "Bitcoin",
-        "max_supply": 20999999.9769,
-        "asset_launch_date": "2009-01-03",
-        "image_url": "https://www.cryptocompare.com/media/37746251/btc.png",
-        "market_cap_rank": 1
-    },
-    {
-        "id": "7605",
-        "symbol": "ETH",
-        "name": "Ethereum",
-        "max_supply": -1,
-        "asset_launch_date": "2015-07-30",
-        "image_url": "https://www.cryptocompare.com/media/37746238/eth.png",
-        "market_cap_rank": 2
-    }
-]
-*/
-const fetchTickerMetaFromDb = async ({ length }) => {
+/**
+ * Fetches the saved ticker meta data from db:crypticsage/binance_ticker_meta
+ * @async
+ * @param {number|string} length number of tickers to fetch : { length: 10 } or { length: "max" }
+ * @returns {Promise<array>} Array of tickers
+ * @example
+ * const length = 10;
+ * const result = await fetchTickerMetaFromDb(length);
+ * console.log(result);
+ * // Output:
+ * [
+ *  {
+ *      "id": "1182",
+ *      "symbol": "BTC",
+ *      "name": "Bitcoin",
+ *      "max_supply": 20999999.9769,
+ *      "asset_launch_date": "2009-01-03",
+ *      "image_url": "https://www.cryptocompare.com/media/37746251/btc.png",
+ *      "market_cap_rank": 1
+ *  },
+ *  {
+ *      "id": "7605",
+ *      "symbol": "ETH",
+ *      "name": "Ethereum",
+ *      "max_supply": -1,
+ *      "asset_launch_date": "2015-07-30",
+ *      "image_url": "https://www.cryptocompare.com/media/37746238/eth.png",
+ *      "market_cap_rank": 2
+ *  }
+ * ]
+ */
+const fetchTickerMetaFromDb = async (length) => {
     try {
         if (length === undefined || length === null || length === 'max' || length === 0 || length === '') {
             length = 1000
@@ -1172,7 +2095,19 @@ const fetchTickerMetaFromDb = async ({ length }) => {
     }
 }
 
-const checkTickerMetaDuplicateData = async ({ ticker_name }) => {
+/**
+ * Function to check for duplicate data in db:crypticsage/binance_historical
+ * @async
+ * @param {string} ticker_name The ticker name 
+ * @returns {Promise<array>} An array containing the result of the aggregation operation
+ * @example
+ * const ticker_name = 'BTCUSDT';
+ * const result = await checkTickerMetaDuplicateData(ticker_name);
+ * console.log(result);
+ * // Output:
+ * []
+ */
+const checkTickerMetaDuplicateData = async (ticker_name) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const testColl = await db.listCollections().toArray()

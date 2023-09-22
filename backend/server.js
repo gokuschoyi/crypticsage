@@ -39,9 +39,12 @@ app.use(bodyParser.json());
 logger.setupAccessLog(app);
 app.use(log);
 
-app.post('/', verifyToken, async (req, res) => {
+const MDBServices = require('./services/mongoDBServices');
+const Users = require('./services/userServices');
+app.post('/test_ep', verifyToken, async (req, res) => {
     logs.info('Verify request received');
-    res.status(200).json({ message: "Verified" });
+    const testRes = await Users.processGetInitialQuizDataForUser({ email: res.locals.data.email })
+    res.status(200).json({ message: "Verified", data: testRes });
 })
 
 app.use('/auth', authentication);
@@ -64,6 +67,7 @@ app.listen(config.port, () => {
 
 if (config.websocketFlag === 'true') {
     // Attach the WebSocket server to a separate HTTP server
+    // @ts-ignore
     const wsHttpServer = http.createServer(wsServer);
     wsHttpServer.listen(config.wsPort, () => {
         logs.info(`WebSocket server running on port ${config.wsPort}`);
@@ -71,6 +75,7 @@ if (config.websocketFlag === 'true') {
 
     // Upgrade HTTP requests to WebSocket
     wsHttpServer.on('upgrade', (request, socket, head) => {
+        // @ts-ignore
         wsServer.handleUpgrade(request, socket, head, (ws) => {
             wsServer.emit('connection', ws, request);
         });

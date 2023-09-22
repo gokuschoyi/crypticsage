@@ -135,10 +135,10 @@ const AllQuizzes = (props) => {
                                                                     <Quiz
                                                                         key={index}
                                                                         title={quiz.quizTitle}
-                                                                        quizScore={quiz.quizScore}
-                                                                        quizTotal={quiz.quizTotal}
-                                                                        quizCompleted={quiz.quizCompleted}
-                                                                        quizCompletedDate={quiz.quizCompletedDate}
+                                                                        quizScore={quiz.quiz_score}
+                                                                        quizTotal={quiz.quiz_total}
+                                                                        quizCompleted={quiz.quiz_completed}
+                                                                        quizCompletedDate={quiz.quiz_completed_date}
                                                                         quizID={quiz.quizId}
                                                                         index={index}
                                                                     />

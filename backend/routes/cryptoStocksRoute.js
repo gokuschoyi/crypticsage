@@ -19,15 +19,12 @@ router.post('/fetch_token_data', CSController.fetchTickerDataFromDB) // converte
 const process = async (req, res) => {
     try {
         const { openTime, period } = req.body
-        // let [inserted, updateMeta] = await MDBServices.insertHistoricalDataToDb({ type, ticker_name, period, token_data })
-        // let fObjs = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance_metadata' })
         // let test = await HDServices.processUpdateHistoricalYFinanceData({ symbol: ticker_name })
         // let periods = ["1m", "4h", "6h", "8h", "12h", "1d", "3d", "1w"]
         // let token_count = 10
         // let test = await HDUtil.generateUpdateQueriesForBinanceTickers()
-        // let insert = await MDBServices.saveOrUpdateTickerMeta({ cryptoData })
         // let test = await CSUtil.fetchTopTickerByMarketCap({ length: 5 })
-        /* let fObjs = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yfinance_metadata' })
+        /* 
 
         const tickersList = ["AAPL", "TSLA", "AMZN", "GOOGL"]
         let tickers = tickersList.filter((ticker) => {

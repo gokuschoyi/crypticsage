@@ -1,0 +1,58 @@
+{
+    "opts": {
+        "template": "node_modules/clean-jsdoc-theme",
+        "destination":"./docs",
+        "recurse": true,
+        "verbose": true,
+        "theme_opts":{
+            "title": "Cryptic Sage",
+            "homepageTitle":"Crypticsage Backend API"
+        }
+    },
+    "plugins": [
+        "plugins/markdown",
+        "jsdoc-http-plugin"
+    ],
+    "source": {
+        "include": [
+            "./services/authServices.js",
+            "./typedefs.js",
+            "./routes/authRoute.js",
+            "./routes/userRoute.js"
+        ],
+        "includePattern": ".+\\.js(doc|x)?$",
+        "exclude":[
+            "./node_modules"
+        ]
+    },
+    "tags":{
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc","closure"]
+    },
+    "docdash": {
+        "static": true,
+        "sort": true,
+        "search": true,
+        "collapse": true,
+        "typedefs": true,
+        "removeQuotes": "none",
+        "scripts": [],
+        "menu": {
+            "Github repo": {
+                "href": "https://github.com/gokuschoyi/crypticsage",
+                "target": "_blank",
+                "class": "menu-item",
+                "id": "repository"
+            }
+        }
+    },
+    "templates": {
+        "default": {
+            "useLongnameInNav": true
+        }
+    },
+    "markdown": {
+        "hardwrap": false,
+        "idInHeadings": true
+    }
+}

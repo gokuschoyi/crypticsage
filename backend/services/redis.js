@@ -17,6 +17,7 @@ const connectionOptions = {
 let redisClient
 
 try {
+    // @ts-ignore
     redisClient = new Redis(connectionOptions);
 
     redisClient.on('error', (err) => {

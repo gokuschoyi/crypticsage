@@ -24,7 +24,7 @@ ON FAILURE :
 */
 const processVerifyPassword = async ({ email, password }) => {
     try {
-        const user = await MDBServices.getUserByEmail({ email })
+        const user = await MDBServices.getUserByEmail(email)
         const hashedPassword = user[0].password;
         let validPassword = false;
         if (hashedPassword === '' && (user[0].signup_type === 'google' || user[0].signup_type === 'facebook')) {
@@ -59,7 +59,7 @@ ON SUCCESS :
 const processUpdatePassword = async ({ email, newPassword }) => {
     try {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await MDBServices.updateUserPasswordByEmail({ email, hashedPassword })
+        await MDBServices.updateUserPasswordByEmail(email, hashedPassword)
     } catch (error) {
         log.error(error.stack)
         throw error
@@ -78,10 +78,10 @@ ON SUCCESS :
 */
 const processUpdateProfilePicture = async ({ email, profilePicture }) => {
     try {
-        const updateResult = await MDBServices.updateUserProfilePicture({ email, profilePicture })
-        if (updateResult) {
-            message = "Profile image updated successfully"
-            uStatus = true
+        const updateResult = await MDBServices.updateUserProfilePicture(email, profilePicture)
+        if (updateResult.modifiedCount === 1) {
+            let  message = "Profile image updated successfully"
+            let uStatus = true
             return [message, uStatus]
         } else {
             throw new Error('Profile image update failed')
@@ -104,10 +104,10 @@ ON SUCCESS :
 */
 const processUpdateUserData = async ({ email, userData }) => {
     try {
-        const updateResult = await MDBServices.updateUserData({ email, userData })
+        const updateResult = await MDBServices.updateUserData(email, userData)
         if (updateResult) {
-            message = "User data updated successfully"
-            uStatus = true
+            let message = "User data updated successfully"
+            let uStatus = true
             return [message, uStatus]
         } else {
             throw new Error('User data update failed')
@@ -136,10 +136,10 @@ ON SUCCESS :
 */
 const processUpdateUserPreferences = async ({ email, preferences }) => {
     try {
-        const updatePreference = await MDBServices.updateUserPreferences({ email, preferences })
+        const updatePreference = await MDBServices.updateUserPreferences(email, preferences)
         if (updatePreference) {
-            message = "User preferences updated successfully"
-            uStatus = true
+            let message = "User preferences updated successfully"
+            let uStatus = true
             return [message, uStatus]
         } else {
             throw new Error('User preferences update failed')
@@ -203,7 +203,7 @@ const processUpdateUserPreferences = async ({ email, preferences }) => {
 */
 const processUpdateUserLessonStatus = async ({ email, lesson_status }) => {
     try {
-        const updateLessonStatus = await MDBServices.updateUserLessonStatus({ email, lesson_status })
+        const updateLessonStatus = await MDBServices.updateUserLessonStatus(email, lesson_status)
         const [message, uStatus, userLessonStatus] = updateLessonStatus
         return [message, uStatus, userLessonStatus]
     } catch (error) {
@@ -263,10 +263,10 @@ const processUpdateUserLessonStatus = async ({ email, lesson_status }) => {
 */
 const processGetInitialQuizDataForUser = async ({ email }) => {
     try {
-        let user = await MDBServices.getUserByEmail({ email })
+        let user = await MDBServices.getUserByEmail(email)
         // log.info(user)
         let userQuizStatus = user[0].quiz_status
-        let transformedQuizData = await MDBServices.getInitialQuizDataForUser({ userQuizStatus })
+        let transformedQuizData = await MDBServices.getInitialQuizDataForUser(userQuizStatus)
         return transformedQuizData
     } catch (error) {
         log.error(error.stack)
@@ -318,11 +318,11 @@ const processGetInitialQuizDataForUser = async ({ email }) => {
 */
 const processGetQuiz = async ({ quizId }) => {
     try {
-        let selectedQuiz = await MDBServices.getQuizDataById({ quizId })
+        let selectedQuiz = await MDBServices.getQuizDataById(quizId)
         if (selectedQuiz.length === 0) {
             throw new Error('Quiz not found')
         } else {
-            updatedQuiz = selectedQuiz[0].questions.map((ques, index) => {
+            let updatedQuiz = selectedQuiz[0].questions.map((ques, index) => {
                 const { correctAnswer, ...updatedQuestion } = ques
                 return (
                     updatedQuestion
@@ -380,7 +380,7 @@ const processGetQuiz = async ({ quizId }) => {
 */
 const processSubmitQuiz = async ({ email, sectionId, lessonId, quizId, quizData }) => {
     try {
-        let quiz = await MDBServices.getQuizDataById({ quizId })
+        let quiz = await MDBServices.getQuizDataById(quizId)
         let score = 0
         let total = 0
         quiz[0].questions.forEach((question) => {
@@ -399,7 +399,7 @@ const processSubmitQuiz = async ({ email, sectionId, lessonId, quizId, quizData 
             total: total,
             quizTitle: quiz[0].quizTitle,
         }
-        const updateStatus = await MDBServices.updateQuizStatusForUser({ email, sectionId, lessonId, quizId, score, total })
+        const updateStatus = await MDBServices.updateQuizStatusForUser(email, sectionId, lessonId, quizId, score, total)
         if (updateStatus.acknowledged) {
             return data
         } else {
@@ -445,7 +445,7 @@ const processSubmitQuiz = async ({ email, sectionId, lessonId, quizId, quizData 
 */
 const processGetRecentLessonAndQuiz = async ({ email }) => {
     try {
-        let user = await MDBServices.getUserByEmail({ email })
+        let user = await MDBServices.getUserByEmail(email)
         let lessonStatus = user[0].lesson_status
         let quizStatus = user[0].quiz_status
         let recentLessonQuizStatus = await AuthUtil.getRecentLessonAndQuiz(lessonStatus, quizStatus)
@@ -459,7 +459,7 @@ const processGetRecentLessonAndQuiz = async ({ email }) => {
 // process the file upload csv only
 const processFileUpload = async (req) => {
     try {
-        if (!req.files.length === 0) {
+        if (!req.files.length) {
             throw new Error('No files were uploaded')
         } else {
             let finalResult = AuthUtil.processUploadedCsv(req)

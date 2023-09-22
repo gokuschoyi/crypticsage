@@ -9,7 +9,8 @@ const mongoOptions = {
 };
 
 // Create a connection pool for "crypticsage" database
-const client = new MongoClient(config.mongoUri, mongoOptions);
+const mongoUri = config.mongoUri ?? '';
+const client = new MongoClient(mongoUri);
 
 // ssh -L 27017:localhost:27017 yadu@10.0.0.116 
 // to link remote mongo to local instead of ssh

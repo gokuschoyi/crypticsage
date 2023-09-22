@@ -10,7 +10,7 @@ const verifyToken = (req, res, next) => {
         res.status(401).json({ message: "Unauthorized access (Empty Token pssed)" });
     }
     else {
-        jwt.verify(token, config.tokenKey, (err, decodedToken) => {
+        jwt.verify(token, config.tokenKey ?? '', (err, decodedToken) => {
             if (err) {
                 res.status(401).json({ message: "Unauthorized access" });
                 log.warn("Token expired");

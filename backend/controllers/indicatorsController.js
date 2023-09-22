@@ -1,5 +1,6 @@
 const logger = require('../middleware/logger/Logger');
 const log = logger.create(__filename.slice(__dirname.length + 1))
+// @ts-ignore
 var talib = require('talib/build/Release/talib')
 const { createTimer } = require('../utils/timer')
 
@@ -12,7 +13,7 @@ const getIndicatorDesc = async (req, res) => {
     var totalFunctionCount = 0;
     var funcDesc = talib.explain("ADX");
     let desc = []
-    for (i in functions) {
+    for (let i in functions) {
         totalFunctionCount++;
         desc.push(functions[i])
     }

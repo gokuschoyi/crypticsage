@@ -15,7 +15,8 @@ let UTaskQueue;
 
 const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }) => {
     try {
-        let availableTickers = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yfinance_metadata' })
+        const collection_name = 'yfinance_metadata'
+        let availableTickers = await MDBServices.getFirstObjectForEachPeriod(collection_name)
         let tickers = tickersList.filter((ticker) => {
             return !availableTickers.some((obj) => obj.ticker_name === ticker)
         })
@@ -27,10 +28,12 @@ const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }
 
             const toDate = '2023-07-03' // HDUtil.formatDateForYFinance(new Date().toLocaleString())
             for (let i = 0; i < tickers.length; i++) {
+                const ticker_name = tickers[i]
                 let fromDate
-                const startDate = await HDUtil.getFirstTradeDate({ symbol: tickers[i] })
+                const startDate = await HDUtil.getFirstTradeDate({ symbol: ticker_name })
                 if (startDate === undefined) {
-                    const customError = new Error(`No start date for ${tickers[i]}`)
+                    const customError = new Error(`No start date for ${ticker_name}`)
+                    // @ts-ignore
                     customError.failReason = "No start date"
                     throw customError
                 } else {
@@ -39,32 +42,33 @@ const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }
 
                     log.info(fromDate)
 
-                    uploadStatus[tickers[i]] = {}
+                    uploadStatus[ticker_name] = {}
                     for (let j = 0; j < periods.length; j++) {
+                        const period = periods[j]
                         let params = {
-                            ticker_name: tickers[i],
+                            ticker_name: ticker_name,
                             from: fromDate,
                             to: toDate,
-                            period: periods[j]
+                            period: period
                         }
                         let yFResult = await HDUtil.getHistoricalYFinanceData(params)
                         let ins;
                         if (yFResult.length > 0) {
                             let meta = {}
                             const type = 'stock'
-                            let newIns = await MDBServices.insertHistoricalDataToDb({ type: type, ticker_name: tickers[i], period: periods[j], token_data: yFResult })
+                            let newIns = await MDBServices.insertHistoricalDataToDb(type, ticker_name, period, yFResult)
                             let metadata = {
                                 oldest: yFResult[0],
                                 latest: yFResult[yFResult.length - 1],
                                 updatedCount: yFResult.length,
                                 metaData: meta
                             }
-                            let updateMetaRes = await MDBServices.updateTickerMetaData({ type: type, ticker_name: tickers[i], period: periods[j], meta: metadata })
+                            let updateMetaRes = await MDBServices.updateTickerMetaData(type, ticker_name, period, metadata)
                             ins = [newIns, updateMetaRes]
-                            uploadStatus[tickers[i]][periods[j]] = ins
+                            uploadStatus[ticker_name][period] = ins
                         } else {
                             ins = ['No Data Found']
-                            uploadStatus[tickers[i]][periods[j]] = ins
+                            uploadStatus[ticker_name][period] = ins
                         }
                     }
                 }
@@ -80,8 +84,8 @@ const processInitialSaveHistoricalDataYFinance = async ({ tickersList, periods }
 const processUpdateHistoricalYFinanceData = async ({ symbol }) => {
     try {
         let diffArray = []
-
-        let allYfTickersInDb = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yfinance_metadata' })
+        const collection_name = 'yfinance_metadata'
+        let allYfTickersInDb = await MDBServices.getFirstObjectForEachPeriod(collection_name)
 
         let yfTickersInDb = []
         allYfTickersInDb.forEach((ticker) => {
@@ -143,14 +147,14 @@ const processUpdateHistoricalYFinanceData = async ({ symbol }) => {
                 if (updateCount > 0) {
                     let meta = {}
                     const type = 'stock'
-                    let newIns = await MDBServices.insertHistoricalDataToDb({ type: type, ticker_name: ticker_name, period: period, token_data: latestTickerDatafromYF })
+                    let newIns = await MDBServices.insertHistoricalDataToDb(type, ticker_name, period, latestTickerDatafromYF)
                     let metadata = {
                         oldest: latestTickerDatafromYF[0],
                         latest: latestTickerDatafromYF[latestTickerDatafromYF.length - 1],
                         updatedCount: latestTickerDatafromYF.length,
                         metaData: meta
                     }
-                    let updateMetaRes = await MDBServices.updateTickerMetaData({ type: type, ticker_name: ticker_name, period: period, meta: metadata })
+                    let updateMetaRes = await MDBServices.updateTickerMetaData(type, ticker_name, period, metadata)
 
                     diffArray.push({
                         ticker_name: ticker_name,
@@ -240,7 +244,9 @@ const processInitialSaveHistoricalDataBinance = async ({ token_count }) => {
 
             // console logs the failed tasks in the queue, initial save
             initialFetchWorker.on('failed', (job) => {
+                // @ts-ignore
                 const redisCommand = `hgetall bull:${queueName}:${job.id}`
+                // @ts-ignore
                 log.error(`Initial fetch task failed for : , ${job.name}, with id : , ${job.id}`)
                 log.warn(`Check Redis for more info : ${redisCommand}`)
             });
@@ -335,7 +341,9 @@ const processUpdateBinanceData = async () => {
 
         // console logs the failed tasks in the queue, updates
         const failedListener = () => {
+            // @ts-ignore
             const redisCommand = `hgetall bull:${queueName}:${job.id}`
+            // @ts-ignore
             log.error(`Update task failed for : ", ${job.name}, " with id : ", ${job.id}`)
             log.warn(`Check Redis for more info : ", ${redisCommand}`)
         }
@@ -410,6 +418,7 @@ const processUpdateBinanceData = async () => {
 const serviceCheckJobCompletition = async ({ jobIds, type }) => {
     try {
         const processedResults = []
+        let message, data
         switch (type) {
             case "initial_":
                 for (const jobId of jobIds) {
@@ -448,7 +457,8 @@ const serviceCheckJobCompletition = async ({ jobIds, type }) => {
                 data = processedResults
                 break;
             default:
-                res.status(400).json({ message: "Invalid type" })
+                message = "Invalid type"
+                data = []
                 break;
         }
         return ({ message, data })

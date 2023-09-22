@@ -24,7 +24,7 @@ const FASLatestTickerMetaData = async (req, res) => {
 const deleteTickerMeta = async (req, res) => {
     try {
         const { symbol } = req.body
-        const deletedTickerMeta = await MDBServices.deleteOneMetaData({ symbol })
+        const deletedTickerMeta = await MDBServices.deleteOneMetaData(symbol)
         res.status(200).json({ message: "Delete Ticker Meta request success", deletedTickerMeta });
     } catch (error) {
         log.error(error.stack)
@@ -81,7 +81,15 @@ const findYFTicker = async (req, res) => {
 
 const getBinanceTickersIndb = async (req, res) => {
     try {
-        const [totalTickerCountInDb, totalTickersWithDataToFetch, tickersWithHistData, tickersWithNoHistData, tickerWithNoDataInBinance] = await CMServices.serviceGetBinanceTickerStatsFromDb()
+        const test = await CMServices.serviceGetBinanceTickerStatsFromDb()
+        let one = test[0]
+        const [
+            totalTickerCountInDb,
+            totalTickersWithDataToFetch,
+            tickersWithHistData,
+            tickersWithNoHistData,
+            tickerWithNoDataInBinance
+        ] = await CMServices.serviceGetBinanceTickerStatsFromDb()
         let tickersWithHistDataLength = tickersWithHistData.length
         let tickersWithNoHistDataLength = tickersWithNoHistData.length
         res.status(200).json({
@@ -185,7 +193,7 @@ const deleteOneYfinanceTicker = async (req, res) => {
     try {
         const { symbol } = req.body
         const type = 'stock'
-        const deleteStatus = await MDBServices.deleteTickerHistDataFromDb({ ticker_name: symbol, type })
+        const deleteStatus = await MDBServices.deleteTickerHistDataFromDb(symbol, type)
         res.status(200).json({ message: "Yfinance tickers deleted", deleteStatus });
     } catch (error) {
         log.error(error.stack)
@@ -254,7 +262,7 @@ const updateSection = async (req, res) => {
         if (isInputValid) {
             const { title, content, url, sectionId } = params
             const update = await CMServices.serviceUdpateSectionInDb({ title, content, url, sectionId })
-            res.status(200).json({ message: "Section updated successfully", update: true, update });
+            res.status(200).json({ message: "Section updated successfully", update: true });
         }
     } catch (error) {
         log.error(error.stack)

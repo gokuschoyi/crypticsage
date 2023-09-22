@@ -1,8 +1,7 @@
 const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
 // const yahooFinance = require('yahoo-finance2').default; // summary quotes not working
-const axios = require('axios');
-const { connect, close } = require('../services/db-conn')
+const axios = require('axios').default;
 
 // < - - - - - - - - - - Helper Functions - - - - - - - - - - >
 

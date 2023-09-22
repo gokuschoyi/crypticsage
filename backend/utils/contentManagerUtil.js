@@ -1,6 +1,6 @@
 const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
-const axios = require('axios');
+const axios = require('axios').default;
 
 const fetchSymbolsFromBinanceAPI = async () => {
     try {

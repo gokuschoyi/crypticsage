@@ -20,7 +20,7 @@ const HDUtil = require('../utils/historicalDataUtil');
 const serviceFetchAndSaveLatestTickerMetaData = async ({ length }) => {
     try {
         let cryptoData = await CSUtil.fetchTopTickerByMarketCap({ length })
-        let result = await MDBServices.saveOrUpdateTickerMeta({ cryptoData })
+        let result = await MDBServices.saveOrUpdateTickerMeta(cryptoData)
         return result
     } catch (error) {
         log.error(error.stack)
@@ -28,10 +28,35 @@ const serviceFetchAndSaveLatestTickerMetaData = async ({ length }) => {
     }
 }
 
-// needs rework after db changes 
+/**
+ * This returns a dictionary with a `table` _key_ and a `database` _key_.
+ *
+ * @param {Array} params - An array of 2 elements
+ * @return {{table: string, database: string}} - The database and table to query
+ */
+const parseTableAndDb = (params) => {
+    return { table: params[0], database: params[1] };
+}
+
+// needs rework after db changes
+/**
+ * 
+ * Retrieve information about tickers and their data.
+ * @async
+ * @returns {Promise<
+ * [
+ *      totalTickerCountInDb:number,
+ *      totalTickersWithDataToFetch:number,
+ *      tickersWithHistData:Array,
+ *      tickersWithNoHistData:Array,
+ *      tickerWithNoDataInBinance:Array
+ * ]
+ * >} An array containing various ticker-related data.
+ */
 const serviceGetBinanceTickerStatsFromDb = async () => {
     try {
-        let tickerMeta = await MDBServices.fetchTickerMetaFromDb({ length: "" })
+        const length = ''
+        let tickerMeta = await MDBServices.fetchTickerMetaFromDb(length)
         let symbolsFromBinance = await CMUtil.fetchSymbolsFromBinanceAPI()
 
         let tickerNameAdded = tickerMeta.map((ticker) => {
@@ -44,7 +69,8 @@ const serviceGetBinanceTickerStatsFromDb = async () => {
 
         let tickerWithNoDataInBinance = tickerNameAdded.filter((item) => item.ticker_name === null)
         let finalRes = tickerNameAdded.filter((item) => item.ticker_name !== null)
-        let tickersWithHistData = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance_metadata' })
+        const collection_name = 'binance_metadata'
+        let tickersWithHistData = await MDBServices.getFirstObjectForEachPeriod(collection_name)
 
         const findMatchingObject = (tickerName) => {
             return finalRes.find((item) => item.ticker_name === tickerName);
@@ -67,7 +93,13 @@ const serviceGetBinanceTickerStatsFromDb = async () => {
 
         let tickersWithNoHistData = finalRes.filter(item1 => !tickersWithHistData.map(item2 => item2.ticker_name).includes(item1.ticker_name));
 
-        return [totalTickerCountInDb, totalTickersWithDataToFetch, updatedTickersWithHistData, tickersWithNoHistData, tickerWithNoDataInBinance]
+        return [
+            totalTickerCountInDb,
+            totalTickersWithDataToFetch,
+            updatedTickersWithHistData,
+            tickersWithNoHistData,
+            tickerWithNoDataInBinance
+        ]
     } catch (error) {
         log.error(error.stack)
         throw error
@@ -76,7 +108,8 @@ const serviceGetBinanceTickerStatsFromDb = async () => {
 
 const serviceGetYfinanceTickerStatsFromDb = async () => {
     try {
-        let yFTickerInfo = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yfinance_metadata' })
+        const collection_name = 'yfinance_metadata'
+        let yFTickerInfo = await MDBServices.getFirstObjectForEachPeriod(collection_name)
         return yFTickerInfo
     } catch (error) {
         log.error(error.stack)
@@ -306,12 +339,12 @@ const serviceUpdateOneBinanceTicker = async ({ updateQueries }) => {
 }
 const updateDbWithNewTickerInfo = async ({ type, ticker_name, period, token_data }) => {
     try {
-        await MDBServices.insertHistoricalDataToDb({ type, ticker_name, period, token_data })
+        await MDBServices.insertHistoricalDataToDb(type, ticker_name, period, token_data)
         let metadata = {
             latest: token_data[token_data.length - 1],
             updatedCount: token_data.length,
         }
-        await MDBServices.updateTickerMetaData({ type, ticker_name, period, meta: metadata })
+        await MDBServices.updateTickerMetaData(type, ticker_name, period, metadata)
     } catch (error) {
         log.error(error.stack)
         throw error
@@ -364,6 +397,8 @@ const serviceUpdateAllBinanceTickers = async () => {
 
 const serviceCheckOneBinanceTickerJobCompletition = async ({ jobIds, type }) => {
     try {
+        let message = ""
+        let data = []
         const processedResults = []
         switch (type) {
             case "update-one-ticker_":
@@ -406,7 +441,7 @@ const serviceCheckOneBinanceTickerJobCompletition = async ({ jobIds, type }) => 
 // OUTPUT : [documents]
 const serviceGetDocuments = async ({ collectionName, filter }) => {
     try {
-        let documents = await MDBServices.getAllDocumentsFromCollection({ collectionName, filter })
+        let documents = await MDBServices.getAllDocumentsFromCollection(collectionName, filter)
         if (documents.length === 0) {
             switch (collectionName) {
                 case "sections":
@@ -431,12 +466,17 @@ const serviceGetDocuments = async ({ collectionName, filter }) => {
 // INPUT : { title, content, url }
 const serviceAddDocuments = async ({ collectionName, document }) => {
     try {
-        let insertedResult = await MDBServices.insertDocumentToCollection({ collectionName, document })
+        let insertedResult = await MDBServices.insertDocumentToCollection(collectionName, document)
         let statusResult = null
+        let sectionId = null
+        let lessonId = null
+        let lessonData = null
+        let quizId = null
+        let quizTitle = null
         switch (collectionName) {
             case "sections":
                 ({ sectionId } = document)
-                statusResult = await MDBServices.addSectionStatusForUsers({ sectionId })
+                statusResult = await MDBServices.addSectionStatusForUsers(sectionId)
                 break;
             case "lessons":
                 ({ sectionId, lessonId, lessonData } = document)
@@ -448,7 +488,7 @@ const serviceAddDocuments = async ({ collectionName, document }) => {
                     lesson_progress: 1,
                     lesson_complete: false,
                 }
-                statusResult = await MDBServices.addLessonStatusForUsers({ sectionId, lesson_status })
+                statusResult = await MDBServices.addLessonStatusForUsers(sectionId, lesson_status)
                 break;
             case "quiz":
                 ({ sectionId, lessonId, quizId, quizTitle } = document)
@@ -461,7 +501,7 @@ const serviceAddDocuments = async ({ collectionName, document }) => {
                     quiz_score: "",
                     quiz_complete: false,
                 }
-                statusResult = await MDBServices.addQuizStatusForUsers({ sectionId, lessonId, quizObject })
+                statusResult = await MDBServices.addQuizStatusForUsers(sectionId, lessonId, quizObject)
                 break;
             default:
                 break;
@@ -494,8 +534,10 @@ const serviceAddDocuments = async ({ collectionName, document }) => {
 const serviceUdpateSectionInDb = async ({ title, content, url, sectionId }) => {
 
     try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "sections", id: sectionId, })
-        const updated = await MDBServices.updateSectionData({ title, content, url, sectionId })
+        const collectionName = "sections"
+        const id = sectionId
+        await MDBServices.checkForDocumentInCollection(collectionName, id)
+        const updated = await MDBServices.updateSectionData(title, content, url, sectionId)
         return updated
     } catch (error) {
         log.error(error.stack)
@@ -507,9 +549,11 @@ const serviceUdpateSectionInDb = async ({ title, content, url, sectionId }) => {
 const serviceUpdateLessonInDb = async ({ chapter_title, lessonData, lessonId, sectionId }) => {
 
     try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "lessons", id: lessonId })
-        const updated = await MDBServices.updateLessonData({ chapter_title, lessonData, lessonId })
-        const lessonTitleStatus = await MDBServices.updateLessonNameChangeAcrossUsersStatus({ sectionId, lessonId, chapter_title })
+        const collectionName = "lessons"
+        const id = lessonId
+        await MDBServices.checkForDocumentInCollection(collectionName, id)
+        const updated = await MDBServices.updateLessonData(chapter_title, lessonData, lessonId)
+        const lessonTitleStatus = await MDBServices.updateLessonNameChangeAcrossUsersStatus(sectionId, lessonId, chapter_title)
         return [updated, lessonTitleStatus]
     } catch (error) {
         log.error(error.stack)
@@ -520,10 +564,12 @@ const serviceUpdateLessonInDb = async ({ chapter_title, lessonData, lessonId, se
 // updates an existing quiz in the database. Have to add updates to quiz status for users
 const serviceUpdateQuizInDb = async ({ quizId, quizTitle, quizDescription, questions }) => {
     try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "quiz", id: quizId })
-        const [update, reqData] = await MDBServices.updateQuizData({ quizId, quizTitle, quizDescription, questions })
+        const collectionName = "quiz"
+        const id = quizId
+        await MDBServices.checkForDocumentInCollection(collectionName, id)
+        const [update, reqData] = await MDBServices.updateQuizData(quizId, quizTitle, quizDescription, questions)
         const { sectionId, lessonId } = reqData
-        const quizTitleStatus = await MDBServices.updateQuizNameChangeAcrossUsersStatus({ sectionId, lessonId, quizId, quizTitle })
+        const quizTitleStatus = await MDBServices.updateQuizNameChangeAcrossUsersStatus(sectionId, lessonId, quizId, quizTitle)
         return [update, quizTitleStatus]
     } catch (error) {
         log.error(error.stack)
@@ -543,12 +589,17 @@ const serviceUpdateQuizInDb = async ({ quizId, quizTitle, quizDescription, quest
 const serviceDeleteSectionFromDb = async ({ sectionId }) => {
 
     try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "sections", id: sectionId })
+        const collectionName = "sections"
+        const deleteCollectionNameLessons = 'lessons'
+        const deleteCollectionNameQuiz = 'quiz'
+        const type = "sectionDelete"
+        const id = sectionId
+        await MDBServices.checkForDocumentInCollection(collectionName, id)
 
-        const deletedSection = await MDBServices.deleteOneDocumentFromCollection({ collectionName: "sections", id: sectionId })
-        const deletedLessons = await MDBServices.deleteManyDocumentsFromCollection({ type: "sectionDelete", collectionName: "lessons", id: sectionId })
-        const deletedQuiz = await MDBServices.deleteManyDocumentsFromCollection({ type: "sectionDelete", collectionName: "quiz", id: sectionId })
-        const removedLessonAndQuizStatus = await MDBServices.removeLessonAndQuizStatusFromUsers({ sectionId })
+        const deletedSection = await MDBServices.deleteOneDocumentFromCollection(collectionName, id)
+        const deletedLessons = await MDBServices.deleteManyDocumentsFromCollection(type, deleteCollectionNameLessons, sectionId)
+        const deletedQuiz = await MDBServices.deleteManyDocumentsFromCollection(type, deleteCollectionNameQuiz, sectionId)
+        const removedLessonAndQuizStatus = await MDBServices.removeLessonAndQuizStatusFromUsers(sectionId)
         return [deletedSection, deletedLessons, deletedQuiz, removedLessonAndQuizStatus]
     } catch (error) {
         log.error(error.stack)
@@ -558,11 +609,15 @@ const serviceDeleteSectionFromDb = async ({ sectionId }) => {
 
 const serviceDeleteLessonFromDb = async ({ lessonId, sectionId }) => {
     try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "lessons", id: lessonId })
+        const collectionName = "lessons"
+        const id = lessonId
+        const type = "lessonDelete"
+        const deleteCollectionNameQuiz = 'quiz'
+        await MDBServices.checkForDocumentInCollection(collectionName, id)
 
-        const deleteLesson = await MDBServices.deleteOneDocumentFromCollection({ collectionName: "lessons", id: lessonId })
-        const deletedQuiz = await MDBServices.deleteManyDocumentsFromCollection({ type: "lessonDelete", collectionName: "quiz", id: lessonId })
-        const deletedLessonStatusFromUser = await MDBServices.removeOneLessonAndQuizStatusFromUsers({ sectionId, lessonId })
+        const deleteLesson = await MDBServices.deleteOneDocumentFromCollection(collectionName, id)
+        const deletedQuiz = await MDBServices.deleteManyDocumentsFromCollection(type, deleteCollectionNameQuiz, lessonId)
+        const deletedLessonStatusFromUser = await MDBServices.removeOneLessonAndQuizStatusFromUsers(sectionId, lessonId)
         return [deleteLesson, deletedQuiz, deletedLessonStatusFromUser]
     } catch (error) {
         log.error(error.stack)
@@ -572,10 +627,12 @@ const serviceDeleteLessonFromDb = async ({ lessonId, sectionId }) => {
 
 const serviceDeleteQuizFromDb = async ({ quizId, sectionId, lessonId }) => {
     try {
-        await MDBServices.checkForDocumentInCollection({ collectionName: "quiz", id: quizId })
+        const collectionName = "quiz"
+        const id = quizId
+        await MDBServices.checkForDocumentInCollection(collectionName, id)
 
-        const deleteQuiz = await MDBServices.deleteOneDocumentFromCollection({ collectionName: "quiz", id: quizId })
-        const deleteQuizStatusFromUser = await MDBServices.removeQuizStatusFromUser({ sectionId, lessonId, quizId })
+        const deleteQuiz = await MDBServices.deleteOneDocumentFromCollection(collectionName, id)
+        const deleteQuizStatusFromUser = await MDBServices.removeQuizStatusFromUser(quizId, lessonId, sectionId)
         return [deleteQuiz, deleteQuizStatusFromUser]
     } catch (error) {
         log.error(error.stack)

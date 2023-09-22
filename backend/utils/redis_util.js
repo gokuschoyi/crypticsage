@@ -17,7 +17,7 @@ const handleTokenRedisStorage = async (req, res, next) => {
             let perviousFetch_count = JSON.parse(result).ticker_meta.fetch_count;
             if (perviousFetch_count < fetch_count) {
                 log.info(`Additional fetch required. Old count : ${perviousFetch_count}, New count count : ${fetch_count} (Redis Handler)`)
-                fetchTickerHistDataBasedOnCount({ asset_type, ticker_name, period, fetch_count })
+                fetchTickerHistDataBasedOnCount(asset_type, ticker_name, period, fetch_count)
                 .then((data) => {
                     let finalData = {
                         data: data,
@@ -36,7 +36,7 @@ const handleTokenRedisStorage = async (req, res, next) => {
     })
     if (!isTokenDataAvailableInRedis) {
         log.info("Fetching data from MongoDB (Redis Handler)")
-        let data = await fetchTickerHistDataBasedOnCount({ asset_type, ticker_name, period, fetch_count });
+        let data = await fetchTickerHistDataBasedOnCount(asset_type, ticker_name, period, fetch_count);
         let finalData = {
             data: data,
             ticker_meta: { asset_type, ticker_name, period, fetch_count }

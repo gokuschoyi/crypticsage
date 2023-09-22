@@ -12,8 +12,10 @@ const processGetLatestCryptoData = async () => {
 
         const t2 = createTimer('Fetching ticker meta from db')
         t2.startTimer()
-        let cryptoData = await MDBServices.fetchTickerMetaFromDb({ length: "max" })
-        let cDataInDb = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance_metadata' })
+        const length = ''
+        let cryptoData = await MDBServices.fetchTickerMetaFromDb(length)
+        const collection_name = 'binance_metadata'
+        let cDataInDb = await MDBServices.getFirstObjectForEachPeriod(collection_name)
         t2.stopTimer(__filename.slice(__dirname.length + 1))
 
         const t3 = createTimer('Promise All')
@@ -85,7 +87,7 @@ const processGetLatestCryptoData = async () => {
 // change later to fetch data from historical_data
 const processFetchTickerDataFromDb = async ({ asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset }) => {
     try {
-        const fetchedData = await MDBServices.fetchTickerHistDataFromDb({ type: asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset })
+        const fetchedData = await MDBServices.fetchTickerHistDataFromDb(asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset)
         return fetchedData
     } catch (error) {
         log.error(error.stack)

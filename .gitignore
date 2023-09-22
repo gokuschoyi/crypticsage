@@ -34,3 +34,4 @@ backend/middleware/logger/logs/access.log
 backend/middleware/logger/logs/app.log
 backend/middleware/logger/old_logs/access_one.log
 backend/middleware/logger/old_logs/access.log
+backend/docs

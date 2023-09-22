@@ -5,6 +5,47 @@ const fs = require('fs');
 const util = require('util');
 const readdir = util.promisify(fs.readdir);
 
+
+/**
+ * @typedef {Object} Quiz
+ * @property {string} sectionId
+ * @property {string} sectionName
+ * @property {string} lessonId
+ * @property {string} lessonName
+ * @property {string} quizId
+ * @property {string} quizTitle
+ * @property {boolean} quizDescription
+ * @property {array} questions
+ * @property {boolean} [quiz_completed]
+ * @property {string} [quiz_completed_date]
+ * @property {number} [quiz_score]
+ * @property {number} [quiz_total]
+ */
+
+/**
+ * @typedef {Object} Lesson
+ * @property {string} lessonID
+ * @property {string} lessonName
+ * @property {Quiz[]} allQuizzes
+ */
+
+/**
+ * @typedef {Object} Section
+ * @property {string} sectionId
+ * @property {string} sectionName
+ * @property {Lesson[]} lessons
+ */
+
+/**
+ * @typedef {Object} OutputObject
+ * @property {Section[]} quizzes
+ */
+
+/**
+ * @param {Object} userQuizStatus user quiz data from FE
+ * @param {Array<Quiz>} quizCollection 
+ * @returns {Promise<Object>} An object containing the transformed quiz data.
+ */
 const transformQuizData = async (userQuizStatus, quizCollection) => {
     const result = []
     //converting user status to array
@@ -34,13 +75,16 @@ const transformQuizData = async (userQuizStatus, quizCollection) => {
         } else {
             quiz.quiz_completed = false;
             quiz.quiz_completed_date = "";
-            quiz.quiz_score = "";
-            quiz.quiz_total = "";
+            quiz.quiz_score = 0;
+            quiz.quiz_total = 0;
         }
         return quiz;
     })
 
     //transforming quiz collection to required format
+    /**
+     * @type {OutputObject}
+     */
     const outputObject = {
         quizzes: []
     };
@@ -54,10 +98,13 @@ const transformQuizData = async (userQuizStatus, quizCollection) => {
         const quizTitle = quiz.quizTitle;
         const quizCompleted = quiz.quiz_completed;
         const quizCompletedDate = quiz.quiz_completed_date;
+        const questions = quiz.questions;
+        const quizDescription = quiz.quizDescription;
         const quizScore = quiz.quiz_score;
         const quizTotal = quiz.quiz_total;
 
-        let section = outputObject.quizzes.find(section => section.sectionName === sectionName);
+
+        let section = outputObject.quizzes.find(section => section.sectionName === sectionName) || null;
         if (!section) {
             section = {
                 sectionName,
@@ -78,12 +125,18 @@ const transformQuizData = async (userQuizStatus, quizCollection) => {
         }
 
         lesson.allQuizzes.push({
+            sectionId,
+            sectionName,
+            lessonId,
+            lessonName,
             quizId,
             quizTitle,
-            quizCompleted,
-            quizCompletedDate,
-            quizScore,
-            quizTotal
+            quizDescription,
+            questions,
+            quiz_completed:quizCompleted,
+            quiz_completed_date:quizCompletedDate,
+            quiz_score:quizScore,
+            quiz_total:quizTotal,
         });
     }
     return { outputObject };
@@ -123,6 +176,7 @@ const processUploadedCsv = async (req) => {
                         const regex = /-\d+.*$/;
                         let trimmed = filename.replace(regex, '')
                         final[trimmed] = results
+                        // @ts-ignore
                         resolve()
                     })
                     .on('error', (error) => {

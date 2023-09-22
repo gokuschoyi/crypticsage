@@ -2,7 +2,7 @@ const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
 const { createTimer } = require('../utils/timer')
 const yahooFinance = require('yahoo-finance2').default;
-const axios = require('axios');
+const axios = require('axios').default;
 const { v4: uuidv4 } = require('uuid');
 
 const MDBServices = require('../services/mongoDBServices')
@@ -73,32 +73,26 @@ const getFirstTradeDate = async ({ symbol }) => {
 
 // takes the last_updated and checks if that ticker needs update or not
 // returns [daysElapsed, from, to]
+/**
+ * 
+ * @param {*} param0 
+ * @returns {Promise<[number, string, string]>}
+ */
 const checkForUpdates = async ({ last_updated }) => {
     let currentDate = new Date().getTime()
     let lastUpdatedTickerDate = new Date(last_updated).getTime()
     let timeDiff = currentDate - lastUpdatedTickerDate // Calculate the time difference in milliseconds
     let daysElapsed = parseFloat((timeDiff / (1000 * 3600 * 24)).toFixed(2)) // Convert milliseconds to days
 
-    // Get the current date adjusted for the desired time zone and convert to UTC
-    // 2023-07-10T00:00:00.000+00:00 to 10/07/2023, 10:00:00 am
-    /* const currentDate = new Date();
-    const currentUTCDate = new Date(currentDate.toLocaleString('en-US', { timeZone: "UTC" }))
-
-    const l_updated = new Date(last_updated); // Convert the GMT time to a Date object
-    const lastUpdatedTickerDate = new Date(l_updated.toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
-
-    const timeDiff = currentUTCDate.getTime() - lastUpdatedTickerDate.getTime(); // Calculate the time difference in milliseconds
-    let daysElapsed = parseFloat((timeDiff / (1000 * 3600 * 24)).toFixed(2)) // Convert milliseconds to days */
-
     if (daysElapsed > 0) {
         let from = formatDateForYFinance(new Date(last_updated).toLocaleString())
         let to = formatDateForYFinance(new Date(currentDate).toLocaleString())
         if (from === to) {
-            return [daysElapsed = 0]
+            return [0, '', '']
         }
         return [daysElapsed, from, to]
     } else {
-        return [daysElapsed = 0]
+        return [0, '', '']
     }
 
     // console.log("elapsed :", daysElapsed, currentUTCDate.toLocaleString(), "+", lastUpdatedTickerDate.toLocaleString())
@@ -262,14 +256,14 @@ async function processHistoricalData(job) {
     let ins
     if (historicalData.length > 0) {
         const type = 'crypto'
-        let newIns = await MDBServices.insertHistoricalDataToDb({ type: type, ticker_name: ticker, period: period, token_data: historicalData })
+        let newIns = await MDBServices.insertHistoricalDataToDb(type, ticker, period, historicalData)
         let metadata = {
             oldest: historicalData[0],
             latest: historicalData[historicalData.length - 1],
             updatedCount: historicalData.length,
             metaData: meta
         }
-        let updateMetaRes = await MDBServices.updateTickerMetaData({ type: type, ticker_name: ticker, period: period, meta: metadata })
+        let updateMetaRes = await MDBServices.updateTickerMetaData(type, ticker, period, metadata)
         ins = [newIns, updateMetaRes]
     } else {
         ins = ['No Data Found']
@@ -301,12 +295,12 @@ const processUpdateHistoricalData = async (job) => {
     let ins
     if (updateResult.length > 0) {
         const type = 'crypto'
-        let newIns = await MDBServices.insertHistoricalDataToDb({ type: type, ticker_name: ticker_name, period: period, token_data: updateResult })
+        let newIns = await MDBServices.insertHistoricalDataToDb(type, ticker_name, period, updateResult)
         let metadata = {
             latest: updateResult[updateResult.length - 1],
             updatedCount: updateResult.length,
         }
-        let updateMetaRes = await MDBServices.updateTickerMetaData({ type: type, ticker_name: ticker_name, period: period, meta: metadata })
+        let updateMetaRes = await MDBServices.updateTickerMetaData(type, ticker_name, period, metadata)
         ins = [newIns, updateMetaRes]
         return ins
     } else {
@@ -346,7 +340,9 @@ const getTotalDurationInMarket = async ({ token_count }) => {
     try {
         const mkt_full_url = `https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${token_count}&tsym=USD`
         let latestTokenData = await axios.get(mkt_full_url)
-        latestTokenData = latestTokenData.data.Data
+            .then((response) => {
+                return response.data.Data
+            })
 
         const binance_symbol_url = "https://api.binance.com/api/v3/exchangeInfo"
         const binanceResult = await axios.get(binance_symbol_url)
@@ -410,6 +406,10 @@ const getTotalDurationInMarket = async ({ token_count }) => {
     }
 ] 
 */
+
+/**
+ * @returns {Promise<[Array, number]>}
+ */
 const generateFetchQueriesForBinanceTickers = async ({ periods, token_count }) => {
     const fetchQuery = []
     try {
@@ -429,7 +429,8 @@ const generateFetchQueriesForBinanceTickers = async ({ periods, token_count }) =
             })
 
         const totalNoOfRequiredFetches = allTickers.length * periods.length
-        const tickersIndb = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance_metadata' })
+        const collection_name = 'binance_metadata'
+        const tickersIndb = await MDBServices.getFirstObjectForEachPeriod(collection_name)
 
         let availableTickerInDb = tickersIndb.map(ticker => {
             const tickerName = ticker.ticker_name
@@ -579,9 +580,15 @@ const fetchHistoricalDataBinance = async ({ ticker_name, period }) => {
     56
 ]
 */
+
+/**
+ * 
+ * @returns {Promise<[Array, number]>}
+ */
 const generateUpdateQueriesForBinanceTickers = async () => {
     try {
-        const latestBinanceTickerStatus = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'binance_metadata' })
+        const collection_name = 'binance_metadata'
+        const latestBinanceTickerStatus = await MDBServices.getFirstObjectForEachPeriod(collection_name)
         let result = latestBinanceTickerStatus.flatMap((obj) => {
             const ticker_name = obj.ticker_name
             return Object.entries(obj.data).map(([period, { lastHistorical }]) => ({
@@ -685,7 +692,8 @@ const testGetHistoricalDataBinance = async ({ ticker_name, period }) => {
 
 const fetchBinanceHistoricalBetweenPeriods = async ({ ticker_name, period, start, end }) => {
     try {
-        const divisions = divideTimePeriod(start, end, period, limit = 1000);
+        const limit = 1000;
+        const divisions = divideTimePeriod(start, end, period, limit);
         let data = []
         let type = "Update 1m"
         for (let i = 0; i < divisions.length; i++) {

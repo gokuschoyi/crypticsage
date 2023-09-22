@@ -48,7 +48,8 @@ const getLatestStocksData = async (req, res) => {
         // '','GOOG','MSFT','IBM','AMZN','ORCL','INTC','QCOM','CSCO','SAP','TSM','BIDU','EMC','HPQ','TXN','ERIC','ASML','YHOO'
         // '',GOOGL,MSFT,IBM,AMZN,ORCL,INTC,QCOM,CSCO,SAP,TSM,BIDU,EMC,HPQ,TXN,ERIC,ASML,YHOO
         // AAPL,TSLA,GOOGL,MSFT,TSMC,ORCL,AMZN
-        const symbolsInDb = await MDBServices.getFirstObjectForEachPeriod({ collection_name: 'yfinance_metadata' })
+        const collection_name = 'yfinance_metadata'
+        const symbolsInDb = await MDBServices.getFirstObjectForEachPeriod(collection_name)
         let yFSymbols = symbolsInDb.map((symbol) => symbol.ticker_name)
         /* const yFSymbols = ['AAPL', 'GOOG', 'MSFT']
          */
@@ -65,6 +66,7 @@ const fetchTickerDataFromDB = async (req, res) => {
         const params = req.body
         const [isValidated, payload] = Validator.validateFetchTickerDataInput({ params })
         if (isValidated) {
+            // @ts-ignore
             const { asset_type, ticker_name, period, page_no, items_per_page } = payload
             const fetchedResults = await CSServices.processFetchTickerDataFromDb({ asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset:params.new_fetch_offset })
             res.status(200).json({ message: "Token Data fetched successfully", fetchedResults })
