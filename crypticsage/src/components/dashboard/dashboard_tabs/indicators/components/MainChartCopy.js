@@ -86,7 +86,7 @@ const MainChart = (props) => {
     const rsiSeriesNewRef = useRef(null)
 
     const selectedFunctionData = useSelector(state => state.cryptoStockModule.selectedFunctions)
-
+    const modifiedSelectedFunctionWithDataToRender = useSelector(state => state.cryptoStockModule.modifiedSelectedFunctionWithDataToRender)
     const wsRef = useRef(null)
     const pageNo = useRef(1)
     const newDataRef = useRef([...tDataRedux])
@@ -364,11 +364,12 @@ const MainChart = (props) => {
         tokenDom.addEventListener('touchmove', (event) => handleTouchMove(event))
 
         return () => {
+            console.log('UE : Main chart return')
             window.removeEventListener('resize', handleResize);
             tokenDom.removeEventListener('mousemove', calculateMousePosition)
             tokenDom.removeEventListener('touchmove', handleTouchMove)
             chart.current.remove();
-            setChartSeriesState([])
+            // setChartSeriesState([])
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [symbol, selectedTokenPeriod])
@@ -400,74 +401,76 @@ const MainChart = (props) => {
 
     const [chartSeriesState, setChartSeriesState] = useState([])
     useEffect(() => {
-        if (chart.current !== null) {
-            let reduxDataCopy = JSON.parse(JSON.stringify(selectedFunctionData))
-            console.log("loading selectd function chart data")
+        console.log("<---------------------START-------------------------->")
+        if (modifiedSelectedFunctionWithDataToRender.length > 0) {
+            console.time("New chart data")
+            console.log(chartSeriesState)
+            // console.log(modifiedSelectedFunctionWithDataToRender)
+            let reduxDataCopy = JSON.parse(JSON.stringify(modifiedSelectedFunctionWithDataToRender))
             const contentBox = document.getElementsByClassName('selected-function-value-displaybox')[0]
 
             let functionTitles = ''
-            const chartDataToRender = reduxDataCopy.flatMap((d) => {
-                const name = d.name;
-                const functions = d.functions;
 
-                // Create an array to hold the results
-                const finalResult = functions.map((f) => {
-                    functionTitles = functionTitles + `<div id=${name}${f.differentiatorValue} style="display:flex; flex-direction:row; gap:10px" class='function-title'>${name}_${f.differentiatorValue}<div class=${name}_${f.id}></div></div>`
-                    const convertedData = f.result
-                        .filter((d) => d.outReal !== null)
-                        .map((d) => ({
-                            time: d.time,
-                            value: d.outReal
-                        }))
-                    console.log(f.result.length)
-                    return {
-                        name: `${name}_${f.id}`,
-                        result: convertedData,
-                        visible: f.show_chart_flag
-                    }
-                });
-                // Return the result for this item in reduxDataCopy
-                return finalResult;
-            });
+            // rendering function titles
+            reduxDataCopy.forEach((f) => {
+                functionTitles = functionTitles + `
+                <div id=${f.display_name}${f.differentiatorValue} style="display:flex; flex-direction:row; gap:10px" class='function-title'>
+                    ${f.name}_${f.key}
+                    <div class=${f.name}_${f.id}_${f.key}>
+                    </div>
+                </div>`
+            })
 
             contentBox.innerHTML = functionTitles
+            console.log("LEngth", chartSeriesState.length)
 
-            const filteredNonZero =  chartDataToRender.filter((func) => func.result.length !== 0)
-            // console.log(filteredNonZero)
+            // checking and rendering chart
+            selectedFunctionData.forEach((func) => {
+                const funcIds = func.functions.map((f) => f.id) // if count = 1 then it is a single function else if 2 a copy of same function is present
+                console.log("Func id from redux", funcIds)
+                funcIds.forEach((id) => {
+                    const filtered = reduxDataCopy.filter((chartData) => chartData.id === id);
+                    console.log("Filtered", filtered)
+                    filtered.forEach((f) => {
+                        const existingInState = chartSeriesState.find((series) => series.id === f.id && series.key === f.key);
+                        // console.log("Existing in state", existingInState)
+                        if (existingInState) {
+                            console.log('Existing in state', f.key)
+                            existingInState.series.applyOptions({ visible: f.visible });
+                        } else {
+                            console.log("Does not exist in state", f.key)
+                            const newSeries = chart.current.addLineSeries({
+                                color: lineColors[Math.floor(Math.random() * lineColors.length)],
+                                lineWidth: 1,
+                                visible: f.visible,
+                                priceLineVisible: false
+                            });
+                            newSeries.setData(f.result);
+                            setChartSeriesState((prevSeries) => [...prevSeries, { name: f.name, series: newSeries, id: f.id, key: f.key }]);
+                        }
+                    })
+                })
+            })
 
-            filteredNonZero.forEach((func) => {
-                const existingSeries = chartSeriesState.find((series) => series.name === func.name);
-                if (!existingSeries) {
-                    console.log('Not exisiting')
-                    const newSeries = chart.current.addLineSeries({
-                        color: lineColors[Math.floor(Math.random() * lineColors.length)],
-                        lineWidth: 1,
-                        visible: func.visible,
-                        priceLineVisible: false
-                    });
-                    newSeries.setData(func.result);
-                    setChartSeriesState((prevSeries) => [...prevSeries, { name: func.name, series: newSeries }]);
-                } else {
-                    console.log('existing')
-                    existingSeries.series.applyOptions({ visible: func.visible });
-                }
-            });
+            // checking and removing chart
+            const existingSeriesId = chartSeriesState.map((series) => { return { id: series.id, key: series.key } });
+            const functionsInState = reduxDataCopy.map((func) => { return { id: func.id, key: func.key } });
+            const difference = existingSeriesId.filter((series) => !functionsInState.some((func) => func.id === series.id && func.key === series.key));
 
-            const existingSeriesNames = chartSeriesState.map((series) => series.name);
-            const functionsInState = filteredNonZero.map((func) => func.name);
+            console.log(existingSeriesId)
+            console.log(functionsInState)
+            console.log(difference)
 
-            const deletedFunctions = existingSeriesNames.filter((name) => !functionsInState.includes(name));
-
-            deletedFunctions.forEach((deletedFunctionName) => {
-                const seriesToRemove = chartSeriesState.find((series) => series.name === deletedFunctionName);
+            difference.forEach((func) => {
+                const seriesToRemove = chartSeriesState.find((series) => series.id === func.id && series.key === func.key);
                 if (seriesToRemove) {
                     chart.current.removeSeries(seriesToRemove.series);
                     // Update chartSeriesState to remove the deleted series
-                    setChartSeriesState((prevSeries) => prevSeries.filter((series) => series.name !== deletedFunctionName))
+                    setChartSeriesState((prevSeries) => prevSeries.filter((series) => series.id !== func.id))
                 }
             });
 
-
+            // subscribing to crosshair move event
             chart.current.subscribeCrosshairMove((param) => {
                 // console.log(param)
                 if (
@@ -487,7 +490,7 @@ const MainChart = (props) => {
                     const seriesValue = seriesDataMap.get(series.series);
                     // console.log(seriesValue)
                     if (seriesValue !== undefined) {
-                        const divToInsertDataTo = document.querySelector(`.${series.name}`);
+                        const divToInsertDataTo = document.querySelector(`.${series.name}_${series.id}_${series.key}`);
                         if (divToInsertDataTo) {
                             divToInsertDataTo.innerHTML = seriesValue.value.toFixed(2);
                         }
@@ -495,12 +498,15 @@ const MainChart = (props) => {
                 })
 
             })
-
-            // console.log("existing", existingSeriesNames, "in redux", functionsInState, "deleted function", deletedFunctions)
-        }
+            console.timeEnd("New chart data")
+            console.log("<------------------END----------------------------->")
+        } else { console.log('No chart to render'); console.log("<------------------END----------------------------->") }
         return () => {
             console.log('Add : UE RETURN')
-            chart.current.unsubscribeCrosshairMove()
+            /* chartSeriesState.forEach((series) => {
+                chart.current.removeSeries(series.series);
+            }) */
+            // console.log(chartSeriesState)
         }
     })
 

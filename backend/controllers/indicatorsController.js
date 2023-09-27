@@ -106,22 +106,21 @@ const addDataToFuncQuery = ({ func_query, processed_data }) => {
 const formatOutputs = ({ ticker_data, talib_result, output_keys }) => {
     const keys = Object.keys(output_keys)
     const diff = talib_result.begIndex + 1
-    const emptyArrayWithNull = [...new Array(diff)].map((d) => null)
-
-    let input_data_copy = [...ticker_data]; // Make a copy of the ticker_data
-
+    
+    let input_data_copy = ticker_data.slice(talib_result.begIndex, (ticker_data.length - 1)); // Make a copy of the ticker_data
+    const resultArray = [];
     keys.forEach((key) => {
         const talibResultForKey = talib_result.result[output_keys[key]];
-        const combined = [...emptyArrayWithNull, ...talibResultForKey];
-        input_data_copy = input_data_copy.map((item, index) => {
+        let data = input_data_copy.map((item, index) => {
             return {
                 time: item.openTime / 1000,
-                [key]: combined[index],
+                value: talibResultForKey[index],
             };
         });
+        resultArray.push({ key, data });
     });
 
-    return { final_res: input_data_copy, diff: diff }
+    return { final_res: resultArray, diff: diff }
 }
 
 const executeTalibFunction = async (req, res) => {

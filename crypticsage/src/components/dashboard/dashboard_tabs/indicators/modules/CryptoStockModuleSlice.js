@@ -7,7 +7,8 @@ const initialState = {
     cryptoDataInDb: [],
     stocksDataInDb: [],
     streamedTickerData: [],
-    selectedFunctions: []
+    selectedFunctions: [],
+    modifiedSelectedFunctionWithDataToRender: [],
 }
 
 const cryptoStockModuleSlice = createSlice({
@@ -59,9 +60,11 @@ const cryptoStockModuleSlice = createSlice({
         setSelectedFunctions: (state, action) => {
             const { name, hint, group_name, outputs, function_selected_flag, inputs, optInputs, result } = action.payload;
             const currentState = state.selectedFunctions;
+            const diffVal = optInputs.length > 0 ? optInputs[0].defaultValue : ''
             const foundFunction = currentState.find((func) => func.name === name);
             if (!foundFunction) {
-                state.selectedFunctions.push({
+                let newId = uuidv4();
+                const objectToPush = {
                     name: name,
                     hint: hint,
                     outputs: outputs,
@@ -69,25 +72,46 @@ const cryptoStockModuleSlice = createSlice({
                     function_selected_flag: function_selected_flag,
                     functions: [
                         {
-                            id: uuidv4(),
+                            id: newId,
+                            name: name,
+                            display_name: `${name}_${diffVal}`,
                             inputs: inputs,
                             optInputs: optInputs,
-                            result: result,
+                            outputAvailable: result.length > 0 ? true : false,
                             show_chart_flag: true,
-                            differentiatorValue: optInputs.length > 0 ? optInputs[0].defaultValue : ''
+                            differentiatorValue: diffVal
                         }
                     ]
+                }
+                state.selectedFunctions.push(objectToPush)
+
+                // console.log(result)
+                result.forEach((differentOutputs) => {
+                    const objectForChart = {
+                        id: newId,
+                        name: name,
+                        display_name: `${name}_${diffVal}`,
+                        result: differentOutputs.data,
+                        visible: true,
+                        key: differentOutputs.key,
+                        differentiatorValue: diffVal
+                    }
+                    state.modifiedSelectedFunctionWithDataToRender.push(objectForChart)
                 })
+
             } else {
+                console.log('Existing in redux')
                 const foundIndex = currentState.findIndex((func) => func.name === name);
                 currentState[foundIndex].functions.push(
                     {
                         id: uuidv4(),
+                        name: name,
+                        display_name: `${name}_${diffVal}`,
                         inputs: inputs,
                         optInputs: optInputs,
-                        result: result,
+                        outputAvailable: result.length > 0 ? true : false,
                         show_chart_flag: false,
-                        differentiatorValue: optInputs.length > 0 ? optInputs[0].defaultValue : ''
+                        differentiatorValue: diffVal
                     }
                 );
                 state.selectedFunctions = currentState;
@@ -211,7 +235,7 @@ const cryptoStockModuleSlice = createSlice({
             state.selectedFunctions = currentState;
         },
         setTalibResult: (state, action) => {
-            const { name, id, result } = action.payload;
+            const { name, id, optInputs, result } = action.payload;
             const currentState = state.selectedFunctions;
             // Find the index of the function by name
             const foundFunctionIndex = currentState.findIndex((func) => func.name === name);
@@ -227,7 +251,7 @@ const cryptoStockModuleSlice = createSlice({
                     const updatedFunction = { ...foundFunction.functions[foundFunctionToUpdateIndex] };
 
                     // Update the inputs array within the function
-                    updatedFunction.result = result;
+                    updatedFunction.outputAvailable = true;
 
                     // Update the function within the found function's functions array
                     foundFunction.functions[foundFunctionToUpdateIndex] = updatedFunction;
@@ -239,6 +263,30 @@ const cryptoStockModuleSlice = createSlice({
             }
             // Finally, update the state with the modified currentState
             state.selectedFunctions = currentState;
+
+            const diffVal = optInputs.length > 0 ? optInputs[0].defaultValue : ''
+            result.forEach((differentOutputs) => {
+                const objectForChart = {
+                    id: id,
+                    name: name,
+                    display_name: `${name}_${diffVal}`,
+                    result: differentOutputs.data,
+                    visible: false,
+                    key: differentOutputs.key,
+                    differentiatorValue: diffVal
+                }
+
+                // Check if an object with the same 'key' exists in the array
+                const existingObjectIndex = state.modifiedSelectedFunctionWithDataToRender.findIndex((item) => item.id === id);
+                if (existingObjectIndex !== -1) {
+                    // If an object with the same 'key' exists, update it
+                    objectForChart.visible = true;
+                    state.modifiedSelectedFunctionWithDataToRender[existingObjectIndex] = objectForChart;
+                } else {
+                    // If no object with the same 'key' exists, push the new object
+                    state.modifiedSelectedFunctionWithDataToRender.push(objectForChart);
+                }
+            })
         },
         toggleShowHideChartFlag: (state, action) => {
             const { id, name } = action.payload;
@@ -269,6 +317,20 @@ const cryptoStockModuleSlice = createSlice({
 
             // Finally, update the state with the modified currentState
             state.selectedFunctions = currentState;
+
+            const currentStateModified = state.modifiedSelectedFunctionWithDataToRender;
+
+            const filteredFunctionsById = currentStateModified.filter((func) => func.id === id);
+
+            if (filteredFunctionsById.length > 0) {
+                filteredFunctionsById.forEach((filteredFunc) => {
+                    filteredFunc.visible = !filteredFunc.visible;
+                    const foundFunctionIndexModified = currentStateModified.findIndex((func) => func.id === id && filteredFunc.key === func.key);
+                    currentStateModified[foundFunctionIndexModified] = filteredFunc;
+                })
+            }
+
+            state.modifiedSelectedFunctionWithDataToRender = currentStateModified;
         },
         removeFromSelectedFunction: (state, action) => {
             const { id, name, group_name } = action.payload;
@@ -277,7 +339,7 @@ const cryptoStockModuleSlice = createSlice({
             const foundFunction = currentState[currentState.findIndex((func) => func.name === name)];
             const foundFunctionIndex = foundFunction.functions.findIndex((func) => func.id === id);
             foundFunction.functions.splice(foundFunctionIndex, 1);
-            // console.log(foundFunction.functions.length);
+
             if (foundFunction.functions.length === 0) {
                 const foundIndex = currentState.findIndex((func) => func.name === name);
                 currentState.splice(foundIndex, 1);
@@ -289,6 +351,19 @@ const cryptoStockModuleSlice = createSlice({
                 talibDesc[foundGroupIndex] = foundGroup;
             }
 
+            const modifiedSFWithDataTR = state.modifiedSelectedFunctionWithDataToRender;
+
+            const filteredFunctiosnById = modifiedSFWithDataTR.filter((func) => func.id === id);
+
+            if (filteredFunctiosnById.length > 0) {
+                filteredFunctiosnById.forEach((filteredFunc) => {
+                    const foundFunctionIndexInModified = modifiedSFWithDataTR.findIndex((func) => func.id === id && filteredFunc.key === func.key);
+                    modifiedSFWithDataTR.splice(foundFunctionIndexInModified, 1);
+                })
+            }
+
+            state.modifiedSelectedFunctionWithDataToRender = modifiedSFWithDataTR;
+
             state.selectedFunctions = currentState;
             state.talibDescription = talibDesc;
         },
@@ -299,6 +374,7 @@ const cryptoStockModuleSlice = createSlice({
             state.stocksDataInDb = [];
             state.streamedTickerData = [];
             state.selectedFunctions = [];
+            state.modifiedSelectedFunctionWithDataToRender = [];
         }
     }
 })

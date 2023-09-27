@@ -7,6 +7,7 @@ import {
     , setSelectedFunctionInputValues
     , setSelectedFunctionOptionalInputValues
     , toggleShowHideChartFlag
+    , newToggle
     , removeFromSelectedFunction
     , setFunctionInputErrorFlagAndMessage
     , setTalibResult
@@ -83,7 +84,7 @@ const SelectedFunctionContainer = (props) => {
         const func_name = param.func_name
         let defaultGroup = defaultTalibFunctionsCopy.find((group) => group.group_name === group_name)
         let defaultFunction = defaultGroup.functions.find((func) => func.name === func_name)
-        // console.log(defaultFunction)
+        console.log(defaultFunction)
         const { name, inputs, optInputs } = defaultFunction
         dispatch(setSelectedFunctions(
             {
@@ -102,8 +103,8 @@ const SelectedFunctionContainer = (props) => {
     }
 
     const handleToggleShowHideChart = (param) => {
-        const { id } = param
-        console.log(id, name)
+        const { id, name } = param
+        console.log(name, id)
         dispatch(toggleShowHideChartFlag({ id: id, name: name }))
     }
 
@@ -221,7 +222,7 @@ const SelectedFunctionContainer = (props) => {
                 executeTalibFunction({ token, payload })
                     .then((res) => {
                         console.log(res.data)
-                        dispatch(setTalibResult({ id: id, name: name, result: res.data.result }))
+                        dispatch(setTalibResult({ id: id, name: name, optInputs:optInputs, result: res.data.result }))
                     })
                     .catch(err => {
                         console.log(err)
@@ -297,7 +298,7 @@ const SelectedFunctionContainer = (props) => {
 
                 <AccordionDetails>
                     {functions.length > 0 && functions.map((func, index) => {
-                        const { id, inputs, optInputs, result, show_chart_flag } = func
+                        const { id, name, inputs, optInputs, outputAvailable, show_chart_flag } = func
                         return (
                             <Box key={index} mt={1} borderRadius={2} pl={1} pr={1} pb={1} sx={{ backgroundColor: `${theme.palette.background.paper}` }}>
 
@@ -307,8 +308,8 @@ const SelectedFunctionContainer = (props) => {
                                     </Box>
                                     <Box className='function-action-box' display='flex' flexDirection='row'>
 
-                                        {result.length > 0 &&
-                                            <IconButton size='small' aria-label="Hide shart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: id })}>
+                                        {outputAvailable &&
+                                            <IconButton size='small' aria-label="Hide shart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: id, name: name })}>
                                                 {show_chart_flag ?
                                                     <VisibilityOffIcon className='small-icon' />
                                                     :
@@ -318,7 +319,7 @@ const SelectedFunctionContainer = (props) => {
                                         }
 
                                         <IconButton size='small' aria-label="execute query" color="secondary" onClick={handleGenerateQuery.bind(null, { id: id })}>
-                                            {result.length > 0 ?
+                                            {outputAvailable ?
                                                 <RestartAltIcon className='small-icon' />
                                                 :
                                                 <PlayArrowIcon className='small-icon' />
