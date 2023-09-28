@@ -5,6 +5,27 @@
     align-items: center;
 }
 
+.selected-function-legend{
+    display:flex;
+    flex-direction: column;
+    position: absolute;
+    gap:3px;
+    z-index: 3;
+    font-size: 10px;
+    color: var(--mui-palette-primary-newWhite);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+}
+
+.selected-function-unique{
+    display:flex;
+    flex-direction: column;
+    backdrop-filter: blur(5px);
+    padding-left: 10px;
+    border-radius: 10px;
+    align-items: flex-start;
+}
+
 .tool-tip-indicators {
     width: 130px;
     background-color: #fff;
@@ -151,6 +172,11 @@
 .small-icon {
     width: 20px;
     height: 20px;
+}
+
+.smaller-icon{
+    width: 15px;
+    height: 15px;
 }
 
 @keyframes rotate {

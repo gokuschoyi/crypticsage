@@ -1,9 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Box, useTheme } from '@mui/material'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { Box, useTheme, IconButton } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { updateTickerWithOneDataPoint, getHistoricalTickerDataFroDb } from '../../../../../api/adminController'
 import { useSelector, useDispatch } from 'react-redux'
-import { setStreamedTickerDataRedux, setCryptoDataInDbRedux, resetStreamedTickerDataRedux } from '../modules/CryptoStockModuleSlice'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import SettingsIcon from '@mui/icons-material/Settings';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import {
+    setStreamedTickerDataRedux
+    , setCryptoDataInDbRedux
+    , setIsDataNewFlag
+    , toggleShowHideChartFlag
+    , removeFromSelectedFunction
+    , resetStreamedTickerDataRedux
+} from '../modules/CryptoStockModuleSlice'
 const checkForUniqueAndTransform = (data) => {
     const uniqueData = [];
     const seenTimes = new Set();
@@ -31,13 +42,6 @@ const calculateRsiData = (data) => {
         .filter((d) => d.high)
         .map((d) => ({ time: d.time, value: d.low }));
     return rsi_data
-}
-
-const calculateNewRsiData = (data) => {
-    const rsi_data_new = data
-        .filter((d) => d.low)
-        .map((d) => ({ time: d.time, value: d.close }));
-    return rsi_data_new
 }
 
 const calculateVolumeData = (data) => {
@@ -83,7 +87,6 @@ const MainChart = (props) => {
     const candleStickSeriesRef = useRef(null)
     const candleStickVolumeSeriesRef = useRef(null)
     const rsiSeriesRef = useRef(null)
-    const rsiSeriesNewRef = useRef(null)
 
     const selectedFunctionData = useSelector(state => state.cryptoStockModule.selectedFunctions)
     const modifiedSelectedFunctionWithDataToRender = useSelector(state => state.cryptoStockModule.modifiedSelectedFunctionWithDataToRender)
@@ -91,6 +94,9 @@ const MainChart = (props) => {
     const pageNo = useRef(1)
     const newDataRef = useRef([...tDataRedux])
     const chart = useRef(null)
+    const chartboxRef = useRef();
+
+    // Main chart useEffect
     useEffect(() => {
         console.log("UE : Main chart")
         console.log(tDataRedux.length)
@@ -219,14 +225,6 @@ const MainChart = (props) => {
         const rsi_data = calculateRsiData(tData)
         rsiSeriesRef.current.setData(rsi_data);
 
-        // RSI new
-        rsiSeriesNewRef.current = chart.current.addLineSeries({
-            color: 'red',
-            lineWidth: 1,
-            pane: 2,
-        });
-        const rsi_data_new = calculateNewRsiData(tData)
-        rsiSeriesNewRef.current.setData(rsi_data_new);
 
         // Define the debounce function
         function debounce(func, delay) {
@@ -274,7 +272,6 @@ const MainChart = (props) => {
                         candleStickSeriesRef.current.setData(uniqueData)
                         candleStickVolumeSeriesRef.current.setData(calculateVolumeData(uniqueData))
                         rsiSeriesRef.current.setData(calculateRsiData(uniqueData))
-                        rsiSeriesNewRef.current.setData(calculateNewRsiData(uniqueData))
 
                         uniqueBarNumbers = []
                     })
@@ -284,6 +281,7 @@ const MainChart = (props) => {
         }, 500); // Adjust the delay as needed (e.g., 1000ms = 1 second)
 
         chart.current.timeScale().subscribeVisibleLogicalRangeChange((param) => {
+            // console.log(param)
             const { from, to } = param
             const candleSticksInVisibleRange = Math.floor(to - from)
             fetchPoint = Math.floor(candleSticksInVisibleRange * 0.2) / -1
@@ -369,11 +367,12 @@ const MainChart = (props) => {
             tokenDom.removeEventListener('mousemove', calculateMousePosition)
             tokenDom.removeEventListener('touchmove', handleTouchMove)
             chart.current.remove();
-            // setChartSeriesState([])
+            setChartSeriesState([])
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [symbol, selectedTokenPeriod])
 
+    // sets the background color of the chart based on theme
     useEffect(() => {
         if (chart.current !== undefined || chart.current !== null) {
             chart.current.applyOptions({
@@ -387,128 +386,137 @@ const MainChart = (props) => {
             })
         }
     }, [chartBackgroundColor])
-    const chartboxRef = useRef();
-
-    const lineColors = [
-        "#FFAA00",
-        "#DDBB77",
-        "#EECC99",
-        "#CCAACC",
-        "#DDDD88",
-        "#FF9966",
-        "#FFBB88",
-    ]
 
     const [chartSeriesState, setChartSeriesState] = useState([])
-    useEffect(() => {
-        console.log("<---------------------START-------------------------->")
-        if (modifiedSelectedFunctionWithDataToRender.length > 0) {
-            console.time("New chart data")
-            console.log(chartSeriesState)
-            // console.log(modifiedSelectedFunctionWithDataToRender)
-            let reduxDataCopy = JSON.parse(JSON.stringify(modifiedSelectedFunctionWithDataToRender))
-            const contentBox = document.getElementsByClassName('selected-function-value-displaybox')[0]
 
-            let functionTitles = ''
+    // renders the chart based on the selected functions
+    const renderChart = useCallback(() => {
+        if (modifiedSelectedFunctionWithDataToRender.length === 0 && chartSeriesState.length === 0) {
+            console.log('No chart to render : Callback');
+            return;
+        }
 
-            // rendering function titles
-            reduxDataCopy.forEach((f) => {
-                functionTitles = functionTitles + `
-                <div id=${f.display_name}${f.differentiatorValue} style="display:flex; flex-direction:row; gap:10px" class='function-title'>
-                    ${f.name}_${f.key}
-                    <div class=${f.name}_${f.id}_${f.key}>
-                    </div>
-                </div>`
-            })
+        const lineColors = [
+            "#FFAA00",
+            "#DDBB77",
+            "#EECC99",
+            "#CCAACC",
+            "#DDDD88",
+            "#FF9966",
+            "#FFBB88",
+        ]
 
-            contentBox.innerHTML = functionTitles
-            console.log("LEngth", chartSeriesState.length)
+        console.time('Chart Load Time');
 
-            // checking and rendering chart
-            selectedFunctionData.forEach((func) => {
-                const funcIds = func.functions.map((f) => f.id) // if count = 1 then it is a single function else if 2 a copy of same function is present
-                console.log("Func id from redux", funcIds)
-                funcIds.forEach((id) => {
-                    const filtered = reduxDataCopy.filter((chartData) => chartData.id === id);
-                    console.log("Filtered", filtered)
-                    filtered.forEach((f) => {
-                        const existingInState = chartSeriesState.find((series) => series.id === f.id && series.key === f.key);
-                        // console.log("Existing in state", existingInState)
-                        if (existingInState) {
-                            console.log('Existing in state', f.key)
-                            existingInState.series.applyOptions({ visible: f.visible });
-                        } else {
-                            console.log("Does not exist in state", f.key)
-                            const newSeries = chart.current.addLineSeries({
-                                color: lineColors[Math.floor(Math.random() * lineColors.length)],
-                                lineWidth: 1,
-                                visible: f.visible,
-                                priceLineVisible: false
-                            });
-                            newSeries.setData(f.result);
-                            setChartSeriesState((prevSeries) => [...prevSeries, { name: f.name, series: newSeries, id: f.id, key: f.key }]);
-                        }
-                    })
-                })
-            })
+        const reduxDataCopy = JSON.parse(JSON.stringify(modifiedSelectedFunctionWithDataToRender));
 
-            // checking and removing chart
-            const existingSeriesId = chartSeriesState.map((series) => { return { id: series.id, key: series.key } });
-            const functionsInState = reduxDataCopy.map((func) => { return { id: func.id, key: func.key } });
-            const difference = existingSeriesId.filter((series) => !functionsInState.some((func) => func.id === series.id && func.key === series.key));
-
-            console.log(existingSeriesId)
-            console.log(functionsInState)
-            console.log(difference)
-
-            difference.forEach((func) => {
-                const seriesToRemove = chartSeriesState.find((series) => series.id === func.id && series.key === func.key);
+        // filter and remove charts with old data based on isDataNew flag
+        const chartsWithNewData = reduxDataCopy.filter((f) => f.isDataNew === true);
+        if (chartsWithNewData.length > 0) {
+            console.log('Charts with new data', chartsWithNewData.length);
+            chartsWithNewData.forEach((f) => {
+                const seriesToRemove = chartSeriesState.find((series) => series.id === f.id && series.key === f.key);
                 if (seriesToRemove) {
                     chart.current.removeSeries(seriesToRemove.series);
-                    // Update chartSeriesState to remove the deleted series
-                    setChartSeriesState((prevSeries) => prevSeries.filter((series) => series.id !== func.id))
+                    setChartSeriesState((prevSeries) => prevSeries.filter((series) => series.id !== f.id))
+                }
+            })
+            dispatch(setIsDataNewFlag())
+        } else { console.log("No new data for chart") }
+
+        // checking and rendering chart
+        selectedFunctionData.forEach((func) => {
+            const funcIds = func.functions.map((f) => f.id) // if count = 1 then it is a single function else if 2 a copy of same function is present
+            // console.log("Func id from redux", funcIds)
+            funcIds.forEach((id) => {
+                const filtered = reduxDataCopy.filter((chartData) => chartData.id === id);
+                // console.log("Filtered", filtered)
+                filtered.forEach((f) => {
+                    const existingInState = chartSeriesState.find((series) => series.id === f.id && series.key === f.key);
+                    // console.log("Existing in state", existingInState)
+                    if (existingInState) {
+                        // console.log('Existing in state', f.key)
+                        existingInState.series.applyOptions({ visible: f.visible });
+                    } else {
+                        // console.log("Does not exist in state", f.key)
+                        const newSeries = chart.current.addLineSeries({
+                            color: lineColors[Math.floor(Math.random() * lineColors.length)],
+                            lineWidth: 1,
+                            visible: f.visible,
+                            priceLineVisible: false,
+                            lastValueVisible: false,
+                        });
+                        newSeries.setData(f.result);
+                        setChartSeriesState((prevSeries) => [...prevSeries, { name: f.name, series: newSeries, id: f.id, key: f.key }]);
+                    }
+                });
+            });
+        });
+
+        // checking and removing chart
+        const existingSeriesId = chartSeriesState.map((series) => ({ id: series.id, key: series.key }));
+        const functionsInState = reduxDataCopy.map((func) => ({ id: func.id, key: func.key }));
+        const difference = existingSeriesId.filter((series) => !functionsInState.some((func) => func.id === series.id && func.key === series.key));
+
+        // console.log(existingSeriesId)
+        // console.log(functionsInState)
+        // console.log(difference)
+
+        difference.forEach((func) => {
+            const seriesToRemove = chartSeriesState.find((series) => series.id === func.id && series.key === func.key);
+            if (seriesToRemove) {
+                chart.current.removeSeries(seriesToRemove.series);
+                // Update chartSeriesState to remove the deleted series
+                setChartSeriesState((prevSeries) => prevSeries.filter((series) => series.id !== func.id))
+            }
+        });
+
+        console.timeEnd('Chart Load Time');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chartSeriesState, modifiedSelectedFunctionWithDataToRender]);
+
+    useEffect(() => {
+        console.log('<---------------------START-------------------------->');
+        renderChart();
+
+        // Subscribe to crosshair move event
+        const crosshairMoveHandler = (param) => {
+            if (
+                param.point === undefined ||
+                !param.time ||
+                param.point.x < 0 ||
+                param.point.x > chartboxRef.current.clientWidth ||
+                param.point.y < 0 ||
+                param.point.y > chartboxRef.current.clientHeight ||
+                param.paneIndex !== 0
+            ) {
+                return;
+            }
+
+            const seriesDataMap = new Map(param.seriesData);
+
+            chartSeriesState.forEach((series) => {
+                const seriesValue = seriesDataMap.get(series.series);
+                if (seriesValue !== undefined) {
+                    const divToInsertDataTo = document.querySelector(`.${series.name}_${series.id}_${series.key}`);
+                    if (divToInsertDataTo) {
+                        let displayKey = convertKeysForDisplay(series.key)
+                        divToInsertDataTo.innerHTML = `${displayKey} : ${seriesValue.value.toFixed(2)}`
+                    }
                 }
             });
+        };
 
-            // subscribing to crosshair move event
-            chart.current.subscribeCrosshairMove((param) => {
-                // console.log(param)
-                if (
-                    param.point === undefined ||
-                    !param.time ||
-                    param.point.x < 0 ||
-                    param.point.x > chartboxRef.current.clientWidth ||
-                    param.point.y < 0 ||
-                    param.point.y > chartboxRef.current.clientHeight ||
-                    param.paneIndex !== 0
-                ) {
-                    // console.log('No crosshair data')
-                    return
-                }
-                const seriesDataMap = new Map(param.seriesData);
-                chartSeriesState.forEach((series) => {
-                    const seriesValue = seriesDataMap.get(series.series);
-                    // console.log(seriesValue)
-                    if (seriesValue !== undefined) {
-                        const divToInsertDataTo = document.querySelector(`.${series.name}_${series.id}_${series.key}`);
-                        if (divToInsertDataTo) {
-                            divToInsertDataTo.innerHTML = seriesValue.value.toFixed(2);
-                        }
-                    }
-                })
+        chart.current.subscribeCrosshairMove(crosshairMoveHandler);
 
-            })
-            console.timeEnd("New chart data")
-            console.log("<------------------END----------------------------->")
-        } else { console.log('No chart to render'); console.log("<------------------END----------------------------->") }
+        console.log('<------------------END----------------------------->');
+
         return () => {
-            console.log('Add : UE RETURN')
-            /* chartSeriesState.forEach((series) => {
-                chart.current.removeSeries(series.series);
-            }) */
-            // console.log(chartSeriesState)
-        }
-    })
+            console.log('Add : UE RETURN');
+            chart.current.unsubscribeCrosshairMove(crosshairMoveHandler);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [renderChart]);
 
     // web socket warning becaue of react strict mode
     useEffect(() => {
@@ -550,7 +558,6 @@ const MainChart = (props) => {
                 })
 
                 rsiSeriesRef.current.update({ time: tickerPayload.openTime / 1000, value: tickerPayload.low });
-                rsiSeriesNewRef.current.update({ time: tickerPayload.openTime / 1000, value: tickerPayload.close });
 
                 if (latestDateRf.current < tickerPayload.openTime && selectedTokenPeriod === '1m') {
                     const fetchQuery = {
@@ -586,7 +593,7 @@ const MainChart = (props) => {
             };
         };
 
-        if (candleStickSeriesRef.current && rsiSeriesRef.current && rsiSeriesNewRef.current) {
+        if (candleStickSeriesRef.current && rsiSeriesRef.current) {
             // console.log('Connecting to binance WS for ticker data');
             // if (wsRef.current !== null) {
             //     // console.log('Closing old WS connection from UE');
@@ -603,14 +610,119 @@ const MainChart = (props) => {
         }
     }, [selectedTokenPeriod, symbol, token, dispatch])
 
+    // handles the show/hide chart button
+    const handleToggleShowHideChart = (param) => {
+        const { id, name } = param
+        // console.log(name, id)
+        dispatch(toggleShowHideChartFlag({ id: id, name: name }))
+    }
+
+    // handles the settings button - to be implemented
+    const handleOpenSettingsModal = (param) => {
+        const { id, name } = param
+        console.log(name, id)
+    }
+
+    // handles the delete button
+    const handleDeleteQuery = (param) => {
+        const { id, name, group_name } = param
+        console.log(id, name, group_name)
+        dispatch(removeFromSelectedFunction({ id: id, name: name, group_name: group_name }))
+    }
+
+    const convertKeysForDisplay = (key) => {
+        let final = ''
+        switch (key) {
+            case 'outRealUpperBand':
+                final = 'U'
+                break;
+            case 'outRealLowerBand':
+                final = 'L'
+                break;
+            case 'outRealMiddleBand':
+                final = 'M'
+                break;
+            case 'outInPhase':
+                final = 'Phase'
+                break;
+            case 'outQuadrature':
+                final = 'Quad'
+                break;
+            case 'outSine':
+                final = 'Sine'
+                break;
+            case 'outLeadSine':
+                final = 'LeadSine'
+                break;
+            case 'outMACD':
+                final = 'Out'
+                break;
+            case 'outMACDSignal':
+                final = 'Signal'
+                break;
+            case 'outMACDHist':
+                final = 'Hist'
+                break;
+            case 'outSlowK':
+                final = 'SlowK'
+                break;
+            case 'outSlowD':
+                final = 'SlowD'
+                break;
+            case 'outFastK':
+                final = 'FastK'
+                break;
+            case 'outFastD':
+                final = 'FastD'
+                break;
+            default:
+                break;
+        }
+        return final
+    }
+
     return (
         <Box sx={{ width: '100%', height: '100%' }}>
             <Box className='chart-cont-dom' width="100%" height="100%" >
+                <Box className='selected-function-legend' pt={'5px'}>
+                    {selectedFunctionData.map((selectedFunction, index) => {
+                        const selectedFunc = selectedFunction.functions
+                        const outputs = selectedFunction.outputs
+                        return (
+                            <Box key={index} className='selected-function-unique' justifyContent='space-between' alignItems='center'>
+                                {selectedFunc.map((func, i) => (
+                                    <Box key={i} display='flex' flexDirection='row' alignItems='center'>
+                                        <Box className='function-title' display='flex' flexDirection='row' gap='5px'>
+                                            {func.name}
+                                            {outputs.map((output, j) => (
+                                                <Box key={j} className={`${func.name}_${func.id}_${output.name}`}></Box>
+                                            ))}
+                                        </Box>
+                                        {func.outputAvailable &&
+                                            <IconButton size='small' aria-label="Hide chart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: func.id, name: func.name })}>
+                                                {func.show_chart_flag ?
+                                                    <VisibilityOffIcon className='smaller-icon' />
+                                                    :
+                                                    <VisibilityIcon className='smaller-icon' />
+                                                }
+                                            </IconButton>
+                                        }
+                                        <IconButton size='small' aria-label="modify query" color="secondary" onClick={handleOpenSettingsModal.bind(null, { id: func.id, name: func.name })} >
+                                            <SettingsIcon className='smaller-icon' />
+                                        </IconButton>
+                                        <IconButton size='small' aria-label="delete query" color="secondary" onClick={handleDeleteQuery.bind(null, { id: func.id, name: func.name, group_name: selectedFunction.group_name })}>
+                                            <DeleteOutlineIcon className='smaller-icon' />
+                                        </IconButton>
+                                    </Box>
+                                ))}
+                            </Box>
+                        )
+                    })}
+                </Box>
                 <Box ref={chartboxRef}></Box>
                 <Box className='tool-tip-indicators'></Box>
             </Box>
-
-        </Box>
+        </Box >
     )
 }
 

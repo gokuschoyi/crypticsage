@@ -82,19 +82,14 @@ const FunctionContainer = (props) => {
     // handle generate query for each function
     const handleGenerateQuery = (func_name) => {
         let talibExecuteQuery = {}
+        let tOITypes = {}
 
         const transformedOptionalInputs = defaultOptionalInputs.reduce((result, item) => {
             result[item.name] = item.defaultValue
+            tOITypes[item.name] = item.type;
             return result;
         }, {})
-        let tOITypes = {}
 
-        defaultOptionalInputs.reduce((result, input) => {
-            tOITypes[input.name] = input.type;
-            return result;
-        }, {});
-
-        // console.log(outputs)
         let outputkeys = {}
         let outputsCopy = [...outputs]
         outputkeys = outputsCopy.reduce((result, output) => {
@@ -102,25 +97,54 @@ const FunctionContainer = (props) => {
             return result;
         }, {});
 
-        const isFlagsAvailable = inputs[0].flags === undefined ? false : true
-        let input = {}
-        if (isFlagsAvailable) { // flags field available, so we can directly use the flags
-            let flags = inputs[0].flags;
-            let converted = {};
+        let converted = {}
+        let checked = selectedInputOptions.map((input) => {
+            if (input.flags) {
+                Object.keys(input.flags).forEach((key) => {
+                    converted[input.flags[key]] = input.flags[key];
+                });
+                return input
+            } else {
+                if (input.value === '') {
+                    return {
+                        ...input,
+                        errorFlag: true,
+                        helperText: 'Please select a valid input',
+                    }
+                } else {
+                    converted[input.name] = input.value;
+                    return {
+                        ...input,
+                        errorFlag: false,
+                        helperText: '',
+                    }
+                }
+            }
+        })
 
-            // Use forEach to populate the converted object
-            Object.keys(flags).forEach((key) => {
-                // console.log(flags[key]);
-                converted[flags[key]] = flags[key];
-            });
+        // console.log(checked)
+        const filtered = checked.filter((item) => !item.flags)
+        // console.log(filtered)
+        const hasEmptyValues = filtered.every((item) => {
+            if (!item.flags) {
+                // If there are no flags
+                return item.value === '';
+            }
+            return false; // If there are flags, we consider it as not having empty values
+        });
+        console.log(hasEmptyValues)
+        if (hasEmptyValues) {
+            setSelectedInputOptions(checked)
+            return
+        } else {
+            delete fetchValues['items_per_page']
+            delete fetchValues['page_no']
 
             talibExecuteQuery['name'] = name;
             talibExecuteQuery['startIdx'] = 0;
             talibExecuteQuery['endIdx'] = histDataLength - 1;
             talibExecuteQuery = { ...talibExecuteQuery, ...converted, ...transformedOptionalInputs }
 
-            delete fetchValues['items_per_page']
-            delete fetchValues['page_no']
             let payload = {
                 func_query: talibExecuteQuery,
                 func_param_input_keys: converted,
@@ -161,83 +185,6 @@ const FunctionContainer = (props) => {
                 .catch(err => {
                     console.log(err)
                 })
-        } else { // flags not present in the input, so we have to take input from user
-            let selectedInputOptionsCopy = [...selectedInputOptions]
-            let checked = selectedInputOptionsCopy.map((item) => {
-                if (item.value === '') {
-                    return {
-                        ...item,
-                        errorFlag: true,
-                        helperText: 'Please select a valid input',
-                    };
-                } else {
-                    return {
-                        ...item,
-                        errorFlag: false,
-                        helperText: '',
-                    };
-                }
-            });
-
-            let notNull = checked.every((item) => item.value !== '')
-
-            if (!notNull) {
-                setSelectedInputOptions(checked)
-                return
-            } else {
-                setSelectedInputOptions(checked)
-                Object.keys(selectedInputOptionsCopy).forEach((key) => {
-                    // console.log(key)
-                    input[selectedInputOptionsCopy[key].name] = selectedInputOptionsCopy[key].value;
-                })
-
-                talibExecuteQuery['name'] = name;
-                talibExecuteQuery['startIdx'] = 0;
-                talibExecuteQuery['endIdx'] = histDataLength - 1;
-                talibExecuteQuery = { ...talibExecuteQuery, ...input, ...transformedOptionalInputs }
-
-                delete fetchValues['items_per_page']
-                delete fetchValues['page_no']
-                let payload = {
-                    func_query: talibExecuteQuery,
-                    func_param_input_keys: input,
-                    func_param_optional_input_keys: tOITypes,
-                    func_param_output_keys: outputkeys,
-                    db_query: {
-                        ...fetchValues,
-                        fetch_count: histDataLength
-                    }
-                }
-                console.log(payload)
-                executeTalibFunction({ token, payload })
-                    .then((res) => {
-                        console.log(res.data)
-                        dispatch(setSelectedFlagInTalibDescription(
-                            {
-                                group,
-                                name,
-                                inputs: selectedInputOptions,
-                                optInputs: defaultOptionalInputs
-                            }
-                        ))
-                        dispatch(setSelectedFunctions(
-                            {
-                                hint,
-                                name,
-                                group_name,
-                                inputs: selectedInputOptions,
-                                optInputs: defaultOptionalInputs,
-                                outputs,
-                                function_selected_flag: true,
-                                result: res.data.result
-                            }
-                        ))
-                        functionSelectedRef.current = true
-                    })
-                    .catch(err => {
-                        console.log(err)
-                    })
-            }
         }
     }
 

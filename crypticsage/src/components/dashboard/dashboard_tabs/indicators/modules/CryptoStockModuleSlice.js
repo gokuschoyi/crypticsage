@@ -79,7 +79,7 @@ const cryptoStockModuleSlice = createSlice({
                             optInputs: optInputs,
                             outputAvailable: result.length > 0 ? true : false,
                             show_chart_flag: true,
-                            differentiatorValue: diffVal
+                            differentiatorValue: diffVal,
                         }
                     ]
                 }
@@ -94,13 +94,14 @@ const cryptoStockModuleSlice = createSlice({
                         result: differentOutputs.data,
                         visible: true,
                         key: differentOutputs.key,
-                        differentiatorValue: diffVal
+                        differentiatorValue: diffVal,
+                        isDataNew: false
                     }
                     state.modifiedSelectedFunctionWithDataToRender.push(objectForChart)
                 })
 
             } else {
-                console.log('Existing in redux')
+                // console.log('Existing in redux')
                 const foundIndex = currentState.findIndex((func) => func.name === name);
                 currentState[foundIndex].functions.push(
                     {
@@ -220,8 +221,8 @@ const cryptoStockModuleSlice = createSlice({
                         return input;
                     });
                     updatedFunction.differentiatorValue = updatedFunction.optInputs[0].defaultValue;
-                    let diffValue = updatedFunction.optInputs[0].defaultValue;
-                    console.log(diffValue);
+                    // let diffValue = updatedFunction.optInputs[0].defaultValue;
+                    // console.log(diffValue);
 
                     // Update the function within the found function's functions array
                     foundFunction.functions[foundFunctionToUpdateIndex] = updatedFunction;
@@ -240,6 +241,7 @@ const cryptoStockModuleSlice = createSlice({
             // Find the index of the function by name
             const foundFunctionIndex = currentState.findIndex((func) => func.name === name);
 
+            // setting outputAvailable to true
             if (foundFunctionIndex !== -1) {
                 const foundFunction = currentState[foundFunctionIndex];
 
@@ -273,14 +275,16 @@ const cryptoStockModuleSlice = createSlice({
                     result: differentOutputs.data,
                     visible: false,
                     key: differentOutputs.key,
-                    differentiatorValue: diffVal
+                    differentiatorValue: diffVal,
+                    isDataNew: false
                 }
 
                 // Check if an object with the same 'key' exists in the array
-                const existingObjectIndex = state.modifiedSelectedFunctionWithDataToRender.findIndex((item) => item.id === id);
+                const existingObjectIndex = state.modifiedSelectedFunctionWithDataToRender.findIndex((item) => item.id === id && item.key === objectForChart.key);
                 if (existingObjectIndex !== -1) {
                     // If an object with the same 'key' exists, update it
                     objectForChart.visible = true;
+                    objectForChart.isDataNew = true;
                     state.modifiedSelectedFunctionWithDataToRender[existingObjectIndex] = objectForChart;
                 } else {
                     // If no object with the same 'key' exists, push the new object
@@ -375,6 +379,13 @@ const cryptoStockModuleSlice = createSlice({
             state.streamedTickerData = [];
             state.selectedFunctions = [];
             state.modifiedSelectedFunctionWithDataToRender = [];
+        },
+        setIsDataNewFlag: (state, action) => {
+            const currentState = state.modifiedSelectedFunctionWithDataToRender;
+            currentState.filter((func) => func.isDataNew === true).forEach((func) => {
+                func.isDataNew = false;
+            })
+            state.modifiedSelectedFunctionWithDataToRender = currentState;
         }
     }
 })
@@ -395,5 +406,6 @@ export const {
     , toggleShowHideChartFlag
     , removeFromSelectedFunction
     , resetCryptoStockModule
+    , setIsDataNewFlag
 } = actions;
 export default reducer;

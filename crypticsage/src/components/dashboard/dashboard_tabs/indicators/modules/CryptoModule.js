@@ -270,9 +270,11 @@ const CryptoModule = () => {
                                     </Box>
                                 </Grid>
 
-                                <Grid item xs={12} sm={12} md={12} lg={2} xl={2}>
-                                    <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' pl={2} pr={2} pt={4}></Box>
-                                </Grid>
+                                {<Grid item xs={12} sm={12} md={12} lg={2} xl={2}>
+                                    <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' pl={2} pr={2} pt={4}>
+                                        Placeholder for now
+                                    </Box>
+                                </Grid>}
                             </Grid>
 
                         </Box>
