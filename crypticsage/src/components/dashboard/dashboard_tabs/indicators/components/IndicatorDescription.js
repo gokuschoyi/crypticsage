@@ -73,7 +73,7 @@ const FunctionContainer = (props) => {
     const token = useSelector(state => state.auth.accessToken);
     const funcCopy = Object.assign({}, func)
     // console.log(funcCopy)
-    const { group, hint, name, inputs, optInputs, outputs, function_selected_flag } = funcCopy
+    const { group, hint, name, inputs, optInputs, outputs, function_selected_flag, splitPane } = funcCopy
 
     const [selectedInputOptions, setSelectedInputOptions] = useState(inputs)
     const [defaultOptionalInputs, setDefaultOptionalInputs] = useState(optInputs)
@@ -81,6 +81,7 @@ const FunctionContainer = (props) => {
 
     // handle generate query for each function
     const handleGenerateQuery = (func_name) => {
+        // console.log("Split pane",splitPane)
         let talibExecuteQuery = {}
         let tOITypes = {}
 
@@ -125,14 +126,20 @@ const FunctionContainer = (props) => {
         // console.log(checked)
         const filtered = checked.filter((item) => !item.flags)
         // console.log(filtered)
-        const hasEmptyValues = filtered.every((item) => {
-            if (!item.flags) {
-                // If there are no flags
-                return item.value === '';
-            }
-            return false; // If there are flags, we consider it as not having empty values
-        });
-        console.log(hasEmptyValues)
+        let hasEmptyValues
+        if (filtered.length > 0) {
+            hasEmptyValues = filtered.every((item) => {
+                if (!item.flags) {
+                    // If there are no flags
+                    return item.value === '';
+                }
+                return false; // If there are flags, we consider it as not having empty values
+            });
+        } else {
+            hasEmptyValues = false
+        }
+        // console.log(hasEmptyValues)
+        
         if (hasEmptyValues) {
             setSelectedInputOptions(checked)
             return
@@ -177,7 +184,8 @@ const FunctionContainer = (props) => {
                             optInputs: defaultOptionalInputs,
                             outputs,
                             function_selected_flag: true,
-                            result: res.data.result
+                            result: res.data.result,
+                            splitPane
                         }
                     ))
                     functionSelectedRef.current = true

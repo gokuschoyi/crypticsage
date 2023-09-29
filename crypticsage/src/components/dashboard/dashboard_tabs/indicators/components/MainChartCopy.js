@@ -15,6 +15,9 @@ import {
     , removeFromSelectedFunction
     , resetStreamedTickerDataRedux
 } from '../modules/CryptoStockModuleSlice'
+
+const EXTRA_DATA_FETCH_POINT_FRACTION = 0.4;
+
 const checkForUniqueAndTransform = (data) => {
     const uniqueData = [];
     const seenTimes = new Set();
@@ -35,13 +38,6 @@ const checkForUniqueAndTransform = (data) => {
         }
     })
     return uniqueData
-}
-
-const calculateRsiData = (data) => {
-    const rsi_data = data
-        .filter((d) => d.high)
-        .map((d) => ({ time: d.time, value: d.low }));
-    return rsi_data
 }
 
 const calculateVolumeData = (data) => {
@@ -75,6 +71,7 @@ const calculateVolumeData = (data) => {
 const MainChart = (props) => {
     const { latestTime, new_fetch_offset, symbol, selectedTokenPeriod, module } = props;
     const token = useSelector(state => state.auth.accessToken);
+    const toolTipSwitchFlag = useSelector(state => state.cryptoStockModule.toolTipOn)
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
 
@@ -86,7 +83,6 @@ const MainChart = (props) => {
     const latestDateRf = useRef(latestTime) // latest time in the fetched data. Data doe not inclusive of this time
     const candleStickSeriesRef = useRef(null)
     const candleStickVolumeSeriesRef = useRef(null)
-    const rsiSeriesRef = useRef(null)
 
     const selectedFunctionData = useSelector(state => state.cryptoStockModule.selectedFunctions)
     const modifiedSelectedFunctionWithDataToRender = useSelector(state => state.cryptoStockModule.modifiedSelectedFunctionWithDataToRender)
@@ -112,6 +108,7 @@ const MainChart = (props) => {
 
         const tooltipPadding = 10;
         const tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
+        let ohlcvLegend = document.getElementsByClassName('ohlcv-box')[0]
         let toolTipXCoOrdinates = 0, toolTipYCoOrdinates = 0;
 
         const handleResize = () => {
@@ -138,7 +135,6 @@ const MainChart = (props) => {
             toolTipXCoOrdinates = event.touches[0].pageX;
             toolTipYCoOrdinates = event.touches[0].pageY;
         }
-
 
         let scrollYAxis = window.scrollY
 
@@ -216,16 +212,6 @@ const MainChart = (props) => {
         const volDat = calculateVolumeData(tData)
         candleStickVolumeSeriesRef.current.setData(volDat);
 
-        // RSI
-        rsiSeriesRef.current = chart.current.addLineSeries({
-            color: 'purple',
-            lineWidth: 1,
-            pane: 1,
-        });
-        const rsi_data = calculateRsiData(tData)
-        rsiSeriesRef.current.setData(rsi_data);
-
-
         // Define the debounce function
         function debounce(func, delay) {
             let timeoutId;
@@ -241,7 +227,7 @@ const MainChart = (props) => {
 
         let uniqueBarNumbers = [];
         let lastBarNo = 0
-        let fetchPoint = Math.floor(newDataRef.current.length * 0.2) / -1
+        let fetchPoint = Math.floor(newDataRef.current.length * EXTRA_DATA_FETCH_POINT_FRACTION) / -1
 
         // Create a debounced version of your data fetching logic
         const debouncedFetchData = debounce((barNo, candleSticksInVisibleRange) => {
@@ -271,7 +257,6 @@ const MainChart = (props) => {
 
                         candleStickSeriesRef.current.setData(uniqueData)
                         candleStickVolumeSeriesRef.current.setData(calculateVolumeData(uniqueData))
-                        rsiSeriesRef.current.setData(calculateRsiData(uniqueData))
 
                         uniqueBarNumbers = []
                     })
@@ -300,6 +285,7 @@ const MainChart = (props) => {
             lastBarNo = barNo
         })
 
+
         // update tooltip
         chart.current.subscribeCrosshairMove((param) => {
             if (
@@ -311,7 +297,7 @@ const MainChart = (props) => {
                 param.point.y > chartboxRef.current.clientHeight ||
                 param.paneIndex !== 0
             ) {
-                tooltip.style.display = 'none';
+                // tooltip.style.display = 'none';
             } else {
                 const dateStr = new Date(param.time * 1000).toLocaleString('en-AU',
                     {
@@ -323,7 +309,7 @@ const MainChart = (props) => {
                         hour12: true
                     }
                 );
-                tooltip.style.display = 'block';
+                // tooltip.style.display = 'block';
                 const data = param.seriesData.get(candleStickSeriesRef.current);
                 const volData = param.seriesData.get(candleStickVolumeSeriesRef.current);
                 // console.log(volData)
@@ -332,15 +318,14 @@ const MainChart = (props) => {
                 const close = data.close;
                 const high = data.high;
                 const low = data.low;
-                tooltip.innerHTML = `
-                    <div style="color: ${'rgba(255, 82, 82, 1)'}">${symbol}</div>
-                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">O :${Math.round(100 * open) / 100}</div>
-                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">H :${Math.round(100 * high) / 100}</div>
-                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">L :${Math.round(100 * low) / 100}</div>
-                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">C :${Math.round(100 * close) / 100}</div>
-                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">V :${Math.round(volData.value).toFixed(2)}</div>
-                    <div class-name='tooltip-text' style="color: ${'black'},font-size: 12px;">${dateStr}</div>
-                    `;
+                let newString = `
+                    <div style="width:70px; text-align:start">O : ${Math.round(100 * open) / 100}</div>
+                    <div style="width:70px; text-align:start">H : ${Math.round(100 * high) / 100}</div>
+                    <div style="width:70px; text-align:start">L : ${Math.round(100 * low) / 100}</div>
+                    <div style="width:70px; text-align:start">C : ${Math.round(100 * close) / 100}</div>
+                    <div style="width:70px; text-align:start">V : ${Math.round(volData.value).toFixed(2)}</div>
+                    `
+                ohlcvLegend.innerHTML = newString
 
                 let diffX = toolTipXCoOrdinates - offsetLeft
                 if (diffX > cWidth - 150) {
@@ -372,6 +357,68 @@ const MainChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [symbol, selectedTokenPeriod])
 
+    // Tooltip useEffect to show/hide
+    useEffect(() => {
+        // console.log("UE : tooltip subscribe")
+        let tooltip
+        const toolTipHandler = (param) => {
+            if (
+                param.point === undefined ||
+                !param.time ||
+                param.point.x < 0 ||
+                param.point.x > chartboxRef.current.clientWidth ||
+                param.point.y < 0 ||
+                param.point.y > chartboxRef.current.clientHeight ||
+                param.paneIndex !== 0
+            ) {
+                tooltip.style.display = 'none';
+            } else {
+                const dateStr = new Date(param.time * 1000).toLocaleString('en-AU',
+                    {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: '2-digit',
+                        hour: 'numeric',
+                        minute: 'numeric',
+                        hour12: true
+                    }
+                );
+                tooltip.style.display = 'block';
+                const data = param.seriesData.get(candleStickSeriesRef.current);
+                const volData = param.seriesData.get(candleStickVolumeSeriesRef.current);
+                // console.log(volData)
+                const open = data.value !== undefined ? data.value : data.open;
+
+                const close = data.close;
+                const high = data.high;
+                const low = data.low;
+
+                tooltip.innerHTML = `
+                    <div style="color: ${'rgba(255, 82, 82, 1)'}">${symbol}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">O : ${Math.round(100 * open) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">H : ${Math.round(100 * high) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">L : ${Math.round(100 * low) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">C : ${Math.round(100 * close) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">V : ${Math.round(volData.value).toFixed(2)}</div>
+                    <div class-name='tooltip-text' style="color: ${'black'},font-size: 12px;">${dateStr}</div>
+                    `;
+            }
+        }
+
+        if (toolTipSwitchFlag) {
+            tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
+            chart.current.subscribeCrosshairMove(toolTipHandler);
+        } else {
+            tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
+            tooltip.style.display = 'none';
+        }
+
+        return () => {
+            // console.log("Tooltip Subscribe UE  : Return")
+            chart.current.unsubscribeCrosshairMove(toolTipHandler)
+        }
+    })
+
     // sets the background color of the chart based on theme
     useEffect(() => {
         if (chart.current !== undefined || chart.current !== null) {
@@ -388,7 +435,8 @@ const MainChart = (props) => {
     }, [chartBackgroundColor])
 
     const [chartSeriesState, setChartSeriesState] = useState([])
-
+    const removePaneFlag = useRef(false)
+    const paneOneChartLength = useRef(0)
     // renders the chart based on the selected functions
     const renderChart = useCallback(() => {
         if (modifiedSelectedFunctionWithDataToRender.length === 0 && chartSeriesState.length === 0) {
@@ -432,10 +480,15 @@ const MainChart = (props) => {
                 const filtered = reduxDataCopy.filter((chartData) => chartData.id === id);
                 // console.log("Filtered", filtered)
                 filtered.forEach((f) => {
-                    const existingInState = chartSeriesState.find((series) => series.id === f.id && series.key === f.key);
+                    // console.log(f.splitPane)
+                    const existingInStateIndex = chartSeriesState.findIndex((series) => series.id === f.id && series.key === f.key);
+                    // console.log("Existing in state index", existingInStateIndex)
                     // console.log("Existing in state", existingInState)
-                    if (existingInState) {
+                    if (existingInStateIndex !== -1) {
                         // console.log('Existing in state', f.key)
+                        let existingInState = chartSeriesState[existingInStateIndex];
+                        existingInState.visible = f.visible
+                        // console.log(existingInState)
                         existingInState.series.applyOptions({ visible: f.visible });
                     } else {
                         // console.log("Does not exist in state", f.key)
@@ -445,9 +498,19 @@ const MainChart = (props) => {
                             visible: f.visible,
                             priceLineVisible: false,
                             lastValueVisible: false,
+                            pane: f.splitPane ? 1 : 0,
                         });
                         newSeries.setData(f.result);
-                        setChartSeriesState((prevSeries) => [...prevSeries, { name: f.name, series: newSeries, id: f.id, key: f.key }]);
+                        setChartSeriesState((prevSeries) => [...prevSeries,
+                        {
+                            name: f.name,
+                            series: newSeries,
+                            id: f.id,
+                            key: f.key,
+                            pane: f.splitPane ? 1 : 0,
+                            visible: f.visible
+                        }
+                        ]);
                     }
                 });
             });
@@ -471,6 +534,20 @@ const MainChart = (props) => {
             }
         });
 
+        // Removing pane 1 if no chart is present
+        paneOneChartLength.current = chartSeriesState.filter((series) => series.pane === 1).length
+        if (paneOneChartLength.current > 0) {
+            removePaneFlag.current = true
+        }
+        // console.log(paneOneChartLength.current, removePaneFlag.current)
+        if (paneOneChartLength.current === 0 && removePaneFlag.current) {
+            // console.log("Remove pane")
+            chart.current.removePane(1)
+            removePaneFlag.current = false
+        } else {
+            // console.log("pane needed")
+        }
+
         console.timeEnd('Chart Load Time');
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chartSeriesState, modifiedSelectedFunctionWithDataToRender]);
@@ -481,23 +558,28 @@ const MainChart = (props) => {
 
         // Subscribe to crosshair move event
         const crosshairMoveHandler = (param) => {
+            // console.log(param)
             if (
                 param.point === undefined ||
                 !param.time ||
                 param.point.x < 0 ||
                 param.point.x > chartboxRef.current.clientWidth ||
                 param.point.y < 0 ||
-                param.point.y > chartboxRef.current.clientHeight ||
-                param.paneIndex !== 0
+                param.point.y > chartboxRef.current.clientHeight
             ) {
                 return;
             }
 
             const seriesDataMap = new Map(param.seriesData);
 
-            chartSeriesState.forEach((series) => {
+            let local = [...chartSeriesState]
+            let paneZero = local.filter((series) => series.pane === 0)
+            let paneOne = local.filter((series) => series.pane === 1)
+            let toShow = param.paneIndex === 0 ? paneZero : paneOne
+
+            toShow.forEach((series) => {
                 const seriesValue = seriesDataMap.get(series.series);
-                if (seriesValue !== undefined) {
+                if (seriesValue !== undefined && series.visible) {
                     const divToInsertDataTo = document.querySelector(`.${series.name}_${series.id}_${series.key}`);
                     if (divToInsertDataTo) {
                         let displayKey = convertKeysForDisplay(series.key)
@@ -557,8 +639,6 @@ const MainChart = (props) => {
                     value: parseFloat(tickerPayload.volume),
                 })
 
-                rsiSeriesRef.current.update({ time: tickerPayload.openTime / 1000, value: tickerPayload.low });
-
                 if (latestDateRf.current < tickerPayload.openTime && selectedTokenPeriod === '1m') {
                     const fetchQuery = {
                         ticker_name: symbol,
@@ -593,7 +673,7 @@ const MainChart = (props) => {
             };
         };
 
-        if (candleStickSeriesRef.current && rsiSeriesRef.current) {
+        if (candleStickSeriesRef.current) {
             // console.log('Connecting to binance WS for ticker data');
             // if (wsRef.current !== null) {
             //     // console.log('Closing old WS connection from UE');
@@ -684,22 +764,23 @@ const MainChart = (props) => {
     return (
         <Box sx={{ width: '100%', height: '100%' }}>
             <Box className='chart-cont-dom' width="100%" height="100%" >
-                <Box className='selected-function-legend' pt={'5px'}>
+                <Box className='selected-function-legend'>
+                    <Box className='selected-function-unique ohlcv-box'></Box>
                     {selectedFunctionData.map((selectedFunction, index) => {
                         const selectedFunc = selectedFunction.functions
                         const outputs = selectedFunction.outputs
                         return (
-                            <Box key={index} className='selected-function-unique' justifyContent='space-between' alignItems='center'>
+                            <Box key={index} className='selected-function-unique sel-func' justifyContent='space-between' alignItems='center'>
                                 {selectedFunc.map((func, i) => (
-                                    <Box key={i} display='flex' flexDirection='row' alignItems='center'>
+                                    <Box className='single-data-box' key={i} display='flex' flexDirection='row' alignItems='center' gap={'5px'}>
                                         <Box className='function-title' display='flex' flexDirection='row' gap='5px'>
-                                            {func.name}
+                                            <Box>{func.name}</Box>
                                             {outputs.map((output, j) => (
                                                 <Box key={j} className={`${func.name}_${func.id}_${output.name}`}></Box>
                                             ))}
                                         </Box>
                                         {func.outputAvailable &&
-                                            <IconButton size='small' aria-label="Hide chart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: func.id, name: func.name })}>
+                                            <IconButton size='small' sx={{ padding: '2px' }} aria-label="Hide chart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: func.id, name: func.name })}>
                                                 {func.show_chart_flag ?
                                                     <VisibilityOffIcon className='smaller-icon' />
                                                     :
@@ -707,10 +788,10 @@ const MainChart = (props) => {
                                                 }
                                             </IconButton>
                                         }
-                                        <IconButton size='small' aria-label="modify query" color="secondary" onClick={handleOpenSettingsModal.bind(null, { id: func.id, name: func.name })} >
+                                        <IconButton size='small' sx={{ padding: '2px' }} aria-label="modify query" color="secondary" onClick={handleOpenSettingsModal.bind(null, { id: func.id, name: func.name })} >
                                             <SettingsIcon className='smaller-icon' />
                                         </IconButton>
-                                        <IconButton size='small' aria-label="delete query" color="secondary" onClick={handleDeleteQuery.bind(null, { id: func.id, name: func.name, group_name: selectedFunction.group_name })}>
+                                        <IconButton size='small' sx={{ padding: '2px' }} aria-label="delete query" color="secondary" onClick={handleDeleteQuery.bind(null, { id: func.id, name: func.name, group_name: selectedFunction.group_name })}>
                                             <DeleteOutlineIcon className='smaller-icon' />
                                         </IconButton>
                                     </Box>

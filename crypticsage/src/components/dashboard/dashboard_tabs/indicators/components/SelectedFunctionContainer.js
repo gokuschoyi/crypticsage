@@ -159,13 +159,18 @@ const SelectedFunctionContainer = (props) => {
 
         // console.log(checked)
         const filtered = checked.filter((item) => !item.flags);
-        const hasEmptyValues = filtered.every((item) => {
-            if (!item.flags) {
-                // If there are no flags
-                return item.value === '';
-            }
-            return false; // If there are flags, we consider it as not having empty values
-        });
+        let hasEmptyValues
+        if (filtered.length > 0) {
+            hasEmptyValues = filtered.every((item) => {
+                if (!item.flags) {
+                    // If there are no flags
+                    return item.value === '';
+                }
+                return false; // If there are flags, we consider it as not having empty values
+            });
+        } else {
+            hasEmptyValues = false
+        }
         // console.log(hasEmptyValues)
 
         if (hasEmptyValues) {

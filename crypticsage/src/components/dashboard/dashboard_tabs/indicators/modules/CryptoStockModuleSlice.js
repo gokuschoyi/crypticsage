@@ -2,6 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from 'uuid';
 
 const initialState = {
+    toolTipOn : false,
+    selectedTickerName: '',
+    selectedTickerPeriod: '4h',
     talibDescription: [],
     talibDescriptionCopy: [],
     cryptoDataInDb: [],
@@ -15,6 +18,9 @@ const cryptoStockModuleSlice = createSlice({
     name: 'cryptoStockModule',
     initialState,
     reducers: {
+        toggleToolTipSwitch: (state) => {
+            state.toolTipOn = !state.toolTipOn;
+        },
         setTalibDescription: (state, action) => {
             state.talibDescription = action.payload;
             state.talibDescriptionCopy = action.payload;
@@ -45,6 +51,12 @@ const cryptoStockModuleSlice = createSlice({
 
             state.talibDescription = currentState;
         },
+        setSelectedTickerName: (state, action) => {
+            state.selectedTickerName = action.payload;
+        },
+        setSelectedTickerPeriod: (state, action) => {
+            state.selectedTickerPeriod = action.payload;
+        },
         setCryptoDataInDbRedux: (state, action) => {
             state.cryptoDataInDb = action.payload;
         },
@@ -58,7 +70,7 @@ const cryptoStockModuleSlice = createSlice({
             state.streamedTickerData = [];
         },
         setSelectedFunctions: (state, action) => {
-            const { name, hint, group_name, outputs, function_selected_flag, inputs, optInputs, result } = action.payload;
+            const { name, hint, group_name, outputs, function_selected_flag, inputs, optInputs, result, splitPane } = action.payload;
             const currentState = state.selectedFunctions;
             const diffVal = optInputs.length > 0 ? optInputs[0].defaultValue : ''
             const foundFunction = currentState.find((func) => func.name === name);
@@ -70,6 +82,7 @@ const cryptoStockModuleSlice = createSlice({
                     outputs: outputs,
                     group_name: group_name,
                     function_selected_flag: function_selected_flag,
+                    splitPane: splitPane,
                     functions: [
                         {
                             id: newId,
@@ -95,7 +108,8 @@ const cryptoStockModuleSlice = createSlice({
                         visible: true,
                         key: differentOutputs.key,
                         differentiatorValue: diffVal,
-                        isDataNew: false
+                        isDataNew: false,
+                        splitPane: splitPane,
                     }
                     state.modifiedSelectedFunctionWithDataToRender.push(objectForChart)
                 })
@@ -112,7 +126,8 @@ const cryptoStockModuleSlice = createSlice({
                         optInputs: optInputs,
                         outputAvailable: result.length > 0 ? true : false,
                         show_chart_flag: false,
-                        differentiatorValue: diffVal
+                        differentiatorValue: diffVal,
+                        splitPane: splitPane,
                     }
                 );
                 state.selectedFunctions = currentState;
@@ -371,7 +386,15 @@ const cryptoStockModuleSlice = createSlice({
             state.selectedFunctions = currentState;
             state.talibDescription = talibDesc;
         },
+        resetDataLoadedState: (state) => {
+            state.selectedTickerPeriod = '4h';
+            state.talibDescription = state.talibDescriptionCopy;
+            state.selectedFunctions = [];
+            state.modifiedSelectedFunctionWithDataToRender = [];
+        },
         resetCryptoStockModule: (state) => {
+            state.selectedTickerName = '';
+            state.selectedTickerPeriod = '4h';
             state.talibDescription = [];
             state.talibDescriptionCopy = [];
             state.cryptoDataInDb = [];
@@ -392,8 +415,11 @@ const cryptoStockModuleSlice = createSlice({
 
 const { reducer, actions } = cryptoStockModuleSlice;
 export const {
-    setTalibDescription
+    toggleToolTipSwitch
+    , setTalibDescription
     , setSelectedFlagInTalibDescription
+    , setSelectedTickerName
+    , setSelectedTickerPeriod
     , setCryptoDataInDbRedux
     , setStocksDataInDbRedux
     , setStreamedTickerDataRedux
@@ -405,6 +431,7 @@ export const {
     , setTalibResult
     , toggleShowHideChartFlag
     , removeFromSelectedFunction
+    , resetDataLoadedState
     , resetCryptoStockModule
     , setIsDataNewFlag
 } = actions;
