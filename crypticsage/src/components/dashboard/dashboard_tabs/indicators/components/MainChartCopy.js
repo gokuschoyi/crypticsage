@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { Box, useTheme, IconButton } from '@mui/material'
+import { Box, useTheme, IconButton, Button, Card, CardContent, CardActions, Typography, Autocomplete, TextField, Tooltip, } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { updateTickerWithOneDataPoint, getHistoricalTickerDataFroDb } from '../../../../../api/adminController'
 import { useSelector, useDispatch } from 'react-redux'
@@ -7,16 +7,20 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import {
     setStreamedTickerDataRedux
     , setCryptoDataInDbRedux
     , setIsDataNewFlag
     , toggleShowHideChartFlag
     , removeFromSelectedFunction
+    , toggleShowSettingsFlag
+    , setSelectedFunctionInputValues
+    , setSelectedFunctionOptionalInputValues
     , resetStreamedTickerDataRedux
 } from '../modules/CryptoStockModuleSlice'
 
-const EXTRA_DATA_FETCH_POINT_FRACTION = 0.4;
+const EXTRA_DATA_FETCH_POINT_FRACTION = 0.3;
 
 const checkForUniqueAndTransform = (data) => {
     const uniqueData = [];
@@ -68,6 +72,187 @@ const calculateVolumeData = (data) => {
 
 }
 
+const MultiSelect = (props) => {
+    const theme = useTheme()
+    const { inputLabel, selectedInputOptions, handleInputOptions, fieldName, errorFlag, helperText, id } = props
+    const inputOptions = [
+        "",
+        "high",
+        "low",
+        "open",
+        "close",
+    ]
+    return (
+        <Box className='test-input' display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'40px'}>
+            <Box sx={{ width: '100%' }}>
+                <Autocomplete
+                    size='small'
+                    disableClearable
+                    disablePortal={false}
+                    id={`select-input-${fieldName}`}
+                    options={inputOptions}
+                    value={selectedInputOptions} // Set the selected value
+                    onChange={(event, newValue) => handleInputOptions(fieldName, newValue, id)} // Handle value change
+                    sx={{ width: 'auto' }}
+                    renderInput={(params) => <TextField {...params}
+                        variant="outlined"
+                        error={errorFlag}
+                        helperText={helperText}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: `${theme.palette.text.secondary}`,
+                                }
+                            }
+                        }}
+                        label={`Select a ${inputLabel}`}
+                        color="secondary"
+                    />}
+                />
+            </Box>
+            <Tooltip title={'Select one of the flags to be used for calculation'} placement='top' sx={{ cursor: 'pointer' }}>
+                <InfoOutlinedIcon className='small-icon' />
+            </Tooltip>
+        </Box>
+    )
+}
+
+const SettingsCard = (props) => {
+    const { selectedFunctionNameAndId } = props
+    const { slId, slName } = selectedFunctionNameAndId
+    const selectedFunctionData = useSelector(state => state.cryptoStockModule.selectedFunctions)
+    const functionData = selectedFunctionData.find((func) => func.name === slName)
+    const selectedFunc = functionData.functions.find((func) => func.id === slId)
+    const dispatch = useDispatch()
+    const theme = useTheme()
+    const { name, id, inputs, optInputs } = selectedFunc
+
+    // handle input options
+    const handleInputOptions = (fieldName, newValue, id) => {
+        dispatch(setSelectedFunctionInputValues({ fieldName, value: newValue, id, name }))
+    }
+
+    // handle optional input change
+    const handleOptionalInputChange = (e) => {
+        const { name: nm, value, id } = e.target
+        // console.log(nm, value, id)
+        dispatch(setSelectedFunctionOptionalInputValues({ fieldName: nm, value, id, name: name }))
+    }
+
+    const handleCloseSettings = (param) => {
+        const { name, id } = param
+        dispatch(toggleShowSettingsFlag({ id: id, name: name }))
+    }
+
+    return (
+        <Card sx={{ width: 265 }}>
+            <CardContent>
+                <Typography textAlign='start' gutterBottom variant="body1">
+                    SETTINGS  : {name}
+                </Typography>
+                <Box>
+                    <Box className='settings-inputs'>
+                        <Typography variant='h6' textAlign='start' fontWeight='500'>INPUTS</Typography>
+                        {inputs.length > 0 && inputs.map((input, index) => {
+                            const { value, errorFlag, helperText } = input
+                            return (
+                                <Box key={index} display='flex' flexDirection='column' pb={'5px'} alignItems='flex-start'>
+                                    {input.flags ?
+                                        (
+                                            <Box sx={{ width: '100%' }}>
+                                                <Typography><span style={{ fontWeight: '600' }}>Name : </span>{input.name}</Typography>
+                                                {/* <Typography><span style={{ fontWeight: '600' }}>Type : </span>{input.type}</Typography> */}
+                                                <Typography textAlign='start'><span style={{ fontWeight: '600' }}>Flags : </span></Typography>
+                                                <Box pl={2}>
+                                                    {Object.keys(input.flags).map((key, index) => {
+                                                        return (
+                                                            <Typography key={index}>{key} : {input.flags[key]}</Typography>
+                                                        )
+                                                    })}
+                                                </Box>
+                                            </Box>
+                                        ) :
+                                        (
+                                            <Box pt={1} width='100%'>
+                                                <MultiSelect
+                                                    inputLabel={input.name === 'inReal' ? 'flag' : input.name}
+                                                    selectedInputOptions={value}
+                                                    handleInputOptions={handleInputOptions}
+                                                    fieldName={input.name}
+                                                    errorFlag={errorFlag}
+                                                    helperText={helperText}
+                                                    id={id}
+                                                />
+                                            </Box>
+                                        )
+                                    }
+                                </Box>
+                            )
+                        })}
+                    </Box>
+                    <Box className='settings-optional-inputs' pt={2}>
+                        <Typography variant='h6' textAlign='start' fontWeight='500'>OPTIONAL INPUTS</Typography>
+                        {optInputs.length === 0 ?
+                            (
+                                <Box pt={1}>
+                                    <Typography textAlign='start'>None</Typography>
+                                </Box>
+                            )
+                            :
+                            (
+                                optInputs && optInputs.map((optionalInput, index) => {
+                                    const { displayName, hint, name, defaultValue, errorFlag, helperText } = optionalInput
+                                    return (
+                                        <Box pt={'15px'} key={index} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
+                                            <TextField
+                                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                                                error={errorFlag}
+                                                helperText={helperText}
+                                                size='small'
+                                                id={id}
+                                                label={displayName}
+                                                name={name}
+                                                value={defaultValue}
+                                                onChange={(handleOptionalInputChange)}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        '& fieldset': {
+                                                            borderColor: `${theme.palette.text.secondary}`,
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                            {name === 'optInMAType' ?
+                                                (
+                                                    <Tooltip
+                                                        title={`SMA = 0, EMA = 1, WMA = 2, DEMA = 3, TEMA = 4, TRIMA = 5, KAMA = 6, MAMA = 7, T3 = 8`}
+                                                        placement='top' sx={{ cursor: 'pointer' }}>
+                                                        <InfoOutlinedIcon className='small-icon' />
+                                                    </Tooltip>
+                                                )
+                                                :
+                                                (
+                                                    <Tooltip title={hint} placement='top' sx={{ cursor: 'pointer' }}>
+                                                        <InfoOutlinedIcon className='small-icon' />
+                                                    </Tooltip>
+                                                )
+                                            }
+                                        </Box>
+                                    )
+                                })
+                            )
+                        }
+                    </Box>
+                </Box>
+            </CardContent>
+            <CardActions>
+                <Button color='secondary' size="small">Run</Button>
+                <Button color='secondary' size="small" onClick={handleCloseSettings.bind(null, { id: id, name: name })}>Close</Button>
+            </CardActions>
+        </Card>
+    )
+}
+
 const MainChart = (props) => {
     const { latestTime, new_fetch_offset, symbol, selectedTokenPeriod, module } = props;
     const token = useSelector(state => state.auth.accessToken);
@@ -98,18 +283,9 @@ const MainChart = (props) => {
         console.log(tDataRedux.length)
         let tData = checkForUniqueAndTransform(tDataRedux)
 
-        let tokenChartBox = document.getElementsByClassName('token-chart-box')[0].getBoundingClientRect()
-        let offsetLeft = Math.round(tokenChartBox.left);
-        let offsetTop = Math.round(tokenChartBox.top)
-
         let tokenDom = document.getElementsByClassName('chart-cont-dom')[0]
         let cWidth = tokenDom.clientWidth;
         let cHeight = tokenDom.clientHeight;
-
-        const tooltipPadding = 10;
-        const tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
-        let ohlcvLegend = document.getElementsByClassName('ohlcv-box')[0]
-        let toolTipXCoOrdinates = 0, toolTipYCoOrdinates = 0;
 
         const handleResize = () => {
             cWidth = tokenDom.clientWidth;
@@ -117,28 +293,7 @@ const MainChart = (props) => {
             // console.log(cWidth, cHeight)
             chart.current.applyOptions({ width: cWidth, height: cHeight });
 
-            tokenChartBox = document.getElementsByClassName('token-chart-box')[0].getBoundingClientRect()
-            offsetLeft = Math.round(tokenChartBox.left);
-            offsetTop = Math.round(tokenChartBox.top)
-
-            scrollYAxis = window.scrollY
         };
-
-        // gets the global mouse co-ordinates form the document- desktops
-        const calculateMousePosition = (event) => {
-            toolTipXCoOrdinates = event.pageX;
-            toolTipYCoOrdinates = event.pageY;
-        }
-
-        // gets the global mouse co-ordinates form the document- touch devices
-        const handleTouchMove = (event) => {
-            toolTipXCoOrdinates = event.touches[0].pageX;
-            toolTipYCoOrdinates = event.touches[0].pageY;
-        }
-
-        let scrollYAxis = window.scrollY
-
-        // console.log(cWidth, cHeight)
 
         chart.current = createChart(chartboxRef.current, {
             width: cWidth,
@@ -269,7 +424,7 @@ const MainChart = (props) => {
             // console.log(param)
             const { from, to } = param
             const candleSticksInVisibleRange = Math.floor(to - from)
-            fetchPoint = Math.floor(candleSticksInVisibleRange * 0.2) / -1
+            fetchPoint = Math.floor(candleSticksInVisibleRange * EXTRA_DATA_FETCH_POINT_FRACTION) / -1
 
             const barsInfo = candleStickSeriesRef.current.barsInLogicalRange(param);
             const { barsBefore } = barsInfo
@@ -285,9 +440,35 @@ const MainChart = (props) => {
             lastBarNo = barNo
         })
 
+        window.addEventListener('resize', handleResize);
 
-        // update tooltip
-        chart.current.subscribeCrosshairMove((param) => {
+        return () => {
+            console.log('UE : Main chart return')
+            window.removeEventListener('resize', handleResize);
+            chart.current.remove();
+            setChartSeriesState([])
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [symbol, selectedTokenPeriod])
+
+    const generateOHLCV_String = (param) => {
+        const { open, high, low, close, vol } = param
+        return `
+        <div class="value-box">
+            <div style="width:70px; text-align:start">O : <span id="openValue">${Math.round(100 * open) / 100}</span></div>
+            <div style="width:70px; text-align:start">H : <span id="highValue">${Math.round(100 * high) / 100}</span></div>
+            <div style="width:70px; text-align:start">L : <span id="lowValue">${Math.round(100 * low) / 100}</span></div>
+            <div style="width:70px; text-align:start">C : <span id="closeValue">${Math.round(100 * close) / 100}</span></div>
+            <div style="width:70px; text-align:start">V : <span id="volumeValue">${(vol).toFixed(2)}</span></div>
+        </div>
+        `
+    }
+
+    const subscribedRef = useRef(false)
+    // ohlcv crosshair subscriber
+    useEffect(() => {
+        let ohlcvLegend = document.getElementsByClassName('ohlcv-box')[0]
+        const ohlcvHandler = (param) => {
             if (
                 param.point === undefined ||
                 !param.time ||
@@ -297,9 +478,11 @@ const MainChart = (props) => {
                 param.point.y > chartboxRef.current.clientHeight ||
                 param.paneIndex !== 0
             ) {
+                subscribedRef.current = false;
                 // tooltip.style.display = 'none';
             } else {
-                const dateStr = new Date(param.time * 1000).toLocaleString('en-AU',
+                subscribedRef.current = true;
+                const date = new Date(param.time * 1000).toLocaleString('en-AU',
                     {
                         day: '2-digit',
                         month: '2-digit',
@@ -309,58 +492,58 @@ const MainChart = (props) => {
                         hour12: true
                     }
                 );
-                // tooltip.style.display = 'block';
+
                 const data = param.seriesData.get(candleStickSeriesRef.current);
                 const volData = param.seriesData.get(candleStickVolumeSeriesRef.current);
-                // console.log(volData)
                 const open = data.value !== undefined ? data.value : data.open;
 
                 const close = data.close;
                 const high = data.high;
                 const low = data.low;
-                let newString = `
-                    <div style="width:70px; text-align:start">O : ${Math.round(100 * open) / 100}</div>
-                    <div style="width:70px; text-align:start">H : ${Math.round(100 * high) / 100}</div>
-                    <div style="width:70px; text-align:start">L : ${Math.round(100 * low) / 100}</div>
-                    <div style="width:70px; text-align:start">C : ${Math.round(100 * close) / 100}</div>
-                    <div style="width:70px; text-align:start">V : ${Math.round(volData.value).toFixed(2)}</div>
-                    `
-                ohlcvLegend.innerHTML = newString
-
-                let diffX = toolTipXCoOrdinates - offsetLeft
-                if (diffX > cWidth - 150) {
-                    toolTipXCoOrdinates = toolTipXCoOrdinates - (100 + (tooltipPadding * 2))
-                }
-
-                let diffY = toolTipYCoOrdinates - offsetTop - scrollYAxis
-                if (diffY > cHeight - 150) {
-                    toolTipYCoOrdinates = toolTipYCoOrdinates - (100 + (tooltipPadding * 2))
-                }
-                // console.log(diffX, diffY)
-                tooltip.style.left = `${toolTipXCoOrdinates + tooltipPadding}px`;
-                tooltip.style.top = `${toolTipYCoOrdinates + tooltipPadding}px`;
+                let newString = generateOHLCV_String({ open, high, low, close, vol: volData.value })
+                let dateStr = `<div style="width:110px; text-align:start">${date}</div>`
+                let finalStr = toolTipSwitchFlag ? `${newString}` : `${dateStr}${newString}`
+                ohlcvLegend.innerHTML = finalStr
             }
-        })
+        }
 
-        window.addEventListener('resize', handleResize);
-        tokenDom.addEventListener('mousemove', (event) => calculateMousePosition(event))
-        tokenDom.addEventListener('touchmove', (event) => handleTouchMove(event))
+        chart.current.subscribeCrosshairMove(ohlcvHandler)
 
         return () => {
-            console.log('UE : Main chart return')
-            window.removeEventListener('resize', handleResize);
-            tokenDom.removeEventListener('mousemove', calculateMousePosition)
-            tokenDom.removeEventListener('touchmove', handleTouchMove)
-            chart.current.remove();
-            setChartSeriesState([])
+            chart.current.unsubscribeCrosshairMove(ohlcvHandler)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [symbol, selectedTokenPeriod])
+    })
+
 
     // Tooltip useEffect to show/hide
     useEffect(() => {
         // console.log("UE : tooltip subscribe")
-        let tooltip
+        let tokenChartBox = document.getElementsByClassName('token-chart-box')[0].getBoundingClientRect()
+        let offsetLeft = Math.round(tokenChartBox.left);
+        let offsetTop = Math.round(tokenChartBox.top)
+
+        let tokenDom = document.getElementsByClassName('chart-cont-dom')[0]
+        let cWidth = tokenDom.clientWidth;
+        let cHeight = tokenDom.clientHeight;
+
+        const tooltipPadding = 10;
+        const tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
+        let toolTipXCoOrdinates = 0, toolTipYCoOrdinates = 0;
+
+        let scrollYAxis = window.scrollY
+
+        // gets the global mouse co-ordinates form the document- desktops
+        const calculateMousePosition = (event) => {
+            toolTipXCoOrdinates = event.pageX;
+            toolTipYCoOrdinates = event.pageY;
+        }
+
+        // gets the global mouse co-ordinates form the document- touch devices
+        const handleTouchMove = (event) => {
+            toolTipXCoOrdinates = event.touches[0].pageX;
+            toolTipYCoOrdinates = event.touches[0].pageY;
+        }
+
         const toolTipHandler = (param) => {
             if (
                 param.point === undefined ||
@@ -402,14 +585,31 @@ const MainChart = (props) => {
                     <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">V : ${Math.round(volData.value).toFixed(2)}</div>
                     <div class-name='tooltip-text' style="color: ${'black'},font-size: 12px;">${dateStr}</div>
                     `;
+
+                let diffX = toolTipXCoOrdinates - offsetLeft
+                if (diffX > cWidth - 150) {
+                    toolTipXCoOrdinates = toolTipXCoOrdinates - (100 + (tooltipPadding * 2))
+                }
+
+                let diffY = toolTipYCoOrdinates - offsetTop - scrollYAxis
+                if (diffY > cHeight - 150) {
+                    toolTipYCoOrdinates = toolTipYCoOrdinates - (100 + (tooltipPadding * 2))
+                }
+                // console.log(diffX, diffY)
+                tooltip.style.left = `${toolTipXCoOrdinates + tooltipPadding}px`;
+                tooltip.style.top = `${toolTipYCoOrdinates + tooltipPadding}px`;
             }
         }
 
         if (toolTipSwitchFlag) {
-            tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
+            // tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
+            tokenDom.addEventListener('mousemove', (event) => calculateMousePosition(event))
+            tokenDom.addEventListener('touchmove', (event) => handleTouchMove(event))
             chart.current.subscribeCrosshairMove(toolTipHandler);
         } else {
-            tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
+            tokenDom.removeEventListener('mousemove', calculateMousePosition)
+            tokenDom.removeEventListener('touchmove', handleTouchMove)
+            // tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
             tooltip.style.display = 'none';
         }
 
@@ -454,7 +654,7 @@ const MainChart = (props) => {
             "#FFBB88",
         ]
 
-        console.time('Chart Load Time');
+        // console.time('Chart Load Time');
 
         const reduxDataCopy = JSON.parse(JSON.stringify(modifiedSelectedFunctionWithDataToRender));
 
@@ -548,15 +748,16 @@ const MainChart = (props) => {
             // console.log("pane needed")
         }
 
-        console.timeEnd('Chart Load Time');
+        // console.timeEnd('Chart Load Time');
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chartSeriesState, modifiedSelectedFunctionWithDataToRender]);
 
     useEffect(() => {
-        console.log('<---------------------START-------------------------->');
+        console.log("UE : Render chart")
+        // console.log('<---------------------START-------------------------->');
         renderChart();
 
-        // Subscribe to crosshair move event
+        // Subscribe to crosshair move event of the selected talib functions
         const crosshairMoveHandler = (param) => {
             // console.log(param)
             if (
@@ -591,19 +792,34 @@ const MainChart = (props) => {
 
         chart.current.subscribeCrosshairMove(crosshairMoveHandler);
 
-        console.log('<------------------END----------------------------->');
+        // console.log('<------------------END----------------------------->');
 
         return () => {
-            console.log('Add : UE RETURN');
+            console.log('UE RETURN : Render chart');
             chart.current.unsubscribeCrosshairMove(crosshairMoveHandler);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [renderChart]);
 
     // web socket warning becaue of react strict mode
+    const previousValue = useRef({ open: '', high: '', low: '', close: '', vol: '' })
     useEffect(() => {
         const lowerCaseSymbol = symbol.toLowerCase()
         const webSocketConnectionURI = `wss://stream.binance.com:9443/ws/${lowerCaseSymbol}@kline_${selectedTokenPeriod}`
+        let ohlcvLegend = document.getElementsByClassName('ohlcv-box')[0]
+
+        // Function to check and apply the pulsing class for new data
+        function checkAndApplyPulse(id, value, prevValue) {
+            const element = document.getElementById(id);
+            if (value !== prevValue) {
+                element.classList.add('pulsing');
+
+                // Remove the pulsing class after the animation completes
+                element.addEventListener('animationiteration', () => {
+                    element.classList.remove('pulsing');
+                });
+            }
+        }
 
         const createWebSocket = () => {
             const ws = new WebSocket(webSocketConnectionURI);
@@ -638,6 +854,52 @@ const MainChart = (props) => {
                     time: tickerPayload.openTime / 1000,
                     value: parseFloat(tickerPayload.volume),
                 })
+
+                if (!subscribedRef.current) {
+                    console.log(subscribedRef.current)
+                    const currentValue = {
+                        openTime: tickerPayload.openTime,
+                        open: tickerPayload.open,
+                        high: tickerPayload.high,
+                        low: tickerPayload.low,
+                        close: tickerPayload.close,
+                        vol: tickerPayload.volume
+                    }
+                    
+
+                    const date = new Date(currentValue.openTime).toLocaleString('en-AU',
+                        {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: '2-digit',
+                            hour: 'numeric',
+                            minute: 'numeric',
+                            hour12: true
+                        }
+                    );
+
+                    let newString = generateOHLCV_String({
+                        open: parseFloat(tickerPayload.open),
+                        high: parseFloat(tickerPayload.high),
+                        low: parseFloat(tickerPayload.low),
+                        close: parseFloat(tickerPayload.close),
+                        vol: parseFloat(tickerPayload.volume)
+                    })
+                    let dateStr = `<div class="" style="width:110px; text-align:start">${date}</div>`
+                    let finalStr = `${dateStr}${newString}`
+                    ohlcvLegend.innerHTML = finalStr
+
+                    // Check and apply pulse class for each value
+                    checkAndApplyPulse('openValue', currentValue.open, previousValue.current.open);
+                    checkAndApplyPulse('highValue', currentValue.high, previousValue.current.high);
+                    checkAndApplyPulse('lowValue', currentValue.low, previousValue.current.low);
+                    checkAndApplyPulse('closeValue', currentValue.close, previousValue.current.close);
+                    checkAndApplyPulse('volumeValue', currentValue.vol, previousValue.current.vol);
+
+                    previousValue.current = currentValue
+                } else{
+                    console.log(subscribedRef.current)
+                }
 
                 if (latestDateRf.current < tickerPayload.openTime && selectedTokenPeriod === '1m') {
                     const fetchQuery = {
@@ -688,7 +950,7 @@ const MainChart = (props) => {
                 wsRef.current.close(); // Close the WebSocket connection on unmount
             }
         }
-    }, [selectedTokenPeriod, symbol, token, dispatch])
+    }, [selectedTokenPeriod, symbol, token, dispatch, previousValue])
 
     // handles the show/hide chart button
     const handleToggleShowHideChart = (param) => {
@@ -697,10 +959,10 @@ const MainChart = (props) => {
         dispatch(toggleShowHideChartFlag({ id: id, name: name }))
     }
 
-    // handles the settings button - to be implemented
-    const handleOpenSettingsModal = (param) => {
+    const handleOpenSettings = (param) => {
         const { id, name } = param
-        console.log(name, id)
+        dispatch(toggleShowSettingsFlag({ id: id, name: name }))
+        // console.log(name, id)
     }
 
     // handles the delete button
@@ -771,31 +1033,59 @@ const MainChart = (props) => {
                         const outputs = selectedFunction.outputs
                         return (
                             <Box key={index} className='selected-function-unique sel-func' justifyContent='space-between' alignItems='center'>
-                                {selectedFunc.map((func, i) => (
-                                    <Box className='single-data-box' key={i} display='flex' flexDirection='row' alignItems='center' gap={'5px'}>
-                                        <Box className='function-title' display='flex' flexDirection='row' gap='5px'>
-                                            <Box>{func.name}</Box>
-                                            {outputs.map((output, j) => (
-                                                <Box key={j} className={`${func.name}_${func.id}_${output.name}`}></Box>
-                                            ))}
-                                        </Box>
-                                        {func.outputAvailable &&
-                                            <IconButton size='small' sx={{ padding: '2px' }} aria-label="Hide chart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: func.id, name: func.name })}>
-                                                {func.show_chart_flag ?
-                                                    <VisibilityOffIcon className='smaller-icon' />
-                                                    :
-                                                    <VisibilityIcon className='smaller-icon' />
+                                {selectedFunc.map((func, i) => {
+                                    const { id, name, outputAvailable, show_chart_flag, show_settings } = func
+                                    return (
+                                        <Box key={i} display='flex' flexDirection='row' alignItems='flex-start' className='data-plus-settins-box' gap='5px'>
+                                            <Box className='single-data-box' display='flex' flexDirection='row' alignItems='center' gap={'5px'}>
+                                                <Box className='function-title' display='flex' flexDirection='row' gap='5px'>
+                                                    <Box>{name}</Box>
+                                                    {outputs.map((output, j) => (
+                                                        <Box key={j} className={`${name}_${id}_${output.name}`}></Box>
+                                                    ))}
+                                                </Box>
+                                                {outputAvailable &&
+                                                    <IconButton
+                                                        size='small'
+                                                        sx={{ padding: '2px' }}
+                                                        aria-label="Hide chart"
+                                                        color="secondary"
+                                                        onClick={handleToggleShowHideChart.bind(null, { id: id, name: name })}
+                                                    >
+                                                        {show_chart_flag ?
+                                                            <VisibilityOffIcon className='smaller-icon' />
+                                                            :
+                                                            <VisibilityIcon className='smaller-icon' />
+                                                        }
+                                                    </IconButton>
                                                 }
-                                            </IconButton>
-                                        }
-                                        <IconButton size='small' sx={{ padding: '2px' }} aria-label="modify query" color="secondary" onClick={handleOpenSettingsModal.bind(null, { id: func.id, name: func.name })} >
-                                            <SettingsIcon className='smaller-icon' />
-                                        </IconButton>
-                                        <IconButton size='small' sx={{ padding: '2px' }} aria-label="delete query" color="secondary" onClick={handleDeleteQuery.bind(null, { id: func.id, name: func.name, group_name: selectedFunction.group_name })}>
-                                            <DeleteOutlineIcon className='smaller-icon' />
-                                        </IconButton>
-                                    </Box>
-                                ))}
+                                                <IconButton
+                                                    size='small'
+                                                    sx={{ padding: '2px' }}
+                                                    aria-label="modify query"
+                                                    color="secondary"
+                                                    onClick={handleOpenSettings.bind(null, { id: id, name: name })}
+                                                >
+                                                    <SettingsIcon className='smaller-icon' />
+                                                </IconButton>
+                                                <IconButton
+                                                    size='small'
+                                                    sx={{ padding: '2px' }}
+                                                    aria-label="delete query"
+                                                    color="secondary"
+                                                    onClick={handleDeleteQuery.bind(null, { id: id, name: name, group_name: selectedFunction.group_name })}
+                                                >
+                                                    <DeleteOutlineIcon className='smaller-icon' />
+                                                </IconButton>
+                                            </Box>
+                                            <Box id={id} className={`settings-box ${show_settings ? 'show' : 'hide'}`}>
+                                                <SettingsCard
+                                                    selectedFunctionNameAndId={{ slId: id, slName: name }}
+                                                />
+                                            </Box>
+                                        </Box>
+                                    )
+                                })}
                             </Box>
                         )
                     })}

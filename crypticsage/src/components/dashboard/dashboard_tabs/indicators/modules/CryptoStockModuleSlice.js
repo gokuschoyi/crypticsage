@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from 'uuid';
 
 const initialState = {
-    toolTipOn : false,
+    toolTipOn: false,
     selectedTickerName: '',
     selectedTickerPeriod: '4h',
     talibDescription: [],
@@ -12,6 +12,7 @@ const initialState = {
     streamedTickerData: [],
     selectedFunctions: [],
     modifiedSelectedFunctionWithDataToRender: [],
+    processSelectedFunctionsOnMoreData: false,
 }
 
 const cryptoStockModuleSlice = createSlice({
@@ -20,6 +21,9 @@ const cryptoStockModuleSlice = createSlice({
     reducers: {
         toggleToolTipSwitch: (state) => {
             state.toolTipOn = !state.toolTipOn;
+        },
+        toggleProcessSelectedFunctionsOnMoreData: (state, action) => {
+            state.processSelectedFunctionsOnMoreData = action.payload;
         },
         setTalibDescription: (state, action) => {
             state.talibDescription = action.payload;
@@ -93,6 +97,7 @@ const cryptoStockModuleSlice = createSlice({
                             outputAvailable: result.length > 0 ? true : false,
                             show_chart_flag: true,
                             differentiatorValue: diffVal,
+                            show_settings: false,
                         }
                     ]
                 }
@@ -127,7 +132,7 @@ const cryptoStockModuleSlice = createSlice({
                         outputAvailable: result.length > 0 ? true : false,
                         show_chart_flag: false,
                         differentiatorValue: diffVal,
-                        splitPane: splitPane,
+                        show_settings: false,
                     }
                 );
                 state.selectedFunctions = currentState;
@@ -351,6 +356,53 @@ const cryptoStockModuleSlice = createSlice({
 
             state.modifiedSelectedFunctionWithDataToRender = currentStateModified;
         },
+        toggleShowSettingsFlag: (state, action) => {
+            const { name, id } = action.payload;
+            const currentState = state.selectedFunctions;
+
+            /* currentState.forEach((func) => {
+                func.functions.forEach((func) => {
+                    func.show_settings = false;
+                })
+            })
+ */
+            // Find the index of the function by name
+            const foundFunctionIndex = currentState.findIndex((func) => func.name === name);
+
+            if (foundFunctionIndex !== -1) {
+
+                const foundFunction = currentState[foundFunctionIndex];
+
+                // Find the index of the function to update within the found function's functions array
+                const foundFunctionToUpdateIndex = foundFunction.functions.findIndex((func) => func.id === id);
+
+                if (foundFunctionToUpdateIndex !== -1) {
+
+                    // Create a copy of the function to update
+                    const updatedFunction = { ...foundFunction.functions[foundFunctionToUpdateIndex] };
+
+                    // Update the show_settings flag
+                    updatedFunction.show_settings = !updatedFunction.show_settings; // maybe true here
+
+                    // Update the function within the found function's functions array
+
+                    foundFunction.functions[foundFunctionToUpdateIndex] = updatedFunction;
+                    
+                    // Update the currentState with the modified function
+                    currentState[foundFunctionIndex] = foundFunction;
+                }
+            }
+            state.selectedFunctions = currentState;
+        },
+        resetShowSettingsFlag: (state) => {
+            const currentState = state.selectedFunctions;
+            currentState.forEach((func) => {
+                func.functions.forEach((func) => {
+                    func.show_settings = false;
+                })
+            })
+            state.selectedFunctions = currentState;
+        },
         removeFromSelectedFunction: (state, action) => {
             const { id, name, group_name } = action.payload;
             const currentState = state.selectedFunctions;
@@ -416,6 +468,7 @@ const cryptoStockModuleSlice = createSlice({
 const { reducer, actions } = cryptoStockModuleSlice;
 export const {
     toggleToolTipSwitch
+    , toggleProcessSelectedFunctionsOnMoreData
     , setTalibDescription
     , setSelectedFlagInTalibDescription
     , setSelectedTickerName
@@ -430,6 +483,8 @@ export const {
     , setSelectedFunctionOptionalInputValues
     , setTalibResult
     , toggleShowHideChartFlag
+    , toggleShowSettingsFlag
+    , resetShowSettingsFlag
     , removeFromSelectedFunction
     , resetDataLoadedState
     , resetCryptoStockModule

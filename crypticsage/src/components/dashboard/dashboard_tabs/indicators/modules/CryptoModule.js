@@ -219,15 +219,14 @@ const CryptoModule = () => {
     return (
         <Box className='crypto-module-container'>
             <Box width='-webkit-fill-available'>
-                <Header title='Ticker Info' />
+                <Header title={cryptotoken} />
             </Box>
 
             <Box m={2}>
                 <Grid container className='indicator-chart-grid-box' >
                     <Grid item xs={12} sm={12} md={12} lg={12} xl={12} pt={2}>
                         <Box display='flex' flexDirection='column' height='100%'>
-                            <Box pl={2} display='flex' flexDirection='row' alignItems='center' gap='10px'>
-                                <Typography variant='h5' textAlign='start' pt={1} pb={1}>{cryptotoken}</Typography>
+                            <Box pl={2} pr={2} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' gap='10px'>
                                 <Box className='autocomplete-select-box' width='200px'>
                                     <Autocomplete
                                         size='small'
@@ -238,7 +237,7 @@ const CryptoModule = () => {
                                         value={selectedTokenPeriod} // Set the selected value
                                         onChange={(event, newValue) => handlePeriodChange(newValue)} // Handle value change
                                         sx={{ width: 'auto' }}
-                                        renderInput={(params) => <TextField {...params}
+                                        renderInput={(params) => <TextField size='small' {...params}
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
                                                     '& fieldset': {

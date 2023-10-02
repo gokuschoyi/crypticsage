@@ -233,14 +233,14 @@ const Topbar = (props) => {
             className="topbar"
             display="flex"
             sx={{ borderBottom: mode === 'light' ? '1px solid #000000' : '' }}
-            justifyContent="flex-end"
+            justifyContent={sm ? "space-between" : "flex-end"}
             p={2}
             backgroundColor={theme.palette.primary.newBlack}
         >
             {sm && (
                 <Box display="flex">
                     <IconButton
-                        className={smallScreenToggleState ? 'remove-rotate-icon' : 'rotate-icon'}
+                        className={smallScreenToggleState ? 'remove-rotate-icon' : 'rotate-icon-topbar'}
                         sx={{ color: `${theme.palette.secondary.main}` }}
                         onClick={(e) => showSidebar(e)}>
                         <ArrowForwardIcon />
