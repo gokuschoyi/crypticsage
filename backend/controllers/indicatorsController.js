@@ -12,13 +12,80 @@ const getIndicatorDesc = async (req, res) => {
     var functions = talib.functions;
     var totalFunctionCount = 0;
     var funcDesc = talib.explain("ADX");
-    let desc = []
-    for (let i in functions) {
-        totalFunctionCount++;
-        desc.push(functions[i])
-    }
+    const excludeList = ["AVGDEV", "IMI"]
+    const functionsWithSplitPane = [
+        "BETA"
+        , "CORREL"
+        , "LINEARREG_ANGLE"
+        , "LINEARREG_SLOPE"
+        , "STDDEV"
+        , "VAR"
+        , "AD"
+        , "ADOSC"
+        , "OBV"
+        , "HT_DCPERIOD"
+        , "HT_DCPHASE"
+        , "HT_PHASOR"
+        , "HT_SINE"
+        , "HT_TRENDMODE"
+        , "ADX"
+        , "ADXR"
+        , "APO"
+        , "AROON"
+        , "AROONOSC"
+        , "BOP"
+        , "CCI"
+        , "CMO"
+        , "DX"
+        , "MACD"
+        , "MACDEXT"
+        , "MACDFIX"
+        , "MFI"
+        , "MINUS_DI"
+        , "MINUS_DM"
+        , "MOM"
+        , "PLUS_DI"
+        , "PLUS_DI"
+        , "PPO"
+        , "ROC"
+        , "ROCP"
+        , "ROCR"
+        , "ROCR100"
+        , "RSI"
+        , "STOCH"
+        , "STOCHF"
+        , "STOCHRSI"
+        , "TRIX"
+        , "ULTOSC"
+        , "WILLR"
+        , "ATR"
+        , "NATR"
+        , "TRANGE"
+    ]
 
-    desc = desc.map((func) => {
+    let desc = []
+    functions.forEach((func) => {
+        if (!excludeList.includes(func.name)) {
+            totalFunctionCount++;
+            desc.push(func);
+        }
+    });
+
+    const updatedDesc = desc.map((func) => {
+        if (functionsWithSplitPane.includes(func.name)) {
+            return {
+                ...func,
+                splitPane: true
+            }
+        } else {
+            return {
+                ...func,
+                splitPane: false
+            }
+        }
+    })
+
+    desc = updatedDesc.map((func) => {
         const { inputs, optInputs } = func
         const modifiedInputs = inputs.map((input) => {
             if (!input.flags) {
@@ -106,22 +173,21 @@ const addDataToFuncQuery = ({ func_query, processed_data }) => {
 const formatOutputs = ({ ticker_data, talib_result, output_keys }) => {
     const keys = Object.keys(output_keys)
     const diff = talib_result.begIndex + 1
-    const emptyArrayWithNull = [...new Array(diff)].map((d) => null)
 
-    let input_data_copy = [...ticker_data]; // Make a copy of the ticker_data
-
+    let input_data_copy = ticker_data.slice(talib_result.begIndex, (ticker_data.length)); // Make a copy of the ticker_data
+    const resultArray = [];
     keys.forEach((key) => {
         const talibResultForKey = talib_result.result[output_keys[key]];
-        const combined = [...emptyArrayWithNull, ...talibResultForKey];
-        input_data_copy = input_data_copy.map((item, index) => {
+        let data = input_data_copy.map((item, index) => {
             return {
                 time: item.openTime / 1000,
-                [key]: combined[index],
+                value: talibResultForKey[index],
             };
         });
+        resultArray.push({ key, data });
     });
 
-    return { final_res: input_data_copy, diff: diff }
+    return { final_res: resultArray, diff: diff }
 }
 
 const executeTalibFunction = async (req, res) => {
@@ -147,11 +213,17 @@ const executeTalibFunction = async (req, res) => {
     // final query to be executed
     let finalFuncQuery = addDataToFuncQuery({ func_query: validatedInputData, processed_data: processed })
 
-    log.info('Executing talib function')
     // execute the talib function
-    var talResult = talib.execute(finalFuncQuery)
     const t = createTimer("Talib Function Execution")
     t.startTimer()
+    var talResult;
+    try {
+        log.info('Executing talib function')
+        talResult = talib.execute(finalFuncQuery)
+    } catch (e) {
+        log.error(e)
+        res.status(400).json({ message: "Execute Talib Function request error" })
+    }
 
     // format the output data
     const { final_res, diff } = formatOutputs({
@@ -177,16 +249,19 @@ const executeTalibFunction = async (req, res) => {
 }
 
 const calculateSMA = async (req, res) => {
-    const { asset_type, ticker_name, period, page_no, items_per_page } = req.body.db_query;
+    const { asset_type, ticker_name, period, page_no, items_per_page } = req.body.payload.db_query;
     try {
-        const cacheKey = `${asset_type}-${ticker_name}-${period}-${page_no}-${items_per_page}`;
+        var funcDesc = talib.explain("AVGDEV");
+        console.log(funcDesc)
+        const cacheKey = `${asset_type}-${ticker_name}-${period}`;
         const tokendataFromRedis = await getValuesFromRedis(cacheKey);
+        // console.log(tokendataFromRedis)
         let requiredTokenData = [];
-        requiredTokenData = tokendataFromRedis.ticker_data;
+        requiredTokenData = tokendataFromRedis.data.ticker_data;
         const d1 = requiredTokenData.map((item) => item.close)
         log.info('Executing talib function')
         var result = talib.execute({
-            name: "EMA",
+            name: "AVGDEV",
             startIdx: 0,
             endIdx: d1.length - 1,
             inReal: d1,

@@ -4,7 +4,12 @@ import { useParams } from 'react-router-dom';
 import Header from '../../../global/Header';
 import { Indicators } from '../components/IndicatorDescription';
 import { getHistoricalTickerDataFroDb, fetchLatestTickerForUser } from '../../../../../api/adminController'
-import { setCryptoDataInDbRedux, resetStreamedTickerDataRedux } from './CryptoStockModuleSlice'
+import {
+    setCryptoDataInDbRedux,
+    setSelectedTickerPeriod,
+    resetStreamedTickerDataRedux,
+    toggleToolTipSwitch
+} from './CryptoStockModuleSlice'
 import MainChart from '../components/MainChartCopy';
 import SelectedFunctionContainer from '../components/SelectedFunctionContainer';
 import { useSelector } from 'react-redux'
@@ -16,6 +21,8 @@ import {
     , Grid
     , Skeleton
     , useTheme
+    , Switch
+    , FormControlLabel
 } from '@mui/material'
 
 const periodToMilliseconds = (period) => {
@@ -91,12 +98,14 @@ const checkIfNewTickerFetchIsRequired = ({ openTime, selectedTokenPeriod }) => {
 const CryptoModule = () => {
     const params = useParams();
     const token = useSelector(state => state.auth.accessToken);
+    const tokenPeriod = useSelector(state => state.cryptoStockModule.selectedTickerPeriod)
+    const toolTipSwitchFlag = useSelector(state => state.cryptoStockModule.toolTipOn)
+    // console.log('toolTipSwitchFlag', toolTipSwitchFlag)
     const theme = useTheme()
     const { cryptotoken } = params;
     const module = window.location.href.split("/dashboard/indicators/")[1].split("/")[0]
 
     const dispatch = useDispatch();
-
     const periods = [
         '1m',
         '4h',
@@ -108,11 +117,11 @@ const CryptoModule = () => {
         '1w',
     ]
 
-    const [selectedTokenPeriod, setSelectedTokenPeriod] = useState('4h');
+    const [selectedTokenPeriod, setSelectedTokenPeriod] = useState(tokenPeriod);
     // console.log(selectedTokenPeriod)
 
     const handlePeriodChange = (newValue) => {
-        // dispatch(setCryptoDataInDbRedux([]))
+        dispatch(setSelectedTickerPeriod(newValue))
         setChartData([])
         setSelectedTokenPeriod(newValue);
         setFetchValues({
@@ -210,15 +219,14 @@ const CryptoModule = () => {
     return (
         <Box className='crypto-module-container'>
             <Box width='-webkit-fill-available'>
-                <Header title='Ticker Info' />
+                <Header title={cryptotoken} />
             </Box>
 
             <Box m={2}>
                 <Grid container className='indicator-chart-grid-box' >
                     <Grid item xs={12} sm={12} md={12} lg={12} xl={12} pt={2}>
                         <Box display='flex' flexDirection='column' height='100%'>
-                            <Box pl={2} display='flex' flexDirection='row' alignItems='center' gap='10px'>
-                                <Typography variant='h5' textAlign='start' pt={1} pb={1}>{cryptotoken}</Typography>
+                            <Box pl={2} pr={2} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' gap='10px'>
                                 <Box className='autocomplete-select-box' width='200px'>
                                     <Autocomplete
                                         size='small'
@@ -229,7 +237,7 @@ const CryptoModule = () => {
                                         value={selectedTokenPeriod} // Set the selected value
                                         onChange={(event, newValue) => handlePeriodChange(newValue)} // Handle value change
                                         sx={{ width: 'auto' }}
-                                        renderInput={(params) => <TextField {...params}
+                                        renderInput={(params) => <TextField size='small' {...params}
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
                                                     '& fieldset': {
@@ -240,6 +248,16 @@ const CryptoModule = () => {
                                             label="Select a period"
                                             color="secondary"
                                         />}
+                                    />
+                                </Box>
+                                <Box>
+                                    <FormControlLabel
+                                        value="start"
+                                        control={<Switch size="small" color="secondary" />}
+                                        label={toolTipSwitchFlag ? 'Hide Tooltips' : 'Show Tooltips'}
+                                        labelPlacement="start"
+                                        checked={toolTipSwitchFlag}
+                                        onChange={() => dispatch(toggleToolTipSwitch())}
                                     />
                                 </Box>
                             </Box>
@@ -270,9 +288,11 @@ const CryptoModule = () => {
                                     </Box>
                                 </Grid>
 
-                                <Grid item xs={12} sm={12} md={12} lg={2} xl={2}>
-                                    <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' pl={2} pr={2} pt={4}></Box>
-                                </Grid>
+                                {<Grid item xs={12} sm={12} md={12} lg={2} xl={2}>
+                                    <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' pl={2} pr={2} pt={4}>
+                                        Placeholder for now
+                                    </Box>
+                                </Grid>}
                             </Grid>
 
                         </Box>

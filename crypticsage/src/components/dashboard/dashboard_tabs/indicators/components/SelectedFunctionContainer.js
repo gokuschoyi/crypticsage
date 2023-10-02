@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, AccordionActions, IconButton, Tooltip, TextField, Autocomplete, useTheme } from '@mui/material'
 import { executeTalibFunction } from '../../../../../api/adminController'
@@ -102,33 +102,29 @@ const SelectedFunctionContainer = (props) => {
     }
 
     const handleToggleShowHideChart = (param) => {
-        const { id } = param
-        console.log(id, name)
+        const { id, name } = param
+        console.log(name, id)
         dispatch(toggleShowHideChartFlag({ id: id, name: name }))
     }
 
     // handle generate query for each function
     const handleGenerateQuery = (params) => {
         const { id } = params
-        console.log(id)
-        let talibExecuteQuery = {}
+        // console.log(id)
         const reduxFunctionsCopy = JSON.parse(JSON.stringify(functions))
         const functionTOGenerateQueryFor = reduxFunctionsCopy.find((func) => func.id === id)
-        const { inputs, optInputs } = functionTOGenerateQueryFor
-        console.log(functionTOGenerateQueryFor)
+        const { inputs, optInputs, name } = functionTOGenerateQueryFor
+        let selectedInputOptions = [...inputs]
+        // console.log(functionTOGenerateQueryFor)
 
+        let talibExecuteQuery = {}
+        let tOITypes = {}
         const transformedOptionalInputs = optInputs.reduce((result, item) => {
             result[item.name] = item.defaultValue
+            tOITypes[item.name] = item.type;
             return result;
         }, {})
-        let tOITypes = {}
 
-        optInputs.reduce((result, input) => {
-            tOITypes[input.name] = input.type;
-            return result;
-        }, {});
-
-        // console.log(outputs)
         let outputkeys = {}
         let outputsCopy = [...outputs]
         outputkeys = outputsCopy.reduce((result, output) => {
@@ -136,26 +132,58 @@ const SelectedFunctionContainer = (props) => {
             return result;
         }, {});
 
-        const isFlagsAvailable = inputs[0].flags === undefined ? false : true
-        let input = {}
+        let converted = {}
+        let checked = selectedInputOptions.map((input) => {
+            if (input.flags) {
+                Object.keys(input.flags).forEach((key) => {
+                    converted[input.flags[key]] = input.flags[key];
+                })
+                return input
+            } else {
+                if (input.value === '') {
+                    return {
+                        ...input,
+                        errorFlag: true,
+                        helperText: 'Please select a valid input',
+                    };
+                } else {
+                    converted[input.name] = input.value;
+                    return {
+                        ...input,
+                        errorFlag: false,
+                        helperText: '',
+                    };
+                }
+            }
+        })
 
-        if (isFlagsAvailable) { // flags field available, so we can directly use the flags
-            let flags = inputs[0].flags;
-            let converted = {};
-
-            // Use forEach to populate the converted object
-            Object.keys(flags).forEach((key) => {
-                // console.log(flags[key]);
-                converted[flags[key]] = flags[key];
+        // console.log(checked)
+        const filtered = checked.filter((item) => !item.flags);
+        let hasEmptyValues
+        if (filtered.length > 0) {
+            hasEmptyValues = filtered.every((item) => {
+                if (!item.flags) {
+                    // If there are no flags
+                    return item.value === '';
+                }
+                return false; // If there are flags, we consider it as not having empty values
             });
+        } else {
+            hasEmptyValues = false
+        }
+        // console.log(hasEmptyValues)
+
+        if (hasEmptyValues) {
+            dispatch(setFunctionInputErrorFlagAndMessage({ name: name, id: id, inputs: checked }))
+        } else {
+            delete fetchValues['items_per_page']
+            delete fetchValues['page_no']
 
             talibExecuteQuery['name'] = name;
             talibExecuteQuery['startIdx'] = 0;
             talibExecuteQuery['endIdx'] = histDataLength - 1;
             talibExecuteQuery = { ...talibExecuteQuery, ...converted, ...transformedOptionalInputs }
 
-            delete fetchValues['items_per_page']
-            delete fetchValues['page_no']
             let payload = {
                 func_query: talibExecuteQuery,
                 func_param_input_keys: converted,
@@ -168,67 +196,14 @@ const SelectedFunctionContainer = (props) => {
             }
 
             console.log(payload)
-            /* executeTalibFunction({ token, payload })
+            executeTalibFunction({ token, payload })
                 .then((res) => {
-                    console.log(res)
+                    console.log(res.data)
+                    dispatch(setTalibResult({ id: id, name: name, optInputs: optInputs, result: res.data.result }))
                 })
                 .catch(err => {
                     console.log(err)
-                }) */
-        } else { // flags not present in the input, so we have to take input from user
-            let selectedInputOptionsCopy = [...inputs]
-            let checked = selectedInputOptionsCopy.map((item) => {
-                if (item.value === '') {
-                    return {
-                        ...item,
-                        errorFlag: true,
-                        helperText: 'Please select a valid input',
-                    };
-                } else {
-                    return {
-                        ...item,
-                        errorFlag: false,
-                        helperText: '',
-                    };
-                }
-            });
-            let notNull = checked.every((item) => item.value !== '')
-
-            if (notNull) {
-                Object.keys(selectedInputOptionsCopy).forEach((key) => {
-                    // console.log(key)
-                    input[selectedInputOptionsCopy[key].name] = selectedInputOptionsCopy[key].value;
                 })
-
-                talibExecuteQuery['name'] = name;
-                talibExecuteQuery['startIdx'] = 0;
-                talibExecuteQuery['endIdx'] = histDataLength - 1;
-                talibExecuteQuery = { ...talibExecuteQuery, ...input, ...transformedOptionalInputs }
-
-                delete fetchValues['items_per_page']
-                delete fetchValues['page_no']
-                let payload = {
-                    func_query: talibExecuteQuery,
-                    func_param_input_keys: input,
-                    func_param_optional_input_keys: tOITypes,
-                    func_param_output_keys: outputkeys,
-                    db_query: {
-                        ...fetchValues,
-                        fetch_count: histDataLength
-                    }
-                }
-                console.log(payload)
-                executeTalibFunction({ token, payload })
-                    .then((res) => {
-                        console.log(res.data)
-                        dispatch(setTalibResult({ id: id, name: name, result: res.data.result }))
-                    })
-                    .catch(err => {
-                        console.log(err)
-                    })
-            } else {
-                dispatch(setFunctionInputErrorFlagAndMessage({ name: name, id: id, inputs: checked }))
-            }
         }
     }
 
@@ -287,7 +262,7 @@ const SelectedFunctionContainer = (props) => {
                 <AccordionActions>
                     <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' width='100%' pl={1} pr={1}>
                         <Typography variant='h6' fontWeight='bold' sx={{ textAlign: 'start' }}>{name}</Typography>
-                        <IconButton disabled={functions.length === MAX_FUNCTION_DUPLICATES} size='small' aria-label="add query" color="secondary" onClick={handleAddIndicator.bind(null, { func_name: name })}>
+                        <IconButton disabled={functions[0].optInputs.length === 0 || functions.length === MAX_FUNCTION_DUPLICATES} size='small' aria-label="add query" color="secondary" onClick={handleAddIndicator.bind(null, { func_name: name })}>
                             <Tooltip title="Add query" placement='top'>
                                 <AddIcon className='small-icon' />
                             </Tooltip>
@@ -297,7 +272,7 @@ const SelectedFunctionContainer = (props) => {
 
                 <AccordionDetails>
                     {functions.length > 0 && functions.map((func, index) => {
-                        const { id, inputs, optInputs, result, show_chart_flag } = func
+                        const { id, name, inputs, optInputs, outputAvailable, show_chart_flag } = func
                         return (
                             <Box key={index} mt={1} borderRadius={2} pl={1} pr={1} pb={1} sx={{ backgroundColor: `${theme.palette.background.paper}` }}>
 
@@ -307,8 +282,8 @@ const SelectedFunctionContainer = (props) => {
                                     </Box>
                                     <Box className='function-action-box' display='flex' flexDirection='row'>
 
-                                        {result.length > 0 &&
-                                            <IconButton size='small' aria-label="Hide shart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: id })}>
+                                        {outputAvailable &&
+                                            <IconButton size='small' aria-label="Hide shart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: id, name: name })}>
                                                 {show_chart_flag ?
                                                     <VisibilityOffIcon className='small-icon' />
                                                     :
@@ -318,7 +293,7 @@ const SelectedFunctionContainer = (props) => {
                                         }
 
                                         <IconButton size='small' aria-label="execute query" color="secondary" onClick={handleGenerateQuery.bind(null, { id: id })}>
-                                            {result.length > 0 ?
+                                            {outputAvailable ?
                                                 <RestartAltIcon className='small-icon' />
                                                 :
                                                 <PlayArrowIcon className='small-icon' />

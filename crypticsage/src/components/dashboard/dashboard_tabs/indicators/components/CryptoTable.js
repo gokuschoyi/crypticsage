@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCryptoDataRedux, setCryptoPreferencesRedux } from '../IndicatorsSlice'
+import { setSelectedTickerName, resetDataLoadedState,resetShowSettingsFlag } from '../modules/CryptoStockModuleSlice'
 import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../global/Icons';
 import { getLatestCryptoData } from '../../../../../api/crypto'
 import { convert, getLastUpdatedTimeString, getDateTime, getCurrencySymbol } from '../../../../../utils/Utils'
@@ -33,6 +34,7 @@ const CryptoTable = () => {
 
     //<------ table logic ------>//
     const token = useSelector(state => state.auth.accessToken);
+    const selectedToken = useSelector(state => state.cryptoStockModule.selectedTickerName);
     const cryptoPreferences = useSelector(state => state.indicators.cryptoPreferences);
     const { currency: rCurr, order: rOrder, orderBy: rOrderBy } = cryptoPreferences
     const cryptoDataInRedux = useSelector(state => state.indicators.cryptoData);
@@ -162,9 +164,17 @@ const CryptoTable = () => {
 
     //reddirect to '/dashboard/indicators/crypto/${dataId}' if matchedSymbol exists
     const handleTokenPageLoad = (dataId) => {
-        console.log(dataId)
+        console.log(dataId, selectedToken)
         if (dataId !== null) {
-            navigate(`/dashboard/indicators/crypto/${dataId}`)
+            if (dataId === selectedToken) {
+                dispatch(resetShowSettingsFlag())
+                navigate(`/dashboard/indicators/crypto/${dataId}`)
+            } else {
+                dispatch(setSelectedTickerName(dataId))
+                dispatch(resetDataLoadedState())
+                dispatch(resetShowSettingsFlag())
+                navigate(`/dashboard/indicators/crypto/${dataId}`)
+            }
         } else {
             console.log("no token name present")
         }
