@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCryptoDataRedux, setCryptoPreferencesRedux } from '../IndicatorsSlice'
-import { setSelectedTickerName, resetDataLoadedState,resetShowSettingsFlag } from '../modules/CryptoStockModuleSlice'
+import { setSelectedTickerName, resetDataLoadedState, resetShowSettingsFlag, setCryptoDataInDbRedux } from '../modules/CryptoStockModuleSlice'
 import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../global/Icons';
 import { getLatestCryptoData } from '../../../../../api/crypto'
 import { convert, getLastUpdatedTimeString, getDateTime, getCurrencySymbol } from '../../../../../utils/Utils'
@@ -173,6 +173,7 @@ const CryptoTable = () => {
                 dispatch(setSelectedTickerName(dataId))
                 dispatch(resetDataLoadedState())
                 dispatch(resetShowSettingsFlag())
+                dispatch(setCryptoDataInDbRedux([]))
                 navigate(`/dashboard/indicators/crypto/${dataId}`)
             }
         } else {

@@ -1,8 +1,28 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from 'uuid';
+import axios from "axios";
+const baseUrl = process.env.NODE_ENV === 'development' ? process.env.REACT_APP_BASEURL : process.env.REACT_APP_NGROK_URL;
+
+export const executeAllSelectedFunctions = createAsyncThunk(
+    'cryptoStockModule/sendApiRequests',
+    async (finalTalibExecuteQuery, thunkAPI) => {
+        const allResponses = []
+        for (const queryObj of finalTalibExecuteQuery) {
+            const { id, payload } = queryObj;
+            try {
+                const response = await axios.post(`${baseUrl}/indicators/execute_talib_function`, { payload }, {})
+                allResponses.push({ id, result: response.data.result })
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        // console.log("Execute response",allResponses)
+        return allResponses;
+    })
 
 const initialState = {
     toolTipOn: false,
+    barsFromTo: { from: 0, to: 0 },
     selectedTickerName: '',
     selectedTickerPeriod: '4h',
     talibDescription: [],
@@ -21,6 +41,9 @@ const cryptoStockModuleSlice = createSlice({
     reducers: {
         toggleToolTipSwitch: (state) => {
             state.toolTipOn = !state.toolTipOn;
+        },
+        setBarsFromTo: (state, action) => {
+            state.barsFromTo = action.payload;
         },
         toggleProcessSelectedFunctionsOnMoreData: (state, action) => {
             state.processSelectedFunctionsOnMoreData = action.payload;
@@ -60,6 +83,10 @@ const cryptoStockModuleSlice = createSlice({
         },
         setSelectedTickerPeriod: (state, action) => {
             state.selectedTickerPeriod = action.payload;
+            state.cryptoDataInDb = [];
+            state.talibDescription = state.talibDescriptionCopy;
+            state.selectedFunctions = [];
+            state.modifiedSelectedFunctionWithDataToRender = [];
         },
         setCryptoDataInDbRedux: (state, action) => {
             state.cryptoDataInDb = action.payload;
@@ -387,7 +414,7 @@ const cryptoStockModuleSlice = createSlice({
                     // Update the function within the found function's functions array
 
                     foundFunction.functions[foundFunctionToUpdateIndex] = updatedFunction;
-                    
+
                     // Update the currentState with the modified function
                     currentState[foundFunctionIndex] = foundFunction;
                 }
@@ -443,9 +470,11 @@ const cryptoStockModuleSlice = createSlice({
             state.talibDescription = state.talibDescriptionCopy;
             state.selectedFunctions = [];
             state.modifiedSelectedFunctionWithDataToRender = [];
+            state.barsFromTo = { from: 0, to: 0 };
         },
         resetCryptoStockModule: (state) => {
             state.selectedTickerName = '';
+            state.barsFromTo = { from: 0, to: 0 };
             state.selectedTickerPeriod = '4h';
             state.talibDescription = [];
             state.talibDescriptionCopy = [];
@@ -462,12 +491,33 @@ const cryptoStockModuleSlice = createSlice({
             })
             state.modifiedSelectedFunctionWithDataToRender = currentState;
         }
+    }, extraReducers: (builder) => {
+        builder.addCase(executeAllSelectedFunctions.fulfilled, (state, action) => {
+            const currentMSFWDTR = state.modifiedSelectedFunctionWithDataToRender;
+            const newData = action.payload
+
+            const updatedMSFWDTR = currentMSFWDTR.map((item) => {
+                const matchingData = newData.find((data) => data.id === item.id && data.result.some((res) => res.key === item.key));
+                if (matchingData) {
+                    const newResult = matchingData.result.find((res) => res.key === item.key).data;
+                    return {
+                        ...item,
+                        result: newResult,
+                        isDataNew: true,
+                    };
+                }
+                return item;
+            });
+            state.modifiedSelectedFunctionWithDataToRender = updatedMSFWDTR;
+            // console.log("State modified",updatedMSFWDTR)
+        })
     }
 })
 
 const { reducer, actions } = cryptoStockModuleSlice;
 export const {
     toggleToolTipSwitch
+    , setBarsFromTo
     , toggleProcessSelectedFunctionsOnMoreData
     , setTalibDescription
     , setSelectedFlagInTalibDescription

@@ -100,6 +100,7 @@ const CryptoModule = () => {
     const token = useSelector(state => state.auth.accessToken);
     const tokenPeriod = useSelector(state => state.cryptoStockModule.selectedTickerPeriod)
     const toolTipSwitchFlag = useSelector(state => state.cryptoStockModule.toolTipOn)
+    const ohlcData = useSelector(state => state.cryptoStockModule.cryptoDataInDb)
     // console.log('toolTipSwitchFlag', toolTipSwitchFlag)
     const theme = useTheme()
     const { cryptotoken } = params;
@@ -153,11 +154,11 @@ const CryptoModule = () => {
     const tickerDataRef = useRef(false)
     useEffect(() => {
 
-        if (!tickerDataRef.current) {
+        if (!tickerDataRef.current && ohlcData.length === 0) {
             // console.log('UE : Fetching ticker data from DB')
             tickerDataRef.current = true
             let converted = []
-            dispatch(setCryptoDataInDbRedux([]))
+            // dispatch(setCryptoDataInDbRedux([]))
             dispatch(resetStreamedTickerDataRedux())
             getHistoricalTickerDataFroDb({
                 token,
@@ -210,11 +211,15 @@ const CryptoModule = () => {
                 .catch(err => {
                     console.log(err)
                 })
+        } else {
+            // console.log('UE : Fetching ticker data from redux')
+            const dataInDb = ohlcData
+            const converted = checkForUniqueAndTransform(dataInDb)
+            setChartData(converted)
         }
-    })
+    }, [ohlcData, fetchValues, token, cryptotoken, selectedTokenPeriod, dispatch])
 
     const selectedFunctions = useSelector(state => state.cryptoStockModule.selectedFunctions)
-    const histDataLength = useSelector(state => state.cryptoStockModule.cryptoDataInDb).length
 
     return (
         <Box className='crypto-module-container'>
@@ -251,6 +256,7 @@ const CryptoModule = () => {
                                     />
                                 </Box>
                                 <Box>
+                                    <Typography>{ohlcData.length} / {ohlcData.length / 500}</Typography>
                                     <FormControlLabel
                                         value="start"
                                         control={<Switch size="small" color="secondary" />}
@@ -316,7 +322,7 @@ const CryptoModule = () => {
                                             const { name } = funcRedux
                                             return (
                                                 <Grid key={`${name}${index}`} item xs={12} sm={12} md={6} lg={4} xl={3}>
-                                                    <SelectedFunctionContainer key={index} funcRedux={funcRedux} histDataLength={histDataLength} fetchValues={fetchValues} />
+                                                    <SelectedFunctionContainer key={index} funcRedux={funcRedux} fetchValues={fetchValues} />
                                                 </Grid>
                                             )
                                         })}

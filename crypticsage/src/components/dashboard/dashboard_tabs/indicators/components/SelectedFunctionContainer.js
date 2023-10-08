@@ -71,11 +71,12 @@ const MultiSelect = (props) => {
 
 const SelectedFunctionContainer = (props) => {
     const theme = useTheme()
-    const { funcRedux, histDataLength, fetchValues } = props
+    const { funcRedux, fetchValues } = props
     const { hint, name, group_name, functions, outputs } = funcRedux
     // console.log('funcRes ', functions)
     const dispatch = useDispatch()
     const token = useSelector(state => state.auth.accessToken);
+    const histDataLength = useSelector(state => state.cryptoStockModule.cryptoDataInDb).length
     const defaultTalibFunctionsCopy = useSelector(state => state.cryptoStockModule.talibDescriptionCopy)
 
     const handleAddIndicator = (param) => {

@@ -12,13 +12,17 @@ import {
     setStreamedTickerDataRedux
     , setCryptoDataInDbRedux
     , setIsDataNewFlag
+    , setBarsFromTo
     , toggleShowHideChartFlag
     , removeFromSelectedFunction
     , toggleShowSettingsFlag
     , setSelectedFunctionInputValues
     , setSelectedFunctionOptionalInputValues
+    , toggleProcessSelectedFunctionsOnMoreData
     , resetStreamedTickerDataRedux
 } from '../modules/CryptoStockModuleSlice'
+
+import { executeAllSelectedFunctions } from '../modules/CryptoStockModuleSlice'
 
 const EXTRA_DATA_FETCH_POINT_FRACTION = 0.3;
 
@@ -261,8 +265,13 @@ const MainChart = (props) => {
     const chartBackgroundColor = theme.palette.background.default
 
     const dispatch = useDispatch()
+    const processMore = useSelector(state => state.cryptoStockModule.processSelectedFunctionsOnMoreData)
     // const streamedTickerData = useSelector(state => state.cryptoStockModule.streamedTickerData)
     const tDataRedux = useSelector(state => state.cryptoStockModule.cryptoDataInDb)
+    const pageNoBasedOnDataInRedux = Math.floor(tDataRedux.length / 500)
+
+    const selectedTickerPeriod = useSelector(state => state.cryptoStockModule.selectedTickerPeriod)
+    const selectedTickerName = useSelector(state => state.cryptoStockModule.selectedTickerName)
 
     const newFetchedDataCount = useRef(0)
     const latestDateRf = useRef(latestTime) // latest time in the fetched data. Data doe not inclusive of this time
@@ -272,15 +281,102 @@ const MainChart = (props) => {
     const selectedFunctionData = useSelector(state => state.cryptoStockModule.selectedFunctions)
     const modifiedSelectedFunctionWithDataToRender = useSelector(state => state.cryptoStockModule.modifiedSelectedFunctionWithDataToRender)
     const wsRef = useRef(null)
-    const pageNo = useRef(1)
+    const pageNo = useRef(pageNoBasedOnDataInRedux)
     const newDataRef = useRef([...tDataRedux])
     const chart = useRef(null)
     const chartboxRef = useRef();
 
+    // const [finalTalibExecuteQuery, setFinalTalibExcuteQuery] = useState([])
+    useEffect(() => {
+        console.log("UE 1 : Execute all selected functions")
+        if (processMore && selectedFunctionData.length > 0) {
+            let fTalibExecuteQuery = []
+
+            selectedFunctionData.forEach((unique_func) => {
+                const { outputs } = unique_func;
+                const func = unique_func.functions;
+                func.forEach((f) => {
+                    const { inputs, optInputs, name, id } = f;
+                    let inputEmpty = false;
+                    let talibExecuteQuery = {}
+                    let tOITypes = {}
+                    const transformedOptionalInputs = optInputs.reduce((result, item) => {
+                        result[item.name] = item.defaultValue
+                        tOITypes[item.name] = item.type;
+                        return result;
+                    }, {})
+
+                    let outputkeys = {}
+                    let outputsCopy = [...outputs]
+                    outputkeys = outputsCopy.reduce((result, output) => {
+                        result[output.name] = output.name;
+                        return result;
+                    }, {});
+
+                    let converted = {}
+                    inputs.map((input) => {
+                        if (input.flags) {
+                            Object.keys(input.flags).forEach((key) => {
+                                converted[input.flags[key]] = input.flags[key];
+                            })
+                            return input
+                        } else {
+                            if (input.value === '') {
+                                inputEmpty = true;
+                                converted[input.name] = "";
+                                return {
+                                    ...input,
+                                    errorFlag: true,
+                                    helperText: 'Please select a valid input',
+                                };
+                            } else {
+                                converted[input.name] = input.value;
+                                return {
+                                    ...input,
+                                    errorFlag: false,
+                                    helperText: '',
+                                };
+                            }
+                        }
+                    })
+
+                    talibExecuteQuery['name'] = name;
+                    talibExecuteQuery['startIdx'] = 0;
+                    talibExecuteQuery['endIdx'] = tDataRedux.length - 1;
+                    talibExecuteQuery = { ...talibExecuteQuery, ...converted, ...transformedOptionalInputs }
+
+
+                    let payload = {
+                        func_query: talibExecuteQuery,
+                        func_param_input_keys: converted,
+                        func_param_optional_input_keys: tOITypes,
+                        func_param_output_keys: outputkeys,
+                        db_query: {
+                            asset_type: 'crypto',
+                            fetch_count: tDataRedux.length,
+                            period: selectedTickerPeriod,
+                            ticker_name: selectedTickerName
+                        }
+                    }
+                    fTalibExecuteQuery.push({ id, payload, inputEmpty })
+                })
+            })
+            fTalibExecuteQuery = fTalibExecuteQuery.filter((item) => !item.inputEmpty)
+            dispatch(executeAllSelectedFunctions(fTalibExecuteQuery))
+
+            // console.log("Execute query", fTalibExecuteQuery)
+            // setFinalTalibExcuteQuery(fTalibExecuteQuery)
+            dispatch(toggleProcessSelectedFunctionsOnMoreData(false))
+        }
+        return () => {
+            console.log('UE RETURN 1 : Execute all selected functions')
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [processMore, selectedFunctionData, tDataRedux])
+
     // Main chart useEffect
     useEffect(() => {
-        console.log("UE : Main chart")
-        console.log(tDataRedux.length)
+        console.log("UE 2 : Main chart")
         let tData = checkForUniqueAndTransform(tDataRedux)
 
         let tokenDom = document.getElementsByClassName('chart-cont-dom')[0]
@@ -367,89 +463,139 @@ const MainChart = (props) => {
         const volDat = calculateVolumeData(tData)
         candleStickVolumeSeriesRef.current.setData(volDat);
 
-        // Define the debounce function
-        function debounce(func, delay) {
-            let timeoutId;
-            return function () {
-                const context = this;
-                const args = arguments;
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => {
-                    func.apply(context, args);
-                }, delay);
-            };
-        }
-
-        let uniqueBarNumbers = [];
-        let lastBarNo = 0
-        let fetchPoint = Math.floor(newDataRef.current.length * EXTRA_DATA_FETCH_POINT_FRACTION) / -1
-
-        // Create a debounced version of your data fetching logic
-        const debouncedFetchData = debounce((barNo, candleSticksInVisibleRange) => {
-            // Your data fetching logic here
-            if (barNo < fetchPoint) {
-                pageNo.current = pageNo.current + 1;
-                console.log('Fetching more data', barNo, pageNo.current);
-
-                // Fetch new data query
-                const fetchQuery = {
-                    asset_type: module,
-                    ticker_name: symbol,
-                    period: selectedTokenPeriod,
-                    page_no: pageNo.current,
-                    items_per_page: 500,
-                    new_fetch_offset: new_fetch_offset + newFetchedDataCount.current
-                }
-                // console.log(fetchQuery)
-
-                getHistoricalTickerDataFroDb({ token, payload: fetchQuery })
-                    .then((res) => {
-                        const newData = res.data.fetchedResults.ticker_data
-                        newDataRef.current = [...newData, ...newDataRef.current]
-                        fetchPoint = Math.floor(candleSticksInVisibleRange * 0.2) / -1
-                        dispatch(setCryptoDataInDbRedux(newDataRef.current))
-                        const uniqueData = checkForUniqueAndTransform(newDataRef.current)
-
-                        candleStickSeriesRef.current.setData(uniqueData)
-                        candleStickVolumeSeriesRef.current.setData(calculateVolumeData(uniqueData))
-
-                        uniqueBarNumbers = []
-                    })
-            } else {
-                // console.log('No fetch', barNo, pageNo.current, lastBarNo, fetchPoint);
-            }
-        }, 500); // Adjust the delay as needed (e.g., 1000ms = 1 second)
-
-        chart.current.timeScale().subscribeVisibleLogicalRangeChange((param) => {
-            // console.log(param)
-            const { from, to } = param
-            const candleSticksInVisibleRange = Math.floor(to - from)
-            fetchPoint = Math.floor(candleSticksInVisibleRange * EXTRA_DATA_FETCH_POINT_FRACTION) / -1
-
-            const barsInfo = candleStickSeriesRef.current.barsInLogicalRange(param);
-            const { barsBefore } = barsInfo
-            const barNo = Math.floor(barsBefore)
-
-            // Check if the generated barNo is unique
-            if (!uniqueBarNumbers.includes(barNo)) {
-                uniqueBarNumbers.push(barNo);
-                if (barNo < lastBarNo) { // chcking if the chart is moving backwards, left to right
-                    debouncedFetchData(barNo, candleSticksInVisibleRange);
-                }
-            }
-            lastBarNo = barNo
-        })
-
         window.addEventListener('resize', handleResize);
 
         return () => {
-            console.log('UE : Main chart return')
+            console.log('UE RETURN 2 : Main chart')
             window.removeEventListener('resize', handleResize);
             chart.current.remove();
             setChartSeriesState([])
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [symbol, selectedTokenPeriod])
+
+    // Define the debounce function
+    function debounce(func, delay) {
+        let timeoutId;
+        return function () {
+            const context = this;
+            const args = arguments;
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func.apply(context, args);
+            }, delay);
+        };
+    }
+
+    const fetchPointRef = useRef(Math.floor(newDataRef.current.length * EXTRA_DATA_FETCH_POINT_FRACTION) / -1)
+    const uniqueBarNumbersRef = useRef([]);
+    const lastBarNoRef = useRef(0)
+    const SFDlengthRef = useRef(selectedFunctionData.length)
+
+    // Create a debounced version of your data fetching logic
+    const debouncedFetchData = debounce((barNo, candleSticksInVisibleRange, SFDLength) => {
+        // Your data fetching logic here
+        if (barNo < fetchPointRef.current) {
+            pageNo.current = pageNo.current + 1;
+            console.log('Fetching more data', barNo, pageNo.current);
+
+            // Fetch new data query
+            const fetchQuery = {
+                asset_type: module,
+                ticker_name: symbol,
+                period: selectedTokenPeriod,
+                page_no: pageNo.current,
+                items_per_page: 500,
+                new_fetch_offset: new_fetch_offset + newFetchedDataCount.current
+            }
+            // console.log(fetchQuery)
+
+            getHistoricalTickerDataFroDb({ token, payload: fetchQuery })
+                .then((res) => {
+                    const newData = res.data.fetchedResults.ticker_data
+                    newDataRef.current = [...newData, ...newDataRef.current]
+                    fetchPointRef.current = Math.floor(candleSticksInVisibleRange * 0.2) / -1
+                    dispatch(setCryptoDataInDbRedux(newDataRef.current))
+
+                    const uniqueData = checkForUniqueAndTransform(newDataRef.current)
+
+                    candleStickSeriesRef.current.setData(uniqueData)
+                    candleStickVolumeSeriesRef.current.setData(calculateVolumeData(uniqueData))
+
+                    uniqueBarNumbersRef.current = []
+                    // console.log("Inside Debounce", SFDLength)
+                    if (SFDLength > 0) {
+                        dispatch(toggleProcessSelectedFunctionsOnMoreData(true))
+                    }
+                })
+        } else {
+            // console.log('No fetch', barNo, pageNo.current, lastBarNo, fetchPoint);
+        }
+    }, 500); // Adjust the delay as needed (e.g., 1000ms = 1 second)
+
+    useEffect(() => {
+        console.log("UE 3 : Debounce fetch")
+        SFDlengthRef.current = selectedFunctionData.length
+        const VLRCHandler = (param) => {
+            const { from, to } = param
+            // console.log(from, to)
+            const candleSticksInVisibleRange = Math.floor(to - from)
+            fetchPointRef.current = Math.floor(candleSticksInVisibleRange * EXTRA_DATA_FETCH_POINT_FRACTION) / -1
+
+            const barsInfo = candleStickSeriesRef.current.barsInLogicalRange(param);
+            const { barsBefore } = barsInfo
+            const barNo = Math.floor(barsBefore)
+
+            // Check if the generated barNo is unique
+            if (!uniqueBarNumbersRef.current.includes(barNo)) {
+                uniqueBarNumbersRef.current.push(barNo);
+                if (barNo < lastBarNoRef.current) { // chcking if the chart is moving backwards, left to right
+                    debouncedFetchData(barNo, candleSticksInVisibleRange, SFDlengthRef.current);
+                }
+            }
+            lastBarNoRef.current = barNo
+        }
+
+        chart.current.timeScale().subscribeVisibleLogicalRangeChange(VLRCHandler)
+
+        return () => {
+            console.log("UE RETURN 3 : Debounce fetch")
+            chart.current.timeScale().unsubscribeVisibleTimeRangeChange(VLRCHandler)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedFunctionData])
+
+
+    const debouncedFromToSave = debounce((from, to) => {
+        // console.log(from, to)
+        dispatch(setBarsFromTo({ from: from, to: to }))
+    }, 500)
+
+
+    const barsFromToRedux = useSelector(state => state.cryptoStockModule.barsFromTo)
+    useEffect(() => {
+        const barsInChartHandler = (param) => {
+            const { from, to } = param
+            const fromRounded = Math.floor(from)
+            const toRounded = Math.floor(to)
+            debouncedFromToSave(fromRounded, toRounded)
+            // console.log(fromRounded, toRounded)
+        }
+        // console.log('UE : from to')
+        const { from, to } = barsFromToRedux
+        // console.log(from, to)
+        if (barsFromToRedux.from !== 0 && barsFromToRedux.to !== 0) {
+            // console.log(from, to)
+            chart.current.timeScale().setVisibleLogicalRange({ from: from, to: to })
+        } else {
+            console.log('UE : Initial chartset visible logical range')
+        }
+        chart.current.timeScale().subscribeVisibleLogicalRangeChange(barsInChartHandler)
+
+        return () => {
+            chart.current.timeScale().unsubscribeVisibleTimeRangeChange(barsInChartHandler)
+        }
+    }, [])
 
     const generateOHLCV_String = (param) => {
         const { open, high, low, close, vol } = param
@@ -513,7 +659,6 @@ const MainChart = (props) => {
             chart.current.unsubscribeCrosshairMove(ohlcvHandler)
         }
     })
-
 
     // Tooltip useEffect to show/hide
     useEffect(() => {
@@ -637,6 +782,7 @@ const MainChart = (props) => {
     const [chartSeriesState, setChartSeriesState] = useState([])
     const removePaneFlag = useRef(false)
     const paneOneChartLength = useRef(0)
+
     // renders the chart based on the selected functions
     const renderChart = useCallback(() => {
         if (modifiedSelectedFunctionWithDataToRender.length === 0 && chartSeriesState.length === 0) {
@@ -661,16 +807,21 @@ const MainChart = (props) => {
         // filter and remove charts with old data based on isDataNew flag
         const chartsWithNewData = reduxDataCopy.filter((f) => f.isDataNew === true);
         if (chartsWithNewData.length > 0) {
-            console.log('Charts with new data', chartsWithNewData.length);
+            // console.log('Charts with new data', chartsWithNewData.length);
+            let updated = []
             chartsWithNewData.forEach((f) => {
                 const seriesToRemove = chartSeriesState.find((series) => series.id === f.id && series.key === f.key);
                 if (seriesToRemove) {
                     chart.current.removeSeries(seriesToRemove.series);
-                    setChartSeriesState((prevSeries) => prevSeries.filter((series) => series.id !== f.id))
+                    seriesToRemove.series = null
+                    updated.push(seriesToRemove)
+                } else {
+                    updated.push(seriesToRemove)
                 }
             })
             dispatch(setIsDataNewFlag())
-        } else { console.log("No new data for chart") }
+        } else { // console.log("No new data for chart") 
+        }
 
         // checking and rendering chart
         selectedFunctionData.forEach((func) => {
@@ -687,13 +838,26 @@ const MainChart = (props) => {
                     if (existingInStateIndex !== -1) {
                         // console.log('Existing in state', f.key)
                         let existingInState = chartSeriesState[existingInStateIndex];
-                        existingInState.visible = f.visible
-                        // console.log(existingInState)
-                        existingInState.series.applyOptions({ visible: f.visible });
+                        if (existingInState.series !== null) {
+                            existingInState.visible = f.visible
+                            existingInState.series.applyOptions({ visible: f.visible });
+                        } else {
+                            const newSeries = chart.current.addLineSeries({
+                                color: existingInState.color,
+                                lineWidth: 1,
+                                visible: f.visible,
+                                priceLineVisible: false,
+                                lastValueVisible: false,
+                                pane: f.splitPane ? 1 : 0,
+                            });
+                            newSeries.setData(f.result);
+                            existingInState.series = newSeries
+                        }
                     } else {
                         // console.log("Does not exist in state", f.key)
+                        const color = lineColors[Math.floor(Math.random() * lineColors.length)];
                         const newSeries = chart.current.addLineSeries({
-                            color: lineColors[Math.floor(Math.random() * lineColors.length)],
+                            color: color,
                             lineWidth: 1,
                             visible: f.visible,
                             priceLineVisible: false,
@@ -708,7 +872,8 @@ const MainChart = (props) => {
                             id: f.id,
                             key: f.key,
                             pane: f.splitPane ? 1 : 0,
-                            visible: f.visible
+                            visible: f.visible,
+                            color: color
                         }
                         ]);
                     }
@@ -753,7 +918,7 @@ const MainChart = (props) => {
     }, [chartSeriesState, modifiedSelectedFunctionWithDataToRender]);
 
     useEffect(() => {
-        console.log("UE : Render chart")
+        console.log("UE 4 : Render chart")
         // console.log('<---------------------START-------------------------->');
         renderChart();
 
@@ -795,7 +960,7 @@ const MainChart = (props) => {
         // console.log('<------------------END----------------------------->');
 
         return () => {
-            console.log('UE RETURN : Render chart');
+            console.log('UE RETURN 4 : Render chart');
             chart.current.unsubscribeCrosshairMove(crosshairMoveHandler);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -856,7 +1021,7 @@ const MainChart = (props) => {
                 })
 
                 if (!subscribedRef.current) {
-                    console.log(subscribedRef.current)
+                    // console.log(subscribedRef.current)
                     const currentValue = {
                         openTime: tickerPayload.openTime,
                         open: tickerPayload.open,
@@ -865,7 +1030,7 @@ const MainChart = (props) => {
                         close: tickerPayload.close,
                         vol: tickerPayload.volume
                     }
-                    
+
 
                     const date = new Date(currentValue.openTime).toLocaleString('en-AU',
                         {
@@ -897,8 +1062,8 @@ const MainChart = (props) => {
                     checkAndApplyPulse('volumeValue', currentValue.vol, previousValue.current.vol);
 
                     previousValue.current = currentValue
-                } else{
-                    console.log(subscribedRef.current)
+                } else {
+                    // console.log(subscribedRef.current)
                 }
 
                 if (latestDateRf.current < tickerPayload.openTime && selectedTokenPeriod === '1m') {
