@@ -21,8 +21,10 @@ const formatDateForProcessInitialSaveHistoricalDataYFinance = (param) => {
 // new Date 10/07/2023, 12:19:38 pm to yyyy-mm-dd
 const formatDateForYFinance = (param) => {
     log.info(`Date param yf fetch : ${param}`)
-    const [date, tz] = param.split(', ');
-    const [d, m, y] = date.split('/')
+    const newDt = new Date(param)
+    const d = newDt.getDate()
+    const m = newDt.getMonth() + 1
+    const y = newDt.getFullYear()
     const formattedDate = `${y}-${m}-${d}`;
     return formattedDate;
 }

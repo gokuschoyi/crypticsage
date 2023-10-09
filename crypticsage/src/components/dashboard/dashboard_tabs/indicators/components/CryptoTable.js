@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCryptoDataRedux, setCryptoPreferencesRedux } from '../IndicatorsSlice'
-import { setSelectedTickerName, resetDataLoadedState, resetShowSettingsFlag, setCryptoDataInDbRedux } from '../modules/CryptoStockModuleSlice'
+import { setSelectedTickerName, resetDataLoadedState, resetShowSettingsFlag, setCryptoDataInDbRedux } from '../modules/CryptoModuleSlice'
 import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../global/Icons';
 import { getLatestCryptoData } from '../../../../../api/crypto'
 import { convert, getLastUpdatedTimeString, getDateTime, getCurrencySymbol } from '../../../../../utils/Utils'
@@ -34,7 +34,7 @@ const CryptoTable = () => {
 
     //<------ table logic ------>//
     const token = useSelector(state => state.auth.accessToken);
-    const selectedToken = useSelector(state => state.cryptoStockModule.selectedTickerName);
+    const selectedToken = useSelector(state => state.cryptoModule.selectedTickerName);
     const cryptoPreferences = useSelector(state => state.indicators.cryptoPreferences);
     const { currency: rCurr, order: rOrder, orderBy: rOrderBy } = cryptoPreferences
     const cryptoDataInRedux = useSelector(state => state.indicators.cryptoData);

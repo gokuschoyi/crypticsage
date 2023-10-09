@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { getIndicatorDesc, executeTalibFunction } from '../../../../../api/adminController'
 import { useSelector, useDispatch } from 'react-redux'
-import { setTalibDescription, setSelectedFlagInTalibDescription, setSelectedFunctions } from '../modules/CryptoStockModuleSlice'
+import { setTalibDescription, setSelectedFlagInTalibDescription, setSelectedFunctions } from '../modules/CryptoModuleSlice'
 import {
     Box,
     Accordion,
@@ -426,10 +426,10 @@ const Indicators = (props) => {
     const { fetchValues } = props
     const token = useSelector(state => state.auth.accessToken);
     const dispatch = useDispatch()
-    const histDataLength = useSelector(state => state.cryptoStockModule.cryptoDataInDb).length
+    const histDataLength = useSelector(state => state.cryptoModule.cryptoDataInDb).length
 
     // const [copyRawTalibDesc, setCopyRawTalibDesc] = useState([])
-    const talibDescriptionRedux = useSelector(state => state.cryptoStockModule.talibDescription);
+    const talibDescriptionRedux = useSelector(state => state.cryptoModule.talibDescription);
     const [rawTalibDesc, setRawTalibDesc] = useState([]) // copy of grouped talib desc data
     const [talibDesc, setTalibDesc] = useState(talibDescriptionRedux) // grouped talib desc data
 

@@ -20,9 +20,9 @@ import {
     , setSelectedFunctionOptionalInputValues
     , toggleProcessSelectedFunctionsOnMoreData
     , resetStreamedTickerDataRedux
-} from '../modules/CryptoStockModuleSlice'
+} from '../modules/CryptoModuleSlice'
 
-import { executeAllSelectedFunctions } from '../modules/CryptoStockModuleSlice'
+import { executeAllSelectedFunctions } from '../modules/CryptoModuleSlice'
 
 const EXTRA_DATA_FETCH_POINT_FRACTION = 0.3;
 
@@ -124,7 +124,7 @@ const MultiSelect = (props) => {
 const SettingsCard = (props) => {
     const { selectedFunctionNameAndId } = props
     const { slId, slName } = selectedFunctionNameAndId
-    const selectedFunctionData = useSelector(state => state.cryptoStockModule.selectedFunctions)
+    const selectedFunctionData = useSelector(state => state.cryptoModule.selectedFunctions)
     const functionData = selectedFunctionData.find((func) => func.name === slName)
     const selectedFunc = functionData.functions.find((func) => func.id === slId)
     const dispatch = useDispatch()
@@ -260,26 +260,26 @@ const SettingsCard = (props) => {
 const MainChart = (props) => {
     const { latestTime, new_fetch_offset, symbol, selectedTokenPeriod, module } = props;
     const token = useSelector(state => state.auth.accessToken);
-    const toolTipSwitchFlag = useSelector(state => state.cryptoStockModule.toolTipOn)
+    const toolTipSwitchFlag = useSelector(state => state.cryptoModule.toolTipOn)
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
 
     const dispatch = useDispatch()
-    const processMore = useSelector(state => state.cryptoStockModule.processSelectedFunctionsOnMoreData)
-    // const streamedTickerData = useSelector(state => state.cryptoStockModule.streamedTickerData)
-    const tDataRedux = useSelector(state => state.cryptoStockModule.cryptoDataInDb)
+    const processMore = useSelector(state => state.cryptoModule.processSelectedFunctionsOnMoreData)
+    // const streamedTickerData = useSelector(state => state.cryptoModule.streamedTickerData)
+    const tDataRedux = useSelector(state => state.cryptoModule.cryptoDataInDb)
     const pageNoBasedOnDataInRedux = Math.floor(tDataRedux.length / 500)
 
-    const selectedTickerPeriod = useSelector(state => state.cryptoStockModule.selectedTickerPeriod)
-    const selectedTickerName = useSelector(state => state.cryptoStockModule.selectedTickerName)
+    const selectedTickerPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
+    const selectedTickerName = useSelector(state => state.cryptoModule.selectedTickerName)
 
     const newFetchedDataCount = useRef(0)
     const latestDateRf = useRef(latestTime) // latest time in the fetched data. Data doe not inclusive of this time
     const candleStickSeriesRef = useRef(null)
     const candleStickVolumeSeriesRef = useRef(null)
 
-    const selectedFunctionData = useSelector(state => state.cryptoStockModule.selectedFunctions)
-    const modifiedSelectedFunctionWithDataToRender = useSelector(state => state.cryptoStockModule.modifiedSelectedFunctionWithDataToRender)
+    const selectedFunctionData = useSelector(state => state.cryptoModule.selectedFunctions)
+    const modifiedSelectedFunctionWithDataToRender = useSelector(state => state.cryptoModule.modifiedSelectedFunctionWithDataToRender)
     const wsRef = useRef(null)
     const pageNo = useRef(pageNoBasedOnDataInRedux)
     const newDataRef = useRef([...tDataRedux])
@@ -572,7 +572,7 @@ const MainChart = (props) => {
     }, 500)
 
 
-    const barsFromToRedux = useSelector(state => state.cryptoStockModule.barsFromTo)
+    const barsFromToRedux = useSelector(state => state.cryptoModule.barsFromTo)
     useEffect(() => {
         const barsInChartHandler = (param) => {
             const { from, to } = param

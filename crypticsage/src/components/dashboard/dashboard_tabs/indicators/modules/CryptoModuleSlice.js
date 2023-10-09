@@ -4,7 +4,7 @@ import axios from "axios";
 const baseUrl = process.env.NODE_ENV === 'development' ? process.env.REACT_APP_BASEURL : process.env.REACT_APP_NGROK_URL;
 
 export const executeAllSelectedFunctions = createAsyncThunk(
-    'cryptoStockModule/sendApiRequests',
+    'cryptoModule/sendApiRequests',
     async (finalTalibExecuteQuery, thunkAPI) => {
         const allResponses = []
         for (const queryObj of finalTalibExecuteQuery) {

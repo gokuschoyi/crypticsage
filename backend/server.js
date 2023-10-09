@@ -18,10 +18,13 @@ const indicator = require('./routes/indicatorsRoute')
 const http = require('http');
 const app = express();
 
-// const schedule = require('node-schedule');
-// const job = schedule.scheduleJob('*/10 * * * * *', function () {
-//     logs.info('The answer to life, the universe, and everything!');
-// });
+const CMServices = require('./services/contentManagerServices')
+const schedule = require('node-schedule');
+const job = schedule.scheduleJob('30 10 * * *', async function () {
+    logs.info(`Updating binance ticker. (Daily CRON), ${new Date()}`)
+    let processIds = await CMServices.serviceUpdateAllBinanceTickers();
+    logs.info(processIds);
+});
 
 const log = (req, res, next) => {
     logs.info(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);

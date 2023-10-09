@@ -9,7 +9,7 @@ import {
     setSelectedTickerPeriod,
     resetStreamedTickerDataRedux,
     toggleToolTipSwitch
-} from './CryptoStockModuleSlice'
+} from './CryptoModuleSlice'
 import MainChart from '../components/MainChartCopy';
 import SelectedFunctionContainer from '../components/SelectedFunctionContainer';
 import { useSelector } from 'react-redux'
@@ -98,9 +98,9 @@ const checkIfNewTickerFetchIsRequired = ({ openTime, selectedTokenPeriod }) => {
 const CryptoModule = () => {
     const params = useParams();
     const token = useSelector(state => state.auth.accessToken);
-    const tokenPeriod = useSelector(state => state.cryptoStockModule.selectedTickerPeriod)
-    const toolTipSwitchFlag = useSelector(state => state.cryptoStockModule.toolTipOn)
-    const ohlcData = useSelector(state => state.cryptoStockModule.cryptoDataInDb)
+    const tokenPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
+    const toolTipSwitchFlag = useSelector(state => state.cryptoModule.toolTipOn)
+    const ohlcData = useSelector(state => state.cryptoModule.cryptoDataInDb)
     // console.log('toolTipSwitchFlag', toolTipSwitchFlag)
     const theme = useTheme()
     const { cryptotoken } = params;
@@ -219,7 +219,7 @@ const CryptoModule = () => {
         }
     }, [ohlcData, fetchValues, token, cryptotoken, selectedTokenPeriod, dispatch])
 
-    const selectedFunctions = useSelector(state => state.cryptoStockModule.selectedFunctions)
+    const selectedFunctions = useSelector(state => state.cryptoModule.selectedFunctions)
 
     return (
         <Box className='crypto-module-container'>

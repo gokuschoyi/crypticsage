@@ -10,7 +10,7 @@ import {
     , removeFromSelectedFunction
     , setFunctionInputErrorFlagAndMessage
     , setTalibResult
-} from '../modules/CryptoStockModuleSlice'
+} from '../modules/CryptoModuleSlice'
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -76,8 +76,8 @@ const SelectedFunctionContainer = (props) => {
     // console.log('funcRes ', functions)
     const dispatch = useDispatch()
     const token = useSelector(state => state.auth.accessToken);
-    const histDataLength = useSelector(state => state.cryptoStockModule.cryptoDataInDb).length
-    const defaultTalibFunctionsCopy = useSelector(state => state.cryptoStockModule.talibDescriptionCopy)
+    const histDataLength = useSelector(state => state.cryptoModule.cryptoDataInDb).length
+    const defaultTalibFunctionsCopy = useSelector(state => state.cryptoModule.talibDescriptionCopy)
 
     const handleAddIndicator = (param) => {
         console.log(param.func_name)
