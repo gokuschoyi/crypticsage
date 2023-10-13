@@ -13,6 +13,7 @@ router.post('/getCryptoData', CSController.getCryptoDataByMarketCap)
 router.post('/getHistoricalData', CSController.getLatestTickerData) //change name to getRecentChartData
 router.post('/get-latest-crypto-data', CSController.getLatestCryptoData)
 router.post('/get-latest-stocks-data', CSController.getLatestStocksData)
+router.post('/get-stock-summary-details', CSController.getStockSummaryDetails)
 
 router.post('/fetch_token_data', CSController.fetchTickerDataFromDB) // converted
 

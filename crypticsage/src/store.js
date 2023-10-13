@@ -13,6 +13,7 @@ import quizSlice from './components/dashboard/dashboard_tabs/quiz/QuizSlice.js';
 
 import IndicatorsSlice from './components/dashboard/dashboard_tabs/indicators/IndicatorsSlice.js';
 import cryptoModuleSlice from './components/dashboard/dashboard_tabs/indicators/modules/CryptoModuleSlice.js';
+import stockModuleSlice from './components/dashboard/dashboard_tabs/indicators/modules/StockModuleSlice.js';
 
 const reducer = combineReducers({
     settings: settingsSlice,
@@ -24,6 +25,7 @@ const reducer = combineReducers({
     quiz: quizSlice,
     indicators: IndicatorsSlice,
     cryptoModule: cryptoModuleSlice,
+    stockModule: stockModuleSlice,
 })
 
 const persistConfig = {

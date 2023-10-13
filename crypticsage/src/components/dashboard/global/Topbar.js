@@ -11,6 +11,7 @@ import { resetStatsState } from '../dashboard_tabs/stats/StatsSlice.js';
 import { resetTransformedData } from "../dashboard_tabs/quiz/QuizSlice";
 import { resetIndicatorsState } from '../dashboard_tabs/indicators/IndicatorsSlice'
 import { resetCryptoStockModule } from '../dashboard_tabs/indicators/modules/CryptoModuleSlice'
+import { resetStocksDataInDbRedux } from '../dashboard_tabs/indicators/modules/StockModuleSlice'
 import { useSelector, useDispatch } from 'react-redux';
 import InputBase from "@mui/material/InputBase";
 import {
@@ -130,6 +131,7 @@ const Topbar = (props) => {
         dispatch(resetTransformedData());
         dispatch(resetIndicatorsState());
         dispatch(resetCryptoStockModule());
+        dispatch(resetStocksDataInDbRedux());
     }
 
     const userContainer = () => {

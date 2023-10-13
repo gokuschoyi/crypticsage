@@ -18,6 +18,10 @@ export const capitalizeFirstLetter = (string) => {
 
 // convert large number to K, M, B, T
 export const convert = (n) => {
+    if (n === null) return 'N/A';
+    if (n < 0) {
+        return `-${convert(-n)}`;
+    }
     if (n < 1e3) return n.toFixed(4);
     if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + "K";
     if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(1) + "M";

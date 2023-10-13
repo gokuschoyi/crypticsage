@@ -50,7 +50,8 @@ export const themeSettings = (mode) => {
                     },
                     background: {
                         default: colors.colorOne[900],
-                        paper: '#212121'
+                        paper: '#212121',
+                        paperOne:'#2d2c2c'
                     },
                     error: {
                         main: '#F44336',
@@ -104,7 +105,8 @@ export const themeSettings = (mode) => {
                     },
                     background: {
                         default: '#fff',
-                        paper: '#f5f5f5'
+                        paper: '#f5f5f5',
+                        paperOne:'#e7e7e7'
                     },
                     error: {
                         main: '#F44336',

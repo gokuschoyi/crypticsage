@@ -28,7 +28,7 @@
     "uuid": "^9.0.0",
     "winston": "^3.10.0",
     "ws": "^8.13.0",
-    "yahoo-finance2": "^2.4.1"
+    "yahoo-finance2": "^2.8.0"
   },
   "devDependencies": {
     "clean-jsdoc-theme": "^4.2.10",

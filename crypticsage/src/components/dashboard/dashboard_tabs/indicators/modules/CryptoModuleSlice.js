@@ -28,15 +28,14 @@ const initialState = {
     talibDescription: [],
     talibDescriptionCopy: [],
     cryptoDataInDb: [],
-    stocksDataInDb: [],
     streamedTickerData: [],
     selectedFunctions: [],
     modifiedSelectedFunctionWithDataToRender: [],
     processSelectedFunctionsOnMoreData: false,
 }
 
-const cryptoStockModuleSlice = createSlice({
-    name: 'cryptoStockModule',
+const cryptoModuleSlice = createSlice({
+    name: 'cryptoModule',
     initialState,
     reducers: {
         toggleToolTipSwitch: (state) => {
@@ -90,9 +89,6 @@ const cryptoStockModuleSlice = createSlice({
         },
         setCryptoDataInDbRedux: (state, action) => {
             state.cryptoDataInDb = action.payload;
-        },
-        setStocksDataInDbRedux: (state, action) => {
-            state.stocksDataInDb = action.payload;
         },
         setStreamedTickerDataRedux: (state, action) => {
             state.streamedTickerData.push(action.payload);
@@ -479,7 +475,6 @@ const cryptoStockModuleSlice = createSlice({
             state.talibDescription = [];
             state.talibDescriptionCopy = [];
             state.cryptoDataInDb = [];
-            state.stocksDataInDb = [];
             state.streamedTickerData = [];
             state.selectedFunctions = [];
             state.modifiedSelectedFunctionWithDataToRender = [];
@@ -514,7 +509,7 @@ const cryptoStockModuleSlice = createSlice({
     }
 })
 
-const { reducer, actions } = cryptoStockModuleSlice;
+const { reducer, actions } = cryptoModuleSlice;
 export const {
     toggleToolTipSwitch
     , setBarsFromTo

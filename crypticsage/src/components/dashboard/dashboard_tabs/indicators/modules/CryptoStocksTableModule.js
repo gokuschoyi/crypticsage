@@ -7,8 +7,12 @@ import {
     , Tabs
     , Tab
 } from '@mui/material'
-const CryptoStocksTableModule = () => {
+import { setSelectedTab } from '../IndicatorsSlice'
+import { useSelector, useDispatch } from 'react-redux';
 
+const CryptoStocksTableModule = () => {
+    const dispatch = useDispatch()
+    const selectedTab = useSelector(state => state.indicators.selectedTab)
     // adds accessibility props and id to the tab panel
     function a11yProps(index) {
         return {
@@ -18,12 +22,13 @@ const CryptoStocksTableModule = () => {
     }
 
     // switch mode values for crypto and stocks
-    const [tabValue, setTabValue] = React.useState(0);
+    const [tabValue, setTabValue] = React.useState(selectedTab);
 
     // handles the change of the tab
     const handleTabChange = (event, newValue) => {
         // console.log('newValue', newValue)
         setTabValue(newValue);
+        dispatch(setSelectedTab(newValue))
     };
     return (
         <Box className='crypto-stocks-table-module'>

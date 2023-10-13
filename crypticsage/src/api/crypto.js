@@ -51,3 +51,13 @@ export const getLatestStocksData = async (data) => {
     const response = await axios.post(`${baseUrl}/crypto/get-latest-stocks-data`, { token, tokenName }, config)
     return response;
 }
+
+export const getStockSummaryDetails = async (data) => {
+    let token = data.token;
+    let symbol = data.symbol;
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/crypto/get-stock-summary-details`, { token, symbol }, config)
+    return response;
+}

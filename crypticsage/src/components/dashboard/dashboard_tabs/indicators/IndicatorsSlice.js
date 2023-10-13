@@ -7,13 +7,17 @@ const initialState = {
         currency: 'USD',
         order: 'asc',
         orderBy: 'market_cap_rank',
-    }
+    },
+    selectedTab: 0,
 }
 
 const indicatorsSlice = createSlice({
     name: 'indicators',
     initialState,
     reducers: {
+        setSelectedTab: (state, action) => {
+            state.selectedTab = action.payload;
+        },
         setCryptoDataRedux: (state, action) => {
             state.cryptoData = action.payload.cryptoData;
         },
@@ -37,6 +41,7 @@ const indicatorsSlice = createSlice({
 
 const { reducer, actions } = indicatorsSlice;
 export const {
+    setSelectedTab,
     setCryptoDataRedux,
     setCryptoPreferencesRedux,
     setStocksDataRedux,

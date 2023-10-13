@@ -171,12 +171,16 @@
 }
 
 .stocks-name>.stocks-content {
+    border-radius: 10px;
     transition: all 0.2s ease-in-out;
+    display: flex;
+    justify-content: center;
 }
 
 .stocks-name>.stocks-content:hover {
     transition: all 0.2s ease-in-out;
     transform: scale(1.06);
+    background-color: var(--mui-palette-background-paper);
 }
 
 .MuiTableCell-root {
@@ -228,6 +232,98 @@
 
 .crypto-module-container {
     width: 100%;
+}
+
+.stock-module-container {
+    width: 100%;
+}
+
+.company-risk-box-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-radius: 5px;
+    align-items: center;
+    background-color: var(--mui-palette-background-paperOne);
+}
+
+.company-officers-box-item-text {
+    text-align: start;
+}
+
+.table-main {
+    border-collapse: collapse;
+    width: 100%;
+    /* margin-top: 10px; */
+    table-layout: fixed;
+}
+
+.table-main,
+.table-head,
+.new-table-head {
+    background-color: var(--mui-palette-background-paper);
+}
+
+.table-head {
+    width: 190px;
+}
+
+.new-table-head {
+    width: 310px;
+}
+
+.table-row {
+    background-color: var(--mui-palette-background-paperOne);
+}
+
+.table-head,
+.new-table-head,
+.table-data {
+    border: 1px solid var(--mui-palette-background-default);
+    white-space: nowrap;
+    padding: 4px;
+    text-align: left;
+}
+
+/* estimate table  */
+.indi-estimate-box {
+    background-color: var(--mui-palette-background-paperOne);
+}
+
+.esti-table {
+    border-collapse: collapse;
+    /* width: 100%; */
+    margin-top: 10px;
+}
+
+.esti-table .esti-table-head {
+    background-color: var(--mui-palette-background-paper);
+}
+
+.esti-table,
+.esti-table-head,
+.esti-table-td {
+    border: 1px solid var(--mui-palette-background-default);
+    white-space: nowrap;
+}
+
+.esti-table-head,
+.esti-table-td {
+    padding: 4px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.data-table {
+    table-layout: fixed;
+}
+
+.table-container {
+    overflow: hidden;
+    width: 100%;
+    padding-top: 10px;
+    /* Adjust the width for your desired fixed size */
+    overflow-x: auto;
 }
 
 .settings-box {

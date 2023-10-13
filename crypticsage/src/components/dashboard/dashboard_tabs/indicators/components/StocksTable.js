@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { getLatestStocksData } from '../../../../../api/crypto'
 import { convert, getLastUpdatedTimeString, getDateTime } from '../../../../../utils/Utils'
 import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../global/Icons';
@@ -19,8 +19,12 @@ import {
     , Collapse
 } from '@mui/material'
 
+import { setStocksDataRedux } from '../IndicatorsSlice'
+import { setSelectedStockName, resetStateOnStockNameChange } from '../modules/StockModuleSlice'
+import { useNavigate } from 'react-router-dom';
+
 function Row(props) {
-    const { row } = props;
+    const { row, handleStocksPageLoad } = props;
     const [openMore, setOpenMore] = React.useState(false);
     const switchCollapse = (e) => {
         setOpenMore((prev) => !prev)
@@ -63,7 +67,12 @@ function Row(props) {
                     </IconButton>
                 </TableCell>
                 <TableCell className='stocks-name'>
-                    <Box className='stocks-content'>
+                    <Box className='stocks-content' data-id={symbol}
+                        onClick={(e) => {
+                            const dataId = e.currentTarget.getAttribute('data-id')
+                            handleStocksPageLoad(dataId)
+                        }}
+                    >
                         {symbol}
                     </Box>
                 </TableCell>
@@ -185,15 +194,20 @@ const StocksTable = () => {
     const theme = useTheme()
     const tableHeight = 500;
 
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
     //<------ table logic ------>//
     const token = useSelector(state => state.auth.accessToken);
     const [stockData, setStockData] = useState([]);
     const [fetchedTime, setFetchedTime] = useState('');
+    const stockDataInRedux = useSelector(state => state.indicators.stocksData)
 
     // get latest stocks data
     const loadedRef = useRef(false);
     useEffect(() => {
-        if (!loadedRef.current) {
+        if (!loadedRef.current && stockDataInRedux.length === 0) {
+            console.log('UE : Stocks info fetch')
             loadedRef.current = true;
             let data = {
                 token: token,
@@ -203,9 +217,14 @@ const StocksTable = () => {
                     const time = Math.floor(Date.now() / 1000)
                     setFetchedTime(time);
                     setStockData(res.data.yFData)
+                    dispatch(setStocksDataRedux(res.data.yFData))
                 })
+        } else {
+            console.log('UE : Stocks info fetch from redux')
+            let reduxCopy = [...stockDataInRedux]
+            setStockData(reduxCopy)
         }
-    })
+    }, [stockDataInRedux, token, dispatch])
 
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('market_cap');
@@ -243,11 +262,26 @@ const StocksTable = () => {
         }
         getLatestStocksData(data)
             .then((res) => {
-                setStockData(res.data.yFData)
+                // setStockData(res.data.yFData)
+                dispatch(setStocksDataRedux(res.data.yFData))
                 const time = Math.floor(Date.now() / 1000)
                 setFetchedTime(time);
                 refreshIcon.classList.remove('rotate-icon');
             })
+    }
+
+    const selectedStock = useSelector(state => state.stockModule.selectedStock)
+    const handleStocksPageLoad = (dataId) => {
+        console.log('handleStocksPageLoad : ', dataId)
+        if (dataId !== null) {
+            if (dataId === selectedStock) {
+                navigate(`/dashboard/indicators/stocks/${dataId}`)
+            } else { // reset state when stock name in redux and selected dont match
+                dispatch(setSelectedStockName(dataId))
+                dispatch(resetStateOnStockNameChange())
+                navigate(`/dashboard/indicators/stocks/${dataId}`)
+            }
+        }
     }
 
     return (
@@ -331,7 +365,7 @@ const StocksTable = () => {
                                     <TableBody>
                                         {stockData.map((row, index) => {
                                             return (
-                                                <Row row={row} key={index} />
+                                                <Row row={row} key={index} handleStocksPageLoad={handleStocksPageLoad} />
                                             )
                                         })}
                                     </TableBody>

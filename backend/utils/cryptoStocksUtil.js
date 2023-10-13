@@ -1,6 +1,6 @@
 const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
-// const yahooFinance = require('yahoo-finance2').default; // summary quotes not working
+const yahooFinance = require('yahoo-finance2').default; // summary quotes not working
 const axios = require('axios').default;
 
 // < - - - - - - - - - - Helper Functions - - - - - - - - - - >
@@ -224,6 +224,495 @@ const getYfinanceQuotes = async (symbols) => {
     return finalData
 }
 
+const yFinanceDatCleaner = (result) => {
+    let resultObj = {}
+    for (const [key, moduleValue] of Object.entries(result)) {
+        switch (key) {
+            case 'assetProfile':
+                console.log('Cleaning assetProfile')
+                let companyofficers = moduleValue.companyOfficers
+                companyofficers.forEach((officer) => {
+                    return {
+                        ...officer,
+                        totalPay: officer.totalPay.raw,
+                        exercisedValue: officer.exercisedValue.raw,
+                        unexercisedValue: officer.unexercisedValue.raw,
+                    }
+                })
+                moduleValue.companyOfficers = companyofficers
+                resultObj[key] = moduleValue
+                break;
+            default:
+                console.log('No key match from url fetch')
+        }
+    }
+    return resultObj
+}
+
+const transformPriceSummary = (stockData) => {
+    let groupedData = {}
+    // Group 1: Stock Market Data
+    const stockMarketData = {
+        basicMarketData: {
+            priceHint: stockData.priceHint,
+            previousClose: stockData.previousClose,
+            open: stockData.open,
+            dayLow: stockData.dayLow,
+            dayHigh: stockData.dayHigh,
+        },
+        regularMarketData: {
+            regularMarketPreviousClose: stockData.regularMarketPreviousClose,
+            regularMarketOpen: stockData.regularMarketOpen,
+            regularMarketDayLow: stockData.regularMarketDayLow,
+            regularMarketDayHigh: stockData.regularMarketDayHigh,
+        },
+        financialData: {
+            dividendYield: stockData.dividendYield,
+            payoutRatio: stockData.payoutRatio,
+            beta: stockData.beta,
+            trailingPE: stockData.trailingPE,
+            forwardPE: stockData.forwardPE,
+        },
+        volumeData: {
+            volume: stockData.volume,
+            regularMarketVolume: stockData.regularMarketVolume,
+            averageVolume: stockData.averageVolume,
+            averageVolume10days: stockData.averageVolume10days,
+            averageDailyVolume10Day: stockData.averageDailyVolume10Day,
+            averageDailyVolume3Month: stockData.averageDailyVolume3Month,
+        },
+        bidAskData: {
+            bid: stockData.bid,
+            ask: stockData.ask,
+            bidSize: stockData.bidSize,
+            askSize: stockData.askSize,
+        },
+        marketCapAndRange: {
+            marketCap: stockData.marketCap,
+            fiftyTwoWeekLow: stockData.fiftyTwoWeekLow,
+            fiftyTwoWeekHigh: stockData.fiftyTwoWeekHigh,
+            priceToSalesTrailing12Months: stockData.priceToSalesTrailing12Months,
+        },
+        movingAverages: {
+            fiftyDayAverage: stockData.fiftyDayAverage,
+            twoHundredDayAverage: stockData.twoHundredDayAverage,
+        },
+        dividendInformation: {
+            trailingAnnualDividendRate: stockData.trailingAnnualDividendRate,
+            trailingAnnualDividendYield: stockData.trailingAnnualDividendYield,
+        }
+    };
+
+    // Group 2: Market and Exchange Information 
+    const marketExchangeInfo = {
+        currencyAndMarketSource: {
+            currency: stockData.currency,
+            fromCurrency: stockData.fromCurrency,
+            toCurrency: stockData.toCurrency,
+            currencySymbol: stockData.currencySymbol,
+        },
+        marketExchange: {
+            exchange: stockData.exchange,
+            exchangeName: stockData.exchangeName,
+            exchangeDataDelayedBy: stockData.exchangeDataDelayedBy,
+        },
+        stockInformation: {
+            quoteType: stockData.quoteType,
+            symbol: stockData.symbol,
+            underlyingSymbol: stockData.underlyingSymbol,
+            shortName: stockData.shortName,
+            longName: stockData.longName,
+            quoteSourceName: stockData.quoteSourceName,
+        },
+        priceData: {
+            postMarketChangePercent: stockData.postMarketChangePercent,
+            postMarketChange: stockData.postMarketChange,
+            postMarketTime: stockData.postMarketTime,
+            postMarketPrice: stockData.postMarketPrice,
+            postMarketSource: stockData.postMarketSource,
+            regularMarketChangePercent: stockData.regularMarketChangePercent,
+            regularMarketChange: stockData.regularMarketChange,
+            regularMarketTime: stockData.regularMarketTime,
+            regularMarketPrice: stockData.regularMarketPrice,
+        },
+        stockTradeability: {
+            tradeable: stockData.tradeable,
+        },
+        marketInformation: {
+            coinMarketCapLink: stockData.coinMarketCapLink,
+            algorithm: stockData.algorithm,
+            preMarketSource: stockData.preMarketSource,
+            regularMarketSource: stockData.regularMarketSource,
+        },
+    }
+    groupedData['stockMarketData'] = stockMarketData
+    groupedData['marketExchangeInfo'] = marketExchangeInfo
+    return groupedData;
+}
+
+const transformDefaultKeyStat = (inputData) => {
+    return {
+        "price_information": {
+            "priceHint": inputData.priceHint,
+            "forwardPE": inputData.forwardPE
+        },
+        "profitability": {
+            "profitMargins": inputData.profitMargins
+        },
+        "shares_information": {
+            "floatShares": inputData.floatShares,
+            "sharesOutstanding": inputData.sharesOutstanding,
+            "sharesShort": inputData.sharesShort,
+            "sharesShortPriorMonth": inputData.sharesShortPriorMonth,
+            "sharesShortPreviousMonthDate": inputData.sharesShortPreviousMonthDate,
+            "dateShortInterest": inputData.dateShortInterest,
+            "sharesPercentSharesOut": inputData.sharesPercentSharesOut,
+            "heldPercentInsiders": inputData.heldPercentInsiders,
+            "heldPercentInstitutions": inputData.heldPercentInstitutions,
+            "shortRatio": inputData.shortRatio,
+            "shortPercentOfFloat": inputData.shortPercentOfFloat
+        },
+        "financial_metrics": {
+            "beta": inputData.beta,
+            "impliedSharesOutstanding": inputData.impliedSharesOutstanding,
+            "bookValue": inputData.bookValue,
+            "priceToBook": inputData.priceToBook,
+            "lastFiscalYearEnd": inputData.lastFiscalYearEnd,
+            "nextFiscalYearEnd": inputData.nextFiscalYearEnd,
+            "mostRecentQuarter": inputData.mostRecentQuarter,
+            "earningsQuarterlyGrowth": inputData.earningsQuarterlyGrowth,
+            "netIncomeToCommon": inputData.netIncomeToCommon,
+            "trailingEps": inputData.trailingEps,
+            "forwardEps": inputData.forwardEps,
+            "pegRatio": inputData.pegRatio,
+            "lastSplitFactor": inputData.lastSplitFactor,
+            "lastSplitDate": inputData.lastSplitDate,
+            "category": inputData.category,
+            "fundFamily": inputData.fundFamily,
+            "legalType": inputData.legalType,
+        },
+        "valuation_and_performance": {
+            "enterpriseValue": inputData.enterpriseValue,
+            "enterpriseToRevenue": inputData.enterpriseToRevenue,
+            "enterpriseToEbitda": inputData.enterpriseToEbitda,
+            "52WeekChange": inputData["52WeekChange"],
+            "SandP52WeekChange": inputData.SandP52WeekChange
+        }
+    };
+}
+
+const transformFinancialData = (financialData) => {
+    const targetPricesAndRecommendations = {
+        currentPrice: financialData.currentPrice,
+        targetHighPrice: financialData.targetHighPrice,
+        targetLowPrice: financialData.targetLowPrice,
+        targetMeanPrice: financialData.targetMeanPrice,
+        targetMedianPrice: financialData.targetMedianPrice,
+        recommendationMean: financialData.recommendationMean,
+        recommendationKey: financialData.recommendationKey,
+        numberOfAnalystOpinions: financialData.numberOfAnalystOpinions,
+    };
+
+    const cashAndDebt = {
+        totalCash: financialData.totalCash,
+        totalCashPerShare: financialData.totalCashPerShare,
+        totalDebt: financialData.totalDebt,
+        debtToEquity: financialData.debtToEquity,
+    };
+
+    const financialRatios = {
+        quickRatio: financialData.quickRatio,
+        currentRatio: financialData.currentRatio,
+        returnOnAssets: financialData.returnOnAssets,
+        returnOnEquity: financialData.returnOnEquity,
+    };
+
+    const revenueAndProfits = {
+        totalRevenue: financialData.totalRevenue,
+        revenuePerShare: financialData.revenuePerShare,
+        grossProfits: financialData.grossProfits,
+        freeCashflow: financialData.freeCashflow,
+        operatingCashflow: financialData.operatingCashflow,
+        earningsGrowth: financialData.earningsGrowth,
+        revenueGrowth: financialData.revenueGrowth,
+        ebitda: financialData.ebitda,
+    };
+
+    const profitMargins = {
+        grossMargins: financialData.grossMargins,
+        ebitdaMargins: financialData.ebitdaMargins,
+        operatingMargins: financialData.operatingMargins,
+        profitMargins: financialData.profitMargins,
+    };
+
+    const currency = {
+        financialCurrency: financialData.financialCurrency,
+    };
+
+    return {
+        targetPricesAndRecommendations: targetPricesAndRecommendations,
+        cashAndDebt: cashAndDebt,
+        financialRatios: financialRatios,
+        revenueAndProfits: revenueAndProfits,
+        profitMargins: profitMargins,
+        currency: currency,
+    };
+}
+
+const getStockSummaryDetails = async (symbol) => {
+    // 'summaryProfile','majorHoldersBreakdown' 'netSharePurchaseActivity' not included as it same as assetProfile with less information
+    log.info(`Fetching symbol summary for ${symbol}`)
+    const whiteListModule = ['secFilings', 'quoteType']
+    const blackListModules = ['industryTrend', 'majorDirectHolders', 'sectorTrend', 'topHoldings', 'fundProfile', 'fundPerformance']
+
+    const moduleOptions = {
+        modules: [
+            'assetProfile'
+            , 'balanceSheetHistory'
+            , 'balanceSheetHistoryQuarterly'
+            , 'calendarEvents'
+            , 'cashflowStatementHistory'
+            , 'cashflowStatementHistoryQuarterly'
+            , 'defaultKeyStatistics'
+            , 'earnings'
+            , 'earningsHistory'
+            , 'earningsTrend'
+            , 'financialData'
+            , 'fundOwnership'
+            , 'incomeStatementHistory'
+            , 'incomeStatementHistoryQuarterly'
+            , 'indexTrend'
+            , 'insiderHolders'
+            , 'insiderTransactions'
+            , 'institutionOwnership'
+            , 'price'
+            , 'recommendationTrend'
+            , 'summaryDetail'
+            , 'upgradeDowngradeHistory'
+        ]
+    }
+
+    const insightsOptions = {
+        reportsCount: 4
+    }
+
+    let qSummary = {}
+    let symbolInsights = {}
+    let stockProfile = {
+        combinedCashflowStatement: {
+            annual: {},
+            quarterly: {}
+        },
+        combinedBalanceSheet: {
+            annual: {},
+            quarterly: {}
+        },
+        cominedIncomeStatement: {
+            annual: {},
+            quarterly: {}
+        }
+    }
+
+    const modules = ["assetProfile"]
+
+    try {
+        // @ts-ignore
+        symbolInsights = await yahooFinance.insights(symbol, insightsOptions);
+        // @ts-ignore
+        qSummary = await yahooFinance.quoteSummary(symbol, moduleOptions)
+
+    } catch (error) {
+        log.warn('Error fetching summary from yahoo finance 2, Trying to fetch from url instead')
+        log.error(error.stack)
+        try {
+            const baseYFUrl = "https://query1.finance.yahoo.com/v6/finance/quoteSummary/"
+            const key = modules.map(module => `modules=${module}`).join('&');
+            const finalUrl = `${baseYFUrl}${symbol}?${key}`
+            console.log(finalUrl)
+        } catch (error) {
+            log.warn('Error fetching URL')
+            log.error(error.stack)
+            throw error
+        }
+    }
+
+    for (const [key, moduleValue] of Object.entries(qSummary)) {
+        // console.log(key)
+        switch (key) {
+            case 'assetProfile':
+                console.log('assetProfile')
+                delete moduleValue.city
+                delete moduleValue.state
+                delete moduleValue.zip
+                delete moduleValue.country
+                delete moduleValue.phone
+                delete moduleValue.industryKey
+                delete moduleValue.industryDisp
+                delete moduleValue.sectorKey
+                delete moduleValue.sectorDisp
+                delete moduleValue.maxAge
+                stockProfile[key] = moduleValue
+                break;
+            case 'recommendationTrend':
+                console.log('recommendationTrend')
+                delete moduleValue.maxAge
+                stockProfile[key] = moduleValue
+                break;
+            case 'indexTrend':
+                console.log('indexTrend')
+                delete moduleValue.maxAge
+                stockProfile[key] = moduleValue
+                break;
+            case 'price':
+                console.log('price')
+                delete moduleValue.maxAge
+                if (stockProfile['combinedPriceSummary'] === undefined) {
+                    stockProfile['combinedPriceSummary'] = moduleValue
+                } else {
+                    stockProfile['combinedPriceSummary'] = { ...stockProfile['combinedPriceSummary'], ...moduleValue }
+                }
+                break;
+            case 'summaryDetail':
+                console.log('summaryDetail')
+                delete moduleValue.maxAge
+                if (stockProfile['combinedPriceSummary'] === undefined) {
+                    stockProfile['combinedPriceSummary'] = moduleValue
+                } else {
+                    stockProfile['combinedPriceSummary'] = { ...stockProfile['combinedPriceSummary'], ...moduleValue }
+                }
+                break;
+            case 'calendarEvents':
+                console.log('calendarEvents')
+                delete moduleValue.maxAge
+                stockProfile[key] = moduleValue
+                break;
+            case 'earnings':
+                console.log('earnings')
+                delete moduleValue.maxAge
+                if (stockProfile['combinedEarnings'] === undefined) {
+                    stockProfile['combinedEarnings'] = moduleValue
+                } else {
+                    stockProfile['combinedEarnings'] = { ...stockProfile['combinedEarnings'], ...moduleValue }
+                }
+                break;
+            case 'earningsHistory':
+                console.log('earningsHistory')
+                delete moduleValue.maxAge
+                if (stockProfile['combinedEarnings'] === undefined) {
+                    stockProfile['combinedEarnings'] = moduleValue
+                } else {
+                    stockProfile['combinedEarnings'] = { ...stockProfile['combinedEarnings'], ...moduleValue }
+                }
+                break;
+            case 'earningsTrend':
+                console.log('earningsTrend')
+                delete moduleValue.maxAge
+                if (stockProfile['combinedEarnings'] === undefined) {
+                    stockProfile['combinedEarnings'] = moduleValue
+                } else {
+                    stockProfile['combinedEarnings'] = { ...stockProfile['combinedEarnings'], ...moduleValue }
+                }
+                break;
+            case 'cashflowStatementHistory':
+                console.log('cashflowStatementHistory')
+                delete moduleValue.maxAge
+                stockProfile.combinedCashflowStatement.annual = moduleValue;
+                break;
+            case 'cashflowStatementHistoryQuarterly':
+                console.log('cashflowStatementHistoryQuarterly')
+                delete moduleValue.maxAge
+                stockProfile.combinedCashflowStatement.quarterly = moduleValue;
+                break;
+            case 'balanceSheetHistory':
+                console.log('balanceSheetHistory')
+                delete moduleValue.maxAge
+                stockProfile.combinedBalanceSheet.annual = moduleValue;
+                break;
+            case 'balanceSheetHistoryQuarterly':
+                console.log('balanceSheetHistoryQuarterly')
+                delete moduleValue.maxAge
+                stockProfile.combinedBalanceSheet.quarterly = moduleValue;
+                break;
+            case 'incomeStatementHistory':
+                console.log('incomeStatementHistory')
+                delete moduleValue.maxAge
+                stockProfile.cominedIncomeStatement.annual = moduleValue;
+                break;
+            case 'incomeStatementHistoryQuarterly':
+                console.log('incomeStatementHistoryQuarterly')
+                delete moduleValue.maxAge
+                stockProfile.cominedIncomeStatement.quarterly = moduleValue;
+                break;
+            case 'defaultKeyStatistics':
+                console.log('defaultKeyStatistics')
+                delete moduleValue.maxAge
+                stockProfile[key] = transformDefaultKeyStat(moduleValue)
+                break;
+            case 'financialData':
+                console.log('financialData')
+                delete moduleValue.maxAge
+                stockProfile[key] = transformFinancialData(moduleValue)
+                break;
+            case 'fundOwnership':
+                console.log('fundOwnership')
+                delete moduleValue.maxAge
+                stockProfile[key] = moduleValue
+                break;
+            case 'insiderHolders':
+                console.log('insiderHolders')
+                delete moduleValue.maxAge
+                stockProfile[key] = moduleValue
+                break;
+            case 'institutionOwnership':
+                console.log('institutionOwnership')
+                delete moduleValue.maxAge
+                stockProfile[key] = moduleValue
+                break;
+            case 'insiderTransactions':
+                console.log('insiderTransactions')
+                delete moduleValue.maxAge
+                const groupedArray = moduleValue.transactions.reduce((acc, obj) => {
+                    const existingEntry = acc.find(entry => entry.name === obj.filerName);
+                    if (existingEntry) {
+                        existingEntry.transactions.push(obj);
+                    } else {
+                        acc.push({
+                            name: obj.filerName,
+                            transactions: [obj]
+                        });
+                    }
+                    return acc;
+                }, []);
+                stockProfile[key] = groupedArray
+                break;
+            case 'upgradeDowngradeHistory':
+                delete moduleValue.maxAge
+                stockProfile[key] = moduleValue
+                break;
+            default:
+                console.log('No key match')
+        }
+    }
+
+    let combinedPriceSummaryCopy = stockProfile['combinedPriceSummary']
+    let transformedPriceSummary = transformPriceSummary(combinedPriceSummaryCopy)
+    stockProfile['combinedPriceSummary'] = transformedPriceSummary
+
+    const insideHld = stockProfile['insiderHolders'].holders
+    const insideTran = stockProfile['insiderTransactions']
+    const added = insideHld.map((item, index) => {
+        const matched = insideTran.find((element) => element.name === item.name)
+        return {
+            ...item,
+            transactions: matched.transactions
+        }
+    })
+    stockProfile['insiderHolders'].holders = added
+    delete stockProfile.insiderTransactions
+    // console.log(added)
+    return stockProfile
+}
+
 // < - - - - - - - - - - Helper Functions - - - - - - - - - - >
 
 module.exports = {
@@ -233,4 +722,5 @@ module.exports = {
     , fetchTopTickerByMarketCap
     , getLatestOHLCForTicker
     , getYfinanceQuotes
+    , getStockSummaryDetails
 }
