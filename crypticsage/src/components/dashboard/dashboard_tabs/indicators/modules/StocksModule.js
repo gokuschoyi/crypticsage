@@ -291,23 +291,34 @@ const RecommendationTrend = ({ summary }) => {
             </Box>
 
             <Box className='recommendation-trend-box-body'>
-                <Grid container spacing={2}>
-                    {trend.map((trendItem, index) => {
-                        const { period, buy, hold, sell, strongBuy, strongSell } = trendItem
-                        return (
-                            <Grid key={index} item xs={12} sm={6} md={6} lg={6} xl={3}>
-                                <Paper className='recommendation-trend-box-item' elevation={4} square={false} sx={{ padding: '8px' }}>
-                                    <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Period : {period}</Typography>
-                                    <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Buy : {buy}</Typography>
-                                    <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Hold : {hold}</Typography>
-                                    <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Sell : {sell}</Typography>
-                                    <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Strong Buy : {strongBuy}</Typography>
-                                    <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Strong Sell : {strongSell}</Typography>
-                                </Paper>
-                            </Grid>
-                        )
-                    })}
-                </Grid>
+                <Accordion>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="recommedation-trend"
+                        id="recommedation-trend"
+                    >
+                        <Typography variant='h5' className='recommedation-trend-box-header' textAlign='start'>Recommendation Trend</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Grid container spacing={4}>
+                            {trend.map((trendItem, index) => {
+                                const { period, buy, hold, sell, strongBuy, strongSell } = trendItem
+                                return (
+                                    <Grid key={index} item xs={12} sm={6} md={6} lg={6} xl={3}>
+                                        <Paper className='recommendation-trend-box-item' elevation={8} square={false} sx={{ padding: '8px' }}>
+                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Period : {period}</Typography>
+                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Buy : {buy}</Typography>
+                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Hold : {hold}</Typography>
+                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Sell : {sell}</Typography>
+                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Strong Buy : {strongBuy}</Typography>
+                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Strong Sell : {strongSell}</Typography>
+                                        </Paper>
+                                    </Grid>
+                                )
+                            })}
+                        </Grid>
+                    </AccordionDetails>
+                </Accordion>
             </Box>
         </Box>
     )
@@ -333,32 +344,49 @@ const IndexTrend = ({ summary }) => {
             </Box>
 
             <Box className='index-trend-box-body'>
-                <Box display='flex' flexDirection='row' gap='10px'>
-                    <Typography variant='body1' className='index-trend-box-item-text'>Symbol : {symbol}</Typography>
-                    <Typography variant='body1' className='index-trend-box-item-text'>PE Ratio : {peRatio}</Typography>
-                    <Typography variant='body1' className='index-trend-box-item-text'>PEG Ratio : {pegRatio}</Typography>
-                </Box>
-                <Box className='estimates-box'>
-                    <table className='esti-table'>
-                        <thead>
-                            <tr>
-                                <th className='esti-table-head'>Period</th>
-                                <th className='esti-table-head'>Growth</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {estimates.map((item, index) => {
-                                const { period, growth } = item
-                                return (
-                                    <tr key={index} className='indi-estimate-box'>
-                                        <td className='esti-table-td'>{period}</td>
-                                        <td className='esti-table-td'>{growth === undefined ? 'N/A' : growth}</td>
+                <Accordion>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="index-trend"
+                        id="index-trend"
+                    >
+                        <Typography variant='h5' className='index-trend-box-header' textAlign='start'>Index Trend</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Box display='flex' flexDirection='row' gap='10px'>
+                            <Paper elevation={4} style={{ padding: '4px' }}>
+                                <Typography variant='body1' className='index-trend-box-item-text'>Symbol : {symbol}</Typography>
+                            </Paper>
+                            <Paper elevation={4} style={{ padding: '4px' }}>
+                                <Typography variant='body1' className='index-trend-box-item-text'>PE Ratio : {peRatio}</Typography>
+                            </Paper>
+                            <Paper elevation={4} style={{ padding: '4px' }}>
+                                <Typography variant='body1' className='index-trend-box-item-text'>PEG Ratio : {pegRatio}</Typography>
+                            </Paper>
+                        </Box>
+                        <Box className='estimates-box'>
+                            <table className='esti-table'>
+                                <thead>
+                                    <tr>
+                                        <th className='esti-table-head'>Period</th>
+                                        <th className='esti-table-head'>Growth</th>
                                     </tr>
-                                )
-                            })}
-                        </tbody>
-                    </table>
-                </Box>
+                                </thead>
+                                <tbody>
+                                    {estimates.map((item, index) => {
+                                        const { period, growth } = item
+                                        return (
+                                            <tr key={index} className='indi-estimate-box'>
+                                                <td className='esti-table-td'>{period}</td>
+                                                <td className='esti-table-td'>{growth === undefined ? 'N/A' : growth}</td>
+                                            </tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </table>
+                        </Box>
+                    </AccordionDetails>
+                </Accordion>
             </Box>
         </Box>
     )
@@ -702,134 +730,146 @@ const CombinedEarnings = ({ summary }) => {
                 <Typography variant='h3'>Earnings Report</Typography>
             </Box>
 
-            <Grid container spacing={2}>
-                <Grid item xs={12} sm={12} md={12} lg={8} xl={8} className='first-grid-earnings'>
-                    <Box className='earnings-data-box'>
-                        <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>Earnings Date</Typography>
-                        <Box className='earnings-date' display='flex' flexDirection='column' alignItems='start'>
-                            {earningsChart.earningsDate.map((date, index) => {
-                                const newDate = new Date(date).toLocaleString();
-                                return (
-                                    <Typography key={index} variant='h6'>{newDate}</Typography>
-                                )
-                            })}
+            <Box className='combined-earnings-box-body'>
+                <Accordion>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="combined-earnings"
+                        id="combined-earnings"
+                    >
+                        <Typography variant='h5' className='combined-earnings-box-header' textAlign='start'>Earnings</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={12} md={12} lg={8} xl={8} className='first-grid-earnings'>
+                                <Box className='earnings-data-box'>
+                                    <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>Earnings Date</Typography>
+                                    <Box className='earnings-date' display='flex' flexDirection='column' alignItems='start'>
+                                        {earningsChart.earningsDate.map((date, index) => {
+                                            const newDate = new Date(date).toLocaleString();
+                                            return (
+                                                <Typography key={index} variant='h6'>{newDate}</Typography>
+                                            )
+                                        })}
+                                    </Box>
+                                    <table className='esti-table'>
+                                        <thead>
+                                            <tr>
+                                                <th className='esti-table-head'>Date</th>
+                                                <th className='esti-table-head'>Actual</th>
+                                                <th className='esti-table-head'>Estimate</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {addedEarningsChart.map((item, index) => (
+                                                <tr key={index} className='indi-estimate-box'>
+                                                    <td className='esti-table-td'>{item.date}</td>
+                                                    <td className='esti-table-td'>{item.actual}</td>
+                                                    <td className='esti-table-td'>{item.estimate}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </Box>
+
+                                <Box className='history-box' pt={1}>
+                                    <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>History</Typography>
+                                    <Box className='table-container'>
+                                        <table className="table-main">
+                                            <thead className='table-group'>
+                                                <tr className='table-row'>
+                                                    <th className='table-head'>Date</th>
+                                                    <th className='table-head'>Period</th>
+                                                    <th className='table-head'>Surprise Percent</th>
+                                                    <th className='table-head'>EPS Difference</th>
+                                                    <th className='table-head'>EPS Estimate</th>
+                                                    <th className='table-head'>EPS Actual</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className='table-body'>
+                                                {history.map((item, index) => (
+                                                    <tr key={index} className='table-row'>
+                                                        <td className='table-data'>{new Date(item.quarter).toLocaleDateString()}</td>
+                                                        <td className='table-data'>{item.period}</td>
+                                                        <td className='table-data'>{item.surprisePercent}</td>
+                                                        <td className='table-data'>{item.epsDifference}</td>
+                                                        <td className='table-data'>{item.epsEstimate}</td>
+                                                        <td className='table-data'>{item.epsActual}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </Box>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
+                                <Box className='financal-chart-data-box'>
+                                    <CustomBarChart data={financialsChart} currency={currency} />
+                                </Box>
+                            </Grid>
+                        </Grid>
+
+                        <Box className='trend-box' pt={1}>
+                            <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>Trend</Typography>
+                            <Box className='trend-period-selector' sx={{ borderBottom: 1, borderColor: 'divider', height: '45px', width: 'fit-content' }} mt={1}>
+                                <Tabs value={tabValue} onChange={handleTabChange} aria-label="trend tabs" textColor="secondary" indicatorColor="primary">
+                                    {trend.map((trend, index) => {
+                                        const period = trend.period
+                                        return (
+                                            <Tab sx={{ minWidth: '50px', padding: '5px 10px' }} key={index} className='tab' label={period} {...a11yProps(index, period)} />
+                                        )
+                                    })}
+                                </Tabs>
+                            </Box>
+
+                            <Box className='basid-details' pt={1}>
+                                <Typography variant='h5' textAlign='start'>End Date : {new Date(selectedPeriodData.endDate).toLocaleDateString()}</Typography>
+                                <Typography variant='h5' textAlign='start'>Growth : {selectedPeriodData.growth}</Typography>
+                            </Box>
+
+                            <Box className='selceted-trend-box' pt={1}>
+                                <Box className='earning-estimate-data' width='100%' pt={1}>
+                                    <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>Earnings Estimate</Typography>
+                                    <Box className='table-container'>
+                                        <DataTable
+                                            data={renameKeys(selectedPeriodData.earningsEstimate)}
+                                        />
+                                    </Box>
+                                </Box>
+
+                                <Box className='revenue-estimate-data' width='100%' pt={1}>
+                                    <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>Revenue Estimate</Typography>
+                                    <Box className='table-container'>
+                                        <DataTable
+                                            data={renameKeys(selectedPeriodData.revenueEstimate)}
+                                        />
+                                    </Box>
+                                </Box>
+
+                                <Box className='eps-trend-data' width='100%' pt={1}>
+                                    <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>EPS Trend</Typography>
+                                    <Box className='table-container'>
+                                        <DataTable
+                                            data={renameKeys(selectedPeriodData.epsTrend)}
+                                        />
+                                    </Box>
+                                </Box>
+
+                                <Box className='eps-revision-data' width='100%' pt={1}>
+                                    <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>EPS Revision</Typography>
+                                    <Box className='table-container'>
+                                        <DataTable
+                                            data={renameKeys(selectedPeriodData.epsRevisions)}
+                                        />
+                                    </Box>
+                                </Box>
+
+                            </Box>
                         </Box>
-                        <table className='esti-table'>
-                            <thead>
-                                <tr>
-                                    <th className='esti-table-head'>Date</th>
-                                    <th className='esti-table-head'>Actual</th>
-                                    <th className='esti-table-head'>Estimate</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {addedEarningsChart.map((item, index) => (
-                                    <tr key={index} className='indi-estimate-box'>
-                                        <td className='esti-table-td'>{item.date}</td>
-                                        <td className='esti-table-td'>{item.actual}</td>
-                                        <td className='esti-table-td'>{item.estimate}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </Box>
-
-                    <Box className='history-box' pt={1}>
-                        <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>History</Typography>
-                        <Box className='table-container'>
-                            <table className="table-main">
-                                <thead className='table-group'>
-                                    <tr className='table-row'>
-                                        <th className='table-head'>Date</th>
-                                        <th className='table-head'>Period</th>
-                                        <th className='table-head'>Surprise Percent</th>
-                                        <th className='table-head'>EPS Difference</th>
-                                        <th className='table-head'>EPS Estimate</th>
-                                        <th className='table-head'>EPS Actual</th>
-                                    </tr>
-                                </thead>
-                                <tbody className='table-body'>
-                                    {history.map((item, index) => (
-                                        <tr key={index} className='table-row'>
-                                            <td className='table-data'>{new Date(item.quarter).toLocaleDateString()}</td>
-                                            <td className='table-data'>{item.period}</td>
-                                            <td className='table-data'>{item.surprisePercent}</td>
-                                            <td className='table-data'>{item.epsDifference}</td>
-                                            <td className='table-data'>{item.epsEstimate}</td>
-                                            <td className='table-data'>{item.epsActual}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </Box>
-                    </Box>
-                </Grid>
-                <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
-                    <Box className='financal-chart-data-box'>
-                        <CustomBarChart data={financialsChart} currency={currency} />
-                    </Box>
-                </Grid>
-            </Grid>
-
-            <Box className='trend-box' pt={1}>
-                <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>Trend</Typography>
-                <Box className='trend-period-selector' sx={{ borderBottom: 1, borderColor: 'divider', height: '45px', width: 'fit-content' }} mt={1}>
-                    <Tabs value={tabValue} onChange={handleTabChange} aria-label="trend tabs" textColor="secondary" indicatorColor="primary">
-                        {trend.map((trend, index) => {
-                            const period = trend.period
-                            return (
-                                <Tab sx={{ minWidth: '50px', padding: '5px 10px' }} key={index} className='tab' label={period} {...a11yProps(index, period)} />
-                            )
-                        })}
-                    </Tabs>
-                </Box>
-
-                <Box className='basid-details' pt={1}>
-                    <Typography variant='h5' textAlign='start'>End Date : {new Date(selectedPeriodData.endDate).toLocaleDateString()}</Typography>
-                    <Typography variant='h5' textAlign='start'>Growth : {selectedPeriodData.growth}</Typography>
-                </Box>
-
-                <Box className='selceted-trend-box' pt={1}>
-                    <Box className='earning-estimate-data' width='100%' pt={1}>
-                        <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>Earnings Estimate</Typography>
-                        <Box className='table-container'>
-                            <DataTable
-                                data={renameKeys(selectedPeriodData.earningsEstimate)}
-                            />
-                        </Box>
-                    </Box>
-
-                    <Box className='revenue-estimate-data' width='100%' pt={1}>
-                        <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>Revenue Estimate</Typography>
-                        <Box className='table-container'>
-                            <DataTable
-                                data={renameKeys(selectedPeriodData.revenueEstimate)}
-                            />
-                        </Box>
-                    </Box>
-
-                    <Box className='eps-trend-data' width='100%' pt={1}>
-                        <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>EPS Trend</Typography>
-                        <Box className='table-container'>
-                            <DataTable
-                                data={renameKeys(selectedPeriodData.epsTrend)}
-                            />
-                        </Box>
-                    </Box>
-
-                    <Box className='eps-revision-data' width='100%' pt={1}>
-                        <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>EPS Revision</Typography>
-                        <Box className='table-container'>
-                            <DataTable
-                                data={renameKeys(selectedPeriodData.epsRevisions)}
-                            />
-                        </Box>
-                    </Box>
-
-                </Box>
+                    </AccordionDetails>
+                </Accordion>
             </Box>
-
-        </Box>
+        </Box >
     )
 }
 
@@ -872,39 +912,50 @@ const CombinedReports = (props) => {
             </Box>
 
             <Box className='combined-data-box'>
-                <Box className='cahsflow-period-selector' sx={{ borderBottom: 1, borderColor: 'divider', height: '45px', width: 'fit-content' }} mt={1}>
-                    <Tabs value={tabValue} onChange={handleTabChange} aria-label="cashflow tabs example" textColor="secondary" indicatorColor="primary">
-                        <Tab className='tab' label="Annual" {...a11yProps(0)} />
-                        <Tab className='tab' label="Quarter" {...a11yProps(1)} />
-                    </Tabs>
-                </Box>
+                <Accordion>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="combined-data"
+                        id="combined-data"
+                    >
+                        <Typography variant='h5' className='combined-data-box-header' textAlign='start'>{report_title}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Box className='cahsflow-period-selector' sx={{ borderBottom: 1, borderColor: 'divider', height: '45px', width: 'fit-content' }} mt={1}>
+                            <Tabs value={tabValue} onChange={handleTabChange} aria-label="cashflow tabs example" textColor="secondary" indicatorColor="primary">
+                                <Tab className='tab' label="Annual" {...a11yProps(0)} />
+                                <Tab className='tab' label="Quarter" {...a11yProps(1)} />
+                            </Tabs>
+                        </Box>
 
-                <Box className='table-container'>
-                    <table className="table-main">
-                        <thead className='table-group'>
-                            <tr className='table-row'>
-                                <th className='new-table-head'>*</th>
-                                {columnNames.map((endDate, index) => (
-                                    <th className='table-head' key={index}>{new Date(endDate).toLocaleDateString()}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody className='table-body'>
-                            {Object.keys(renameKeys(selectedData[report_key][0]))
-                                .filter((key) => !excludedKeys.includes(key)) // Filter out excluded keys
-                                .map((key, index) => (
-                                    <tr className='table-row' key={index}>
-                                        <td className='table-data'>{key}</td>
-                                        {columnNames.map((endDate, colIndex) => (
-                                            <td className='table-data' key={colIndex}>
-                                                {convert(tableData.find((data) => data['End Date'] === endDate)[key])}
-                                            </td>
+                        <Box className='table-container'>
+                            <table className="table-main">
+                                <thead className='table-group'>
+                                    <tr className='table-row'>
+                                        <th className='new-table-head'>*</th>
+                                        {columnNames.map((endDate, index) => (
+                                            <th className='table-head' key={index}>{new Date(endDate).toLocaleDateString()}</th>
                                         ))}
                                     </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </Box>
+                                </thead>
+                                <tbody className='table-body'>
+                                    {Object.keys(renameKeys(selectedData[report_key][0]))
+                                        .filter((key) => !excludedKeys.includes(key)) // Filter out excluded keys
+                                        .map((key, index) => (
+                                            <tr className='table-row' key={index}>
+                                                <td className='table-data'>{key}</td>
+                                                {columnNames.map((endDate, colIndex) => (
+                                                    <td className='table-data' key={colIndex}>
+                                                        {convert(tableData.find((data) => data['End Date'] === endDate)[key])}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </table>
+                        </Box>
+                    </AccordionDetails>
+                </Accordion>
             </Box>
 
         </Box>
@@ -930,44 +981,54 @@ const DefaultKeyStats = ({ summary }) => {
             </Box>
 
             <Box className='key-stats-box'>
-
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                        <Box display='flex' flexDirection='column' alignItems='start'>
-                            <Typography variant='h5'>Valuation & Performance</Typography>
-                            <CustomTable obj={renameKeys(valuation_and_performance)} />
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                        <Box display='flex' flexDirection='column' alignItems='start'>
-                            <Typography variant='h5'>Price Information</Typography>
-                            <CustomTable obj={renameKeys(price_information)} />
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                        <Box display='flex' flexDirection='column' alignItems='start'>
-                            <Typography variant='h5'>Profitability</Typography>
-                            <CustomTable obj={renameKeys(profitability)} />
-                        </Box>
-                    </Grid>
-                </Grid>
-
-                <Box pt={2}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
-                            <Box display='flex' flexDirection='column' alignItems='start'>
-                                <Typography variant='h5'>Financial Metrics</Typography>
-                                <CustomTable obj={renameKeys(financial_metrics)} />
-                            </Box>
+                <Accordion>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="key-stats"
+                        id="key-stats"
+                    >
+                        <Typography variant='h5' className='key-stats-box-header' textAlign='start'>Key Statistics</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                <Box display='flex' flexDirection='column' alignItems='start'>
+                                    <Typography variant='h5'>Valuation & Performance</Typography>
+                                    <CustomTable obj={renameKeys(valuation_and_performance)} />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                <Box display='flex' flexDirection='column' alignItems='start'>
+                                    <Typography variant='h5'>Price Information</Typography>
+                                    <CustomTable obj={renameKeys(price_information)} />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                <Box display='flex' flexDirection='column' alignItems='start'>
+                                    <Typography variant='h5'>Profitability</Typography>
+                                    <CustomTable obj={renameKeys(profitability)} />
+                                </Box>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
-                            <Box display='flex' flexDirection='column' alignItems='start'>
-                                <Typography variant='h5'>Shares Information</Typography>
-                                <CustomTable obj={renameKeys(shares_information)} />
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </Box>
+
+                        <Box pt={2}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
+                                    <Box display='flex' flexDirection='column' alignItems='start'>
+                                        <Typography variant='h5'>Financial Metrics</Typography>
+                                        <CustomTable obj={renameKeys(financial_metrics)} />
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
+                                    <Box display='flex' flexDirection='column' alignItems='start'>
+                                        <Typography variant='h5'>Shares Information</Typography>
+                                        <CustomTable obj={renameKeys(shares_information)} />
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    </AccordionDetails>
+                </Accordion>
             </Box>
         </Box>
     )
@@ -991,43 +1052,53 @@ const FinancialData = ({ summary }) => {
             </Box>
 
             <Box className='financial-data-table-box'>
-
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                        <Box display='flex' flexDirection='column' alignItems='start'>
-                            <Typography variant='h5'>Financial Ratios</Typography>
-                            <CustomTable obj={renameKeys(financialRatios)} />
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                        <Box display='flex' flexDirection='column' alignItems='start'>
-                            <Typography variant='h5'>Profit Margins</Typography>
-                            <CustomTable obj={renameKeys(profitMargins)} />
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                        <Box display='flex' flexDirection='column' alignItems='start'>
-                            <Typography variant='h5'>Cash & Debt</Typography>
-                            <CustomTable obj={renameKeys(cashAndDebt)} />
-                        </Box>
-                    </Grid>
-                </Grid>
-                <Box pt={2}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                            <Box display='flex' flexDirection='column' alignItems='start'>
-                                <Typography variant='h5'>Traget Prices & Recommendations</Typography>
-                                <CustomTable obj={renameKeys(targetPricesAndRecommendations)} />
-                            </Box>
+                <Accordion>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="financial-data"
+                        id="financial-data"
+                    >
+                        <Typography variant='h5' className='financial-data-box-header' textAlign='start'>Financial Data</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                <Box display='flex' flexDirection='column' alignItems='start'>
+                                    <Typography variant='h5'>Financial Ratios</Typography>
+                                    <CustomTable obj={renameKeys(financialRatios)} />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                <Box display='flex' flexDirection='column' alignItems='start'>
+                                    <Typography variant='h5'>Profit Margins</Typography>
+                                    <CustomTable obj={renameKeys(profitMargins)} />
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                <Box display='flex' flexDirection='column' alignItems='start'>
+                                    <Typography variant='h5'>Cash & Debt</Typography>
+                                    <CustomTable obj={renameKeys(cashAndDebt)} />
+                                </Box>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
-                            <Box display='flex' flexDirection='column' alignItems='start'>
-                                <Typography variant='h5'>Revenue And Profits</Typography>
-                                <CustomTable obj={renameKeys(revenueAndProfits)} />
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </Box>
+                        <Box pt={2}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                    <Box display='flex' flexDirection='column' alignItems='start'>
+                                        <Typography variant='h5'>Traget Prices & Recommendations</Typography>
+                                        <CustomTable obj={renameKeys(targetPricesAndRecommendations)} />
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={6} lg={4} xl={4}>
+                                    <Box display='flex' flexDirection='column' alignItems='start'>
+                                        <Typography variant='h5'>Revenue And Profits</Typography>
+                                        <CustomTable obj={renameKeys(revenueAndProfits)} />
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    </AccordionDetails>
+                </Accordion>
             </Box>
         </Box>
     )
@@ -1052,23 +1123,34 @@ const CustomOwnership = (props) => {
             </Box>
 
             <Box className='ownership-box'>
-                <Grid container spacing={2}>
-                    {ownershipList.map((owner, index) => {
-                        const { organization, pctChange, pctHeld, position, reportDate, value } = owner
-                        return (
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4} key={index}>
-                                <Paper elevation={4} square={false} sx={{ padding: '8px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                    <Typography variant='h6' fontWeight={500} textAlign='start'>{index + 1} : {organization}</Typography>
-                                    <Typography variant='h6' textAlign='start'>ReportDate : {new Date(reportDate).toLocaleDateString()}</Typography>
-                                    <Typography variant='h6' textAlign='start'>Position : {position}</Typography>
-                                    <Typography variant='h6' textAlign='start'>Value : {value}</Typography>
-                                    <Typography variant='h6' textAlign='start'>% Change : {pctChange}</Typography>
-                                    <Typography variant='h6' textAlign='start'>% Held : {pctHeld}</Typography>
-                                </Paper>
-                            </Grid>
-                        )
-                    })}
-                </Grid>
+                <Accordion>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="ownership"
+                        id="ownership"
+                    >
+                        <Typography variant='h5' className='ownership-box-header' textAlign='start'>{ownership_type}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Grid container spacing={2}>
+                            {ownershipList.map((owner, index) => {
+                                const { organization, pctChange, pctHeld, position, reportDate, value } = owner
+                                return (
+                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={4} key={index}>
+                                        <Paper elevation={4} square={false} sx={{ padding: '8px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                            <Typography variant='h6' fontWeight={500} textAlign='start'>{index + 1} : {organization}</Typography>
+                                            <Typography variant='h6' textAlign='start'>ReportDate : {new Date(reportDate).toLocaleDateString()}</Typography>
+                                            <Typography variant='h6' textAlign='start'>Position : {position}</Typography>
+                                            <Typography variant='h6' textAlign='start'>Value : {value}</Typography>
+                                            <Typography variant='h6' textAlign='start'>% Change : {pctChange}</Typography>
+                                            <Typography variant='h6' textAlign='start'>% Held : {pctHeld}</Typography>
+                                        </Paper>
+                                    </Grid>
+                                )
+                            })}
+                        </Grid>
+                    </AccordionDetails>
+                </Accordion>
             </Box>
         </Box>
     )
@@ -1093,23 +1175,34 @@ const InsideHolders = ({ summary }) => {
             </Box>
 
             <Box className='inside-holde-box'>
-                <Grid container spacing={2}>
-                    {holders.map((holder, index) => {
-                        const { name, relation, transactionDescription, latestTransDate, positionDirect, positionDirectDate, positionIndirect, positionIndirectDate } = holder
-                        return (
-                            <Grid item xs={12} sm={12} md={6} lg={4} xl={4} key={index} >
-                                <Paper elevation={4} square={false} sx={{ padding: '8px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                    <Typography variant='h6' fontWeight={500} textAlign='start'>{index + 1} : {name}</Typography>
-                                    <Typography variant='h6' textAlign='start'>Relation : {relation}</Typography>
-                                    <Typography variant='h6' textAlign='start'>Position Direct : {positionDirect ? positionDirect : 'N/A'}{positionDirectDate ? `, ${new Date(positionDirectDate).toLocaleDateString()}` : ''}</Typography>
-                                    <Typography variant='h6' textAlign='start'>Position Indirect : {positionIndirect ? positionIndirect : 'N/A'}{positionIndirectDate ? `, ${new Date(positionIndirectDate).toLocaleDateString()}` : ''}</Typography>
-                                    <Typography variant='h6' textAlign='start'>Transaction Description : {transactionDescription}</Typography>
-                                    <Typography variant='h6' textAlign='start'>Transaction Date : {new Date(latestTransDate).toLocaleDateString()}</Typography>
-                                </Paper>
-                            </Grid>
-                        )
-                    })}
-                </Grid>
+                <Accordion>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="inside-holder"
+                        id="inside-holder"
+                    >
+                        <Typography variant='h5' className='inside-holde-box-header' textAlign='start'>Company Officers</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Grid container spacing={2}>
+                            {holders.map((holder, index) => {
+                                const { name, relation, transactionDescription, latestTransDate, positionDirect, positionDirectDate, positionIndirect, positionIndirectDate } = holder
+                                return (
+                                    <Grid item xs={12} sm={12} md={6} lg={4} xl={4} key={index} >
+                                        <Paper elevation={4} square={false} sx={{ padding: '8px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                            <Typography variant='h6' fontWeight={500} textAlign='start'>{index + 1} : {name}</Typography>
+                                            <Typography variant='h6' textAlign='start'>Relation : {relation}</Typography>
+                                            <Typography variant='h6' textAlign='start'>Position Direct : {positionDirect ? positionDirect : 'N/A'}{positionDirectDate ? `, ${new Date(positionDirectDate).toLocaleDateString()}` : ''}</Typography>
+                                            <Typography variant='h6' textAlign='start'>Position Indirect : {positionIndirect ? positionIndirect : 'N/A'}{positionIndirectDate ? `, ${new Date(positionIndirectDate).toLocaleDateString()}` : ''}</Typography>
+                                            <Typography variant='h6' textAlign='start'>Transaction Description : {transactionDescription}</Typography>
+                                            <Typography variant='h6' textAlign='start'>Transaction Date : {new Date(latestTransDate).toLocaleDateString()}</Typography>
+                                        </Paper>
+                                    </Grid>
+                                )
+                            })}
+                        </Grid>
+                    </AccordionDetails>
+                </Accordion>
             </Box>
         </Box>
     )
@@ -1212,21 +1305,21 @@ const StocksModule = () => {
                 ) :
                 (
                     <Box className='stock-summary-profile-box' pl={4} pr={4} pb={4} display='flex' flexDirection='column' gap='40px'>
-                        <AssetProfile summary={stockSummaryState} />
-                        <RecommendationTrend summary={stockSummaryState} />
-                        <IndexTrend summary={stockSummaryState} />
-                        <CombinedPriceSummary summary={stockSummaryState} />
-                        <CalendarEvents summary={stockSummaryState} />
-                        <CombinedEarnings summary={stockSummaryState} />
-                        <CombinedReports report_title='Cash Flow Report' data_key='combinedCashflowStatement' report_key='cashflowStatements' summary={stockSummaryState} />
-                        <CombinedReports report_title='Balance Sheet Report' data_key='combinedBalanceSheet' report_key='balanceSheetStatements' summary={stockSummaryState} />
-                        <CombinedReports report_title='Income Statement' data_key='cominedIncomeStatement' report_key='incomeStatementHistory' summary={stockSummaryState} />
-                        <DefaultKeyStats summary={stockSummaryState} />
-                        <FinancialData summary={stockSummaryState} />
-                        <CustomOwnership ownership_type='Fund Ownership' data_key='fundOwnership' summary={stockSummaryState} />
-                        <CustomOwnership ownership_type='Institution Ownership' data_key='institutionOwnership' summary={stockSummaryState} />
-                        <InsideHolders summary={stockSummaryState} />
-                        <UpgradeDowngradeHistory summary={stockSummaryState} />
+                        {stockSummaryState.assetProfile && <AssetProfile summary={stockSummaryState} />}
+                        {stockSummaryState.recommendationTrend && <RecommendationTrend summary={stockSummaryState} />}
+                        {stockSummaryState.indexTrend && <IndexTrend summary={stockSummaryState} />}
+                        {stockSummaryState.combinedPriceSummary && <CombinedPriceSummary summary={stockSummaryState} />}
+                        {stockSummaryState.calendarEvents && <CalendarEvents summary={stockSummaryState} />}
+                        {stockSummaryState.combinedEarnings && <CombinedEarnings summary={stockSummaryState} />}
+                        {stockSummaryState.combinedCashflowStatement && <CombinedReports report_title='Cash Flow Report' data_key='combinedCashflowStatement' report_key='cashflowStatements' summary={stockSummaryState} />}
+                        {stockSummaryState.combinedBalanceSheet && <CombinedReports report_title='Balance Sheet Report' data_key='combinedBalanceSheet' report_key='balanceSheetStatements' summary={stockSummaryState} />}
+                        {stockSummaryState.cominedIncomeStatement && <CombinedReports report_title='Income Statement' data_key='cominedIncomeStatement' report_key='incomeStatementHistory' summary={stockSummaryState} />}
+                        {stockSummaryState.defaultKeyStatistics && <DefaultKeyStats summary={stockSummaryState} />}
+                        {stockSummaryState.financialData && <FinancialData summary={stockSummaryState} />}
+                        {stockSummaryState.fundOwnership && <CustomOwnership ownership_type='Fund Ownership' data_key='fundOwnership' summary={stockSummaryState} />}
+                        {stockSummaryState.institutionOwnership && <CustomOwnership ownership_type='Institution Ownership' data_key='institutionOwnership' summary={stockSummaryState} />}
+                        {stockSummaryState.insiderHolders && <InsideHolders summary={stockSummaryState} />}
+                        {stockSummaryState.upgradeDowngradeHistory && <UpgradeDowngradeHistory summary={stockSummaryState} />}
                     </Box>
                 )
             }

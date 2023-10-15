@@ -20,11 +20,17 @@ const app = express();
 
 const CMServices = require('./services/contentManagerServices')
 const schedule = require('node-schedule');
-const job = schedule.scheduleJob('30 10 * * *', async function () {
+
+const rule = new schedule.RecurrenceRule();
+rule.hour = 10;
+rule.minute = 0;
+rule.second = 0;
+
+const job = schedule.scheduleJob(rule, async function(){
     logs.info(`Updating binance ticker. (Daily CRON), ${new Date()}`)
     let processIds = await CMServices.serviceUpdateAllBinanceTickers();
     logs.info(processIds);
-});
+}); 
 
 const log = (req, res, next) => {
     logs.info(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);
