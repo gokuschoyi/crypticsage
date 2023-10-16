@@ -26,18 +26,23 @@ rule.hour = 10;
 rule.minute = 0;
 rule.second = 0;
 
-const job = schedule.scheduleJob(rule, async function(){
-    logs.info(`Updating binance ticker. (Daily CRON), ${new Date()}`)
-    let processIds = await CMServices.serviceUpdateAllBinanceTickers();
-    logs.info(processIds);
-}); 
-
 const log = (req, res, next) => {
     logs.info(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);
     next();
 }
 
 logs.info('Starting server...');
+
+if (config.schedulerFlag === 'true') {
+    logs.info('Starting scheduled Crypto update...')
+    const job = schedule.scheduleJob(rule, async function () {
+        logs.info(`Updating binance ticker. (Daily CRON), ${new Date()}`)
+        let processIds = await CMServices.serviceUpdateAllBinanceTickers();
+        logs.info(processIds);
+    });
+} else {
+    logs.info('Scheduler flag set to false, Change in env to enable scheduler');
+}
 
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -71,7 +76,7 @@ app.use('/indicators', verifyToken, indicator)
 // app.use('/indicators', verifyToken, indicators); // remove later
 
 app.listen(config.port, () => {
-    logs.info(`Express server listening on port ${config.port}`);
+    logs.info(`Express server listening on port : ${config.port}`);
 });
 
 if (config.websocketFlag === 'true') {

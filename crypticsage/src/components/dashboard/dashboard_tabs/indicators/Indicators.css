@@ -32,6 +32,11 @@
     gap: 5px;
 }
 
+.stock-link:hover {
+    cursor: pointer;
+    color: red !important;
+}
+
 .ohlcv-box {
     padding: 0px 10px;
     display: flex;
@@ -251,11 +256,19 @@
     text-align: start;
 }
 
+.estimates-box {
+    width: 336px
+}
+
+.earnings-act-est-box {
+    width: 300px;
+}
+
 .table-main {
     border-collapse: collapse;
     width: 100%;
     /* margin-top: 10px; */
-    table-layout: fixed;
+    /* table-layout: fixed; */
 }
 
 .table-main,
@@ -281,7 +294,7 @@
 .table-data {
     border: 1px solid var(--mui-palette-background-default);
     white-space: nowrap;
-    padding: 4px;
+    padding: 4px 3px;
     text-align: left;
 }
 
@@ -426,6 +439,7 @@
         flex-direction: column;
         padding: 5px 10px;
     }
+
 }
 
 @media screen and (max-width: 600px) {
@@ -438,4 +452,49 @@
         font-size: 12px !important;
         font-weight: 400 !important;
     }
+
+    .estimates-box,
+    .earnings-act-est-box {
+        width: 100%;
+    }
+
+    .table-head {
+        text-align: center;
+    }
+
+    .table-data {
+        text-align: center;
+    }
+
+    /* .border-right {
+        border-right: 1px solid white !important;
+    } */
 }
+
+#wordToUnderline {
+    position: relative;
+    display: inline-block;
+}
+
+#underline {
+    position: absolute;
+    background-color: red;
+    height: 2px;
+    bottom: -2px;
+    left: 0px;
+    z-index: -1;
+}
+
+
+/* .stock-header>h3 ::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background-color: blue;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+} */

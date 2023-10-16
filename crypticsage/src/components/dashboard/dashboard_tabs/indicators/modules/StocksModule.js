@@ -6,6 +6,7 @@ import { getStockSummaryDetails } from '../../../../../api/crypto'
 import { setStockSummary } from './StockModuleSlice'
 import { useSelector, useDispatch } from 'react-redux'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import gsap from "gsap";
 
 import CustomBarChart from '../components/BarChart';
 import { convert } from '../../../../../utils/Utils'
@@ -26,6 +27,25 @@ const generateRiskColor = (risk) => {
     return color
 }
 
+const RiskPaper = (props) => {
+    const { risk_type, risk_value } = props
+    return (
+        <Paper elevation={4} sx={{ height: '35px', padding: '8px' }} className='company-risk-box-item'>
+            <Typography variant='body1' className='company-risk-box-item-text'>{risk_type} : <span style={{ color: generateRiskColor(risk_value) }}>{risk_value}</span></Typography>
+            <Tooltip title={generateRiskColor(risk_value) === 'green' ? 'Low Risk' : generateRiskColor(risk_value) === 'orange' ? 'Medium risk' : 'High risk'} placement='top' arrow>
+                <Box height='8px' width='8px'
+                    style={{
+                        cursor: 'pointer',
+                        borderRadius: '8px',
+                        backgroundColor: generateRiskColor(risk_value)
+                    }}
+                >
+                </Box>
+            </Tooltip>
+        </Paper>
+    )
+}
+
 const DataTable = (props) => {
     const { data } = props
     const headers = Object.keys(data);
@@ -36,7 +56,7 @@ const DataTable = (props) => {
             <thead className='table-group'>
                 <tr className='table-row'>
                     {headers.map((header, index) => (
-                        <th className='table-head' key={index}>{header}</th>
+                        <th className={`table-head ${index !== headers.length - 1 ? 'border-right' : ''}`} key={index}>{header}</th>
                     ))}
                 </tr>
             </thead>
@@ -54,7 +74,13 @@ const DataTable = (props) => {
 const renameKeys = (obj) => {
     const result = {};
     for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
+        if (key === 'sharesShortPreviousMonthDate') {
+            result['SS Prev Month'] = obj[key];
+        } else if (key === 'numberOfAnalystOpinions') {
+            result['No Of Analyst Opinions'] = obj[key];
+        } else if (key === 'netIncomeApplicableToCommonShares') {
+            result['NI Applicable To Common Shares'] = obj[key];
+        } else if (obj.hasOwnProperty(key)) {
             let newKey = key.replace(/([a-z])([A-Z])|(\d)(\D)|(\D)(\d)/g, (match, p1, p2, p3, p4, p5, p6) => {
                 if (p1 && p2) {
                     return `${p1} ${p2}`;
@@ -76,8 +102,8 @@ const renameKeys = (obj) => {
 const CustomTable = ({ obj }) => {
     const tableRows = Object.entries(obj).map(([header, value]) => (
         <tr className='table-row' key={header}>
-            <th className='table-data'>{header}</th>
-            <td className='table-data'>{value}</td>
+            <th className='table-data' style={{ textAlign: 'left' }}>{header}</th>
+            <td className='table-data' style={{ textAlign: 'left' }}>{value}</td>
         </tr>
     ));
 
@@ -86,8 +112,8 @@ const CustomTable = ({ obj }) => {
             <table className="table-main" style={{ height: 'fit-content' }}>
                 <thead className='table-group'>
                     <tr className='table-row'>
-                        <th className='table-head'>Category</th>
-                        <th className='table-head'>Value</th>
+                        <th className='table-head' style={{ textAlign: 'left' }}>Category</th>
+                        <th className='table-head' style={{ textAlign: 'left' }}>Value</th>
                     </tr>
                 </thead>
                 <tbody className='table-body'>
@@ -98,9 +124,21 @@ const CustomTable = ({ obj }) => {
     );
 }
 
+const RedDot = () => {
+    return (
+        <Box height='8px' width='8px'
+            style={{
+                cursor: 'pointer',
+                borderRadius: '8px',
+                backgroundColor: 'red'
+            }
+            }
+        />
+    )
+}
+
 const AssetProfile = ({ summary }) => {
     const { assetProfile } = summary
-    // console.log('Asset Profile', assetProfile)
     const theme = useTheme()
     const {
         address1
@@ -118,20 +156,13 @@ const AssetProfile = ({ summary }) => {
         , governanceEpochDate
         , compensationAsOfEpochDate
     } = assetProfile
-    const govDate = new Date(governanceEpochDate).toDateString()
-    const compDate = new Date(compensationAsOfEpochDate).toDateString()
+    const govDate = new Date(governanceEpochDate).toDateString() === 'Invalid Date' ? 'N/A' : new Date(governanceEpochDate).toDateString()
+    const compDate = new Date(compensationAsOfEpochDate).toDateString() === 'Invalid Date' ? 'N/A' : new Date(compensationAsOfEpochDate).toDateString()
     return (
-        <Box className='asset-profile-box'>
-            <Box className='asset-profile-box-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
-                </Box>
-                <Typography variant='h3'>Asset Profile</Typography>
+        <Box className='asset-profile-box stock-section'>
+            <Box className='asset-profile-box-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">Asset Profile<span id="underline"></span></Typography>
             </Box>
 
             <Box className='asset-profile-box-body'>
@@ -146,7 +177,7 @@ const AssetProfile = ({ summary }) => {
                             <Typography variant='body1' className='address-info-text'>INDUSTRY : {industry}</Typography>
                             <Typography variant='body1' className='address-info-text'>SECTOR : {sector}</Typography>
                             <Typography variant='body1' className='address-info-text'>ADDRESS : {address1}</Typography>
-                            <Typography variant='body1' className='address-info-text'>WEBSITE : <a href={website}>{website}</a></Typography>
+                            <Typography variant='body1' className='address-info-text'>WEBSITE : <a className='stock-link' style={{ color: `${theme.palette.error.dark}` }} href={website}>{website}</a></Typography>
                             <Typography variant='body1' className='address-info-text'>EMPLOYEES : {fullTimeEmployees}</Typography>
                             <Typography variant='body1' className='address-info-text'>GOVERNANCE EPOCH DATE : {govDate}</Typography>
                             <Typography variant='body1' className='address-info-text'>COMPENSATION EPOCH DATE : {compDate}</Typography>
@@ -168,16 +199,16 @@ const AssetProfile = ({ summary }) => {
                                 {companyOfficers.map((officer, index) => {
                                     const { age, exercisedValue, fiscalYear, name, title, totalPay, yearBorn } = officer
                                     return (
-                                        <Grid key={index} item xs={12} sm={12} md={6} lg={6} xl={4}>
-                                            <Box className='company-officers-box-item' display='flex' flexDirection='column' alignItems='flex-start' p={1} sx={{ backgroundColor: `${theme.palette.background.paperOne}`, borderRadius: '10px' }}>
-                                                <Typography variant='body1' className='company-officers-box-item-text'>Name : {name}</Typography>
-                                                <Typography variant='body1' className='company-officers-box-item-text'>Title : {title}</Typography>
-                                                <Typography variant='body1' className='company-officers-box-item-text'>Age : {age === undefined ? 'N/A' : age}</Typography>
-                                                <Typography variant='body1' className='company-officers-box-item-text'>Year Born : {yearBorn === undefined ? 'N/A' : yearBorn}</Typography>
-                                                <Typography variant='body1' className='company-officers-box-item-text'>Fiscal Year : {fiscalYear}</Typography>
-                                                <Typography variant='body1' className='company-officers-box-item-text'>Total Pay : {totalPay}</Typography>
-                                                <Typography variant='body1' className='company-officers-box-item-text'>Exercised Value : {exercisedValue === 0 ? 'N/A' : exercisedValue}</Typography>
-                                            </Box>
+                                        <Grid key={index} item xs={12} sm={6} md={4} lg={4} xl={3}>
+                                            <Paper className='company-officers-box-item' elevation={8} style={{ padding: '5px', display: 'flex', flexDirection: 'column' }}>
+                                                <Typography variant='custom' className='company-officers-box-item-text'>Name : {name}</Typography>
+                                                <Typography variant='custom' className='company-officers-box-item-text'>Title : {title}</Typography>
+                                                <Typography variant='custom' className='company-officers-box-item-text'>Age : {age === undefined ? 'N/A' : age}</Typography>
+                                                <Typography variant='custom' className='company-officers-box-item-text'>Year Born : {yearBorn === undefined ? 'N/A' : yearBorn}</Typography>
+                                                <Typography variant='custom' className='company-officers-box-item-text'>Fiscal Year : {fiscalYear}</Typography>
+                                                <Typography variant='custom' className='company-officers-box-item-text'>Total Pay : {totalPay}</Typography>
+                                                <Typography variant='custom' className='company-officers-box-item-text'>Exercised Value : {exercisedValue === 0 ? 'N/A' : exercisedValue}</Typography>
+                                            </Paper>
                                         </Grid>
                                     )
                                 })}
@@ -186,86 +217,28 @@ const AssetProfile = ({ summary }) => {
                     </Accordion>
                 </Box>
 
-                <Box className='company-risk-box' pt={2}>
-                    <Typography variant='h5' className='company-risk-box-header' textAlign='start'>Company Risk</Typography>
-                    <Grid container spacing={2} columns={15} pt={1}>
-                        <Grid item xs={15} sm={15} md={7} lg={3} xl={3}>
-                            <Paper elevation={4} sx={{ height: '35px', padding: '8px' }} className='company-risk-box-item'>
-                                <Typography variant='body1' className='company-risk-box-item-text'>Audit Risk : <span style={{ color: generateRiskColor(auditRisk) }}>{auditRisk}</span></Typography>
-                                <Tooltip title={generateRiskColor(auditRisk) === 'green' ? 'Low Risk' : generateRiskColor(auditRisk) === 'orange' ? 'Medium risk' : 'High risk'} placement='top' arrow>
-                                    <Box height='8px' width='8px'
-                                        style={{
-                                            cursor: 'pointer',
-                                            borderRadius: '8px',
-                                            backgroundColor: generateRiskColor(auditRisk)
-                                        }}
-                                    >
-                                    </Box>
-                                </Tooltip>
-                            </Paper>
+                {(auditRisk || boardRisk || compensationRisk || shareHolderRightsRisk || overallRisk) &&
+                    <Box className='company-risk-box' pt={2}>
+                        <Typography variant='h5' className='company-risk-box-header' textAlign='start'>Company Risk</Typography>
+                        <Grid container spacing={2} columns={15} pt={1}>
+                            <Grid item xs={15} sm={15} md={7} lg={3} xl={3}>
+                                {auditRisk && <RiskPaper risk_type={'Autid Risk'} risk_value={auditRisk} />}
+                            </Grid>
+                            <Grid item xs={15} sm={15} md={7} lg={3} xl={3}>
+                                {boardRisk && <RiskPaper risk_type={'Board Risk'} risk_value={boardRisk} />}
+                            </Grid>
+                            <Grid item xs={15} sm={15} md={7} lg={3} xl={3}>
+                                {compensationRisk && <RiskPaper risk_type={'Compensation Risk'} risk_value={compensationRisk} />}
+                            </Grid>
+                            <Grid item xs={15} sm={15} md={7} lg={3} xl={3}>
+                                {shareHolderRightsRisk && <RiskPaper risk_type={'Share Holders Risk'} risk_value={shareHolderRightsRisk} />}
+                            </Grid>
+                            <Grid item xs={15} sm={15} md={7} lg={3} xl={3}>
+                                {overallRisk && <RiskPaper risk_type={'Overall Risk'} risk_value={overallRisk} />}
+                            </Grid>
                         </Grid>
-                        <Grid item xs={15} sm={15} md={7} lg={3} xl={3}>
-                            <Paper elevation={4} sx={{ height: '35px', padding: '8px' }} className='company-risk-box-item'>
-                                <Typography variant='body1' className='company-risk-box-item-text'>Board Risk : <span style={{ color: generateRiskColor(boardRisk) }}>{boardRisk}</span></Typography>
-                                <Tooltip title={generateRiskColor(boardRisk) === 'green' ? 'Low Risk' : generateRiskColor(boardRisk) === 'orange' ? 'Medium risk' : 'High risk'} placement='top' arrow>
-                                    <Box height='8px' width='8px'
-                                        style={{
-                                            cursor: 'pointer',
-                                            borderRadius: '8px',
-                                            backgroundColor: generateRiskColor(boardRisk)
-                                        }}
-                                    >
-                                    </Box>
-                                </Tooltip>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={15} sm={15} md={7} lg={3} xl={3}>
-                            <Paper elevation={4} sx={{ height: '35px', padding: '8px' }} className='company-risk-box-item'>
-                                <Typography variant='body1' className='company-risk-box-item-text'>Compensation Risk : <span style={{ color: generateRiskColor(compensationRisk) }}>{compensationRisk}</span></Typography>
-                                <Tooltip title={generateRiskColor(compensationRisk) === 'green' ? 'Low Risk' : generateRiskColor(compensationRisk) === 'orange' ? 'Medium risk' : 'High risk'} placement='top' arrow>
-                                    <Box height='8px' width='8px'
-                                        style={{
-                                            cursor: 'pointer',
-                                            borderRadius: '8px',
-                                            backgroundColor: generateRiskColor(compensationRisk)
-                                        }}
-                                    >
-                                    </Box>
-                                </Tooltip>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={15} sm={15} md={7} lg={3} xl={3}>
-                            <Paper elevation={4} sx={{ height: '35px', padding: '8px' }} className='company-risk-box-item'>
-                                <Typography variant='body1' className='company-risk-box-item-text'>Share Holder Rights Risk : <span style={{ color: generateRiskColor(shareHolderRightsRisk) }}>{shareHolderRightsRisk}</span></Typography>
-                                <Tooltip title={generateRiskColor(shareHolderRightsRisk) === 'green' ? 'Low Risk' : generateRiskColor(shareHolderRightsRisk) === 'orange' ? 'Medium risk' : 'High risk'} placement='top' arrow>
-                                    <Box height='8px' width='8px'
-                                        style={{
-                                            cursor: 'pointer',
-                                            borderRadius: '8px',
-                                            backgroundColor: generateRiskColor(shareHolderRightsRisk)
-                                        }}
-                                    >
-                                    </Box>
-                                </Tooltip>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={15} sm={15} md={7} lg={3} xl={3}>
-                            <Paper elevation={4} sx={{ height: '35px', padding: '8px' }} className='company-risk-box-item'>
-                                <Typography variant='body1' className='company-risk-box-item-text'>Overall Risk : <span style={{ color: generateRiskColor(overallRisk) }}>{overallRisk}</span></Typography>
-                                <Tooltip title={generateRiskColor(overallRisk) === 'green' ? 'Low Risk' : generateRiskColor(overallRisk) === 'orange' ? 'Medium risk' : 'High risk'} placement='top' arrow>
-                                    <Box height='8px' width='8px'
-                                        style={{
-                                            cursor: 'pointer',
-                                            borderRadius: '8px',
-                                            backgroundColor: generateRiskColor(overallRisk)
-                                        }}
-                                    >
-                                    </Box>
-                                </Tooltip>
-                            </Paper>
-                        </Grid>
-                    </Grid>
-                </Box>
+                    </Box>
+                }
             </Box>
         </Box >
     )
@@ -277,17 +250,10 @@ const RecommendationTrend = ({ summary }) => {
     // console.log('Recommendation Trend', recommendationTrend)
 
     return (
-        <Box className='recommendation-trend-box'>
-            <Box className='recommendation-trend-box-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
-                </Box>
-                <Typography variant='h3'>Recommendation Trend</Typography>
+        <Box className='recommendation-trend-box stock-section'>
+            <Box className='recommendation-trend-box-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">Recommendation Trend<span id="underline"></span></Typography>
             </Box>
 
             <Box className='recommendation-trend-box-body'>
@@ -304,14 +270,14 @@ const RecommendationTrend = ({ summary }) => {
                             {trend.map((trendItem, index) => {
                                 const { period, buy, hold, sell, strongBuy, strongSell } = trendItem
                                 return (
-                                    <Grid key={index} item xs={12} sm={6} md={6} lg={6} xl={3}>
-                                        <Paper className='recommendation-trend-box-item' elevation={8} square={false} sx={{ padding: '8px' }}>
-                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Period : {period}</Typography>
-                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Buy : {buy}</Typography>
-                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Hold : {hold}</Typography>
-                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Sell : {sell}</Typography>
-                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Strong Buy : {strongBuy}</Typography>
-                                            <Typography variant='body1' textAlign='start' className='recommendation-trend-box-item-text'>Strong Sell : {strongSell}</Typography>
+                                    <Grid key={index} item xs={6} sm={6} md={3} lg={3} xl={3}>
+                                        <Paper className='recommendation-trend-box-item' elevation={8} square={false} sx={{ padding: '8px', display: 'flex', flexDirection: 'column' }}>
+                                            <Typography variant='custom' textAlign='start' className='recommendation-trend-box-item-text'>Period : {period}</Typography>
+                                            <Typography variant='custom' textAlign='start' className='recommendation-trend-box-item-text'>Buy : {buy}</Typography>
+                                            <Typography variant='custom' textAlign='start' className='recommendation-trend-box-item-text'>Hold : {hold}</Typography>
+                                            <Typography variant='custom' textAlign='start' className='recommendation-trend-box-item-text'>Sell : {sell}</Typography>
+                                            <Typography variant='custom' textAlign='start' className='recommendation-trend-box-item-text'>Strong Buy : {strongBuy}</Typography>
+                                            <Typography variant='custom' textAlign='start' className='recommendation-trend-box-item-text'>Strong Sell : {strongSell}</Typography>
                                         </Paper>
                                     </Grid>
                                 )
@@ -330,65 +296,53 @@ const IndexTrend = ({ summary }) => {
     // console.log('Index Trend', indexTrend)
 
     return (
-        <Box className='index-trend-box'>
-            <Box className='index-trend-box-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
-                </Box>
-                <Typography variant='h3'>Index Trend</Typography>
+        <Box className='index-trend-box stock-section'>
+            <Box className='index-trend-box-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">Index Trend<span id="underline"></span></Typography>
             </Box>
 
             <Box className='index-trend-box-body'>
-                <Accordion>
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="index-trend"
-                        id="index-trend"
-                    >
-                        <Typography variant='h5' className='index-trend-box-header' textAlign='start'>Index Trend</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Box display='flex' flexDirection='row' gap='10px'>
-                            <Paper elevation={4} style={{ padding: '4px' }}>
-                                <Typography variant='body1' className='index-trend-box-item-text'>Symbol : {symbol}</Typography>
-                            </Paper>
-                            <Paper elevation={4} style={{ padding: '4px' }}>
-                                <Typography variant='body1' className='index-trend-box-item-text'>PE Ratio : {peRatio}</Typography>
-                            </Paper>
-                            <Paper elevation={4} style={{ padding: '4px' }}>
-                                <Typography variant='body1' className='index-trend-box-item-text'>PEG Ratio : {pegRatio}</Typography>
-                            </Paper>
-                        </Box>
-                        <Box className='estimates-box'>
-                            <table className='esti-table'>
-                                <thead>
-                                    <tr>
-                                        <th className='esti-table-head'>Period</th>
-                                        <th className='esti-table-head'>Growth</th>
+
+                <Box className='accor-index-trend' display='flex' flexDirection='row' gap='10px' alignItems='center'>
+                    <Box display='flex' flexDirection='row' gap='10px'>
+                        <Paper elevation={4} style={{ padding: '4px' }}>
+                            <Typography variant='custom' className='index-trend-box-item-text'>Symbol : {symbol}</Typography>
+                        </Paper>
+                        <Paper elevation={4} style={{ padding: '4px' }}>
+                            <Typography variant='custom' className='index-trend-box-item-text'>PE Ratio : {peRatio}</Typography>
+                        </Paper>
+                        <Paper elevation={4} style={{ padding: '4px' }}>
+                            <Typography variant='custom' className='index-trend-box-item-text'>PEG Ratio : {pegRatio}</Typography>
+                        </Paper>
+                    </Box>
+                </Box>
+
+
+                <Box className='estimates-box'>
+                    <table className='esti-table' style={{ tableLayout: 'fixed', width: '100%' }}>
+                        <thead>
+                            <tr>
+                                <th className='esti-table-head'>Period</th>
+                                <th className='esti-table-head'>Growth</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {estimates.map((item, index) => {
+                                const { period, growth } = item
+                                return (
+                                    <tr key={index} className='indi-estimate-box'>
+                                        <td className='esti-table-td'>{period}</td>
+                                        <td className='esti-table-td'>{growth === undefined ? 'N/A' : growth}</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {estimates.map((item, index) => {
-                                        const { period, growth } = item
-                                        return (
-                                            <tr key={index} className='indi-estimate-box'>
-                                                <td className='esti-table-td'>{period}</td>
-                                                <td className='esti-table-td'>{growth === undefined ? 'N/A' : growth}</td>
-                                            </tr>
-                                        )
-                                    })}
-                                </tbody>
-                            </table>
-                        </Box>
-                    </AccordionDetails>
-                </Accordion>
+                                )
+                            })}
+                        </tbody>
+                    </table>
+                </Box>
+
             </Box>
-        </Box>
+        </Box >
     )
 }
 
@@ -400,17 +354,10 @@ const CombinedPriceSummary = ({ summary }) => {
     const tradable = stockTradeability.isTradable ? 'Yes' : 'No'
 
     return (
-        <Box className='combined-price-summary-box'>
-            <Box className='combined-price-summary-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
-                </Box>
-                <Typography variant='h3'>Stock & Market Info</Typography>
+        <Box className='combined-price-summary-box stock-section'>
+            <Box className='combined-price-summary-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">Stock & Market Info<span id="underline"></span></Typography>
             </Box>
 
             <Box className='stock-market-data'>
@@ -459,12 +406,12 @@ const CombinedPriceSummary = ({ summary }) => {
                             <Box className='table-container'>
                                 <DataTable
                                     data={{
-                                        "Volume": volumeData.volume,
-                                        "Reg Mkt Volume": volumeData.regularMarketVolume,
-                                        "Avg Volume": volumeData.averageVolume,
-                                        "Avg Vol 10 days": volumeData.averageVolume10days,
-                                        "Avg daily Vol 10 days": volumeData.averageDailyVolume10Day,
-                                        "Avg daily Vol 3M": volumeData.averageDailyVolume3Month
+                                        "Volume": convert(volumeData.volume),
+                                        "Reg Mkt Volume": convert(volumeData.regularMarketVolume),
+                                        "Avg Volume": convert(volumeData.averageVolume),
+                                        "Avg Vol 10 days": convert(volumeData.averageVolume10days),
+                                        "Avg daily Vol 10 days": convert(volumeData.averageDailyVolume10Day),
+                                        "Avg daily Vol 3M": convert(volumeData.averageDailyVolume3Month)
                                     }}
                                 />
                             </Box>
@@ -504,7 +451,7 @@ const CombinedPriceSummary = ({ summary }) => {
                             <Box className='table-container'>
                                 <DataTable
                                     data={{
-                                        "Market Cap": marketCapAndRange.marketCap,
+                                        "Market Cap": convert(marketCapAndRange.marketCap),
                                         "52 Week Low": marketCapAndRange.fiftyTwoWeekLow,
                                         "52 Week High": marketCapAndRange.fiftyTwoWeekHigh,
                                         "Price To Sale Trailing 12M": marketCapAndRange.priceToSalesTrailing12Months
@@ -641,40 +588,35 @@ const CalendarEvents = ({ summary }) => {
     const { earnings } = calendarEvents
 
     return (
-        <Box className='calendar-events-box'>
-            <Box className='calendar-events-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
+        <Box className='calendar-events-box stock-section'>
+            <Box className='calendar-events-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">Calendar Events<span id="underline"></span></Typography>
+            </Box>
+
+            <Box className='calendar-events-box-body'>
+                <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>Earnings Date</Typography>
+                <Box className='earnings-date' display='flex' flexDirection='column' alignItems='start'>
+                    {earnings.earningsDate.map((date, index) => {
+                        const newDate = new Date(date).toLocaleString();
+                        return (
+                            <Typography key={index} variant='h6'>{newDate}</Typography>
+                        )
+                    })}
                 </Box>
-                <Typography variant='h3'>Calendar Events</Typography>
-            </Box>
 
-            <Typography variant='h5' textAlign='start' sx={{ textDecoration: 'underline' }}>Earnings Date</Typography>
-            <Box className='earnings-date' display='flex' flexDirection='column' alignItems='start'>
-                {earnings.earningsDate.map((date, index) => {
-                    const newDate = new Date(date).toLocaleString();
-                    return (
-                        <Typography key={index} variant='h6'>{newDate}</Typography>
-                    )
-                })}
-            </Box>
-
-            <Box className='table-container'>
-                <DataTable
-                    data={{
-                        "Earnings Avg": earnings.earningsAverage,
-                        "Earnings High": earnings.earningsHigh,
-                        "Earnings Low": earnings.earningsLow,
-                        "Revenue Avg": earnings.revenueAverage,
-                        "Revenue High": earnings.revenueHigh,
-                        "Revenue Low": earnings.revenueLow,
-                    }}
-                />
+                <Box className='table-container'>
+                    <DataTable
+                        data={{
+                            "Earnings Avg": earnings.earningsAverage,
+                            "Earnings High": earnings.earningsHigh,
+                            "Earnings Low": earnings.earningsLow,
+                            "Revenue Avg": convert(earnings.revenueAverage),
+                            "Revenue High": convert(earnings.revenueHigh),
+                            "Revenue Low": convert(earnings.revenueLow),
+                        }}
+                    />
+                </Box>
             </Box>
         </Box>
     )
@@ -700,9 +642,25 @@ const CombinedEarnings = ({ summary }) => {
         };
     }
 
+    const formatData = (dat) => {
+        let tempRE = {}
+        for (const key in dat) {
+            if (dat.hasOwnProperty(key)) {
+                const val = dat[key];
+                tempRE[key] = convert(val)
+            }
+        }
+        return tempRE
+    }
+
     const [tabValue, setTabValue] = useState(0)
     const [selectedPeriod, setSelectedPeriod] = useState(trend[0].period)
-    const [selectedPeriodData, setSelectedPeriodData] = useState(trend[0])
+    const [selectedPeriodData, setSelectedPeriodData] = useState(
+        {
+            ...trend[0],
+            revenueEstimate: formatData(trend[0].revenueEstimate)
+        }
+    )
 
     const handleTabChange = (event, newValue) => {
         const period = event.target.getAttribute('data-id')
@@ -710,24 +668,20 @@ const CombinedEarnings = ({ summary }) => {
         // console.log(newValue, period)
         setSelectedPeriod(period)
         let selectedData = trend.filter(item => item.period === period)
-        setSelectedPeriodData(selectedData[0])
+        setSelectedPeriodData({
+            ...selectedData[0],
+            revenueEstimate: formatData(selectedData[0].revenueEstimate)
+        })
     }
 
     // console.log(selectedPeriod, selectedPeriodData)
 
     return (
-        <Box className='combined-earnings-box'>
+        <Box className='combined-earnings-box stock-section'>
 
-            <Box className='combined-earnings-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
-                </Box>
-                <Typography variant='h3'>Earnings Report</Typography>
+            <Box className='combined-earnings-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">Earnings Report<span id="underline"></span></Typography>
             </Box>
 
             <Box className='combined-earnings-box-body'>
@@ -752,24 +706,26 @@ const CombinedEarnings = ({ summary }) => {
                                             )
                                         })}
                                     </Box>
-                                    <table className='esti-table'>
-                                        <thead>
-                                            <tr>
-                                                <th className='esti-table-head'>Date</th>
-                                                <th className='esti-table-head'>Actual</th>
-                                                <th className='esti-table-head'>Estimate</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {addedEarningsChart.map((item, index) => (
-                                                <tr key={index} className='indi-estimate-box'>
-                                                    <td className='esti-table-td'>{item.date}</td>
-                                                    <td className='esti-table-td'>{item.actual}</td>
-                                                    <td className='esti-table-td'>{item.estimate}</td>
+                                    <Box className='earnings-act-est-box'>
+                                        <table className='esti-table' style={{ tableLayout: 'fixed', width: '100%' }}>
+                                            <thead>
+                                                <tr>
+                                                    <th className='esti-table-head'>Date</th>
+                                                    <th className='esti-table-head'>Actual</th>
+                                                    <th className='esti-table-head'>Estimate</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {addedEarningsChart.map((item, index) => (
+                                                    <tr key={index} className='indi-estimate-box'>
+                                                        <td className='esti-table-td'>{item.date}</td>
+                                                        <td className='esti-table-td'>{item.actual}</td>
+                                                        <td className='esti-table-td'>{item.estimate}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </Box>
                                 </Box>
 
                                 <Box className='history-box' pt={1}>
@@ -816,7 +772,7 @@ const CombinedEarnings = ({ summary }) => {
                                     {trend.map((trend, index) => {
                                         const period = trend.period
                                         return (
-                                            <Tab sx={{ minWidth: '50px', padding: '5px 10px' }} key={index} className='tab' label={period} {...a11yProps(index, period)} />
+                                            <Tab sx={{ minWidth: '40px', padding: '5px 10px' }} key={index} className='tab' label={period} {...a11yProps(index, period)} />
                                         )
                                     })}
                                 </Tabs>
@@ -873,8 +829,7 @@ const CombinedEarnings = ({ summary }) => {
     )
 }
 
-const CombinedReports = (props) => {
-    const { report_title, data_key, report_key, summary } = props
+const CombinedReports = ({ report_title, data_key, report_key, summary }) => {
     const data = summary[`${data_key}`]
     const { annual, quarterly } = data
 
@@ -898,17 +853,10 @@ const CombinedReports = (props) => {
     const columnNames = [...new Set(tableData.map((data) => data['End Date']))];
 
     return (
-        <Box className='combined-report-box'>
-            <Box className='combined-report-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
-                </Box>
-                <Typography variant='h3'>{report_title}</Typography>
+        <Box className='combined-report-box stock-section'>
+            <Box className='combined-report-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">{report_title}<span id="underline"></span></Typography>
             </Box>
 
             <Box className='combined-data-box'>
@@ -943,7 +891,7 @@ const CombinedReports = (props) => {
                                         .filter((key) => !excludedKeys.includes(key)) // Filter out excluded keys
                                         .map((key, index) => (
                                             <tr className='table-row' key={index}>
-                                                <td className='table-data'>{key}</td>
+                                                <td className='table-data' style={{ textAlign: 'left' }}>{key}</td>
                                                 {columnNames.map((endDate, colIndex) => (
                                                     <td className='table-data' key={colIndex}>
                                                         {convert(tableData.find((data) => data['End Date'] === endDate)[key])}
@@ -965,19 +913,26 @@ const CombinedReports = (props) => {
 const DefaultKeyStats = ({ summary }) => {
     const { defaultKeyStatistics } = summary
     const { price_information, profitability, shares_information, financial_metrics, valuation_and_performance } = defaultKeyStatistics
+    let financialMetricCopy = {
+        ...financial_metrics,
+        lastFiscalYearEnd: new Date(financial_metrics.lastFiscalYearEnd).toDateString(),
+        nextFiscalYearEnd: new Date(financial_metrics.nextFiscalYearEnd).toDateString(),
+        mostRecentQuarter: new Date(financial_metrics.mostRecentQuarter).toDateString(),
+        lastSplitDate: new Date(financial_metrics.lastSplitDate * 1000).toDateString()
+    }
+
+    let sharesInfoCopy = {
+        ...shares_information,
+        sharesShortPriorMonth: new Date(shares_information.sharesShortPriorMonth).toDateString(),
+        sharesShortPreviousMonthDate: new Date(shares_information.sharesShortPreviousMonthDate).toDateString(),
+        dateShortInterest: new Date(shares_information.dateShortInterest).toDateString()
+    }
 
     return (
-        <Box className='default-stats-box'>
-            <Box className='default-stats-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
-                </Box>
-                <Typography variant='h3'>Key Statistics</Typography>
+        <Box className='default-stats-box stock-section'>
+            <Box className='default-stats-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">Key Statistics<span id="underline"></span></Typography>
             </Box>
 
             <Box className='key-stats-box'>
@@ -1016,13 +971,13 @@ const DefaultKeyStats = ({ summary }) => {
                                 <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
                                     <Box display='flex' flexDirection='column' alignItems='start'>
                                         <Typography variant='h5'>Financial Metrics</Typography>
-                                        <CustomTable obj={renameKeys(financial_metrics)} />
+                                        <CustomTable obj={renameKeys(financialMetricCopy)} />
                                     </Box>
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} lg={6} xl={6}>
                                     <Box display='flex' flexDirection='column' alignItems='start'>
                                         <Typography variant='h5'>Shares Information</Typography>
-                                        <CustomTable obj={renameKeys(shares_information)} />
+                                        <CustomTable obj={renameKeys(sharesInfoCopy)} />
                                     </Box>
                                 </Grid>
                             </Grid>
@@ -1038,17 +993,10 @@ const FinancialData = ({ summary }) => {
     const { financialData } = summary
     const { targetPricesAndRecommendations, cashAndDebt, financialRatios, revenueAndProfits, profitMargins, currency } = financialData
     return (
-        <Box className='financial-data-box'>
-            <Box className='financial-data-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
-                </Box>
-                <Typography variant='h3'>Financial Data</Typography>
+        <Box className='financial-data-box stock-section'>
+            <Box className='financial-data-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">Financial Data<span id="underline"></span></Typography>
             </Box>
 
             <Box className='financial-data-table-box'>
@@ -1104,22 +1052,14 @@ const FinancialData = ({ summary }) => {
     )
 }
 
-const CustomOwnership = (props) => {
-    const { ownership_type, data_key, summary } = props
+const CustomOwnership = ({ ownership_type, data_key, summary }) => {
     const { ownershipList } = summary[data_key]
 
     return (
-        <Box className='mainownership-box'>
-            <Box className='ownership-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
-                </Box>
-                <Typography variant='h3'>{ownership_type}</Typography>
+        <Box className='mainownership-box stock-section'>
+            <Box className='ownership-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">{ownership_type}<span id="underline"></span></Typography>
             </Box>
 
             <Box className='ownership-box'>
@@ -1138,12 +1078,12 @@ const CustomOwnership = (props) => {
                                 return (
                                     <Grid item xs={12} sm={12} md={6} lg={4} xl={4} key={index}>
                                         <Paper elevation={4} square={false} sx={{ padding: '8px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                            <Typography variant='h6' fontWeight={500} textAlign='start'>{index + 1} : {organization}</Typography>
-                                            <Typography variant='h6' textAlign='start'>ReportDate : {new Date(reportDate).toLocaleDateString()}</Typography>
-                                            <Typography variant='h6' textAlign='start'>Position : {position}</Typography>
-                                            <Typography variant='h6' textAlign='start'>Value : {value}</Typography>
-                                            <Typography variant='h6' textAlign='start'>% Change : {pctChange}</Typography>
-                                            <Typography variant='h6' textAlign='start'>% Held : {pctHeld}</Typography>
+                                            <Typography variant='custom' fontWeight={500} textAlign='start'>{index + 1} : {organization}</Typography>
+                                            <Typography variant='custom' textAlign='start'>ReportDate : {new Date(reportDate).toLocaleDateString()}</Typography>
+                                            <Typography variant='custom' textAlign='start'>Position : {position}</Typography>
+                                            <Typography variant='custom' textAlign='start'>Value : {value}</Typography>
+                                            <Typography variant='custom' textAlign='start'>% Change : {pctChange}</Typography>
+                                            <Typography variant='custom' textAlign='start'>% Held : {pctHeld}</Typography>
                                         </Paper>
                                     </Grid>
                                 )
@@ -1161,17 +1101,10 @@ const InsideHolders = ({ summary }) => {
     const { holders } = insiderHolders
 
     return (
-        <Box className='inside-holder-box'>
-            <Box className='inside-holder-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
-                </Box>
-                <Typography variant='h3'>Inside Holders</Typography>
+        <Box className='inside-holder-box stock-section'>
+            <Box className='inside-holder-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">Inside Holders<span id="underline"></span></Typography>
             </Box>
 
             <Box className='inside-holde-box'>
@@ -1190,12 +1123,12 @@ const InsideHolders = ({ summary }) => {
                                 return (
                                     <Grid item xs={12} sm={12} md={6} lg={4} xl={4} key={index} >
                                         <Paper elevation={4} square={false} sx={{ padding: '8px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                            <Typography variant='h6' fontWeight={500} textAlign='start'>{index + 1} : {name}</Typography>
-                                            <Typography variant='h6' textAlign='start'>Relation : {relation}</Typography>
-                                            <Typography variant='h6' textAlign='start'>Position Direct : {positionDirect ? positionDirect : 'N/A'}{positionDirectDate ? `, ${new Date(positionDirectDate).toLocaleDateString()}` : ''}</Typography>
-                                            <Typography variant='h6' textAlign='start'>Position Indirect : {positionIndirect ? positionIndirect : 'N/A'}{positionIndirectDate ? `, ${new Date(positionIndirectDate).toLocaleDateString()}` : ''}</Typography>
-                                            <Typography variant='h6' textAlign='start'>Transaction Description : {transactionDescription}</Typography>
-                                            <Typography variant='h6' textAlign='start'>Transaction Date : {new Date(latestTransDate).toLocaleDateString()}</Typography>
+                                            <Typography variant='custom' fontWeight={500} textAlign='start'>{index + 1} : {name}</Typography>
+                                            <Typography variant='custom' textAlign='start'>Relation : {relation}</Typography>
+                                            <Typography variant='custom' textAlign='start'>Position Direct : {positionDirect ? positionDirect : 'N/A'}{positionDirectDate ? `, ${new Date(positionDirectDate).toLocaleDateString()}` : ''}</Typography>
+                                            <Typography variant='custom' textAlign='start'>Position Indirect : {positionIndirect ? positionIndirect : 'N/A'}{positionIndirectDate ? `, ${new Date(positionIndirectDate).toLocaleDateString()}` : ''}</Typography>
+                                            <Typography variant='custom' textAlign='start'>Transaction Description : {transactionDescription}</Typography>
+                                            <Typography variant='custom' textAlign='start'>Transaction Date : {new Date(latestTransDate).toLocaleDateString()}</Typography>
                                         </Paper>
                                     </Grid>
                                 )
@@ -1213,17 +1146,10 @@ const UpgradeDowngradeHistory = ({ summary }) => {
     const { history } = upgradeDowngradeHistory
 
     return (
-        <Box className='upgrade-downgrade-history-box'>
-            <Box className='upgrade-downgrade-history-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
-                <Box height='8px' width='8px'
-                    style={{
-                        cursor: 'pointer',
-                        borderRadius: '8px',
-                        backgroundColor: 'red'
-                    }}
-                >
-                </Box>
-                <Typography variant='h3'>Upgrade/Downgrade History</Typography>
+        <Box className='upgrade-downgrade-history-box stock-section'>
+            <Box className='upgrade-downgrade-history-header stock-header' pb={1} width='100%' alignItems='center' display='flex' flexDirection='row' gap='10px'>
+                <RedDot />
+                <Typography variant='h3' id="wordToUnderline">Upgrade/Downgrade History<span id="underline"></span></Typography>
             </Box>
 
             <Box className='upgrade-downgrade-hist-box'>
@@ -1244,7 +1170,7 @@ const UpgradeDowngradeHistory = ({ summary }) => {
                                 const { epochGradeDate, action, firm, fromGrade, toGrade } = item
                                 return (
                                     <tr key={index} className='table-row'>
-                                        <td className='table-data'>{new Date(epochGradeDate).toLocaleString()}</td>
+                                        <td className='table-data' style={{ textAlign: 'left' }}>{new Date(epochGradeDate).toLocaleString()}</td>
                                         <td className='table-data'>{action}</td>
                                         <td className='table-data'>{firm}</td>
                                         <td className='table-data'>{fromGrade === 'Market Outperform' ? 'MO' : fromGrade}</td>
@@ -1291,6 +1217,33 @@ const StocksModule = () => {
             }
         }
     }, [stockSummary, stockstoken, token, dispatch])
+
+    useEffect(() => {
+        console.log('UE : gsap handler')
+        const stockSections = document.querySelectorAll('.stock-header')
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                const h3 = entry.target.querySelector('#underline');
+                if (entry.isIntersecting) {
+                    // Animate the underline in
+                    gsap.to(h3, {
+                        width: "100%",
+                    });
+                } else {
+                    // Animate the underline out
+                    gsap.to(h3, {
+                        width: "0",
+                    });
+                }
+            });
+        }, {
+            threshold: 0.5
+        });
+
+        stockSections.forEach(section => {
+            observer.observe(section);
+        });
+    })
 
     // console.log(stockSummaryState)
 

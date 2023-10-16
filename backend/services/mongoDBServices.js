@@ -18,7 +18,7 @@ const HISTORICAL_DATABASE_NAME = 'historical_data'
 const mongoUri = config.mongoUri ?? '';
 const client = MongoClient.connect(mongoUri)
     .then(client => {
-        log.info(`Connected to Mongo database.`)
+        log.info(`Connected to Mongo database : 27017`)
         return client
     })
     .catch(error => {

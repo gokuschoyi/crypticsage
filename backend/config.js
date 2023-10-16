@@ -15,6 +15,7 @@ const {
     TOKEN_SECRET_KEY,
     TOKEN_EXPIRATION_TIME,
     GOOGLE_OAUTH_CLIENT_ID,
+    SCHEDULER_FLAG
 } = process.env;
 
 assert(PORT, 'PORT is required');
@@ -32,4 +33,5 @@ module.exports = {
     tokenKey: TOKEN_SECRET_KEY,
     tokenExpirationTime: TOKEN_EXPIRATION_TIME,
     googleOAuthClientId: GOOGLE_OAUTH_CLIENT_ID,
+    schedulerFlag: SCHEDULER_FLAG
 };

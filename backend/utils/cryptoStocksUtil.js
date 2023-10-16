@@ -231,7 +231,7 @@ const yFinanceDataCleaner = (result) => {
     for (const [key, moduleValue] of Object.entries(result)) {
         switch (key) {
             case 'assetProfile':
-                console.log('Cleaning assetProfile')
+                log.info('Cleaning assetProfile')
                 let companyofficers = moduleValue.companyOfficers.map((officer) => {
                     return {
                         ...officer,
