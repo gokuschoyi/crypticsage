@@ -3,8 +3,9 @@ import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import Header from '../../../global/Header';
 import { Indicators } from '../components/IndicatorDescription';
-import { getHistoricalTickerDataFroDb, fetchLatestTickerForUser } from '../../../../../api/adminController'
+import { getHistoricalTickerDataFroDb, fetchLatestTickerForUser, startModelTraining } from '../../../../../api/adminController'
 import {
+    setPredictedValues,
     setCryptoDataInDbRedux,
     setSelectedTickerPeriod,
     resetStreamedTickerDataRedux,
@@ -23,7 +24,58 @@ import {
     , useTheme
     , Switch
     , FormControlLabel
+    , Button
+    , Tooltip
+    , Slider
 } from '@mui/material'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+
+import PredictionsChart from '../components/PredictionsChart';
+
+const MultiSelect = (props) => {
+    const theme = useTheme()
+    const { inputLabel, selectedInputOptions, handleInputOptions, fieldName } = props
+    const inputOptions = [
+        "",
+        "high",
+        "low",
+        "open",
+        "close",
+    ]
+    return (
+        <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'40px'}>
+            <Box sx={{ width: '100%' }}>
+                <Autocomplete
+                    size='small'
+                    disableClearable
+                    disablePortal={false}
+                    id={`select-input-${fieldName}`}
+                    options={inputOptions}
+                    value={selectedInputOptions} // Set the selected value
+                    onChange={(event, newValue) => handleInputOptions(newValue)} // Handle value change
+                    sx={{ width: 'auto' }}
+                    renderInput={(params) => <TextField {...params}
+                        variant="standard"
+
+
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: `${theme.palette.text.secondary}`,
+                                }
+                            }
+                        }}
+                        label={`${inputLabel}`}
+                        color="secondary"
+                    />}
+                />
+            </Box>
+            <Tooltip title={'Select one of the flags to be used to predict'} placement='top' sx={{ cursor: 'pointer' }}>
+                <InfoOutlinedIcon className='small-icon' />
+            </Tooltip>
+        </Box>
+    )
+}
 
 const periodToMilliseconds = (period) => {
     switch (period) {
@@ -93,6 +145,44 @@ const checkIfNewTickerFetchIsRequired = ({ openTime, selectedTokenPeriod }) => {
     let finalDate = end.getTime()
     fetchLength = fetchLength - 1 // to avoid fetching the last ticker
     return [fetchLength, finalDate]
+}
+
+const CustomSlider = (props) => {
+    const { sliderValue, setSliderValue, label, min, max, sliderMin, sliderMax, scaledLearningRate, step, marks } = props
+
+    const handleSliderValueChange = (e, value) => {
+        // console.log(value)
+        if (value < min || value > max) {
+            return
+        } else {
+            if (value === sliderValue) {
+                return
+            } else {
+                setSliderValue(value)
+            }
+        }
+    }
+    return (
+        <Box display='flex' flexDirection='column' alignItems='start'>
+            <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%'>
+                <Typography id="training-size-slider" variant='custom' gutterBottom>{label} : {scaledLearningRate === undefined ? `${sliderValue}${label === 'Training size' ? '%' : ''}` : scaledLearningRate}</Typography>
+                <Typography variant='custom'>(Min: {min}, Max: {max})</Typography>
+            </Box>
+
+            <Box sx={{ width: 300 }}>
+                <Slider
+                    size='small'
+                    color='secondary'
+                    value={sliderValue}
+                    valueLabelDisplay={scaledLearningRate === undefined ? "auto" : "off"}
+                    step={1}
+                    min={sliderMin}
+                    max={sliderMax}
+                    onChange={(e, value) => handleSliderValueChange(e, value)}
+                />
+            </Box>
+        </Box>
+    )
 }
 
 const CryptoModule = () => {
@@ -219,8 +309,146 @@ const CryptoModule = () => {
         }
     }, [ohlcData, fetchValues, token, cryptotoken, selectedTokenPeriod, dispatch])
 
+    const selectedTickerPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
+    const selectedTickerName = useSelector(state => state.cryptoModule.selectedTickerName)
     const selectedFunctions = useSelector(state => state.cryptoModule.selectedFunctions)
+    const tDataRedux = useSelector(state => state.cryptoModule.cryptoDataInDb)
 
+    // Model training parameters
+    const [trainingDatasetSize, setTrainingDatasetSize] = useState(80)
+    const [timeStep, setTimeStepValue] = useState(14)
+    const [lookAhead, setLookAhead] = useState(1)
+    const [epoch, setEpoch] = useState(2)
+    const [hiddenLayer, setHiddenLayer] = useState(4)
+    const [multiSelectValue, setMultiSelectValue] = useState('close')
+    const [learningRate, setLearningRate] = useState(1)
+    const [scaledLearningRate, setScaledLearningRate] = useState(0.01)
+
+    useEffect(() => {
+        setScaledLearningRate(learningRate / 100)
+    }, [learningRate])
+
+    const handleMultiselectOptions = (newValue) => {
+        setMultiSelectValue(newValue)
+    }
+
+    const startWebSocketFlagRef = useRef(false)
+    useEffect(() => {
+        if (!startWebSocketFlagRef.current) {
+            startWebSocketFlagRef.current = true
+            const ws = new WebSocket('ws://localhost:8081');
+            ws.onopen = () => {
+                console.log('WS : CONNECTION ESTABLISHED')
+                ws.send(JSON.stringify({ action: 'Start training', data: 'test' }));
+            }
+            ws.onmessage = (e) => {
+                console.log('WS : MESSAGE RECEIVED', e.data)
+            }
+        }
+    })
+
+    // Execute query to start model training
+    const handleGenerateTrainigQuery = () => {
+        if (selectedFunctions.length === 0) {
+            console.log('Select an indicator to plot')
+        } else {
+            console.log('Generating Training Query')
+            let fTalibExecuteQuery = []
+            selectedFunctions.forEach((unique_func) => {
+                const { outputs } = unique_func;
+                const func = unique_func.functions;
+                func.forEach((f) => {
+                    const { inputs, optInputs, name, id } = f;
+                    let inputEmpty = false;
+                    let talibExecuteQuery = {}
+                    let tOITypes = {}
+                    const transformedOptionalInputs = optInputs.reduce((result, item) => {
+                        result[item.name] = item.defaultValue
+                        tOITypes[item.name] = item.type;
+                        return result;
+                    }, {})
+
+                    let outputkeys = {}
+                    let outputsCopy = [...outputs]
+                    outputkeys = outputsCopy.reduce((result, output) => {
+                        result[output.name] = output.name;
+                        return result;
+                    }, {});
+
+                    let converted = {}
+                    inputs.map((input) => {
+                        if (input.flags) {
+                            Object.keys(input.flags).forEach((key) => {
+                                converted[input.flags[key]] = input.flags[key];
+                            })
+                            return input
+                        } else {
+                            if (input.value === '') {
+                                inputEmpty = true;
+                                converted[input.name] = "";
+                                return {
+                                    ...input,
+                                    errorFlag: true,
+                                    helperText: 'Please select a valid input',
+                                };
+                            } else {
+                                converted[input.name] = input.value;
+                                return {
+                                    ...input,
+                                    errorFlag: false,
+                                    helperText: '',
+                                };
+                            }
+                        }
+                    })
+
+                    talibExecuteQuery['name'] = name;
+                    talibExecuteQuery['startIdx'] = 0;
+                    talibExecuteQuery['endIdx'] = tDataRedux.length - 1;
+                    talibExecuteQuery = { ...talibExecuteQuery, ...converted, ...transformedOptionalInputs }
+
+
+                    let payload = {
+                        func_query: talibExecuteQuery,
+                        func_param_input_keys: converted,
+                        func_param_optional_input_keys: tOITypes,
+                        func_param_output_keys: outputkeys,
+                        db_query: {
+                            asset_type: 'crypto',
+                            fetch_count: tDataRedux.length,
+                            period: selectedTickerPeriod,
+                            ticker_name: selectedTickerName
+                        }
+                    }
+                    fTalibExecuteQuery.push({ id, payload, inputEmpty })
+                })
+            })
+            fTalibExecuteQuery = fTalibExecuteQuery.filter((item) => !item.inputEmpty)
+            console.log(fTalibExecuteQuery)
+            let model_training_parameters = {
+                training_size: trainingDatasetSize,
+                time_step: timeStep,
+                look_ahead: lookAhead,
+                epochs: epoch,
+                hidden_layers: hiddenLayer,
+                learning_rate: scaledLearningRate,
+                to_predict: multiSelectValue
+            }
+            console.log('Model parameters', model_training_parameters)
+            startModelTraining({
+                token,
+                payload: {
+                    fTalibExecuteQuery,
+                    model_training_parameters
+                }
+            }).then((res) => {
+                dispatch(setPredictedValues(res.data.finalRs))
+            })
+        }
+    }
+
+
+    console.log(trainingDatasetSize, timeStep, lookAhead, epoch, hiddenLayer, multiSelectValue, learningRate, scaledLearningRate)
     return (
         <Box className='crypto-module-container'>
             <Box width='-webkit-fill-available'>
@@ -269,7 +497,7 @@ const CryptoModule = () => {
                             </Box>
 
                             <Grid container className='indicator-chart-grid'>
-                                <Grid item xs={12} sm={12} md={12} lg={10} xl={10}>
+                                <Grid item xs={12} sm={12} md={12} lg={9} xl={9}>
                                     <Box className='chart-container' display='flex' flexDirection='column' height='100%' m={2}>
                                         {chartData.length === 0 ?
                                             (
@@ -294,11 +522,29 @@ const CryptoModule = () => {
                                     </Box>
                                 </Grid>
 
-                                {<Grid item xs={12} sm={12} md={12} lg={2} xl={2}>
-                                    <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' pl={2} pr={2} pt={4}>
-                                        Placeholder for now
+                                <Grid item xs={12} sm={12} md={12} lg={3} xl={3}>
+                                    <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' gap='10px' pl={2} pr={2} pt={4}>
+                                        <Box display='flex' flexDirection='column' gap='5px'>
+
+                                            <CustomSlider sliderValue={trainingDatasetSize} setSliderValue={setTrainingDatasetSize} label={'Training size'} min={50} max={95} sliderMin={0} sliderMax={100} />
+                                            <CustomSlider sliderValue={timeStep} setSliderValue={setTimeStepValue} label={'Step Size'} min={14} max={100} sliderMin={1} sliderMax={100} />
+                                            <CustomSlider sliderValue={lookAhead} setSliderValue={setLookAhead} label={'Look Ahead'} min={1} max={5} sliderMin={1} sliderMax={5} />
+                                            <CustomSlider sliderValue={epoch} setSliderValue={setEpoch} label={'Epochs'} min={1} max={20} sliderMin={1} sliderMax={20} />
+                                            <CustomSlider sliderValue={hiddenLayer} setSliderValue={setHiddenLayer} label={'Hidden Layers'} min={1} max={20} sliderMin={1} sliderMax={20} />
+                                            <CustomSlider sliderValue={learningRate} setSliderValue={setLearningRate} label={'Learning Rate'} min={0} max={100} sliderMin={0} sliderMax={100} scaledLearningRate={scaledLearningRate} />
+
+                                            <MultiSelect
+                                                inputLabel={'Prediction flag'}
+                                                selectedInputOptions={multiSelectValue}
+                                                handleInputOptions={handleMultiselectOptions}
+                                                fieldName={'To predict'}
+                                            />
+
+                                        </Box>
+                                        <Button variant='outlined' color='secondary' onClick={(e) => handleGenerateTrainigQuery()}>Generate Training Data Query</Button>
                                     </Box>
-                                </Grid>}
+                                    <PredictionsChart />
+                                </Grid>
                             </Grid>
 
                         </Box>

@@ -177,3 +177,13 @@ export const executeTalibFunction = async ({ token, payload }) => {
     })
     return response;
 }
+
+export const startModelTraining = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/indicators/start_model_training`, { payload }, config, {
+        withCredentials: true
+    })
+    return response;
+}

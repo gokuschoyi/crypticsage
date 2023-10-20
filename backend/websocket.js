@@ -1,11 +1,30 @@
 const { WebSocketServer } = require('ws');
 
-const CMServices = require('./services/contentManagerServices')
+const CMServices = require('./services/contentManagerServices');
+const e = require('express');
 
 // Start the WebSocket server instance
 const wsServer = new WebSocketServer({ noServer: true });
-
+var wsGlobal = null;
 wsServer.on('connection', function connection(ws) {
+    wsGlobal = ws;
+    // console.log(wsGlobal)
+    ws.on('message', async function incoming(message) {
+        // @ts-ignore
+        const data = JSON.parse(message);
+        if (data.action === 'Start training') {
+            console.log('Model traiing started', data)
+        } else {
+            console.log('Invalid action')
+        }
+    })
+    ws.send('something');
+})
+
+
+// wsGlobal.send('message', 'Hello from server');
+
+/* wsServer.on('connection', function connection(ws) {
     console.log('WS : UPDATE 1 BINANCE TICKER : CONNECTION ESTABLISHED', wsServer.clients.size)
 
     ws.on('message', async (message) => {
@@ -21,7 +40,7 @@ wsServer.on('connection', function connection(ws) {
             ws.send(JSON.stringify(statusUpdates));
         }
     });
-});
+}); */
 
 /* wsServer.on('connection', function connection(ws) {
     console.log('WS : UPDATE 1 BINANCE TICKER : CONNECTION ESTABLISHED', wsServer.clients.size)

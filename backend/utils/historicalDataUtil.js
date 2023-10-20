@@ -219,7 +219,7 @@ const calculateUpdateTickerEndDate = ({ openTime, period }) => {
     const periodInMilli = periodToMilliseconds(period)
     const currentTime = new Date().getTime()
     let fetchLength = Math.floor((currentTime - openTime) / periodInMilli)
-    log.info(`Fetch length for ${period} : ${fetchLength}`)
+    log.info()
 
     let end
     switch (period) {
@@ -234,7 +234,7 @@ const calculateUpdateTickerEndDate = ({ openTime, period }) => {
             break;
     }
 
-    log.info(`${new Date(openTime).toLocaleString()}, ${new Date(end).toLocaleString()}`)
+    log.info(`Fetch length for ${period} : ${fetchLength} : ${new Date(openTime).toLocaleString()}, ${new Date(end).toLocaleString()}`)
     let finalDate = end.getTime()
     return finalDate
 }

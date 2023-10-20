@@ -32,12 +32,16 @@ const initialState = {
     selectedFunctions: [],
     modifiedSelectedFunctionWithDataToRender: [],
     processSelectedFunctionsOnMoreData: false,
+    predictedValues: []
 }
 
 const cryptoModuleSlice = createSlice({
     name: 'cryptoModule',
     initialState,
     reducers: {
+        setPredictedValues: (state, action) => {
+            state.predictedValues = action.payload;
+        },
         toggleToolTipSwitch: (state) => {
             state.toolTipOn = !state.toolTipOn;
         },
@@ -478,6 +482,7 @@ const cryptoModuleSlice = createSlice({
             state.streamedTickerData = [];
             state.selectedFunctions = [];
             state.modifiedSelectedFunctionWithDataToRender = [];
+            state.predictedValues = [];
         },
         setIsDataNewFlag: (state, action) => {
             const currentState = state.modifiedSelectedFunctionWithDataToRender;
@@ -511,7 +516,8 @@ const cryptoModuleSlice = createSlice({
 
 const { reducer, actions } = cryptoModuleSlice;
 export const {
-    toggleToolTipSwitch
+    setPredictedValues
+    , toggleToolTipSwitch
     , setBarsFromTo
     , toggleProcessSelectedFunctionsOnMoreData
     , setTalibDescription

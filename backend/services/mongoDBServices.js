@@ -585,9 +585,9 @@ const getInitialQuizDataForUser = async (userQuizStatus) => {
     try {
         let quizzes_array = []
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
-        
+
         const quizCollectionFromDB = await db.collection('quiz').find({}).toArray();
-        
+
         const quizCollection = quizCollectionFromDB.map((quiz) => {
             return {
                 sectionId: quiz.sectionId,
@@ -1697,6 +1697,58 @@ const insertHistoricalDataToDb = async (type, ticker_name, period, token_data) =
 }
 
 /**
+ * Fetches the entire ticker data from db:historical_data based on thetype, ticker name and period
+ * @async
+ * @param {string} type crypto | stock
+ * @param {string} ticker_name the ticker name
+ * @param {string} period 1m | 4h | 6h | 8h | 12h | 1d | 3d | 1w
+ * @returns {Promise<Array>} An object containing the fetched data 
+ * @example
+ * const type = 'crypto';
+ * const ticker_name = 'BTCUSDT';
+ * const period = '4h';
+ * const result = await fetchEntireHistDataFromDb(type, ticker_name, period);
+ * console.log(result);
+ * // Output:
+ * [
+ * {
+ *   "openTime": 1502942400000,
+ *   "open": "4261.48000000",
+ *   "high": "4313.62000000",
+ *   "low": "4261.48000000",
+ *   "close": "4285.08000000",
+ *   "volume": "39.89610500",
+ * }, ... {}
+ * ]
+ */
+const fetchEntireHistDataFromDb = async (type, ticker_name, period) => {
+    try {
+        const db = (await client).db(HISTORICAL_DATABASE_NAME)
+        const collection_name = `${type}_${ticker_name}_${period}`
+        const collection = db.collection(collection_name)
+        const sortQuery = { openTime: 1 }
+        const keysToIncude = { _id: 0, openTime: 1, open: 1, high: 1, low: 1, close: 1, volume: 1 }
+
+        const t = createTimer(`Fetching entire ticker data for ${ticker_name}, ${period}`)
+        t.startTimer()
+        // @ts-ignore
+        const tokenData = await collection.aggregate([
+            {
+                $project: keysToIncude,
+            },
+            {
+                $sort: sortQuery,
+            }
+        ]).toArray();
+        t.stopTimer(__filename.slice(__dirname.length + 1))
+        return tokenData
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+/**
  * Fetches the ticker data from db:historical_data based on the ticker name, period, page_no and items_per_page
  * @async
  * @param {string} type 
@@ -2181,6 +2233,7 @@ module.exports = {
     , fetchTickerMetaFromDb
     , checkTickerMetaDuplicateData
     , insertHistoricalDataToDb
+    , fetchEntireHistDataFromDb
     , fetchTickerHistDataFromDb
     , fetchTickerHistDataBasedOnCount
     , updateTickerMetaData
