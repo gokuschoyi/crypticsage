@@ -143,13 +143,16 @@ const createTrainingData = async ({ stdData, timeStep, lookAhead, e_key, trainin
     return [trainSplit, xTrain, yTrain, xTrainTest, yTrainTest]
 }
 
-const formatPredictedOutput = ({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice, id }) => {
+const formatPredictedOutput = async ({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice, id }) => {
     let tickerHistCopy = tickerHist.slice(time_step, tickerHist.length + 1)
     console.log('Before combining', tickerHistCopy.length, tickerHistCopy[0], tickerHistCopy[tickerHistCopy.length - 1])
-    let tickerDates = tickerHistCopy.slice(trainSplit, tickerHistCopy.length + 1).map((item, index) => {
+    const slicedTickerHistCopy = tickerHistCopy.slice(trainSplit, tickerHistCopy.length)
+
+    let tickerDates = slicedTickerHistCopy.map((item, index) => {
+        const strDate = new Date(item.openTime).toLocaleString()
         return {
-            openTime: new Date(item.openTime).toLocaleString(),
-            open: new Date(new Date(item.openTime).toLocaleString()).getTime() / 1000,
+            openTime: strDate,
+            open: item.openTime / 1000,
             actual: yTrainTest[index][0],
             predicted: predictedPrice[index][0]
         }

@@ -347,7 +347,7 @@ const startModelTraining = async (job) => {
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Combining and finalizing the data for plotting..." })
     log.info('----> Step 10 : Combining and finalizing the data for plotting')
-    TFMUtil.formatPredictedOutput({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice, id: model_id })
+    await TFMUtil.formatPredictedOutput({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice, id: model_id })
     TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions formatted, sending result...` })
 
 
