@@ -1,90 +1,84 @@
 const { WebSocketServer } = require('ws');
+const TF_Model = require('./utils/tf_model');
 
-const CMServices = require('./services/contentManagerServices');
-const e = require('express');
+// Initialize a Map to track user connections
+const userConnections = new Map();
 
 // Start the WebSocket server instance
 const wsServer = new WebSocketServer({ noServer: true });
-var wsGlobal = null;
-wsServer.on('connection', function connection(ws) {
-    wsGlobal = ws;
-    // console.log(wsGlobal)
+const RedisUtil = require('./utils/redis_util')
+
+// Event handlers
+const onNotify = (ws, message) => {
+    if (ws) {
+        ws.send(JSON.stringify({ action: 'notify', message: message }));
+    }
+};
+
+const onEpochBegin = (ws, epoch) => {
+    if (ws) {
+        ws.send(JSON.stringify({ action: 'epochBegin', epoch: epoch }));
+    }
+};
+
+const onEpochEnd = (ws, epoch, log) => {
+    if (ws) {
+        ws.send(JSON.stringify({ action: 'epochEnd', epoch: epoch, log: log }));
+    }
+};
+
+const onBatchEnd = (ws, batch, log) => {
+    if (ws) {
+        ws.send(JSON.stringify({ action: 'batchEnd', batch: batch, log: log }));
+    }
+};
+
+const onTrainingEnd = (ws) => {
+    if (ws) {
+        ws.send(JSON.stringify({ action: 'trainingEnd' }));
+    }
+};
+
+const onPredictionCompleted = async (ws, id) => {
+    if (ws) {
+        const predictions = await RedisUtil.getTestPredictions(id);
+        ws.send(JSON.stringify({ action: 'prediction_completed', id: id, predictions: predictions }));
+    }
+};
+
+wsServer.on('connection', function connection(ws, req) {
+    ws.send(JSON.stringify({ action: 'connected' }));
+
+    // @ts-ignore
+    const params = new URLSearchParams(req.url.replace('/?', ''));
+    let user_id = params.get('user_id')
+    console.log('Connection received', user_id)
+
+    const existingConnection = userConnections.get(user_id);
+    if (existingConnection && existingConnection !== ws) {
+        console.log('Existing user connection found. Closing it.')
+        existingConnection.close()
+    }
+
+    userConnections.set(user_id, ws);
+
     ws.on('message', async function incoming(message) {
         // @ts-ignore
         const data = JSON.parse(message);
-        if (data.action === 'Start training') {
-            console.log('Model traiing started', data)
-        } else {
-            console.log('Invalid action')
-        }
-    })
-    ws.send('something');
-})
-
-
-// wsGlobal.send('message', 'Hello from server');
-
-/* wsServer.on('connection', function connection(ws) {
-    console.log('WS : UPDATE 1 BINANCE TICKER : CONNECTION ESTABLISHED', wsServer.clients.size)
-
-    ws.on('message', async (message) => {
-        const parsedMessage = JSON.parse(message);
-        console.log("WS ACTION : ",parsedMessage.action)
-
-        if (parsedMessage.action === 'startCheckJobStatus') {
-            const { jobIds, type } = parsedMessage.data;
-            console.time('serviceCheckOneBinanceTickerJobCompletition')
-            const statusUpdates = await CMServices.serviceCheckOneBinanceTickerJobCompletition({ jobIds, type })
-            console.timeEnd('serviceCheckOneBinanceTickerJobCompletition')
-            // Send status updates to the client
-            ws.send(JSON.stringify(statusUpdates));
-        }
+        console.log('Received:', data);
     });
-}); */
 
-/* wsServer.on('connection', function connection(ws) {
-    console.log('WS : UPDATE 1 BINANCE TICKER : CONNECTION ESTABLISHED', wsServer.clients.size)
- 
-    ws.on('message', async (message) => {
-        const parsedMessage = JSON.parse(message);
- 
-        if (parsedMessage.action === 'startCheckJobStatus') {
- 
-            const interval = setInterval(async () => {
-                const { jobIds, type } = parsedMessage.data;
-                const statusUpdates = await CMServices.serviceCheckOneBinanceTickerJobCompletition({ jobIds, type })
- 
-                const jobstatus = statusUpdates.data
- 
-                // Send status updates to the client
-                ws.send(JSON.stringify(statusUpdates));
- 
- 
-                // console.log('jobstatus', jobstatus)
-                // Check if all jobs are completed
-                const allJobsCompleted = jobstatus.every(update => update.completed);
-                if (allJobsCompleted) {
-                    clearInterval(interval); // Stop sending updates
-                }
-            }, 1000); // Adjust the interval as needed
-        }
-    });
-}); */
+    TF_Model.eventEmitter.on('notify', (message) => onNotify(ws, message));
+    TF_Model.eventEmitter.on('epochBegin', (epoch) => onEpochBegin(ws, epoch));
+    TF_Model.eventEmitter.on('epochEnd', (epoch, log) => onEpochEnd(ws, epoch, log));
+    TF_Model.eventEmitter.on('batchEnd', (batch, log) => onBatchEnd(ws, batch, log));
+    TF_Model.eventEmitter.on('trainingEnd', () => onTrainingEnd(ws));
+    TF_Model.eventEmitter.once('prediction_completed', async (id) => onPredictionCompleted(ws, id));
 
-/* wsServer.on('connection', function connection(ws) {
-    console.log('WS CONNECTION ESTABLISHED', wsServer.clients.size)
- 
-    ws.on('message', async function message(data) {
-        async function processMessage() {
-            let parsedData = JSON.parse(data);
-            let status = await CMServices.serviceCheckOneBinanceTickerJobCompletition({ jobIds: parsedData.jobIds, type: parsedData.type });
-            ws.send(JSON.stringify(status));
-        }
- 
-        await processMessage();
+    ws.on('close', function close() {
+        // TF_Model.eventEmitter.removeAllListeners();
+        console.log('disconnected');
     });
- 
-    ws.on('error', console.error);
-}); */
+});
 
 module.exports = { wsServer }

@@ -1,9 +1,13 @@
 const logger = require('../middleware/logger/Logger');
 const log = logger.create(__filename.slice(__dirname.length + 1))
+const IUtil = require('../utils/indicatorUtil');
+const TFMUtil = require('../utils/tf_modelUtil');
 // @ts-ignore
 var talib = require('talib/build/Release/talib')
-
-const tf = require('@tensorflow/tfjs-node');
+const { v4: uuidv4 } = require('uuid');
+const { Queue, Worker } = require('bullmq');
+const { redisClient } = require('../services/redis')
+const connection = redisClient // Create a Redis connection
 
 const { createTimer } = require('../utils/timer')
 
@@ -144,56 +148,6 @@ const getIndicatorDesc = async (req, res) => {
     res.status(200).json({ message: 'talib desc', desc })
 }
 
-// converts the optional input data to required format for talib function
-const validateOptionalInputData = ({ func_query, opt_input_keys }) => {
-    for (const key in opt_input_keys) {
-        const inputType = opt_input_keys[key];
-        if (inputType === 'integer_range') {
-            func_query[key] = parseInt(func_query[key]);
-        } else if (inputType === 'real_range') {
-            func_query[key] = parseFloat(func_query[key]);
-        }
-    }
-    return func_query;
-}
-
-// converts the input data flags and generates the required data for talib function
-const processInputData = ({ ticker_data, func_input_keys }) => {
-    const processedInputData = {};
-    for (const key in func_input_keys) {
-        const requiredTokenData = ticker_data.map((item) => parseFloat(item[func_input_keys[key]]));
-        processedInputData[key] = requiredTokenData;
-    }
-    return processedInputData;
-}
-
-// adds the processed data to the talib function query
-const addDataToFuncQuery = ({ func_query, processed_data }) => {
-    for (const key in processed_data) {
-        func_query[key] = processed_data[key];
-    }
-    return func_query;
-}
-
-const formatOutputs = ({ ticker_data, talib_result, output_keys }) => {
-    const keys = Object.keys(output_keys)
-    const diff = talib_result.begIndex + 1
-    let input_data_copy = ticker_data.slice(talib_result.begIndex, (ticker_data.length)); // Make a copy of the ticker_data
-    const resultArray = [];
-    keys.forEach((key) => {
-        const talibResultForKey = talib_result.result[output_keys[key]];
-        let data = input_data_copy.map((item, index) => {
-            return {
-                time: item.openTime / 1000,
-                value: talibResultForKey[index],
-            };
-        });
-        resultArray.push({ key, data });
-    });
-
-    return { final_res: resultArray, diff: diff }
-}
-
 const executeTalibFunction = async (req, res) => {
     const { db_query, func_query, func_param_input_keys, func_param_optional_input_keys, func_param_output_keys } = req.body.payload;
     const { asset_type, ticker_name, period, fetch_count } = db_query;
@@ -209,13 +163,13 @@ const executeTalibFunction = async (req, res) => {
     }
 
     // validates the optional input data
-    let validatedInputData = validateOptionalInputData({ func_query, opt_input_keys: func_param_optional_input_keys })
+    let validatedInputData = IUtil.validateOptionalInputData({ func_query, opt_input_keys: func_param_optional_input_keys })
 
     // all data requreid for the function
-    let processed = processInputData({ ticker_data: tokenDataFromRedis.ticker_data, func_input_keys: func_param_input_keys })
+    let processed = IUtil.processInputData({ ticker_data: tokenDataFromRedis.ticker_data, func_input_keys: func_param_input_keys })
 
     // final query to be executed
-    let finalFuncQuery = addDataToFuncQuery({ func_query: validatedInputData, processed_data: processed })
+    let finalFuncQuery = IUtil.addDataToFuncQuery({ func_query: validatedInputData, processed_data: processed })
 
     // execute the talib function
     const t = createTimer("Talib Function Execution")
@@ -230,7 +184,7 @@ const executeTalibFunction = async (req, res) => {
     }
 
     // format the output data
-    const { final_res, diff } = formatOutputs({
+    const { final_res, diff } = IUtil.formatOutputs({
         ticker_data: tokenDataFromRedis.ticker_data,
         talib_result: talResult,
         output_keys: func_param_output_keys
@@ -247,192 +201,114 @@ const executeTalibFunction = async (req, res) => {
     res.status(200).json({ message: "Execute Talib Function request success", result: final_res, info })
 }
 
-const processSelectedFunctionsForModelTraining = async ({ selectedFunctions, tickerHistory }) => {
-    let finalTalibResult = {}
-    selectedFunctions.forEach((query) => {
-        const functionQueryPayload = query.payload;
-        const { db_query, func_query, func_param_input_keys, func_param_optional_input_keys, func_param_output_keys } = functionQueryPayload;
-
-        // validates the optional input data
-        let validatedInputData = validateOptionalInputData({ func_query, opt_input_keys: func_param_optional_input_keys })
-
-        // all data requreid for the function
-        let processed = processInputData({ ticker_data: tickerHistory, func_input_keys: func_param_input_keys })
-
-        // final query to be executed
-        let finalFuncQuery = addDataToFuncQuery({ func_query: validatedInputData, processed_data: processed })
-        finalFuncQuery.endIdx = tickerHistory.length - 1
-
-        // execute the talib function
-        const t = createTimer("Talib Function Execution")
-        t.startTimer()
-        var talResult;
-        try {
-            log.info(`Executing talib function : ${func_query.name}`)
-            talResult = talib.execute(finalFuncQuery)
-            const keys = Object.keys(func_param_output_keys)
-            keys.forEach((key) => {
-                let result = talResult.result[func_param_output_keys[key]]
-                finalTalibResult[`${func_query.name}_${key}`] = result
-            })
-        } catch (e) {
-            log.error(e)
-        }
-        t.stopTimer(__filename.slice(__dirname.length + 1))
-
-    })
-    return finalTalibResult
-}
-
-function findSmallestArrayLength(obj) {
-    let smallestLength = Infinity; // Initialize with a very large value
-
-    for (const key in obj) {
-        if (Array.isArray(obj[key])) {
-            const arrayLength = obj[key].length;
-            if (arrayLength < smallestLength) {
-                smallestLength = arrayLength;
-            }
-        }
-    }
-
-    return smallestLength === Infinity ? 0 : smallestLength; // Return 0 if no arrays were found
-}
-
-const trimDataBasedOnTalibSmallestLength = async ({ finalTalibResult, tickerHistory }) => {
-    const smallestLength = findSmallestArrayLength(finalTalibResult)
-    console.log('Smallest length : ', smallestLength)
-    const diff = tickerHistory.length - smallestLength
-    console.log("Max difference : ", diff)
-
-    let tickerHist = tickerHistory.slice(diff, tickerHistory.length + 1)
-    console.log('Ticker history length after adjustment : ', tickerHist.length, tickerHist[0], tickerHist[tickerHist.length - 1])
-
-    const resultKeys = Object.keys(finalTalibResult)
-    resultKeys.forEach((key) => {
-        let funcResLength = finalTalibResult[key].length
-        let lenDiff = funcResLength - smallestLength
-        console.log('Function resut length before adjustment', key, lenDiff, funcResLength)
-        finalTalibResult[key] = finalTalibResult[key].slice(lenDiff, funcResLength + 1)
-        console.log('Function resut length after adjustment', key, lenDiff, finalTalibResult[key].length)
-    })
-    return [tickerHist, finalTalibResult]
-}
-
-const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult }) => {
-    // Extract OHLCV and technical indicator data
-    const ohlcvData = tickerHist.map((item) => [parseFloat(item.open), parseFloat(item.high), parseFloat(item.low), parseFloat(item.close), parseFloat(item.volume)])
-    console.log('Transformed OHLCV Length : ', ohlcvData.length, 'Sample data : ', ohlcvData[0], ohlcvData[ohlcvData.length - 1])
-
-    // Combine OHLCV data with technical indicator data
-    const features = ohlcvData.map((ohlcv, i) => {
-        const additionalData = Object.values(finalTalibResult).map((result) => result[i]);
-        return [...ohlcv, ...additionalData];
-    });
-
-    console.log('Combined features Length : ', features.length, 'Sample data : ', features[0], features[features.length - 1])
-
-    return features
-}
-
-function standardizeData(features) {
-    const { mean, variance } = tf.moments(tf.tensor(features), 0);
-    const standardizedFeatures = tf.div(tf.sub(tf.tensor(features), mean), tf.sqrt(variance));
-    const stdData = standardizedFeatures.arraySync();
-    // @ts-ignore
-    console.log('Standardized Data Length : ', stdData.length, 'Sample data : ', stdData[0], stdData[stdData.length - 1])
-    return stdData;
-}
-
-const createTrainingData = async ({ stdData, timeStep, lookAhead, e_key, training_size }) => {
-    const e_type = {
-        "open": 0,
-        "high": 1,
-        "low": 2,
-        "close": 3,
-    }
-    const e = e_type[e_key]
-    var standardized_features = []
-    var standardized_labels = []
-
-    // @ts-ignore first timeStep values are not inclded 
-    for (let i = timeStep; i < stdData.length - lookAhead + 1; i++) {
-        // @ts-ignore
-        const trainXRow = stdData.slice(i - timeStep, i);
-        standardized_features.push(trainXRow);
-
-        const trainYRow = stdData[i + lookAhead - 1][e];
-        standardized_labels.push([trainYRow]);
-    }
-
-    console.log('Standardized_features : ', standardized_features.length, 'standardized_labels : ', standardized_labels.length)
-
-    const trainSplitRatio = training_size / 100
-    const trainSplit = Math.floor(standardized_features.length * trainSplitRatio)
-    console.log('Split Index: ', trainSplit)
-
-    const xTrain = standardized_features.slice(0, trainSplit)
-    const yTrain = standardized_labels.slice(0, trainSplit)
-    const xTrainTest = standardized_features.slice(trainSplit, standardized_features.length)
-    const yTrainTest = standardized_labels.slice(trainSplit, standardized_labels.length)
-
-    console.log('xTrain : ', xTrain.length, 'xTrain test : ', xTrainTest.length)
-    console.log('yTrain : ', yTrain.length, 'yTrain test : ', yTrainTest.length, yTrainTest[0], yTrainTest[yTrainTest.length - 1][0])
-    return [trainSplit, xTrain, yTrain, xTrainTest, yTrainTest]
-}
-
-const formatPredictedOutput = ({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice }) => {
-    let tickerHistCopy = tickerHist.slice(time_step, tickerHist.length + 1)
-    console.log('Before combining', tickerHistCopy.length, tickerHistCopy[0], tickerHistCopy[tickerHistCopy.length - 1])
-    let tickerDates = tickerHistCopy.slice(trainSplit, tickerHistCopy.length + 1).map((item, index) => {
-        return {
-            openTime: new Date(item.openTime).toLocaleString(),
-            open: new Date(new Date(item.openTime).toLocaleString()).getTime() / 1000,
-            actual: yTrainTest[index][0],
-            predicted: predictedPrice[index][0]
-        }
-    })
-    console.log('Final result length', tickerDates.length, tickerDates[0], tickerDates[tickerDates.length - 1])
-    return tickerDates
-}
-
-const startModelTraining = async (req, res) => {
+const procssModelTraining = async (req, res) => {
     const { fTalibExecuteQuery, model_training_parameters } = req.body.payload
+    const model_id = uuidv4();
+    const model_training_queue = "MODEL_TRAINING_QUEUE"
+    const job_name = "MODEL_TRAINING_JOB_" + model_id
+    try {
+        const model_queue = new Queue(model_training_queue, { connection });
+        const model_worker = new Worker(model_training_queue, startModelTraining, { connection });
+
+        const modelTrainingCompletedListener = (job) => {
+            log.info(`Model Training Completed ${job.id}`)
+            // model_queue.close()
+            model_worker.close()
+            model_worker.removeListener('completed', modelTrainingCompletedListener)
+        }
+
+        const modelTrainingFailedListener = (job) => {
+            const redisCommand = `hgetall bull:${model_training_queue}:${job.id}`
+            log.error(`Update task failed for : ", ${job.name}, " with id : ", ${job.id}`)
+            log.warn(`Check Redis for more info : ", ${redisCommand}`)
+        }
+
+        model_worker.on('completed', modelTrainingCompletedListener)
+        model_worker.on('failed', modelTrainingFailedListener)
+
+        model_worker.on('error', (error) => {
+            log.error(error.stack)
+        })
+
+        const job = await model_queue.add(
+            job_name,
+            { fTalibExecuteQuery, model_training_parameters, model_id },
+            {
+                removeOnComplete: {
+                    age: 3600, // keep up to 1 min
+                    count: 1000, // keep up to 1000 jobs
+                },
+                removeOnFail: {
+                    age: 3600, // keep up to 1 min
+                },
+                jobId: model_id,
+            }
+        )
+
+        const isActive = model_worker.isRunning();
+        if (isActive) {
+            const message = "Model Training started"
+            res.status(200).json({ message, finalRs: [], job_id: job.id });
+        } else {
+            model_worker.run()
+            const message = "Model Training started"
+            res.status(200).json({ message, finalRs: [], job_id: job.id });
+        }
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+
+}
+
+const startModelTraining = async (job) => {
+    const { fTalibExecuteQuery, model_training_parameters, model_id } = job.data
     const { db_query } = fTalibExecuteQuery[0].payload;
     const { asset_type, ticker_name, period } = db_query;
     // Model parameters
     const { training_size, time_step, look_ahead, epochs: epochCount, hidden_layers, learning_rate, to_predict } = model_training_parameters
     console.log('Model parameters : ', model_training_parameters)
 
-
     log.info('----> Step 1 : Fetching the ticker data from db') // oldest first 
     const tickerHistory = await fetchEntireHistDataFromDb(asset_type, ticker_name, period)
     const tickerHistoryLength = tickerHistory.length
     console.log('Initial Total Length : ', tickerHistoryLength)
     console.log('Latest Data : ', tickerHistory[tickerHistoryLength - 1])
+    TF_Model.eventEmitter.emit('notify', { message: `----> Fetched ${tickerHistoryLength} tickers from db...`, latestData: tickerHistory[tickerHistoryLength - 1] })
 
 
+    TF_Model.eventEmitter.emit('notify', { message: "----> Executing selected functions..." })
     log.info('----> Step 2 : Executing the talib functions')
     // processing and executing talib functions
-    let finalTalibRes = await processSelectedFunctionsForModelTraining({ selectedFunctions: fTalibExecuteQuery, tickerHistory: tickerHistory })
+    let finalTalibRes = await TFMUtil.processSelectedFunctionsForModelTraining({ selectedFunctions: fTalibExecuteQuery, tickerHistory: tickerHistory })
+    TF_Model.eventEmitter.emit('notify', { message: `----> Function execution completed...` })
 
 
+    TF_Model.eventEmitter.emit('notify', { message: "----> Finding smallest array to adjust ticker hist and function data..." })
     log.info('----> Step 3 : Finding smallest array to adjust ticker hist and function data')
-    const [tickerHist, finalTalibResult] = await trimDataBasedOnTalibSmallestLength({ finalTalibResult: finalTalibRes, tickerHistory })
+    const [tickerHist, finalTalibResult] = await TFMUtil.trimDataBasedOnTalibSmallestLength({ finalTalibResult: finalTalibRes, tickerHistory })
+    TF_Model.eventEmitter.emit('notify', { message: `----> Trimmed data based on talib smallest length...` })
 
 
+    TF_Model.eventEmitter.emit('notify', { message: "----> Transforming and combining the OHLCV and function data for model training..." })
     log.info('----> Step 4 : Transforming and combining the data to required format for model training')
-    const features = await transformDataToRequiredShape({ tickerHist, finalTalibResult })
+    const features = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult })
+    TF_Model.eventEmitter.emit('notify', { message: `----> Transformed data to required shape...` })
 
 
+    TF_Model.eventEmitter.emit('notify', { message: "----> Standardizing the data..." })
     log.info('----> Step 5 : Standardizing the data')
-    let stdData = standardizeData(features)
+    let stdData = TFMUtil.standardizeData(features)
+    TF_Model.eventEmitter.emit('notify', { message: `----> Data standardized...` })
 
 
+    TF_Model.eventEmitter.emit('notify', { message: "----> Creating the training data..." })
     log.info('----> Step 6 : Transformig and creating the training data')
-    const [trainSplit, xTrain, yTrain, xTrainTest, yTrainTest] = await createTrainingData({ stdData, timeStep: time_step, lookAhead: look_ahead, e_key: to_predict, training_size })
+    const [trainSplit, xTrain, yTrain, xTrainTest, yTrainTest] = await TFMUtil.createTrainingData({ stdData, timeStep: time_step, lookAhead: look_ahead, e_key: to_predict, training_size })
+    TF_Model.eventEmitter.emit('notify', { message: `----> Training data created...` })
 
 
+    TF_Model.eventEmitter.emit('notify', { message: "----> Creating the model..." })
     log.info('----> Step 7 : Creating the model')
     const input_layer_shape = time_step;
     const input_layer_neurons = 64;
@@ -451,70 +327,38 @@ const startModelTraining = async (req, res) => {
     }
 
     const model_ = TF_Model.createModel(model_parama)
+    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model created...` })
 
 
+    TF_Model.eventEmitter.emit('notify', { message: "----> Training the model..." })
     log.info('----> Step 8 : Training the model')
     const epochs = epochCount;
     const batchSize = 32;
     const trained_model_ = await TF_Model.trainModel(model_, xTrain, yTrain, epochs, batchSize)
+    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model trained...` })
 
+
+    TF_Model.eventEmitter.emit('notify', { message: "----> Making the predictions on test data..." })
     log.info('----> Step 9 : Making the predictions on test data')
     let predictedPrice = await TF_Model.makePredictions(trained_model_, xTrainTest)
     console.log('Predicted length', predictedPrice.length, predictedPrice[0], predictedPrice[predictedPrice.length - 1][0])
+    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions completed...` })
 
 
+    TF_Model.eventEmitter.emit('notify', { message: "----> Combining and finalizing the data for plotting..." })
     log.info('----> Step 10 : Combining and finalizing the data for plotting')
-    let finalRs = formatPredictedOutput({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice })
+    TFMUtil.formatPredictedOutput({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice, id: model_id })
+    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions formatted, sending result...` })
 
 
     TF_Model.disposeModel(model_)
 
-    res.status(200).json({ message: "Model Training Started", finalTalibResult, features, finalRs })
-}
-
-
-const calculateSMA = async (req, res) => {
-    const { asset_type, ticker_name, period, page_no, items_per_page } = req.body.payload.db_query;
-    try {
-        var funcDesc = talib.explain("AVGDEV");
-        console.log(funcDesc)
-        const cacheKey = `${asset_type}-${ticker_name}-${period}`;
-        const tokendataFromRedis = await getValuesFromRedis(cacheKey);
-        // console.log(tokendataFromRedis)
-        let requiredTokenData = [];
-        requiredTokenData = tokendataFromRedis.data.ticker_data;
-        const d1 = requiredTokenData.map((item) => item.close)
-        log.info('Executing talib function')
-        var result = talib.execute({
-            name: "AVGDEV",
-            startIdx: 0,
-            endIdx: d1.length - 1,
-            inReal: d1,
-            optInTimePeriod: 10
-        })
-        log.info('Talib function executed')
-        const fResult = result.result.outReal
-        const diff = requiredTokenData.length - fResult.length;
-        const emptyArr = [...new Array(diff)].map((d) => null)
-        const d3 = [...emptyArr, ...fResult]
-        requiredTokenData = requiredTokenData.map((item, index) => {
-            return {
-                openTime: new Date(item.openTime).toLocaleString(),
-                open: item.open,
-                close: item.close,
-                sma: d3[index]
-            }
-        })
-        res.status(200).json({ message: "Get Latest Token Data request success", requiredTokenData });
-    } catch (error) {
-        log.error(error.stack)
-        res.status(400).json({ message: "Get Latest Token Data request error" })
-    }
+    return 'Model Training Completed'
 }
 
 module.exports = {
     getIndicatorDesc,
     executeTalibFunction,
+    procssModelTraining,
     startModelTraining,
-    calculateSMA
 }

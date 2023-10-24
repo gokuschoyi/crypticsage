@@ -4,11 +4,11 @@ import { createChart } from 'lightweight-charts';
 import { useSelector } from 'react-redux';
 const PredictionsChart = () => {
 
-    const predictedVlauesRedux = useSelector(state => state.cryptoModule.predictedValues)
+    const predictedVlauesRedux = useSelector(state => state.cryptoModule.modelData.predictedValues)
     const predictionsChartRef = useRef(null)
     const chart = useRef(null)
     useEffect(() => {
-        console.log('UE : Predctions Chart')
+        // console.log('UE : Predctions Chart')
         if (predictedVlauesRedux.length === 0 || !predictionsChartRef.current) {
             return
         } else {
@@ -76,17 +76,21 @@ const PredictionsChart = () => {
         }
 
         return () => {
-            console.log('UE Return : Predctions Chart')
+            // console.log('UE Return : Predctions Chart')
             chart.current.remove()
         }
     }, [predictedVlauesRedux])
     return (
-        <Box display='flex' flexDirection='column' gap='20px'>
-            <Box>
-                <Typography variant='h5'>Predictions values</Typography>
-            </Box>
-            <Box ref={predictionsChartRef}></Box>
-        </Box>
+        <>
+            <Box display='flex' flexDirection='column' gap='20px' pt={4} pl={2} pr={2}>
+                {predictedVlauesRedux.length !== 0 &&
+                    <Box>
+                        <Typography variant='h5' textAlign='start'>Predictions Chart</Typography>
+                    </Box>
+                }
+                <Box ref={predictionsChartRef}></Box>
+            </Box >
+        </>
     )
 }
 

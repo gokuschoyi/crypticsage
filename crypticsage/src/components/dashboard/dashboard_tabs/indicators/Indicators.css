@@ -32,9 +32,43 @@
     gap: 5px;
 }
 
+.epoch {
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+}
+
+.epoch-end {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
+
+.batch-end {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
+
+.batch-end-text {
+    width: 200px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: start;
+}
+
 .stock-link:hover {
     cursor: pointer;
     color: red !important;
+}
+
+.socket-message {
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin: 0px;
+    text-align: start;
 }
 
 .ohlcv-box {
@@ -79,7 +113,8 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-.indicator-chart-grid-box {
+.indicator-chart-grid-box,
+.tensor-flow-grid {
     background-color: var(--mui-palette-background-paper);
 }
 
@@ -438,6 +473,21 @@
     .ohlcv-box {
         flex-direction: column;
         padding: 5px 10px;
+    }
+
+    .epoch {
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .epoch-end {
+        flex-direction: column;
+        align-items: start;
+    }
+
+    .batch-end {
+        flex-direction: column;
+        align-items: start;
     }
 
 }

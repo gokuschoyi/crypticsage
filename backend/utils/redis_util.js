@@ -17,16 +17,16 @@ const handleTokenRedisStorage = async (req, res, next) => {
             if (perviousFetch_count < fetch_count) {
                 log.info(`Additional fetch required. Old count : ${perviousFetch_count}, New count count : ${fetch_count} (Redis Handler)`)
                 fetchTickerHistDataBasedOnCount(asset_type, ticker_name, period, fetch_count)
-                .then((data) => {
-                    let finalData = {
-                        data: data,
-                        ticker_meta: { asset_type, ticker_name, period, fetch_count }
-                    }
-                    log.info(`Updating Redis store with count : ${fetch_count}`);
-                    redisClient.set(cacheKey, JSON.stringify(finalData));
-                    redisClient.expire(cacheKey, 1800);
-                    isTokenDataAvailableInRedis = true;
-                })
+                    .then((data) => {
+                        let finalData = {
+                            data: data,
+                            ticker_meta: { asset_type, ticker_name, period, fetch_count }
+                        }
+                        log.info(`Updating Redis store with count : ${fetch_count}`);
+                        redisClient.set(cacheKey, JSON.stringify(finalData));
+                        redisClient.expire(cacheKey, 1800);
+                        isTokenDataAvailableInRedis = true;
+                    })
             } else {
                 isTokenDataAvailableInRedis = true;
                 log.info(`Data exists in Redis store with count : ${perviousFetch_count}`);
@@ -69,7 +69,35 @@ const getValuesFromRedis = (cacheKey) => {
     })
 }
 
+const saveTestPredictions = (id, finalData) => {
+    return new Promise((resolve, reject) => {
+        redisClient.set(id, JSON.stringify(finalData));
+        redisClient.expire(id, 4 * 1800);
+    })
+}
+
+const getTestPredictions = (id) => {
+    return new Promise((resolve, reject) => {
+        redisClient.get(id, (error, result) => {
+            if (error) {
+                log.error('Error retrieving predictions from Redis')
+                log.error(error.stack);
+                reject(error)
+            } else if (result) {
+                log.info(`Fetching predictions from Redis store`);
+                let data = JSON.parse(result);
+                resolve(data)
+            } else {
+                log.warn('Predictions does not exist in Redis store');
+                resolve(null)
+            }
+        })
+    })
+}
+
 module.exports = {
     handleTokenRedisStorage,
-    getValuesFromRedis
+    getValuesFromRedis,
+    saveTestPredictions,
+    getTestPredictions
 }

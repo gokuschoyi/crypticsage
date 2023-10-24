@@ -69,7 +69,7 @@ const CryptoTable = () => {
     const loadedRef = useRef(false);
     useEffect(() => {
         if (!loadedRef.current && cryptoDataInRedux.length === 0) {
-            console.log('UE : ticker info fetch')
+            // console.log('UE : ticker info fetch')
             loadedRef.current = true
             let data = {
                 token: token,
@@ -89,7 +89,7 @@ const CryptoTable = () => {
                     dispatch(setCryptoDataRedux({ cryptoData: data }))
                 })
         } else if (cryptoDataInRedux.length > 0) {
-            console.log('UE : ticker info fetch from redux')
+            // console.log('UE : ticker info fetch from redux')
             setCryptoData(cryptoDataInRedux)
             const cList = cryptoDataInRedux[0].prices
             let cListArray = []

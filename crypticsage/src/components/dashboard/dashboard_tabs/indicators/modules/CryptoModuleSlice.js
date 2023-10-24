@@ -32,15 +32,60 @@ const initialState = {
     selectedFunctions: [],
     modifiedSelectedFunctionWithDataToRender: [],
     processSelectedFunctionsOnMoreData: false,
-    predictedValues: []
+    modelData: {
+        model_id: '',
+        training_parameters: {
+            trainingDatasetSize: 80,
+            timeStep: 14,
+            lookAhead: 1,
+            epoch: 1,
+            hiddenLayer: 1,
+            multiSelectValue: 'close',
+            learningRate: 1,
+            scaledLearningRate: 0.01
+        },
+        startWebSocket: false,
+        progress_message: [],
+        epoch_no: 0,
+        epoch_results: [],
+        predictedValues: [],
+    }
 }
 
 const cryptoModuleSlice = createSlice({
     name: 'cryptoModule',
     initialState,
     reducers: {
+        setModelId: (state, action) => {
+            state.modelData.model_id = action.payload;
+        },
+        setTrainingParameters: (state, action) => {
+            state.modelData.training_parameters = action.payload;
+        },
+        setStartWebSocket: (state, action) => {
+            state.modelData.startWebSocket = action.payload;
+        },
         setPredictedValues: (state, action) => {
-            state.predictedValues = action.payload;
+            state.modelData.predictedValues = action.payload;
+        },
+        setProgressMessage: (state, action) => {
+            state.modelData.progress_message.push(action.payload);
+        },
+        setEpochNo: (state, action) => {
+            state.modelData.epoch_no = action.payload;
+        },
+        setEpochResults: (state, action) => {
+            state.modelData.epoch_results.push(action.payload);
+        },
+        resetPredictionsValue: (state) => {
+            state.modelData.predictedValues = [];
+        },
+        resetModelData: (state) => {
+            state.modelData.model_id = '';
+            state.modelData.epoch_results = [];
+            state.modelData.epoch_no = initialState.modelData.epoch_no;
+            state.modelData.predictedValues = [];
+            state.modelData.progress_message = [];
         },
         toggleToolTipSwitch: (state) => {
             state.toolTipOn = !state.toolTipOn;
@@ -482,7 +527,7 @@ const cryptoModuleSlice = createSlice({
             state.streamedTickerData = [];
             state.selectedFunctions = [];
             state.modifiedSelectedFunctionWithDataToRender = [];
-            state.predictedValues = [];
+            state.modelData = initialState.modelData;
         },
         setIsDataNewFlag: (state, action) => {
             const currentState = state.modifiedSelectedFunctionWithDataToRender;
@@ -516,7 +561,15 @@ const cryptoModuleSlice = createSlice({
 
 const { reducer, actions } = cryptoModuleSlice;
 export const {
-    setPredictedValues
+    setModelId
+    , setTrainingParameters
+    , setStartWebSocket
+    , setPredictedValues
+    , setProgressMessage
+    , setEpochNo
+    , setEpochResults
+    , resetPredictionsValue
+    , resetModelData
     , toggleToolTipSwitch
     , setBarsFromTo
     , toggleProcessSelectedFunctionsOnMoreData

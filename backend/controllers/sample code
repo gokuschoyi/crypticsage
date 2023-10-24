@@ -1,3 +1,5 @@
+// sudo kill -9 $(sudo lsof -t -i:27017) when mongo ports go over the limit
+
 /* model.add(tf.layers.lstm({ units: 64, activation: 'relu', inputShape: [standardized_features[0].length, standardized_features[0][0].length], returnSequences: true }))
 model.add(tf.layers.lstm({ units: 32, activation: 'relu', returnSequences: false }))
 model.add(tf.layers.dropout({ rate: 0.2 }))

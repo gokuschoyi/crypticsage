@@ -1,6 +1,6 @@
 const logger = require('../middleware/logger/Logger');
 const log = logger.create(__filename.slice(__dirname.length + 1))
-const { wsServer } = require('../websocket')
+const EventEmitter = require('events');
 const tf = require('@tensorflow/tfjs-node');
 
 /**
@@ -46,11 +46,29 @@ const createModel = (model_parama) => {
     return model
 }
 
-const trainModel = async (model, xTrain, yTrain, epochs, batch_size) => {
-    const callback = (epoch, log) => {
-        console.log('Epoch Loss', epoch, "loss: ", log.loss, "mse : ", log.mse, "mae : ", log.mae,);
-    };
+const eventEmitter = new EventEmitter();
 
+const epochBeginCallback = (epoch) => {
+    // console.log('Epoch Start', epoch);
+    eventEmitter.emit('epochBegin', epoch)
+}
+
+const epochEndCallback = (epoch, log) => {
+    // console.log('Epoch Loss', epoch, "loss: ", log.loss, "mse : ", log.mse, "mae : ", log.mae, log);
+    eventEmitter.emit('epochEnd', epoch, log)
+};
+
+const batchEndCallback = (batch, log) => {
+    // console.log(batch)
+    eventEmitter.emit('batchEnd', batch, log)
+}
+
+const onTrainEndCallback = () => {
+    // console.log('Training finished')
+    eventEmitter.emit('trainingEnd')
+}
+
+const trainModel = async (model, xTrain, yTrain, epochs, batch_size) => {
     const xTrainTensor = tf.tensor(xTrain)
     const yTrainTensor = tf.tensor(yTrain)
     console.log('xTrain tensor shape: ', xTrainTensor.shape, 'yTrain tensor shape', yTrainTensor.shape)
@@ -65,16 +83,26 @@ const trainModel = async (model, xTrain, yTrain, epochs, batch_size) => {
 
     await model.fit(xTrainTensor, yTrainTensor,
         {
-            batchSize: batch_size, epochs: epochs, callbacks: {
+            batchSize: batch_size,
+            epochs: epochs,
+            verbose: 1,
+            callbacks: {
+                onEpochBegin: async (epoch) => {
+                    epochBeginCallback(epoch);
+                },
                 onEpochEnd: async (epoch, log) => {
-                    callback(epoch, log);
+                    epochEndCallback(epoch, log);
                 },
                 onBatchEnd: async (batch, log) => {
-                    console.log('Loss: ' + log.loss.toFixed(5), batch)
+                    batchEndCallback(batch, log)
                 },
+                onTrainEnd: async () => {
+                    onTrainEndCallback()
+                }
             }
         });
 
+    eventEmitter.removeListener('batchEnd', batchEndCallback)
     return model
 }
 
@@ -93,5 +121,6 @@ module.exports = {
     createModel,
     trainModel,
     makePredictions,
-    disposeModel
+    disposeModel,
+    eventEmitter
 }

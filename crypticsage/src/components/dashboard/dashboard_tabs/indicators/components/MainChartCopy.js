@@ -288,7 +288,7 @@ const MainChart = (props) => {
 
     // const [finalTalibExecuteQuery, setFinalTalibExcuteQuery] = useState([])
     useEffect(() => {
-        console.log("UE 1 : Execute all selected functions")
+        // console.log("UE 1 : Execute all selected functions")
         if (processMore && selectedFunctionData.length > 0) {
             let fTalibExecuteQuery = []
 
@@ -369,14 +369,14 @@ const MainChart = (props) => {
             dispatch(toggleProcessSelectedFunctionsOnMoreData(false))
         }
         return () => {
-            console.log('UE RETURN 1 : Execute all selected functions')
+            // console.log('UE RETURN 1 : Execute all selected functions')
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [processMore, selectedFunctionData, tDataRedux])
 
     // Main chart useEffect
     useEffect(() => {
-        console.log("UE 2 : Main chart")
+        // console.log("UE 2 : Main chart")
         let tData = checkForUniqueAndTransform(tDataRedux)
 
         let tokenDom = document.getElementsByClassName('chart-cont-dom')[0]
@@ -466,7 +466,7 @@ const MainChart = (props) => {
         window.addEventListener('resize', handleResize);
 
         return () => {
-            console.log('UE RETURN 2 : Main chart')
+            // console.log('UE RETURN 2 : Main chart')
             window.removeEventListener('resize', handleResize);
             chart.current.remove();
             setChartSeriesState([])
@@ -534,7 +534,7 @@ const MainChart = (props) => {
     }, 500); // Adjust the delay as needed (e.g., 1000ms = 1 second)
 
     useEffect(() => {
-        console.log("UE 3 : Debounce fetch")
+        // console.log("UE 3 : Debounce fetch")
         SFDlengthRef.current = selectedFunctionData.length
         const VLRCHandler = (param) => {
             const { from, to } = param
@@ -559,7 +559,7 @@ const MainChart = (props) => {
         chart.current.timeScale().subscribeVisibleLogicalRangeChange(VLRCHandler)
 
         return () => {
-            console.log("UE RETURN 3 : Debounce fetch")
+            // console.log("UE RETURN 3 : Debounce fetch")
             chart.current.timeScale().unsubscribeVisibleTimeRangeChange(VLRCHandler)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -588,7 +588,7 @@ const MainChart = (props) => {
             // console.log(from, to)
             chart.current.timeScale().setVisibleLogicalRange({ from: from, to: to })
         } else {
-            console.log('UE : Initial chartset visible logical range')
+            // console.log('UE : Initial chartset visible logical range')
         }
         chart.current.timeScale().subscribeVisibleLogicalRangeChange(barsInChartHandler)
 
@@ -786,7 +786,7 @@ const MainChart = (props) => {
     // renders the chart based on the selected functions
     const renderChart = useCallback(() => {
         if (modifiedSelectedFunctionWithDataToRender.length === 0 && chartSeriesState.length === 0) {
-            console.log('No chart to render : Callback');
+            // console.log('No chart to render : Callback');
             return;
         }
 
@@ -918,7 +918,7 @@ const MainChart = (props) => {
     }, [chartSeriesState, modifiedSelectedFunctionWithDataToRender]);
 
     useEffect(() => {
-        console.log("UE 4 : Render chart")
+        // console.log("UE 4 : Render chart")
         // console.log('<---------------------START-------------------------->');
         renderChart();
 
@@ -960,7 +960,7 @@ const MainChart = (props) => {
         // console.log('<------------------END----------------------------->');
 
         return () => {
-            console.log('UE RETURN 4 : Render chart');
+            // console.log('UE RETURN 4 : Render chart');
             chart.current.unsubscribeCrosshairMove(crosshairMoveHandler);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1073,7 +1073,7 @@ const MainChart = (props) => {
                         start: latestDateRf.current,
                         end: latestDateRf.current + 59000,
                     }
-                    console.log('New ticker data available. Fetch one ticker', new Date(latestDateRf.current).toLocaleString(), new Date(latestDateRf.current + 59000).toLocaleString())
+                    // console.log('New ticker data available. Fetch one ticker', new Date(latestDateRf.current).toLocaleString(), new Date(latestDateRf.current + 59000).toLocaleString())
                     latestDateRf.current = tickerPayload.openTime
 
                     dispatch(setStreamedTickerDataRedux({
@@ -1133,7 +1133,7 @@ const MainChart = (props) => {
     // handles the delete button
     const handleDeleteQuery = (param) => {
         const { id, name, group_name } = param
-        console.log(id, name, group_name)
+        // console.log(id, name, group_name)
         dispatch(removeFromSelectedFunction({ id: id, name: name, group_name: group_name }))
     }
 

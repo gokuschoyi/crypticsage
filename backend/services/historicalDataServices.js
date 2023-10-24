@@ -2,7 +2,6 @@ const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
 const { createTimer } = require('../utils/timer')
 const { Queue, Worker } = require('bullmq');
-const { close } = require('../services/db-conn')
 const { redisClient } = require('../services/redis')
 
 const MDBServices = require('../services/mongoDBServices')

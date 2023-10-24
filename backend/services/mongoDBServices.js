@@ -2193,6 +2193,65 @@ const checkTickerMetaDuplicateData = async (ticker_name) => {
     }
 }
 
+const checkForDuplicateDocumentsInHistory = async (ticker_name, period) => {
+    try {
+        const db = (await client).db(HISTORICAL_DATABASE_NAME)
+        const collection_name = `crypto_${ticker_name}_${period}`
+        const collection = db.collection(collection_name)
+
+        const duplicates = await collection.aggregate([
+            {
+                $group: {
+                    _id: '$openTime',
+                    count: { $sum: 1 },
+                    docs: { $push: '$$ROOT' } // Include all documents in the group
+                }
+            },
+            {
+                $match: {
+                    count: { $gt: 1 } // Find keys with more than one occurrence
+                }
+            }
+        ]).toArray();
+
+        let deleteduplicateResult = []
+        if (duplicates.length > 0) {
+            console.log('Duplicate documents found. Removing duplicates...');
+
+            // Loop through duplicates and remove all but one document for each duplicate key
+            for (const duplicate of duplicates) {
+                // @ts-ignore
+                let delDupli = await collection.deleteMany({ openTime: duplicate._id }, { sort: { _id: 1 }, limit: duplicate.count - 1 });
+                deleteduplicateResult.push(delDupli)
+            }
+
+            console.log('Duplicate documents removed.');
+        } else {
+            console.log('No duplicate documents found.');
+        }
+
+        const latestDocumentCount = await collection.countDocuments();
+
+        const cryptic_db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const cryptic_collection = cryptic_db.collection(`binance_metadata`)
+
+        const updatedResult = await cryptic_collection.updateOne(
+            { ticker_name: ticker_name },
+            {
+                $set: {
+                    [`data.${period}.ticker_count`]: latestDocumentCount
+                }
+            })
+
+        return [deleteduplicateResult, updatedResult, latestDocumentCount]
+
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+
+    }
+}
+
 //<------------------------CRYPTO-STOCKS SERVICES-------------------------->
 
 
@@ -2237,4 +2296,5 @@ module.exports = {
     , fetchTickerHistDataFromDb
     , fetchTickerHistDataBasedOnCount
     , updateTickerMetaData
+    , checkForDuplicateDocumentsInHistory
 }
