@@ -103,6 +103,9 @@ const MultiSelect = (props) => {
                         error={errorFlag}
                         helperText={helperText}
                         sx={{
+                            '& .MuiInputBase-input': {
+                                height: '10px'
+                            },
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
                                     borderColor: `${theme.palette.text.secondary}`,
@@ -150,7 +153,7 @@ const SettingsCard = (props) => {
 
     return (
         <Card sx={{ width: 265 }}>
-            <CardContent>
+            <CardContent sx={{ padding: '4px' }}>
                 <Typography textAlign='start' gutterBottom variant="body1">
                     SETTINGS  : {name}
                 </Typography>
@@ -163,14 +166,14 @@ const SettingsCard = (props) => {
                                 <Box key={index} display='flex' flexDirection='column' pb={'5px'} alignItems='flex-start'>
                                     {input.flags ?
                                         (
-                                            <Box sx={{ width: '100%' }}>
-                                                <Typography><span style={{ fontWeight: '600' }}>Name : </span>{input.name}</Typography>
+                                            <Box sx={{ width: '100%' }} display='flex' flexDirection='column'>
+                                                <Typography variant='custom' style={{ paddingLeft: '16px', textAlign: 'start' }}><span style={{ fontWeight: '600' }}>Name : </span>{input.name}</Typography>
                                                 {/* <Typography><span style={{ fontWeight: '600' }}>Type : </span>{input.type}</Typography> */}
-                                                <Typography textAlign='start'><span style={{ fontWeight: '600' }}>Flags : </span></Typography>
-                                                <Box pl={2}>
+                                                <Typography pl={2} variant='custom' textAlign='start'><span style={{ fontWeight: '600' }}>Flags : </span></Typography>
+                                                <Box pl={3} display='flex' flexDirection='column'>
                                                     {Object.keys(input.flags).map((key, index) => {
                                                         return (
-                                                            <Typography key={index}>{key} : {input.flags[key]}</Typography>
+                                                            <Typography variant='custom' key={index} style={{ textAlign: 'start' }}>{key} : {input.flags[key]}</Typography>
                                                         )
                                                     })}
                                                 </Box>
@@ -194,7 +197,7 @@ const SettingsCard = (props) => {
                             )
                         })}
                     </Box>
-                    <Box className='settings-optional-inputs' pt={2}>
+                    <Box className='settings-optional-inputs' pt={1}>
                         <Typography variant='h6' textAlign='start' fontWeight='500'>OPTIONAL INPUTS</Typography>
                         {optInputs.length === 0 ?
                             (
@@ -209,7 +212,7 @@ const SettingsCard = (props) => {
                                     return (
                                         <Box pt={'15px'} key={index} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
                                             <TextField
-                                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', style: { height: '10px' } }}
                                                 error={errorFlag}
                                                 helperText={helperText}
                                                 size='small'
@@ -383,6 +386,7 @@ const MainChart = (props) => {
         let cWidth = tokenDom.clientWidth;
         let cHeight = tokenDom.clientHeight;
 
+        // paddiing causing some resize fit issue. Check later -- fixed by changing margin with padding
         const handleResize = () => {
             cWidth = tokenDom.clientWidth;
             cHeight = tokenDom.clientHeight;
@@ -601,11 +605,11 @@ const MainChart = (props) => {
         const { open, high, low, close, vol } = param
         return `
         <div class="value-box">
-            <div style="width:70px; text-align:start">O : <span id="openValue">${Math.round(100 * open) / 100}</span></div>
-            <div style="width:70px; text-align:start">H : <span id="highValue">${Math.round(100 * high) / 100}</span></div>
-            <div style="width:70px; text-align:start">L : <span id="lowValue">${Math.round(100 * low) / 100}</span></div>
-            <div style="width:70px; text-align:start">C : <span id="closeValue">${Math.round(100 * close) / 100}</span></div>
-            <div style="width:70px; text-align:start">V : <span id="volumeValue">${(vol).toFixed(2)}</span></div>
+            <div style="width:73px; text-align:start">O : <span id="openValue">${Math.round(100 * open) / 100}</span></div>
+            <div style="width:73px; text-align:start">H : <span id="highValue">${Math.round(100 * high) / 100}</span></div>
+            <div style="width:73px; text-align:start">L : <span id="lowValue">${Math.round(100 * low) / 100}</span></div>
+            <div style="width:73px; text-align:start">C : <span id="closeValue">${Math.round(100 * close) / 100}</span></div>
+            <div style="width:73px; text-align:start">V : <span id="volumeValue">${(vol).toFixed(2)}</span></div>
         </div>
         `
     }
@@ -1189,76 +1193,74 @@ const MainChart = (props) => {
     }
 
     return (
-        <Box sx={{ width: '100%', height: '100%' }}>
-            <Box className='chart-cont-dom' width="100%" height="100%" >
-                <Box className='selected-function-legend'>
-                    <Box className='selected-function-unique ohlcv-box'></Box>
-                    {selectedFunctionData.map((selectedFunction, index) => {
-                        const selectedFunc = selectedFunction.functions
-                        const outputs = selectedFunction.outputs
-                        return (
-                            <Box key={index} className='selected-function-unique sel-func' justifyContent='space-between' alignItems='center'>
-                                {selectedFunc.map((func, i) => {
-                                    const { id, name, outputAvailable, show_chart_flag, show_settings } = func
-                                    return (
-                                        <Box key={i} display='flex' flexDirection='row' alignItems='flex-start' className='data-plus-settins-box' gap='5px'>
-                                            <Box className='single-data-box' display='flex' flexDirection='row' alignItems='center' gap={'5px'}>
-                                                <Box className='function-title' display='flex' flexDirection='row' gap='5px'>
-                                                    <Box>{name}</Box>
-                                                    {outputs.map((output, j) => (
-                                                        <Box key={j} className={`${name}_${id}_${output.name}`}></Box>
-                                                    ))}
-                                                </Box>
-                                                {outputAvailable &&
-                                                    <IconButton
-                                                        size='small'
-                                                        sx={{ padding: '2px' }}
-                                                        aria-label="Hide chart"
-                                                        color="secondary"
-                                                        onClick={handleToggleShowHideChart.bind(null, { id: id, name: name })}
-                                                    >
-                                                        {show_chart_flag ?
-                                                            <VisibilityOffIcon className='smaller-icon' />
-                                                            :
-                                                            <VisibilityIcon className='smaller-icon' />
-                                                        }
-                                                    </IconButton>
-                                                }
+        <Box className='chart-cont-dom' width="100%" height="100%" >
+            <Box className='selected-function-legend'>
+                <Box className='selected-function-unique ohlcv-box'></Box>
+                {selectedFunctionData.map((selectedFunction, index) => {
+                    const selectedFunc = selectedFunction.functions
+                    const outputs = selectedFunction.outputs
+                    return (
+                        <Box key={index} className='selected-function-unique sel-func' justifyContent='space-between' alignItems='center'>
+                            {selectedFunc.map((func, i) => {
+                                const { id, name, outputAvailable, show_chart_flag, show_settings } = func
+                                return (
+                                    <Box key={i} display='flex' flexDirection='row' alignItems='flex-start' className='data-plus-settins-box'>
+                                        <Box className='single-data-box' display='flex' flexDirection='row' alignItems='center' gap={'5px'}>
+                                            <Box className='function-title' display='flex' flexDirection='row' gap='5px'>
+                                                <Box>{name}</Box>
+                                                {outputs.map((output, j) => (
+                                                    <Box key={j} className={`${name}_${id}_${output.name}`}></Box>
+                                                ))}
+                                            </Box>
+                                            {outputAvailable &&
                                                 <IconButton
                                                     size='small'
                                                     sx={{ padding: '2px' }}
-                                                    aria-label="modify query"
+                                                    aria-label="Hide chart"
                                                     color="secondary"
-                                                    onClick={handleOpenSettings.bind(null, { id: id, name: name })}
+                                                    onClick={handleToggleShowHideChart.bind(null, { id: id, name: name })}
                                                 >
-                                                    <SettingsIcon className='smaller-icon' />
+                                                    {show_chart_flag ?
+                                                        <VisibilityOffIcon className='smaller-icon' />
+                                                        :
+                                                        <VisibilityIcon className='smaller-icon' />
+                                                    }
                                                 </IconButton>
-                                                <IconButton
-                                                    size='small'
-                                                    sx={{ padding: '2px' }}
-                                                    aria-label="delete query"
-                                                    color="secondary"
-                                                    onClick={handleDeleteQuery.bind(null, { id: id, name: name, group_name: selectedFunction.group_name })}
-                                                >
-                                                    <DeleteOutlineIcon className='smaller-icon' />
-                                                </IconButton>
-                                            </Box>
-                                            <Box id={id} className={`settings-box ${show_settings ? 'show' : 'hide'}`}>
-                                                <SettingsCard
-                                                    selectedFunctionNameAndId={{ slId: id, slName: name }}
-                                                />
-                                            </Box>
+                                            }
+                                            <IconButton
+                                                size='small'
+                                                sx={{ padding: '2px' }}
+                                                aria-label="modify query"
+                                                color="secondary"
+                                                onClick={handleOpenSettings.bind(null, { id: id, name: name })}
+                                            >
+                                                <SettingsIcon className='smaller-icon' />
+                                            </IconButton>
+                                            <IconButton
+                                                size='small'
+                                                sx={{ padding: '2px' }}
+                                                aria-label="delete query"
+                                                color="secondary"
+                                                onClick={handleDeleteQuery.bind(null, { id: id, name: name, group_name: selectedFunction.group_name })}
+                                            >
+                                                <DeleteOutlineIcon className='smaller-icon' />
+                                            </IconButton>
                                         </Box>
-                                    )
-                                })}
-                            </Box>
-                        )
-                    })}
-                </Box>
-                <Box ref={chartboxRef}></Box>
-                <Box className='tool-tip-indicators'></Box>
+                                        <Box id={id} className={`settings-box ${show_settings ? 'show' : 'hide'}`}>
+                                            <SettingsCard
+                                                selectedFunctionNameAndId={{ slId: id, slName: name }}
+                                            />
+                                        </Box>
+                                    </Box>
+                                )
+                            })}
+                        </Box>
+                    )
+                })}
             </Box>
-        </Box >
+            <Box ref={chartboxRef}></Box>
+            <Box className='tool-tip-indicators'></Box>
+        </Box>
     )
 }
 

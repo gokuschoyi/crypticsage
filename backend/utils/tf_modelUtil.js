@@ -9,6 +9,13 @@ const IUtil = require('./indicatorUtil');
 const RedisUtil = require('./redis_util')
 const { createTimer } = require('../utils/timer')
 
+const e_type = {
+    "open": 0,
+    "high": 1,
+    "low": 2,
+    "close": 3,
+}
+
 const processSelectedFunctionsForModelTraining = async ({ selectedFunctions, tickerHistory }) => {
     let finalTalibResult = {}
     selectedFunctions.forEach((query) => {
@@ -97,22 +104,25 @@ const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult }) =>
     return features
 }
 
-function standardizeData(features) {
+function standardizeData(features, to_predict) {
+    const e = e_type[to_predict]
+
     const { mean, variance } = tf.moments(tf.tensor(features), 0);
     const standardizedFeatures = tf.div(tf.sub(tf.tensor(features), mean), tf.sqrt(variance));
     const stdData = standardizedFeatures.arraySync();
+
+    const label_mean = mean.arraySync()[e];
+    const label_variance = variance.arraySync()[e];
+
+    // console.log('mean',mean.arraySync())
+    // console.log('variance',variance.arraySync())
+
     // @ts-ignore
     console.log('Standardized Data Length : ', stdData.length, 'Sample data : ', stdData[0], stdData[stdData.length - 1])
-    return stdData;
+    return [stdData, label_mean, label_variance];
 }
 
 const createTrainingData = async ({ stdData, timeStep, lookAhead, e_key, training_size }) => {
-    const e_type = {
-        "open": 0,
-        "high": 1,
-        "low": 2,
-        "close": 3,
-    }
     const e = e_type[e_key]
     var standardized_features = []
     var standardized_labels = []
@@ -143,12 +153,12 @@ const createTrainingData = async ({ stdData, timeStep, lookAhead, e_key, trainin
     return [trainSplit, xTrain, yTrain, xTrainTest, yTrainTest]
 }
 
-const formatPredictedOutput = async ({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice, id }) => {
+const formatPredictedOutput = async ({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice, id, label_mean, label_variance }) => {
     let tickerHistCopy = tickerHist.slice(time_step, tickerHist.length + 1)
     console.log('Before combining', tickerHistCopy.length, tickerHistCopy[0], tickerHistCopy[tickerHistCopy.length - 1])
     const slicedTickerHistCopy = tickerHistCopy.slice(trainSplit, tickerHistCopy.length)
 
-    let tickerDates = slicedTickerHistCopy.map((item, index) => {
+    let predictionsPlusActual = slicedTickerHistCopy.map((item, index) => {
         const strDate = new Date(item.openTime).toLocaleString()
         return {
             openTime: strDate,
@@ -157,8 +167,25 @@ const formatPredictedOutput = async ({ tickerHist, time_step, trainSplit, yTrain
             predicted: predictedPrice[index][0]
         }
     })
-    console.log('Final result length', tickerDates.length, tickerDates[0], tickerDates[tickerDates.length - 1])
-    RedisUtil.saveTestPredictions(id, tickerDates)
+
+    const originalData = predictionsPlusActual.map(standardizedRow => {
+        const originalPrice = (standardizedRow.actual * Math.sqrt(label_variance)) + label_mean;
+        const scaled_predictedPrice = (standardizedRow.predicted * Math.sqrt(label_variance)) + label_mean;
+        return {
+            ...standardizedRow,
+            actual: originalPrice,
+            predicted: scaled_predictedPrice
+        }
+    })
+
+    const finalData = {
+        standardized: predictionsPlusActual,
+        scaled: originalData
+    }
+
+
+    console.log('Final result length', predictionsPlusActual.length, predictionsPlusActual[0], predictionsPlusActual[predictionsPlusActual.length - 1])
+    RedisUtil.saveTestPredictions(id, finalData)
     TF_Model.eventEmitter.emit('prediction_completed', id)
     // return tickerDates
 }

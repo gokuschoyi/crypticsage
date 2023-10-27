@@ -12,7 +12,9 @@ import {
     setCryptoDataInDbRedux,
     setSelectedTickerPeriod,
     resetStreamedTickerDataRedux,
-    toggleToolTipSwitch
+    toggleToolTipSwitch,
+    setSelectedFunctions,
+    setSelectedFlagInTalibDescription
 } from './CryptoModuleSlice'
 
 import useWebSocket from './WebSocket';
@@ -36,6 +38,7 @@ import {
     , CircularProgress
     , IconButton
     , Paper
+    , Chip
 } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
@@ -53,36 +56,38 @@ const MultiSelect = (props) => {
         "close",
     ]
     return (
-        <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'40px'}>
-            <Box sx={{ width: '100%' }}>
-                <Autocomplete
-                    size='small'
-                    disableClearable
-                    disablePortal={false}
-                    id={`select-input-${fieldName}`}
-                    name='multiSelectValue'
-                    options={inputOptions}
-                    value={selectedInputOptions} // Set the selected value
-                    onChange={(event, newValue) => handleInputOptions(event, newValue)} // Handle value change
-                    sx={{ width: 'auto' }}
-                    renderInput={(params) => <TextField {...params}
-                        variant="standard"
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: `${theme.palette.text.secondary}`,
+        <Paper elavation={6}>
+            <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'40px'} pl={'4px'} pr={'4px'} pt={1} pb={1}>
+                <Box sx={{ width: '100%' }}>
+                    <Autocomplete
+                        size='small'
+                        disableClearable
+                        disablePortal={false}
+                        id={`select-input-${fieldName}`}
+                        name='multiSelectValue'
+                        options={inputOptions}
+                        value={selectedInputOptions} // Set the selected value
+                        onChange={(event, newValue) => handleInputOptions(event, newValue)} // Handle value change
+                        sx={{ width: 'auto' }}
+                        renderInput={(params) => <TextField {...params}
+                            variant="standard"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': {
+                                        borderColor: `${theme.palette.text.secondary}`,
+                                    }
                                 }
-                            }
-                        }}
-                        label={`${inputLabel}`}
-                        color="secondary"
-                    />}
-                />
+                            }}
+                            label={`${inputLabel}`}
+                            color="secondary"
+                        />}
+                    />
+                </Box>
+                <Tooltip title={'Select one of the flags to be used to predict'} placement='top' sx={{ cursor: 'pointer' }}>
+                    <InfoOutlinedIcon className='small-icon' />
+                </Tooltip>
             </Box>
-            <Tooltip title={'Select one of the flags to be used to predict'} placement='top' sx={{ cursor: 'pointer' }}>
-                <InfoOutlinedIcon className='small-icon' />
-            </Tooltip>
-        </Box>
+        </Paper>
     )
 }
 
@@ -172,27 +177,29 @@ const CustomSlider = (props) => {
         }
     }
     return (
-        <Box display='flex' flexDirection='column' alignItems='start'>
-            <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%'>
-                <Typography id="training-size-slider" variant='custom' gutterBottom>{label} : {scaledLearningRate === undefined ? `${sliderValue}${label === 'Training size' ? '%' : ''}` : scaledLearningRate}</Typography>
-                <Typography variant='custom'>(Min: {min}, Max: {max})</Typography>
-            </Box>
+        <Paper elevation={6}>
+            <Box p={'4px'} display='flex' flexDirection='column' alignItems='start'>
+                <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%'>
+                    <Typography id="training-size-slider" variant='custom'>{label} : {scaledLearningRate === undefined ? `${sliderValue}${label === 'Training size' ? '%' : ''}` : scaledLearningRate}</Typography>
+                    <Typography variant='custom'>(Min: {min}, Max: {max})</Typography>
+                </Box>
 
-            <Box sx={{ width: 300 }}>
-                <Slider
-                    size='small'
-                    color='secondary'
-                    disabled={disabled}
-                    value={sliderValue}
-                    name={name}
-                    valueLabelDisplay={scaledLearningRate === undefined ? "auto" : "off"}
-                    step={1}
-                    min={sliderMin}
-                    max={sliderMax}
-                    onChange={(e) => handleSliderValueChange(e)}
-                />
+                <Box sx={{ width: "100%" }}>
+                    <Slider
+                        size='small'
+                        color='secondary'
+                        disabled={disabled}
+                        value={sliderValue}
+                        name={name}
+                        valueLabelDisplay={scaledLearningRate === undefined ? "auto" : "off"}
+                        step={1}
+                        min={sliderMin}
+                        max={sliderMax}
+                        onChange={(e) => handleSliderValueChange(e)}
+                    />
+                </Box>
             </Box>
-        </Box>
+        </Paper>
     )
 }
 
@@ -249,6 +256,7 @@ const CryptoModule = () => {
     // default fetch data
     const [chartData, setChartData] = useState([]) // data to be passed to chart
     const [fetchValues, setFetchValues] = useState(defaultFetchValues)
+    const [actualFetchLength, setActualFetchLength] = useState(0)
     const [newTickerLength, setNewTickerLength] = useState(0)
 
     // to fetch ticker data
@@ -273,6 +281,7 @@ const CryptoModule = () => {
             })
                 .then((res) => {
                     const dataInDb = res.data.fetchedResults.ticker_data
+                    setActualFetchLength(dataInDb.length)
                     const latestOpenTime = dataInDb[dataInDb.length - 1].openTime
                     let [fetchLength, end] = checkIfNewTickerFetchIsRequired({ openTime: latestOpenTime, selectedTokenPeriod })
                     setNewTickerLength(fetchLength)
@@ -367,11 +376,11 @@ const CryptoModule = () => {
     const epochResults = useSelector(state => state.cryptoModule.modelData.epoch_results)
     const epochNo = useSelector(state => state.cryptoModule.modelData.epoch_no)
 
-    const [batchResult, setBatchResult] = useState(null)
+    const [batchResult, setBatchResult] = useState(false)
 
     const [trainingStartedFlag, setTrainingStartedFlag] = useState(false)
 
-    const { webSocket, createModelProgressWebSocket } = useWebSocket(webSocketURL, setBatchResult, setTrainingStartedFlag, dispatch)
+    const { webSocket, createModelProgressWebSocket } = useWebSocket(webSocketURL, batchResult, setBatchResult, setTrainingStartedFlag, dispatch)
 
     // WebSocket connection
     useEffect(() => {
@@ -517,212 +526,352 @@ const CryptoModule = () => {
         dispatch(setStartWebSocket(false))
     }
 
+    const talibFunctions = useSelector(state => state.cryptoModule.talibDescription)
+    const [transformedFunctionsList, setTransformedFunctionList] = useState([]);
+
+    useEffect(() => {
+        if (talibFunctions.length > 0) {
+            const modified = talibFunctions.reduce((result, item) => {
+                return [
+                    ...result,
+                    ...item.functions.map((func) => ({
+                        func_selected: func.function_selected_flag,
+                        group: func.group,
+                        label: `${func.name} : ${func.hint}`,
+                    }))
+                ];
+            }, [])
+            setTransformedFunctionList(modified)
+        }
+    }, [talibFunctions])
+
+    const [searchedFunctions, setSearchedFunction] = useState([]);
+    const handleSearchedFunctions = (newValue) => {
+        setSearchedFunction(newValue)
+    }
+    // console.log(searchedFunctions)
+
+    const handleAddSelectedFunction = () => {
+        console.log('Add functions to calculate')
+        const functionNamesToAdd = searchedFunctions.map((func) => {
+            const [func_name, func_hint] = func.label.split(':')
+            return func_name.trim()
+        })
+        // console.log(functionNamesToAdd)
+
+        functionNamesToAdd.forEach((func_name) => {
+            const foundFunction = talibFunctions
+                .map(group => group.functions)
+                .flat()
+                .find(func => func.name === func_name);
+            console.log(foundFunction)
+
+            if (foundFunction) {
+                dispatch(setSelectedFlagInTalibDescription(
+                    {
+                        group: foundFunction.group,
+                        name: foundFunction.name,
+                        inputs: foundFunction.inputs,
+                        optInputs: foundFunction.optInputs,
+                    }
+                ))
+
+                dispatch(setSelectedFunctions(
+                    {
+                        hint: foundFunction.hint,
+                        name: foundFunction.name,
+                        group_name: foundFunction.group,
+                        inputs: foundFunction.inputs,
+                        optInputs: foundFunction.optInputs,
+                        outputs: foundFunction.outputs,
+                        function_selected_flag: true,
+                        result: [],
+                        splitPane: foundFunction.splitPane
+                    }
+                ))
+            }
+        })
+        setSearchedFunction((prev) => { return [] })
+
+    }
+
+    const predictedVlauesRedux = useSelector(state => state.cryptoModule.modelData.predictedValues)
+    const [predictionChartType, setPredictionChartType] = React.useState('standardized')
+
+    // console.log(predictedVlauesRedux)
+
+    const handlePredictionsChartType = (param) => {
+        const { type } = param;
+        // console.log(type)
+        setPredictionChartType(type)
+    }
+
     return (
         <Box className='crypto-module-container'>
             <Box width='-webkit-fill-available'>
                 <Header title={cryptotoken} />
             </Box>
 
-            <Box m={2}>
-                <Grid container className='indicator-chart-grid-box' >
-                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12} pt={2}>
-                        <Box display='flex' flexDirection='column' height='100%'>
-                            <Box className='ticker-period-selector-top' pl={2} pr={2} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' gap='10px'>
-                                <Box className='autocomplete-select-box' width='200px'>
-                                    <Autocomplete
-                                        size='small'
-                                        disableClearable
-                                        disablePortal={false}
-                                        id="selec-stock-select"
-                                        options={periods}
-                                        value={selectedTokenPeriod} // Set the selected value
-                                        onChange={(event, newValue) => handlePeriodChange(newValue)} // Handle value change
-                                        sx={{ width: 'auto' }}
-                                        renderInput={(params) => <TextField size='small' {...params}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    '& fieldset': {
-                                                        borderColor: `${theme.palette.primary.newWhite} !important`,
-                                                    }
+            <Box m={2} className='crypto-module-container-box'>
+
+                <Grid container className='indicator-chart-grid' pt={2} pb={2}>
+                    <Grid item xs={12} sm={12} md={12} lg={9} xl={9}>
+                        <Box className='ticker-period-selector-top' pl={3} pr={3} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' gap='10px'>
+                            <Box className='autocomplete-select-box' width='200px'>
+                                <Autocomplete
+                                    size='small'
+                                    disableClearable
+                                    disablePortal={false}
+                                    id="selec-stock-select"
+                                    options={periods}
+                                    value={selectedTokenPeriod} // Set the selected value
+                                    onChange={(event, newValue) => handlePeriodChange(newValue)} // Handle value change
+                                    sx={{ width: 'auto' }}
+                                    renderInput={(params) => <TextField size='small' {...params}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: `${theme.palette.primary.newWhite} !important`,
                                                 }
-                                            }}
-                                            label="Select a period"
-                                            color="secondary"
-                                        />}
-                                    />
-                                </Box>
-                                <Box>
-                                    <Typography>{ohlcData.length} / {ohlcData.length / 500}</Typography>
-                                    <FormControlLabel
-                                        value="start"
-                                        control={<Switch size="small" color="secondary" />}
-                                        label={toolTipSwitchFlag ? 'Hide Tooltips' : 'Show Tooltips'}
-                                        labelPlacement="start"
-                                        checked={toolTipSwitchFlag}
-                                        onChange={() => dispatch(toggleToolTipSwitch())}
-                                    />
-                                </Box>
-                            </Box>
-
-                            <Grid container className='indicator-chart-grid'>
-                                <Grid item xs={12} sm={12} md={12} lg={9} xl={9}>
-                                    <Box className='chart-container' display='flex' flexDirection='column' height='100%' m={2}>
-                                        {chartData.length === 0 ?
-                                            (
-                                                <Box className='token-chart-box' minHeight="100%" alignItems='center' justifyContent='center' display='flex'>
-                                                    <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
-                                                </Box>
-                                            )
-                                            :
-                                            (
-                                                <Box className='token-chart-box' minHeight="100%">
-                                                    <MainChart
-                                                        latestTime={chartData[chartData.length - 1].time * 1000 + 60000}
-                                                        new_fetch_offset={newTickerLength}
-                                                        symbol={cryptotoken}
-                                                        selectedTokenPeriod={selectedTokenPeriod}
-                                                        module={module}
-                                                        fetchValues={fetchValues}
-                                                    />
-                                                </Box>
-                                            )
-                                        }
-                                    </Box>
-                                </Grid>
-
-                                <Grid item xs={12} sm={12} md={12} lg={3} xl={3}>
-                                    placeholder
-                                </Grid>
-                            </Grid>
-                        </Box>
-                    </Grid>
-                </Grid >
-
-                <Grid container className='tensor-flow-grid'>
-                    <Grid item xs={12} sm={12} md={3} lg={3} xl={3}>
-                        <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' gap='10px' pl={2} pr={2} pt={4} pb={2}>
-                            <Box display='flex' flexDirection='column' gap='5px'>
-                                <CustomSlider sliderValue={modelParams.trainingDatasetSize} name={'trainingDatasetSize'} handleModelParamChange={handleModelParamChange} label={'Training size'} min={50} max={95} sliderMin={0} sliderMax={100} disabled={trainingStartedFlag} />
-                                <CustomSlider sliderValue={modelParams.timeStep} name={'timeStep'} handleModelParamChange={handleModelParamChange} label={'Step Size'} min={14} max={100} sliderMin={1} sliderMax={100} disabled={trainingStartedFlag} />
-                                <CustomSlider sliderValue={modelParams.lookAhead} name={'lookAhead'} handleModelParamChange={handleModelParamChange} label={'Look Ahead'} min={1} max={5} sliderMin={1} sliderMax={5} disabled={trainingStartedFlag} />
-                                <CustomSlider sliderValue={modelParams.epoch} name={'epoch'} handleModelParamChange={handleModelParamChange} label={'Epochs'} min={1} max={20} sliderMin={1} sliderMax={20} disabled={trainingStartedFlag} />
-                                <CustomSlider sliderValue={modelParams.hiddenLayer} name={'hiddenLayer'} handleModelParamChange={handleModelParamChange} label={'Hidden Layers'} min={1} max={20} sliderMin={1} sliderMax={10} disabled={trainingStartedFlag} />
-                                <CustomSlider sliderValue={modelParams.learningRate} name={'learningRate'} handleModelParamChange={handleModelParamChange} label={'Learning Rate'} min={0} max={100} sliderMin={0} sliderMax={100} scaledLearningRate={modelParams.scaledLearningRate} disabled={trainingStartedFlag} />
-                                <MultiSelect
-                                    inputLabel={'Prediction flag'}
-                                    selectedInputOptions={modelParams.multiSelectValue}
-                                    handleInputOptions={handleMultiselectOptions}
-                                    fieldName={'To predict'}
+                                            }
+                                        }}
+                                        label="Select a period"
+                                        color="secondary"
+                                    />}
                                 />
                             </Box>
-
-                            <Box display='flex' alignItems='center' gap='10px'>
-                                <Button
-                                    variant='outlined'
-                                    size='small'
-                                    color='secondary'
-                                    disabled={trainingStartedFlag}
-                                    onClick={(e) => handleStartModelTraining()}
-                                    endIcon={trainingStartedFlag && <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />}
-                                >
-                                    {trainingStartedFlag ? 'Training' : 'Start Training'}
-                                </Button>
-                                <Tooltip title={'Reset data'} placement='top' sx={{ cursor: 'pointer' }}>
-                                    <IconButton onClick={handleClearModelData.bind(null)}>
-                                        <RestartAltIcon className='small-icon' />
-                                    </IconButton>
-                                </Tooltip>
-                                {noFuncSelected !== '' && <Typography variant='custom' sx={{ color: 'red' }}>{noFuncSelected}</Typography>}
+                            <Box display='flex' flexDirection='column' alignItems='start'>
+                                <Typography variant='h6' style={{ marginLeft: '16px' }}>{actualFetchLength}, {ohlcData.length} / {ohlcData.length / 500}</Typography>
+                                <FormControlLabel
+                                    value="start"
+                                    control={<Switch size="small" color="secondary" />}
+                                    label={toolTipSwitchFlag ? 'Hide Tooltips' : 'Show Tooltips'}
+                                    labelPlacement="start"
+                                    checked={toolTipSwitchFlag}
+                                    onChange={() => dispatch(toggleToolTipSwitch())}
+                                />
                             </Box>
-
-                            {/* progress message */}
-                            {progressMessage.length > 0 && (
-                                <Paper elevation={6} sx={{ backgroundColor: `${theme.palette.background.paperOne}` }}>
-                                    <Box p={'5px'} className='progress-update-notify-ws' id="messageDiv" display='flex' flexDirection='column' alignItems='start' height='180px' overflow='auto'>
-                                        {progressMessage.map((message, index) => {
-                                            return (
-                                                <p key={index} className='socket-message'>{message.message}</p>
-                                            )
-                                        })}
-
-                                    </Box>
-                                </Paper>
-                            )}
-
-                            {/* epoch end results */}
-                            {epochResults.length > 0 && epochResults.map((result, index) => {
-                                return (
-                                    <Box key={index} className={`epoch_${index} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
-                                        <span className='epoch-no' style={{ fontWeight: '600', fontSize: '0.75rem', width: '70px', textAlign: 'start' }}>Epoch : {result.epoch}</span>
-                                        <Box className={`model-progress_${index}`} variant='h6'>
-                                            <div className='epoch-end'>
-                                                <div className='batch-end-text'>Loss : {result.loss}</div>
-                                                <div className='batch-end-text'>MSE : {result.mse}</div>
-                                                <div className='batch-end-text'>MAE : {result.mae}</div>
-                                            </div>
-                                        </Box>
+                        </Box>
+                        <Box className='chart-container' display='flex' flexDirection='column' height='100%' pl={2} pr={2} pt={2}>
+                            {chartData.length === 0 ?
+                                (
+                                    <Box className='token-chart-box' minHeight="100%" alignItems='center' justifyContent='center' display='flex'>
+                                        <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
                                     </Box>
                                 )
-                            })}
-
-                            {/* epoch batch results */}
-                            {batchResult && (
-                                <Box className={`epoch_{} epoch`} sx={{ display: batchResult ? 'flex' : 'none', flexDirection: 'row', gap: '10px' }}>
-                                    <span className='epoch-no' style={{ fontWeight: '600', fontSize: '0.75rem', width: '70px', textAlign: 'start' }}>Epoch : {epochNo}</span>
-                                    <Box className={`model-progress_{}`} variant='h6'>
-                                        <div className='batch-end'>
-                                            <div style={{ fontWeight: '600', fontSize: '0.75rem', width: '70px', textAlign: 'start' }}>Batch : {batchResult.batch}</div>
-                                            <div className='batch-end-text'>Loss : {batchResult.loss}</div>
-                                            <div className='batch-end-text'>MSE : {batchResult.mse}</div>
-                                            <div className='batch-end-text'>MAE : {batchResult.mae}</div>
-                                        </div>
+                                :
+                                (
+                                    <Box className='token-chart-box' minHeight="100%">
+                                        <MainChart
+                                            latestTime={chartData[chartData.length - 1].time * 1000 + 60000}
+                                            new_fetch_offset={newTickerLength}
+                                            symbol={cryptotoken}
+                                            selectedTokenPeriod={selectedTokenPeriod}
+                                            module={module}
+                                            fetchValues={fetchValues}
+                                        />
                                     </Box>
-                                </Box>
-                            )
+                                )
                             }
-
                         </Box>
                     </Grid>
-                    <Grid item xs={12} sm={12} md={6} lg={8} xl={6}>
-                        <PredictionsChart />
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={3} lg={3} xl={3}>
-                        <Box className='saved-models' pt={4}>
-                            Saved models
+                    <Grid item xs={12} sm={12} md={12} lg={3} xl={3}>
+                        <Box className='search-indicator-box' display='flex' flexDirection='row' alignItems='center' pl={2} pr={2} pt={1}>
+                            <Box className='function-selector' width='100%'>
+                                {transformedFunctionsList.length > 0 &&
+                                    <Autocomplete
+                                        sx={{ backgroundColor: `${theme.palette.background.paperOne}` }}
+                                        disableCloseOnSelect={true}
+                                        value={searchedFunctions}
+                                        size='small'
+                                        multiple
+                                        limitTags={2}
+                                        id="tags-filled"
+                                        options={transformedFunctionsList.sort((a, b) => -b.group.localeCompare(a.group))}
+                                        getOptionDisabled={(option) => transformedFunctionsList.filter((item) => item.label === option.label)[0].func_selected || searchedFunctions.includes(option.label)}
+                                        groupBy={(option) => option.group}
+                                        freeSolo
+                                        onChange={(event, newValue) => {
+                                            handleSearchedFunctions(newValue)
+                                        }}
+                                        renderTags={(value, getTagProps) =>
+                                            value.map((option, index) => (
+                                                <Chip variant="outlined" label={option.label} {...getTagProps({ index })} />
+                                            ))
+                                        }
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                variant="filled"
+                                                label="Search for a function"
+                                                placeholder="Search..."
+                                            />
+                                        )}
+                                    />
+                                }
+                                {searchedFunctions.length > 0 &&
+                                    <Box display='flex' alignItems='start' pt={1}>
+                                        <Button size='small' color='secondary' variant='outlined' onClick={handleAddSelectedFunction.bind(null)}>Add Functions</Button>
+                                    </Box>
+                                }
+                            </Box>
                         </Box>
                     </Grid>
                 </Grid>
 
-
-                <Box ml={2} mr={2} mb={2} mt={2}>
-                    <Box pl={1}>
-                        <Typography variant='h4' sx={{ textAlign: 'start' }}>Selected Indicators</Typography>
-                    </Box>
+                <Box mb={2} mt={2} className='selected-functions-box'>
                     {selectedFunctions.length === 0 ?
                         (
                             <Box display='flex' flexDirection='row' justifyContent='flex-start'>
-                                <Typography variant='h6' pl={1} sx={{ textAlign: 'start' }}>Select an indicator to plot</Typography>
+                                <Typography variant='h4' pl={1} sx={{ textAlign: 'start' }}>Select an indicator to plot</Typography>
                             </Box>
                         )
                         :
                         (
-                            <Grid container className='indicator-data-container'>
-                                {selectedFunctions && selectedFunctions.map((funcRedux, index) => {
-                                    const { name } = funcRedux
-                                    return (
-                                        <Grid key={`${name}${index}`} item xs={12} sm={12} md={6} lg={4} xl={3}>
-                                            <SelectedFunctionContainer key={index} funcRedux={funcRedux} fetchValues={fetchValues} />
-                                        </Grid>
-                                    )
-                                })}
-                            </Grid>
+                            <React.Fragment>
+                                <Box pl={2} pt={2}>
+                                    <Typography variant='h4' sx={{ textAlign: 'start' }}>Selected Indicators</Typography>
+                                </Box>
+                                <Grid pl={1} container className='indicator-data-container'>
+                                    {selectedFunctions && selectedFunctions.map((funcRedux, index) => {
+                                        const { name } = funcRedux
+                                        return (
+                                            <Grid key={`${name}${index}`} item xs={12} sm={6} md={4} lg={3} xl={3}>
+                                                <SelectedFunctionContainer key={index} funcRedux={funcRedux} fetchValues={fetchValues} />
+                                            </Grid>
+                                        )
+                                    })}
+                                </Grid>
+                            </React.Fragment>
                         )
                     }
                 </Box>
 
-            </Box >
+                <Box className='model-training-container'>
+                    <Box alignItems='start' display='flex' pl={2} pt={2} pb={1} className='trainmodel-title'>
+                        <Typography variant='h4'>Model Training</Typography>
+                    </Box>
+                    <Grid container className='tensor-flow-grid'>
+                        <Grid item xs={12} sm={12} md={4} lg={3} xl={3} pl={2} pr={2} pb={2}>
+                            <Box display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' pb={2}>
+                                <Typography variant='h5' textAlign='start'>Parameters</Typography>
+                                <Box display='flex' alignItems='center' gap='10px'>
+                                    <Button
+                                        variant='outlined'
+                                        size='small'
+                                        color='secondary'
+                                        disabled={trainingStartedFlag}
+                                        onClick={(e) => handleStartModelTraining()}
+                                        endIcon={trainingStartedFlag && <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />}
+                                    >
+                                        {trainingStartedFlag ? 'Training' : 'Train'}
+                                    </Button>
+                                    <Tooltip title={'Reset data'} placement='top' sx={{ cursor: 'pointer' }}>
+                                        <IconButton onClick={handleClearModelData.bind(null)}>
+                                            <RestartAltIcon className='small-icon' />
+                                        </IconButton>
+                                    </Tooltip>
+                                    {noFuncSelected !== '' && <Typography variant='custom' sx={{ color: 'red' }}>{noFuncSelected}</Typography>}
+                                </Box>
+                            </Box>
 
-            <Indicators symbol={cryptotoken} fetchValues={fetchValues} />
+                            <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' gap='10px'>
+                                <Box display='flex' flexDirection='column' gap='5px' width='100%'>
+                                    <CustomSlider sliderValue={modelParams.trainingDatasetSize} name={'trainingDatasetSize'} handleModelParamChange={handleModelParamChange} label={'Training size'} min={50} max={95} sliderMin={0} sliderMax={100} disabled={trainingStartedFlag} />
+                                    <CustomSlider sliderValue={modelParams.timeStep} name={'timeStep'} handleModelParamChange={handleModelParamChange} label={'Step Size'} min={14} max={100} sliderMin={1} sliderMax={100} disabled={trainingStartedFlag} />
+                                    <CustomSlider sliderValue={modelParams.lookAhead} name={'lookAhead'} handleModelParamChange={handleModelParamChange} label={'Look Ahead'} min={1} max={5} sliderMin={1} sliderMax={5} disabled={trainingStartedFlag} />
+                                    <CustomSlider sliderValue={modelParams.epoch} name={'epoch'} handleModelParamChange={handleModelParamChange} label={'Epochs'} min={1} max={20} sliderMin={1} sliderMax={20} disabled={trainingStartedFlag} />
+                                    <CustomSlider sliderValue={modelParams.hiddenLayer} name={'hiddenLayer'} handleModelParamChange={handleModelParamChange} label={'Hidden Layers'} min={1} max={20} sliderMin={1} sliderMax={10} disabled={trainingStartedFlag} />
+                                    <CustomSlider sliderValue={modelParams.learningRate} name={'learningRate'} handleModelParamChange={handleModelParamChange} label={'Learning Rate'} min={0} max={100} sliderMin={0} sliderMax={100} scaledLearningRate={modelParams.scaledLearningRate} disabled={trainingStartedFlag} />
+                                    <MultiSelect
+                                        inputLabel={'Prediction flag'}
+                                        selectedInputOptions={modelParams.multiSelectValue}
+                                        handleInputOptions={handleMultiselectOptions}
+                                        fieldName={'To predict'}
+                                    />
+                                </Box>
+                            </Box>
+                        </Grid>
+
+                        <Grid item xs={12} sm={12} md={8} lg={6} xl={6} pl={2} pr={2} pb={2} className='predictions-chart-grid'>
+                            <Box pl={2} pr={2} display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
+                                <Typography variant='h5' textAlign='start'>Predictions Chart</Typography>
+                                {Object.keys(predictedVlauesRedux).length !== 0 && <Box display='flex' flexDirection='row' gap={'10px'}>
+                                    <Button disabled={predictionChartType === "standardized" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })} variant='outlined' size='small' color='secondary'>Standardized</Button>
+                                    <Button disabled={predictionChartType === "scaled" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })} variant='outlined' size='small' color='secondary'>Scaled</Button>
+                                </Box>
+                                }
+                            </Box>
+
+                            <PredictionsChart
+                                predictionChartType={predictionChartType}
+                                trainingStartedFlag={trainingStartedFlag}
+                            />
+
+                            <Box className='main-training-status-box' pt={1}>
+                                {/* epoch end results */}
+                                <Box className='epoch-end-progress-box' pt={1}>
+                                    {epochResults.length > 0 && epochResults.map((result, index) => {
+                                        return (
+                                            <Box key={index} className={`epoch_${index} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px', justifyContent: 'space-between' }}>
+                                                <div className='epoch-no' style={{ fontWeight: '600', fontSize: '0.75rem', minWidth: '60px', textAlign: 'start' }}>E : {result.epoch}</div>
+                                                <Box className={`model-progress_${index}`} variant='h6'>
+                                                    <div className='epoch-end'>
+                                                        <div className='batch-end-text'>Loss : {result.loss}</div>
+                                                        <div className='batch-end-text'>MSE : {result.mse}</div>
+                                                        <div className='batch-end-text'>MAE : {result.mae}</div>
+                                                    </div>
+                                                </Box>
+                                            </Box>
+                                        )
+                                    })}
+                                </Box>
+
+                                {/* epoch batch results */}
+                                <Box className='batch-end-progress-box' pt={1}>
+                                    {batchResult && (
+                                        <Box className={`epoch_{} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
+                                            <Box className={`model-progress_{}`} variant='h6'>
+                                                <div className='batch-end'>
+                                                    <div style={{ fontWeight: '600', fontSize: '0.75rem', width: '70px', textAlign: 'start' }} id='batch-no'></div>
+                                                    <div className='batch-end-text' id='loss'></div>
+                                                    <div className='batch-end-text' id='mse'></div>
+                                                    <div className='batch-end-text' id='mae'></div>
+                                                </div>
+                                            </Box>
+                                        </Box>
+                                    )
+                                    }
+                                </Box>
+
+                                {/* progress message */}
+                                <Box className='checkpoint-progress-box'>
+                                    {progressMessage.length > 0 && (
+                                        <Paper elevation={6} sx={{ backgroundColor: `${theme.palette.background.paperOne}` }}>
+                                            <Box p={'5px'} className='progress-update-notify-ws' id="messageDiv" display='flex' flexDirection='column' alignItems='start' height='100px' overflow='auto'>
+                                                {progressMessage.map((message, index) => {
+                                                    return (
+                                                        <p key={index} className='socket-message'>{message.message}</p>
+                                                    )
+                                                })}
+
+                                            </Box>
+                                        </Paper>
+                                    )}
+                                </Box>
+                            </Box>
+                        </Grid>
+
+                        <Grid item xs={12} sm={12} md={12} lg={3} xl={3}>
+                            <Box className='saved-models' pl={2}>
+                                <Typography variant='h5' textAlign='start'>Saved Models</Typography>
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </Box>
+
+                <Indicators symbol={cryptotoken} fetchValues={fetchValues} />
+            </Box >
         </Box >
     )
 }

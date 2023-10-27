@@ -42,6 +42,7 @@ const onTrainingEnd = (ws) => {
 const onPredictionCompleted = async (ws, id) => {
     if (ws) {
         const predictions = await RedisUtil.getTestPredictions(id);
+        TF_Model.eventEmitter.removeAllListeners();
         ws.send(JSON.stringify({ action: 'prediction_completed', id: id, predictions: predictions }));
     }
 };

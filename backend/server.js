@@ -22,7 +22,7 @@ const CMServices = require('./services/contentManagerServices')
 const schedule = require('node-schedule');
 
 const rule = new schedule.RecurrenceRule();
-rule.hour = 10;
+rule.hour = 7;
 rule.minute = 0;
 rule.second = 0;
 

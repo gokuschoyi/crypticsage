@@ -139,7 +139,7 @@ const FunctionContainer = (props) => {
             hasEmptyValues = false
         }
         // console.log(hasEmptyValues)
-        
+
         if (hasEmptyValues) {
             setSelectedInputOptions(checked)
             return
@@ -461,6 +461,7 @@ const Indicators = (props) => {
 
     const [expanded, setExpanded] = useState(false);
     const handleAccordianChange = (panel) => (event, isExpanded) => {
+        console.log(panel, isExpanded)
         setExpanded(isExpanded ? panel : false);
     };
 
@@ -495,8 +496,8 @@ const Indicators = (props) => {
     return (
         <Box className='admin-indicator-container' >
 
-            <Box className='talib-indicators-box' p={2} >
-                <Box className='search-indicator-box' display='flex' flexDirection='row' alignItems='center' ml={2} pt={2} pb={2} gap={2}>
+            <Box className='talib-indicators-box'>
+                <Box className='search-indicator-box' display='flex' flexDirection='row' alignItems='center' pt={2} pb={2} gap={2}>
                     <TextField
                         color='secondary'
                         label="Search indicator"
@@ -515,34 +516,38 @@ const Indicators = (props) => {
                     />
                 </Box>
 
-                <Box pl={2} pr={2} className='all-talib-functions' sx={{ minHeight: '500px' }}>
-                    {talibDesc && talibDesc.map((group, index) => {
-                        const { group_name, functions } = group
-                        return (
-                            <Box width='100%' pt={1} pb={1} key={group_name} >
-                                <Accordion expanded={expanded === `${group_name}`} onChange={handleAccordianChange(`${group_name}`)} TransitionProps={{ mountOnEnter: true }} >
-                                    <AccordionSummary
-                                        expandIcon={<ExpandMoreIcon />}
-                                        aria-controls="panel1a-content"
-                                        id="panel1a-header"
-                                    >
-                                        <Typography variant='h5'>({index + 1}) : {group_name} <span style={{ color: 'red' }}>({functions.length})</span></Typography>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        <Grid container spacing={1} className='indicator-data-container'>
-                                            {functions && functions.map((func, index) => {
-                                                return (
-                                                    <Grid key={func.name} item xs={12} sm={12} md={6} lg={4} xl={3}>
-                                                        <FunctionContainer key={index} group_name={group_name} func={func} histDataLength={histDataLength} fetchValues={fetchValues} />
-                                                    </Grid>
-                                                )
-                                            })}
-                                        </Grid>
-                                    </AccordionDetails>
-                                </Accordion>
-                            </Box>
-                        )
-                    })}
+                <Box className='all-talib-functions' sx={{ minHeight: '500px' }}>
+                    <Grid container spacing={1} >
+                        {talibDesc && talibDesc.map((group, index) => {
+                            const { group_name, functions } = group
+                            return (
+                                <Grid key={group_name} item xs={12} sm={12} md={12} lg={12} xl={6}>
+                                    <Box width='100%' pt={1} pb={1}  >
+                                        <Accordion  TransitionProps={{ mountOnEnter: true }} >
+                                            <AccordionSummary
+                                                expandIcon={<ExpandMoreIcon />}
+                                                aria-controls="panel1a-content"
+                                                id="panel1a-header"
+                                            >
+                                                <Typography variant='h5'>({index + 1}) : {group_name} <span style={{ color: 'red' }}>({functions.length})</span></Typography>
+                                            </AccordionSummary>
+                                            <AccordionDetails>
+                                                <Grid container spacing={1} className='indicator-data-container'>
+                                                    {functions && functions.map((func, index) => {
+                                                        return (
+                                                            <Grid key={func.name} item xs={12} sm={12} md={6} lg={4} xl={6}>
+                                                                <FunctionContainer key={index} group_name={group_name} func={func} histDataLength={histDataLength} fetchValues={fetchValues} />
+                                                            </Grid>
+                                                        )
+                                                    })}
+                                                </Grid>
+                                            </AccordionDetails>
+                                        </Accordion>
+                                    </Box>
+                                </Grid>
+                            )
+                        })}
+                    </Grid>
                 </Box>
             </Box>
         </Box >

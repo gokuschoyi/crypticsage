@@ -298,7 +298,8 @@ const startModelTraining = async (job) => {
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Standardizing the data..." })
     log.info('----> Step 5 : Standardizing the data')
-    let stdData = TFMUtil.standardizeData(features)
+    let [stdData, label_mean, label_variance] = TFMUtil.standardizeData(features, to_predict)
+    console.log(label_mean, label_variance)
     TF_Model.eventEmitter.emit('notify', { message: `----> Data standardized...` })
 
 
@@ -347,7 +348,7 @@ const startModelTraining = async (job) => {
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Combining and finalizing the data for plotting..." })
     log.info('----> Step 10 : Combining and finalizing the data for plotting')
-    await TFMUtil.formatPredictedOutput({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice, id: model_id })
+    await TFMUtil.formatPredictedOutput({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice, id: model_id, label_mean, label_variance })
     TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions formatted, sending result...` })
 
 

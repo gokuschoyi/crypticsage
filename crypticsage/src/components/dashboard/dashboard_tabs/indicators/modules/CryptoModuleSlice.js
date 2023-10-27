@@ -48,7 +48,7 @@ const initialState = {
         progress_message: [],
         epoch_no: 0,
         epoch_results: [],
-        predictedValues: [],
+        predictedValues: {},
     }
 }
 
@@ -78,13 +78,13 @@ const cryptoModuleSlice = createSlice({
             state.modelData.epoch_results.push(action.payload);
         },
         resetPredictionsValue: (state) => {
-            state.modelData.predictedValues = [];
+            state.modelData.predictedValues = {};
         },
         resetModelData: (state) => {
             state.modelData.model_id = '';
             state.modelData.epoch_results = [];
             state.modelData.epoch_no = initialState.modelData.epoch_no;
-            state.modelData.predictedValues = [];
+            state.modelData.predictedValues = {};
             state.modelData.progress_message = [];
         },
         toggleToolTipSwitch: (state) => {
@@ -135,6 +135,7 @@ const cryptoModuleSlice = createSlice({
             state.talibDescription = state.talibDescriptionCopy;
             state.selectedFunctions = [];
             state.modifiedSelectedFunctionWithDataToRender = [];
+            state.barsFromTo = { from: 0, to: 0 };
         },
         setCryptoDataInDbRedux: (state, action) => {
             state.cryptoDataInDb = action.payload;
@@ -167,7 +168,7 @@ const cryptoModuleSlice = createSlice({
                             inputs: inputs,
                             optInputs: optInputs,
                             outputAvailable: result.length > 0 ? true : false,
-                            show_chart_flag: true,
+                            show_chart_flag: result.length > 0 ?true :false,
                             differentiatorValue: diffVal,
                             show_settings: false,
                         }
