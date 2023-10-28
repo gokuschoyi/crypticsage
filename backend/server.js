@@ -1,3 +1,5 @@
+// @ts-nocheck
+const fs = require('fs');
 const express = require('express');
 var cors = require('cors')
 const { wsServer } = require('./websocket')
@@ -15,7 +17,8 @@ const fetchCryptoData = require('./routes/cryptoStocksRoute');
 const indicator = require('./routes/indicatorsRoute')
 // const indicators = require('./routes/indicators/indicatorsRoute');
 
-const http = require('http');
+const http= require('http');
+const https = require('https');
 const app = express();
 
 const CMServices = require('./services/contentManagerServices')
@@ -75,9 +78,18 @@ app.use('/indicators', verifyToken, indicator)
 
 // app.use('/indicators', verifyToken, indicators); // remove later
 
-app.listen(config.port, () => {
+https
+    .createServer({
+        key: fs.readFileSync('./ssl/localhost-key.pem'),
+        cert: fs.readFileSync('./ssl/localhost.pem')
+    }, app)
+    .listen(config.port, () => {
+        logs.info(`Express server listening on port : ${config.port}`);
+    })
+
+/* app.listen(config.port, () => {
     logs.info(`Express server listening on port : ${config.port}`);
-});
+}); */
 
 if (config.websocketFlag === 'true') {
     // Attach the WebSocket server to a separate HTTP server
