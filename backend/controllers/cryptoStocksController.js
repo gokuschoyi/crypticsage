@@ -53,7 +53,7 @@ const getLatestStocksData = async (req, res) => {
         let yFSymbols = symbolsInDb.map((symbol) => symbol.ticker_name)
         /* const yFSymbols = ['AAPL', 'GOOG', 'MSFT']
          */
-        let yFData = await CSUtil.getYfinanceQuotes(yFSymbols)
+        let yFData = await CSUtil.getYFinanceShortSummary(yFSymbols)
         res.status(200).json({ message: "Get Latest Stocks Data request success", yFData });
     } catch (error) {
         log.error(error.stack)
@@ -64,7 +64,7 @@ const getLatestStocksData = async (req, res) => {
 const getStockSummaryDetails = async (req, res) => {
     const { symbol } = req.body
     try {
-        const stockSummaryDetails = await CSUtil.getStockSummaryDetails(symbol)
+        const stockSummaryDetails = await CSUtil.getYFinanceFullSummary(symbol)
         res.status(200).json({ message: "Get Stock Summary Details request success", stockSummaryDetails });
     } catch(error) {
         log.error(error.stack)

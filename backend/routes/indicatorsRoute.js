@@ -17,7 +17,8 @@ const checkDuplicates = async (req, res, next) => {
     if (deleteduplicateResult) {
         // @ts-ignore
         let length = deleteduplicateResult.length
-        res.status(200).json({ message: 'Duplicate data found', length, data: deleteduplicateResult, updatedResult, latestDocumentCount })
+        let prevLength = length + latestDocumentCount
+        res.status(200).json({ message: 'Duplicate data found', length, latestDocumentCount, updatedResult, prevLength, data: deleteduplicateResult })
     } else {
         res.status(200).json({ message: 'No duplicate data found', data: deleteduplicateResult })
     }

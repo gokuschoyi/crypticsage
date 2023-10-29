@@ -2216,15 +2216,17 @@ const checkForDuplicateDocumentsInHistory = async (ticker_name, period) => {
 
         let deleteduplicateResult = []
         if (duplicates.length > 0) {
-            console.log('Duplicate documents found. Removing duplicates...');
+            console.log('Duplicate documents found. Removing duplicates...', duplicates.length);
 
             // Loop through duplicates and remove all but one document for each duplicate key
+            let c = 1;
             for (const duplicate of duplicates) {
+                console.log(`Removing ${c++} of ${duplicates.length} duplicates (${duplicate.count}) for key ${duplicate._id}, ${new Date(duplicate._id).toLocaleString()}`)
                 // @ts-ignore
                 let delDupli = await collection.deleteMany({ openTime: duplicate._id }, { sort: { _id: 1 }, limit: duplicate.count - 1 });
                 deleteduplicateResult.push(delDupli)
             }
-
+            console.log(duplicates.length, 'Duplicate documents removed.');
             console.log('Duplicate documents removed.');
         } else {
             console.log('No duplicate documents found.');
@@ -2252,6 +2254,105 @@ const checkForDuplicateDocumentsInHistory = async (ticker_name, period) => {
     }
 }
 
+const fetchYFinanceShortSummary = async (symbols) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const collection = db.collection('yfinance_metadata')
+
+        const query = { ticker_name: { $in: symbols } }
+
+        const matching = await collection.find(query).toArray()
+        const final = matching.map((item) => { return item.meta.short_summary })
+        return final
+
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const fetchYFinanceFullSummary = async (symbol) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const collection = db.collection('yfinance_metadata')
+
+        const query = { ticker_name: symbol }
+        const document = await collection.findOne(query)
+        if (document) {
+            return document.meta.full_summary
+        } else {
+            return null
+        }
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const updateYFinanceMetadata = async (ticker_name, meta_type, meta_data) => {
+    // log.info(`Updating ${meta_type} for ${ticker_name} `)
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const collection = db.collection('yfinance_metadata')
+        const query = { ticker_name };
+        const stock = await collection.findOne(query)
+        let updatedStockMeta;
+        if (stock) {
+            // Check if the `meta_type` field exists in the `meta` object
+            if (stock.meta && stock.meta[meta_type]) {
+                // Update the specific `meta_type` field
+                log.info(`Updating ${meta_type} for ${ticker_name} `)
+                updatedStockMeta = await collection.updateOne(
+                    query, // Use the same query
+                    {
+                        $set: {
+                            [`meta.${meta_type}`]: meta_data
+                        }
+                    }
+                );
+            } else {
+                // Update the entire `meta` object 
+                log.info(`Adding ${meta_type} for ${ticker_name} `)
+                updatedStockMeta = await collection.updateOne(
+                    query, // Use the same query
+                    {
+                        $set: {
+                            [`meta.${meta_type}`]: meta_data // Create a new `meta` object with the desired field
+                        }
+                    }
+                );
+            }
+        }
+        return updatedStockMeta
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const isMetadatAvailable = async (ticker_name) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const collection = db.collection('yfinance_metadata')
+
+        const query = { ticker_name };
+        const document = await collection.findOne(query)
+        // @ts-ignore
+        if (Object.keys(document.meta).length > 0) {
+            return true
+        } else {
+            return false
+        }
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+/* let res = async () => {
+    isMetadatAvailable('AAPL').then((result) => {console.log(result)})
+}
+res() */
 //<------------------------CRYPTO-STOCKS SERVICES-------------------------->
 
 
@@ -2297,4 +2398,8 @@ module.exports = {
     , fetchTickerHistDataBasedOnCount
     , updateTickerMetaData
     , checkForDuplicateDocumentsInHistory
+    , fetchYFinanceShortSummary
+    , fetchYFinanceFullSummary
+    , updateYFinanceMetadata
+    , isMetadatAvailable
 }

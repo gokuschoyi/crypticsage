@@ -17,17 +17,23 @@ const fetchCryptoData = require('./routes/cryptoStocksRoute');
 const indicator = require('./routes/indicatorsRoute')
 // const indicators = require('./routes/indicators/indicatorsRoute');
 
-const http= require('http');
+const http = require('http');
 const https = require('https');
 const app = express();
 
 const CMServices = require('./services/contentManagerServices')
+const CSUtil = require('./utils/cryptoStocksUtil');
 const schedule = require('node-schedule');
 
-const rule = new schedule.RecurrenceRule();
-rule.hour = 7;
-rule.minute = 0;
-rule.second = 0;
+const binance_ticker_fetch_rule = new schedule.RecurrenceRule();
+binance_ticker_fetch_rule.hour = 7;
+binance_ticker_fetch_rule.minute = 0;
+binance_ticker_fetch_rule.second = 0;
+
+const yf_metadata_update_rule = new schedule.RecurrenceRule();
+yf_metadata_update_rule.hour = 7;
+yf_metadata_update_rule.minute = 5;
+yf_metadata_update_rule.second = 0;
 
 const log = (req, res, next) => {
     logs.info(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);
@@ -38,11 +44,17 @@ logs.info('Starting server...');
 
 if (config.schedulerFlag === 'true') {
     logs.info('Starting scheduled Crypto update...')
-    const job = schedule.scheduleJob(rule, async function () {
+    const job = schedule.scheduleJob(binance_ticker_fetch_rule, async function () {
         logs.info(`Updating binance ticker. (Daily CRON), ${new Date()}`)
         let processIds = await CMServices.serviceUpdateAllBinanceTickers();
         logs.info(processIds);
     });
+
+    schedule.scheduleJob(yf_metadata_update_rule, async function () {
+        logs.info(`Updating yfinance metadata. (Daily CRON), ${new Date()}`)
+        await CSUtil.yFinance_metaData_updater()
+    })
+
 } else {
     logs.info('Scheduler flag set to false, Change in env to enable scheduler');
 }
@@ -78,18 +90,20 @@ app.use('/indicators', verifyToken, indicator)
 
 // app.use('/indicators', verifyToken, indicators); // remove later
 
-https
-    .createServer({
-        key: fs.readFileSync('./ssl/localhost-key.pem'),
-        cert: fs.readFileSync('./ssl/localhost.pem')
-    }, app)
-    .listen(config.port, () => {
-        logs.info(`Express server listening on port : ${config.port}`);
-    })
-
-/* app.listen(config.port, () => {
-    logs.info(`Express server listening on port : ${config.port}`);
-}); */
+if (config.https_flag === 'true') {
+    https
+        .createServer({
+            key: fs.readFileSync('./ssl/localhost-key.pem'),
+            cert: fs.readFileSync('./ssl/localhost.pem')
+        }, app)
+        .listen(config.port, () => {
+            logs.info(`Express server listening on port : ${config.port}, HTTPS`);
+        })
+} else {
+    app.listen(config.port, () => {
+        logs.info(`Express server listening on port : ${config.port}, HTTP`);
+    });
+}
 
 if (config.websocketFlag === 'true') {
     // Attach the WebSocket server to a separate HTTP server

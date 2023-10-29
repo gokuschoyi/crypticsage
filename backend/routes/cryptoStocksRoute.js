@@ -31,7 +31,8 @@ const process = async (req, res) => {
         let tickers = tickersList.filter((ticker) => {
             return !fObjs.some((obj) => obj.ticker_name === ticker)
         }) */
-        let test = HDUtil.calculateUpdateTickerEndDate({openTime, period})
+        // let test = HDUtil.calculateUpdateTickerEndDate({ openTime, period })
+        let test = await CSUtil.yFinance_metaData_updater()
         res.status(200).json({ message: "Get Latest Stocks Data request success", test });
     } catch (error) {
         console.log(error.stack)

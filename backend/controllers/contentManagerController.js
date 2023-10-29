@@ -6,6 +6,7 @@ const Validator = require('../utils/validator')
 const CMServices = require('../services/contentManagerServices')
 const MDBServices = require('../services/mongoDBServices')
 const HDServices = require('../services/historicalDataServices')
+const CSUtil = require('../utils/cryptoStocksUtil')
 
 // <--- Admin Stats ---> //
 
@@ -175,8 +176,19 @@ const updateAllBinanceTickers = async (req, res) => {
 const fetchOneYfinanceTicker = async (req, res) => {
     try {
         const { symbol } = req.body
+        const newSymbol = symbol[0]
         const periods = ["1d", "1wk", "1mo"]
         const [uploadStatus, availableTickers, tickers] = await HDServices.processInitialSaveHistoricalDataYFinance({ tickersList: symbol, periods })
+        const isMetaDataAvailable = await MDBServices.isMetadatAvailable(newSymbol)
+        if(!isMetaDataAvailable){ // add metadata
+            log.info(`Metadata unavaiable, adding metadata for ${newSymbol}`)
+            await CSUtil.getYfinanceQuotes(symbol)
+            const meta_type = 'full_summary'
+            const full_summary = await CSUtil.getStockSummaryDetails(newSymbol)
+            await MDBServices.updateYFinanceMetadata(newSymbol, meta_type, full_summary)
+        } else{
+            log.info(`Metadata avaiable for ${newSymbol}`)
+        }
         res.status(200).json({ message: "Yfinance tickers added", uploadStatus, availableTickers, tickers });
     } catch (error) {
         let formattedError = JSON.stringify(logger.formatError(error))

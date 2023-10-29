@@ -3,6 +3,7 @@ const logger = require('../middleware/logger/Logger')
 const log = logger.create(__filename.slice(__dirname.length + 1))
 const yahooFinance = require('yahoo-finance2').default; // summary quotes not working
 const axios = require('axios').default;
+const MDBServices = require('../services/mongoDBServices')
 
 // < - - - - - - - - - - Helper Functions - - - - - - - - - - >
 
@@ -101,31 +102,32 @@ const periodToMilliseconds = (period) => {
 //         param - price data from CryptoCompare : object
 // OUTPUT : tokenData - required object for the Stocks table data
 const generateYFObject = (symbol, param) => {
+    // console.log(param)
     let tokenData = {}
     tokenData["symbol"] = symbol
-    tokenData["open"] = param.summaryDetail?.open.raw || "N/A"
-    tokenData["high"] = param.summaryDetail?.dayHigh.raw || "N/A"
-    tokenData["low"] = param.summaryDetail?.dayLow.raw || "N/A"
-    tokenData["divident_rate"] = param.summaryDetail?.dividendRate.raw || "N/A"
-    tokenData["divident_yield"] = param.summaryDetail?.dividendYield.raw || "N/A"
-    tokenData["five_year_avg_dividend_yield"] = param.summaryDetail?.fiveYearAvgDividendYield.raw || "N/A"
-    tokenData["market_cap"] = param.summaryDetail?.marketCap.raw || "N/A"
-    tokenData["fiftyTwoWeekLow"] = param.summaryDetail?.fiftyTwoWeekLow.raw || "N/A"
-    tokenData["fiftyTwoWeekHigh"] = param.summaryDetail?.fiftyTwoWeekHigh.raw || "N/A"
-    tokenData["enterpriseValue"] = param.defaultKeyStatistics?.enterpriseValue.raw || "N/A"
-    tokenData["pegRatio"] = param.defaultKeyStatistics?.pegRatio.raw || "N/A"
-    tokenData["currentQuarterEstimate"] = param.earnings?.earningsChart.currentQuarterEstimate.raw || "N/A"
+    tokenData["open"] = param.summaryDetail?.open || param.summaryDetail?.open?.raw || "N/A"
+    tokenData["high"] = param.summaryDetail?.dayHigh || param.summaryDetail?.dayHigh?.raw || "N/A"
+    tokenData["low"] = param.summaryDetail?.dayLow || param.summaryDetail?.dayLow?.raw || "N/A"
+    tokenData["divident_rate"] = param.summaryDetail?.dividendRate || param.summaryDetail?.dividendRate?.raw || "N/A"
+    tokenData["divident_yield"] = param.summaryDetail?.dividendYield || param.summaryDetail?.dividendYield?.raw || "N/A"
+    tokenData["five_year_avg_dividend_yield"] = param.summaryDetail?.fiveYearAvgDividendYield || param.summaryDetail?.fiveYearAvgDividendYield?.raw || "N/A"
+    tokenData["market_cap"] = param.summaryDetail?.marketCap || param.summaryDetail?.marketCap?.raw || "N/A"
+    tokenData["fiftyTwoWeekLow"] = param.summaryDetail?.fiftyTwoWeekLow || param.summaryDetail?.fiftyTwoWeekLow?.raw || "N/A"
+    tokenData["fiftyTwoWeekHigh"] = param.summaryDetail?.fiftyTwoWeekHigh || param.summaryDetail?.fiftyTwoWeekHigh?.raw || "N/A"
+    tokenData["enterpriseValue"] = param.defaultKeyStatistics?.enterpriseValue || param.defaultKeyStatistics?.enterpriseValue?.raw || "N/A"
+    tokenData["pegRatio"] = param.defaultKeyStatistics?.pegRatio || param.defaultKeyStatistics?.pegRatio?.raw || "N/A"
+    tokenData["currentQuarterEstimate"] = param.earnings?.earningsChart.currentQuarterEstimate || param.earnings?.earningsChart.currentQuarterEstimate?.raw || "N/A"
     tokenData["financial_chart"] = param.earnings?.financialsChart.yearly || "N/A"
     tokenData["short_name"] = param.price?.shortName || "N/A"
-    tokenData["total_cash"] = param.financialData?.totalCash.raw || "N/A"
-    tokenData["ebitda"] = param.financialData?.ebitda.raw || "N/A"
-    tokenData["total_debt"] = param.financialData?.totalDebt.raw || "N/A"
-    tokenData["total_revenue"] = param.financialData?.totalRevenue.raw || "N/A"
-    tokenData["debt_to_equity"] = param.financialData?.debtToEquity.raw || "N/A"
-    tokenData["gross_profit"] = param.financialData?.grossProfits.raw || "N/A"
-    tokenData["free_cashflow"] = param.financialData?.freeCashflow.raw || "N/A"
-    tokenData["operating_cashflow"] = param.financialData?.operatingCashflow.raw || "N/A"
-    tokenData["rev_growth"] = param.financialData?.revenueGrowth.raw || "N/A"
+    tokenData["total_cash"] = param.financialData?.totalCash || param.financialData?.totalCash?.raw || "N/A"
+    tokenData["ebitda"] = param.financialData?.ebitd || param.financialData?.ebitda?.raw || "N/A"
+    tokenData["total_debt"] = param.financialData?.totalDebt || param.financialData?.totalDebt?.raw || "N/A"
+    tokenData["total_revenue"] = param.financialData?.totalRevenue || param.financialData?.totalRevenue?.raw || "N/A"
+    tokenData["debt_to_equity"] = param.financialData?.debtToEquity || param.financialData?.debtToEquity?.raw || "N/A"
+    tokenData["gross_profit"] = param.financialData?.grossProfits || param.financialData?.grossProfits?.raw || "N/A"
+    tokenData["free_cashflow"] = param.financialData?.freeCashflow || param.financialData?.freeCashflow?.raw || "N/A"
+    tokenData["operating_cashflow"] = param.financialData?.operatingCashflow || param.financialData?.operatingCashflow?.raw || "N/A"
+    tokenData["rev_growth"] = param.financialData?.revenueGrowth || param.financialData?.revenueGrowth?.raw || "N/A"
     return tokenData
 }
 
@@ -199,6 +201,48 @@ const getLatestOHLCForTicker = async ({ timeFrame, tokenName, limit }) => {
     }
 }
 
+const getYFinanceShortSummary = async (symbols) => {
+    try {
+        const short_summary_result = await MDBServices.fetchYFinanceShortSummary(symbols)
+        return short_summary_result
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const getYFinanceFullSummary = async (symbol) => {
+    try {
+        const full_summary_result = await MDBServices.fetchYFinanceFullSummary(symbol)
+        return full_summary_result
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const yFinance_metaData_updater = async () => {
+    try {
+        const collection_name = 'yfinance_metadata'
+        const stock_symbols_data = await MDBServices.getFirstObjectForEachPeriod(collection_name)
+        let stock_symbols = stock_symbols_data.map((symbol) => symbol.ticker_name)
+        log.info('Updating short summary for symbols')
+        await getYfinanceQuotes(stock_symbols)
+
+        log.info('Updating full summary for stock')
+        const meta_type = 'full_summary'
+        for (const symb in stock_symbols) {
+            const symbol = stock_symbols[symb]
+            const full_summary = await getStockSummaryDetails(symbol)
+            await MDBServices.updateYFinanceMetadata(symbol, meta_type, full_summary)
+        }
+        return 'Success'
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
 // Fetches the quotes for the given symbols
 // INPUT : symbols - array of symbols
 // OUTPUT : finalData - array of objects containing the quotes for the given symbols
@@ -209,17 +253,45 @@ const getYfinanceQuotes = async (symbols) => {
     const modules = ['price', 'summaryDetail', 'earnings', 'defaultKeyStatistics', 'financialData']
     const key = modules.map(module => `modules=${module}`).join('&');
     let finalData = []
-    for (const item in symbols) {
-        let symbol = symbols[item]
-        const finalUrl = `${baseYFUrl}${symbol}?${key}`
+    const meta_type = 'short_summary'
+
+    try {
+        log.info('Test fetching to ensure URL works, else using package')
+        log.info(`${baseYFUrl}${symbols[0]}?modules=assetProfile`)
+        const result = await axios.get(`${baseYFUrl}${symbols[0]}?modules=assetProfile`)
+
+        if (result.data) {
+            for (const item in symbols) {
+                let symbol = symbols[item]
+                console.log('short summary', symbol)
+                const finalUrl = `${baseYFUrl}${symbol}?${key}`
+                try {
+                    const result = await axios.get(finalUrl)
+                    summaryDetail = result.data.quoteSummary.result[0]
+                    let transformedData = generateYFObject(symbol, summaryDetail)
+                    await MDBServices.updateYFinanceMetadata(symbol, meta_type, transformedData)
+                    finalData.push(transformedData)
+                } catch (error) {
+                    log.error(error.stack)
+                    throw error
+                }
+            }
+        }
+    } catch (err) {
+        log.warn('Fetch from URL failed, trying Yahoo Finance package');
         try {
-            const result = await axios.get(finalUrl)
-            summaryDetail = result.data.quoteSummary.result[0]
-            let transformedData = generateYFObject(symbol, summaryDetail)
-            finalData.push(transformedData)
-        } catch (error) {
-            log.error(error.stack)
-            throw error
+            for (const symbol of symbols) {
+                console.log(symbol)
+                // @ts-ignore
+                const quoteData = await yahooFinance.quoteSummary(symbol, { modules: modules });
+                let transformedData = generateYFObject(symbol, quoteData);
+                let updateSS = await MDBServices.updateYFinanceMetadata(symbol, meta_type, transformedData)
+                // console.log(updateSS)
+                finalData.push(transformedData);
+            }
+        } catch (err) {
+            log.warn('yhaoo package error')
+            log.error(err.stack)
         }
     }
     return finalData
@@ -1012,7 +1084,7 @@ const fetchFromYFinancePackage = async (symbol, modules, insightsOptions) => {
     const whiteListModule = ['quoteType']
 
     const moduleOptions = {
-        modules:modules
+        modules: modules
     }
     let qSummary = {}
     let symbolInsights = {}
@@ -1085,7 +1157,7 @@ const generateStockReport = async (symbol) => {
 
 const getStockSummaryDetails = async (symbol) => {
     log.info(`Fetching symbol summary for ${symbol}`)
-    
+
     let qSummary = {}
     qSummary = await generateStockReport(symbol)
     let symbolInsights = {}
@@ -1293,6 +1365,9 @@ module.exports = {
     , periodToMilliseconds
     , fetchTopTickerByMarketCap
     , getLatestOHLCForTicker
+    , getYFinanceShortSummary
+    , getYFinanceFullSummary
+    , yFinance_metaData_updater
     , getYfinanceQuotes
     , getStockSummaryDetails
 }
