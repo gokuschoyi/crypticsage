@@ -225,6 +225,8 @@ const StocksTable = () => {
                 })
         } else {
             console.log('UE : Stocks info fetch from redux')
+            const time = Math.floor(Date.now() / 1000)
+            setFetchedTime(time);
             let reduxCopy = [...stockDataInRedux]
             setStockData(reduxCopy)
         }
@@ -257,6 +259,7 @@ const StocksTable = () => {
         return sortedArray;
     }, [stockData, order, orderBy])
 
+    // this is redundant as the metatdata is alerady fetched daily remove later
     const refreshStockData = () => {
         console.log("refreshing stock data")
         const refreshIcon = document.getElementById('refresh-icon');

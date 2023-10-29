@@ -178,7 +178,7 @@ const CustomSlider = (props) => {
     }
     return (
         <Paper elevation={6}>
-            <Box p={'4px'} display='flex' flexDirection='column' alignItems='start'>
+            <Box p={'4px 8px'} display='flex' flexDirection='column' alignItems='start'>
                 <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%'>
                     <Typography id="training-size-slider" variant='custom'>{label} : {scaledLearningRate === undefined ? `${sliderValue}${label === 'Training size' ? '%' : ''}` : scaledLearningRate}</Typography>
                     <Typography variant='custom'>(Min: {min}, Max: {max})</Typography>
@@ -633,7 +633,10 @@ const CryptoModule = () => {
                                                 '& fieldset': {
                                                     borderColor: `${theme.palette.primary.newWhite} !important`,
                                                 }
-                                            }
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                height: '10px'
+                                            },
                                         }}
                                         label="Select a period"
                                         color="secondary"
@@ -641,7 +644,7 @@ const CryptoModule = () => {
                                 />
                             </Box>
                             <Box display='flex' flexDirection='column' alignItems='start'>
-                                <Typography variant='h6' style={{ marginLeft: '16px' }}>{actualFetchLength}, {ohlcData.length} / {ohlcData.length / 500}</Typography>
+                                <Typography variant='custom' style={{ marginLeft: '16px' }}>{actualFetchLength}, {ohlcData.length} / {ohlcData.length / 500}</Typography>
                                 <FormControlLabel
                                     value="start"
                                     control={<Switch size="small" color="secondary" />}
@@ -736,7 +739,7 @@ const CryptoModule = () => {
                                     {selectedFunctions && selectedFunctions.map((funcRedux, index) => {
                                         const { name } = funcRedux
                                         return (
-                                            <Grid key={`${name}${index}`} item xs={12} sm={6} md={4} lg={3} xl={3}>
+                                            <Grid key={`${name}${index}`} item xs={12} sm={6} md={4} lg={4} xl={3}>
                                                 <SelectedFunctionContainer key={index} funcRedux={funcRedux} fetchValues={fetchValues} />
                                             </Grid>
                                         )
@@ -757,6 +760,9 @@ const CryptoModule = () => {
                                 <Typography variant='h5' textAlign='start'>Parameters</Typography>
                                 <Box display='flex' alignItems='center' gap='10px'>
                                     <Button
+                                        sx={{
+                                            height: '26px',
+                                        }}
                                         variant='outlined'
                                         size='small'
                                         color='secondary'
@@ -766,7 +772,7 @@ const CryptoModule = () => {
                                     >
                                         {trainingStartedFlag ? 'Training' : 'Train'}
                                     </Button>
-                                    <Tooltip title={'Reset data'} placement='top' sx={{ cursor: 'pointer' }}>
+                                    <Tooltip title={'Reset data'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                                         <IconButton onClick={handleClearModelData.bind(null)}>
                                             <RestartAltIcon className='small-icon' />
                                         </IconButton>
@@ -797,8 +803,26 @@ const CryptoModule = () => {
                             <Box pl={2} pr={2} display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
                                 <Typography variant='h5' textAlign='start'>Predictions Chart</Typography>
                                 {Object.keys(predictedVlauesRedux).length !== 0 && <Box display='flex' flexDirection='row' gap={'10px'}>
-                                    <Button disabled={predictionChartType === "standardized" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })} variant='outlined' size='small' color='secondary'>Standardized</Button>
-                                    <Button disabled={predictionChartType === "scaled" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })} variant='outlined' size='small' color='secondary'>Scaled</Button>
+                                    <Button
+                                        sx={{
+                                            height: '26px',
+                                        }}
+                                        disabled={predictionChartType === "standardized" ? true : false}
+                                        onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })}
+                                        variant='outlined'
+                                        size='small'
+                                        color='secondary'>Standardized
+                                    </Button>
+                                    <Button
+                                        sx={{
+                                            height: '26px',
+                                        }}
+                                        disabled={predictionChartType === "scaled" ? true : false}
+                                        onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })}
+                                        variant='outlined'
+                                        size='small'
+                                        color='secondary'>Scaled
+                                    </Button>
                                 </Box>
                                 }
                             </Box>

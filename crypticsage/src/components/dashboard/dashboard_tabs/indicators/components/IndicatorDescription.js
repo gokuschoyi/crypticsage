@@ -14,7 +14,8 @@ import {
     IconButton,
     Tooltip,
     Autocomplete,
-    useTheme
+    useTheme,
+    Paper
 } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CreateIcon from '@mui/icons-material/Create';
@@ -42,12 +43,18 @@ const MultiSelect = (props) => {
                     options={inputOptions}
                     value={selectedInputOptions} // Set the selected value
                     onChange={(event, newValue) => handleInputOptions(fieldName, newValue)} // Handle value change
-                    sx={{ width: 'auto' }}
+
                     renderInput={(params) => <TextField {...params}
                         variant="outlined"
                         error={errorFlag}
                         helperText={helperText}
                         sx={{
+                            '& .MuiInputBase-input': {
+                                height: '10px'
+                            },
+                            '& .MuiInputLabel-root': {
+                                top: '-5px'
+                            },
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
                                     borderColor: `${theme.palette.text.secondary}`,
@@ -64,6 +71,13 @@ const MultiSelect = (props) => {
             </Tooltip>
         </Box>
     )
+}
+
+const input_types = {
+    inReal: 'flag',
+    inReal0: 'flag 1',
+    inReal1: 'flag 2',
+    inPeriods: 'periods',
 }
 
 const FunctionContainer = (props) => {
@@ -268,9 +282,9 @@ const FunctionContainer = (props) => {
                         <Typography
                             variant='h6'
                             fontWeight={400}
+                            className='talib-func-hint'
                             sx={{
                                 // Allow the text to overflow
-                                maxWidth: '290px',
                                 textAlign: 'start',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis', // Add ellipsis (...) to indicate overflow
@@ -308,114 +322,116 @@ const FunctionContainer = (props) => {
                 </AccordionActions>
 
                 <AccordionDetails>
-                    <Box pl={1} pr={1} pb={1} >
-
-                        <Box className='indicator-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                            <Typography variant='h5' fontWeight='500'>INPUTS</Typography>
-                            {selectedInputOptions.length > 0 && selectedInputOptions.map((input, index) => {
-                                const { value, errorFlag, helperText } = input
-                                return (
-                                    <Box key={index} display='flex' flexDirection='column' pb={'5px'}>
-                                        {input.flags ?
-                                            (
-                                                <Box>
-                                                    <Typography><span style={{ fontWeight: '600' }}>Name : </span>{input.name}</Typography>
-                                                    {/* <Typography><span style={{ fontWeight: '600' }}>Type : </span>{input.type}</Typography> */}
-                                                    <Typography><span style={{ fontWeight: '600' }}>Flags : </span></Typography>
-                                                    <Box pl={2}>
-                                                        {Object.keys(input.flags).map((key, index) => {
-                                                            return (
-                                                                <Typography key={index}>{key} : {input.flags[key]}</Typography>
-                                                            )
-                                                        })}
+                    <Paper elevation={4}>
+                        <Box p={1}>
+                            <Box className='indicator-inputs' sx={{ textAlign: 'start' }}>
+                                <Typography variant='h6' textAlign='start' fontWeight='500' sx={{textDecoration:'underline', textUnderlineOffset:'3px'}}>INPUTS</Typography>
+                                {selectedInputOptions.length > 0 && selectedInputOptions.map((input, index) => {
+                                    const { value, errorFlag, helperText } = input
+                                    return (
+                                        <Box key={index} display='flex' flexDirection='column' pb={'5px'} alignItems='flex-start'>
+                                            {input.flags ?
+                                                (
+                                                    <Box sx={{ width: '100%' }} display='flex' flexDirection='column'>
+                                                        <Typography variant='custom' style={{ paddingLeft: '16px', textAlign: 'start' }}><span style={{ fontWeight: '600' }}>Name : </span>{input.name}</Typography>
+                                                        {/* <Typography><span style={{ fontWeight: '600' }}>Type : </span>{input.type}</Typography> */}
+                                                        <Typography pl={2} variant='custom' textAlign='start'><span style={{ fontWeight: '600' }}>Flags : </span></Typography>
+                                                        <Box pl={3} display='flex' flexDirection='column'>
+                                                            {Object.keys(input.flags).map((key, index) => {
+                                                                return (
+                                                                    <Typography variant='custom' key={index} style={{ textAlign: 'start' }}>{key} : {input.flags[key]}</Typography>
+                                                                )
+                                                            })}
+                                                        </Box>
                                                     </Box>
-                                                </Box>
-                                            ) :
-                                            (
-                                                <Box pt={1}>
-                                                    <MultiSelect
-                                                        inputLabel={input.name === 'inReal' ? 'flag' : input.name}
-                                                        selectedInputOptions={value}
-                                                        handleInputOptions={handleInputOptions}
-                                                        fieldName={input.name}
-                                                        errorFlag={errorFlag}
+                                                ) :
+                                                (
+                                                    <Box pt={1} width='100%'>
+                                                        <MultiSelect
+                                                            inputLabel={input_types[input.name]}
+                                                            selectedInputOptions={value}
+                                                            handleInputOptions={handleInputOptions}
+                                                            fieldName={input.name}
+                                                            errorFlag={errorFlag}
+                                                            helperText={helperText}
+                                                        />
+                                                    </Box>
+                                                )
+                                            }
+                                        </Box>
+                                    )
+                                })}
+                            </Box>
+
+                            <Box className='indicator-optional-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
+                                <Typography variant='h6' fontWeight='500' sx={{textDecoration:'underline', textUnderlineOffset:'3px'}}>OPTIONAL INPUTS</Typography>
+                                {defaultOptionalInputs.length === 0 ?
+                                    (
+                                        <Typography>None</Typography>
+                                    )
+                                    :
+                                    (
+                                        defaultOptionalInputs && defaultOptionalInputs.map((optionalInput, index) => {
+                                            const { displayName, hint, name, defaultValue, errorFlag, helperText } = optionalInput
+                                            return (
+                                                <Box pt={'10px'} key={index} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
+                                                    <TextField
+                                                        inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', style: { height: '10px' } }}
+                                                        error={errorFlag}
                                                         helperText={helperText}
+                                                        size='small'
+                                                        id={`${name}-optional-input`}
+                                                        label={displayName}
+                                                        name={name}
+                                                        value={defaultValue}
+                                                        onChange={(handleOptionalInputChange)}
+                                                        sx={{
+                                                            '& .MuiOutlinedInput-root': {
+                                                                '& fieldset': {
+                                                                    borderColor: `${theme.palette.text.secondary}`,
+                                                                }
+                                                            }
+                                                        }}
                                                     />
+                                                    {name === 'optInMAType' ?
+                                                        (
+                                                            <Tooltip
+                                                                title={`SMA = 0, EMA = 1, WMA = 2, DEMA = 3, TEMA = 4, TRIMA = 5, KAMA = 6, MAMA = 7, T3 = 8`}
+                                                                placement='top' sx={{ cursor: 'pointer' }}>
+                                                                <InfoOutlinedIcon className='small-icon' />
+                                                            </Tooltip>
+                                                        )
+                                                        :
+                                                        (
+                                                            <Tooltip title={hint} placement='top' sx={{ cursor: 'pointer' }}>
+                                                                <InfoOutlinedIcon className='small-icon' />
+                                                            </Tooltip>
+                                                        )
+                                                    }
                                                 </Box>
                                             )
-                                        }
-                                    </Box>
-                                )
-                            })}
-                        </Box>
+                                        })
+                                    )
+                                }
+                            </Box>
 
-                        <Box className='indicator-optional-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                            <Typography variant='h5' fontWeight='500'>OPTIONAL INPUTS</Typography>
-                            {defaultOptionalInputs.length === 0 ?
-                                (
-                                    <Typography>None</Typography>
-                                )
-                                :
-                                (
-                                    defaultOptionalInputs && defaultOptionalInputs.map((optionalInput, index) => {
-                                        const { displayName, hint, name, defaultValue, errorFlag, helperText } = optionalInput
-                                        return (
-                                            <Box pt={'15px'} key={index} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
-                                                <TextField
-                                                    inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                                                    error={errorFlag}
-                                                    helperText={helperText}
-                                                    size='small'
-                                                    id={`${name}-optional-input`}
-                                                    label={displayName}
-                                                    name={name}
-                                                    value={defaultValue}
-                                                    onChange={(handleOptionalInputChange)}
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': {
-                                                            '& fieldset': {
-                                                                borderColor: `${theme.palette.text.secondary}`,
-                                                            }
-                                                        }
-                                                    }}
-                                                />
-                                                {name === 'optInMAType' ?
-                                                    (
-                                                        <Tooltip
-                                                            title={`SMA = 0, EMA = 1, WMA = 2, DEMA = 3, TEMA = 4, TRIMA = 5, KAMA = 6, MAMA = 7, T3 = 8`}
-                                                            placement='top' sx={{ cursor: 'pointer' }}>
-                                                            <InfoOutlinedIcon className='small-icon' />
-                                                        </Tooltip>
-                                                    )
-                                                    :
-                                                    (
-                                                        <Tooltip title={hint} placement='top' sx={{ cursor: 'pointer' }}>
-                                                            <InfoOutlinedIcon className='small-icon' />
-                                                        </Tooltip>
-                                                    )
-                                                }
+                            <Box className='indicator-outputs' pt={'10px'} sx={{ textAlign: 'start' }}>
+                                <Typography variant='h6' fontWeight='500' sx={{textDecoration:'underline', textUnderlineOffset:'3px'}}>OUTPUTS</Typography>
+                                {outputs && outputs.map((output, index) => {
+                                    return (
+                                        <Box key={index} display='flex' flexDirection='column' pt={'4px'}>
+                                            <Typography variant='custom'><span style={{ fontWeight: '600' }}>0 : </span>{output['0'] || 'N/A'}</Typography>
+                                            <Box pl={2} display='flex' flexDirection='column'>
+                                                <Typography variant='custom'><span style={{ fontWeight: '600' }}>Name : </span>{output.name || 'N/A'}</Typography>
+                                                <Typography variant='custom'><span style={{ fontWeight: '600' }}>Type : </span>{output.type || 'N/A'}</Typography>
+                                                <Typography variant='custom'><span style={{ fontWeight: '600' }}>Flags : </span>{JSON.stringify(output.flags) || 'N/A'}</Typography>
                                             </Box>
-                                        )
-                                    })
-                                )
-                            }
+                                        </Box>
+                                    )
+                                })}
+                            </Box>
                         </Box>
-
-                        <Box className='indicator-outputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                            <Typography variant='h5' fontWeight='500'>OUTPUTS</Typography>
-                            {outputs && outputs.map((output, index) => {
-                                return (
-                                    <Box key={index} display='flex' flexDirection='column' gap='5px'>
-                                        <Typography><span style={{ fontWeight: '600' }}>0 : </span>{output['0'] || 'N/A'}</Typography>
-                                        <Typography><span style={{ fontWeight: '600' }}>Flags : </span>{JSON.stringify(output.flags) || 'N/A'}</Typography>
-                                        <Typography><span style={{ fontWeight: '600' }}>Name : </span>{output.name || 'N/A'}</Typography>
-                                        <Typography><span style={{ fontWeight: '600' }}>Type : </span>{output.type || 'N/A'}</Typography>
-                                    </Box>
-                                )
-                            })}
-                        </Box>
-
-                    </Box>
+                    </Paper>
                 </AccordionDetails>
             </Accordion>
         </Box >
@@ -499,6 +515,7 @@ const Indicators = (props) => {
             <Box className='talib-indicators-box'>
                 <Box className='search-indicator-box' display='flex' flexDirection='row' alignItems='center' pt={2} pb={2} gap={2}>
                     <TextField
+                        inputProps={{ style: { height: '10px' } }}
                         color='secondary'
                         label="Search indicator"
                         variant="outlined"
@@ -511,7 +528,10 @@ const Indicators = (props) => {
                                 '& fieldset': {
                                     borderColor: '#E0E3E2',
                                 }
-                            }
+                            },
+                            '& .MuiInputLabel-root': {
+                                top: '-5px'
+                            },
                         }}
                     />
                 </Box>
@@ -523,7 +543,7 @@ const Indicators = (props) => {
                             return (
                                 <Grid key={group_name} item xs={12} sm={12} md={12} lg={12} xl={6}>
                                     <Box width='100%' pt={1} pb={1}  >
-                                        <Accordion  TransitionProps={{ mountOnEnter: true }} >
+                                        <Accordion TransitionProps={{ mountOnEnter: true }} >
                                             <AccordionSummary
                                                 expandIcon={<ExpandMoreIcon />}
                                                 aria-controls="panel1a-content"
@@ -535,7 +555,7 @@ const Indicators = (props) => {
                                                 <Grid container spacing={1} className='indicator-data-container'>
                                                     {functions && functions.map((func, index) => {
                                                         return (
-                                                            <Grid key={func.name} item xs={12} sm={12} md={6} lg={4} xl={6}>
+                                                            <Grid key={func.name} item xs={12} sm={6} md={6} lg={4} xl={6}>
                                                                 <FunctionContainer key={index} group_name={group_name} func={func} histDataLength={histDataLength} fetchValues={fetchValues} />
                                                             </Grid>
                                                         )

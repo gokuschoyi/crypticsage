@@ -21,6 +21,11 @@
     transition: all 0.2s ease-in-out;
 }
 
+.talib-func-hint {
+    max-width: 290px;
+    transition: all 0.2s ease-in-out;
+}
+
 .predictions-legend {
     display: flex;
     flex-direction: column;
@@ -537,6 +542,19 @@
     .batch-end-text {
         width: 122px;
     }
+
+    .talib-func-hint{
+        max-width: 240px;
+        transition: all 0.2s ease-in-out;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .talib-func-hint{
+        max-width: 150px;
+        transition: all 0.2s ease-in-out;
+    }
+
 }
 
 @media screen and (max-width: 600px) {
@@ -573,9 +591,13 @@
         transition: all 0.2s ease-in-out;
     }
 
-
     .batch-end-text {
         width: 95px;
+    }
+
+    .talib-func-hint{
+        max-width: 270px;
+        transition: all 0.2s ease-in-out;
     }
 
     /* .border-right {

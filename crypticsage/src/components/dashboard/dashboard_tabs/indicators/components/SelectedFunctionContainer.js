@@ -35,9 +35,10 @@ const MultiSelect = (props) => {
         "close",
     ]
     return (
-        <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'40px'}>
+        <Box className='selected-function-multiselect' display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'55px'} width='100%'>
             <Box sx={{ width: '100%' }}>
                 <Autocomplete
+                    fullWidth
                     size='small'
                     disableClearable
                     disablePortal={false}
@@ -51,6 +52,9 @@ const MultiSelect = (props) => {
                         error={errorFlag}
                         helperText={helperText}
                         sx={{
+                            '& .MuiInputBase-input': {
+                                height: '10px'
+                            },
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
                                     borderColor: `${theme.palette.text.secondary}`,
@@ -245,9 +249,9 @@ const SelectedFunctionContainer = (props) => {
                         <Typography
                             variant='h6'
                             fontWeight={400}
+                            className='talib-func-hint'
                             sx={{
                                 // Allow the text to overflow
-                                maxWidth: '290px',
                                 textAlign: 'start',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis', // Add ellipsis (...) to indicate overflow
@@ -309,40 +313,37 @@ const SelectedFunctionContainer = (props) => {
                                     </Box>
                                 </Box>
 
-                                <Box className='indicator-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                                    <Typography variant='h5' fontWeight='500'>INPUTS</Typography>
+                                <Box className='indicator-inputs-selected' pt={'10px'} sx={{ textAlign: 'start' }}>
+                                    <Typography variant='h6' textAlign='start' fontWeight='500' sx={{textDecoration:'underline', textUnderlineOffset:'3px'}}>INPUTS</Typography>
                                     {inputs.length > 0 && inputs.map((input, index) => {
                                         const { value, errorFlag, helperText } = input
                                         return (
-                                            <Box key={index} display='flex' flexDirection='column' pb={'5px'}>
+                                            <Box key={index} display='flex' flexDirection='column' pb={'5px'} alignItems='flex-start'>
                                                 {input.flags ?
-                                                    (
-                                                        <Box>
-                                                            <Typography><span style={{ fontWeight: '600' }}>Name : </span>{input.name}</Typography>
-                                                            {/* <Typography><span style={{ fontWeight: '600' }}>Type : </span>{input.type}</Typography> */}
-                                                            <Typography><span style={{ fontWeight: '600' }}>Flags : </span></Typography>
-                                                            <Box pl={2}>
-                                                                {Object.keys(input.flags).map((key, index) => {
-                                                                    return (
-                                                                        <Typography key={index}>{key} : {input.flags[key]}</Typography>
-                                                                    )
-                                                                })}
-                                                            </Box>
+                                                    <Box sx={{ width: '100%' }} display='flex' flexDirection='column' className='text'>
+                                                        <Typography variant='custom' style={{ paddingLeft: '16px', textAlign: 'start' }}><span style={{ fontWeight: '600' }}>Name : </span>{input.name}</Typography>
+                                                        {/* <Typography><span style={{ fontWeight: '600' }}>Type : </span>{input.type}</Typography> */}
+                                                        <Typography pl={2} variant='custom' textAlign='start'><span style={{ fontWeight: '600' }}>Flags : </span></Typography>
+                                                        <Box pl={3} display='flex' flexDirection='column'>
+                                                            {Object.keys(input.flags).map((key, index) => {
+                                                                return (
+                                                                    <Typography variant='custom' key={index} style={{ textAlign: 'start' }}>{key} : {input.flags[key]}</Typography>
+                                                                )
+                                                            })}
                                                         </Box>
-                                                    ) :
-                                                    (
-                                                        <Box pt={1}>
-                                                            <MultiSelect
-                                                                inputLabel={input.name === 'inReal' ? 'flag' : input.name}
-                                                                selectedInputOptions={value}
-                                                                handleInputOptions={handleInputOptions}
-                                                                fieldName={input.name}
-                                                                errorFlag={errorFlag}
-                                                                helperText={helperText}
-                                                                id={id}
-                                                            />
-                                                        </Box>
-                                                    )
+                                                    </Box>
+                                                    :
+                                                    <Box pt={1} width='100%'>
+                                                        <MultiSelect
+                                                            inputLabel={input.name === 'inReal' ? 'flag' : input.name}
+                                                            selectedInputOptions={value}
+                                                            handleInputOptions={handleInputOptions}
+                                                            fieldName={input.name}
+                                                            errorFlag={errorFlag}
+                                                            helperText={helperText}
+                                                            id={id}
+                                                        />
+                                                    </Box>
                                                 }
                                             </Box>
                                         )
@@ -350,7 +351,7 @@ const SelectedFunctionContainer = (props) => {
                                 </Box>
 
                                 <Box className='indicator-optional-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                                    <Typography variant='h5' fontWeight='500'>OPTIONAL INPUTS</Typography>
+                                    <Typography variant='h6' fontWeight='500' sx={{textDecoration:'underline', textUnderlineOffset:'3px'}}>OPTIONAL INPUTS</Typography>
                                     {optInputs.length === 0 ?
                                         (
                                             <Typography>None</Typography>
@@ -362,7 +363,7 @@ const SelectedFunctionContainer = (props) => {
                                                 return (
                                                     <Box pt={'15px'} key={index} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
                                                         <TextField
-                                                            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                                                            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', style: { height: '10px' } }}
                                                             error={errorFlag}
                                                             helperText={helperText}
                                                             size='small'
