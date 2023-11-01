@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { Success } from '../../../global/CustomToasts'
 import {
     setProgressMessage,
     setEpochNo,
@@ -6,9 +7,27 @@ import {
     setPredictedValues,
     setStartWebSocket
 } from '../modules/CryptoModuleSlice'
-import { useSelector } from 'react-redux';
 
-const useWebSocket = (webSocketURL, batchResult, setBatchResult, setTrainingStartedFlag, dispatch) => {
+// Function to add a new message
+function addMessage(notifyMessageBoxRef, messageText) {
+    /* const messageContainer = document.getElementById('messageDiv');
+    // Create a new message element
+    if (!notifyMessageBoxRef.current) return
+    const messageElement = document.createElement('p');
+    messageElement.classList.add('socket-message');
+    messageElement.textContent = messageText;
+
+    // Insert the new message at the beginning of the container
+    notifyMessageBoxRef.current.insertBefore(messageElement, notifyMessageBoxRef.current.firstChild); */
+
+
+    if (!notifyMessageBoxRef.current) return
+    notifyMessageBoxRef.current.classList.add('socket-message')
+    notifyMessageBoxRef.current.textContent = messageText
+}
+
+
+const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, setBatchResult, setTrainingStartedFlag, dispatch) => {
     const webSocket = useRef(null);
     const ACTIONS = {
         NOTIFY: 'notify',
@@ -19,17 +38,16 @@ const useWebSocket = (webSocketURL, batchResult, setBatchResult, setTrainingStar
         PREDICTION_COMPLETED: 'prediction_completed',
     };
 
-    const epochNo = useSelector(state => state.cryptoModule.modelData.epoch_no)
-
-
     const createModelProgressWebSocket = () => {
         if (webSocket.current && webSocket.current.readyState === WebSocket.OPEN) {
+            notifyMessageBoxRef.current = document.getElementById('loader-message-text');
             console.log('UE: WebSocket connection is already open', webSocket.current);
         } else {
             webSocket.current = new WebSocket(webSocketURL);
 
             webSocket.current.onopen = () => {
                 console.log('WS: CONNECTION ESTABLISHED');
+                notifyMessageBoxRef.current = document.getElementById('loader-message-text');
                 webSocket.current.send(JSON.stringify({ action: 'Socket connection established' })); // Now that the connection is open, you can send data.
             }
 
@@ -40,7 +58,8 @@ const useWebSocket = (webSocketURL, batchResult, setBatchResult, setTrainingStar
 
                 switch (data.action) {
                     case ACTIONS.NOTIFY:
-                        dispatch(setProgressMessage(data.message))
+                        addMessage(notifyMessageBoxRef, data.message.message);
+                        // dispatch(setProgressMessage(data.message))
                         break;
                     case ACTIONS.EPOCH_BEGIN:
                         setBatchResult(true)
@@ -49,7 +68,7 @@ const useWebSocket = (webSocketURL, batchResult, setBatchResult, setTrainingStar
                         dispatch(setEpochNo(epoch))
                         break;
                     case ACTIONS.EPOCH_END:
-                        dispatch(setEpochResults({ ...data.log, epoch: epochNo }))
+                        dispatch(setEpochResults({ ...data.log, epoch: data.epoch }))
                         setBatchResult(false)
                         break;
                     case ACTIONS.BATCH_END:
@@ -70,6 +89,7 @@ const useWebSocket = (webSocketURL, batchResult, setBatchResult, setTrainingStar
                     case ACTIONS.PREDICTION_COMPLETED:
                         dispatch(setPredictedValues(data.predictions))
                         dispatch(setStartWebSocket(false))
+                        Success('Training completed successfully')
                         break;
                     default:
                         break;

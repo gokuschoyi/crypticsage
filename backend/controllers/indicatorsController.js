@@ -14,6 +14,8 @@ const { createTimer } = require('../utils/timer')
 const { getValuesFromRedis } = require('../utils/redis_util');
 const { fetchEntireHistDataFromDb } = require('../services/mongoDBServices')
 const TF_Model = require('../utils/tf_model')
+const fs = require('fs')
+const MDBServices = require('../services/mongoDBServices')
 
 
 const getIndicatorDesc = async (req, res) => {
@@ -204,6 +206,7 @@ const executeTalibFunction = async (req, res) => {
 const procssModelTraining = async (req, res) => {
     const { fTalibExecuteQuery, model_training_parameters } = req.body.payload
     const model_id = uuidv4();
+    console.log('model id', model_id)
     const model_training_queue = "MODEL_TRAINING_QUEUE"
     const job_name = "MODEL_TRAINING_JOB_" + model_id
     try {
@@ -248,11 +251,11 @@ const procssModelTraining = async (req, res) => {
         const isActive = model_worker.isRunning();
         if (isActive) {
             const message = "Model Training started"
-            res.status(200).json({ message, finalRs: [], job_id: job.id });
+            res.status(200).json({ message, finalRs: [], job_id: model_id });
         } else {
             model_worker.run()
             const message = "Model Training started"
-            res.status(200).json({ message, finalRs: [], job_id: job.id });
+            res.status(200).json({ message, finalRs: [], job_id: model_id });
         }
     } catch (error) {
         log.error(error.stack)
@@ -352,9 +355,72 @@ const startModelTraining = async (job) => {
     TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions formatted, sending result...` })
 
 
-    TF_Model.disposeModel(model_)
+    log.info('----> Step 11 : Saving the model and weights  and disposing it ')
+    await TF_Model.saveModel(trained_model_, model_id)
+
+
+    /* log.info('----> Step 12 : Disposing the model')
+    TF_Model.disposeModel(model_) */
 
     return 'Model Training Completed'
+}
+
+const getModel = async (req, res) => {
+    const { user_id } = req.body
+    try {
+        const models = await MDBServices.fetchUserModels(user_id)
+        res.status(200).json({ message: 'Model fetched successfully', models })
+    } catch (err) {
+        log.error(err.stack)
+        res.status(400).json({ message: 'Model fetching failed' })
+    }
+}
+
+const saveModel = async (req, res) => {
+    const { model_id, model_name, ticker_name, ticker_period, predicted_result, talibExecuteQueries, training_parameters } = req.body.payload
+    try {
+        const uid = res.locals.data.uid;
+        const model_data = {
+            training_parameters,
+            talibExecuteQueries,
+            predicted_result,
+        }
+        const [model_save_status, modelSaveResult] = await MDBServices.saveModelForUser(uid, ticker_name, ticker_period, model_id, model_name, model_data)
+        res.status(200).json({ message: 'Model saved successfully', model_save_status, modelSaveResult, user_id: uid })
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model saving failed' })
+    }
+}
+
+const deleteModel = async (req, res) => {
+    const { model_id } = req.body
+    try {
+        const deleted = await deleteModelFromLocalDirectory(model_id)
+        if (deleted) {
+            res.status(200).json({ message: 'Model deleted successfully' })
+        }
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model deletion failed' })
+    }
+    //backend/models/0fb70a60-8a62-443f-bfb5-2090e5742957
+}
+
+const deleteModelFromLocalDirectory = async (model_id) => {
+    try {
+        const path = `./models/${model_id}` // delete a directory in models with the foldername as model_id us fs
+        fs.rm(path, { recursive: true }, (err) => {
+            if (err) {
+                throw err;
+            }
+            log.info(`Removed model ${model_id}`)
+        });
+        return true
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
 }
 
 module.exports = {
@@ -362,4 +428,7 @@ module.exports = {
     executeTalibFunction,
     procssModelTraining,
     startModelTraining,
+    getModel,
+    saveModel,
+    deleteModel,
 }

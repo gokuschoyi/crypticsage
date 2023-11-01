@@ -3,11 +3,14 @@ import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import Header from '../../../global/Header';
 import { Indicators } from '../components/IndicatorDescription';
-import { getHistoricalTickerDataFroDb, fetchLatestTickerForUser, startModelTraining } from '../../../../../api/adminController'
+import { getHistoricalTickerDataFroDb, fetchLatestTickerForUser, startModelTraining, getUserModels, saveModel, deleteModel } from '../../../../../api/adminController'
 import {
+    setUserModels,
+    setModelSavedToDb,
     setModelId,
     setTrainingParameters,
     setStartWebSocket,
+    resetCurrentModelData,
     resetModelData,
     setCryptoDataInDbRedux,
     setSelectedTickerPeriod,
@@ -39,22 +42,49 @@ import {
     , IconButton
     , Paper
     , Chip
+    , Avatar
 } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import SaveIcon from '@mui/icons-material/Save';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
+import AspectRatioIcon from '@mui/icons-material/AspectRatio';
+
+import { Success, Info, Error } from '../../../global/CustomToasts'
 
 import PredictionsChart from '../components/PredictionsChart';
 
+const TICKER_PERIODS = [
+    '1m',
+    '4h',
+    '6h',
+    '8h',
+    '12h',
+    "1d",
+    '3d',
+    '1w',
+]
+
+const INPUT_OPTIONS = [
+    "",
+    "high",
+    "low",
+    "open",
+    "close",
+]
+
+const MODEL_OPTIONS = [
+    "",
+    "Multiple Input Series",
+    "Multiple Parallel Series",
+]
+
 const MultiSelect = (props) => {
     const theme = useTheme()
-    const { inputLabel, selectedInputOptions, handleInputOptions, fieldName } = props
-    const inputOptions = [
-        "",
-        "high",
-        "low",
-        "open",
-        "close",
-    ]
+    const { inputLabel, inputOptions, selectedInputOptions, handleInputOptions, fieldName, toolTipTitle } = props
+
     return (
         <Paper elavation={6}>
             <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'40px'} pl={'4px'} pr={'4px'} pt={1} pb={1}>
@@ -83,7 +113,7 @@ const MultiSelect = (props) => {
                         />}
                     />
                 </Box>
-                <Tooltip title={'Select one of the flags to be used to predict'} placement='top' sx={{ cursor: 'pointer' }}>
+                <Tooltip title={toolTipTitle} placement='top' sx={{ cursor: 'pointer' }}>
                     <InfoOutlinedIcon className='small-icon' />
                 </Tooltip>
             </Box>
@@ -112,6 +142,22 @@ const periodToMilliseconds = (period) => {
         default:
             return 1000 * 60 * 60 * 24;
     }
+}
+
+// model name state management for saved model,, currently the model name in predictions shart changes on each render after save ...
+// save the model name to redux,
+
+const generateRandomModelName = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const length = 10;
+    let modelName = 'model_';
+
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        modelName += characters.charAt(randomIndex);
+    }
+
+    return modelName;
 }
 
 const checkForUniqueAndTransform = (data) => {
@@ -163,19 +209,30 @@ const checkIfNewTickerFetchIsRequired = ({ openTime, selectedTokenPeriod }) => {
 
 const CustomSlider = (props) => {
     const { sliderValue, name, handleModelParamChange, label, min, max, sliderMin, sliderMax, scaledLearningRate, disabled } = props
+    const [slideValue, setSlideValue] = useState(min)
 
-    const handleSliderValueChange = (e) => {
-        const { name, value } = e.target
-        if (value < min || value > max) {
+    useEffect(() => {
+        setSlideValue(sliderValue)
+    }, [sliderValue])
+
+    const handleChange = (e) => {
+        const { value } = e.target
+        if (value < min || value > max || value === slideValue) {
             return
         } else {
-            if (value === sliderValue) {
-                return
-            } else {
-                handleModelParamChange(name, value)
-            }
+            setSlideValue(value)
         }
     }
+
+    const handleSliderValueChange = (e, value) => {
+        if (value < min) {
+            value = min
+        } else if (value > max) {
+            value = max
+        }
+        handleModelParamChange(name, value)
+    }
+
     return (
         <Paper elevation={6}>
             <Box p={'4px 8px'} display='flex' flexDirection='column' alignItems='start'>
@@ -189,13 +246,21 @@ const CustomSlider = (props) => {
                         size='small'
                         color='secondary'
                         disabled={disabled}
-                        value={sliderValue}
+                        value={slideValue}
                         name={name}
-                        valueLabelDisplay={scaledLearningRate === undefined ? "auto" : "off"}
+                        id={name}
+                        valueLabelDisplay={'auto'}
+                        scale={(val) => {
+                            if (scaledLearningRate !== undefined) {
+                                return val / 100;
+                            }
+                            return val;
+                        }}
                         step={1}
                         min={sliderMin}
                         max={sliderMax}
-                        onChange={(e) => handleSliderValueChange(e)}
+                        onChange={(e) => handleChange(e)}
+                        onChangeCommitted={(e, val) => handleSliderValueChange(e, val)}
                     />
                 </Box>
             </Box>
@@ -204,27 +269,17 @@ const CustomSlider = (props) => {
 }
 
 const CryptoModule = () => {
+    const dispatch = useDispatch();
+    const theme = useTheme()
     const params = useParams();
     const token = useSelector(state => state.auth.accessToken);
     const tokenPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
     const toolTipSwitchFlag = useSelector(state => state.cryptoModule.toolTipOn)
     const ohlcData = useSelector(state => state.cryptoModule.cryptoDataInDb)
     // console.log('toolTipSwitchFlag', toolTipSwitchFlag)
-    const theme = useTheme()
+
     const { cryptotoken } = params;
     const module = window.location.href.split("/dashboard/indicators/")[1].split("/")[0]
-
-    const dispatch = useDispatch();
-    const periods = [
-        '1m',
-        '4h',
-        '6h',
-        '8h',
-        '12h',
-        "1d",
-        '3d',
-        '1w',
-    ]
 
     const [selectedTokenPeriod, setSelectedTokenPeriod] = useState(tokenPeriod);
     // console.log(selectedTokenPeriod)
@@ -334,9 +389,83 @@ const CryptoModule = () => {
     const selectedFunctions = useSelector(state => state.cryptoModule.selectedFunctions)
     const tDataRedux = useSelector(state => state.cryptoModule.cryptoDataInDb)
 
+
+    // search and add function feature
+    const talibFunctions = useSelector(state => state.cryptoModule.talibDescription)
+    const [transformedFunctionsList, setTransformedFunctionList] = useState([]);
+
+    useEffect(() => {
+        if (talibFunctions.length > 0) {
+            const modified = talibFunctions.reduce((result, item) => {
+                return [
+                    ...result,
+                    ...item.functions.map((func) => ({
+                        func_selected: func.function_selected_flag,
+                        group: func.group,
+                        label: `${func.name} : ${func.hint}`,
+                    }))
+                ];
+            }, [])
+            setTransformedFunctionList(modified)
+        }
+    }, [talibFunctions])
+
+    const [searchedFunctions, setSearchedFunction] = useState([]);
+    const handleSearchedFunctions = (newValue) => {
+        setSearchedFunction(newValue)
+    }
+
+    const handleAddSelectedFunction = () => {
+        console.log('Add functions to calculate')
+        const functionNamesToAdd = searchedFunctions.map((func) => {
+            const [func_name, func_hint] = func.label.split(':')
+            return func_name.trim()
+        })
+        // console.log(functionNamesToAdd)
+
+        functionNamesToAdd.forEach((func_name) => {
+            const foundFunction = talibFunctions
+                .map(group => group.functions)
+                .flat()
+                .find(func => func.name === func_name);
+            console.log(foundFunction)
+
+            if (foundFunction) {
+                dispatch(setSelectedFlagInTalibDescription(
+                    {
+                        group: foundFunction.group,
+                        name: foundFunction.name,
+                        inputs: foundFunction.inputs,
+                        optInputs: foundFunction.optInputs,
+                    }
+                ))
+
+                dispatch(setSelectedFunctions(
+                    {
+                        hint: foundFunction.hint,
+                        name: foundFunction.name,
+                        group_name: foundFunction.group,
+                        inputs: foundFunction.inputs,
+                        optInputs: foundFunction.optInputs,
+                        outputs: foundFunction.outputs,
+                        function_selected_flag: true,
+                        result: [],
+                        splitPane: foundFunction.splitPane
+                    }
+                ))
+            }
+        })
+        setSearchedFunction((prev) => { return [] })
+
+    }
+
+
     // Model training parameters
     const model_parameters = useSelector(state => state.cryptoModule.modelData.training_parameters)
+    const userModels = useSelector(state => state.cryptoModule.userModels)
+    const model_data = useSelector(state => state.cryptoModule.modelData)
     const [modelParams, setModelParams] = useState(model_parameters)
+    const [modelName, setModelName] = useState(model_data.model_name)
 
     const handleModelParamChange = (name, value) => {
         setModelParams((prev) => {
@@ -356,6 +485,15 @@ const CryptoModule = () => {
         })
     }
 
+    const handleModelTypeOptions = (event, newValue) => {
+        setModelParams((prev) => {
+            return {
+                ...prev,
+                'modelType': newValue
+            }
+        })
+    }
+
     // setting converted learning rate
     useEffect(() => {
         setModelParams((prev) => {
@@ -366,49 +504,12 @@ const CryptoModule = () => {
         })
     }, [modelParams.learningRate])
 
-    const userId = useSelector(state => state.auth.uid)
-
-    // websocket to get model training progress
-    const webSocketURL = process.env.NODE_ENV === 'development' ? `${process.env.REACT_APP_BASE_WEB_SOCKET_URL}/?user_id=${userId}` : `${process.env.REACT_APP_DEV_WEBSOCKET_URL}/?user_id=${userId}`;
-    const startWebSocket = useSelector(state => state.cryptoModule.modelData.startWebSocket)
-
-    const progressMessage = useSelector(state => state.cryptoModule.modelData.progress_message)
-    const epochResults = useSelector(state => state.cryptoModule.modelData.epoch_results)
-    const epochNo = useSelector(state => state.cryptoModule.modelData.epoch_no)
-
-    const [batchResult, setBatchResult] = useState(false)
-
-    const [trainingStartedFlag, setTrainingStartedFlag] = useState(false)
-
-    const { webSocket, createModelProgressWebSocket } = useWebSocket(webSocketURL, batchResult, setBatchResult, setTrainingStartedFlag, dispatch)
-
-    // WebSocket connection
-    useEffect(() => {
-        console.log('UE : Socket start')
-        if (startWebSocket) {
-            if (webSocket.current === null) {
-                console.log('Starting socket, flag = true and socket = null')
-                createModelProgressWebSocket()
-            } else {
-                console.log('WS already present, socket not null')
-            }
-        } else {
-            console.log('Socket flag = false')
-            if (webSocket.current !== null) {
-                console.log('Closing socket, flag = false and socket not null')
-                webSocket.current.close();
-                webSocket.current = null
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [startWebSocket])
-
     // Execute query to start model training
     const [noFuncSelected, setNoFuncSelected] = useState('')
     const handleStartModelTraining = () => {
         if (selectedFunctions.length === 0) {
             console.log('Select an indicator to plot')
-            setNoFuncSelected('Select an indicator to model')
+            setNoFuncSelected('Select a function first to model')
         } else {
             console.log('Sending model training query...')
             setTrainingStartedFlag(true)
@@ -491,7 +592,8 @@ const CryptoModule = () => {
                 epochs: modelParams.epoch,
                 hidden_layers: modelParams.hiddenLayer,
                 learning_rate: modelParams.scaledLearningRate,
-                to_predict: modelParams.multiSelectValue
+                to_predict: modelParams.multiSelectValue,
+                model_type: modelParams.modelType,
             }
             console.log('Execute query + Model parameters', fTalibExecuteQuery, model_training_parameters)
             dispatch(setStartWebSocket(true))
@@ -505,8 +607,10 @@ const CryptoModule = () => {
             }).then((res) => {
                 dispatch(resetModelData())
                 const modelId = res.data.job_id
-                dispatch(setModelId(modelId))
-                dispatch(setTrainingParameters(modelParams))
+                const model_name = generateRandomModelName()
+                setModelName(model_name)
+                dispatch(setModelId({ model_id: modelId, model_name: model_name }))
+                dispatch(setTrainingParameters({ model_params: modelParams, selected_functions: fTalibExecuteQuery }))
             }).catch((err) => {
                 console.log(err.message)
                 setTrainingStartedFlag(false)
@@ -524,86 +628,109 @@ const CryptoModule = () => {
     const handleClearModelData = () => {
         dispatch(resetModelData())
         dispatch(setStartWebSocket(false))
-    }
-
-    const talibFunctions = useSelector(state => state.cryptoModule.talibDescription)
-    const [transformedFunctionsList, setTransformedFunctionList] = useState([]);
-
-    useEffect(() => {
-        if (talibFunctions.length > 0) {
-            const modified = talibFunctions.reduce((result, item) => {
-                return [
-                    ...result,
-                    ...item.functions.map((func) => ({
-                        func_selected: func.function_selected_flag,
-                        group: func.group,
-                        label: `${func.name} : ${func.hint}`,
-                    }))
-                ];
-            }, [])
-            setTransformedFunctionList(modified)
-        }
-    }, [talibFunctions])
-
-    const [searchedFunctions, setSearchedFunction] = useState([]);
-    const handleSearchedFunctions = (newValue) => {
-        setSearchedFunction(newValue)
-    }
-    // console.log(searchedFunctions)
-
-    const handleAddSelectedFunction = () => {
-        console.log('Add functions to calculate')
-        const functionNamesToAdd = searchedFunctions.map((func) => {
-            const [func_name, func_hint] = func.label.split(':')
-            return func_name.trim()
-        })
-        // console.log(functionNamesToAdd)
-
-        functionNamesToAdd.forEach((func_name) => {
-            const foundFunction = talibFunctions
-                .map(group => group.functions)
-                .flat()
-                .find(func => func.name === func_name);
-            console.log(foundFunction)
-
-            if (foundFunction) {
-                dispatch(setSelectedFlagInTalibDescription(
-                    {
-                        group: foundFunction.group,
-                        name: foundFunction.name,
-                        inputs: foundFunction.inputs,
-                        optInputs: foundFunction.optInputs,
-                    }
-                ))
-
-                dispatch(setSelectedFunctions(
-                    {
-                        hint: foundFunction.hint,
-                        name: foundFunction.name,
-                        group_name: foundFunction.group,
-                        inputs: foundFunction.inputs,
-                        optInputs: foundFunction.optInputs,
-                        outputs: foundFunction.outputs,
-                        function_selected_flag: true,
-                        result: [],
-                        splitPane: foundFunction.splitPane
-                    }
-                ))
+        for (const key of Object.keys(model_parameters)) {
+            if (model_parameters[key] !== modelParams[key]) {
+                setModelParams(model_parameters)
+                break
             }
-        })
-        setSearchedFunction((prev) => { return [] })
+        }
+    }
 
+    const handleSaveModel = () => {
+        const saveModelPayload = {
+            model_id: model_data.model_id,
+            model_name: modelName,
+            ticker_name: selectedTickerName,
+            ticker_period: selectedTickerPeriod,
+            training_parameters: model_data.training_parameters,
+            talibExecuteQueries: model_data.talibExecuteQueries,
+            predicted_result: model_data.predictedValues
+        }
+        // console.log(saveModelPayload)
+
+        saveModel({ token, payload: saveModelPayload })
+            .then((res) => {
+                const { model_save_status, modelSaveResult, user_id } = res.data
+                if (model_save_status) {
+                    Success('Model saved')
+                    dispatch(setModelSavedToDb({ status: true, model_name: modelName }))
+                    getUserModels({ token, payload: { user_id } })
+                        .then((res) => {
+                            dispatch(setUserModels(res.data.models))
+                        })
+                } else {
+                    Info('Model already saved')
+                    console.log('Saving the same modle')
+                    return
+                }
+            })
+            .catch((err) => {
+                console.log(err.message)
+            })
+    }
+
+    const handleDeleteModel = () => {
+        const model_id = model_data.model_id
+        deleteModel({ token, payload: { model_id } })
+            .then((res) => {
+                Success(res.data.message)
+                dispatch(resetCurrentModelData())
+            })
+            .catch((err) => {
+                console.log(err.message)
+            })
     }
 
     const predictedVlauesRedux = useSelector(state => state.cryptoModule.modelData.predictedValues)
     const [predictionChartType, setPredictionChartType] = React.useState('standardized')
 
-    // console.log(predictedVlauesRedux)
-
     const handlePredictionsChartType = (param) => {
         const { type } = param;
         // console.log(type)
         setPredictionChartType(type)
+    }
+
+
+    // websocket to get model training progress
+    const userId = useSelector(state => state.auth.uid)
+    const webSocketURL = process.env.NODE_ENV === 'development' ? `${process.env.REACT_APP_BASE_WEB_SOCKET_URL}/?user_id=${userId}` : `${process.env.REACT_APP_DEV_WEBSOCKET_URL}/?user_id=${userId}`;
+    const startWebSocket = useSelector(state => state.cryptoModule.modelData.startWebSocket)
+
+    const notifyMessageBoxRef = useRef(null)
+    const epochResults = useSelector(state => state.cryptoModule.modelData.epoch_results)
+
+    const [batchResult, setBatchResult] = useState(false)
+    const [trainingStartedFlag, setTrainingStartedFlag] = useState(startWebSocket)
+    const { webSocket, createModelProgressWebSocket } = useWebSocket(webSocketURL, notifyMessageBoxRef, batchResult, setBatchResult, setTrainingStartedFlag, dispatch)
+
+    // WebSocket connection
+    useEffect(() => {
+        // console.log('UE : Socket start')
+        if (startWebSocket) {
+            if (webSocket.current === null) {
+                // console.log('Starting socket, flag = true and socket = null')
+                createModelProgressWebSocket()
+            } else {
+                // console.log('WS already present, socket not null')
+            }
+        } else {
+            // console.log('Socket flag = false')
+            if (webSocket.current !== null) {
+                // console.log('Closing socket, flag = false and socket not null')
+                webSocket.current.close();
+                webSocket.current = null
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [startWebSocket])
+
+
+    const handleModelDeletFromSaved = ({ model_id }) => {
+        console.log('clicked',model_id)
+    }
+
+    const handleExpandSelectedModel = ({ model_id }) => {
+        console.log(model_id)
     }
 
     return (
@@ -623,7 +750,7 @@ const CryptoModule = () => {
                                     disableClearable
                                     disablePortal={false}
                                     id="selec-stock-select"
-                                    options={periods}
+                                    options={TICKER_PERIODS}
                                     value={selectedTokenPeriod} // Set the selected value
                                     onChange={(event, newValue) => handlePeriodChange(newValue)} // Handle value change
                                     sx={{ width: 'auto' }}
@@ -644,7 +771,7 @@ const CryptoModule = () => {
                                 />
                             </Box>
                             <Box display='flex' flexDirection='column' alignItems='start'>
-                                <Typography variant='custom' style={{ marginLeft: '16px' }}>{actualFetchLength}, {ohlcData.length} / {ohlcData.length / 500}</Typography>
+                                <Typography variant='custom' style={{ marginLeft: '16px' }}>AF:{actualFetchLength}, R:{ohlcData.length} / {ohlcData.length / 500}</Typography>
                                 <FormControlLabel
                                     value="start"
                                     control={<Switch size="small" color="secondary" />}
@@ -756,29 +883,33 @@ const CryptoModule = () => {
                     </Box>
                     <Grid container className='tensor-flow-grid'>
                         <Grid item xs={12} sm={12} md={4} lg={3} xl={3} pl={2} pr={2} pb={2}>
-                            <Box display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' pb={2}>
-                                <Typography variant='h5' textAlign='start'>Parameters</Typography>
-                                <Box display='flex' alignItems='center' gap='10px'>
-                                    <Button
-                                        sx={{
-                                            height: '26px',
-                                        }}
-                                        variant='outlined'
-                                        size='small'
-                                        color='secondary'
-                                        disabled={trainingStartedFlag}
-                                        onClick={(e) => handleStartModelTraining()}
-                                        endIcon={trainingStartedFlag && <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />}
-                                    >
-                                        {trainingStartedFlag ? 'Training' : 'Train'}
-                                    </Button>
-                                    <Tooltip title={'Reset data'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                        <IconButton onClick={handleClearModelData.bind(null)}>
-                                            <RestartAltIcon className='small-icon' />
-                                        </IconButton>
-                                    </Tooltip>
-                                    {noFuncSelected !== '' && <Typography variant='custom' sx={{ color: 'red' }}>{noFuncSelected}</Typography>}
+                            <Box display='flex' flexDirection='column' pb={2}>
+                                <Box display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
+                                    <Typography variant='h5' textAlign='start'>Parameters</Typography>
+                                    <Box display='flex' alignItems='center' gap='10px'>
+                                        <Button
+                                            sx={{
+                                                height: '26px',
+                                            }}
+                                            variant='outlined'
+                                            size='small'
+                                            color='secondary'
+                                            disabled={trainingStartedFlag}
+                                            onClick={(e) => handleStartModelTraining()}
+                                            endIcon={trainingStartedFlag && <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />}
+                                        >
+                                            {trainingStartedFlag ? 'Training' : 'Train'}
+                                        </Button>
+                                        <Tooltip title={'Reset training data. (This will reset your entire model parameters to default and remove all models and predictions) WARN -  Save before resetting '} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                            <span>
+                                                <IconButton disabled={trainingStartedFlag} onClick={handleClearModelData.bind(null)}>
+                                                    <RestartAltIcon className='small-icon' />
+                                                </IconButton>
+                                            </span>
+                                        </Tooltip>
+                                    </Box>
                                 </Box>
+                                {noFuncSelected !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{noFuncSelected}</Typography>}
                             </Box>
 
                             <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' gap='10px'>
@@ -791,45 +922,76 @@ const CryptoModule = () => {
                                     <CustomSlider sliderValue={modelParams.learningRate} name={'learningRate'} handleModelParamChange={handleModelParamChange} label={'Learning Rate'} min={0} max={100} sliderMin={0} sliderMax={100} scaledLearningRate={modelParams.scaledLearningRate} disabled={trainingStartedFlag} />
                                     <MultiSelect
                                         inputLabel={'Prediction flag'}
+                                        inputOptions={INPUT_OPTIONS}
                                         selectedInputOptions={modelParams.multiSelectValue}
                                         handleInputOptions={handleMultiselectOptions}
                                         fieldName={'To predict'}
+                                        toolTipTitle={'Select one of the flags to be used to predict'}
+                                    />
+                                    <MultiSelect
+                                        inputLabel={'Model type'}
+                                        inputOptions={MODEL_OPTIONS}
+                                        selectedInputOptions={modelParams.modelType}
+                                        handleInputOptions={handleModelTypeOptions}
+                                        fieldName={'Model type'}
+                                        toolTipTitle={'Select a model type'}
                                     />
                                 </Box>
                             </Box>
                         </Grid>
 
                         <Grid item xs={12} sm={12} md={8} lg={6} xl={6} pl={2} pr={2} pb={2} className='predictions-chart-grid'>
-                            <Box pl={2} pr={2} display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
-                                <Typography variant='h5' textAlign='start'>Predictions Chart</Typography>
-                                {Object.keys(predictedVlauesRedux).length !== 0 && <Box display='flex' flexDirection='row' gap={'10px'}>
-                                    <Button
-                                        sx={{
-                                            height: '26px',
-                                        }}
-                                        disabled={predictionChartType === "standardized" ? true : false}
-                                        onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })}
-                                        variant='outlined'
-                                        size='small'
-                                        color='secondary'>Standardized
-                                    </Button>
-                                    <Button
-                                        sx={{
-                                            height: '26px',
-                                        }}
-                                        disabled={predictionChartType === "scaled" ? true : false}
-                                        onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })}
-                                        variant='outlined'
-                                        size='small'
-                                        color='secondary'>Scaled
-                                    </Button>
+                            <Box display='flex' flexDirection='column' pb={2}>
+                                <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' className='prediction-chart-header'>
+                                    <Typography variant='h5' textAlign='start'>Predictions Chart</Typography>
+                                    {Object.keys(predictedVlauesRedux).length !== 0 &&
+                                        <Box display='flex' flexDirection='row' gap={'4px'} alignItems='center' className='model-chart-action-container'>
+                                            <TextField
+                                                size='small'
+                                                inputProps={{ style: { height: '10px' } }}
+                                                id="outlined-controlled"
+                                                label="Model name"
+                                                value={modelName}
+                                                onChange={(event) => {
+                                                    setModelName(event.target.value);
+                                                }}
+                                            />
+                                            <Box className='model-chart-action-box'>
+                                                <Tooltip title={'Save Model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                    <IconButton onClick={handleSaveModel.bind(null, {})}>
+                                                        <SaveIcon className='small-icon' />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                {!model_data.model_saved_to_db &&
+                                                    <Tooltip title={'Delete the current model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                        <IconButton onClick={handleDeleteModel.bind(null, {})}>
+                                                            <DeleteForeverIcon className='small-icon' />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                }
+                                                <Tooltip title={'Normalized values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                    <span>
+                                                        <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "standardized" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })}>
+                                                            <OpenInFullIcon className='small-icon' />
+                                                        </IconButton>
+                                                    </span>
+                                                </Tooltip>
+                                                <Tooltip title={'Scaled values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                    <span>
+                                                        <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })}>
+                                                            <CloseFullscreenIcon className='small-icon' />
+                                                        </IconButton>
+                                                    </span>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
+                                    }
                                 </Box>
-                                }
                             </Box>
 
                             <PredictionsChart
                                 predictionChartType={predictionChartType}
-                                trainingStartedFlag={trainingStartedFlag}
+                                trainingStartedFlag={startWebSocket}
                             />
 
                             <Box className='main-training-status-box' pt={1}>
@@ -869,26 +1031,74 @@ const CryptoModule = () => {
                                 </Box>
 
                                 {/* progress message */}
-                                <Box className='checkpoint-progress-box'>
-                                    {progressMessage.length > 0 && (
+                                {/* <Box className='checkpoint-progress-box'>
+                                    {startWebSocket === true ?
                                         <Paper elevation={6} sx={{ backgroundColor: `${theme.palette.background.paperOne}` }}>
                                             <Box p={'5px'} className='progress-update-notify-ws' id="messageDiv" display='flex' flexDirection='column' alignItems='start' height='100px' overflow='auto'>
-                                                {progressMessage.map((message, index) => {
-                                                    return (
-                                                        <p key={index} className='socket-message'>{message.message}</p>
-                                                    )
-                                                })}
 
                                             </Box>
                                         </Paper>
-                                    )}
-                                </Box>
+                                        :
+                                        <Box>
+                                            {progressMessage.length > 0 && (
+                                                <Paper elevation={6} sx={{ backgroundColor: `${theme.palette.background.paperOne}` }}>
+                                                    <Box p={'5px'} className='progress-update-notify-ws' id="messageDiv" display='flex' flexDirection='column' alignItems='start' height='100px' overflow='auto'>
+                                                        {progressMessage.map((message, index) => {
+                                                            return (
+                                                                <p key={index} className='socket-message'>{message.message}</p>
+                                                            )
+                                                        })}
+
+                                                    </Box>
+                                                </Paper>
+                                            )}
+                                        </Box>
+                                    }
+                                </Box> */}
                             </Box>
                         </Grid>
 
-                        <Grid item xs={12} sm={12} md={12} lg={3} xl={3}>
-                            <Box className='saved-models' pl={2}>
-                                <Typography variant='h5' textAlign='start'>Saved Models</Typography>
+                        <Grid item xs={12} sm={12} md={12} lg={3} xl={3} pl={2} pr={2} pb={2}>
+                            <Box className='saved-models' display='flex' flexDirection='column' pb={2}>
+                                <Box height='32px' display='flex' alignItems='center'>
+                                    <Typography variant='h5' textAlign='start'>Saved Models</Typography>
+                                </Box>
+                            </Box>
+                            <Box>
+                                {userModels.length === 0 ?
+                                    <Box display='flex' alignItems='start'>
+                                        <Typography>No Saved Models</Typography>
+                                    </Box>
+                                    :
+                                    <Box display='flex' flexDirection='column' gap='5px'>
+                                        {userModels.map((model, index) => {
+                                            const {model_name,model_id}=model
+                                            return (
+                                                <Paper key={index} elevation={4}>
+                                                    <Box display='flex' alignItems='center' justifyContent='space-between' pl={'5px'} pr={'5px'}>
+                                                        <Typography>{model_name}</Typography>
+                                                        <Box>
+                                                            <Tooltip title={'View Model Data'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                                <span>
+                                                                    <IconButton onClick={handleModelDeletFromSaved.bind(null, { model_id: model_id })} sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} >
+                                                                        <AspectRatioIcon className='small-icon' />
+                                                                    </IconButton>
+                                                                </span>
+                                                            </Tooltip>
+                                                            <Tooltip title={'Delete Model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                                <span>
+                                                                    <IconButton onClick={handleExpandSelectedModel.bind(null, { model_id: model_id })} sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} >
+                                                                        <DeleteForeverIcon className='small-icon' />
+                                                                    </IconButton>
+                                                                </span>
+                                                            </Tooltip>
+                                                        </Box>
+                                                    </Box>
+                                                </Paper>
+                                            )
+                                        })}
+                                    </Box>
+                                }
                             </Box>
                         </Grid>
                     </Grid>

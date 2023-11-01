@@ -37,3 +37,4 @@ backend/middleware/logger/old_logs/access.log
 backend/docs
 backend/ssl/localhost-key.pem
 backend/ssl/localhost.pem
+backend/models

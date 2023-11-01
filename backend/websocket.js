@@ -53,7 +53,7 @@ wsServer.on('connection', function connection(ws, req) {
     // @ts-ignore
     const params = new URLSearchParams(req.url.replace('/?', ''));
     let user_id = params.get('user_id')
-    console.log('Connection received', user_id)
+    console.log('Connection received and connected', user_id)
 
     const existingConnection = userConnections.get(user_id);
     if (existingConnection && existingConnection !== ws) {
@@ -66,7 +66,7 @@ wsServer.on('connection', function connection(ws, req) {
     ws.on('message', async function incoming(message) {
         // @ts-ignore
         const data = JSON.parse(message);
-        console.log('Received:', data);
+        console.log('Received from client:', data);
     });
 
     TF_Model.eventEmitter.on('notify', (message) => onNotify(ws, message));

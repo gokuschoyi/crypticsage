@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { Box, useTheme, Skeleton, Typography } from '@mui/material'
+import { Box, useTheme, Skeleton, Typography, Paper } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { useSelector } from 'react-redux';
 const PredictionsChart = (props) => {
@@ -183,12 +183,13 @@ const PredictionsChart = (props) => {
     }, [chartBackgroundColor, predictedValueRedux])
 
     return (
-        <Box width="100%">
-            <Box className='predictionChart-box' display='flex' flexDirection='column' gap='20px' pt={1} width="100%" height='100%' >
-                {trainingStartedFlag && (
-                    <Box width='100%' height={chart.current ? '100%' : '310px'}>
-                        <Box position='relative' top='42%' left='50%' sx={{ transform: 'translate(-50%, -50%)' }} width='fit-content' display='flex' flexDirection='row'>
-                            <Typography variant='custom' style={{ textAlign: 'center', letterSpacing: '1px' }}>Training started</Typography>
+        <Box width="100%" className='prediction-chart-component-box'>
+            <Box className='predictionChart-box' display='flex' flexDirection='column' gap='20px' width="100%" height='310px' >
+                {trainingStartedFlag ? (
+                    <Box className='prediction-loader' position='relative' width='100%' height='100%'>
+                        <Skeleton variant="rectangular" width="100%" height='100%' />
+                        <Box position='absolute' top='42%' left='50%' sx={{ transform: 'translate(-50%, -50%)' }} width='fit-content' display='flex' flexDirection='row' justifyContent='center'>
+                            <Typography variant='custom' id='loader-message-text' style={{ textAlign: 'center', whiteSpace: 'nowrap', textOverflow: 'ellipssis', overflow: 'hidden', maxWidth: '400px' }}>Training started</Typography>
                             <div className="center">
                                 <div className="wave"></div>
                                 <div className="wave"></div>
@@ -203,18 +204,22 @@ const PredictionsChart = (props) => {
                                 <div className="wave"></div>
                             </div>
                         </Box>
-                        <Skeleton variant="rectangular" width="100%" height='80%' />
                     </Box>
-                )}
+                ) : Object.keys(chartData).length === 0 && (
+                    <Box display='flex' height='100%' alignItems='center' justifyContent='center' p={1} >
+                        <Paper elevation={4} style={{ padding: '5px' }}>Start training to view predictions</Paper>
+                    </Box>
+                )
+                }
 
                 {predictedValueRedux.length !== 0 &&
                     <Box className=' predictions-legend '>
                         <Box className='predictions-value-box' p={'5px'}></Box>
                     </Box>
                 }
+                <Box className='prediction-chart-ref-box' ref={predictionsChartRef}></Box>
             </Box >
-            <Box className='prediction-chart-ref-box' ref={predictionsChartRef}></Box>
-        </Box>
+        </Box >
     )
 }
 

@@ -11,6 +11,12 @@ router.post('/execute_talib_function', handleTokenRedisStorage, IController.exec
 
 router.post('/start_model_training', IController.procssModelTraining)
 
+router.post('/get_model', IController.getModel)
+router.post('/save_model', IController.saveModel)
+router.post('/delete_model', IController.deleteModel)
+
+
+// Test routes
 const checkDuplicates = async (req, res, next) => {
     const { ticker_name, period } = req.body;
     const [deleteduplicateResult, updatedResult, latestDocumentCount] = await MDBServices.checkForDuplicateDocumentsInHistory(ticker_name, period)

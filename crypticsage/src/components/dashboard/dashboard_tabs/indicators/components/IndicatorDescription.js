@@ -346,7 +346,7 @@ const FunctionContainer = (props) => {
                                                     </Box>
                                                 ) :
                                                 (
-                                                    <Box pt={1} width='100%'>
+                                                    <Box pt={'14px'} width='100%'>
                                                         <MultiSelect
                                                             inputLabel={input_types[input.name]}
                                                             selectedInputOptions={value}

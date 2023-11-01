@@ -12,6 +12,7 @@ import { GoogleLogin } from '@react-oauth/google';
 
 import { useDispatch } from 'react-redux';
 import { setAuthState } from '../authSlice';
+import { setUserModels } from '../../dashboard/dashboard_tabs/indicators/modules/CryptoModuleSlice'
 import { LoginUser } from '../../../api/auth';
 import { setRecentLessonAndQuizStatus } from '../../dashboard/dashboard_tabs/stats/StatsSlice'
 const Login = (props) => {
@@ -92,6 +93,7 @@ const Login = (props) => {
                 }
                 localStorage.setItem('userTheme', userData.preferences.theme)
                 dispatch(setAuthState(userData))
+                dispatch(setUserModels(result.data.data.userModels))
                 dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
                 setIsLoading(false)
                 navigate('/dashboard')
@@ -129,6 +131,7 @@ const Login = (props) => {
             }
             localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
+            dispatch(setUserModels(result.data.data.userModels))
             dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
             setIsLoading(false)
             navigate('/dashboard')
@@ -165,6 +168,7 @@ const Login = (props) => {
             }
             localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
+            dispatch(setUserModels(result.data.data.userModels))
             dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
             setIsLoading(false)
             navigate('/dashboard')

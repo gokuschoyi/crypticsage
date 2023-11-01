@@ -2355,6 +2355,83 @@ const isMetadatAvailable = async (ticker_name) => {
 res() */
 //<------------------------CRYPTO-STOCKS SERVICES-------------------------->
 
+const saveModelForUser = async (user_id, ticker_name, ticker_period, model_id, model_name, model_data) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const model_collection = db.collection('models')
+
+        // Check if the model with the same ID exists
+        const existingModel = await model_collection.findOne({ 'model_id': model_id });
+
+        if (!existingModel) {
+            // The model with the same ID does not exist, create a new model document
+            const newModel = {
+                user_id,
+                model_id,
+                model_name,
+                model_created_date: new Date().getTime(),
+                ticker_name,
+                ticker_period,
+                model_data,
+            };
+
+            const inserted = await model_collection.insertOne(newModel);
+            return [true, inserted];
+        } else {
+            // The model with the same ID already exists, return a message or handle accordingly
+            let message = 'Model with the same ID already exists.';
+            return [false, message];
+        }
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const fetchUserModels = async (user_id) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const model_collection = db.collection('models')
+
+        const projection_field = {
+            _id: 0,
+            model_id: 1,
+            model_name: 1,
+            model_created_date: 1,
+            ticker_name: 1,
+            ticker_period: 1,
+            model_data: 1
+        }
+
+        const pipeline = [
+            // Match documents with the specified user_id
+            {
+                $match: { user_id }
+            },
+            {
+                $project: projection_field
+            },
+            // You can add additional stages here as needed
+            {
+                $unset: ['model_data.predicted_result']
+            }
+        ];
+
+        // Perform the aggregation
+        const userModels = await model_collection.aggregate(pipeline).toArray();
+
+        if (userModels.length > 0) {
+            return userModels
+        }
+        else {
+            return []
+        }
+
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
 
 module.exports = {
     getUserByEmail
@@ -2402,4 +2479,6 @@ module.exports = {
     , fetchYFinanceFullSummary
     , updateYFinanceMetadata
     , isMetadatAvailable
+    , saveModelForUser
+    , fetchUserModels
 }

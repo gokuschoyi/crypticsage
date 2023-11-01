@@ -187,3 +187,35 @@ export const startModelTraining = async ({ token, payload }) => {
     })
     return response;
 }
+
+export const getUserModels = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const { user_id } = payload;
+    const response = await axios.post(`${baseUrl}/indicators/get_model`, { user_id }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
+export const saveModel = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/indicators/save_model`, { payload }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
+export const deleteModel = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const { model_id } = payload;
+    const response = await axios.post(`${baseUrl}/indicators/delete_model`, { model_id }, config, {
+        withCredentials: true
+    })
+    return response;
+}

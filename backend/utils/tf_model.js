@@ -113,6 +113,13 @@ const makePredictions = async (model, xTest) => {
     return predictions.arraySync()
 }
 
+const saveModel = async (model, model_id) => {
+    await model.save(`file://./models/${model_id}`).then((res) => { 
+        console.log('Model saved', res) 
+        model.dispose()
+    });
+}
+
 const disposeModel = (model) => {
     model.dispose()
 }
@@ -121,6 +128,7 @@ module.exports = {
     createModel,
     trainModel,
     makePredictions,
+    saveModel,
     disposeModel,
     eventEmitter
 }

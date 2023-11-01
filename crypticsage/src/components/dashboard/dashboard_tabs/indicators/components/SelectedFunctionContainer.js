@@ -55,6 +55,9 @@ const MultiSelect = (props) => {
                             '& .MuiInputBase-input': {
                                 height: '10px'
                             },
+                            '& .MuiInputLabel-root': {
+                                top: '-5px'
+                            },
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
                                     borderColor: `${theme.palette.text.secondary}`,
@@ -314,7 +317,7 @@ const SelectedFunctionContainer = (props) => {
                                 </Box>
 
                                 <Box className='indicator-inputs-selected' pt={'10px'} sx={{ textAlign: 'start' }}>
-                                    <Typography variant='h6' textAlign='start' fontWeight='500' sx={{textDecoration:'underline', textUnderlineOffset:'3px'}}>INPUTS</Typography>
+                                    <Typography variant='h6' textAlign='start' fontWeight='500' sx={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>INPUTS</Typography>
                                     {inputs.length > 0 && inputs.map((input, index) => {
                                         const { value, errorFlag, helperText } = input
                                         return (
@@ -333,7 +336,7 @@ const SelectedFunctionContainer = (props) => {
                                                         </Box>
                                                     </Box>
                                                     :
-                                                    <Box pt={1} width='100%'>
+                                                    <Box pt={'14px'} width='100%'>
                                                         <MultiSelect
                                                             inputLabel={input.name === 'inReal' ? 'flag' : input.name}
                                                             selectedInputOptions={value}
@@ -351,7 +354,7 @@ const SelectedFunctionContainer = (props) => {
                                 </Box>
 
                                 <Box className='indicator-optional-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                                    <Typography variant='h6' fontWeight='500' sx={{textDecoration:'underline', textUnderlineOffset:'3px'}}>OPTIONAL INPUTS</Typography>
+                                    <Typography variant='h6' fontWeight='500' sx={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>OPTIONAL INPUTS</Typography>
                                     {optInputs.length === 0 ?
                                         (
                                             <Typography>None</Typography>
@@ -361,7 +364,7 @@ const SelectedFunctionContainer = (props) => {
                                             optInputs && optInputs.map((optionalInput, index) => {
                                                 const { displayName, hint, name, defaultValue, errorFlag, helperText } = optionalInput
                                                 return (
-                                                    <Box pt={'15px'} key={index} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
+                                                    <Box pt={'14px'} key={index} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
                                                         <TextField
                                                             inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', style: { height: '10px' } }}
                                                             error={errorFlag}

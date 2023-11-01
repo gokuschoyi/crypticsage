@@ -66,9 +66,12 @@ const checkIsAdmin = (email) => {
  * @returns {Promise<types.UserLoginPayload>}
  */
 const generateUserObjectForLogin = async (user, adminStatus, token) => {
+    const user_id = user[0].uid
+    const userModels = await MDBServices.fetchUserModels(user_id)
     let userData = {}
 
     userData.accessToken = token;
+    userData.userModels = userModels;
     userData.admin_status = adminStatus;
     userData.email = user[0].email;
     userData.displayName = user[0].displayName;

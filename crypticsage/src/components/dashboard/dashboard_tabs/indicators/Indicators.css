@@ -543,14 +543,14 @@
         width: 122px;
     }
 
-    .talib-func-hint{
+    .talib-func-hint {
         max-width: 240px;
         transition: all 0.2s ease-in-out;
     }
 }
 
 @media screen and (max-width: 800px) {
-    .talib-func-hint{
+    .talib-func-hint {
         max-width: 150px;
         transition: all 0.2s ease-in-out;
     }
@@ -595,9 +595,20 @@
         width: 95px;
     }
 
-    .talib-func-hint{
+    .talib-func-hint {
         max-width: 270px;
         transition: all 0.2s ease-in-out;
+    }
+
+    .prediction-chart-header {
+        flex-direction: column;
+        align-items: start;
+        gap: 10px;
+    }
+
+    .model-chart-action-container {
+        justify-content: space-between;
+        width: 100%;
     }
 
     /* .border-right {

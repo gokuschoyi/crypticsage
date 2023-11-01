@@ -1,6 +1,6 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistReducer, persistStore } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+import localforage from 'localforage';
 import thunk from 'redux-thunk';
 import autoMergeLevel2 from 'redux-persist/es/stateReconciler/autoMergeLevel2';
 import sectionSlice from './components/dashboard/dashboard_tabs/sections/SectionSlice';
@@ -30,7 +30,7 @@ const reducer = combineReducers({
 
 const persistConfig = {
     key: 'root',
-    storage,
+    storage: localforage,
     stateReconciler: autoMergeLevel2,
 }
 

@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
+  "nodemonConfig": {
+    "ignore": [
+      "./models"
+    ]
+  },
   "scripts": {
     "start": "nodemon server.js",
     "jsdoc": "jsdoc -c jsdoc.json",
