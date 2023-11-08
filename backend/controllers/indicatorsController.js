@@ -14,8 +14,11 @@ const { createTimer } = require('../utils/timer')
 const { getValuesFromRedis } = require('../utils/redis_util');
 const { fetchEntireHistDataFromDb } = require('../services/mongoDBServices')
 const TF_Model = require('../utils/tf_model')
+const TF_ModelUtil = require('../utils/tf_modelUtil')
 const fs = require('fs')
 const MDBServices = require('../services/mongoDBServices')
+
+const tf = require('@tensorflow/tfjs-node');
 
 
 const getIndicatorDesc = async (req, res) => {
@@ -206,7 +209,7 @@ const executeTalibFunction = async (req, res) => {
 const procssModelTraining = async (req, res) => {
     const { fTalibExecuteQuery, model_training_parameters } = req.body.payload
     const model_id = uuidv4();
-    console.log('model id', model_id)
+    log.info(`Starting model training with id : ${model_id}`)
     const model_training_queue = "MODEL_TRAINING_QUEUE"
     const job_name = "MODEL_TRAINING_JOB_" + model_id
     try {
@@ -269,13 +272,22 @@ const startModelTraining = async (job) => {
     const { db_query } = fTalibExecuteQuery[0].payload;
     const { asset_type, ticker_name, period } = db_query;
     // Model parameters
-    const { training_size, time_step, look_ahead, epochs: epochCount, hidden_layers, learning_rate, to_predict } = model_training_parameters
+    const {
+        training_size,
+        time_step,
+        look_ahead,
+        epochs: epochCount,
+        hidden_layers,
+        learning_rate,
+        to_predict,
+        model_type
+    } = model_training_parameters
     console.log('Model parameters : ', model_training_parameters)
 
     log.info('----> Step 1 : Fetching the ticker data from db') // oldest first 
     const tickerHistory = await fetchEntireHistDataFromDb(asset_type, ticker_name, period)
     const tickerHistoryLength = tickerHistory.length
-    console.log('Initial Total Length : ', tickerHistoryLength)
+    log.info(`Initial Total Length : ${tickerHistoryLength}`)
     console.log('Latest Data : ', tickerHistory[tickerHistoryLength - 1])
     TF_Model.eventEmitter.emit('notify', { message: `----> Fetched ${tickerHistoryLength} tickers from db...`, latestData: tickerHistory[tickerHistoryLength - 1] })
 
@@ -301,28 +313,38 @@ const startModelTraining = async (job) => {
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Standardizing the data..." })
     log.info('----> Step 5 : Standardizing the data')
-    let [stdData, label_mean, label_variance] = TFMUtil.standardizeData(features, to_predict)
-    console.log(label_mean, label_variance)
+    let [stdData, label_mean, label_variance] = TFMUtil.standardizeData(model_type, features, to_predict)
+    log.info({ label_mean, label_variance })
     TF_Model.eventEmitter.emit('notify', { message: `----> Data standardized...` })
 
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Creating the training data..." })
     log.info('----> Step 6 : Transformig and creating the training data')
-    const [trainSplit, xTrain, yTrain, xTrainTest, yTrainTest] = await TFMUtil.createTrainingData({ stdData, timeStep: time_step, lookAhead: look_ahead, e_key: to_predict, training_size })
+    const [trainSplit, xTrain, yTrain, xTrainTest, yTrainTest] = await TFMUtil.createTrainingData(
+        {
+            model_type,
+            stdData,
+            timeStep: time_step,
+            lookAhead: look_ahead,
+            e_key: to_predict,
+            training_size
+        })
     TF_Model.eventEmitter.emit('notify', { message: `----> Training data created...` })
 
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Creating the model..." })
     log.info('----> Step 7 : Creating the model')
-    const input_layer_shape = time_step;
+    const input_layer_shape = time_step; // look back date
     const input_layer_neurons = 64;
     const rnn_output_neurons = 16;
-    const output_layer_neurons = 1;
+    const output_layer_neurons = yTrain[0].length;
     const feature_count = xTrain[0][0].length;
     const n_layers = hidden_layers;
 
     const model_parama = {
+        model_type,
         input_layer_shape,
+        look_ahead,
         feature_count,
         input_layer_neurons,
         rnn_output_neurons,
@@ -338,20 +360,35 @@ const startModelTraining = async (job) => {
     log.info('----> Step 8 : Training the model')
     const epochs = epochCount;
     const batchSize = 32;
-    const trained_model_ = await TF_Model.trainModel(model_, xTrain, yTrain, epochs, batchSize)
+    const trained_model_ = await TF_Model.trainModel(model_, model_type, xTrain, yTrain, epochs, batchSize)
     TF_Model.eventEmitter.emit('notify', { message: `----> TF Model trained...` })
 
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Making the predictions on test data..." })
     log.info('----> Step 9 : Making the predictions on test data')
-    let predictedPrice = await TF_Model.makePredictions(trained_model_, xTrainTest)
-    console.log('Predicted length', predictedPrice.length, predictedPrice[0], predictedPrice[predictedPrice.length - 1][0])
+    const forecastDataSlice = stdData.slice(-time_step)
+    const forecastData = [forecastDataSlice]
+    let [predictedPrice, forecast] = await TF_Model.makePredictions(trained_model_, xTrainTest, forecastData)
+    log.info(`Predicted length : ${predictedPrice.length}, ${predictedPrice[0]}, ${predictedPrice[predictedPrice.length - 1]}`)
     TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions completed...` })
 
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Combining and finalizing the data for plotting..." })
     log.info('----> Step 10 : Combining and finalizing the data for plotting')
-    await TFMUtil.formatPredictedOutput({ tickerHist, time_step, trainSplit, yTrainTest, predictedPrice, id: model_id, label_mean, label_variance })
+    await TFMUtil.formatPredictedOutput(
+        {
+            model_type,
+            look_ahead,
+            tickerHist,
+            time_step,
+            trainSplit,
+            yTrainTest,
+            predictedPrice,
+            forecast,
+            id: model_id,
+            label_mean,
+            label_variance
+        })
     TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions formatted, sending result...` })
 
 
@@ -407,6 +444,22 @@ const deleteModel = async (req, res) => {
     //backend/models/0fb70a60-8a62-443f-bfb5-2090e5742957
 }
 
+const deleteUserModel = async (req, res) => {
+    try {
+        const { model_id } = req.body
+        const uid = res.locals.data.uid;
+        const user_model_deleted = await MDBServices.deleteUserModel(uid, model_id)
+        const deleted = await deleteModelFromLocalDirectory(model_id)
+        if (deleted && user_model_deleted) {
+            res.status(200).json({ message: 'Model deleted successfully' })
+        }
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model deletion failed' })
+
+    }
+}
+
 const deleteModelFromLocalDirectory = async (model_id) => {
     try {
         const path = `./models/${model_id}` // delete a directory in models with the foldername as model_id us fs
@@ -423,6 +476,125 @@ const deleteModelFromLocalDirectory = async (model_id) => {
     }
 }
 
+
+
+const generateTestData = async (req, res) => {
+    const { timeStep, lookAhead } = req.body
+    try {
+
+        const testArray =
+            [[10, 15, 25],
+            [20, 25, 45],
+            [30, 35, 65],
+            [40, 45, 85],
+            [50, 55, 105],
+            [60, 65, 125],
+            [70, 75, 145],
+            [80, 85, 165],
+            [90, 95, 185],
+            [100, 105, 205],
+            [105, 110, 215],
+            ]
+        const trainX = []
+        const trainY = []
+        for (let i = timeStep; i <= testArray.length - lookAhead + 1; i++) {
+            trainX.push(testArray.slice(i - timeStep, i))
+            trainY.push(testArray.slice(i - 1, i + lookAhead - 1).map((row) => [row[2]]))
+        }
+
+        let str = ''
+        trainX.forEach((element, index) => {
+            element.forEach((row, ind) => {
+                let rowStr = ''
+                if (ind === element.length - 1) {
+                    rowStr += row.join(', ') + ` - ${trainY[index]}` + '\n' + '\n'
+                } else {
+                    rowStr = row.join(', ') + '\n'
+                }
+                str += rowStr
+            })
+        })
+
+        // console.log(str)
+        /* console.log(trainX)
+        console.log(trainY) */
+
+        let tensorX = tf.tensor(trainX)
+        let tensorY = tf.tensor(trainY)
+
+        console.log(testArray.length)
+        console.log(testArray.length - timeStep - lookAhead + 2)
+        console.log(tensorX.shape)
+        console.log(tensorY.shape)
+
+        /* const [trainSplit, xTrain, yTrain, xTrainTest, yTrainTest] = await TFMUtil.createTrainingData(
+            {
+                model_type: 'multi_input_single_output_step',
+                stdData: testArray,
+                timeStep: timeStep,
+                lookAhead: lookAhead,
+                e_key: 'low',
+                training_size: 80
+            })
+
+        console.log(xTrain)
+        console.log(yTrain)
+        console.log(xTrainTest)
+        console.log(yTrainTest) */
+
+        const act = [
+            [ 0.9313037991523743 ],
+            [ 0.9217190742492676 ],
+            [ 0.9200571179389954 ],
+            [ 0.9195137023925781 ],
+            [ 0.9114740490913391 ]
+        ]
+
+        const pred = [
+            [ 0.7829376459121704 ],
+            [ 0.9296842813491821 ],
+            [ 0.9347333908081055 ],
+            [ 0.920935869216919 ],
+            [ 0.9096674919128418 ]
+        ]
+
+        /* const act =[
+            [1],
+            [2],
+            [3]
+            7/11 7PM : act : 34627.83, pred :  35219.68  -591.85
+            7/11 11PM : act : 34721.23, pred : 35296.62  -575.39
+            8/11 3AM : act : 35453.98, pred : 35347.19   106.79
+            8/11 7AM : act : 35399.12, pred : 35341.42   57.7
+            8/11 11AM : act : 35269.68, pred : 35314.25  -44.57
+        ]
+
+        const pred =[
+            [0.499192],
+            [1.99],
+            [2.99]
+        ] */
+
+        let act_tensor = tf.tensor(act)
+        let pred_tensor = tf.tensor(pred)
+
+        let mse = tf.losses.meanSquaredError(act_tensor, pred_tensor)
+
+        console.log(mse.arraySync())
+
+        let rmse = tf.sqrt(mse)
+
+        console.log(rmse.arraySync())
+
+
+        res.status(200).send({ message: 'Test data generated successfully', str })
+
+    } catch (err) {
+        log.error(err.stack)
+        res.status(400).json({ message: 'Test data generation failed' })
+    }
+}
+
 module.exports = {
     getIndicatorDesc,
     executeTalibFunction,
@@ -431,4 +603,6 @@ module.exports = {
     getModel,
     saveModel,
     deleteModel,
+    deleteUserModel,
+    generateTestData,
 }

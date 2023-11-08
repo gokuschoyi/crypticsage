@@ -1,5 +1,7 @@
 const { WebSocketServer } = require('ws');
 const TF_Model = require('./utils/tf_model');
+const logger = require('./middleware/logger/Logger');
+const log = logger.create(__filename.slice(__dirname.length + 1))
 
 // Initialize a Map to track user connections
 const userConnections = new Map();
@@ -47,17 +49,24 @@ const onPredictionCompleted = async (ws, id) => {
     }
 };
 
+const onRMSEComplete = async (ws, overAllRMSE) => {
+    if (ws) {
+        ws.send(JSON.stringify({ action: 'prediction_rmse', overAllRMSE: overAllRMSE }));
+    }
+
+}
+
 wsServer.on('connection', function connection(ws, req) {
     ws.send(JSON.stringify({ action: 'connected' }));
 
     // @ts-ignore
     const params = new URLSearchParams(req.url.replace('/?', ''));
     let user_id = params.get('user_id')
-    console.log('Connection received and connected', user_id)
+    log.info(`Connection received and connected with : ${user_id}`)
 
     const existingConnection = userConnections.get(user_id);
     if (existingConnection && existingConnection !== ws) {
-        console.log('Existing user connection found. Closing it.')
+        log.info('Existing user connection found. Closing it.')
         existingConnection.close()
     }
 
@@ -66,7 +75,7 @@ wsServer.on('connection', function connection(ws, req) {
     ws.on('message', async function incoming(message) {
         // @ts-ignore
         const data = JSON.parse(message);
-        console.log('Received from client:', data);
+        log.info(`Received from client : ${JSON.stringify(data)}`);
     });
 
     TF_Model.eventEmitter.on('notify', (message) => onNotify(ws, message));
@@ -75,10 +84,11 @@ wsServer.on('connection', function connection(ws, req) {
     TF_Model.eventEmitter.on('batchEnd', (batch, log) => onBatchEnd(ws, batch, log));
     TF_Model.eventEmitter.on('trainingEnd', () => onTrainingEnd(ws));
     TF_Model.eventEmitter.once('prediction_completed', async (id) => onPredictionCompleted(ws, id));
+    TF_Model.eventEmitter.once('prediction_rmse', (overAllRMSE) => onRMSEComplete(ws, overAllRMSE))
 
     ws.on('close', function close() {
         // TF_Model.eventEmitter.removeAllListeners();
-        console.log('disconnected');
+        log.info('Client disconnected');
     });
 });
 

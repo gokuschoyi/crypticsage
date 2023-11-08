@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from 'react'
 import { Box, useTheme, Skeleton, Typography, Paper } from '@mui/material'
 import { createChart } from 'lightweight-charts';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setBarsFromToPredictions } from '../modules/CryptoModuleSlice'
 const PredictionsChart = (props) => {
-    const { predictionChartType, trainingStartedFlag } = props
+    const { predictionChartType, trainingStartedFlag, model_type, lookAhead } = props
     const theme = useTheme()
+    const dispatch = useDispatch()
     const chartBackgroundColor = theme.palette.background.default
 
     const chartData = useSelector(state => state.cryptoModule.modelData.predictedValues)
@@ -71,31 +73,101 @@ const PredictionsChart = (props) => {
                 },
             });
             chart.current.timeScale().fitContent();
+            let markers = []
+            switch (model_type) {
+                case 'multi_input_single_output_no_step':
+                case 'multi_input_single_output_step':
+                    const actual_values = predictedValueRedux
+                        .filter((prediction) => prediction.actual !== null)
+                        .map((prediction) => ({
+                            time: prediction.open,
+                            value: prediction.actual,
+                            color: '#00ff00',
+                        }));
 
-            const actual_values = predictedValueRedux.map((prediction) => {
-                return {
-                    time: prediction.open,
-                    value: prediction.actual
-                }
-            })
-            const predicted_values = predictedValueRedux.map((prediction) => {
-                return {
-                    time: prediction.open,
-                    value: prediction.predicted
-                }
-            })
+                    const predicted_values = predictedValueRedux
+                        .map((prediction, index) => {
+                            if (prediction.predicted === null) {
+                                return {
+                                    time: prediction.open,
+                                    value: prediction.predicted,
+                                    color: 'transparent'
+                                }
+                            } else {
+                                if (index < predictedValueRedux.length - lookAhead) {
+                                    return {
+                                        time: prediction.open,
+                                        value: prediction.predicted,
+                                        color: '#ff0000',
+                                    }
 
-            actualValueRef.current = chart.current.addLineSeries({
-                color: '#00ff00',
-                lineWidth: 2,
-            });
-            actualValueRef.current.setData(actual_values);
+                                } else {
+                                    return {
+                                        time: prediction.open,
+                                        value: prediction.predicted,
+                                        color: '#F57C00',
+                                    }
+                                }
+                            }
+                        })
 
-            predictedValueRef.current = chart.current.addLineSeries({
-                color: '#ff0000',
-                lineWidth: 2,
-            });
-            predictedValueRef.current.setData(predicted_values);
+                    // console.log('act-length', actual_values.length)
+                    // console.log('pred-length', predicted_values.length)
+
+                    actualValueRef.current = chart.current.addLineSeries({
+                        lineWidth: 2,
+                    });
+                    actualValueRef.current.setData(actual_values);
+
+                    predictedValueRef.current = chart.current.addLineSeries({
+                        lineWidth: 2,
+                    });
+
+                    markers.push({
+                        time: predicted_values[predicted_values.length - lookAhead].time,
+                        position: 'aboveBar',
+                        color: 'red',
+                        shape: 'circle',
+                        text: 'prediction',
+                        size: 0.4
+                    })
+
+                    predictedValueRef.current.setData(predicted_values);
+                    predictedValueRef.current.setMarkers(markers)
+                    break;
+                case 'multi_input_multi_output_no_step':
+                    console.log('Multi paraller chart')
+
+                    const nullRemoved = predictedValueRedux.filter((value) => value.open !== null)
+                        .map((item) => ({
+                            time: item.time,
+                            open: item.open,
+                            high: item.high,
+                            low: item.low,
+                            close: item.close,
+
+                        }))
+
+                    markers.push({
+                        time: nullRemoved[nullRemoved.length - 1].time,
+                        position: 'aboveBar',
+                        color: 'red',
+                        shape: 'circle',
+                        text: 'prediction',
+                        size: 0.4
+                    })
+                    actualValueRef.current = chart.current.addCandlestickSeries({
+                        upColor: '#00ff00',
+                        downColor: '#ff0000',
+                        wickVisible: true,
+                    })
+                    actualValueRef.current.setData(nullRemoved)
+                    actualValueRef.current.setMarkers(markers)
+                    break;
+                default:
+                    console.log('No model')
+                    break;
+            }
 
             window.addEventListener('resize', handleResize);
         }
@@ -103,9 +175,57 @@ const PredictionsChart = (props) => {
         return () => {
             // console.log('UE Return : Predctions Chart')
             window.removeEventListener('resize', handleResize);
+            chart.current.timeScale().unsubscribeVisibleTimeRangeChange(barsInChartHandler)
             chart.current.remove()
             chart.current = null
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [predictedValueRedux])
+
+    // Define the debounce function
+    function debounce(func, delay) {
+        let timeoutId;
+        return function () {
+            const context = this;
+            const args = arguments;
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func.apply(context, args);
+            }, delay);
+        };
+    }
+
+    const debouncedFromToSave = debounce((from, to) => {
+        // console.log(from, to)
+        dispatch(setBarsFromToPredictions({ from: from, to: to }))
+    }, 500)
+
+    const barsInChartHandler = (param) => {
+        const { from, to } = param
+        const fromRounded = Math.floor(from)
+        const toRounded = Math.floor(to)
+        debouncedFromToSave(fromRounded, toRounded)
+        // console.log(fromRounded, toRounded)
+    }
+
+    // handling the zoom in and zoom out of the chart
+    const barsFromToRedux = useSelector(state => state.cryptoModule.barsFromToPredictions)
+    useEffect(() => {
+        const { from, to } = barsFromToRedux
+        // console.log(from, to)
+        if (!chart.current) {
+            return
+        } else {
+            if (barsFromToRedux.from !== 0 && barsFromToRedux.to !== 0) {
+                // console.log(from, to)
+                chart.current.timeScale().setVisibleLogicalRange({ from: from, to: to })
+            } else {
+                // console.log('UE : Initial chartset visible logical range')
+            }
+            chart.current.timeScale().subscribeVisibleLogicalRangeChange(barsInChartHandler)
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictedValueRedux])
 
     // tooltip to show the actual and predicted values
@@ -134,20 +254,71 @@ const PredictionsChart = (props) => {
                         hour12: true
                     }
                 );
-                const act_data = param.seriesData.get(actualValueRef.current);
-                const pred_data = param.seriesData.get(predictedValueRef.current);
-                const diff = act_data.value - pred_data.value
-                // console.log(act_data, pred_data)
+                switch (model_type) {
+                    case 'multi_input_single_output_no_step':
+                    case 'multi_input_single_output_step':
+                        const act_data = param.seriesData.get(actualValueRef.current)?.value || 0;
+                        const pred_data = param.seriesData.get(predictedValueRef.current)?.value || 0;
 
-                let toolTipText = `
-                    <div class='value-box' style="flex-direction:column">
-                        <div style="width:110px; text-align:start">${date}</div>
-                        <Typography style="display:flex; align-items:center; gap:4px;" variant='custom'><div style="width:8px; height:8px; border-radius:10px; background-color:#12ff12"></div>Actual : ${act_data.value}</Typography>
-                        <Typography style="display:flex; align-items:center; gap:4px;" variant='custom'><div style="width:8px; height:8px; border-radius:10px; background-color:red"></div>Predicted : ${pred_data.value}</Typography>
-                        <Typography variant='custom'>${diff < 0 ? 'Over' : 'Under'} : <span style="color:${diff < 0 ? 'red' : '#12ff12'}">${diff}, ${(((act_data.value - pred_data.value) / act_data.value) * 100).toFixed(4)}%</span></Typography>
-                    </div>
-                `
-                predictionsBox.innerHTML = toolTipText
+                        let act_val = predictionChartType === 'scaled' ? parseFloat(act_data.toFixed(2)) : act_data || 0
+                        let pred_val = predictionChartType === 'scaled' ? parseFloat(pred_data.toFixed(2)) : pred_data || 0
+
+                        let diff = 0
+                        let percentageChange = 0
+                        // console.log(act_val, pred_val)
+                        if (act_val !== 0) {
+                            // console.log(true)
+                            if (predictionChartType === 'scaled') {
+                                diff = (pred_val - act_val).toFixed(2);
+                                percentageChange = Math.abs((diff / act_val) * 100).toFixed(4);
+                            } else {
+                                let denominator = act_val;
+                                if ((act_val > 0 && pred_val < 0) || (act_val < 0 && pred_val > 0)) {
+                                    denominator = Math.abs(act_val);
+                                }
+
+                                diff = pred_val - act_val;
+                                percentageChange = ((diff / denominator) * 100).toFixed(4);
+                            }
+                        } else {
+                            // console.log(false)
+                            percentageChange = 0
+                            diff = 0
+                        }
+                        // console.log(diff)
+
+                        let toolTipText = `
+                            <div class='value-box' style="flex-direction:column">
+                                <div style="width:110px; text-align:start">${date}</div>
+                                <Typography style="display:flex; align-items:center; gap:4px;" variant='custom'><div style="width:8px; height:8px; border-radius:10px; background-color:#12ff12"></div>Actual : ${act_val}</Typography>
+                                <Typography style="display:flex; align-items:center; gap:4px;" variant='custom'><div style="width:8px; height:8px; border-radius:10px; background-color:red"></div>Predicted : ${pred_val}</Typography>
+                                <Typography variant='custom'>${diff > 0 ? 'Over : ' : 'Under '}<span style="color:${diff > 0 ? 'red' : '#12ff12'}">${`${diff},`} ${`${percentageChange}%`}</span></Typography>
+                            </div>
+                        `
+                        predictionsBox.innerHTML = toolTipText
+                        break;
+                    case 'multi_input_multi_output_no_step':
+                        const data = param.seriesData.get(actualValueRef.current);
+                        const open = data.value !== undefined ? data.value : data.open;
+
+                        const close = data.close;
+                        const high = data.high;
+                        const low = data.low;
+                        let newString = `
+                        <div class="value-box">
+                            <div style="width:110px; text-align:start">${date}</div>
+                            <div style="width:73px; text-align:start">O : <span id="openValue">${Math.round(100 * open) / 100}</span></div>
+                            <div style="width:73px; text-align:start">H : <span id="highValue">${Math.round(100 * high) / 100}</span></div>
+                            <div style="width:73px; text-align:start">L : <span id="lowValue">${Math.round(100 * low) / 100}</span></div>
+                            <div style="width:73px; text-align:start">C : <span id="closeValue">${Math.round(100 * close) / 100}</span></div>
+                        </div>
+                        `
+
+                        predictionsBox.innerHTML = newString
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 

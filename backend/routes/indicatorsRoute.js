@@ -14,6 +14,9 @@ router.post('/start_model_training', IController.procssModelTraining)
 router.post('/get_model', IController.getModel)
 router.post('/save_model', IController.saveModel)
 router.post('/delete_model', IController.deleteModel)
+router.post('/delete_user_model', IController.deleteUserModel)
+
+router.post('/generate_test_data', IController.generateTestData)
 
 
 // Test routes

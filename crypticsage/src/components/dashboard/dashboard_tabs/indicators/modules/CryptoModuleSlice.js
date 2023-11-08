@@ -23,6 +23,7 @@ export const executeAllSelectedFunctions = createAsyncThunk(
 const initialState = {
     toolTipOn: false,
     barsFromTo: { from: 0, to: 0 },
+    barsFromToPredictions: { from: 0, to: 0 },
     selectedTickerName: '',
     selectedTickerPeriod: '4h',
     talibDescription: [],
@@ -44,7 +45,7 @@ const initialState = {
             epoch: 1,
             hiddenLayer: 1,
             multiSelectValue: 'close',
-            modelType: 'Multiple Input Series',
+            modelType: 'Multi Step Single Output',
             learningRate: 1,
             scaledLearningRate: 0.01
         },
@@ -54,6 +55,7 @@ const initialState = {
         epoch_no: 0,
         epoch_results: [],
         predictedValues: {},
+        predictionRMSE: 0
     }
 }
 
@@ -82,6 +84,12 @@ const cryptoModuleSlice = createSlice({
         setPredictedValues: (state, action) => {
             state.modelData.predictedValues = action.payload;
         },
+        setOverallRMSE: (state, action) => {
+            state.modelData.predictionRMSE = action.payload;
+        },
+        setBarsFromToPredictions: (state, action) => {
+            state.barsFromToPredictions = action.payload;
+        },
         setProgressMessage: (state, action) => {
             state.modelData.progress_message = [action.payload, ...state.modelData.progress_message];
         },
@@ -99,6 +107,9 @@ const cryptoModuleSlice = createSlice({
             state.modelData.epoch_no = initialState.modelData.epoch_no;
             state.modelData.predictedValues = {};
             state.modelData.progress_message = [];
+            state.modelData.model_name = '';
+            state.modelData.predictionRMSE = 0;
+            state.barsFromToPredictions = { from: 0, to: 0 };
         },
         resetModelData: (state) => {
             state.modelData.model_id = '';
@@ -110,6 +121,8 @@ const cryptoModuleSlice = createSlice({
             state.modelData.predictedValues = {};
             state.modelData.progress_message = [];
             state.modelData.talibExecuteQueries = [];
+            state.modelData.predictionRMSE = 0;
+            state.barsFromToPredictions = { from: 0, to: 0 }
         },
         toggleToolTipSwitch: (state) => {
             state.toolTipOn = !state.toolTipOn;
@@ -593,6 +606,8 @@ export const {
     , setTrainingParameters
     , setStartWebSocket
     , setPredictedValues
+    , setOverallRMSE
+    , setBarsFromToPredictions
     , setProgressMessage
     , setEpochNo
     , setEpochResults

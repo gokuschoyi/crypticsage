@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import Header from '../../../global/Header';
 import { Indicators } from '../components/IndicatorDescription';
-import { getHistoricalTickerDataFroDb, fetchLatestTickerForUser, startModelTraining, getUserModels, saveModel, deleteModel } from '../../../../../api/adminController'
+import { getHistoricalTickerDataFroDb, fetchLatestTickerForUser, startModelTraining, getUserModels, saveModel, deleteModelForUser, deleteModel } from '../../../../../api/adminController'
 import {
     setUserModels,
     setModelSavedToDb,
@@ -55,9 +55,11 @@ import AspectRatioIcon from '@mui/icons-material/AspectRatio';
 import { Success, Info, Error } from '../../../global/CustomToasts'
 
 import PredictionsChart from '../components/PredictionsChart';
+import { createChart } from 'lightweight-charts';
 
 const TICKER_PERIODS = [
     '1m',
+    '1h',
     '4h',
     '6h',
     '8h',
@@ -75,18 +77,76 @@ const INPUT_OPTIONS = [
     "close",
 ]
 
-const MODEL_OPTIONS = [
-    "",
-    "Multiple Input Series",
-    "Multiple Parallel Series",
+const mO_Copy = [
+    "Single Step Single Output",
+    "Single Step Multiple Output",
+    "Multi Step Single Output",
+    "Multi Step Multiple Output"
 ]
+
+const MODEL_OPTIONS = [
+    "Multi Step Single Output",
+]
+
+const MODEL_OPTIONS_VALUE = {
+    "Single Step Single Output": "multi_input_single_output_no_step",
+    "Single Step Multiple Output": "multi_input_multi_output_no_step",
+    "Multi Step Single Output": "multi_input_single_output_step",
+    "Multi Step Multiple Output": "multi_input_multi_output_step"
+}
+
+const NEW_MODEL_DESCRIPTION = {
+    "Single Step Single Output": {
+        "model_type": "multi_input_single_output_no_step",
+        "input": "multiple",
+        "output": 'single',
+        "chart_type": "line",
+        "description": "This model is designed to train on multiple input time series datasets with the goal of predicting a single value (Predictions flag), one step ahead. It's important to note that this model focuses on predicting a single value one time-step ahead",
+        "step": false,
+        "prediction_flag": true
+    },
+    "Single Step Multiple Output": {
+        "model_type": "multi_input_multi_output_no_step",
+        "input": "multiple",
+        "output": 'multiple',
+        "chart_type": "candleStick",
+        "description": "The purpose of this model is to train on various input time series datasets, aiming to predict future values for all input features, one step ahead. It's crucial to understand that this model concentrates on predicting all the features for a single step in the future.",
+        "step": false,
+        "prediction_flag": false
+    },
+    "Multi Step Single Output": {
+        "model_type": "multi_input_single_output_step",
+        "input": "multiple",
+        "output": 'multiple',
+        "chart_type": "line",
+        "description": "The purpose of this model is to train on various input time series datasets, aiming to predict future values for look ahead values.",
+        "step": true,
+        "prediction_flag": true
+    },
+    "Multi Step Multiple Output": {
+        "model_type": "multi_input_multi_output_step",
+        "input": "multiple",
+        "output": 'multiple',
+        "chart_type": "candleStick",
+        "description": "The purpose of this model is to train on various input time series datasets, aiming to predict future values for all input features, for look ahead values.",
+        "step": true,
+        "prediction_flag": false
+    }
+}
 
 const MultiSelect = (props) => {
     const theme = useTheme()
     const { inputLabel, inputOptions, selectedInputOptions, handleInputOptions, fieldName, toolTipTitle } = props
+    const [tooltipMessage, setTooltipMessage] = useState(toolTipTitle)
+    useEffect(() => {
+        if (inputLabel === 'Model type') {
+            const model_data = NEW_MODEL_DESCRIPTION[selectedInputOptions]
+            setTooltipMessage(model_data.description)
+        }
+    }, [inputLabel, selectedInputOptions])
 
     return (
-        <Paper elavation={6}>
+        <Paper elevation={8}>
             <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'40px'} pl={'4px'} pr={'4px'} pt={1} pb={1}>
                 <Box sx={{ width: '100%' }}>
                     <Autocomplete
@@ -113,7 +173,7 @@ const MultiSelect = (props) => {
                         />}
                     />
                 </Box>
-                <Tooltip title={toolTipTitle} placement='top' sx={{ cursor: 'pointer' }}>
+                <Tooltip title={tooltipMessage} placement='top' sx={{ cursor: 'pointer' }}>
                     <InfoOutlinedIcon className='small-icon' />
                 </Tooltip>
             </Box>
@@ -143,9 +203,6 @@ const periodToMilliseconds = (period) => {
             return 1000 * 60 * 60 * 24;
     }
 }
-
-// model name state management for saved model,, currently the model name in predictions shart changes on each render after save ...
-// save the model name to redux,
 
 const generateRandomModelName = () => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -593,7 +650,7 @@ const CryptoModule = () => {
                 hidden_layers: modelParams.hiddenLayer,
                 learning_rate: modelParams.scaledLearningRate,
                 to_predict: modelParams.multiSelectValue,
-                model_type: modelParams.modelType,
+                model_type: MODEL_OPTIONS_VALUE[modelParams.modelType],
             }
             console.log('Execute query + Model parameters', fTalibExecuteQuery, model_training_parameters)
             dispatch(setStartWebSocket(true))
@@ -726,12 +783,92 @@ const CryptoModule = () => {
 
 
     const handleModelDeletFromSaved = ({ model_id }) => {
-        console.log('clicked',model_id)
+        console.log('clicked', model_id)
+        deleteModelForUser({ token, model_id })
+            .then((res) => {
+                Success(res.data.message)
+                if (model_id === model_data.model_id) {
+                    dispatch(resetCurrentModelData())
+                }
+                getUserModels({ token, payload: { user_id: userId } })
+                    .then((res) => {
+                        dispatch(setUserModels(res.data.models))
+                    })
+            })
+            .catch((err) => {
+                console.log(err)
+            })
     }
 
     const handleExpandSelectedModel = ({ model_id }) => {
         console.log(model_id)
     }
+
+    /* const testChartRef = useRef(null)
+    const chart = useRef(null)
+    useEffect(() => {
+        const cTime = Math.round(new Date().getTime() / 1000)
+        // console.log(cTime)
+        let dataSet = []
+        for (let i = 0; i < 20; i++) {
+            const dt = cTime + (i * 60000)
+            // console.log(new Date(dt))
+            dataSet.push({
+                time: dt,
+                value: Math.random() * 100
+            })
+        }
+        // dataSet[17].value = null
+        dataSet[18].value = null
+
+        const markers = []
+        let nData = dataSet.map((data) => {
+            if (data.value === null) {
+                return {
+                    ...data,
+                    color: 'transparent'
+                }
+            }
+            else {
+                return {
+                    ...data,
+                    color: 'green'
+                }
+            }
+        })
+
+        markers.push({
+            time: nData[19].time,
+            position: 'inBar',
+            color: 'red',
+            shape: 'circle',
+            text: 'prediction',
+            size: 0.4
+        })
+
+        // console.log(markers)
+        if (!chart.current) {
+            chart.current = createChart(testChartRef.current, {
+                width: 700,
+                height: 400,
+                layout: {
+                    background: {
+                        type: 'solid',
+                        color: '#000000',
+                    },
+                    textColor: 'rgba(255, 255, 255, 0.9)',
+                }
+            })
+
+            chart.current.timeScale().fitContent()
+            const lineSeries = chart.current.addLineSeries({
+                color: 'green'
+            })
+            lineSeries.setData(nData)
+            lineSeries.setMarkers(markers)
+        }
+    }) */
+    // console.log(modelParams.modelType)
 
     return (
         <Box className='crypto-module-container'>
@@ -914,20 +1051,6 @@ const CryptoModule = () => {
 
                             <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' gap='10px'>
                                 <Box display='flex' flexDirection='column' gap='5px' width='100%'>
-                                    <CustomSlider sliderValue={modelParams.trainingDatasetSize} name={'trainingDatasetSize'} handleModelParamChange={handleModelParamChange} label={'Training size'} min={50} max={95} sliderMin={0} sliderMax={100} disabled={trainingStartedFlag} />
-                                    <CustomSlider sliderValue={modelParams.timeStep} name={'timeStep'} handleModelParamChange={handleModelParamChange} label={'Step Size'} min={14} max={100} sliderMin={1} sliderMax={100} disabled={trainingStartedFlag} />
-                                    <CustomSlider sliderValue={modelParams.lookAhead} name={'lookAhead'} handleModelParamChange={handleModelParamChange} label={'Look Ahead'} min={1} max={5} sliderMin={1} sliderMax={5} disabled={trainingStartedFlag} />
-                                    <CustomSlider sliderValue={modelParams.epoch} name={'epoch'} handleModelParamChange={handleModelParamChange} label={'Epochs'} min={1} max={20} sliderMin={1} sliderMax={20} disabled={trainingStartedFlag} />
-                                    <CustomSlider sliderValue={modelParams.hiddenLayer} name={'hiddenLayer'} handleModelParamChange={handleModelParamChange} label={'Hidden Layers'} min={1} max={20} sliderMin={1} sliderMax={10} disabled={trainingStartedFlag} />
-                                    <CustomSlider sliderValue={modelParams.learningRate} name={'learningRate'} handleModelParamChange={handleModelParamChange} label={'Learning Rate'} min={0} max={100} sliderMin={0} sliderMax={100} scaledLearningRate={modelParams.scaledLearningRate} disabled={trainingStartedFlag} />
-                                    <MultiSelect
-                                        inputLabel={'Prediction flag'}
-                                        inputOptions={INPUT_OPTIONS}
-                                        selectedInputOptions={modelParams.multiSelectValue}
-                                        handleInputOptions={handleMultiselectOptions}
-                                        fieldName={'To predict'}
-                                        toolTipTitle={'Select one of the flags to be used to predict'}
-                                    />
                                     <MultiSelect
                                         inputLabel={'Model type'}
                                         inputOptions={MODEL_OPTIONS}
@@ -936,6 +1059,23 @@ const CryptoModule = () => {
                                         fieldName={'Model type'}
                                         toolTipTitle={'Select a model type'}
                                     />
+                                    {modelParams.modelType !== 'Single Step Multiple Output' &&
+                                        <MultiSelect
+                                            inputLabel={'Prediction flag'}
+                                            inputOptions={INPUT_OPTIONS}
+                                            selectedInputOptions={modelParams.multiSelectValue}
+                                            handleInputOptions={handleMultiselectOptions}
+                                            fieldName={'To predict'}
+                                            toolTipTitle={'Select one of the flags to be used to predict'}
+                                        />}
+                                    <CustomSlider sliderValue={modelParams.trainingDatasetSize} name={'trainingDatasetSize'} handleModelParamChange={handleModelParamChange} label={'Training size'} min={50} max={95} sliderMin={0} sliderMax={100} disabled={trainingStartedFlag} />
+                                    <CustomSlider sliderValue={modelParams.timeStep} name={'timeStep'} handleModelParamChange={handleModelParamChange} label={'Step Size'} min={14} max={100} sliderMin={1} sliderMax={100} disabled={trainingStartedFlag} />
+                                    {(modelParams.modelType === 'Multi Step Single Output' || modelParams.modelType === 'Multi Step Multiple Output') &&
+                                        <CustomSlider sliderValue={modelParams.lookAhead} name={'lookAhead'} handleModelParamChange={handleModelParamChange} label={'Look Ahead'} min={2} max={15} sliderMin={2} sliderMax={15} disabled={trainingStartedFlag} />
+                                    }
+                                    <CustomSlider sliderValue={modelParams.epoch} name={'epoch'} handleModelParamChange={handleModelParamChange} label={'Epochs'} min={1} max={20} sliderMin={1} sliderMax={20} disabled={trainingStartedFlag} />
+                                    <CustomSlider sliderValue={modelParams.hiddenLayer} name={'hiddenLayer'} handleModelParamChange={handleModelParamChange} label={'Hidden Layers'} min={1} max={20} sliderMin={1} sliderMax={10} disabled={trainingStartedFlag} />
+                                    <CustomSlider sliderValue={modelParams.learningRate} name={'learningRate'} handleModelParamChange={handleModelParamChange} label={'Learning Rate'} min={0} max={100} sliderMin={0} sliderMax={100} scaledLearningRate={modelParams.scaledLearningRate} disabled={trainingStartedFlag} />
                                 </Box>
                             </Box>
                         </Grid>
@@ -958,31 +1098,39 @@ const CryptoModule = () => {
                                             />
                                             <Box className='model-chart-action-box'>
                                                 <Tooltip title={'Save Model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                                    <IconButton onClick={handleSaveModel.bind(null, {})}>
-                                                        <SaveIcon className='small-icon' />
-                                                    </IconButton>
+                                                    <span>
+                                                        <IconButton onClick={handleSaveModel.bind(null, {})}>
+                                                            <SaveIcon className='small-icon' />
+                                                        </IconButton>
+                                                    </span>
                                                 </Tooltip>
                                                 {!model_data.model_saved_to_db &&
                                                     <Tooltip title={'Delete the current model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                                        <IconButton onClick={handleDeleteModel.bind(null, {})}>
-                                                            <DeleteForeverIcon className='small-icon' />
-                                                        </IconButton>
+                                                        <span>
+                                                            <IconButton onClick={handleDeleteModel.bind(null, {})}>
+                                                                <DeleteForeverIcon className='small-icon' />
+                                                            </IconButton>
+                                                        </span>
                                                     </Tooltip>
                                                 }
-                                                <Tooltip title={'Normalized values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                                    <span>
-                                                        <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "standardized" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })}>
-                                                            <OpenInFullIcon className='small-icon' />
-                                                        </IconButton>
-                                                    </span>
-                                                </Tooltip>
-                                                <Tooltip title={'Scaled values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                                    <span>
-                                                        <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })}>
-                                                            <CloseFullscreenIcon className='small-icon' />
-                                                        </IconButton>
-                                                    </span>
-                                                </Tooltip>
+                                                {modelParams.modelType !== 'Single Step Multiple Output' &&
+                                                    <React.Fragment>
+                                                        <Tooltip title={'Normalized values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                            <span>
+                                                                <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "standardized" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })}>
+                                                                    <OpenInFullIcon className='small-icon' />
+                                                                </IconButton>
+                                                            </span>
+                                                        </Tooltip>
+                                                        <Tooltip title={'Scaled values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                            <span>
+                                                                <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })}>
+                                                                    <CloseFullscreenIcon className='small-icon' />
+                                                                </IconButton>
+                                                            </span>
+                                                        </Tooltip>
+                                                    </React.Fragment>
+                                                }
                                             </Box>
                                         </Box>
                                     }
@@ -992,9 +1140,19 @@ const CryptoModule = () => {
                             <PredictionsChart
                                 predictionChartType={predictionChartType}
                                 trainingStartedFlag={startWebSocket}
+                                model_type={MODEL_OPTIONS_VALUE[modelParams.modelType]}
+                                lookAhead={modelParams.lookAhead}
                             />
 
                             <Box className='main-training-status-box' pt={1}>
+                                {/* Prediction set RMSE results */}
+                                {model_data.predictionRMSE !== 0 &&
+                                    <Box className='prediction-rmse' display='flex' flexDirection='column' alignItems='start'>
+                                        <Box className='batch-end-text' id='prediction-overall-rmse' sx={{width:'100% !important'}}>Prediction MSE : {model_data.predictionRMSE * model_data.predictionRMSE}</Box>
+                                        <Box className='batch-end-text' id='prediction-overall-rmse' sx={{width:'100% !important'}}>Prediction RMSE : {model_data.predictionRMSE}</Box>
+                                    </Box>
+                                }
+
                                 {/* epoch end results */}
                                 <Box className='epoch-end-progress-box' pt={1}>
                                     {epochResults.length > 0 && epochResults.map((result, index) => {
@@ -1072,7 +1230,7 @@ const CryptoModule = () => {
                                     :
                                     <Box display='flex' flexDirection='column' gap='5px'>
                                         {userModels.map((model, index) => {
-                                            const {model_name,model_id}=model
+                                            const { model_name, model_id } = model
                                             return (
                                                 <Paper key={index} elevation={4}>
                                                     <Box display='flex' alignItems='center' justifyContent='space-between' pl={'5px'} pr={'5px'}>
@@ -1080,14 +1238,27 @@ const CryptoModule = () => {
                                                         <Box>
                                                             <Tooltip title={'View Model Data'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                                                                 <span>
-                                                                    <IconButton onClick={handleModelDeletFromSaved.bind(null, { model_id: model_id })} sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} >
+                                                                    <IconButton onClick={handleExpandSelectedModel.bind(null, { model_id: model_id })} sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} >
                                                                         <AspectRatioIcon className='small-icon' />
                                                                     </IconButton>
                                                                 </span>
                                                             </Tooltip>
-                                                            <Tooltip title={'Delete Model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                            <Tooltip
+                                                                placement='top'
+                                                                sx={{ cursor: 'pointer', padding: '6px' }}
+                                                                title={
+                                                                    (
+                                                                        <Box
+                                                                            display='flex' flexDirection='row' gap='5px'
+                                                                        >
+                                                                            <Button color='error' variant='contained' size='small' onClick={handleModelDeletFromSaved.bind(null, { model_id: model_id })}>Yes</Button>
+                                                                            <Button color='warning' variant='contained' size='small' onClick={() => console.log('No')}>No</Button>
+                                                                        </Box>
+                                                                    )
+                                                                }
+                                                            >
                                                                 <span>
-                                                                    <IconButton onClick={handleExpandSelectedModel.bind(null, { model_id: model_id })} sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} >
+                                                                    <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} >
                                                                         <DeleteForeverIcon className='small-icon' />
                                                                     </IconButton>
                                                                 </span>
@@ -1103,6 +1274,8 @@ const CryptoModule = () => {
                         </Grid>
                     </Grid>
                 </Box>
+
+                {/* <Box className='test-chart' ref={testChartRef}></Box> */}
 
                 <Indicators symbol={cryptotoken} fetchValues={fetchValues} />
             </Box >

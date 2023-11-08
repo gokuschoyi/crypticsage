@@ -5,6 +5,7 @@ import {
     setEpochNo,
     setEpochResults,
     setPredictedValues,
+    setOverallRMSE,
     setStartWebSocket
 } from '../modules/CryptoModuleSlice'
 
@@ -36,6 +37,7 @@ const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, setBatchRe
         BATCH_END: 'batchEnd',
         TRAINING_END: 'trainingEnd',
         PREDICTION_COMPLETED: 'prediction_completed',
+        PREDICTION_RMSE: 'prediction_rmse'
     };
 
     const createModelProgressWebSocket = () => {
@@ -90,6 +92,9 @@ const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, setBatchRe
                         dispatch(setPredictedValues(data.predictions))
                         dispatch(setStartWebSocket(false))
                         Success('Training completed successfully')
+                        break;
+                    case ACTIONS.PREDICTION_RMSE:
+                        dispatch(setOverallRMSE(data.overAllRMSE))
                         break;
                     default:
                         break;

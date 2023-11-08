@@ -209,6 +209,16 @@ export const saveModel = async ({ token, payload }) => {
     return response;
 }
 
+export const deleteModelForUser = async ({ token, model_id }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/indicators/delete_user_model`, { model_id }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
 export const deleteModel = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }

@@ -1347,7 +1347,7 @@ const getStockSummaryDetails = async (symbol) => {
             const matched = insideTran.find((element) => element.name === item.name)
             return {
                 ...item,
-                transactions: matched.transactions
+                transactions: matched?.transactions || []
             }
         })
         stockProfile['insiderHolders'].holders = added

@@ -2433,6 +2433,20 @@ const fetchUserModels = async (user_id) => {
     }
 }
 
+const deleteUserModel = async (user_id, model_id) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const model_collection = db.collection('models')
+
+        const query = { user_id, model_id }
+        const deleted = await model_collection.deleteOne(query)
+        return deleted
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
 module.exports = {
     getUserByEmail
     , checkUserExists
@@ -2481,4 +2495,5 @@ module.exports = {
     , isMetadatAvailable
     , saveModelForUser
     , fetchUserModels
+    , deleteUserModel
 }
