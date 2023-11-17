@@ -56,6 +56,7 @@ class Logger {
             format: APP_FORMAT,
             transports: [
                 // new transports.File({ filename: APP_LOG_LOG_PATH }),
+                // @ts-ignore
                 new transports.Console({ APP_FORMAT }),
             ],
             levels: LOG_LEVELS

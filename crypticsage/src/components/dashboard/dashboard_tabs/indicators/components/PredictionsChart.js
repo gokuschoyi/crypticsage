@@ -2,14 +2,61 @@ import React, { useEffect, useRef } from 'react'
 import { Box, useTheme, Skeleton, Typography, Paper } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { useSelector, useDispatch } from 'react-redux';
-import { setBarsFromToPredictions } from '../modules/CryptoModuleSlice'
+import { setBarsFromToPredictions, setStandardizedAndScaledPredictions } from '../modules/CryptoModuleSlice'
+
+const calculateMetrics = (data, thresholdLower = 0.05, thresholdUpper = 0.07) => {
+    let TP = 0;
+    let FP = 0;
+    let TN = 0;
+    let FN = 0;
+    data = data.filter((value) => value.actual !== null && value.predicted !== null)
+    for (let i = 0; i < data.length; i++) {
+        const actualChange = data[i].actual;
+        const predictedChange = data[i].predicted;
+        const percentChange = (predictedChange - actualChange) / actualChange;
+        // console.log(percentChange * 100)
+        if (percentChange >= -thresholdLower && percentChange <= thresholdLower) {
+            TP++;
+        } else if (percentChange >= thresholdLower && percentChange <= thresholdUpper) {
+            FN++;
+        } else if (percentChange > thresholdUpper) {
+            TN++;
+        } else if (percentChange < -thresholdLower) {
+            FP++;
+        }
+    }
+
+    const accuracy = (TP + TN) / (TP + FP + TN + FN); // how close the predicted values are to the actual values based on the threshold. Higher the value better the model
+    const precision = TP / (TP + FP); // how many of the predicted values are actually correct. Higher the value better the model
+    const recall = TP / (TP + FN); // how many of the actual values are predicted correctly. Higher the value better the model
+    const f1 = (2 * precision * recall) / (precision + recall); // harmonic mean of precision and recall. Higher the value better the model
+
+    return { TP, FP, TN, FN, accuracy, precision, recall, f1 };
+}
+
+function calculateMSE(actual, predicted) {
+    if (actual.length !== predicted.length) {
+        throw new Error("Arrays should be of equal length");
+    }
+
+    let sum = 0;
+    for (let i = 0; i < actual.length; i++) {
+        sum += Math.pow(predicted[i] - actual[i], 2);
+    }
+
+    let mse = sum / actual.length;
+    let rmse = Math.sqrt(mse);
+    return { mse, rmse };
+}
+
 const PredictionsChart = (props) => {
-    const { predictionChartType, trainingStartedFlag, model_type, lookAhead } = props
+    const { predictionChartType, trainingStartedFlag, model_type, lookAhead, predictionLookAhead, setModelMetrics } = props
     const theme = useTheme()
     const dispatch = useDispatch()
     const chartBackgroundColor = theme.palette.background.default
 
     const chartData = useSelector(state => state.cryptoModule.modelData.predictedValues)
+    // console.log(chartData)
 
     const [predictedValueRedux, setPredictedValue] = React.useState([]) // chart not removed on reset
 
@@ -17,19 +64,123 @@ const PredictionsChart = (props) => {
     const chart = useRef(null)
     const actualValueRef = useRef(null)
     const predictedValueRef = useRef(null)
+    const allPredictions = useSelector(state => state.cryptoModule.modelData.predictedValues.predictions_array)
+    const dates = useSelector(state => state.cryptoModule.modelData.predictedValues.dates)
 
     // updates the predicted value based on the chart type
     useEffect(() => {
         // console.log('UE : Predctions Chart')
-        if (Object.keys(chartData).length === 0) {
+        if (chartData.standardized.length === 0 || chartData.scaled.length === 0) {
             setPredictedValue([])
             return
         }
         else {
             setPredictedValue(chartData[predictionChartType])
         }
-    }, [chartData, predictionChartType])
+    }, [chartData, predictionChartType, dates])
 
+    // console.log(predictionLookAhead)
+
+    const calculateOriginalPrice = (value, variance, mean) => {
+        if (value === null) return null;
+        return (value * Math.sqrt(variance)) + mean;
+    };
+
+
+    // console.log(predictionLookAhead)
+    useEffect(() => {
+        // const lastTickers = predictedValueRedux.slice(-(lookAhead * 2 - 2))
+        // console.log(lastTickers)
+        if (dates.length === 0) {
+            console.log("No Data yet")
+        } else {
+            let shiftedPredictedValues = []
+            let predIndex = predictionLookAhead - 1
+            let forecastResult = []
+            // console.log('Forecast RAW : ', chartData?.forecast.length)
+
+            for (let i = 0; i < dates.length; i++) {
+                const info = dates[i]
+                let predicted = null
+
+                if (i >= predIndex) {
+                    predicted = allPredictions[i - predIndex][predIndex][0]
+                }
+
+                shiftedPredictedValues.push({
+                    ...info,
+                    predicted: predicted
+                })
+            }
+
+            const lastDate = dates[dates.length - 1].open * 1000
+            const tickerPeriodInMilliSecond = (dates[1].open - dates[0].open) * 1000
+            // console.log('Last Date : ', new Date(lastDate).toLocaleString())
+
+            if (predIndex === 0) {
+                for (let i = 1; i <= chartData.forecast.length; i++) {
+                    forecastResult.push({
+                        openTime: new Date(lastDate + (tickerPeriodInMilliSecond * (i))).toLocaleString(),
+                        open: (lastDate + (tickerPeriodInMilliSecond * (i))) / 1000,
+                        actual: null,
+                        predicted: chartData.forecast[i - 1][0]
+                    })
+                }
+            } else {
+                let predict = allPredictions.slice(-predIndex)
+                // console.log(predict)
+                predict.forEach((value, index) => {
+                    forecastResult.push({
+                        openTime: new Date(lastDate + (tickerPeriodInMilliSecond * (index + 1))).toLocaleString(),
+                        open: (lastDate + (tickerPeriodInMilliSecond * (index + 1))) / 1000,
+                        actual: null,
+                        predicted: value[predIndex][0]
+                    })
+                })
+                
+                const newLastDate = forecastResult[forecastResult.length - 1].open * 1000
+                for (let i = predictionLookAhead; i <= chartData.forecast.length; i++) {
+                    forecastResult.push({
+                        openTime: new Date(newLastDate + (tickerPeriodInMilliSecond * (i-1))).toLocaleString(),
+                        open: (newLastDate + (tickerPeriodInMilliSecond * (i - 1))) / 1000,
+                        actual: null,
+                        predicted: chartData.forecast[i - 1][0]
+                    })
+                }
+            }
+
+            // console.log(forecastResult)
+
+            shiftedPredictedValues = [...shiftedPredictedValues, ...forecastResult]
+
+            const originalDataAfterShifting = shiftedPredictedValues.map((value) => ({
+                ...value,
+                actual: calculateOriginalPrice(value.actual, chartData.label_variance, chartData.label_mean),
+                predicted: calculateOriginalPrice(value.predicted, chartData.label_variance, chartData.label_mean),
+            }))
+
+            dispatch(setStandardizedAndScaledPredictions({ standardized: shiftedPredictedValues, scaled: originalDataAfterShifting }))
+
+
+            const metrics = calculateMetrics(originalDataAfterShifting);
+            // console.log(metrics)
+
+            let mscSt = calculateMSE(shiftedPredictedValues.map((value) => value.actual), shiftedPredictedValues.map((value) => value.predicted))
+            // console.log('Standardized : ',mscSt)
+
+            let mse = calculateMSE(originalDataAfterShifting.map((value) => value.actual), originalDataAfterShifting.map((value) => value.predicted))
+            // console.log('Scaled : ',mse)
+
+            setModelMetrics({
+                metrics,
+                mseStandardized: mscSt,
+                mseScaled: mse
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [predictionLookAhead, chartData.dates])
+
+    // creates the chart
     useEffect(() => {
         // console.log('UE : Predctions Chart')
         const chartGrid = document.getElementsByClassName('predictions-chart-grid')[0]
@@ -94,7 +245,7 @@ const PredictionsChart = (props) => {
                                     color: 'transparent'
                                 }
                             } else {
-                                if (index < predictedValueRedux.length - lookAhead) {
+                                if (index < predictedValueRedux.length - (lookAhead+1)) {
                                     return {
                                         time: prediction.open,
                                         value: prediction.predicted,

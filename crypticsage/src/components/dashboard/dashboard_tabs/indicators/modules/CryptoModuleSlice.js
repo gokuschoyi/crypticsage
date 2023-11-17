@@ -46,7 +46,8 @@ const initialState = {
             hiddenLayer: 1,
             multiSelectValue: 'close',
             modelType: 'Multi Step Single Output',
-            learningRate: 1,
+            learningRate: 50,
+            batchSize: 32,
             scaledLearningRate: 0.01
         },
         talibExecuteQueries: [],
@@ -54,7 +55,11 @@ const initialState = {
         progress_message: [],
         epoch_no: 0,
         epoch_results: [],
-        predictedValues: {},
+        predictedValues: {
+            dates: [],
+            standardized: [],
+            scaled: []
+        },
         predictionRMSE: 0
     }
 }
@@ -82,10 +87,14 @@ const cryptoModuleSlice = createSlice({
             state.modelData.startWebSocket = action.payload;
         },
         setPredictedValues: (state, action) => {
-            state.modelData.predictedValues = action.payload;
+            state.modelData.predictedValues = { ...state.modelData.predictedValues, ...action.payload };
         },
         setOverallRMSE: (state, action) => {
             state.modelData.predictionRMSE = action.payload;
+        },
+        setStandardizedAndScaledPredictions: (state, action) => {
+            state.modelData.predictedValues.standardized = action.payload.standardized;
+            state.modelData.predictedValues.scaled = action.payload.scaled;
         },
         setBarsFromToPredictions: (state, action) => {
             state.barsFromToPredictions = action.payload;
@@ -105,7 +114,11 @@ const cryptoModuleSlice = createSlice({
         resetCurrentModelData: (state) => {
             state.modelData.epoch_results = [];
             state.modelData.epoch_no = initialState.modelData.epoch_no;
-            state.modelData.predictedValues = {};
+            state.modelData.predictedValues = {
+                dates: [],
+                standardized: [],
+                scaled: []
+            };
             state.modelData.progress_message = [];
             state.modelData.model_name = '';
             state.modelData.predictionRMSE = 0;
@@ -118,7 +131,11 @@ const cryptoModuleSlice = createSlice({
             state.modelData.training_parameters = initialState.modelData.training_parameters;
             state.modelData.epoch_results = [];
             state.modelData.epoch_no = initialState.modelData.epoch_no;
-            state.modelData.predictedValues = {};
+            state.modelData.predictedValues = {
+                dates: [],
+                standardized: [],
+                scaled: []
+            };
             state.modelData.progress_message = [];
             state.modelData.talibExecuteQueries = [];
             state.modelData.predictionRMSE = 0;
@@ -607,6 +624,7 @@ export const {
     , setStartWebSocket
     , setPredictedValues
     , setOverallRMSE
+    , setStandardizedAndScaledPredictions
     , setBarsFromToPredictions
     , setProgressMessage
     , setEpochNo

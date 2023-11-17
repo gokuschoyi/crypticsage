@@ -14,12 +14,18 @@ const { createTimer } = require('../utils/timer')
 const { getValuesFromRedis } = require('../utils/redis_util');
 const { fetchEntireHistDataFromDb } = require('../services/mongoDBServices')
 const TF_Model = require('../utils/tf_model')
-const TF_ModelUtil = require('../utils/tf_modelUtil')
 const fs = require('fs')
 const MDBServices = require('../services/mongoDBServices')
 
 const tf = require('@tensorflow/tfjs-node');
 
+
+const e_type = {
+    "open": 0,
+    "high": 1,
+    "low": 2,
+    "close": 3,
+}
 
 const getIndicatorDesc = async (req, res) => {
     log.info("TALib Version: " + talib.version);
@@ -214,7 +220,7 @@ const procssModelTraining = async (req, res) => {
     const job_name = "MODEL_TRAINING_JOB_" + model_id
     try {
         const model_queue = new Queue(model_training_queue, { connection });
-        const model_worker = new Worker(model_training_queue, startModelTraining, { connection });
+        const model_worker = new Worker(model_training_queue, startModelTraining, { connection, lockDuration: 60000, maxStalledCount: 3 });
 
         const modelTrainingCompletedListener = (job) => {
             log.info(`Model Training Completed ${job.id}`)
@@ -236,7 +242,7 @@ const procssModelTraining = async (req, res) => {
             log.error(error.stack)
         })
 
-        const job = await model_queue.add(
+        await model_queue.add(
             job_name,
             { fTalibExecuteQuery, model_training_parameters, model_id },
             {
@@ -277,6 +283,7 @@ const startModelTraining = async (job) => {
         time_step,
         look_ahead,
         epochs: epochCount,
+        batchSize,
         hidden_layers,
         learning_rate,
         to_predict,
@@ -284,7 +291,7 @@ const startModelTraining = async (job) => {
     } = model_training_parameters
     console.log('Model parameters : ', model_training_parameters)
 
-    log.info('----> Step 1 : Fetching the ticker data from db') // oldest first 
+    log.alert('----> Step 1 : Fetching the ticker data from db') // oldest first 
     const tickerHistory = await fetchEntireHistDataFromDb(asset_type, ticker_name, period)
     const tickerHistoryLength = tickerHistory.length
     log.info(`Initial Total Length : ${tickerHistoryLength}`)
@@ -293,34 +300,34 @@ const startModelTraining = async (job) => {
 
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Executing selected functions..." })
-    log.info('----> Step 2 : Executing the talib functions')
+    log.alert('----> Step 2 : Executing the talib functions')
     // processing and executing talib functions
     let finalTalibRes = await TFMUtil.processSelectedFunctionsForModelTraining({ selectedFunctions: fTalibExecuteQuery, tickerHistory: tickerHistory })
     TF_Model.eventEmitter.emit('notify', { message: `----> Function execution completed...` })
 
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Finding smallest array to adjust ticker hist and function data..." })
-    log.info('----> Step 3 : Finding smallest array to adjust ticker hist and function data')
+    log.alert('----> Step 3 : Finding smallest array to adjust ticker hist and function data')
     const [tickerHist, finalTalibResult] = await TFMUtil.trimDataBasedOnTalibSmallestLength({ finalTalibResult: finalTalibRes, tickerHistory })
     TF_Model.eventEmitter.emit('notify', { message: `----> Trimmed data based on talib smallest length...` })
 
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Transforming and combining the OHLCV and function data for model training..." })
-    log.info('----> Step 4 : Transforming and combining the data to required format for model training')
+    log.alert('----> Step 4 : Transforming and combining the data to required format for model training')
     const features = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult })
     TF_Model.eventEmitter.emit('notify', { message: `----> Transformed data to required shape...` })
 
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Standardizing the data..." })
-    log.info('----> Step 5 : Standardizing the data')
+    log.alert('----> Step 5 : Standardizing the data')
     let [stdData, label_mean, label_variance] = TFMUtil.standardizeData(model_type, features, to_predict)
     log.info({ label_mean, label_variance })
     TF_Model.eventEmitter.emit('notify', { message: `----> Data standardized...` })
 
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Creating the training data..." })
-    log.info('----> Step 6 : Transformig and creating the training data')
-    const [trainSplit, xTrain, yTrain, xTrainTest, yTrainTest] = await TFMUtil.createTrainingData(
+    log.alert('----> Step 6 : Transforming and creating the training data')
+    const [trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest] = await TFMUtil.createTrainingData(
         {
             model_type,
             stdData,
@@ -332,8 +339,12 @@ const startModelTraining = async (job) => {
     TF_Model.eventEmitter.emit('notify', { message: `----> Training data created...` })
 
 
+    log.alert('----> Step 7 : Getting dates and verifying correctness')
+    const dates = TFMUtil.getDateRangeForTestSet(tickerHist, trainSplit, time_step, look_ahead, yTrainTest, label_mean, label_variance)
+    console.log('Dates length', dates.length)
+
     TF_Model.eventEmitter.emit('notify', { message: "----> Creating the model..." })
-    log.info('----> Step 7 : Creating the model')
+    log.alert('----> Step 8 : Creating the model')
     const input_layer_shape = time_step; // look back date
     const input_layer_neurons = 64;
     const rnn_output_neurons = 16;
@@ -357,42 +368,67 @@ const startModelTraining = async (job) => {
 
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Training the model..." })
-    log.info('----> Step 8 : Training the model')
+    log.alert('----> Step 9 : Training the model')
     const epochs = epochCount;
-    const batchSize = 32;
-    const trained_model_ = await TF_Model.trainModel(model_, model_type, xTrain, yTrain, epochs, batchSize)
+    // const batchSize = 32;
+    const [trained_model_, history] = await TF_Model.trainModel(model_, learning_rate, xTrain, yTrain, epochs, batchSize)
+    // console.log(history)
     TF_Model.eventEmitter.emit('notify', { message: `----> TF Model trained...` })
 
 
-    TF_Model.eventEmitter.emit('notify', { message: "----> Making the predictions on test data..." })
+    log.alert('----> Step 10 : Evaluating the model on test set')
+    TF_Model.eventEmitter.emit('notify', { message: "----> Evaluating the model on test set..." })
+    // @ts-ignore
+    let xHistory = xTrain.slice(-1)
+    // @ts-ignore
+    const evaluationData = [...xHistory, ...xTrainTest, ...lastSets]
+
+    /* let e = e_type[to_predict]
+    const forecastDataSlice = stdData.slice(-time_step).map(row => {
+        let filteredRow = row.filter((_, index) => index !== e);
+        return filteredRow;
+    });
+    const forecastData = [forecastDataSlice] */
+
+    const [score, scores, predictions, lastPrediction] = await TF_Model.evaluateModelOnTestSet(trained_model_, model_id, evaluationData, yTrainTest, dates, label_mean, label_variance)
+    TF_Model.summarizeScores('LSTM', score, scores)
+
+    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model evaluation completed...` })
+
+    /* TF_Model.eventEmitter.emit('notify', { message: "----> Making the predictions on test data..." })
     log.info('----> Step 9 : Making the predictions on test data')
-    const forecastDataSlice = stdData.slice(-time_step)
+    let e = e_type[to_predict]
+    const forecastDataSlice = stdData.slice(-time_step).map(row => {
+        let filteredRow = row.filter((_, index) => index !== e);
+        return filteredRow;
+    });
     const forecastData = [forecastDataSlice]
     let [predictedPrice, forecast] = await TF_Model.makePredictions(trained_model_, xTrainTest, forecastData)
     log.info(`Predicted length : ${predictedPrice.length}, ${predictedPrice[0]}, ${predictedPrice[predictedPrice.length - 1]}`)
-    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions completed...` })
+    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions completed...` }) */
 
 
-    TF_Model.eventEmitter.emit('notify', { message: "----> Combining and finalizing the data for plotting..." })
-    log.info('----> Step 10 : Combining and finalizing the data for plotting')
+    /* TF_Model.eventEmitter.emit('notify', { message: "----> Combining and finalizing the data for plotting..." })
+    log.alert('----> Step 11 : Combining and finalizing the data for plotting')
     await TFMUtil.formatPredictedOutput(
         {
+            dates,
             model_type,
             look_ahead,
             tickerHist,
             time_step,
             trainSplit,
             yTrainTest,
-            predictedPrice,
-            forecast,
+            predictedPrice: predictions,
+            forecast: lastPrediction,
             id: model_id,
             label_mean,
             label_variance
         })
-    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions formatted, sending result...` })
+    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions formatted, sending result...` }) */
 
 
-    log.info('----> Step 11 : Saving the model and weights  and disposing it ')
+    log.alert('----> Step 11 : Saving the model and weights  and disposing it ')
     await TF_Model.saveModel(trained_model_, model_id)
 
 
@@ -477,9 +513,41 @@ const deleteModelFromLocalDirectory = async (model_id) => {
 }
 
 
+function calculateRMSE(actual, predicted) {
+    // Check if the dimensions of actual and predicted arrays match
+    if (
+        actual.length !== predicted.length ||
+        actual[0].length !== predicted[0].length ||
+        actual[0][0].length !== predicted[0][0].length
+    ) {
+        throw new Error("Array dimensions do not match.");
+    }
+
+    // Initialize variables for sum of squared differences and total count
+    let squaredDifferencesSum = 0;
+    let totalCount = 0;
+
+    // Loop through the arrays to calculate the RMSE
+    for (let i = 0; i < actual.length; i++) {
+        for (let j = 0; j < actual[i].length; j++) {
+            for (let k = 0; k < actual[i][j].length; k++) {
+                const diff = actual[i][j][k] - predicted[i][j][k];
+                squaredDifferencesSum += diff * diff;
+                totalCount++;
+            }
+        }
+    }
+
+    // Calculate the mean squared difference and then the RMSE
+    const meanSquaredDifference = squaredDifferencesSum / totalCount;
+    const rmse = Math.sqrt(meanSquaredDifference);
+
+    return rmse;
+}
 
 const generateTestData = async (req, res) => {
-    const { timeStep, lookAhead } = req.body
+    let { timeStep, lookAhead } = req.body
+    lookAhead = lookAhead
     try {
 
         const testArray =
@@ -497,65 +565,135 @@ const generateTestData = async (req, res) => {
             ]
         const trainX = []
         const trainY = []
-        for (let i = timeStep; i <= testArray.length - lookAhead + 1; i++) {
-            trainX.push(testArray.slice(i - timeStep, i))
-            trainY.push(testArray.slice(i - 1, i + lookAhead - 1).map((row) => [row[2]]))
+
+        let simulatedData = [];
+        for (let i = 0; i < 30; i++) {
+            simulatedData.push({
+                openTime: Date.now() + i * 3600000, // hourly timestamps
+                open: Math.random() * 100,
+                high: Math.random() * 100,
+                low: Math.random() * 100,
+                close: Math.random() * 100,
+                volume: Math.random() * 1000
+            });
         }
 
-        let str = ''
-        trainX.forEach((element, index) => {
-            element.forEach((row, ind) => {
-                let rowStr = ''
-                if (ind === element.length - 1) {
-                    rowStr += row.join(', ') + ` - ${trainY[index]}` + '\n' + '\n'
-                } else {
-                    rowStr = row.join(', ') + '\n'
-                }
-                str += rowStr
-            })
-        })
+        let features = simulatedData.map(item => [item.open, item.high, item.low, item.close, item.volume]);
+        console.log(features[features.length - (lookAhead + 1)])
+
+        /* for (let i = 0; i <= testArray.length - timeStep - lookAhead; i++) {
+            // Extracting features for X
+            let x = testArray.slice(i, i + timeStep).map(step => step.slice(0, -1));
+            
+            // Extracting labels for Y
+            let y = [];
+            for (let j = i + timeStep; j < i + timeStep + lookAhead; j++) {
+                y.push([testArray[j][testArray[j].length - 1]]);
+            }
+    
+            trainX.push(x);
+            trainY.push(y);
+        } */
+
+        /* for (let i = timeStep; i <= testArray.length - lookAhead + 1; i++) {
+            trainX.push(testArray.slice(i - timeStep, i))
+            trainY.push(testArray.slice(i, i + lookAhead - 1).map((row) => [row[2]]))
+        } */
 
         // console.log(str)
         /* console.log(trainX)
         console.log(trainY) */
 
-        let tensorX = tf.tensor(trainX)
+        /* let tensorX = tf.tensor(trainX)
         let tensorY = tf.tensor(trainY)
 
         console.log(testArray.length)
-        console.log(testArray.length - timeStep - lookAhead + 2)
+        console.log(testArray.length - timeStep - lookAhead + 1)
         console.log(tensorX.shape)
-        console.log(tensorY.shape)
+        console.log(tensorY.shape) */
 
-        /* const [trainSplit, xTrain, yTrain, xTrainTest, yTrainTest] = await TFMUtil.createTrainingData(
+        const [trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest] = await TFMUtil.createTrainingData(
             {
                 model_type: 'multi_input_single_output_step',
-                stdData: testArray,
+                stdData: features,
                 timeStep: timeStep,
                 lookAhead: lookAhead,
                 e_key: 'low',
                 training_size: 80
             })
 
-        console.log(xTrain)
-        console.log(yTrain)
-        console.log(xTrainTest)
-        console.log(yTrainTest) */
+        /* console.log(xTrain[0])
+        console.log(yTrain[0])
+        console.log(yTrainTest[0]) */
+
+        // @ts-ignore
+        // console.log(xTrainTest[xTrainTest.length - 1])
+        // console.log(features)
+        console.table(features)
+
+        let lastSetStr = ''
+        // @ts-ignore
+        lastSets.forEach((element, index) => {
+            element.forEach((row, ind) => {
+                let rowStr = ''
+                if (ind === element.length - 1) {
+                    rowStr += row.join(', ') + '\n' + '\n'
+                } else {
+                    rowStr = row.join(', ') + '\n'
+                }
+                lastSetStr += rowStr
+            })
+        })
+
+        console.log(lastSetStr)
+
+        let strX = ''
+        // @ts-ignore
+        xTrain.forEach((element, index) => {
+            element.forEach((row, ind) => {
+                let rowStr = ''
+                if (ind === element.length - 1) {
+                    rowStr += row.join(', ') + ` - ${yTrain[index]}` + '\n' + '\n'
+                } else {
+                    rowStr = row.join(', ') + '\n'
+                }
+                strX += rowStr
+            })
+        })
+
+        // console.log(strX)
+
+        let strXT = ''
+        // @ts-ignore
+        xTrainTest.forEach((element, index) => {
+            element.forEach((row, ind) => {
+                let rowStr = ''
+                if (ind === element.length - 1) {
+                    rowStr += row.join(', ') + ` - ${yTrainTest[index]}` + '\n' + '\n'
+                } else {
+                    rowStr = row.join(', ') + '\n'
+                }
+                strXT += rowStr
+            })
+        })
+
+        // console.log(strXT)
+
 
         const act = [
-            [ 0.9313037991523743 ],
-            [ 0.9217190742492676 ],
-            [ 0.9200571179389954 ],
-            [ 0.9195137023925781 ],
-            [ 0.9114740490913391 ]
+            [0.9313037991523743],
+            [0.9217190742492676],
+            [0.9200571179389954],
+            [0.9195137023925781],
+            [0.9114740490913391]
         ]
 
         const pred = [
-            [ 0.7829376459121704 ],
-            [ 0.9296842813491821 ],
-            [ 0.9347333908081055 ],
-            [ 0.920935869216919 ],
-            [ 0.9096674919128418 ]
+            [0.7829376459121704],
+            [0.9296842813491821],
+            [0.9347333908081055],
+            [0.920935869216919],
+            [0.9096674919128418]
         ]
 
         /* const act =[
@@ -575,8 +713,57 @@ const generateTestData = async (req, res) => {
             [2.99]
         ] */
 
-        let act_tensor = tf.tensor(act)
-        let pred_tensor = tf.tensor(pred)
+        const actual = [
+            [
+                [0.9350184202194214],
+                [0.9322802424430847],
+                [0.938884437084198],
+                [0.9322348237037659],
+                [0.957306981086731],
+                [0.95747971534729],
+                [1.0089547634124756]
+            ],
+            [
+                [0.6027020215988159],
+                [0.8523806929588318],
+                [0.9281507134437561],
+                [0.9427933096885681],
+                [0.9405898451805115],
+                [0.9360988736152649],
+                [0.9328845739364624]
+            ]
+        ];
+        const predicted = [
+            [
+                [0.6027020215988159],
+                [0.8523806929588318],
+                [0.9281507134437561],
+                [0.9427933096885681],
+                [0.9405898451805115],
+                [0.9360988736152649],
+                [0.9328845739364624]
+            ],
+            [
+                [0.5892080068588257],
+                [0.8353583812713623],
+                [0.9115362763404846],
+                [0.9267987608909607],
+                [0.9250696301460266],
+                [0.9208111763000488],
+                [0.9176720976829529]
+            ]
+        ]
+
+
+        /* const frmse = calculateRMSE(actual, predicted);
+        console.log("FunctionRMSE:", frmse);
+
+        let act_tensor = tf.tensor(actual)
+        let pred_tensor = tf.tensor(predicted)
+
+
+        console.log(act_tensor.shape)
+        console.log(pred_tensor.shape)
 
         let mse = tf.losses.meanSquaredError(act_tensor, pred_tensor)
 
@@ -586,8 +773,33 @@ const generateTestData = async (req, res) => {
 
         console.log(rmse.arraySync())
 
+        let lstm_cells = [];
+        for (let index = 0; index < 4; index++) {
+            lstm_cells.push(tf.layers.lstmCell({ units: 16 }));
+        } */
 
-        res.status(200).send({ message: 'Test data generated successfully', str })
+        /* const model = tf.sequential();
+        model.add(tf.layers.lstm({ units: 50, activation: 'relu', inputShape: [24, 10] }));
+        model.add(tf.layers.repeatVector({ n: 7 }));
+        model.add(tf.layers.lstm({ units: 50, activation: 'relu', returnSequences: true }));
+        model.add(tf.layers.rnn({
+            cell: lstm_cells,
+            inputShape: [7, 50],
+            returnSequences: true
+        }));
+        model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [7, 50] }));
+
+
+        model.compile({
+            optimizer: tf.train.adam(),
+            loss: 'meanSquaredError',
+            metrics: ['mse', 'mae'],
+        });
+
+        console.log(model.summary()) */
+
+
+        res.status(200).send({ message: 'Test data generated successfully', strX })
 
     } catch (err) {
         log.error(err.stack)

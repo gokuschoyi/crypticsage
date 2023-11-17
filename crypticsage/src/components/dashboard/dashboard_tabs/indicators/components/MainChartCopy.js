@@ -970,11 +970,36 @@ const MainChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [renderChart]);
 
-    // web socket warning becaue of react strict mode
+
+    const useBinanceWebSocket = (binanceWS_URL) => {
+        const websocketRef = useRef(null);
+        const isInitializedRef = useRef(false);
+    
+        useEffect(() => {
+            if (!isInitializedRef.current) {
+                console.log('Opening Binance WebSocket connection...');
+                websocketRef.current = new WebSocket(binanceWS_URL);
+                isInitializedRef.current = true;
+            }
+    
+            return () => {
+                if (websocketRef.current && websocketRef.current.readyState === 1) {
+                    console.log('Closing Binance WebSocket connection...');
+                    websocketRef.current.close();
+                }
+            };
+        }, [binanceWS_URL]);
+    
+        return websocketRef;
+    };
+
+    // web socket for live updates
     const previousValue = useRef({ open: '', high: '', low: '', close: '', vol: '' })
+    const lowerCaseSymbol = symbol.toLowerCase()
+    const webSocketConnectionURI = `wss://stream.binance.com:9443/ws/${lowerCaseSymbol}@kline_${selectedTokenPeriod}`
+    const binance_websocket = useBinanceWebSocket(webSocketConnectionURI)
+
     useEffect(() => {
-        const lowerCaseSymbol = symbol.toLowerCase()
-        const webSocketConnectionURI = `wss://stream.binance.com:9443/ws/${lowerCaseSymbol}@kline_${selectedTokenPeriod}`
         let ohlcvLegend = document.getElementsByClassName('ohlcv-box')[0]
 
         // Function to check and apply the pulsing class for new data
@@ -991,10 +1016,7 @@ const MainChart = (props) => {
         }
 
         const createWebSocket = () => {
-            const ws = new WebSocket(webSocketConnectionURI);
-            wsRef.current = ws;
-
-            ws.onmessage = (e) => {
+            binance_websocket.current.onmessage = (e) => {
                 const message = JSON.parse(e.data);
                 const tickerPayload = {
                     openTime: message.k.t,
@@ -1099,27 +1121,16 @@ const MainChart = (props) => {
                 }
             };
 
-            ws.onerror = (e) => {
+            binance_websocket.current.onerror = (e) => {
                 // console.log(e);
             };
         };
 
         if (candleStickSeriesRef.current) {
-            // console.log('Connecting to binance WS for ticker data');
-            // if (wsRef.current !== null) {
-            //     // console.log('Closing old WS connection from UE');
-            //     wsRef.current.close(); // Close the existing WebSocket connection
-            // }
             createWebSocket();
         }
-
-        return () => {
-            if (wsRef.current) {
-                // console.log('UE : RETURN , Closing WS connection')
-                wsRef.current.close(); // Close the WebSocket connection on unmount
-            }
-        }
-    }, [selectedTokenPeriod, symbol, token, dispatch, previousValue])
+        
+    }, [selectedTokenPeriod, symbol, token, dispatch, previousValue, binance_websocket])
 
     // handles the show/hide chart button
     const handleToggleShowHideChart = (param) => {
