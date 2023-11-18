@@ -15,8 +15,8 @@ const syslogColors = {
     warn: "yellow",
     error: "bold red",
     crit: "inverse yellow",
-    alert: "bold inverse red",
-    emerg: "bold inverse magenta",
+    alert: "bold red",
+    emerg: "bold magenta",
 };
 
 const LOG_LEVELS = {

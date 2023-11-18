@@ -1,11 +1,11 @@
 import { useRef } from 'react';
-import { Success } from '../../../global/CustomToasts'
+import { Success, Error } from '../../../global/CustomToasts'
 import {
     setProgressMessage,
     setEpochNo,
     setEpochResults,
     setPredictedValues,
-    setOverallRMSE,
+    setPredictionScores,
     setStartWebSocket
 } from '../modules/CryptoModuleSlice'
 
@@ -28,7 +28,7 @@ function addMessage(notifyMessageBoxRef, messageText) {
 }
 
 
-const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, setBatchResult, setTrainingStartedFlag, dispatch) => {
+const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, evaluating, setBatchResult, setEvaluating, setTrainingStartedFlag, dispatch) => {
     const webSocket = useRef(null);
     const ACTIONS = {
         NOTIFY: 'notify',
@@ -36,8 +36,10 @@ const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, setBatchRe
         EPOCH_END: 'epochEnd',
         BATCH_END: 'batchEnd',
         TRAINING_END: 'trainingEnd',
+        EVALUATING: 'evaluating',
+        EVAL_COMPLETE: 'eval_complete',
         PREDICTION_COMPLETED: 'prediction_completed',
-        PREDICTION_RMSE: 'prediction_rmse'
+        ERROR: 'error'
     };
 
     const createModelProgressWebSocket = () => {
@@ -56,16 +58,14 @@ const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, setBatchRe
             webSocket.current.onmessage = (e) => {
                 // console.log('WS: MESSAGE RECEIVED');
                 const data = JSON.parse(e.data);
-                let batchEndBox
+                let batchEndBox, evalBox
 
                 switch (data.action) {
                     case ACTIONS.NOTIFY:
                         addMessage(notifyMessageBoxRef, data.message.message);
-                        // dispatch(setProgressMessage(data.message))
                         break;
                     case ACTIONS.EPOCH_BEGIN:
                         setBatchResult(true)
-                        // console.log(batchEndBox)
                         let epoch = data.epoch
                         dispatch(setEpochNo(epoch))
                         break;
@@ -77,24 +77,38 @@ const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, setBatchRe
                         if (!batchResult) { setBatchResult(true) }
                         batchEndBox = document.querySelector('.batch-end')
                         if (batchEndBox) {
-                            batchEndBox.querySelector('#batch-no').textContent = `Batch : ${data.log.batch}`;
+                            batchEndBox.querySelector('#batch-no').textContent = `Batch : ${data.log.batch}/${data.log.totalNoOfBatch}`;
                             batchEndBox.querySelector('#loss').textContent = `Loss : ${data.log.loss}`;
                             batchEndBox.querySelector('#mse').textContent = `MSE : ${data.log.mse}`;
                             batchEndBox.querySelector('#mae').textContent = `MAE : ${data.log.mae}`;
                         }
-                        // setBatchResult((prev) => { return { ...prev, ...data.log } })
                         break;
                     case ACTIONS.TRAINING_END:
-                        // console.log('Training completed')
-                        setTrainingStartedFlag(false)
+                        // setTrainingStartedFlag(false)
+                        break;
+                    case ACTIONS.EVALUATING:
+                        setEvaluating(true)
+                        evalBox = document.querySelector('.eval-end')
+                        if (evalBox) {
+                            evalBox.querySelector('#eval-no').textContent = `Evaluating : ${data.log.batch}/${data.log.totalNoOfBatch}`
+                        }
+                        // console.log('Evaluating', data.log.batch, data.log.totalNoOfBatch)
+                        break;
+                    case ACTIONS.EVAL_COMPLETE:
+                        setEvaluating((prev) => !prev)
+                        dispatch(setPredictionScores(data.scores))
                         break;
                     case ACTIONS.PREDICTION_COMPLETED:
+                        setEvaluating(false)
+                        setTrainingStartedFlag(false)
                         dispatch(setPredictedValues(data.predictions))
                         dispatch(setStartWebSocket(false))
                         Success('Training completed successfully')
                         break;
-                    case ACTIONS.PREDICTION_RMSE:
-                        dispatch(setOverallRMSE(data.overAllRMSE))
+                    case ACTIONS.ERROR:
+                        dispatch(setStartWebSocket(false))
+                        setTrainingStartedFlag(false)
+                        Error(data.message)
                         break;
                     default:
                         break;

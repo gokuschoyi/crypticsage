@@ -4,7 +4,28 @@ const EventEmitter = require('events');
 const tf = require('@tensorflow/tfjs-node');
 const cliProgress = require('cli-progress');
 const RedisUtil = require('./redis_util')
+const config = require('../config')
 const { sqrt, square } = require('@tensorflow/tfjs-core');
+
+/* // Evaluate the model on the test data using `evaluate`
+console.log('Evaluate on test data');
+const testResult = model.evaluate(xTest, yTest, { batch_size: 128 });
+testResult.print(); */
+
+function displayDataInTable(data, name) {
+    // Convert each sub-array into an object with named properties
+    const objectifiedData = data.map(subArray => {
+        const obj = {};
+        subArray.forEach((value, index) => {
+            obj['col' + (index + 1)] = value;
+        });
+        return obj;
+    });
+
+    // Display the data using console.table
+    console.log(name)
+    console.table(objectifiedData);
+}
 
 /**
  * Creates a model with the given parameters
@@ -90,9 +111,13 @@ const epochEndCallback = (epoch, log) => {
     eventEmitter.emit('epochEnd', epoch, log)
 };
 
-const batchEndCallback = (batch, log) => {
+const batchEndCallback = (batch, log, totalNoOfBatch) => {
     // console.log(batch)
-    eventEmitter.emit('batchEnd', batch, log)
+    let newLog = {
+        ...log,
+        totalNoOfBatch
+    }
+    eventEmitter.emit('batchEnd', batch, newLog)
 }
 
 const onTrainEndCallback = () => {
@@ -108,10 +133,13 @@ const earlyStopping = tf.callbacks.earlyStopping({
 });
 
 const trainModel = async (model, learning_rate, xTrain, yTrain, epochs, batch_size) => {
+    const totalNoOfBatch = Math.round(xTrain.length / batch_size)
     const xTrainTensor = tf.tensor(xTrain)
     const yTrainTensor = tf.tensor(yTrain)
 
-    log.info(`xTrain tensor shape: ${xTrainTensor.shape}, yTrain tensor shape : ${yTrainTensor.shape}`)
+    if (config.debug_flag === 'true') {
+        log.info(`xTrain tensor shape: ${xTrainTensor.shape}, yTrain tensor shape : ${yTrainTensor.shape}`)
+    }
 
     model.compile({
         optimizer: tf.train.adam(),
@@ -136,7 +164,7 @@ const trainModel = async (model, learning_rate, xTrain, yTrain, epochs, batch_si
                     epochEndCallback(epoch, log);
                 },
                 onBatchEnd: async (batch, log) => {
-                    batchEndCallback(batch, log)
+                    batchEndCallback(batch, log, totalNoOfBatch)
                 },
                 onTrainEnd: async () => {
                     onTrainEndCallback()
@@ -148,26 +176,6 @@ const trainModel = async (model, learning_rate, xTrain, yTrain, epochs, batch_si
     return [model, history]
 }
 
-/* // Evaluate the model on the test data using `evaluate`
-console.log('Evaluate on test data');
-const testResult = model.evaluate(xTest, yTest, { batch_size: 128 });
-testResult.print(); */
-
-function displayDataInTable(data, name) {
-    // Convert each sub-array into an object with named properties
-    const objectifiedData = data.map(subArray => {
-        const obj = {};
-        subArray.forEach((value, index) => {
-            obj['col' + (index + 1)] = value;
-        });
-        return obj;
-    });
-
-    // Display the data using console.table
-    console.log(name)
-    console.table(objectifiedData);
-}
-
 const forecast = async (model, inputHistory) => {
     const inputHistoryTensor = tf.tensor(inputHistory)
     // console.log('Forecast Shape : ', inputHistoryTensor.shape)
@@ -176,7 +184,6 @@ const forecast = async (model, inputHistory) => {
 }
 
 const evaluateForecast = (actual, predicted) => {
-    console.log(actual.length, predicted.length)
     // console.log(actual[0], predicted[0])
     let scores = [];
     // Calculate an RMSE score for each day
@@ -194,18 +201,21 @@ const evaluateForecast = (actual, predicted) => {
 }
 
 const evaluateModelOnTestSet = async (trained_model_, model_id, xTrainTest, yTrainTest, dates, label_mean, label_variance) => {
-    log.notice(`xTrain test length : ${xTrainTest.length}, yTrain test length : ${yTrainTest.length}`)
-    // displayDataInTable(xTrainTest[0], 'xTrainTest first element')
-    // displayDataInTable(xTrainTest[1], 'xTrainTest second element')
-
-    displayDataInTable(xTrainTest[xTrainTest.length - 1], 'xTrainTest last element')
     const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.legacy);
     let history = [xTrainTest[0]]
     let predictions = []
     let lastPrediction = []
+    const updateFreq = 20 // Number of predictions to make before sending an update to the client
     try {
         bar1.start(xTrainTest.length - 1, 0);
         for (let i = 1; i < xTrainTest.length - 1; i++) {
+            if (i % updateFreq === 0) {
+                let log = {
+                    batch: i,
+                    totalNoOfBatch: xTrainTest.length - 1
+                }
+                eventEmitter.emit('evaluating', log)
+            }
             bar1.update(i + 1);
             let inputHist = history.slice(-1)
             let historySequence = await forecast(trained_model_, inputHist)
@@ -214,14 +224,19 @@ const evaluateModelOnTestSet = async (trained_model_, model_id, xTrainTest, yTra
         }
         bar1.stop();
         const lastInputHist = xTrainTest.slice(-1)
-        // console.log(lastInputHist)
-        // const forecastTensor = tf.tensor(lastInputHist)
-        // console.log('Forecast tensor shape : ', forecastTensor.shape)
 
         lastPrediction = await forecast(trained_model_, lastInputHist)
 
         let [score, scores] = evaluateForecast(yTrainTest, predictions)
-        console.log('RMSE: ', score, predictions.length)
+        eventEmitter.emit('eval_complete', { rmse: score, scores: scores })
+
+        if (config.debug_flag === 'true') {
+            log.notice(`xTrain test length : ${xTrainTest.length}, yTrain test length : ${yTrainTest.length}`)
+            displayDataInTable(xTrainTest[xTrainTest.length - 1], 'xTrainTest last element')
+            console.log(yTrainTest.length, predictions.length)
+            console.log('RMSE: ', score, predictions.length)
+            summarizeScores('LSTM', score, scores)
+        }
 
         let finalData = {
             dates: dates,
@@ -233,15 +248,9 @@ const evaluateModelOnTestSet = async (trained_model_, model_id, xTrainTest, yTra
 
         RedisUtil.saveTestPredictions(model_id, finalData)
         eventEmitter.emit('prediction_completed', model_id)
-
-        return [score, scores, predictions, lastPrediction]
     } catch (error) {
         console.log(error)
     }
-
-    /* console.log(predictions.length, yTrainTest.length)
-    console.log(predictions[0], yTrainTest[0]) */
-    return [0, [], [], []]
 }
 
 const summarizeScores = (name, score, scores) => {
@@ -264,7 +273,6 @@ const makePredictions = async (model, xTest, forecastData) => {
 
 const saveModel = async (model, model_id) => {
     await model.save(`file://./models/${model_id}`).then((res) => {
-        console.log('Model saved')
         model.dispose()
     });
 }

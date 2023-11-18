@@ -233,6 +233,7 @@ const procssModelTraining = async (req, res) => {
             const redisCommand = `hgetall bull:${model_training_queue}:${job.id}`
             log.error(`Update task failed for : ", ${job.name}, " with id : ", ${job.id}`)
             log.warn(`Check Redis for more info : ", ${redisCommand}`)
+            TF_Model.eventEmitter.emit('error', { message: "Error in training model." })
         }
 
         model_worker.on('completed', modelTrainingCompletedListener)
@@ -294,14 +295,11 @@ const startModelTraining = async (job) => {
     log.alert('----> Step 1 : Fetching the ticker data from db') // oldest first 
     const tickerHistory = await fetchEntireHistDataFromDb(asset_type, ticker_name, period)
     const tickerHistoryLength = tickerHistory.length
-    log.info(`Initial Total Length : ${tickerHistoryLength}`)
-    console.log('Latest Data : ', tickerHistory[tickerHistoryLength - 1])
     TF_Model.eventEmitter.emit('notify', { message: `----> Fetched ${tickerHistoryLength} tickers from db...`, latestData: tickerHistory[tickerHistoryLength - 1] })
 
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Executing selected functions..." })
     log.alert('----> Step 2 : Executing the talib functions')
-    // processing and executing talib functions
     let finalTalibRes = await TFMUtil.processSelectedFunctionsForModelTraining({ selectedFunctions: fTalibExecuteQuery, tickerHistory: tickerHistory })
     TF_Model.eventEmitter.emit('notify', { message: `----> Function execution completed...` })
 
@@ -321,7 +319,6 @@ const startModelTraining = async (job) => {
     TF_Model.eventEmitter.emit('notify', { message: "----> Standardizing the data..." })
     log.alert('----> Step 5 : Standardizing the data')
     let [stdData, label_mean, label_variance] = TFMUtil.standardizeData(model_type, features, to_predict)
-    log.info({ label_mean, label_variance })
     TF_Model.eventEmitter.emit('notify', { message: `----> Data standardized...` })
 
 
@@ -339,9 +336,10 @@ const startModelTraining = async (job) => {
     TF_Model.eventEmitter.emit('notify', { message: `----> Training data created...` })
 
 
+    TF_Model.eventEmitter.emit('notify', { message: "----> Generating dates for test set data..." })
     log.alert('----> Step 7 : Getting dates and verifying correctness')
     const dates = TFMUtil.getDateRangeForTestSet(tickerHist, trainSplit, time_step, look_ahead, yTrainTest, label_mean, label_variance)
-    console.log('Dates length', dates.length)
+
 
     TF_Model.eventEmitter.emit('notify', { message: "----> Creating the model..." })
     log.alert('----> Step 8 : Creating the model')
@@ -370,7 +368,6 @@ const startModelTraining = async (job) => {
     TF_Model.eventEmitter.emit('notify', { message: "----> Training the model..." })
     log.alert('----> Step 9 : Training the model')
     const epochs = epochCount;
-    // const batchSize = 32;
     const [trained_model_, history] = await TF_Model.trainModel(model_, learning_rate, xTrain, yTrain, epochs, batchSize)
     // console.log(history)
     TF_Model.eventEmitter.emit('notify', { message: `----> TF Model trained...` })
@@ -380,60 +377,13 @@ const startModelTraining = async (job) => {
     TF_Model.eventEmitter.emit('notify', { message: "----> Evaluating the model on test set..." })
     // @ts-ignore
     let xHistory = xTrain.slice(-1)
-    // @ts-ignore
     const evaluationData = [...xHistory, ...xTrainTest, ...lastSets]
-
-    /* let e = e_type[to_predict]
-    const forecastDataSlice = stdData.slice(-time_step).map(row => {
-        let filteredRow = row.filter((_, index) => index !== e);
-        return filteredRow;
-    });
-    const forecastData = [forecastDataSlice] */
-
-    const [score, scores, predictions, lastPrediction] = await TF_Model.evaluateModelOnTestSet(trained_model_, model_id, evaluationData, yTrainTest, dates, label_mean, label_variance)
-    TF_Model.summarizeScores('LSTM', score, scores)
-
+    await TF_Model.evaluateModelOnTestSet(trained_model_, model_id, evaluationData, yTrainTest, dates, label_mean, label_variance)
     TF_Model.eventEmitter.emit('notify', { message: `----> TF Model evaluation completed...` })
-
-    /* TF_Model.eventEmitter.emit('notify', { message: "----> Making the predictions on test data..." })
-    log.info('----> Step 9 : Making the predictions on test data')
-    let e = e_type[to_predict]
-    const forecastDataSlice = stdData.slice(-time_step).map(row => {
-        let filteredRow = row.filter((_, index) => index !== e);
-        return filteredRow;
-    });
-    const forecastData = [forecastDataSlice]
-    let [predictedPrice, forecast] = await TF_Model.makePredictions(trained_model_, xTrainTest, forecastData)
-    log.info(`Predicted length : ${predictedPrice.length}, ${predictedPrice[0]}, ${predictedPrice[predictedPrice.length - 1]}`)
-    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions completed...` }) */
-
-
-    /* TF_Model.eventEmitter.emit('notify', { message: "----> Combining and finalizing the data for plotting..." })
-    log.alert('----> Step 11 : Combining and finalizing the data for plotting')
-    await TFMUtil.formatPredictedOutput(
-        {
-            dates,
-            model_type,
-            look_ahead,
-            tickerHist,
-            time_step,
-            trainSplit,
-            yTrainTest,
-            predictedPrice: predictions,
-            forecast: lastPrediction,
-            id: model_id,
-            label_mean,
-            label_variance
-        })
-    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model predictions formatted, sending result...` }) */
 
 
     log.alert('----> Step 11 : Saving the model and weights  and disposing it ')
     await TF_Model.saveModel(trained_model_, model_id)
-
-
-    /* log.info('----> Step 12 : Disposing the model')
-    TF_Model.disposeModel(model_) */
 
     return 'Model Training Completed'
 }

@@ -49,9 +49,21 @@ const onPredictionCompleted = async (ws, id) => {
     }
 };
 
-const onRMSEComplete = async (ws, overAllRMSE) => {
+const onEvaluation = async (ws, log) => {
     if (ws) {
-        ws.send(JSON.stringify({ action: 'prediction_rmse', overAllRMSE: overAllRMSE }));
+        ws.send(JSON.stringify({ action: 'evaluating', log }));
+    }
+}
+
+const onEvaluationCompletition = async (ws, scores) => {
+    if (ws) {
+        ws.send(JSON.stringify({ action: 'eval_complete', scores: scores }));
+    }
+}
+
+const handleTrainingError = (ws, err) => {
+    if (ws) {
+        ws.send(JSON.stringify({ action: 'error', message: err.message }));
     }
 
 }
@@ -62,11 +74,11 @@ wsServer.on('connection', function connection(ws, req) {
     // @ts-ignore
     const params = new URLSearchParams(req.url.replace('/?', ''));
     let user_id = params.get('user_id')
-    log.info(`Connection received and connected with : ${user_id}`)
+    log.emerg(`Connection received and connected with : ${user_id}`)
 
     const existingConnection = userConnections.get(user_id);
     if (existingConnection && existingConnection !== ws) {
-        log.info('Existing user connection found. Closing it.')
+        log.emerg('Existing user connection found. Closing it.')
         existingConnection.close()
     }
 
@@ -75,7 +87,7 @@ wsServer.on('connection', function connection(ws, req) {
     ws.on('message', async function incoming(message) {
         // @ts-ignore
         const data = JSON.parse(message);
-        log.info(`Received from client : ${JSON.stringify(data)}`);
+        log.emerg(`Received from client : ${JSON.stringify(data)}`);
     });
 
     TF_Model.eventEmitter.on('notify', (message) => onNotify(ws, message));
@@ -83,12 +95,14 @@ wsServer.on('connection', function connection(ws, req) {
     TF_Model.eventEmitter.on('epochEnd', (epoch, log) => onEpochEnd(ws, epoch, log));
     TF_Model.eventEmitter.on('batchEnd', (batch, log) => onBatchEnd(ws, batch, log));
     TF_Model.eventEmitter.on('trainingEnd', () => onTrainingEnd(ws));
+    TF_Model.eventEmitter.on('evaluating', (log) => onEvaluation(ws, log));
+    TF_Model.eventEmitter.once('eval_complete', (scores) => onEvaluationCompletition(ws, scores))
     TF_Model.eventEmitter.once('prediction_completed', async (id) => onPredictionCompleted(ws, id));
-    TF_Model.eventEmitter.once('prediction_rmse', (overAllRMSE) => onRMSEComplete(ws, overAllRMSE))
+    TF_Model.eventEmitter.on('error', (err) => handleTrainingError(ws, err));
 
     ws.on('close', function close() {
         // TF_Model.eventEmitter.removeAllListeners();
-        log.info('Client disconnected');
+        log.emerg('Client disconnected');
     });
 });
 

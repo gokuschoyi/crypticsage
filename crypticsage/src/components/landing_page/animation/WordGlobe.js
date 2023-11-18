@@ -5,7 +5,30 @@ import { Text, OrbitControls } from '@react-three/drei'
 // import randomWord from 'random-words';
 // import { useControls } from 'leva'
 
-const wordList = ["dog", "banana", "computer", "coffee", "book", "ocean", "train", "tree", "desk", "mouse", "sky", "mountain", "guitar", "stadium", "telephone", "bicycle", "cloud", "sunrise", "flower", "rainbow", "apple", "car", "house", "chair", "table", "pen", "notebook", "phone", "television", "computer", "keyboard", "mouse", "monitor", "printer", "camera", "guitar", "piano", "drums", "violin", "trumpet", "saxophone", "clarinet", "flute", "garden", "park", "beach", "pool", "library", "school", "university", "restaurant", "cafe", "bakery", "grocery", "supermarket", "mall", "store", "market", "factory", "farm", "zoo", "aquarium", "museum", "theater", "cinema", "stadium"];
+import G_Data from '../../dashboard/dashboard_tabs/glossary/GlossaryData'
+
+function generateWord(g_data) {
+    const wordList = []
+    // eslint-disable-next-line no-unused-vars
+    for (const [key, value] of Object.entries(g_data)) {
+        wordList.push(...value)
+    }
+
+    const randomWordsList = new Set()
+    const totalWords = wordList.length
+    const maxWords = Math.min(70, totalWords)
+
+    while (randomWordsList.size < maxWords) {
+        const randomIndex = Math.floor(Math.random() * totalWords)
+        const randomWord = wordList[randomIndex]
+        randomWordsList.add(randomWord)
+    }
+
+    const rWLArray = Array.from(randomWordsList)
+
+    const words = rWLArray.map((word) => word.word)
+    return [rWLArray, words]
+}
 
 function selectWords(words) {
     if (words.length === 0) {
@@ -17,11 +40,10 @@ function selectWords(words) {
     return selectedWord;
 }
 
-console.log(selectWords(wordList))
-
 function Word({ children, setSelectedWord, handleOpenWordMeaning, ...props }) {
+    // console.log('FUNC : Word')
     const color = new THREE.Color()
-    const fontProps = { font: '/MontserratBlack-3zOvZ.ttf', fontSize: 2, letterSpacing: 0.05, lineHeight: 1, 'material-toneMapped': false }
+    const fontProps = { fontSize: 1.5, letterSpacing: 0.05, lineHeight: 1, 'material-toneMapped': false }
     const ref = useRef()
     const [hovered, setHovered] = useState(false)
     const over = (e) => {
@@ -61,7 +83,8 @@ function Word({ children, setSelectedWord, handleOpenWordMeaning, ...props }) {
 }
 
 function Cloud(props) {
-    const { count, radius, setSelectedWord, handleOpenWordMeaning } = props
+    // console.log('FUNC : Cloud')
+    const { words: wds, count, radius, setSelectedWord, handleOpenWordMeaning } = props
     const tempBuffer = useRef([]);
 
 
@@ -71,17 +94,24 @@ function Cloud(props) {
         const thetaSpan = (Math.PI * 2) / count
         for (let i = 1; i < count + 1; i++)
             for (let j = 0; j < count; j++)
-                tempBuffer.current.push([new THREE.Vector3().setFromSpherical(spherical.set(radius, phiSpan * i, thetaSpan * j)), selectWords(wordList)])
+                tempBuffer.current.push([new THREE.Vector3().setFromSpherical(spherical.set(radius, phiSpan * i, thetaSpan * j)), selectWords(wds)])
         // console.log(spherical)
         return tempBuffer.current;
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const words = useMemo(() => generatePosition({ count, radius }), [count, radius])
     // console.log(words.map(([pos, word], index) => <Word key={index} position={pos} children={word} />))
     return words.map(([pos, word], index) => <Word key={index} position={pos} children={word} setSelectedWord={setSelectedWord} handleOpenWordMeaning={handleOpenWordMeaning} />)
 }
 
 function WordlGlobeMesh(props) {
+    // console.log('FUNC : WordlGlobeMesh')
+    const { words, setSelectedWord, handleOpenWordMeaning } = props
+    const CloudRef = useMemo(() => {
+        return <Cloud words={words} count={7} radius={24} setSelectedWord={setSelectedWord} handleOpenWordMeaning={handleOpenWordMeaning} />
+    }, [setSelectedWord, handleOpenWordMeaning, words])
+
     /* const options = useMemo(() => {
         return {
             x: { value: 0, min: 0, max: Math.PI * 2, step: 0.01 },
@@ -92,9 +122,6 @@ function WordlGlobeMesh(props) {
         }
     }, []) */
     // const pA = useControls('Points', options)
-    const CloudRef = useMemo(() => {
-        return <Cloud count={7} radius={20} setSelectedWord={props.setSelectedWord} handleOpenWordMeaning={props.handleOpenWordMeaning} />
-    }, [])
     // console.log(<Cloud count={7} radius={20} />)
     // console.log("______________________________")
     // console.log(CloudRef)
@@ -120,11 +147,24 @@ function WordlGlobeMesh(props) {
 }
 
 export default function WordCloud(props) {
+    // console.log('FUNC : WordCloud')
+    const { setSelectedWord, handleOpenWordMeaning, setWordList } = props
+    const [generatedWords, setGeneratedWords] = useState(null)
+
+    useEffect(() => {
+        if (!generatedWords) {
+            const [randomWordsList, words] = generateWord(G_Data)
+            setWordList(randomWordsList)
+            setGeneratedWords(words)
+            // console.log(randomWordsList, words)
+        }
+    }, [generatedWords, setGeneratedWords, setWordList])
+
     return (
-        <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 35], fov: 90 }}>
+        <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 38], fov: 90 }}>
             <ambientLight intensity={0.5} />
             <spotLight position={[0, 0, 50]} angle={0.3} penumbra={1} intensity={2} castShadow />
-            <WordlGlobeMesh setSelectedWord={props.setSelectedWord} handleOpenWordMeaning={props.handleOpenWordMeaning} />
+            {generatedWords && <WordlGlobeMesh words={generatedWords} setSelectedWord={setSelectedWord} handleOpenWordMeaning={handleOpenWordMeaning} />}
         </Canvas>
     )
 }

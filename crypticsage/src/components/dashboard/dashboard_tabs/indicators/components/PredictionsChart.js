@@ -4,7 +4,7 @@ import { createChart } from 'lightweight-charts';
 import { useSelector, useDispatch } from 'react-redux';
 import { setBarsFromToPredictions, setStandardizedAndScaledPredictions } from '../modules/CryptoModuleSlice'
 
-const calculateMetrics = (data, thresholdLower = 0.05, thresholdUpper = 0.07) => {
+const calculateMetrics = (data, thresholdLower = 0.01, thresholdUpper = 0.02) => {
     let TP = 0;
     let FP = 0;
     let TN = 0;
@@ -31,7 +31,16 @@ const calculateMetrics = (data, thresholdLower = 0.05, thresholdUpper = 0.07) =>
     const recall = TP / (TP + FN); // how many of the actual values are predicted correctly. Higher the value better the model
     const f1 = (2 * precision * recall) / (precision + recall); // harmonic mean of precision and recall. Higher the value better the model
 
-    return { TP, FP, TN, FN, accuracy, precision, recall, f1 };
+    return {
+        TP,
+        FP,
+        TN,
+        FN,
+        accuracy: accuracy.toFixed(4),
+        precision: precision.toFixed(4),
+        recall: recall.toFixed(4),
+        f1: f1.toFixed(4)
+    };
 }
 
 function calculateMSE(actual, predicted) {
@@ -137,11 +146,11 @@ const PredictionsChart = (props) => {
                         predicted: value[predIndex][0]
                     })
                 })
-                
+
                 const newLastDate = forecastResult[forecastResult.length - 1].open * 1000
                 for (let i = predictionLookAhead; i <= chartData.forecast.length; i++) {
                     forecastResult.push({
-                        openTime: new Date(newLastDate + (tickerPeriodInMilliSecond * (i-1))).toLocaleString(),
+                        openTime: new Date(newLastDate + (tickerPeriodInMilliSecond * (i - 1))).toLocaleString(),
                         open: (newLastDate + (tickerPeriodInMilliSecond * (i - 1))) / 1000,
                         actual: null,
                         predicted: chartData.forecast[i - 1][0]
@@ -245,7 +254,7 @@ const PredictionsChart = (props) => {
                                     color: 'transparent'
                                 }
                             } else {
-                                if (index < predictedValueRedux.length - (lookAhead+1)) {
+                                if (index < predictedValueRedux.length - (lookAhead + 1)) {
                                     return {
                                         time: prediction.open,
                                         value: prediction.predicted,

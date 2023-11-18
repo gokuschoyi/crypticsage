@@ -41,7 +41,9 @@ const Banner = () => {
         navigate('auth');
     }
 
+    const [wordList, setWordList] = React.useState([])
     const [selectedWord, setSelectedWord] = React.useState('')
+    const [meaning, setMeaning] = React.useState('')
     const [open, setOpen] = React.useState(false);
     const handleOpenWordMeaning = () => {
         setOpen(true)
@@ -50,12 +52,19 @@ const Banner = () => {
         setOpen((prev) => !prev)
     }
 
+    useEffect(() => {
+        const meaning = wordList.find((word) => word.word === selectedWord)
+        if (meaning) {
+            setMeaning(meaning.definition)
+        }
+    }, [selectedWord, wordList])
+
     return (
         <Box className="banner-container" sx={{ backgroundColor: `#00000080` }} id='home'>
             <WordMeaningDialog
                 open={open}
-                heading="Word Meaning"
-                wordMeaning={selectedWord}
+                heading={selectedWord}
+                wordMeaning={meaning}
                 handleCloseWordMeaning={handleCloseWordMeaning}
             />
             <Grid
@@ -97,6 +106,7 @@ const Banner = () => {
                         <WordGlobe
                             setSelectedWord={setSelectedWord}
                             handleOpenWordMeaning={handleOpenWordMeaning}
+                            setWordList={setWordList}
                         />
                     </Box>
 

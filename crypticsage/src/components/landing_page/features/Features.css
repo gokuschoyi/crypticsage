@@ -30,7 +30,8 @@
 .features-image-container {
   display: flex !important;
   justify-content: center;
-  height: 350px;
+  align-items: flex-start;
+  height: 370px;
 }
 
 .features-image-container img {

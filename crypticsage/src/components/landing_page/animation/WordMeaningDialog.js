@@ -31,16 +31,16 @@ const WordMeaningDialog = (props) => {
             maxWidth='sm'
             aria-describedby="alert-dialog-slide-description"
         >
-            <DialogTitle sx={{ color: `${theme.palette.secondary.main}`, textAlign: 'center' }}>{heading}</DialogTitle>
+            <DialogTitle sx={{ color: `${theme.palette.secondary.main}`, textAlign: 'start' }}>{heading}</DialogTitle>
             <DialogContent>
-                <Box sx={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50px' }}>
+                <Box sx={{  display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50px' }}>
                     <Typography varient='h5' textAlign='start'>
                         {wordMeaning}
                     </Typography>
                 </Box>
             </DialogContent>
             <DialogActions sx={{ paddingRight: '25px' }}>
-                <Button sx={buttonStyle} onClick={handleCloseWordMeaning}>CLOSE</Button>
+                <Button size='small' sx={buttonStyle} onClick={handleCloseWordMeaning}>CLOSE</Button>
             </DialogActions>
         </Dialog>
     )

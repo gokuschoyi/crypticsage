@@ -1730,7 +1730,9 @@ const fetchEntireHistDataFromDb = async (type, ticker_name, period) => {
         const keysToIncude = { _id: 0, openTime: 1, open: 1, high: 1, low: 1, close: 1, volume: 1 }
 
         const t = createTimer(`Fetching entire ticker data for ${ticker_name}, ${period}`)
-        t.startTimer()
+        if (config.debug_flag === 'true') {
+            t.startTimer()
+        }
         // @ts-ignore
         const tokenData = await collection.aggregate([
             {
@@ -1740,7 +1742,11 @@ const fetchEntireHistDataFromDb = async (type, ticker_name, period) => {
                 $sort: sortQuery,
             }
         ]).toArray();
-        t.stopTimer(__filename.slice(__dirname.length + 1))
+        if (config.debug_flag === 'true') {
+            log.info(`Initial Total Length : ${tokenData.length}`)
+            console.log('Latest Data : ', tokenData[tokenData.length - 1])
+            t.stopTimer(__filename.slice(__dirname.length + 1))
+        }
         return tokenData
     } catch (error) {
         log.error(error.stack)

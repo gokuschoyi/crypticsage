@@ -1,6 +1,6 @@
 const log = require('../middleware/logger/Logger').create(__filename.slice(__dirname.length + 1))
 const { redisClient } = require('../services/redis')
-
+const config = require('../config')
 const { fetchTickerHistDataBasedOnCount } = require('../services/mongoDBServices')
 
 
@@ -84,7 +84,9 @@ const getTestPredictions = (id) => {
                 log.error(error.stack);
                 reject(error)
             } else if (result) {
-                log.info(`Fetching predictions from Redis store`);
+                if (config.debug_flag === 'true') {
+                    log.info(`Fetching predictions from Redis store`);
+                }
                 let data = JSON.parse(result);
                 resolve(data)
             } else {

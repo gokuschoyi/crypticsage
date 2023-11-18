@@ -60,7 +60,10 @@ const initialState = {
             standardized: [],
             scaled: []
         },
-        predictionRMSE: 0
+        score: {
+            over_all_score: 0,
+            scores: []
+        },
     }
 }
 
@@ -89,8 +92,9 @@ const cryptoModuleSlice = createSlice({
         setPredictedValues: (state, action) => {
             state.modelData.predictedValues = { ...state.modelData.predictedValues, ...action.payload };
         },
-        setOverallRMSE: (state, action) => {
-            state.modelData.predictionRMSE = action.payload;
+        setPredictionScores: (state, action) => {
+            state.modelData.score.over_all_score = action.payload.rmse;
+            state.modelData.score.scores = action.payload.scores;
         },
         setStandardizedAndScaledPredictions: (state, action) => {
             state.modelData.predictedValues.standardized = action.payload.standardized;
@@ -121,7 +125,10 @@ const cryptoModuleSlice = createSlice({
             };
             state.modelData.progress_message = [];
             state.modelData.model_name = '';
-            state.modelData.predictionRMSE = 0;
+            state.modelData.score = {
+                over_all_score: 0,
+                scores: []
+            };
             state.barsFromToPredictions = { from: 0, to: 0 };
         },
         resetModelData: (state) => {
@@ -138,7 +145,10 @@ const cryptoModuleSlice = createSlice({
             };
             state.modelData.progress_message = [];
             state.modelData.talibExecuteQueries = [];
-            state.modelData.predictionRMSE = 0;
+            state.modelData.score = {
+                over_all_score: 0,
+                scores: []
+            };
             state.barsFromToPredictions = { from: 0, to: 0 }
         },
         toggleToolTipSwitch: (state) => {
@@ -623,7 +633,7 @@ export const {
     , setTrainingParameters
     , setStartWebSocket
     , setPredictedValues
-    , setOverallRMSE
+    , setPredictionScores
     , setStandardizedAndScaledPredictions
     , setBarsFromToPredictions
     , setProgressMessage
