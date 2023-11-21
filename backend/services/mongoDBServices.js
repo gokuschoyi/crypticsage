@@ -1628,6 +1628,19 @@ const getFirstObjectForEachPeriod = async (collection_name) => {
     }
 };
 
+const getBinanceTIckerNames = async () => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const collection = db.collection('binance_metadata');
+        // Specify the field to return in the second parameter of the find() method
+        const result = await collection.find({}, { projection: { ticker_name: 1, _id: 0 } }).toArray();
+        return result;
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
 /**
  * Inserts an array of ticker data to the db:historical_data
  * @async
@@ -2486,6 +2499,7 @@ module.exports = {
     , deleteOneMetaData
     , deleteTickerHistDataFromDb
     , getFirstObjectForEachPeriod
+    , getBinanceTIckerNames
     , saveOrUpdateTickerMeta
     , fetchTickerMetaFromDb
     , checkTickerMetaDuplicateData

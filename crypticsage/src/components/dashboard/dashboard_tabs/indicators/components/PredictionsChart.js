@@ -101,7 +101,8 @@ const PredictionsChart = (props) => {
         // const lastTickers = predictedValueRedux.slice(-(lookAhead * 2 - 2))
         // console.log(lastTickers)
         if (dates.length === 0) {
-            console.log("No Data yet")
+            // console.log("No Prediction data yet")
+            return
         } else {
             let shiftedPredictedValues = []
             let predIndex = predictionLookAhead - 1

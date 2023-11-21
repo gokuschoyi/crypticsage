@@ -38,3 +38,5 @@ backend/docs
 backend/ssl/localhost-key.pem
 backend/ssl/localhost.pem
 backend/models
+
+# "start": "concurrently --kill-others -r \"cd backend && npm start\" \"cd crypticsage && npm start\""

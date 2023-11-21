@@ -15,7 +15,8 @@ import {
     Tooltip,
     Autocomplete,
     useTheme,
-    Paper
+    Paper,
+    CircularProgress
 } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CreateIcon from '@mui/icons-material/Create';
@@ -92,6 +93,8 @@ const FunctionContainer = (props) => {
     const [selectedInputOptions, setSelectedInputOptions] = useState(inputs)
     const [defaultOptionalInputs, setDefaultOptionalInputs] = useState(optInputs)
     const functionSelectedRef = useRef(function_selected_flag)
+
+    const [talibExecuting, setTalibExecuting] = useState(false)
 
     // handle generate query for each function
     const handleGenerateQuery = (func_name) => {
@@ -178,9 +181,10 @@ const FunctionContainer = (props) => {
             }
 
             console.log(payload)
+            setTalibExecuting(true)
             executeTalibFunction({ token, payload })
                 .then((res) => {
-                    console.log(res.data)
+                    // console.log(res.data)
                     dispatch(setSelectedFlagInTalibDescription(
                         {
                             group,
@@ -203,8 +207,10 @@ const FunctionContainer = (props) => {
                         }
                     ))
                     functionSelectedRef.current = true
+                    setTalibExecuting(false)
                 })
                 .catch(err => {
+                    setTalibExecuting(false)
                     console.log(err)
                 })
         }
@@ -310,11 +316,16 @@ const FunctionContainer = (props) => {
                             )
                             :
                             (
-                                <IconButton size='small' aria-label="update" color="secondary" onClick={handleGenerateQuery.bind(null, { func_name: name })}>
-                                    <Tooltip title="Generate query" placement='top'>
-                                        <CreateIcon className='small-icon' />
-                                    </Tooltip>
-                                </IconButton>
+                                <Box display='flex' justifyContent='center'>
+                                    {talibExecuting ? <CircularProgress color="error" sx={{ margin: '5px' }} size={20} /> :
+                                        (
+                                            <IconButton size='small' aria-label="update" color="secondary" onClick={handleGenerateQuery.bind(null, { func_name: name })}>
+                                                <Tooltip title="Generate query" placement='top'>
+                                                    <CreateIcon className='small-icon' />
+                                                </Tooltip>
+                                            </IconButton>)
+                                    }
+                                </Box>
                             )
                         }
 
@@ -325,7 +336,7 @@ const FunctionContainer = (props) => {
                     <Paper elevation={4}>
                         <Box p={1}>
                             <Box className='indicator-inputs' sx={{ textAlign: 'start' }}>
-                                <Typography variant='h6' textAlign='start' fontWeight='500' sx={{textDecoration:'underline', textUnderlineOffset:'3px'}}>INPUTS</Typography>
+                                <Typography variant='h6' textAlign='start' fontWeight='500' sx={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>INPUTS</Typography>
                                 {selectedInputOptions.length > 0 && selectedInputOptions.map((input, index) => {
                                     const { value, errorFlag, helperText } = input
                                     return (
@@ -364,7 +375,7 @@ const FunctionContainer = (props) => {
                             </Box>
 
                             <Box className='indicator-optional-inputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                                <Typography variant='h6' fontWeight='500' sx={{textDecoration:'underline', textUnderlineOffset:'3px'}}>OPTIONAL INPUTS</Typography>
+                                <Typography variant='h6' fontWeight='500' sx={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>OPTIONAL INPUTS</Typography>
                                 {defaultOptionalInputs.length === 0 ?
                                     (
                                         <Typography>None</Typography>
@@ -416,7 +427,7 @@ const FunctionContainer = (props) => {
                             </Box>
 
                             <Box className='indicator-outputs' pt={'10px'} sx={{ textAlign: 'start' }}>
-                                <Typography variant='h6' fontWeight='500' sx={{textDecoration:'underline', textUnderlineOffset:'3px'}}>OUTPUTS</Typography>
+                                <Typography variant='h6' fontWeight='500' sx={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>OUTPUTS</Typography>
                                 {outputs && outputs.map((output, index) => {
                                     return (
                                         <Box key={index} display='flex' flexDirection='column' pt={'4px'}>

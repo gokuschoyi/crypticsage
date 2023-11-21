@@ -192,8 +192,6 @@ const createTrainingData = async ({ model_type, stdData, timeStep, lookAhead, e_
             subsetf = standardized_features.slice(-1)
             subsetl = standardized_labels.slice(-1)
 
-            console.log(subsetf)
-            console.log(subsetl)
 
             str = ''
             subsetf.forEach((element, index) => {
@@ -209,6 +207,8 @@ const createTrainingData = async ({ model_type, stdData, timeStep, lookAhead, e_
             })
 
             if (config.debug_flag === 'true') {
+                // console.log(subsetf)
+                // console.log(subsetl)
                 console.log('From function test array length', stdData.length)
                 console.log('Offset length  : ', stdData.length - timeStep - lookAhead + 1)
                 console.log('Training_features : ', standardized_features.length, 'Training_labels : ', standardized_labels.length)

@@ -18,6 +18,7 @@ const fs = require('fs')
 const MDBServices = require('../services/mongoDBServices')
 
 const tf = require('@tensorflow/tfjs-node');
+const path = require('path');
 
 
 const e_type = {
@@ -220,7 +221,10 @@ const procssModelTraining = async (req, res) => {
     const job_name = "MODEL_TRAINING_JOB_" + model_id
     try {
         const model_queue = new Queue(model_training_queue, { connection });
-        const model_worker = new Worker(model_training_queue, startModelTraining, { connection, lockDuration: 60000, maxStalledCount: 3 });
+
+        const modelTrainingProcessorFile = path.join(__dirname, '../workers/modelTrainer')
+        console.log('modelTrainingProcessorFile : ', modelTrainingProcessorFile)
+        const model_worker = new Worker(model_training_queue, startModelTraining, { connection, maxStalledCount: 3 });
 
         const modelTrainingCompletedListener = (job) => {
             log.info(`Model Training Completed ${job.id}`)
@@ -761,7 +765,6 @@ module.exports = {
     getIndicatorDesc,
     executeTalibFunction,
     procssModelTraining,
-    startModelTraining,
     getModel,
     saveModel,
     deleteModel,

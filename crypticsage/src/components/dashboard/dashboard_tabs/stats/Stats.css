@@ -3,7 +3,7 @@
 }
 
 .tool-tip {
-  width: 96px;
+  width: 11s0px;
   background-color: #fff;
   color: #000;
   position: absolute;
@@ -54,7 +54,7 @@
   justify-content: space-between;
   position: relative;
   transition: all 0.3s ease-in-out;
-  cursor: pointer;
+  /* cursor: pointer; */
   background-color: var(--mui-palette-background-paper);
 }
 
@@ -71,7 +71,7 @@
   justify-content: space-between;
   position: relative;
   transition: all 0.3s ease-in-out;
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 
 .card-trading-view-data {
@@ -87,7 +87,7 @@
   justify-content: space-between;
   position: relative;
   transition: all 0.3s ease-in-out;
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 
 .card-holder-slider {
@@ -103,7 +103,28 @@
   justify-content: space-between;
   overflow: hidden;
   height: 181px !important;
+  /* cursor: pointer; */
+}
+
+.underline-animation {
   cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
+.underline-animation::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px; /* You can adjust the thickness of the underline here */
+  background-color: currentColor; /* Or set to a specific color */
+  transition: width 0.3s ease;
+}
+
+.underline-animation:hover::after {
+  width: 100%;
 }
 
 .action-box {
@@ -203,7 +224,9 @@
 
 .center-col {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
 }
 
 .token-selector-box {

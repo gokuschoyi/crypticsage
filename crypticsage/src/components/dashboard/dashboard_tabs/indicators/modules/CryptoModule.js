@@ -36,14 +36,14 @@ import {
     , Switch
     , FormControlLabel
     , Button
-    , Tooltip
     , Slider
     , CircularProgress
     , IconButton
     , Paper
     , Chip
-    , Avatar
 } from '@mui/material'
+import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
+import { styled } from '@mui/material/styles';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SaveIcon from '@mui/icons-material/Save';
@@ -52,10 +52,9 @@ import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import AspectRatioIcon from '@mui/icons-material/AspectRatio';
 
-import { Success, Info, Error } from '../../../global/CustomToasts'
+import { Success, Info } from '../../../global/CustomToasts'
 
 import PredictionsChart from '../components/PredictionsChart';
-import { createChart } from 'lightweight-charts';
 
 const TICKER_PERIODS = [
     '1m',
@@ -168,6 +167,41 @@ const ClassificationTable = ({ data }) => {
     );
 };
 
+const NoMaxWidthTooltip = styled(({ className, ...props }) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+))({
+    [`& .${tooltipClasses.tooltip}`]: {
+        maxWidth: 'none',
+    },
+});
+
+const PredictionMSETable = ({ data }) => {
+    console.log(data)
+
+    return (
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>MSE</th>
+                    <th>RMSE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {data.map((item, index) => {
+                    return (
+                        <tr key={index}>
+                            <td>{item.date}</td>
+                            <td className='prediction-mse'>{item.rmse * item.rmse}</td>
+                            <td className='prediction-mse'>{item.rmse}</td>
+                        </tr>
+                    );
+                })}
+            </tbody>
+        </table>
+    )
+}
+
 const MultiSelect = (props) => {
     const theme = useTheme()
     const { inputLabel, inputOptions, selectedInputOptions, handleInputOptions, fieldName, toolTipTitle } = props
@@ -237,6 +271,31 @@ const periodToMilliseconds = (period) => {
             return 1000 * 60 * 60 * 24 * 7;
         default:
             return 1000 * 60 * 60 * 24;
+    }
+}
+
+const generateMSESteps = (period) => {
+    switch (period) {
+        case '1m':
+            return 1;
+        case '1h':
+            return 1;
+        case '4h':
+            return 4;
+        case '6h':
+            return 6;
+        case '8h':
+            return 8;
+        case '12h':
+            return 12;
+        case '1d':
+            return 24;
+        case '3d':
+            return 3;
+        case '1w':
+            return 7;
+        default:
+            return 24;
     }
 }
 
@@ -1163,19 +1222,39 @@ const CryptoModule = () => {
                                 {/* Prediction set RMSE results */}
                                 {model_data.score.over_all_score !== 0 &&
                                     <Box width='100%'>
-                                        <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '12px' }}>
+                                        <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
                                             <thead className='table-group'>
                                                 <tr className='table-row'>
                                                     <th className='table-head'>Type</th>
-                                                    <th className='table-head'>RMSE</th>
                                                     <th className='table-head'>MSE</th>
+                                                    <th className='table-head'>RMSE</th>
                                                 </tr>
                                             </thead>
                                             <tbody className='table-body'>
                                                 <tr className='table-row'>
-                                                    <td className='table-data' style={{ textAlign: 'start' }}>Test Set (Tensor)</td>
-                                                    <td className='table-data'>{model_data.score.over_all_score}</td>
+                                                    <td className='table-data' style={{ textAlign: 'start' }}>
+                                                        <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
+                                                            Test Set (Tensor)
+                                                            <NoMaxWidthTooltip
+                                                                title={(
+                                                                    <PredictionMSETable data={model_data.score.scores.map((item, index) => {
+                                                                        return (
+                                                                            {
+                                                                                date: `+${generateMSESteps(selectedTickerPeriod) * (index + 1)}h`,
+                                                                                rmse: item
+                                                                            }
+                                                                        )
+                                                                    })} />
+                                                                )}
+                                                                placement='right'
+                                                                arrow
+                                                            >
+                                                                <AspectRatioIcon sx={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                                                            </NoMaxWidthTooltip>
+                                                        </Box>
+                                                    </td>
                                                     <td className='table-data'>{model_data.score.over_all_score * model_data.score.over_all_score}</td>
+                                                    <td className='table-data'>{model_data.score.over_all_score}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -1186,12 +1265,14 @@ const CryptoModule = () => {
                                 <Box className='batch-end-progress-box' pt={1}>
                                     {batchResult && (
                                         <Box className={`epoch_{} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
-                                            <Box className={`model-progress_{}`} variant='h6'>
+                                            <Box className={`model-progress_{}`} width='100%' variant='h6'>
                                                 <div className='batch-end'>
                                                     <div style={{ fontWeight: '600', fontSize: '0.75rem', width: '105px', textAlign: 'start' }} id='batch-no'></div>
-                                                    <div className='batch-end-text' id='loss'></div>
-                                                    <div className='batch-end-text' id='mse'></div>
-                                                    <div className='batch-end-text' id='mae'></div>
+                                                    <div style={{display:'flex', flexDirection:'row', gap:'10px'}}>
+                                                        <div className='batch-end-text' id='loss'></div>
+                                                        <div className='batch-end-text' id='mse'></div>
+                                                        <div className='batch-end-text' id='mae'></div>
+                                                    </div>
                                                 </div>
                                             </Box>
                                         </Box>
@@ -1252,7 +1333,7 @@ const CryptoModule = () => {
                                                         </Tooltip>
                                                     </Box>
                                                     <Box width='100%'>
-                                                        <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '12px' }}>
+                                                        <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
                                                             <thead className='table-group'>
                                                                 <tr className='table-row'>
                                                                     <th className='table-head'>Accuracy</th>
@@ -1277,12 +1358,12 @@ const CryptoModule = () => {
                                             <Box display='flex' flexDirection='row' justifyContent='space-between'>
                                                 {(Object.keys(modelMetrics.mseStandardized).length > 0 && Object.keys(modelMetrics.mseScaled).length > 0) &&
                                                     <Box width='100%'>
-                                                        <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '12px' }}>
+                                                        <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
                                                             <thead className='table-group'>
                                                                 <tr className='table-row'>
                                                                     <th className='table-head'>Type</th>
-                                                                    <th className='table-head'>RMSE</th>
                                                                     <th className='table-head'>MSE</th>
+                                                                    <th className='table-head'>RMSE</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody className='table-body'>

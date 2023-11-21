@@ -256,13 +256,14 @@ const Stats = (props) => {
                                             <SwiperSlide key={index}>
                                                 <CustomTokenCard
                                                     title={token.symbol}
-                                                    price={`$ ${token.current_price}`}
+                                                    price={`$ ${token.current_price.toFixed(2)}`}
                                                     image={`${token.image_url}`}
                                                     price_change_24h={token.price_change_24h}
                                                     price_change_percentage_24h={token.price_change_percentage_24h}
                                                     market_cap_rank={token.market_cap_rank}
                                                     high_24h={token.high_24h}
                                                     low_24h={token.low_24h}
+                                                    symbol={token.matched}
                                                 />
                                             </SwiperSlide>
                                         )

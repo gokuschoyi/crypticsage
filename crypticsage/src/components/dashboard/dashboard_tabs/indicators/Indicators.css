@@ -81,16 +81,38 @@
     flex-direction: row;
     gap: 10px;
     align-items: center;
+    justify-content:space-between;
 }
 
 .batch-end-text {
     width: 160px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.7rem;
+    font-weight: 500;
     text-align: start;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.prediction-mse {
+    max-width: 100px !important;
+    text-align: start;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.5s ease;
+    /* Animation effect */
+}
+
+/* Define hover behavior for the entire row */
+tr:hover .prediction-mse {
+    max-width: none;
+    /* Allow the cell to expand */
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    transition: all 0.5s ease;
+    /* Animation effect */
 }
 
 .stock-link:hover {
@@ -592,7 +614,7 @@
     }
 
     .batch-end-text {
-        width: 95px;
+        width: 110px;
     }
 
     .talib-func-hint {

@@ -162,6 +162,8 @@ const fetchTopTickerByMarketCap = async ({ length }) => {
             return ticker.RAW !== undefined;
         })
 
+        const tickerSymbol = await MDBServices.getBinanceTIckerNames()
+
         const filteredCryptoData = undefinedRemoved.map((crypto, index) => {
             const { CoinInfo, RAW } = crypto;
             return {
@@ -180,7 +182,19 @@ const fetchTopTickerByMarketCap = async ({ length }) => {
                 low_24h: RAW.USD.LOW24HOUR,
             };
         });
-        return cryptoData = filteredCryptoData
+
+        const filteredCryptoDataWithMatched = filteredCryptoData.map(crypto => {
+            // Find the ticker with the same symbol
+            const ticker = tickerSymbol.find(t => t.ticker_name.includes(crypto.symbol));
+            // If a matching ticker is found, use its matched value, otherwise use false
+            const matched = ticker ? ticker.ticker_name : 'N/A';
+            // Return a new object with the matched key
+            return {...crypto, matched};
+        });
+        
+        // console.log(filteredCryptoDataWithMatched)
+
+        return cryptoData = filteredCryptoDataWithMatched
     } catch (error) {
         let formattedError = JSON.stringify(logger.formatError(error))
         log.error({ message: 'Error CryptoCompare', error: formattedError })

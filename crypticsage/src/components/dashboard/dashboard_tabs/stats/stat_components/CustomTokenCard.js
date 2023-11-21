@@ -1,22 +1,42 @@
 import React from 'react'
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, Paper } from '@mui/material'
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { setSelectedTickerName, resetShowSettingsFlag, resetDataLoadedState, setCryptoDataInDbRedux } from '../../indicators/modules/CryptoModuleSlice';
 import { ArrowDropDownIcon, ArrowDropUpIcon } from '../../../global/Icons';
 const CustomTokenCard = (props) => {
-    const { title, price, image, price_change_24h, price_change_percentage_24h, market_cap_rank, high_24h, low_24h } = props
+    const { title, price, image, price_change_24h, price_change_percentage_24h, market_cap_rank, high_24h, low_24h, symbol } = props
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const selectedToken = useSelector(state => state.cryptoModule.selectedTickerName);
+
+    const handleSymbolClick = ({ symbol }) => {
+        if (symbol === 'N/A') return
+        const redirectURL = `/dashboard/indicators/crypto/${symbol}`
+        if (symbol === selectedToken) {
+            dispatch(resetShowSettingsFlag())
+            navigate(redirectURL)
+        } else {
+            dispatch(setSelectedTickerName(symbol))
+            dispatch(resetDataLoadedState())
+            dispatch(resetShowSettingsFlag())
+            dispatch(setCryptoDataInDbRedux([]))
+            navigate(redirectURL)
+        }
+    }
+
     return (
         <Box className='card-holder-slider' >
             <Box className='info-box'>
                 <Box className='token-box'>
-                    <Typography sx={{ fontSize: 20, fontWeight: '500', textAlign: 'left' }} gutterBottom>
-                        {title.toUpperCase()}
+                    <Typography onClick={handleSymbolClick.bind(null, { symbol })} variant='h5' className={symbol !== 'N/A' ? "underline-animation" : ''} sx={{ margin: '0px', fontSize: 20, fontWeight: '500', textAlign: 'left' }} gutterBottom>
+                        {symbol !== 'N/A' ? symbol.toUpperCase() : title.toUpperCase()}
                     </Typography>
-                    <Box display='flex' flexBasis='row' gap='1rem'>
+                    <Box display='flex' flexDirection='row' gap='1rem' alignContent='center'>
                         {market_cap_rank &&
-                            <Box>
-                                <Typography sx={{ fontSize: 16, fontWeight: '300', textAlign: 'left' }} gutterBottom>
-                                    {market_cap_rank}
-                                </Typography>
-                            </Box>
+                            <Typography variant='h5' sx={{ margin: '0px', fontSize: 16, fontWeight: '300', textAlign: 'left' }} gutterBottom>
+                                {market_cap_rank}
+                            </Typography>
                         }
                         <img className='token-image' loading='lazy' src={`${image}`} alt='crypto' />
                     </Box>
@@ -34,22 +54,22 @@ const CustomTokenCard = (props) => {
                     </Typography>
                 </Box>
                 <Box className='high-low-box'>
-                    <Box className='center-col'>
-                        <Typography sx={{ fontSize: 14, fontWeight: '300', textAlign: 'left' }} gutterBottom>
+                    <Paper elevation={4} sx={{ padding: '0px 5px' }} className='center-col'>
+                        <Typography sx={{ margin: '0px', fontSize: 14, fontWeight: '500', textAlign: 'left' }} gutterBottom>
                             H 24h
                         </Typography>
-                        <Typography sx={{ fontSize: 12, fontWeight: '300', textAlign: 'left' }} gutterBottom>
-                            {high_24h}
+                        <Typography sx={{ margin: '0px', fontSize: 14, fontWeight: '500', textAlign: 'left' }} gutterBottom>
+                            {high_24h.toFixed(2)}
                         </Typography>
-                    </Box>
-                    <Box className='center-col'>
-                        <Typography sx={{ fontSize: 14, fontWeight: '300', textAlign: 'left' }} gutterBottom>
+                    </Paper>
+                    <Paper elevation={4} sx={{ padding: '0px 5px' }} className='center-col'>
+                        <Typography sx={{ margin: '0px', fontSize: 14, fontWeight: '500', textAlign: 'left' }} gutterBottom>
                             L 24h
                         </Typography>
-                        <Typography sx={{ fontSize: 12, fontWeight: '300', textAlign: 'left' }} gutterBottom>
-                            {low_24h}
+                        <Typography sx={{ margin: '0px', fontSize: 14, fontWeight: '500', textAlign: 'left' }} gutterBottom>
+                            {low_24h.toFixed(2)}
                         </Typography>
-                    </Box>
+                    </Paper>
                 </Box>
             </Box>
             <Box className='action-box'>

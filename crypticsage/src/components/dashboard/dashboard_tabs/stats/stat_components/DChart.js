@@ -6,12 +6,12 @@ const DashboardChart = (props) => {
     const { chartData, selectedTokenName, tokenUrl, gridLineToggle } = props;
     const theme = useTheme();
     const chartBackgroundColor = theme.palette.background.default
-    console.log(chartBackgroundColor)
+    // console.log(chartBackgroundColor)
 
     const chartContainerRef = useRef();
     const chart = useRef();
     useEffect(() => {
-        console.log("from DC chart")
+        // console.log("from DC chart")
 
         // let chart;
         let coinChartBox = document.getElementsByClassName('coin-chart-box')[0].getBoundingClientRect()
@@ -126,14 +126,15 @@ const DashboardChart = (props) => {
                     // console.log(param.point)
                     // console.log({ toolTipXCoOrdinates, offsetLeft, toolTipYCoOrdinates, offsetTop, scrollYAxis })
 
-                    const dateStr = new Date(param.time * 1000).toLocaleDateString('en-AU');
+                    const [dateStr, time] = (new Date(param.time * 1000).toLocaleString('en-AU').split(','));
                     tooltip.style.display = 'block';
                     const data = param.seriesData.get(candleStickSeries);
                     const price = data.value !== undefined ? data.value : data.close;
                     tooltip.innerHTML = `
                     <div style="color: ${'rgba(255, 82, 82, 1)'}">${selectedTokenName}</div>
-                    <div style="font-size: 18px; margin: 4px 0px; color: ${'black'}">${Math.round(100 * price) / 100}</div>
+                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">C : ${Math.round(100 * price) / 100}</div>
                     <div style="color: ${'black'}">${dateStr}</div>
+                    <div style="color: ${'black'}">${time}</div>
                     `;
 
                     let diffX = toolTipXCoOrdinates - offsetLeft

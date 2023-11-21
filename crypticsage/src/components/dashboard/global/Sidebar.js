@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useSelector, useDispatch } from 'react-redux';
 import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import CSLogo from '../../../assets/csLogo.png'
 import {
     HomeOutlinedIcon,
@@ -30,6 +30,34 @@ const SidebarC = () => {
     const { admin_status } = useSelector(state => state.auth);
     const userCollapsedSidebar = useSelector(state => state.auth.preferences.collapsedSidebar);
     const { collapseSidebar, collapsed } = useProSidebar();
+
+    const selectedToken = useSelector(state => state.cryptoModule.selectedTickerName)
+    const location = useLocation();
+    const isFirestRender = React.useRef(true);
+    useEffect(() => {
+        if (isFirestRender.current) {
+            isFirestRender.current = false;
+            const currentRoute = location.pathname.split('/');
+            // console.log(currentRoute, selectedToken)
+            // console.log(currentSideBarTab, currentRoute)
+            if (currentRoute.length === 5 && currentRoute[2] === 'indicators') {
+                // console.log('indicators')
+                if (selectedToken !== currentRoute[2]) {
+                    dispatch(setSidebarState('indicators'));
+                }
+            } else if (currentRoute.length === 2 && currentRoute[1] === 'dashboard') {
+                // console.log('dashboard')
+                if (selectedToken !== currentRoute[1]) {
+                    dispatch(setSidebarState('dashboardTab'));
+                }
+            }
+        }
+
+        return () => {
+            isFirestRender.current = true;
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch, location.pathname])
 
     //add md to dep to triggrer collapseSidebar
     //adding collapsed prevetents opening the sidebar
@@ -102,9 +130,9 @@ const SidebarC = () => {
                                     </IconButton>)
                                     :
                                     (
-                                        <img 
-                                        style={{filter: `${mode === 'dark' ? 'invert(1)' : ''}`}}
-                                        className="smallscreen-logo" height="45px" alt='logo' src={CSLogo}></img>
+                                        <img
+                                            style={{ filter: `${mode === 'dark' ? 'invert(1)' : ''}` }}
+                                            className="smallscreen-logo" height="45px" alt='logo' src={CSLogo}></img>
                                     )
                                 }
                             </Box>
