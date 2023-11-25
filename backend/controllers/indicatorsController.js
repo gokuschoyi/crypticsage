@@ -1,7 +1,6 @@
 const logger = require('../middleware/logger/Logger');
 const log = logger.create(__filename.slice(__dirname.length + 1))
 const IUtil = require('../utils/indicatorUtil');
-const TFMUtil = require('../utils/tf_modelUtil');
 // @ts-ignore
 var talib = require('talib/build/Release/talib')
 const { v4: uuidv4 } = require('uuid');
@@ -13,9 +12,12 @@ const { createTimer } = require('../utils/timer')
 
 const { getValuesFromRedis } = require('../utils/redis_util');
 const { fetchEntireHistDataFromDb } = require('../services/mongoDBServices')
-const TF_Model = require('../utils/tf_model')
 const fs = require('fs')
 const MDBServices = require('../services/mongoDBServices')
+
+const Redis = require("ioredis");
+// @ts-ignore
+const redisPublisher = new Redis();
 
 const tf = require('@tensorflow/tfjs-node');
 const path = require('path');
@@ -215,6 +217,7 @@ const executeTalibFunction = async (req, res) => {
 
 const procssModelTraining = async (req, res) => {
     const { fTalibExecuteQuery, model_training_parameters } = req.body.payload
+    const uid = res.locals.data.uid;
     const model_id = uuidv4();
     log.info(`Starting model training with id : ${model_id}`)
     const model_training_queue = "MODEL_TRAINING_QUEUE"
@@ -224,7 +227,7 @@ const procssModelTraining = async (req, res) => {
 
         const modelTrainingProcessorFile = path.join(__dirname, '../workers/modelTrainer')
         console.log('modelTrainingProcessorFile : ', modelTrainingProcessorFile)
-        const model_worker = new Worker(model_training_queue, startModelTraining, { connection, maxStalledCount: 3 });
+        const model_worker = new Worker(model_training_queue, modelTrainingProcessorFile, { connection, useWorkerThreads: true });
 
         const modelTrainingCompletedListener = (job) => {
             log.info(`Model Training Completed ${job.id}`)
@@ -233,24 +236,35 @@ const procssModelTraining = async (req, res) => {
             model_worker.removeListener('completed', modelTrainingCompletedListener)
         }
 
-        const modelTrainingFailedListener = (job) => {
+        const modelTrainingFailedListener = (job, error) => {
+            console.log('Job Data', job.failedReason)
+            console.log('Model Training Failed : ', error.stack)
+            console.log('Model Training Failed : ', error.message)
+
             const redisCommand = `hgetall bull:${model_training_queue}:${job.id}`
-            log.error(`Update task failed for : ", ${job.name}, " with id : ", ${job.id}`)
-            log.warn(`Check Redis for more info : ", ${redisCommand}`)
-            TF_Model.eventEmitter.emit('error', { message: "Error in training model." })
+            log.error(`Model training failed for : ${job.name}, " with id : ${job.id}`)
+            log.warn(`Check Redis for more info : ${redisCommand}`)
+            if (job.failedReason !== 'job stalled more than allowable limit') {
+                redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'error', uid, message: error.message }))
+            }
         }
 
         model_worker.on('completed', modelTrainingCompletedListener)
         model_worker.on('failed', modelTrainingFailedListener)
 
         model_worker.on('error', (error) => {
-            log.error(error.stack)
+            console.log('Model Training Error : ', error)
         })
 
         await model_queue.add(
             job_name,
-            { fTalibExecuteQuery, model_training_parameters, model_id },
+            { fTalibExecuteQuery, model_training_parameters, model_id, uid },
             {
+                attempts: 2,
+                backoff: {
+                    type: 'exponential',
+                    delay: 2000,
+                },
                 removeOnComplete: {
                     age: 3600, // keep up to 1 min
                     count: 1000, // keep up to 1000 jobs
@@ -276,120 +290,6 @@ const procssModelTraining = async (req, res) => {
         throw error
     }
 
-}
-
-const startModelTraining = async (job) => {
-    const { fTalibExecuteQuery, model_training_parameters, model_id } = job.data
-    const { db_query } = fTalibExecuteQuery[0].payload;
-    const { asset_type, ticker_name, period } = db_query;
-    // Model parameters
-    const {
-        training_size,
-        time_step,
-        look_ahead,
-        epochs: epochCount,
-        batchSize,
-        hidden_layers,
-        learning_rate,
-        to_predict,
-        model_type
-    } = model_training_parameters
-    console.log('Model parameters : ', model_training_parameters)
-
-    log.alert('----> Step 1 : Fetching the ticker data from db') // oldest first 
-    const tickerHistory = await fetchEntireHistDataFromDb(asset_type, ticker_name, period)
-    const tickerHistoryLength = tickerHistory.length
-    TF_Model.eventEmitter.emit('notify', { message: `----> Fetched ${tickerHistoryLength} tickers from db...`, latestData: tickerHistory[tickerHistoryLength - 1] })
-
-
-    TF_Model.eventEmitter.emit('notify', { message: "----> Executing selected functions..." })
-    log.alert('----> Step 2 : Executing the talib functions')
-    let finalTalibRes = await TFMUtil.processSelectedFunctionsForModelTraining({ selectedFunctions: fTalibExecuteQuery, tickerHistory: tickerHistory })
-    TF_Model.eventEmitter.emit('notify', { message: `----> Function execution completed...` })
-
-
-    TF_Model.eventEmitter.emit('notify', { message: "----> Finding smallest array to adjust ticker hist and function data..." })
-    log.alert('----> Step 3 : Finding smallest array to adjust ticker hist and function data')
-    const [tickerHist, finalTalibResult] = await TFMUtil.trimDataBasedOnTalibSmallestLength({ finalTalibResult: finalTalibRes, tickerHistory })
-    TF_Model.eventEmitter.emit('notify', { message: `----> Trimmed data based on talib smallest length...` })
-
-
-    TF_Model.eventEmitter.emit('notify', { message: "----> Transforming and combining the OHLCV and function data for model training..." })
-    log.alert('----> Step 4 : Transforming and combining the data to required format for model training')
-    const features = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult })
-    TF_Model.eventEmitter.emit('notify', { message: `----> Transformed data to required shape...` })
-
-
-    TF_Model.eventEmitter.emit('notify', { message: "----> Standardizing the data..." })
-    log.alert('----> Step 5 : Standardizing the data')
-    let [stdData, label_mean, label_variance] = TFMUtil.standardizeData(model_type, features, to_predict)
-    TF_Model.eventEmitter.emit('notify', { message: `----> Data standardized...` })
-
-
-    TF_Model.eventEmitter.emit('notify', { message: "----> Creating the training data..." })
-    log.alert('----> Step 6 : Transforming and creating the training data')
-    const [trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest] = await TFMUtil.createTrainingData(
-        {
-            model_type,
-            stdData,
-            timeStep: time_step,
-            lookAhead: look_ahead,
-            e_key: to_predict,
-            training_size
-        })
-    TF_Model.eventEmitter.emit('notify', { message: `----> Training data created...` })
-
-
-    TF_Model.eventEmitter.emit('notify', { message: "----> Generating dates for test set data..." })
-    log.alert('----> Step 7 : Getting dates and verifying correctness')
-    const dates = TFMUtil.getDateRangeForTestSet(tickerHist, trainSplit, time_step, look_ahead, yTrainTest, label_mean, label_variance)
-
-
-    TF_Model.eventEmitter.emit('notify', { message: "----> Creating the model..." })
-    log.alert('----> Step 8 : Creating the model')
-    const input_layer_shape = time_step; // look back date
-    const input_layer_neurons = 64;
-    const rnn_output_neurons = 16;
-    const output_layer_neurons = yTrain[0].length;
-    const feature_count = xTrain[0][0].length;
-    const n_layers = hidden_layers;
-
-    const model_parama = {
-        model_type,
-        input_layer_shape,
-        look_ahead,
-        feature_count,
-        input_layer_neurons,
-        rnn_output_neurons,
-        output_layer_neurons,
-        n_layers
-    }
-
-    const model_ = TF_Model.createModel(model_parama)
-    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model created...` })
-
-
-    TF_Model.eventEmitter.emit('notify', { message: "----> Training the model..." })
-    log.alert('----> Step 9 : Training the model')
-    const epochs = epochCount;
-    const [trained_model_, history] = await TF_Model.trainModel(model_, learning_rate, xTrain, yTrain, epochs, batchSize)
-    // console.log(history)
-    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model trained...` })
-
-
-    log.alert('----> Step 10 : Evaluating the model on test set')
-    TF_Model.eventEmitter.emit('notify', { message: "----> Evaluating the model on test set..." })
-    // @ts-ignore
-    let xHistory = xTrain.slice(-1)
-    const evaluationData = [...xHistory, ...xTrainTest, ...lastSets]
-    await TF_Model.evaluateModelOnTestSet(trained_model_, model_id, evaluationData, yTrainTest, dates, label_mean, label_variance)
-    TF_Model.eventEmitter.emit('notify', { message: `----> TF Model evaluation completed...` })
-
-
-    log.alert('----> Step 11 : Saving the model and weights  and disposing it ')
-    await TF_Model.saveModel(trained_model_, model_id)
-
-    return 'Model Training Completed'
 }
 
 const getModel = async (req, res) => {
@@ -453,13 +353,17 @@ const deleteUserModel = async (req, res) => {
 const deleteModelFromLocalDirectory = async (model_id) => {
     try {
         const path = `./models/${model_id}` // delete a directory in models with the foldername as model_id us fs
-        fs.rm(path, { recursive: true }, (err) => {
-            if (err) {
-                throw err;
-            }
-            log.info(`Removed model ${model_id}`)
-        });
-        return true
+        if (fs.existsSync(path)) {
+            fs.rm(path, { recursive: true }, (err) => {
+                if (err) {
+                    throw err;
+                }
+                log.info(`Removed model : ${model_id}`)
+            });
+            return true
+        } else {
+            log.info(`Model file not found for : ${model_id}`)
+        }
     } catch (error) {
         log.error(error.stack)
         throw error
@@ -498,6 +402,7 @@ function calculateRMSE(actual, predicted) {
 
     return rmse;
 }
+
 
 const generateTestData = async (req, res) => {
     let { timeStep, lookAhead } = req.body
@@ -566,7 +471,7 @@ const generateTestData = async (req, res) => {
         console.log(tensorX.shape)
         console.log(tensorY.shape) */
 
-        const [trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest] = await TFMUtil.createTrainingData(
+        /* const [trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest] = await TFMUtil.createTrainingData(
             {
                 model_type: 'multi_input_single_output_step',
                 stdData: features,
@@ -574,7 +479,7 @@ const generateTestData = async (req, res) => {
                 lookAhead: lookAhead,
                 e_key: 'low',
                 training_size: 80
-            })
+            }) */
 
         /* console.log(xTrain[0])
         console.log(yTrain[0])
@@ -584,24 +489,24 @@ const generateTestData = async (req, res) => {
         // console.log(xTrainTest[xTrainTest.length - 1])
         // console.log(features)
         console.table(features)
+        /* 
+                let lastSetStr = ''
+                // @ts-ignore
+                lastSets.forEach((element, index) => {
+                    element.forEach((row, ind) => {
+                        let rowStr = ''
+                        if (ind === element.length - 1) {
+                            rowStr += row.join(', ') + '\n' + '\n'
+                        } else {
+                            rowStr = row.join(', ') + '\n'
+                        }
+                        lastSetStr += rowStr
+                    })
+                })
+        
+                console.log(lastSetStr) */
 
-        let lastSetStr = ''
-        // @ts-ignore
-        lastSets.forEach((element, index) => {
-            element.forEach((row, ind) => {
-                let rowStr = ''
-                if (ind === element.length - 1) {
-                    rowStr += row.join(', ') + '\n' + '\n'
-                } else {
-                    rowStr = row.join(', ') + '\n'
-                }
-                lastSetStr += rowStr
-            })
-        })
-
-        console.log(lastSetStr)
-
-        let strX = ''
+        /* let strX = ''
         // @ts-ignore
         xTrain.forEach((element, index) => {
             element.forEach((row, ind) => {
@@ -613,11 +518,11 @@ const generateTestData = async (req, res) => {
                 }
                 strX += rowStr
             })
-        })
+        }) */
 
         // console.log(strX)
 
-        let strXT = ''
+        /* let strXT = ''
         // @ts-ignore
         xTrainTest.forEach((element, index) => {
             element.forEach((row, ind) => {
@@ -629,7 +534,7 @@ const generateTestData = async (req, res) => {
                 }
                 strXT += rowStr
             })
-        })
+        }) */
 
         // console.log(strXT)
 
@@ -752,8 +657,9 @@ const generateTestData = async (req, res) => {
 
         console.log(model.summary()) */
 
-
-        res.status(200).send({ message: 'Test data generated successfully', strX })
+        // const allData = await redisStep.hgetall('model_training_checkpoint_b288539f-a863-48ff-a830-c8418a8e9028')
+        const tickerHistory = await fetchEntireHistDataFromDb({ type: 'crypto', ticker_name: 'BTCUSDT', period: '4h' })
+        res.status(200).send({ message: 'Test data generated successfully', tickerHistory })
 
     } catch (err) {
         log.error(err.stack)

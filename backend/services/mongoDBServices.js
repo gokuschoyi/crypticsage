@@ -1710,11 +1710,12 @@ const insertHistoricalDataToDb = async (type, ticker_name, period, token_data) =
 }
 
 /**
- * Fetches the entire ticker data from db:historical_data based on thetype, ticker name and period
+ * Fetches the entire ticker data from db:historical_data based on the type, ticker name and period
  * @async
- * @param {string} type crypto | stock
- * @param {string} ticker_name the ticker name
- * @param {string} period 1m | 4h | 6h | 8h | 12h | 1d | 3d | 1w
+ * @param {Object} params
+ * @param {string} params.type crypto | forex | stock
+ * @param {string} params.ticker_name the ticker name
+ * @param {string} params.period 1m | 1h | 4h | 6h | 8h | 12h | 1d | 3d | 1w
  * @returns {Promise<Array>} An object containing the fetched data 
  * @example
  * const type = 'crypto';
@@ -1734,7 +1735,7 @@ const insertHistoricalDataToDb = async (type, ticker_name, period, token_data) =
  * }, ... {}
  * ]
  */
-const fetchEntireHistDataFromDb = async (type, ticker_name, period) => {
+const fetchEntireHistDataFromDb = async ({ type, ticker_name, period }) => {
     try {
         const db = (await client).db(HISTORICAL_DATABASE_NAME)
         const collection_name = `${type}_${ticker_name}_${period}`

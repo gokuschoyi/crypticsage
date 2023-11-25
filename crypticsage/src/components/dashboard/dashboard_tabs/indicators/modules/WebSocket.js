@@ -62,7 +62,7 @@ const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, evaluating
 
                 switch (data.action) {
                     case ACTIONS.NOTIFY:
-                        addMessage(notifyMessageBoxRef, data.message.message);
+                        addMessage(notifyMessageBoxRef, data.message);
                         break;
                     case ACTIONS.EPOCH_BEGIN:
                         setBatchResult(true)
@@ -95,7 +95,7 @@ const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, evaluating
                         // console.log('Evaluating', data.log.batch, data.log.totalNoOfBatch)
                         break;
                     case ACTIONS.EVAL_COMPLETE:
-                        setEvaluating((prev) => !prev)
+                        // setEvaluating((prev) => !prev)
                         dispatch(setPredictionScores(data.scores))
                         break;
                     case ACTIONS.PREDICTION_COMPLETED:

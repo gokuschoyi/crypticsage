@@ -53,6 +53,13 @@ function findSmallestArrayLength(obj) {
     return smallestLength === Infinity ? 0 : smallestLength; // Return 0 if no arrays were found
 }
 
+/**
+ * Calcuates the final talib result for the selected functions
+ * @param {Object} param
+ * @param {Array} param.selectedFunctions
+ * @param {Array} param.tickerHistory 
+ * @returns 
+ */
 const processSelectedFunctionsForModelTraining = async ({ selectedFunctions, tickerHistory }) => {
     let finalTalibResult = {}
     selectedFunctions.forEach((query) => {
@@ -94,6 +101,13 @@ const processSelectedFunctionsForModelTraining = async ({ selectedFunctions, tic
     return finalTalibResult
 }
 
+/**
+ * Trims the ticker history and function data based on the smallest length of the talib result
+ * @param {Object} param
+ * @param {Object} param.finalTalibResult
+ * @param {Array} param.tickerHistory 
+ * @returns {Promise<{ tickerHist: Array, finalTalibResult: Object }>}
+ */
 const trimDataBasedOnTalibSmallestLength = async ({ finalTalibResult, tickerHistory }) => {
     const smallestLength = findSmallestArrayLength(finalTalibResult)
     const diff = tickerHistory.length - smallestLength
@@ -112,10 +126,18 @@ const trimDataBasedOnTalibSmallestLength = async ({ finalTalibResult, tickerHist
         finalTalibResult[key] = finalTalibResult[key].slice(lenDiff, funcResLength + 1)
         // console.log('Function resut length after adjustment', key, lenDiff, finalTalibResult[key].length)
     })
-    return [tickerHist, finalTalibResult]
+    return { tickerHist, finalTalibResult }
 }
 
+/**
+ * Transforms the OHLCV and function data to required shape for model training
+ * @param {Object} param
+ * @param {Array} param.tickerHist
+ * @param {Object} param.finalTalibResult
+ * @returns {Promise<array>}
+ */
 const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult }) => {
+
     // Extract OHLCV and technical indicator data
     const ohlcvData = tickerHist.map((item) => [parseFloat(item.open), parseFloat(item.high), parseFloat(item.low), parseFloat(item.close), parseFloat(item.volume)])
 
@@ -129,10 +151,19 @@ const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult }) =>
         console.log('Transformed OHLCV Length : ', ohlcvData.length, 'Sample data : ', ohlcvData[0], ohlcvData[ohlcvData.length - 1])
         console.log('Combined with features Length : ', features.length, 'Sample data : ', features[features.length - 1])
     }
+
     return features
 }
 
-function standardizeData(model_type, features, to_predict) {
+/**
+ * 
+ * @param {Object} param
+ * @param {string} param.model_type
+ * @param {array} param.features
+ * @param {string} param.to_predict
+ * @returns {Promise<{ stdData: Array, label_mean: number, label_variance: number}>}
+ */
+const standardizeData = ({ model_type, features, to_predict }) => {
     const { mean, variance } = tf.moments(tf.tensor(features), 0);
     const standardizedFeatures = tf.div(tf.sub(tf.tensor(features), mean), tf.sqrt(variance));
     const stdData = standardizedFeatures.arraySync();
@@ -159,9 +190,23 @@ function standardizeData(model_type, features, to_predict) {
         // @ts-ignore
         console.log('Standardized Data Length : ', stdData.length, 'Sample data : ', stdData[stdData.length - 1])
     }
-    return [stdData, label_mean, label_variance];
+
+    // @ts-ignore
+    return { stdData, label_mean, label_variance };
 }
 
+
+/**
+ * 
+ * @param {Object} param
+ * @param {string} param.model_type
+ * @param {array} param.stdData
+ * @param {number} param.timeStep
+ * @param {number} param.lookAhead
+ * @param {string} param.e_key
+ * @param {number} param.training_size 
+ * @returns {Promise<{ trainSplit: number, xTrain:array, yTrain:array, xTrainTest:array, lastSets:array, yTrainTest:array  }>}
+ */
 const createTrainingData = async ({ model_type, stdData, timeStep, lookAhead, e_key, training_size }) => {
     const standardized_features = []
     const standardized_labels = []
@@ -290,10 +335,29 @@ const createTrainingData = async ({ model_type, stdData, timeStep, lookAhead, e_
         console.log('yTrain : ', yTrain.length, 'yTrain test : ', yTrainTest.length)
         console.log('Total Training plus Test : ', xTrain.length + xTrainTest.length)
     }
-    return [trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest]
+    return { trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest }
 }
 
-const getDateRangeForTestSet = (ticker_history, train_split, time_step, look_ahead, yTrainTest, label_mean, label_variance) => {
+/**
+ * @typedef {Object} DatesObj
+ * @property {string} openTime - The time when the store opens.
+ * @property {number} actual - Indicates whether the status is the actual/current status.
+ * @property {number} open - Indicates whether the store is open or closed.
+ */
+
+/**
+ * 
+ * @param {Object} param
+ * @param {array} param.ticker_history 
+ * @param {number} param.train_split 
+ * @param {number} param.time_step 
+ * @param {number} param.look_ahead 
+ * @param {array} param.yTrainTest 
+ * @param {number} param.label_mean 
+ * @param {number} param.label_variance 
+ * @returns {DatesObj[]}
+ */
+const getDateRangeForTestSet = ({ ticker_history, train_split, time_step, look_ahead, yTrainTest, label_mean, label_variance }) => {
     const sliced = ticker_history.slice(train_split + time_step, ticker_history.length - (look_ahead))
     let lastOriginal = yTrainTest[yTrainTest.length - 1]
     yTrainTest = yTrainTest.slice(0, -1)
@@ -431,7 +495,7 @@ const formatPredictedOutput = async ({ dates, model_type, look_ahead, tickerHist
 
             console.log('Final result length', predictionsPlusActual.length, predictionsPlusActual[0], predictionsPlusActual[predictionsPlusActual.length - 1])
             RedisUtil.saveTestPredictions(id, finalData)
-            TF_Model.eventEmitter.emit('prediction_completed', id)
+            // TF_Model.eventEmitter.emit('prediction_completed', id)
             break;
         case 'multi_input_multi_output_no_step':
             splitPoint = tickerHist.length - time_step - trainSplit - look_ahead + 1
@@ -527,13 +591,13 @@ const formatPredictedOutput = async ({ dates, model_type, look_ahead, tickerHist
                 scaled: finalResult,
             }
             RedisUtil.saveTestPredictions(id, finalData)
-            TF_Model.eventEmitter.emit('prediction_completed', id)
+            // TF_Model.eventEmitter.emit('prediction_completed', id)
             break;
         case 'multi_input_single_output_step':
             const predictions = tf.tensor(predictedPrice.slice(0, predictedPrice.length - (look_ahead - 1)))
             const actual = tf.tensor(yTrainTest)
             const [overAllRMSE, scores] = await evaluateForecast(actual, predictions);
-            TF_Model.eventEmitter.emit('eval_complete', overAllRMSE)
+            // TF_Model.eventEmitter.emit('eval_complete', overAllRMSE)
 
             console.log('Predicted first from prediction (predictedPrice): ', calculateOriginalPrice(predictedPrice[0][0][0], label_variance, label_mean))
             console.log('Predicted last from prediction (predictedPrice): ', calculateOriginalPrice(predictedPrice[predictedPrice.length - 1][0][0], label_variance, label_mean))
@@ -567,7 +631,7 @@ const formatPredictedOutput = async ({ dates, model_type, look_ahead, tickerHist
             // console.log('Final result length', predPlusActual.length, predPlusActual[0], predPlusActual[predPlusActual.length - 1])
             // console.log('Final result scaled', originalData.length, originalData[0], originalData[originalData.length - 1])
             RedisUtil.saveTestPredictions(id, finalData)
-            TF_Model.eventEmitter.emit('prediction_completed', id)
+            // TF_Model.eventEmitter.emit('prediction_completed', id)
 
         //adjusting for the look-ahead missing values which are present in the last prediction
         // const lastOriginal = yTrainTest[yTrainTest.length - 1]

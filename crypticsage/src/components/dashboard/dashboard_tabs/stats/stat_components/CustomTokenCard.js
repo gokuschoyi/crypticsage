@@ -55,18 +55,18 @@ const CustomTokenCard = (props) => {
                 </Box>
                 <Box className='high-low-box'>
                     <Paper elevation={4} sx={{ padding: '0px 5px' }} className='center-col'>
-                        <Typography sx={{ margin: '0px', fontSize: 14, fontWeight: '500', textAlign: 'left' }} gutterBottom>
+                        <Typography sx={{ margin: '0px', fontSize: 12, fontWeight: '500', textAlign: 'left' }} gutterBottom>
                             H 24h
                         </Typography>
-                        <Typography sx={{ margin: '0px', fontSize: 14, fontWeight: '500', textAlign: 'left' }} gutterBottom>
+                        <Typography sx={{ margin: '0px', fontSize: 12, fontWeight: '500', textAlign: 'left' }} gutterBottom>
                             {high_24h.toFixed(2)}
                         </Typography>
                     </Paper>
                     <Paper elevation={4} sx={{ padding: '0px 5px' }} className='center-col'>
-                        <Typography sx={{ margin: '0px', fontSize: 14, fontWeight: '500', textAlign: 'left' }} gutterBottom>
+                        <Typography sx={{ margin: '0px', fontSize: 12, fontWeight: '500', textAlign: 'left' }} gutterBottom>
                             L 24h
                         </Typography>
-                        <Typography sx={{ margin: '0px', fontSize: 14, fontWeight: '500', textAlign: 'left' }} gutterBottom>
+                        <Typography sx={{ margin: '0px', fontSize: 12, fontWeight: '500', textAlign: 'left' }} gutterBottom>
                             {low_24h.toFixed(2)}
                         </Typography>
                     </Paper>

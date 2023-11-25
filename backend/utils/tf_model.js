@@ -1,11 +1,12 @@
 const logger = require('../middleware/logger/Logger');
 const log = logger.create(__filename.slice(__dirname.length + 1))
-const EventEmitter = require('events');
 const tf = require('@tensorflow/tfjs-node');
 const cliProgress = require('cli-progress');
 const RedisUtil = require('./redis_util')
 const config = require('../config')
-const { sqrt, square } = require('@tensorflow/tfjs-core');
+const Redis = require("ioredis");
+// @ts-ignore
+const redisPublisher = new Redis();
 
 /* // Evaluate the model on the test data using `evaluate`
 console.log('Evaluate on test data');
@@ -75,7 +76,7 @@ const createModel = (model_parama) => {
             model.add(tf.layers.dense({ inputShape: [rnn_output_neurons], units: output_layer_neurons }));
             break;
         case 'multi_input_single_output_step':
-            let lstm_units = 50;
+            let lstm_units = 100;
 
             for (let index = 0; index < n_layers; index++) {
                 lstm_cells.push(tf.layers.lstmCell({ units: rnn_output_neurons }));
@@ -99,30 +100,24 @@ const createModel = (model_parama) => {
     return model
 }
 
-const eventEmitter = new EventEmitter();
-
-const epochBeginCallback = (epoch) => {
-    // console.log('Epoch Start', epoch);
-    eventEmitter.emit('epochBegin', epoch)
+const epochBeginCallback = (uid, epoch) => {
+    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'epochBegin', uid, epoch: epoch }))
 }
 
-const epochEndCallback = (epoch, log) => {
-    // console.log('Epoch Loss', epoch, "loss: ", log.loss, "mse : ", log.mse, "mae : ", log.mae, log);
-    eventEmitter.emit('epochEnd', epoch, log)
+const epochEndCallback = (uid, epoch, log) => {
+    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'epochEnd', uid, epoch: epoch, log: log }))
 };
 
-const batchEndCallback = (batch, log, totalNoOfBatch) => {
-    // console.log(batch)
+const batchEndCallback = (uid, batch, log, totalNoOfBatch) => {
     let newLog = {
         ...log,
         totalNoOfBatch
     }
-    eventEmitter.emit('batchEnd', batch, newLog)
+    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'batchEnd', uid, batch: batch, log: newLog }))
 }
 
-const onTrainEndCallback = () => {
-    // console.log('Training finished')
-    eventEmitter.emit('trainingEnd')
+const onTrainEndCallback = (uid) => {
+    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'trainingEnd', uid }))
 }
 
 // Define your early stopping callback
@@ -132,7 +127,7 @@ const earlyStopping = tf.callbacks.earlyStopping({
     verbose: 2
 });
 
-const trainModel = async (model, learning_rate, xTrain, yTrain, epochs, batch_size) => {
+const trainModel = async ({ model, learning_rate, xTrain, yTrain, epochs, batch_size, uid }) => {
     const totalNoOfBatch = Math.round(xTrain.length / batch_size)
     const xTrainTensor = tf.tensor(xTrain)
     const yTrainTensor = tf.tensor(yTrain)
@@ -158,22 +153,74 @@ const trainModel = async (model, learning_rate, xTrain, yTrain, epochs, batch_si
             callbacks: {
                 earlyStopping,
                 onEpochBegin: async (epoch) => {
-                    epochBeginCallback(epoch);
+                    epochBeginCallback(uid, epoch);
                 },
                 onEpochEnd: async (epoch, log) => {
-                    epochEndCallback(epoch, log);
+                    epochEndCallback(uid, epoch, log);
                 },
                 onBatchEnd: async (batch, log) => {
-                    batchEndCallback(batch, log, totalNoOfBatch)
+                    batchEndCallback(uid, batch, log, totalNoOfBatch)
                 },
                 onTrainEnd: async () => {
-                    onTrainEndCallback()
+                    onTrainEndCallback(uid)
                 }
             }
         });
 
-    eventEmitter.removeListener('batchEnd', batchEndCallback)
-    return [model, history]
+    return { model, history }
+}
+
+const evaluateModelOnTestSet = async ({ trained_model_, model_id, xTrainTest, yTrainTest, dates, label_mean, label_variance, uid }) => {
+    const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.legacy);
+    let history = [xTrainTest[0]]
+    let predictions = []
+    let lastPrediction = []
+    const updateFreq = 20 // Number of predictions to make before sending an update to the client
+    try {
+        bar1.start(xTrainTest.length - 1, 0);
+        for (let i = 1; i < xTrainTest.length - 1; i++) {
+            if (i % updateFreq === 0) {
+                let log = {
+                    batch: i,
+                    totalNoOfBatch: xTrainTest.length - 1
+                }
+                redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'evaluating', uid, log }))
+            }
+            bar1.update(i + 1);
+            let inputHist = history.slice(-1)
+            let historySequence = await forecast(trained_model_, inputHist)
+            predictions.push(historySequence)
+            history.push(xTrainTest[i])
+        }
+        bar1.stop();
+        const lastInputHist = xTrainTest.slice(-1)
+
+        lastPrediction = await forecast(trained_model_, lastInputHist)
+
+        let [score, scores] = evaluateForecast(yTrainTest, predictions)
+        redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'eval_complete', uid, scores: { rmse: score, scores: scores } }))
+
+        if (config.debug_flag === 'true') {
+            log.notice(`xTrain test length : ${xTrainTest.length}, yTrain test length : ${yTrainTest.length}`)
+            displayDataInTable(xTrainTest[xTrainTest.length - 1], 'xTrainTest last element')
+            console.log(yTrainTest.length, predictions.length)
+            console.log('RMSE: ', score)
+            summarizeScores('LSTM', score, scores)
+        }
+
+        let finalData = {
+            dates: dates,
+            predictions_array: predictions,
+            forecast: lastPrediction,
+            label_mean,
+            label_variance,
+        }
+
+        RedisUtil.saveTestPredictions(model_id, finalData)
+        // redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'prediction_completed', uid, id: model_id }))
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 const forecast = async (model, inputHistory) => {
@@ -200,62 +247,33 @@ const evaluateForecast = (actual, predicted) => {
     return [score, scores];
 }
 
-const evaluateModelOnTestSet = async (trained_model_, model_id, xTrainTest, yTrainTest, dates, label_mean, label_variance) => {
-    const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.legacy);
-    let history = [xTrainTest[0]]
-    let predictions = []
-    let lastPrediction = []
-    const updateFreq = 20 // Number of predictions to make before sending an update to the client
-    try {
-        bar1.start(xTrainTest.length - 1, 0);
-        for (let i = 1; i < xTrainTest.length - 1; i++) {
-            if (i % updateFreq === 0) {
-                let log = {
-                    batch: i,
-                    totalNoOfBatch: xTrainTest.length - 1
-                }
-                eventEmitter.emit('evaluating', log)
-            }
-            bar1.update(i + 1);
-            let inputHist = history.slice(-1)
-            let historySequence = await forecast(trained_model_, inputHist)
-            predictions.push(historySequence)
-            history.push(xTrainTest[i])
-        }
-        bar1.stop();
-        const lastInputHist = xTrainTest.slice(-1)
-
-        lastPrediction = await forecast(trained_model_, lastInputHist)
-
-        let [score, scores] = evaluateForecast(yTrainTest, predictions)
-        eventEmitter.emit('eval_complete', { rmse: score, scores: scores })
-
-        if (config.debug_flag === 'true') {
-            log.notice(`xTrain test length : ${xTrainTest.length}, yTrain test length : ${yTrainTest.length}`)
-            displayDataInTable(xTrainTest[xTrainTest.length - 1], 'xTrainTest last element')
-            console.log(yTrainTest.length, predictions.length)
-            console.log('RMSE: ', score, predictions.length)
-            summarizeScores('LSTM', score, scores)
-        }
-
-        let finalData = {
-            dates: dates,
-            predictions_array: predictions,
-            forecast: lastPrediction,
-            label_mean,
-            label_variance,
-        }
-
-        RedisUtil.saveTestPredictions(model_id, finalData)
-        eventEmitter.emit('prediction_completed', model_id)
-    } catch (error) {
-        console.log(error)
-    }
-}
-
 const summarizeScores = (name, score, scores) => {
     let s = scores.map(x => x.toFixed(2)).join(',');
     console.log(`${name}: [${score.toFixed(2)}] ${s}`);
+}
+
+
+const saveModel = async (model, model_id) => {
+    await model.save(`file://./models/${model_id}`).then((res) => {
+        log.info('Model saved successfully')
+        console.log(res)
+    });
+}
+
+const loadModel = async (model_id) => {
+    log.info('Loading model from saved file')
+    let model = null;
+    try {
+        model = await tf.loadLayersModel(`file://./models/${model_id}/model.json`)
+    } catch (error) {
+        model = null
+        throw error
+    }
+    return model
+}
+
+const disposeModel = (model) => {
+    model.dispose()
 }
 
 const makePredictions = async (model, xTest, forecastData) => {
@@ -271,23 +289,13 @@ const makePredictions = async (model, xTest, forecastData) => {
     return [predictions.arraySync(), forecast.arraySync()]
 }
 
-const saveModel = async (model, model_id) => {
-    await model.save(`file://./models/${model_id}`).then((res) => {
-        model.dispose()
-    });
-}
-
-const disposeModel = (model) => {
-    model.dispose()
-}
-
 module.exports = {
     createModel,
     trainModel,
     evaluateModelOnTestSet,
     summarizeScores,
-    makePredictions,
     saveModel,
+    loadModel,
     disposeModel,
-    eventEmitter
+    makePredictions,
 }

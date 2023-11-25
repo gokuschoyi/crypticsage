@@ -277,27 +277,27 @@ const periodToMilliseconds = (period) => {
 const generateMSESteps = (period) => {
     switch (period) {
         case '1m':
-            return 1;
+            return { value: 1, unit: 'm' };
         case '1h':
-            return 1;
+            return { value: 1, unit: 'h' };
         case '4h':
-            return 4;
+            return { value: 4, unit: 'h' };
         case '6h':
-            return 6;
+            return { value: 6, unit: 'h' };
         case '8h':
-            return 8;
+            return { value: 8, unit: 'h' };
         case '12h':
-            return 12;
+            return { value: 12, unit: 'h' };
         case '1d':
-            return 24;
+            return { value: 1, unit: 'd' };
         case '3d':
-            return 3;
+            return { value: 3, unit: 'd' };
         case '1w':
-            return 7;
+            return { value: 1, unit: 'w' };
         default:
-            return 24;
+            return { value: 24, unit: 'h' };
     }
-}
+};
 
 const generateRandomModelName = () => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -1238,9 +1238,10 @@ const CryptoModule = () => {
                                                             <NoMaxWidthTooltip
                                                                 title={(
                                                                     <PredictionMSETable data={model_data.score.scores.map((item, index) => {
+                                                                        const { value, unit } = generateMSESteps(selectedTickerPeriod);
                                                                         return (
                                                                             {
-                                                                                date: `+${generateMSESteps(selectedTickerPeriod) * (index + 1)}h`,
+                                                                                date: `+${value * (index + 1)}${unit}`,
                                                                                 rmse: item
                                                                             }
                                                                         )
@@ -1268,7 +1269,7 @@ const CryptoModule = () => {
                                             <Box className={`model-progress_{}`} width='100%' variant='h6'>
                                                 <div className='batch-end'>
                                                     <div style={{ fontWeight: '600', fontSize: '0.75rem', width: '105px', textAlign: 'start' }} id='batch-no'></div>
-                                                    <div style={{display:'flex', flexDirection:'row', gap:'10px'}}>
+                                                    <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
                                                         <div className='batch-end-text' id='loss'></div>
                                                         <div className='batch-end-text' id='mse'></div>
                                                         <div className='batch-end-text' id='mae'></div>
