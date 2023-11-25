@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Box, useTheme, Skeleton, Typography, Paper } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { useSelector, useDispatch } from 'react-redux';
@@ -74,7 +74,8 @@ const PredictionsChart = (props) => {
     const chartData = useSelector(state => state.cryptoModule.modelData.predictedValues)
     // console.log(chartData)
 
-    const predictedValueRedux = useMemo(() => chartData[predictionChartType] || [], [chartData, predictionChartType]);
+    const [predictedValueRedux, setPredictedValue] = React.useState([])
+    // const predictedValueRedux = useMemo(() => chartData[predictionChartType] || [], [chartData, predictionChartType]);
 
     const predictionsChartRef = useRef(null)
     const chart = useRef(null)
@@ -82,6 +83,17 @@ const PredictionsChart = (props) => {
     const predictedValueRef = useRef(null)
     const allPredictions = useSelector(state => state.cryptoModule.modelData.predictedValues.predictions_array)
     const dates = useSelector(state => state.cryptoModule.modelData.predictedValues.dates)
+
+    useEffect(() => {
+        // console.log('UE : Predctions Chart')
+        if (chartData.standardized.length === 0 || chartData.scaled.length === 0) {
+            setPredictedValue([])
+            return
+        }
+        else {
+            setPredictedValue(chartData[predictionChartType])
+        }
+    }, [chartData, predictionChartType])
 
     // This useEffect is used to shift the predicted values to the right based on the prediction look ahead
     useEffect(() => {
@@ -155,34 +167,8 @@ const PredictionsChart = (props) => {
 
             dispatch(setStandardizedAndScaledPredictions({ standardized: shiftedPredictedValues, scaled: originalDataAfterShifting }))
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [predictionLookAhead, predictionChartType])
-
-    // This useEffect is used to calculate the metrics of the model
-    useEffect(() => {
-        // console.log('UE : Predctions Chart metrics')
-        if (predictedValueRedux.length === 0 || !predictionsChartRef.current) {
-            return
-        } else {
-            const metrics = calculateMetrics(predictedValueRedux);
-            // console.log(metrics)
-
-            let mscSt = calculateMSE(chartData.standardized.map((value) => value.actual), chartData.standardized.map((value) => value.predicted))
-            // console.log('Standardized : ',mscSt)
-
-            let mse = calculateMSE(chartData.scaled.map((value) => value.actual), chartData.scaled.map((value) => value.predicted))
-            // console.log('Scaled : ',mse)
-
-            setModelMetrics((prev) => prev = {
-                metrics,
-                mseStandardized: mscSt,
-                mseScaled: mse
-            })
-            // console.log(predictionChartType, predictionLookAhead, metrics, mscSt, mse)
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [predictedValueRedux])
-
+        
+    }, [predictionLookAhead, predictionChartType, dates, allPredictions, chartData.forecast, chartData.label_variance, chartData.label_mean, dispatch])
 
     // creates the chart
     useEffect(() => {
@@ -229,69 +215,62 @@ const PredictionsChart = (props) => {
             });
             chart.current.timeScale().fitContent();
             let markers = []
-            switch (model_type) {
-                case 'multi_input_single_output_step':
-                    const actual_values = predictedValueRedux
-                        .filter((prediction) => prediction.actual !== null)
-                        .map((prediction) => ({
+
+            const actual_values = predictedValueRedux
+                .filter((prediction) => prediction.actual !== null)
+                .map((prediction) => ({
+                    time: prediction.open,
+                    value: prediction.actual,
+                }));
+
+            const predicted_values = predictedValueRedux
+                .map((prediction, index) => {
+                    if (prediction.predicted === null) {
+                        return {
                             time: prediction.open,
-                            value: prediction.actual,
-                        }));
-
-                    const predicted_values = predictedValueRedux
-                        .map((prediction, index) => {
-                            if (prediction.predicted === null) {
-                                return {
-                                    time: prediction.open,
-                                    value: prediction.predicted,
-                                    color: 'transparent'
-                                }
-                            } else {
-                                if (index < predictedValueRedux.length - (lookAhead + 1)) {
-                                    return {
-                                        time: prediction.open,
-                                        value: prediction.predicted,
-                                    }
-
-                                } else {
-                                    return {
-                                        time: prediction.open,
-                                        value: prediction.predicted,
-                                        color: forecastColor,
-                                    }
-                                }
+                            value: prediction.predicted,
+                            color: 'transparent'
+                        }
+                    } else {
+                        if (index < predictedValueRedux.length - (lookAhead + 1)) {
+                            return {
+                                time: prediction.open,
+                                value: prediction.predicted,
                             }
-                        })
 
-                    // console.log('act-length', actual_values.length)
-                    // console.log('pred-length', predicted_values.length)
+                        } else {
+                            return {
+                                time: prediction.open,
+                                value: prediction.predicted,
+                                color: forecastColor,
+                            }
+                        }
+                    }
+                })
 
-                    actualValueRef.current = chart.current.addLineSeries({
-                        lineWidth: 2,
-                    });
-                    actualValueRef.current.setData(actual_values);
+            // console.log('act-length', actual_values.length)
+            // console.log('pred-length', predicted_values.length)
 
-                    predictedValueRef.current = chart.current.addLineSeries({
-                        lineWidth: 2,
-                    });
+            actualValueRef.current = chart.current.addLineSeries({
+                lineWidth: 2,
+            });
+            actualValueRef.current.setData(actual_values);
 
-                    markers.push({
-                        time: predicted_values[predicted_values.length - lookAhead].time,
-                        position: 'aboveBar',
-                        color: 'red',
-                        shape: 'circle',
-                        text: 'prediction',
-                        size: 0.4
-                    })
+            predictedValueRef.current = chart.current.addLineSeries({
+                lineWidth: 2,
+            });
 
-                    predictedValueRef.current.setData(predicted_values);
-                    predictedValueRef.current.setMarkers(markers)
-                    break;
+            markers.push({
+                time: predicted_values[predicted_values.length - lookAhead].time,
+                position: 'aboveBar',
+                color: 'red',
+                shape: 'circle',
+                text: 'prediction',
+                size: 0.4
+            })
 
-                default:
-                    console.log('No model')
-                    break;
-            }
+            predictedValueRef.current.setData(predicted_values);
+            predictedValueRef.current.setMarkers(markers)
 
             window.addEventListener('resize', handleResize);
         }
@@ -306,56 +285,44 @@ const PredictionsChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictedValueRedux])
 
+    // This useEffect is used to calculate the metrics of the model
+    useEffect(() => {
+        // console.log('UE : Predctions Chart metrics')
+        if (predictedValueRedux.length === 0 || !predictionsChartRef.current) {
+            return
+        } else {
+            const metrics = calculateMetrics(predictedValueRedux);
+            // console.log(metrics)
+
+            let mscSt = calculateMSE(chartData.standardized.map((value) => value.actual), chartData.standardized.map((value) => value.predicted))
+            // console.log('Standardized : ',mscSt)
+
+            let mse = calculateMSE(chartData.scaled.map((value) => value.actual), chartData.scaled.map((value) => value.predicted))
+            // console.log('Scaled : ',mse)
+
+            setModelMetrics((prev) => prev = {
+                metrics,
+                mseStandardized: mscSt,
+                mseScaled: mse
+            })
+            // console.log(predictionChartType, predictionLookAhead, metrics, mscSt, mse)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chartData])
+
     // setting markers and applying theme
     useEffect(() => {
         // console.log('UE : Predctions Chart markers')
         if (predictedValueRedux.length === 0 || !predictionsChartRef.current) {
             return
         } else {
-            /* const predicted_values = predictedValueRedux
-                .map((prediction, index) => {
-                    if (prediction.predicted === null) {
-                        return {
-                            time: prediction.open,
-                            value: prediction.predicted,
-                            color: 'transparent'
-                        }
-                    } else {
-                        if (index < predictedValueRedux.length - (lookAhead + 1)) {
-                            return {
-                                time: prediction.open,
-                                value: prediction.predicted,
-                                color: predictedColor,
-                            }
-
-                        } else {
-                            return {
-                                time: prediction.open,
-                                value: prediction.predicted,
-                                color: forecastColor,
-                            }
-                        }
-                    }
-                })
-
-            predictedValueRef.current.setData(predicted_values); */
             predictedValueRef.current.applyOptions({
-                color : predictedColor,
+                color: predictedColor,
             });
 
             actualValueRef.current.applyOptions({
                 color: actualColor,
             });
-
-            /* const actual_values = predictedValueRedux
-                .filter((prediction) => prediction.actual !== null)
-                .map((prediction) => ({
-                    time: prediction.open,
-                    value: prediction.actual,
-                    color: actualColor,
-                }));
-
-            actualValueRef.current.setData(actual_values); */
 
             let thresholdLower = 0.01
             const tpMarkers = chartData[predictionChartType]
