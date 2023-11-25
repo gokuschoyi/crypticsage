@@ -9,6 +9,7 @@ import {
     setModelSavedToDb,
     setModelId,
     setTrainingParameters,
+    setPredictionPaletteId,
     setStartWebSocket,
     resetCurrentModelData,
     resetModelData,
@@ -55,6 +56,44 @@ import AspectRatioIcon from '@mui/icons-material/AspectRatio';
 import { Success, Info } from '../../../global/CustomToasts'
 
 import PredictionsChart from '../components/PredictionsChart';
+
+const colorCombinations = [
+    {
+        actual: '#0047AB', // Deep Blue
+        predicted: '#FFA500', // Vibrant Orange
+        forecast: '#FFD700', // Bright Yellow
+        TP_up: '#FF69B4', // Hot Pink (for TP_up)
+        TP_down: '#00FA9A' // Medium Spring Green (for TP_down)
+    },
+    {
+        actual: '#B22222', // Classic Red
+        predicted: '#008080', // Soft Teal
+        forecast: '#BC8F8F', // Gentle Lavender
+        TP_up: '#FFFF00', // Yellow (for TP_up)
+        TP_down: '#FF6347' // Tomato (for TP_down)
+    },
+    {
+        actual: '#228B22', // Forest Green
+        predicted: '#800080', // Rich Purple
+        forecast: '#87CEEB', // Sky Blue
+        TP_up: '#FF4500', // Orange Red (for TP_up)
+        TP_down: '#20B2AA' // Light Sea Green (for TP_down)
+    },
+    {
+        actual: '#2F4F4F', // Dark Slate Gray
+        predicted: '#FF7F50', // Bright Coral
+        forecast: '#98FB98', // Pale Green
+        TP_up: '#00CED1', // Dark Turquoise (for TP_up)
+        TP_down: '#FFB6C1' // Light Pink (for TP_down)
+    },
+    {
+        actual: '#1E90FF', // Dark Slate Gray
+        predicted: '#32CD32', // Bright Coral
+        forecast: '#9370DB', // Pale Green
+        TP_up: '#FFD700', // Dark Turquoise (for TP_up)
+        TP_down: '#FF69B4' // Hot Pink (for TP_down)
+    }
+];
 
 const TICKER_PERIODS = [
     '1m',
@@ -176,7 +215,7 @@ const NoMaxWidthTooltip = styled(({ className, ...props }) => (
 });
 
 const PredictionMSETable = ({ data }) => {
-    console.log(data)
+    // console.log(data)
 
     return (
         <table>
@@ -920,6 +959,16 @@ const CryptoModule = () => {
 
     const [modelMetrics, setModelMetrics] = useState({ metrics: {}, mseStandardized: {}, mseScaled: {} })
 
+    const paletteIdRedux = useSelector(state => state.cryptoModule.modelData.predictionPaletteId)
+    const [predictionChartPalette, setPredictionChartPalette] = useState(colorCombinations[paletteIdRedux])
+    const handlePredictionChartPalette = ({ id }) => {
+        console.log(id)
+        dispatch(setPredictionPaletteId(id))
+        setPredictionChartPalette(colorCombinations[id])
+        // console.log(colorCombinations[id])
+    }
+
+
     return (
         <Box className='crypto-module-container'>
             <Box width='-webkit-fill-available'>
@@ -1134,56 +1183,76 @@ const CryptoModule = () => {
                         </Grid>
 
                         <Grid item xs={12} sm={12} md={8} lg={6} xl={6} pl={2} pr={2} pb={2} className='predictions-chart-grid'>
-                            <Box display='flex' flexDirection='column' pb={2}>
+                            <Box display='flex' flexDirection='column' pb={1}>
                                 <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' className='prediction-chart-header'>
-                                    <Typography variant='h5' textAlign='start'>Predictions Chart</Typography>
+                                    <Box display='flex' flexDirection='column' alignItems='start'>
+                                        <Typography variant='h5' textAlign='start'>Predictions Chart</Typography>
+                                        <Typography variant='custom' textAlign='start'>{predictionChartType}</Typography>
+                                    </Box>
                                     {predictedVlauesRedux.length !== 0 &&
-                                        <Box display='flex' flexDirection='row' gap={'4px'} alignItems='center' className='model-chart-action-container'>
-                                            <TextField
-                                                size='small'
-                                                inputProps={{ style: { height: '10px' } }}
-                                                id="outlined-controlled"
-                                                label="Model name"
-                                                value={modelName}
-                                                onChange={(event) => {
-                                                    setModelName(event.target.value);
-                                                }}
-                                            />
-                                            <Box className='model-chart-action-box'>
-                                                <Tooltip title={'Save Model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                                    <span>
-                                                        <IconButton onClick={handleSaveModel.bind(null, {})}>
-                                                            <SaveIcon className='small-icon' />
-                                                        </IconButton>
-                                                    </span>
-                                                </Tooltip>
-                                                {!model_data.model_saved_to_db &&
-                                                    <Tooltip title={'Delete the current model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                        <Box className='chart-action-box'>
+                                            <Box display='flex' flexDirection='row' gap={'4px'} alignItems='center' className='model-chart-action-container'>
+                                                <TextField
+                                                    size='small'
+                                                    inputProps={{ style: { height: '10px' } }}
+                                                    id="outlined-controlled"
+                                                    label="Model name"
+                                                    value={modelName}
+                                                    onChange={(event) => {
+                                                        setModelName(event.target.value);
+                                                    }}
+                                                />
+                                                <Box className='model-chart-action-box'>
+                                                    <Tooltip title={'Save Model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                                                         <span>
-                                                            <IconButton onClick={handleDeleteModel.bind(null, {})}>
-                                                                <DeleteForeverIcon className='small-icon' />
+                                                            <IconButton onClick={handleSaveModel.bind(null, {})}>
+                                                                <SaveIcon className='small-icon' />
                                                             </IconButton>
                                                         </span>
                                                     </Tooltip>
-                                                }
-                                                {modelParams.modelType !== 'Single Step Multiple Output' &&
-                                                    <React.Fragment>
-                                                        <Tooltip title={'Normalized values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                    {!model_data.model_saved_to_db &&
+                                                        <Tooltip title={'Delete the current model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                                                             <span>
-                                                                <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "standardized" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })}>
-                                                                    <OpenInFullIcon className='small-icon' />
+                                                                <IconButton onClick={handleDeleteModel.bind(null, {})}>
+                                                                    <DeleteForeverIcon className='small-icon' />
                                                                 </IconButton>
                                                             </span>
                                                         </Tooltip>
-                                                        <Tooltip title={'Scaled values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                                            <span>
-                                                                <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })}>
-                                                                    <CloseFullscreenIcon className='small-icon' />
-                                                                </IconButton>
-                                                            </span>
-                                                        </Tooltip>
-                                                    </React.Fragment>
-                                                }
+                                                    }
+                                                    {modelParams.modelType !== 'Single Step Multiple Output' &&
+                                                        <React.Fragment>
+                                                            <Tooltip title={'Normalized values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                                <span>
+                                                                    <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "standardized" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })}>
+                                                                        <OpenInFullIcon className='small-icon' />
+                                                                    </IconButton>
+                                                                </span>
+                                                            </Tooltip>
+                                                            <Tooltip title={'Scaled values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                                <span>
+                                                                    <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })}>
+                                                                        <CloseFullscreenIcon className='small-icon' />
+                                                                    </IconButton>
+                                                                </span>
+                                                            </Tooltip>
+                                                        </React.Fragment>
+                                                    }
+                                                </Box>
+                                            </Box>
+
+                                            <Box display='flex' flexDirection='row' gap='17px' paddingRight='6px'>
+                                                {colorCombinations.map((palette, index) => (
+                                                    <Box key={index} sx={{
+                                                        width: "10px",
+                                                        height: "10px",
+                                                        borderRadius: "50%",
+                                                        backgroundColor: `${palette.actual}`,
+                                                        cursor: 'pointer',
+                                                        border: `${paletteIdRedux === index ? '1px solid #fff' : 'none'}`,
+                                                    }}
+                                                        onClick={handlePredictionChartPalette.bind(null, { id: index })}
+                                                    />
+                                                ))}
                                             </Box>
                                         </Box>
                                     }
@@ -1197,31 +1266,34 @@ const CryptoModule = () => {
                                 lookAhead={modelParams.lookAhead}
                                 predictionLookAhead={predictionLookAhead}
                                 setModelMetrics={setModelMetrics}
+                                predictionsPalette={predictionChartPalette}
                             />
 
                             <Box className='main-training-status-box' pt={1} gap={'4px'} display='flex' flexDirection='column'>
 
                                 {/* epoch end results */}
-                                <Box className='epoch-end-progress-box' pt={1}>
-                                    {(epochResults.length > 0) && epochResults.map((result, index) => {
-                                        return (
-                                            <Box key={index} className={`epoch_${index} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px', justifyContent: 'space-between' }}>
-                                                <div className='epoch-no' style={{ fontWeight: '600', fontSize: '0.75rem', minWidth: '60px', textAlign: 'start' }}>E : {result.epoch}</div>
-                                                <Box className={`model-progress_${index}`} variant='h6'>
-                                                    <div className='epoch-end'>
-                                                        <div className='batch-end-text'>Loss : {result.loss}</div>
-                                                        <div className='batch-end-text'>MSE : {result.mse}</div>
-                                                        <div className='batch-end-text'>MAE : {result.mae}</div>
-                                                    </div>
+                                {epochResults.length > 0 && (
+                                    <Box className='epoch-end-progress-box' pt={1}>
+                                        {epochResults.map((result, index) => {
+                                            return (
+                                                <Box key={index} className={`epoch_${index} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px', justifyContent: 'space-between' }}>
+                                                    <div className='epoch-no' style={{ fontWeight: '600', fontSize: '0.75rem', minWidth: '60px', textAlign: 'start' }}>E : {result.epoch}</div>
+                                                    <Box className={`model-progress_${index}`} variant='h6'>
+                                                        <div className='epoch-end'>
+                                                            <div className='batch-end-text'>Loss : {result.loss}</div>
+                                                            <div className='batch-end-text'>MSE : {result.mse}</div>
+                                                            <div className='batch-end-text'>MAE : {result.mae}</div>
+                                                        </div>
+                                                    </Box>
                                                 </Box>
-                                            </Box>
-                                        )
-                                    })}
-                                </Box>
+                                            )
+                                        })}
+                                    </Box>
+                                )}
 
                                 {/* Prediction set RMSE results */}
                                 {model_data.score.over_all_score !== 0 &&
-                                    <Box width='100%'>
+                                    <Box width='100%' className='test-set-prediction-result'>
                                         <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
                                             <thead className='table-group'>
                                                 <tr className='table-row'>
@@ -1263,12 +1335,12 @@ const CryptoModule = () => {
                                 }
 
                                 {/* epoch batch results */}
-                                <Box className='batch-end-progress-box' pt={1}>
-                                    {batchResult && (
+                                {batchResult && (
+                                    <Box className='batch-end-progress-box' pt={1}>
                                         <Box className={`epoch_{} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
                                             <Box className={`model-progress_{}`} width='100%' variant='h6'>
                                                 <div className='batch-end'>
-                                                    <div style={{ fontWeight: '600', fontSize: '0.75rem', width: '105px', textAlign: 'start' }} id='batch-no'></div>
+                                                    <div style={{ fontWeight: '600', fontSize: '0.75rem', minWidth: '105px', textAlign: 'start' }} id='batch-no'></div>
                                                     <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
                                                         <div className='batch-end-text' id='loss'></div>
                                                         <div className='batch-end-text' id='mse'></div>
@@ -1277,13 +1349,13 @@ const CryptoModule = () => {
                                                 </div>
                                             </Box>
                                         </Box>
-                                    )
-                                    }
-                                </Box>
+                                    </Box>
+                                )
+                                }
 
                                 {/* Test set evaluating result */}
-                                <Box className='evaluating-set-progress-box' pt={1}>
-                                    {evaluating && (
+                                {evaluating && (
+                                    <Box className='evaluating-set-progress-box' pt={1}>
                                         <Box className={`epoch_{} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
                                             <Box className={`model-progress_{}`} variant='h6'>
                                                 <div className='eval-end'>
@@ -1291,9 +1363,9 @@ const CryptoModule = () => {
                                                 </div>
                                             </Box>
                                         </Box>
-                                    )
-                                    }
-                                </Box>
+                                    </Box>
+                                )
+                                }
 
                                 {/* Prediction set metrics */}
                                 {(predictedVlauesRedux.length !== 0) &&
@@ -1314,7 +1386,7 @@ const CryptoModule = () => {
                                             {Object.keys(modelMetrics.metrics).length > 0 && (
                                                 <Box display='flex' flexDirection='column' gap='4px'>
                                                     <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%'>
-                                                        <Paper elevation={4} style={{ width: '70%', justifyContent: 'space-between', display: 'flex', flexDirection: 'row', gap: '4px' }}>
+                                                        <Paper elevation={4} style={{ width: '70%', justifyContent: 'space-between', display: 'flex', flexDirection: 'row', gap: '4px', padding: '0px 10px' }}>
                                                             <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TP</span> : {modelMetrics.metrics.TP}</Typography>
                                                             <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FN</span> : {modelMetrics.metrics.FN}</Typography>
                                                             <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TN</span> : {modelMetrics.metrics.TN}</Typography>

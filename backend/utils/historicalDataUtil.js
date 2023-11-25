@@ -219,7 +219,6 @@ const calculateUpdateTickerEndDate = ({ openTime, period }) => {
     const periodInMilli = periodToMilliseconds(period)
     const currentTime = new Date().getTime()
     let fetchLength = Math.floor((currentTime - openTime) / periodInMilli)
-    log.info()
 
     let end
     switch (period) {

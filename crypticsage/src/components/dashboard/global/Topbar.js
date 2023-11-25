@@ -6,21 +6,19 @@ import { ColorModeContext } from "../../../themes/theme";
 import { resetSettingsState } from '../dashboard_tabs/settings/SettingsSlice'
 import { resetSectionState } from '../dashboard_tabs/sections/SectionSlice';
 import { handleReduxToggleSmallScreenSidebar, resetSidebarState } from "./SideBarSlice";
-import { resetAuthState } from "../../authorization/authSlice";
+import { setUserTheme, resetAuthState } from "../../authorization/authSlice";
 import { resetStatsState } from '../dashboard_tabs/stats/StatsSlice.js';
 import { resetTransformedData } from "../dashboard_tabs/quiz/QuizSlice";
 import { resetIndicatorsState } from '../dashboard_tabs/indicators/IndicatorsSlice'
 import { resetCryptoStockModule } from '../dashboard_tabs/indicators/modules/CryptoModuleSlice'
 import { resetStocksDataInDbRedux } from '../dashboard_tabs/indicators/modules/StockModuleSlice'
 import { useSelector, useDispatch } from 'react-redux';
-import InputBase from "@mui/material/InputBase";
 import {
     LightModeOutlinedIcon,
     DarkModeOutlinedIcon,
     NotificationsOutlinedIcon,
     SettingsOutlinedIcon,
     PersonOutlinedIcon,
-    SearchIcon,
     ExploreOutlinedIcon,
     AddReactionOutlinedIcon,
     AdminPanelSettingsOutlinedIcon,
@@ -71,6 +69,24 @@ const Topbar = (props) => {
     const mode = theme.palette.mode;
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
 
+    const colorMode = useContext(ColorModeContext);
+
+    const userTheme = useSelector(state => state.auth.preferences.theme);
+    
+    const toggleTheme = () => {
+        dispatch(setUserTheme({ theme: !userTheme }))
+    }
+
+    useEffect(() => {
+        // console.log('UE : theme setting', userTheme, mode)
+        if (userTheme === true && mode !== 'dark') {
+            colorMode.toggleColorMode()
+        } else if (userTheme === false && mode !== 'light') {
+            colorMode.toggleColorMode()
+        }
+    }, [userTheme, mode, colorMode])
+
+
     const smallScreenSidebarLoad = useRef(false)
     useEffect(() => {
         if (!smallScreenSidebarLoad.current) { // Only run if the component is mounted
@@ -118,7 +134,6 @@ const Topbar = (props) => {
     }
 
 
-    const colorMode = useContext(ColorModeContext);
     // console.log(toggleNotifications);
     const dispatch = useDispatch();
     const logOut = async () => {
@@ -277,7 +292,7 @@ const Topbar = (props) => {
                 {theme.palette.mode === "dark" ?
                     (
                         <Box display='flex'>
-                            <IconButton onClick={colorMode.toggleColorMode}>
+                            <IconButton onClick={toggleTheme}>
                                 <LightModeOutlinedIcon />
                             </IconButton>
                             <IconButton onClick={setToggleNotifications}>
@@ -296,7 +311,7 @@ const Topbar = (props) => {
                     :
                     (
                         <Box display='flex'>
-                            <IconButton onClick={colorMode.toggleColorMode}>
+                            <IconButton onClick={toggleTheme}>
                                 <DarkModeOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
                             </IconButton>
                             <IconButton onClick={setToggleNotifications}>

@@ -11,7 +11,7 @@ const initialState = {
     mobile_number: '',
     admin_status: false,
     photoUrl: '',
-    user_lesson_status:{}
+    user_lesson_status: {}
 }
 
 const authSlice = createSlice({
@@ -41,6 +41,10 @@ const authSlice = createSlice({
         setUserPreferences: (state, action) => {
             state.preferences.dashboardHover = action.payload.dashboardHover;
             state.preferences.collapsedSidebar = action.payload.collapsedSidebar;
+            state.preferences.theme = action.payload.theme;
+        },
+        setUserTheme: (state, action) => {
+            state.preferences.theme = action.payload.theme;
         },
         setUserLessonStatus: (state, action) => {
             state.user_lesson_status = action.payload;
@@ -50,6 +54,7 @@ const authSlice = createSlice({
             state.displayName = '';
             state.email = '';
             state.emailVerified = '';
+            state.passwordEmptyFlag = '';
             state.photoUrl = '';
             state.uid = '';
             state.preferences = {};
@@ -67,6 +72,7 @@ export const {
     setNewProfileImage,
     setNewUserData,
     setUserPreferences,
+    setUserTheme,
     setUserLessonStatus,
     resetAuthState
 } = actions;

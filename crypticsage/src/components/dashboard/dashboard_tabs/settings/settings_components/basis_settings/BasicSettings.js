@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import './BasicSettings.css'
 import { createCanvas } from 'canvas';
-import { Box, Grid, Typography, Button, IconButton, TextField, InputAdornment, Switch, FormControlLabel, useTheme } from '@mui/material'
+import { Box, Grid, Typography, Button, IconButton, TextField, InputAdornment, Switch, FormControlLabel, useTheme, Paper } from '@mui/material'
 import { CheckOutlinedIcon, CameraAltIcon, ClearOutlinedIcon, VisibilityOff, Visibility } from '../../../../global/Icons'
 import { verifyPassword, updatePassword, updateProfileImage, updateUserData, updatePreferences } from '../../../../../../api/user'
 import { Success, Error, Info } from '../../../../global/CustomToasts'
@@ -99,21 +99,16 @@ const BasicSettings = () => {
     }
 
     const textFieldStyle = {
-        marginTop: '10px',
-        marginBotton: '10px',
+
         width: '100%',
-        '& label.Mui-focused': {
-            color: 'white',
-            paddingBottom: '10px',
-        },
-        '& label': {
-            color: 'white',
-        },
         '& .MuiOutlinedInput-root': {
-            '&:hover fieldset': {
-                borderColor: 'red',
-            },
-        }
+            '& fieldset': {
+                borderColor: '#E0E3E2',
+            }
+        },
+        '& .MuiInputLabel-root': {
+            top: '-5px'
+        },
     }
 
     const currentPasswordData = {
@@ -266,20 +261,32 @@ const BasicSettings = () => {
     const [navbarCollapse, setNavbarCollapse] = useState(userPreferences.collapsedSidebar)
     const handleNavbarCollapseLabel = (e) => {
         if (e.target.checked) {
+            console.log('Dark')
             setNavbarCollapse((prev) => !prev)
         } else {
+            console.log('Light')
             setNavbarCollapse((prev) => !prev)
         }
     }
 
+    const [userTheme, setUserTheme] = useState(userPreferences.theme)
+    const handleUserTheme = (e) => {
+        if (e.target.checked) {
+            setUserTheme((prev) => !prev)
+        } else {
+            setUserTheme((prev) => !prev)
+        }
+    }
+
     const handleUserPreferenceSave = async (e) => {
-        if (dahsboardHoverLabel === userPreferences.dashboardHover && navbarCollapse === userPreferences.collapsedSidebar) {
+        if (dahsboardHoverLabel === userPreferences.dashboardHover && navbarCollapse === userPreferences.collapsedSidebar && userTheme === userPreferences.theme) {
             Info('No changes made')
             return
         } else {
             let editedPreferences = {
                 dashboardHover: dahsboardHoverLabel,
-                collapsedSidebar: navbarCollapse
+                collapsedSidebar: navbarCollapse,
+                theme: userTheme
             }
             let data = {
                 token: user.accessToken,
@@ -290,7 +297,7 @@ const BasicSettings = () => {
             try {
                 let res = await updatePreferences(data)
                 dispatch(setUserPreferences(editedPreferences))
-                console.log(editedPreferences)
+                // console.log(editedPreferences)
                 Success(res.data.message)
             } catch (err) {
                 if (err.response) {
@@ -364,6 +371,7 @@ const BasicSettings = () => {
                         <Box className='basic-settings-input-container'>
                             <Box display='flex' alignItems='baseline' justifyContent='space-between'>
                                 <TextField
+                                    inputProps={{ style: { height: '10px' } }}
                                     error={userDetails.displayName.error}
                                     helperText={userDetails.displayName.helperText}
                                     onChange={(e) => handleUserDetailsChange(e)}
@@ -378,6 +386,7 @@ const BasicSettings = () => {
                             </Box>
                             <Box display='flex' alignItems='baseline' justifyContent='space-between'>
                                 <TextField sx={textFieldStyle}
+                                    inputProps={{ style: { height: '10px' } }}
                                     error={userDetails.mobileNumber.error}
                                     helperText={userDetails.mobileNumber.helperText}
                                     onChange={(e) => handleUserDetailsChange(e)}
@@ -403,7 +412,7 @@ const BasicSettings = () => {
                         <Box className='preference-box'>
                             <Typography textAlign='start' variant='h4' color='secondary'>PREFERENCES</Typography>
                             <Box className='preference-box-container'>
-                                <Box className='preference-box-item'>
+                                <Paper className='preference-box-item' sx={{padding:'0px 10px'}}>
                                     <Typography textAlign='start' variant='h6' color='secondary'>Dahsboard Hover</Typography>
                                     <Box display='flex' sx={{ width: '100px' }}>
                                         <FormControlLabel
@@ -414,8 +423,8 @@ const BasicSettings = () => {
                                             onChange={(e) => handleDashboardHoverLabel(e)}
                                         />
                                     </Box>
-                                </Box>
-                                <Box className='preference-box-item'>
+                                </Paper>
+                                <Paper className='preference-box-item' sx={{padding:'0px 10px'}}>
                                     <Typography textAlign='start' variant='h6' color='secondary'>Collapsed Sidebar</Typography>
                                     <Box display='flex' sx={{ width: '100px' }}>
                                         <FormControlLabel
@@ -426,7 +435,19 @@ const BasicSettings = () => {
                                             onChange={(e) => handleNavbarCollapseLabel(e)}
                                         />
                                     </Box>
-                                </Box>
+                                </Paper>
+                                <Paper className='preference-box-item' sx={{padding:'0px 10px'}}>
+                                    <Typography textAlign='start' variant='h6' color='secondary'>Theme</Typography>
+                                    <Box display='flex' sx={{ width: '100px' }}>
+                                        <FormControlLabel
+                                            value="top"
+                                            control={<Switch checked={userTheme} color="secondary" />}
+                                            label={(userTheme === true && 'DARK') || (userTheme === false && 'LIGHT')}
+                                            labelPlacement="end"
+                                            onChange={(e) => handleUserTheme(e)}
+                                        />
+                                    </Box>
+                                </Paper>
                                 <Box display='flex' justifyContent='flex-end' sx={{ margin: '20px 0px 10px 0px' }}>
                                     <Button
                                         onClick={(e) => handleUserPreferenceSave(e)}
@@ -452,6 +473,7 @@ const BasicSettings = () => {
                                     </Box>
                                     <Box display='flex' alignItems='baseline' justifyContent='space-between'>
                                         <TextField
+                                            inputProps={{ style: { height: '10px' } }}
                                             fullWidth
                                             onChange={(e) => handlePasswordChange(e)} name='currentPassword' value={currentPassword.currentPassword.value}
                                             id="outlined-adornment-password"
@@ -460,6 +482,16 @@ const BasicSettings = () => {
                                             helperText={currentPassword.currentPassword.helperText}
                                             label="Current Password"
                                             size='small'
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': {
+                                                        borderColor: '#E0E3E2',
+                                                    }
+                                                },
+                                                '& .MuiInputLabel-root': {
+                                                    top: '-5px'
+                                                },
+                                            }}
                                             InputProps={{
                                                 endAdornment:
                                                     <InputAdornment position="end">

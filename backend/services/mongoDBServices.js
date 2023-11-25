@@ -436,6 +436,7 @@ const updateUserData = async (email, userData) => {
  * @typedef {Object} Preferences
  * @property {string} dashboardHover - The dashboard hover status.
  * @property {string} collapsedSidebar - The collapsed sidebar status.
+ * @property {string} theme - The theme status.
  */
 
 /**
@@ -472,7 +473,8 @@ const updateUserPreferences = async (email, preferences) => {
                 $set:
                 {
                     'preferences.dashboardHover': preferences.dashboardHover,
-                    'preferences.collapsedSidebar': preferences.collapsedSidebar
+                    'preferences.collapsedSidebar': preferences.collapsedSidebar,
+                    'preferences.theme': preferences.theme,
                 }
             }
         );

@@ -349,7 +349,7 @@ module.exports = async (job) => {
                         batch_size: batchSize,
                         uid
                     }
-                    console.log(Object.keys(parameters))
+                    // console.log(Object.keys(parameters))
 
                     const testFlag = false;
 
@@ -389,7 +389,7 @@ module.exports = async (job) => {
                     break;
                 case 11: // Evaluating the model on test set // setting step
                     redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Evaluating the model on test set...` }))
-                    trained_model_ = null
+                    // trained_model_ = null
                     let modelForEvaluation = trained_model_ || await TF_Model.loadModel(model_id)
                     trained_model_ = modelForEvaluation
                     const xHistory = JSON.parse(await redisStep.hget(modelCheckpointName, 'xHistory'))

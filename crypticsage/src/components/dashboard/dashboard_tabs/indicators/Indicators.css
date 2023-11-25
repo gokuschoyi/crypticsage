@@ -81,7 +81,7 @@
     flex-direction: row;
     gap: 10px;
     align-items: center;
-    justify-content:space-between;
+    justify-content: space-between;
 }
 
 .batch-end-text {
@@ -458,6 +458,14 @@ tr:hover .prediction-mse {
     max-width: 0;
 }
 
+.chart-action-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: end;
+
+}
+
 @keyframes fadeIn {
     0% {
         opacity: 0;
@@ -614,7 +622,7 @@ tr:hover .prediction-mse {
     }
 
     .batch-end-text {
-        width: 110px;
+        width: 85px;
     }
 
     .talib-func-hint {
@@ -631,6 +639,10 @@ tr:hover .prediction-mse {
     .model-chart-action-container {
         justify-content: space-between;
         width: 100%;
+    }
+
+    .chart-action-box{
+        width:100%
     }
 
     /* .border-right {

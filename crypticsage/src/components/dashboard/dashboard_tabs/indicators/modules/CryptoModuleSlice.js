@@ -41,7 +41,7 @@ const initialState = {
         training_parameters: {
             trainingDatasetSize: 80,
             timeStep: 14,
-            lookAhead: 1,
+            lookAhead: 2,
             epoch: 1,
             hiddenLayer: 1,
             multiSelectValue: 'close',
@@ -60,6 +60,7 @@ const initialState = {
             standardized: [],
             scaled: []
         },
+        predictionPaletteId: 0,
         score: {
             over_all_score: 0,
             scores: []
@@ -91,6 +92,9 @@ const cryptoModuleSlice = createSlice({
         },
         setPredictedValues: (state, action) => {
             state.modelData.predictedValues = { ...state.modelData.predictedValues, ...action.payload };
+        },
+        setPredictionPaletteId: (state, action) => {
+            state.modelData.predictionPaletteId = action.payload;
         },
         setPredictionScores: (state, action) => {
             state.modelData.score.over_all_score = action.payload.rmse;
@@ -633,6 +637,7 @@ export const {
     , setTrainingParameters
     , setStartWebSocket
     , setPredictedValues
+    , setPredictionPaletteId
     , setPredictionScores
     , setStandardizedAndScaledPredictions
     , setBarsFromToPredictions

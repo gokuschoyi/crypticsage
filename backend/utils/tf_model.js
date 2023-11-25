@@ -256,7 +256,7 @@ const summarizeScores = (name, score, scores) => {
 const saveModel = async (model, model_id) => {
     await model.save(`file://./models/${model_id}`).then((res) => {
         log.info('Model saved successfully')
-        console.log(res)
+        // console.log(res)
     });
 }
 

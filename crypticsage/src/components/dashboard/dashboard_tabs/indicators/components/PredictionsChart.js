@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useMemo } from 'react'
 import { Box, useTheme, Skeleton, Typography, Paper } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { useSelector, useDispatch } from 'react-redux';
@@ -58,8 +58,15 @@ function calculateMSE(actual, predicted) {
     return { mse, rmse };
 }
 
+const calculateOriginalPrice = (value, variance, mean) => {
+    if (value === null) return null;
+    return (value * Math.sqrt(variance)) + mean;
+};
+
 const PredictionsChart = (props) => {
-    const { predictionChartType, trainingStartedFlag, model_type, lookAhead, predictionLookAhead, setModelMetrics } = props
+    const { predictionChartType, trainingStartedFlag, model_type, lookAhead, predictionLookAhead, setModelMetrics, predictionsPalette } = props
+    const { actual: actualColor, predicted: predictedColor, forecast: forecastColor, TP_up: tp_upColor, TP_down: tp_downColor } = predictionsPalette
+
     const theme = useTheme()
     const dispatch = useDispatch()
     const chartBackgroundColor = theme.palette.background.default
@@ -67,7 +74,7 @@ const PredictionsChart = (props) => {
     const chartData = useSelector(state => state.cryptoModule.modelData.predictedValues)
     // console.log(chartData)
 
-    const [predictedValueRedux, setPredictedValue] = React.useState([]) // chart not removed on reset
+    const predictedValueRedux = useMemo(() => chartData[predictionChartType] || [], [chartData, predictionChartType]);
 
     const predictionsChartRef = useRef(null)
     const chart = useRef(null)
@@ -76,30 +83,9 @@ const PredictionsChart = (props) => {
     const allPredictions = useSelector(state => state.cryptoModule.modelData.predictedValues.predictions_array)
     const dates = useSelector(state => state.cryptoModule.modelData.predictedValues.dates)
 
-    // updates the predicted value based on the chart type
+    // This useEffect is used to shift the predicted values to the right based on the prediction look ahead
     useEffect(() => {
-        // console.log('UE : Predctions Chart')
-        if (chartData.standardized.length === 0 || chartData.scaled.length === 0) {
-            setPredictedValue([])
-            return
-        }
-        else {
-            setPredictedValue(chartData[predictionChartType])
-        }
-    }, [chartData, predictionChartType, dates])
-
-    // console.log(predictionLookAhead)
-
-    const calculateOriginalPrice = (value, variance, mean) => {
-        if (value === null) return null;
-        return (value * Math.sqrt(variance)) + mean;
-    };
-
-
-    // console.log(predictionLookAhead)
-    useEffect(() => {
-        // const lastTickers = predictedValueRedux.slice(-(lookAhead * 2 - 2))
-        // console.log(lastTickers)
+        // console.log('UE : Predctions Chart adjustment')
         if (dates.length === 0) {
             // console.log("No Prediction data yet")
             return
@@ -159,8 +145,6 @@ const PredictionsChart = (props) => {
                 }
             }
 
-            // console.log(forecastResult)
-
             shiftedPredictedValues = [...shiftedPredictedValues, ...forecastResult]
 
             const originalDataAfterShifting = shiftedPredictedValues.map((value) => ({
@@ -170,29 +154,39 @@ const PredictionsChart = (props) => {
             }))
 
             dispatch(setStandardizedAndScaledPredictions({ standardized: shiftedPredictedValues, scaled: originalDataAfterShifting }))
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [predictionLookAhead, predictionChartType])
 
-
-            const metrics = calculateMetrics(originalDataAfterShifting);
+    // This useEffect is used to calculate the metrics of the model
+    useEffect(() => {
+        // console.log('UE : Predctions Chart metrics')
+        if (predictedValueRedux.length === 0 || !predictionsChartRef.current) {
+            return
+        } else {
+            const metrics = calculateMetrics(predictedValueRedux);
             // console.log(metrics)
 
-            let mscSt = calculateMSE(shiftedPredictedValues.map((value) => value.actual), shiftedPredictedValues.map((value) => value.predicted))
+            let mscSt = calculateMSE(chartData.standardized.map((value) => value.actual), chartData.standardized.map((value) => value.predicted))
             // console.log('Standardized : ',mscSt)
 
-            let mse = calculateMSE(originalDataAfterShifting.map((value) => value.actual), originalDataAfterShifting.map((value) => value.predicted))
+            let mse = calculateMSE(chartData.scaled.map((value) => value.actual), chartData.scaled.map((value) => value.predicted))
             // console.log('Scaled : ',mse)
 
-            setModelMetrics({
+            setModelMetrics((prev) => prev = {
                 metrics,
                 mseStandardized: mscSt,
                 mseScaled: mse
             })
+            // console.log(predictionChartType, predictionLookAhead, metrics, mscSt, mse)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [predictionLookAhead, chartData.dates])
+    }, [predictedValueRedux])
+
 
     // creates the chart
     useEffect(() => {
-        // console.log('UE : Predctions Chart')
+        // console.log('UE : Predctions Chart Rendering')
         const chartGrid = document.getElementsByClassName('predictions-chart-grid')[0]
         let cWidth = chartGrid.clientWidth - 30
 
@@ -236,14 +230,12 @@ const PredictionsChart = (props) => {
             chart.current.timeScale().fitContent();
             let markers = []
             switch (model_type) {
-                case 'multi_input_single_output_no_step':
                 case 'multi_input_single_output_step':
                     const actual_values = predictedValueRedux
                         .filter((prediction) => prediction.actual !== null)
                         .map((prediction) => ({
                             time: prediction.open,
                             value: prediction.actual,
-                            color: '#00ff00',
                         }));
 
                     const predicted_values = predictedValueRedux
@@ -259,14 +251,13 @@ const PredictionsChart = (props) => {
                                     return {
                                         time: prediction.open,
                                         value: prediction.predicted,
-                                        color: '#ff0000',
                                     }
 
                                 } else {
                                     return {
                                         time: prediction.open,
                                         value: prediction.predicted,
-                                        color: '#F57C00',
+                                        color: forecastColor,
                                     }
                                 }
                             }
@@ -296,35 +287,7 @@ const PredictionsChart = (props) => {
                     predictedValueRef.current.setData(predicted_values);
                     predictedValueRef.current.setMarkers(markers)
                     break;
-                case 'multi_input_multi_output_no_step':
-                    console.log('Multi paraller chart')
 
-                    const nullRemoved = predictedValueRedux.filter((value) => value.open !== null)
-                        .map((item) => ({
-                            time: item.time,
-                            open: item.open,
-                            high: item.high,
-                            low: item.low,
-                            close: item.close,
-
-                        }))
-
-                    markers.push({
-                        time: nullRemoved[nullRemoved.length - 1].time,
-                        position: 'aboveBar',
-                        color: 'red',
-                        shape: 'circle',
-                        text: 'prediction',
-                        size: 0.4
-                    })
-                    actualValueRef.current = chart.current.addCandlestickSeries({
-                        upColor: '#00ff00',
-                        downColor: '#ff0000',
-                        wickVisible: true,
-                    })
-                    actualValueRef.current.setData(nullRemoved)
-                    actualValueRef.current.setMarkers(markers)
-                    break;
                 default:
                     console.log('No model')
                     break;
@@ -342,6 +305,86 @@ const PredictionsChart = (props) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictedValueRedux])
+
+    // setting markers and applying theme
+    useEffect(() => {
+        // console.log('UE : Predctions Chart markers')
+        if (predictedValueRedux.length === 0 || !predictionsChartRef.current) {
+            return
+        } else {
+            /* const predicted_values = predictedValueRedux
+                .map((prediction, index) => {
+                    if (prediction.predicted === null) {
+                        return {
+                            time: prediction.open,
+                            value: prediction.predicted,
+                            color: 'transparent'
+                        }
+                    } else {
+                        if (index < predictedValueRedux.length - (lookAhead + 1)) {
+                            return {
+                                time: prediction.open,
+                                value: prediction.predicted,
+                                color: predictedColor,
+                            }
+
+                        } else {
+                            return {
+                                time: prediction.open,
+                                value: prediction.predicted,
+                                color: forecastColor,
+                            }
+                        }
+                    }
+                })
+
+            predictedValueRef.current.setData(predicted_values); */
+            predictedValueRef.current.applyOptions({
+                color : predictedColor,
+            });
+
+            actualValueRef.current.applyOptions({
+                color: actualColor,
+            });
+
+            /* const actual_values = predictedValueRedux
+                .filter((prediction) => prediction.actual !== null)
+                .map((prediction) => ({
+                    time: prediction.open,
+                    value: prediction.actual,
+                    color: actualColor,
+                }));
+
+            actualValueRef.current.setData(actual_values); */
+
+            let thresholdLower = 0.01
+            const tpMarkers = chartData[predictionChartType]
+                .filter(data => {
+                    const actualChange = data.actual;
+                    const predictedChange = data.predicted;
+                    const percentChange = (predictedChange - actualChange) / actualChange;
+                    return percentChange >= -thresholdLower && percentChange <= thresholdLower;
+                })
+                .map(data => {
+                    const actualChange = data.actual;
+                    const predictedChange = data.predicted;
+                    const percentChange = (predictedChange - actualChange) / actualChange;
+
+                    let shape = percentChange < 0 ? 'arrowDown' : 'arrowUp';
+                    let tpColor = percentChange < 0 ? tp_downColor : tp_upColor;
+                    return {
+                        time: data.open,
+                        position: 'aboveBar',
+                        color: tpColor,
+                        shape: shape,
+                        size: 0.1
+                    };
+                });
+
+            predictedValueRef.current.setMarkers(tpMarkers)
+
+        }
+    }, [chartData, predictedValueRedux, predictionChartType, lookAhead, tp_upColor, tp_downColor, actualColor, predictedColor, forecastColor])
 
     // Define the debounce function
     function debounce(func, delay) {
@@ -372,6 +415,7 @@ const PredictionsChart = (props) => {
     // handling the zoom in and zoom out of the chart
     const barsFromToRedux = useSelector(state => state.cryptoModule.barsFromToPredictions)
     useEffect(() => {
+        // console.log('UE : Predctions Chart zoom')
         const { from, to } = barsFromToRedux
         // console.log(from, to)
         if (!chart.current) {
@@ -391,6 +435,7 @@ const PredictionsChart = (props) => {
 
     // tooltip to show the actual and predicted values
     useEffect(() => {
+        // console.log('UE : Predctions Chart tooltip')
         let predictionsBox = document.getElementsByClassName('predictions-value-box')[0]
         const predictionsCrossHairHandler = (param) => {
             if (
@@ -451,9 +496,9 @@ const PredictionsChart = (props) => {
                         let toolTipText = `
                             <div class='value-box' style="flex-direction:column">
                                 <div style="width:110px; text-align:start">${date}</div>
-                                <Typography style="display:flex; align-items:center; gap:4px;" variant='custom'><div style="width:8px; height:8px; border-radius:10px; background-color:#12ff12"></div>Actual : ${act_val}</Typography>
-                                <Typography style="display:flex; align-items:center; gap:4px;" variant='custom'><div style="width:8px; height:8px; border-radius:10px; background-color:red"></div>Predicted : ${pred_val}</Typography>
-                                <Typography variant='custom'>${diff > 0 ? 'Over : ' : 'Under '}<span style="color:${diff > 0 ? 'red' : '#12ff12'}">${`${diff},`} ${`${percentageChange}%`}</span></Typography>
+                                <Typography style="display:flex; align-items:center; gap:4px;" variant='custom'><div style="width:8px; height:8px; border-radius:10px; background-color:${actualColor}"></div>Actual : ${act_val}</Typography>
+                                <Typography style="display:flex; align-items:center; gap:4px;" variant='custom'><div style="width:8px; height:8px; border-radius:10px; background-color:${predictedColor}"></div>Predicted : ${pred_val}</Typography>
+                                <Typography variant='custom'>${diff > 0 ? 'Over : ' : 'Under '}<span style="color:${diff > 0 ? predictedColor : actualColor}">${`${diff},`} ${`${percentageChange}%`}</span></Typography>
                             </div>
                         `
                         predictionsBox.innerHTML = toolTipText
@@ -495,10 +540,12 @@ const PredictionsChart = (props) => {
                 predictionsBox.style.display = 'none'
             }
         }
-    }, [predictedValueRedux])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [predictedValueRedux, actualColor, predictedColor])
 
     // sets the background color of the chart based on theme
     useEffect(() => {
+        // console.log('UE : Predctions Chart background')
         if (predictedValueRedux.length === 0 || !predictionsChartRef.current) {
             return
         } else {
@@ -537,7 +584,7 @@ const PredictionsChart = (props) => {
                             </div>
                         </Box>
                     </Box>
-                ) : Object.keys(chartData).length === 0 && (
+                ) : Object.keys(chartData).length === 3 && (
                     <Box display='flex' height='100%' alignItems='center' justifyContent='center' p={1} >
                         <Paper elevation={4} style={{ padding: '5px' }}>Start training to view predictions</Paper>
                     </Box>
