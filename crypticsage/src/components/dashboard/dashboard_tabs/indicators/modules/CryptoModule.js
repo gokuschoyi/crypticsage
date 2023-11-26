@@ -17,6 +17,7 @@ import {
     setSelectedTickerPeriod,
     resetStreamedTickerDataRedux,
     toggleToolTipSwitch,
+    toggleShowPredictionSwitch,
     setSelectedFunctions,
     setSelectedFlagInTalibDescription
 } from './CryptoModuleSlice'
@@ -238,6 +239,12 @@ const PredictionMSETable = ({ data }) => {
                 })}
             </tbody>
         </table>
+    )
+}
+
+const Dot = ({ color }) => {
+    return (
+        <Box sx={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: color }}></Box>
     )
 }
 
@@ -466,8 +473,9 @@ const CryptoModule = () => {
     const token = useSelector(state => state.auth.accessToken);
     const tokenPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
     const toolTipSwitchFlag = useSelector(state => state.cryptoModule.toolTipOn)
+    const showPredictionSwitchFlag = useSelector(state => state.cryptoModule.showPredictions)
     const ohlcData = useSelector(state => state.cryptoModule.cryptoDataInDb)
-    // console.log('toolTipSwitchFlag', toolTipSwitchFlag)
+    // console.log('showPredictionSwitchFlag', showPredictionSwitchFlag)
 
     const { cryptotoken } = params;
     const module = window.location.href.split("/dashboard/indicators/")[1].split("/")[0]
@@ -893,7 +901,7 @@ const CryptoModule = () => {
         setPredictionChartType(type)
     }
 
-    const [predictionLookAhead, setPredictionLookAhead] = useState(modelParams.lookAhead) //for slider
+    const [predictionLookAhead, setPredictionLookAhead] = useState(1) //for slider
     // console.log(predictionLookAhead)
     const handelPredictionLookAheadSlider = (name, value) => {
         setPredictionLookAhead(value)
@@ -957,17 +965,16 @@ const CryptoModule = () => {
         console.log(model_id)
     }
 
-    const [modelMetrics, setModelMetrics] = useState({ metrics: {}, mseStandardized: {}, mseScaled: {} })
+    const [modelMetrics, setModelMetrics] = useState({ metrics: {}, mse: {} })
 
     const paletteIdRedux = useSelector(state => state.cryptoModule.modelData.predictionPaletteId)
     const [predictionChartPalette, setPredictionChartPalette] = useState(colorCombinations[paletteIdRedux])
     const handlePredictionChartPalette = ({ id }) => {
-        console.log(id)
+        // console.log(id)
         dispatch(setPredictionPaletteId(id))
         setPredictionChartPalette(colorCombinations[id])
         // console.log(colorCombinations[id])
     }
-
 
     return (
         <Box className='crypto-module-container'>
@@ -979,7 +986,7 @@ const CryptoModule = () => {
 
                 <Grid container className='indicator-chart-grid' pt={2} pb={2}>
                     <Grid item xs={12} sm={12} md={12} lg={9} xl={9}>
-                        <Box className='ticker-period-selector-top' pl={3} pr={3} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' gap='10px'>
+                        <Box className='ticker-period-selector-top' pl={2} pr={2} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' gap='10px'>
                             <Box className='autocomplete-select-box' width='200px'>
                                 <Autocomplete
                                     size='small'
@@ -1006,28 +1013,42 @@ const CryptoModule = () => {
                                     />}
                                 />
                             </Box>
-                            <Box display='flex' flexDirection='column' alignItems='start'>
-                                <Typography variant='custom' style={{ marginLeft: '16px' }}>AF:{actualFetchLength}, R:{ohlcData.length} / {ohlcData.length / 500}</Typography>
-                                <FormControlLabel
-                                    value="start"
-                                    control={<Switch size="small" color="secondary" />}
-                                    label={toolTipSwitchFlag ? 'Hide Tooltips' : 'Show Tooltips'}
-                                    labelPlacement="start"
-                                    checked={toolTipSwitchFlag}
-                                    onChange={() => dispatch(toggleToolTipSwitch())}
-                                />
+                            <Box className='tooltip-prediction-box'>
+                                <Box display='flex' flexDirection='column' width='100%' alignItems='baseline'>
+                                    <FormControlLabel
+                                        value="start"
+                                        sx={{ marginLeft: '0px' }}
+                                        control={<Switch size="small" color="secondary" />}
+                                        label={toolTipSwitchFlag ? 'Hide Tooltips' : 'Show Tooltips'}
+                                        labelPlacement="start"
+                                        checked={toolTipSwitchFlag}
+                                        onChange={() => dispatch(toggleToolTipSwitch())}
+                                    />
+                                    {predictedVlauesRedux.length !== 0 &&
+                                        <FormControlLabel
+                                            value="start"
+                                            sx={{ marginLeft: '0px' }}
+                                            control={<Switch size="small" color="secondary" />}
+                                            label={showPredictionSwitchFlag ? 'Hide Predictions' : 'Show Predictions'}
+                                            labelPlacement="start"
+                                            checked={showPredictionSwitchFlag}
+                                            onChange={() => dispatch(toggleShowPredictionSwitch())}
+                                        />
+                                    }
+                                </Box>
+                                <Typography variant='custom' sx={{ textAlign: 'justify' }}>AF:{actualFetchLength}, R:{ohlcData.length} / {ohlcData.length / 500}</Typography>
                             </Box>
                         </Box>
                         <Box className='chart-container' display='flex' flexDirection='column' height='100%' pl={2} pr={2} pt={2}>
                             {chartData.length === 0 ?
                                 (
-                                    <Box className='token-chart-box' minHeight="100%" alignItems='center' justifyContent='center' display='flex'>
+                                    <Box className='token-chart-box' alignItems='center' justifyContent='center' display='flex'>
                                         <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
                                     </Box>
                                 )
                                 :
                                 (
-                                    <Box className='token-chart-box' minHeight="100%">
+                                    <Box className='token-chart-box'>
                                         <MainChart
                                             latestTime={chartData[chartData.length - 1].time * 1000 + 60000}
                                             new_fetch_offset={newTickerLength}
@@ -1042,64 +1063,94 @@ const CryptoModule = () => {
                         </Box>
                     </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={3} xl={3}>
-                        <Box className='search-indicator-box' display='flex' flexDirection='row' alignItems='center' pl={2} pr={2} pt={1}>
-                            <Box className='function-selector' width='100%'>
-                                {transformedFunctionsList.length > 0 &&
-                                    <Autocomplete
-                                        sx={{ backgroundColor: `${theme.palette.background.paperOne}` }}
-                                        disableCloseOnSelect={true}
-                                        value={searchedFunctions}
-                                        size='small'
-                                        multiple
-                                        limitTags={2}
-                                        id="tags-filled"
-                                        options={transformedFunctionsList.sort((a, b) => -b.group.localeCompare(a.group))}
-                                        getOptionDisabled={(option) => transformedFunctionsList.filter((item) => item.label === option.label)[0].func_selected || searchedFunctions.includes(option.label)}
-                                        groupBy={(option) => option.group}
-                                        freeSolo
-                                        onChange={(event, newValue) => {
-                                            handleSearchedFunctions(newValue)
-                                        }}
-                                        renderTags={(value, getTagProps) =>
-                                            value.map((option, index) => (
-                                                <Chip variant="outlined" label={option.label} {...getTagProps({ index })} />
-                                            ))
-                                        }
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                variant="filled"
-                                                label="Search for a function"
-                                                placeholder="Search..."
-                                            />
-                                        )}
-                                    />
-                                }
-                                {searchedFunctions.length > 0 &&
-                                    <Box display='flex' alignItems='start' pt={1}>
-                                        <Button size='small' color='secondary' variant='outlined' onClick={handleAddSelectedFunction.bind(null)}>Add Functions</Button>
-                                    </Box>
-                                }
-                            </Box>
-                        </Box>
+                        {/* PlaceHolder */}
                     </Grid>
                 </Grid>
 
                 <Box mb={2} mt={2} className='selected-functions-box'>
-                    {selectedFunctions.length === 0 ?
-                        (
-                            <Box display='flex' flexDirection='row' justifyContent='flex-start'>
-                                <Typography variant='h4' pl={1} sx={{ textAlign: 'start' }}>Select an indicator to plot</Typography>
-                            </Box>
-                        )
-                        :
-                        (
-                            <React.Fragment>
-                                <Box pl={2} pt={2}>
-                                    <Typography variant='h4' sx={{ textAlign: 'start' }}>Selected Indicators</Typography>
+                    <Grid container pt={2} pb={2}>
+                        <Grid item xs={12} sm={12} md={12} lg={3} xl={3} pl={2} pr={2}>
+                            <Box className='search-indicator-box' display='flex' flexDirection='row' alignItems='center' >
+                                <Box className='function-selector' width='350px'>
+                                    {transformedFunctionsList.length > 0 &&
+                                        <Autocomplete
+                                            sx={{ backgroundColor: `${theme.palette.background.paperOne}` }}
+                                            disableCloseOnSelect={true}
+                                            value={searchedFunctions}
+                                            size='small'
+                                            multiple
+                                            limitTags={2}
+                                            id="tags-filled"
+                                            options={transformedFunctionsList.sort((a, b) => -b.group.localeCompare(a.group))}
+                                            getOptionDisabled={(option) => transformedFunctionsList.filter((item) => item.label === option.label)[0].func_selected || searchedFunctions.includes(option.label)}
+                                            groupBy={(option) => option.group}
+                                            freeSolo
+                                            onChange={(event, newValue) => {
+                                                handleSearchedFunctions(newValue)
+                                            }}
+                                            renderTags={(value, getTagProps) =>
+                                                value.map((option, index) => (
+                                                    <Chip variant="outlined" label={option.label} {...getTagProps({ index })} />
+                                                ))
+                                            }
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="filled"
+                                                    label="Search for a function"
+                                                    placeholder="Search..."
+                                                />
+                                            )}
+                                        />
+                                    }
+                                    {searchedFunctions.length > 0 &&
+                                        <Box display='flex' alignItems='start' pt={1}>
+                                            <Button size='small' color='secondary' variant='outlined' onClick={handleAddSelectedFunction.bind(null)}>Add Functions</Button>
+                                        </Box>
+                                    }
                                 </Box>
-                                <Grid pl={1} container className='indicator-data-container'>
-                                    {selectedFunctions && selectedFunctions.map((funcRedux, index) => {
+                            </Box>
+                            {selectedFunctions.length !== 0 &&
+                                <Box display='flex' flexDirection='column' alignItems='start' pt={1} pb={2}>
+                                    {selectedFunctions.map((funcRedux, index) => {
+                                        const { hint, functions } = funcRedux;
+                                        return (
+                                            <Box key={index}>
+                                                {functions.map((func, funcIndex) => {
+                                                    const { outputAvailable } = func;
+                                                    return (
+                                                        <Box key={funcIndex} display='flex' flexDirection='row' gap='4px' alignItems='center'>
+                                                            <Dot color={outputAvailable ? 'green' : 'red'} />
+                                                            <Typography className='selected-function-hint' variant='custom' sx={{ textAlign: 'start' }}>{hint}</Typography>
+                                                        </Box>
+                                                    );
+                                                })}
+                                            </Box>
+                                        );
+                                    })}
+                                </Box>
+                            }
+                        </Grid>
+
+                        <Grid item xs={12} sm={12} md={12} lg={9} xl={9} pl={2} pr={2}>
+                            {selectedFunctions.length === 0 ?
+                                (
+                                    <Box display='flex' flexDirection='row' justifyContent='flex-start'>
+                                        <Typography variant='h5' pl={1} pt={1} pb={1} sx={{ textAlign: 'start' }}>Select an indicator to plot</Typography>
+                                    </Box>
+                                )
+                                :
+                                (
+                                    <React.Fragment>
+                                        <Box pl={1}>
+                                            <Typography variant='h5' sx={{ textAlign: 'start' }}>Selected Indicators</Typography>
+                                        </Box>
+                                    </React.Fragment>
+                                )
+                            }
+                            {selectedFunctions.length !== 0 &&
+                                <Grid container className='indicator-data-container'>
+                                    {selectedFunctions.map((funcRedux, index) => {
                                         const { name } = funcRedux
                                         return (
                                             <Grid key={`${name}${index}`} item xs={12} sm={6} md={4} lg={4} xl={3}>
@@ -1108,9 +1159,9 @@ const CryptoModule = () => {
                                         )
                                     })}
                                 </Grid>
-                            </React.Fragment>
-                        )
-                    }
+                            }
+                        </Grid>
+                    </Grid>
                 </Box>
 
                 <Box className='model-training-container'>
@@ -1118,7 +1169,7 @@ const CryptoModule = () => {
                         <Typography variant='h4'>Model Training</Typography>
                     </Box>
                     <Grid container className='tensor-flow-grid'>
-                        <Grid item xs={12} sm={12} md={4} lg={3} xl={3} pl={2} pr={2} pb={2}>
+                        <Grid item xs={12} sm={12} md={4} lg={3} xl={3} p={2} className='model-parameters-grid'>
                             <Box display='flex' flexDirection='column' pb={2}>
                                 <Box display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
                                     <Typography variant='h5' textAlign='start'>Parameters</Typography>
@@ -1182,12 +1233,11 @@ const CryptoModule = () => {
                             </Box>
                         </Grid>
 
-                        <Grid item xs={12} sm={12} md={8} lg={6} xl={6} pl={2} pr={2} pb={2} className='predictions-chart-grid'>
+                        <Grid item xs={12} sm={12} md={8} lg={6} xl={6} p={2} className='predictions-chart-grid'>
                             <Box display='flex' flexDirection='column' pb={1}>
-                                <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' className='prediction-chart-header'>
+                                <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='flex-start' className='prediction-chart-header'>
                                     <Box display='flex' flexDirection='column' alignItems='start'>
-                                        <Typography variant='h5' textAlign='start'>Predictions Chart</Typography>
-                                        <Typography variant='custom' textAlign='start'>{predictionChartType}</Typography>
+                                        <Typography variant='h6' textAlign='start'>Predictions {predictionChartType}</Typography>
                                     </Box>
                                     {predictedVlauesRedux.length !== 0 &&
                                         <Box className='chart-action-box'>
@@ -1377,21 +1427,26 @@ const CryptoModule = () => {
                                                 handleModelParamChange={handelPredictionLookAheadSlider}
                                                 label={'Prediction Look Ahead'}
                                                 min={1}
-                                                max={modelParams.lookAhead}
+                                                max={model_parameters.lookAhead}
                                                 sliderMin={1}
-                                                sliderMax={modelParams.lookAhead}
+                                                sliderMax={model_parameters.lookAhead}
                                                 disabled={trainingStartedFlag} />
                                         }
                                         <Box display='flex' flexDirection='column' gap='5px'>
                                             {Object.keys(modelMetrics.metrics).length > 0 && (
                                                 <Box display='flex' flexDirection='column' gap='4px'>
-                                                    <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%'>
-                                                        <Paper elevation={4} style={{ width: '70%', justifyContent: 'space-between', display: 'flex', flexDirection: 'row', gap: '4px', padding: '0px 10px' }}>
-                                                            <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TP</span> : {modelMetrics.metrics.TP}</Typography>
-                                                            <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FN</span> : {modelMetrics.metrics.FN}</Typography>
-                                                            <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TN</span> : {modelMetrics.metrics.TN}</Typography>
-                                                            <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FP</span> : {modelMetrics.metrics.FP}</Typography>
-                                                        </Paper>
+                                                    <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%' gap='5px'>
+                                                        <Box display='flex' flexDirection='row' gap='16px' width='70%' justifyContent='space-between' className='model-metrics'>
+                                                            <Paper elevation={4} style={{ justifyContent: 'space-between', display: 'flex', flexDirection: 'row', gap: '4px', padding: '0px 10px' }}>
+                                                                <Typography variant='custom' textAlign='start'>{predictionChartType}</Typography>
+                                                            </Paper>
+                                                            <Paper elevation={4} style={{ width: '100%', justifyContent: 'space-between', display: 'flex', flexDirection: 'row', gap: '4px', padding: '0px 10px' }}>
+                                                                <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TP</span> : {modelMetrics.metrics.TP}</Typography>
+                                                                <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FN</span> : {modelMetrics.metrics.FN}</Typography>
+                                                                <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TN</span> : {modelMetrics.metrics.TN}</Typography>
+                                                                <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FP</span> : {modelMetrics.metrics.FP}</Typography>
+                                                            </Paper>
+                                                        </Box>
                                                         <Tooltip
                                                             arrow
                                                             className='metrics-tooltip'
@@ -1429,26 +1484,19 @@ const CryptoModule = () => {
                                             )}
 
                                             <Box display='flex' flexDirection='row' justifyContent='space-between'>
-                                                {(Object.keys(modelMetrics.mseStandardized).length > 0 && Object.keys(modelMetrics.mseScaled).length > 0) &&
+                                                {(Object.keys(modelMetrics.mse).length > 0) &&
                                                     <Box width='100%'>
                                                         <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
                                                             <thead className='table-group'>
                                                                 <tr className='table-row'>
-                                                                    <th className='table-head'>Type</th>
                                                                     <th className='table-head'>MSE</th>
                                                                     <th className='table-head'>RMSE</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody className='table-body'>
                                                                 <tr className='table-row'>
-                                                                    <td className='table-data' style={{ textAlign: 'start' }}>Standardized</td>
-                                                                    <td className='table-data'>{modelMetrics.mseStandardized.mse}</td>
-                                                                    <td className='table-data'>{modelMetrics.mseStandardized.rmse}</td>
-                                                                </tr>
-                                                                <tr className='table-row'>
-                                                                    <td className='table-data' style={{ textAlign: 'start' }}>Scaled</td>
-                                                                    <td className='table-data'>{modelMetrics.mseScaled.mse}</td>
-                                                                    <td className='table-data'>{modelMetrics.mseScaled.rmse}</td>
+                                                                    <td className='table-data'>{modelMetrics.mse.mse}</td>
+                                                                    <td className='table-data'>{modelMetrics.mse.rmse}</td>
                                                                 </tr>
                                                             </tbody>
                                                         </table>
@@ -1462,7 +1510,7 @@ const CryptoModule = () => {
                             </Box>
                         </Grid>
 
-                        <Grid item xs={12} sm={12} md={12} lg={3} xl={3} pl={2} pr={2} pb={2}>
+                        <Grid item xs={12} sm={12} md={12} lg={3} xl={3} p={2}>
                             <Box className='saved-models' display='flex' flexDirection='column' pb={2}>
                                 <Box height='32px' display='flex' alignItems='center'>
                                     <Typography variant='h5' textAlign='start'>Saved Models</Typography>

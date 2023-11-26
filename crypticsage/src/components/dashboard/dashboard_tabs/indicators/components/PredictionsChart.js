@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useMemo } from 'react'
 import { Box, useTheme, Skeleton, Typography, Paper } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { useSelector, useDispatch } from 'react-redux';
@@ -74,8 +74,8 @@ const PredictionsChart = (props) => {
     const chartData = useSelector(state => state.cryptoModule.modelData.predictedValues)
     // console.log(chartData)
 
-    const [predictedValueRedux, setPredictedValue] = React.useState([])
-    // const predictedValueRedux = useMemo(() => chartData[predictionChartType] || [], [chartData, predictionChartType]);
+    // const [predictedValueRedux, setPredictedValue] = React.useState([])
+    const predictedValueRedux = useMemo(() => chartData[predictionChartType] || [], [chartData, predictionChartType]);
 
     const predictionsChartRef = useRef(null)
     const chart = useRef(null)
@@ -83,17 +83,6 @@ const PredictionsChart = (props) => {
     const predictedValueRef = useRef(null)
     const allPredictions = useSelector(state => state.cryptoModule.modelData.predictedValues.predictions_array)
     const dates = useSelector(state => state.cryptoModule.modelData.predictedValues.dates)
-
-    useEffect(() => {
-        // console.log('UE : Predctions Chart')
-        if (chartData.standardized.length === 0 || chartData.scaled.length === 0) {
-            setPredictedValue([])
-            return
-        }
-        else {
-            setPredictedValue(chartData[predictionChartType])
-        }
-    }, [chartData, predictionChartType])
 
     // This useEffect is used to shift the predicted values to the right based on the prediction look ahead
     useEffect(() => {
@@ -157,17 +146,22 @@ const PredictionsChart = (props) => {
                 }
             }
 
+
             shiftedPredictedValues = [...shiftedPredictedValues, ...forecastResult]
 
-            const originalDataAfterShifting = shiftedPredictedValues.map((value) => ({
+            const scaledDataAfterShifting = shiftedPredictedValues.map((value) => ({
                 ...value,
                 actual: calculateOriginalPrice(value.actual, chartData.label_variance, chartData.label_mean),
                 predicted: calculateOriginalPrice(value.predicted, chartData.label_variance, chartData.label_mean),
             }))
 
-            dispatch(setStandardizedAndScaledPredictions({ standardized: shiftedPredictedValues, scaled: originalDataAfterShifting }))
+            const lastData = scaledDataAfterShifting.slice(-lookAhead)
+            // console.log(lastData)
+
+            dispatch(setStandardizedAndScaledPredictions({ standardized: shiftedPredictedValues, scaled: scaledDataAfterShifting, lastData: lastData }))
         }
-        
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictionLookAhead, predictionChartType, dates, allPredictions, chartData.forecast, chartData.label_variance, chartData.label_mean, dispatch])
 
     // creates the chart
@@ -294,21 +288,16 @@ const PredictionsChart = (props) => {
             const metrics = calculateMetrics(predictedValueRedux);
             // console.log(metrics)
 
-            let mscSt = calculateMSE(chartData.standardized.map((value) => value.actual), chartData.standardized.map((value) => value.predicted))
-            // console.log('Standardized : ',mscSt)
-
-            let mse = calculateMSE(chartData.scaled.map((value) => value.actual), chartData.scaled.map((value) => value.predicted))
-            // console.log('Scaled : ',mse)
+            let mse = calculateMSE(predictedValueRedux.map((value) => value.actual), predictedValueRedux.map((value) => value.predicted))
+            // console.log('New MSE : ', mse)
 
             setModelMetrics((prev) => prev = {
                 metrics,
-                mseStandardized: mscSt,
-                mseScaled: mse
+                mse: mse
             })
             // console.log(predictionChartType, predictionLookAhead, metrics, mscSt, mse)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [chartData])
+    }, [chartData.standardized, chartData.scaled, predictedValueRedux, predictionChartType, predictionLookAhead, setModelMetrics])
 
     // setting markers and applying theme
     useEffect(() => {

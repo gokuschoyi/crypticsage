@@ -175,7 +175,7 @@ const evaluateModelOnTestSet = async ({ trained_model_, model_id, xTrainTest, yT
     let history = [xTrainTest[0]]
     let predictions = []
     let lastPrediction = []
-    const updateFreq = 20 // Number of predictions to make before sending an update to the client
+    const updateFreq = 10 // Number of predictions to make before sending an update to the client
     try {
         bar1.start(xTrainTest.length - 1, 0);
         for (let i = 1; i < xTrainTest.length - 1; i++) {

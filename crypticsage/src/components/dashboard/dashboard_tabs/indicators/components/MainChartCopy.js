@@ -280,14 +280,16 @@ const MainChart = (props) => {
     const latestDateRf = useRef(latestTime) // latest time in the fetched data. Data doe not inclusive of this time
     const candleStickSeriesRef = useRef(null)
     const candleStickVolumeSeriesRef = useRef(null)
+    const showPredictionSwitchFlag = useSelector(state => state.cryptoModule.showPredictions)
 
     const selectedFunctionData = useSelector(state => state.cryptoModule.selectedFunctions)
     const modifiedSelectedFunctionWithDataToRender = useSelector(state => state.cryptoModule.modifiedSelectedFunctionWithDataToRender)
-    const wsRef = useRef(null)
     const pageNo = useRef(pageNoBasedOnDataInRedux)
     const newDataRef = useRef([...tDataRedux])
     const chart = useRef(null)
     const chartboxRef = useRef();
+
+    const lastLookAheadPredictions = useSelector(state => state.cryptoModule.modelData.lastLookAheadPredictions)
 
     // const [finalTalibExecuteQuery, setFinalTalibExcuteQuery] = useState([])
     useEffect(() => {
@@ -386,13 +388,14 @@ const MainChart = (props) => {
         let cWidth = tokenDom.clientWidth;
         let cHeight = tokenDom.clientHeight;
 
+        // console.log(cWidth, cHeight)
+
         // paddiing causing some resize fit issue. Check later -- fixed by changing margin with padding
         const handleResize = () => {
             cWidth = tokenDom.clientWidth;
             cHeight = tokenDom.clientHeight;
             // console.log(cWidth, cHeight)
             chart.current.applyOptions({ width: cWidth, height: cHeight });
-
         };
 
         chart.current = createChart(chartboxRef.current, {
@@ -477,6 +480,50 @@ const MainChart = (props) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [symbol, selectedTokenPeriod])
+
+    const [predictionLineChart, setPredictionLineChart] = useState(null)
+
+    // Adding the predictions on the main chart
+    useEffect(() => {
+        // console.log('UE : prediction on main chart');
+        // console.log(predictionLineChart)
+        if (lastLookAheadPredictions.length === 0 || !chart.current) {
+            if (predictionLineChart) {
+                console.log('model deleted')
+                chart.current.removeSeries(predictionLineChart);
+                setPredictionLineChart(null);
+            }
+            return;
+        }
+
+        // Remove existing prediction line chart if the flag is off or if there's a new prediction data
+        if ((!showPredictionSwitchFlag || lastLookAheadPredictions.length > 0) && predictionLineChart) {
+            chart.current.removeSeries(predictionLineChart);
+            setPredictionLineChart(null);
+        }
+
+        // Add or update the prediction line chart if the flag is on
+        if (showPredictionSwitchFlag) {
+            const chartData = lastLookAheadPredictions.map(item => ({
+                time: item.open,
+                value: item.predicted
+            }));
+
+            // console.log(predictionLineChart, chart.current);
+
+            let newLineChart = chart.current.addLineSeries({
+                color: 'red',
+                lineWidth: 1
+            });
+
+            newLineChart.setData(chartData);
+            // console.log(chartData, newLineChart);
+            setPredictionLineChart(newLineChart);
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showPredictionSwitchFlag, lastLookAheadPredictions]);
+
 
     // Define the debounce function
     function debounce(func, delay) {
@@ -599,6 +646,7 @@ const MainChart = (props) => {
         return () => {
             chart.current.timeScale().unsubscribeVisibleTimeRangeChange(barsInChartHandler)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const generateOHLCV_String = (param) => {
@@ -609,7 +657,7 @@ const MainChart = (props) => {
             <div style="width:73px; text-align:start">H : <span id="highValue">${Math.round(100 * high) / 100}</span></div>
             <div style="width:73px; text-align:start">L : <span id="lowValue">${Math.round(100 * low) / 100}</span></div>
             <div style="width:73px; text-align:start">C : <span id="closeValue">${Math.round(100 * close) / 100}</span></div>
-            <div style="width:73px; text-align:start">V : <span id="volumeValue">${(vol).toFixed(2)}</span></div>
+            <div style="width:73px; text-align:start">V : <span id="volumeValue">${(vol || 0).toFixed(2)}</span></div>
         </div>
         `
     }
@@ -643,14 +691,14 @@ const MainChart = (props) => {
                     }
                 );
 
-                const data = param.seriesData.get(candleStickSeriesRef.current);
+                const data = param.seriesData.get(candleStickSeriesRef.current) || param.seriesData.get(predictionLineChart);
                 const volData = param.seriesData.get(candleStickVolumeSeriesRef.current);
-                const open = data.value !== undefined ? data.value : data.open;
+                const open = data?.open || 0;
 
-                const close = data.close;
-                const high = data.high;
-                const low = data.low;
-                let newString = generateOHLCV_String({ open, high, low, close, vol: volData.value })
+                const close = data.value !== undefined ? data.value : data.close;
+                const high = data?.high || 0;
+                const low = data?.low || 0;
+                let newString = generateOHLCV_String({ open, high, low, close, vol: volData?.value })
                 let dateStr = `<div style="width:110px; text-align:start">${date}</div>`
                 let finalStr = toolTipSwitchFlag ? `${newString}` : `${dateStr}${newString}`
                 ohlcvLegend.innerHTML = finalStr
@@ -675,23 +723,9 @@ const MainChart = (props) => {
         let cWidth = tokenDom.clientWidth;
         let cHeight = tokenDom.clientHeight;
 
-        const tooltipPadding = 10;
         const tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
-        let toolTipXCoOrdinates = 0, toolTipYCoOrdinates = 0;
 
-        let scrollYAxis = window.scrollY
-
-        // gets the global mouse co-ordinates form the document- desktops
-        const calculateMousePosition = (event) => {
-            toolTipXCoOrdinates = event.pageX;
-            toolTipYCoOrdinates = event.pageY;
-        }
-
-        // gets the global mouse co-ordinates form the document- touch devices
-        const handleTouchMove = (event) => {
-            toolTipXCoOrdinates = event.touches[0].pageX;
-            toolTipYCoOrdinates = event.touches[0].pageY;
-        }
+        const toolTipMargin = 15;
 
         const toolTipHandler = (param) => {
             if (
@@ -716,50 +750,68 @@ const MainChart = (props) => {
                     }
                 );
                 tooltip.style.display = 'block';
-                const data = param.seriesData.get(candleStickSeriesRef.current);
-                const volData = param.seriesData.get(candleStickVolumeSeriesRef.current);
+                const data = param.seriesData.get(candleStickSeriesRef.current) || param.seriesData.get(predictionLineChart);
+                const volData = param.seriesData.get(candleStickVolumeSeriesRef.current)?.value || 0;
                 // console.log(volData)
-                const open = data.value !== undefined ? data.value : data.open;
+                const open = data?.open || 0;
 
-                const close = data.close;
-                const high = data.high;
-                const low = data.low;
+                const close = data.value !== undefined ? data.value : data.close;
+                const high = data?.high || 0;
+                const low = data?.low || 0;
 
                 tooltip.innerHTML = `
                     <div style="color: ${'rgba(255, 82, 82, 1)'}">${symbol}</div>
-                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">O : ${Math.round(100 * open) / 100}</div>
-                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">H : ${Math.round(100 * high) / 100}</div>
-                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">L : ${Math.round(100 * low) / 100}</div>
-                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">C : ${Math.round(100 * close) / 100}</div>
-                    <div class-name='tooltip-text' style="margin: 4px 0px; color: ${'black'}">V : ${Math.round(volData.value).toFixed(2)}</div>
-                    <div class-name='tooltip-text' style="color: ${'black'},font-size: 12px;">${dateStr}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; font-size: 11px; font-weight:400; color: ${'black'}">O : ${Math.round(100 * open) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; font-size: 11px; font-weight:400; color: ${'black'}">H : ${Math.round(100 * high) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; font-size: 11px; font-weight:400; color: ${'black'}">L : ${Math.round(100 * low) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; font-size: 11px; font-weight:400; color: ${'black'}">C : ${Math.round(100 * close) / 100}</div>
+                    <div class-name='tooltip-text' style="margin: 4px 0px; font-size: 11px; font-weight:400; color: ${'black'}">V : ${Math.round(volData).toFixed(2)}</div>
+                    <div class-name='tooltip-text' style="color: ${'black'},font-size: 11px;">${dateStr}</div>
                     `;
 
-                let diffX = toolTipXCoOrdinates - offsetLeft
-                if (diffX > cWidth - 150) {
-                    toolTipXCoOrdinates = toolTipXCoOrdinates - (100 + (tooltipPadding * 2))
+                const coordinate = candleStickSeriesRef.current.priceToCoordinate(close);
+                // console.log(coordinate)
+
+                let shiftedCoordinate = param.point.x;
+                if (coordinate === null) {
+                    return;
                 }
 
-                let diffY = toolTipYCoOrdinates - offsetTop - scrollYAxis
-                if (diffY > cHeight - 150) {
-                    toolTipYCoOrdinates = toolTipYCoOrdinates - (100 + (tooltipPadding * 2))
+                shiftedCoordinate = Math.max(
+                    0,
+                    Math.min(chartboxRef.current.clientWidth, shiftedCoordinate)
+                );
+
+                const coordinateY =
+                    coordinate - toolTipMargin > 0
+                        ? coordinate - toolTipMargin
+                        : Math.max(
+                            0,
+                            Math.min(
+                                chartboxRef.current.clientHeight - toolTipMargin,
+                                coordinate + toolTipMargin
+                            )
+                        );
+
+                let finalX = shiftedCoordinate + offsetLeft + toolTipMargin
+                let finalY = coordinateY + offsetTop + 20 + toolTipMargin
+                if (finalX > cWidth + offsetLeft - 180) {
+                    finalX = finalX - 150
                 }
-                // console.log(diffX, diffY)
-                tooltip.style.left = `${toolTipXCoOrdinates + tooltipPadding}px`;
-                tooltip.style.top = `${toolTipYCoOrdinates + tooltipPadding}px`;
+                if (finalY > offsetTop + cHeight - 180) {
+                    finalY = finalY - 190
+                }
+
+                tooltip.style.left = finalX + 'px';;
+                tooltip.style.top = finalY + 'px';
             }
         }
 
         if (toolTipSwitchFlag) {
-            // tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
-            tokenDom.addEventListener('mousemove', (event) => calculateMousePosition(event))
-            tokenDom.addEventListener('touchmove', (event) => handleTouchMove(event))
             chart.current.subscribeCrosshairMove(toolTipHandler);
         } else {
-            tokenDom.removeEventListener('mousemove', calculateMousePosition)
-            tokenDom.removeEventListener('touchmove', handleTouchMove)
-            // tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
             tooltip.style.display = 'none';
+            chart.current.unsubscribeCrosshairMove(toolTipHandler)
         }
 
         return () => {
@@ -974,14 +1026,14 @@ const MainChart = (props) => {
     const useBinanceWebSocket = (binanceWS_URL) => {
         const websocketRef = useRef(null);
         const isInitializedRef = useRef(false);
-    
+
         useEffect(() => {
             if (!isInitializedRef.current) {
                 console.log('Opening Binance WebSocket connection...');
                 websocketRef.current = new WebSocket(binanceWS_URL);
                 isInitializedRef.current = true;
             }
-    
+
             return () => {
                 if (websocketRef.current && websocketRef.current.readyState === 1) {
                     console.log('Closing Binance WebSocket connection...');
@@ -989,7 +1041,7 @@ const MainChart = (props) => {
                 }
             };
         }, [binanceWS_URL]);
-    
+
         return websocketRef;
     };
 
@@ -1129,7 +1181,7 @@ const MainChart = (props) => {
         if (candleStickSeriesRef.current) {
             createWebSocket();
         }
-        
+
     }, [selectedTokenPeriod, symbol, token, dispatch, previousValue, binance_websocket])
 
     // handles the show/hide chart button
@@ -1232,9 +1284,9 @@ const MainChart = (props) => {
                                                     onClick={handleToggleShowHideChart.bind(null, { id: id, name: name })}
                                                 >
                                                     {show_chart_flag ?
-                                                        <VisibilityOffIcon className='smaller-icon' />
-                                                        :
                                                         <VisibilityIcon className='smaller-icon' />
+                                                        :
+                                                        <VisibilityOffIcon className='smaller-icon' />
                                                     }
                                                 </IconButton>
                                             }

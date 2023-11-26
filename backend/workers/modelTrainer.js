@@ -146,10 +146,10 @@ module.exports = async (job) => {
                         throw new Error(JSON.stringify(newErrorMessage));
                     }
                     // @ts-ignore
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Fetched ${result.length} tickers from db...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(1/11) : Fetched ${result.length} tickers from db...` }))
                     break;
                 case 2: // Executing the talib functions // setting step, finalTalibResult
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Executing selected functions...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(2/11) : Executing selected functions...` }))
                     parameters = {
                         selectedFunctions: fTalibExecuteQuery,
                         tickerHistory: JSON.parse(await redisStep.hget(modelCheckpointName, 'tickerHistory')),
@@ -167,10 +167,10 @@ module.exports = async (job) => {
                         const newErrorMessage = { func_error: error.message, message: 'Error in executing selected functions', step: i }
                         throw new Error(JSON.stringify(newErrorMessage));
                     }
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Function execution completed...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(2/11) : Function execution completed...` }))
                     break;
                 case 3: // Finding smallest array to adjust ticker hist and function data // setting step, tickerHistory, finalTalibResult
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Finding smallest array to adjust ticker hist and function data...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(3/11) : Finding smallest array to adjust ticker hist and function data...` }))
                     parameters = {
                         finalTalibResult: JSON.parse(await redisStep.hget(modelCheckpointName, 'finalTalibResult')),
                         tickerHistory: JSON.parse(await redisStep.hget(modelCheckpointName, 'tickerHistory'))
@@ -191,10 +191,10 @@ module.exports = async (job) => {
                         const newErrorMessage = { func_error: error.message, message: 'Error adjusting the ticker and talib result length', step: i }
                         throw new Error(JSON.stringify(newErrorMessage));
                     }
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Trimmed data based on talib smallest length...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(3/11) : Trimmed data based on talib smallest length...` }))
                     break;
                 case 4: // Transforming and combining the data to required format for model training // setting step, features
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Transforming and combining the OHLCV and function data for model training...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(4/11) : Transforming and combining the OHLCV and function data for model training...` }))
                     parameters = {
                         tickerHist: JSON.parse(await redisStep.hget(modelCheckpointName, 'tickerHistory')),
                         finalTalibResult: JSON.parse(await redisStep.hget(modelCheckpointName, 'finalTalibResult'))
@@ -213,10 +213,10 @@ module.exports = async (job) => {
                         const newErrorMessage = { func_error: error.message, message: 'Error in combining OHLCV and selected function data', step: i }
                         throw new Error(JSON.stringify(newErrorMessage));
                     }
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Transformed data to required shape...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(4/11) : Transformed data to required shape...` }))
                     break;
                 case 5: // Standardizing the data // setting step, stdData, label_mean, label_variance
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Standardizing the data...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(5/11) : Standardizing the data...` }))
                     parameters = {
                         model_type,
                         features: JSON.parse(await redisStep.hget(modelCheckpointName, 'features')),
@@ -240,10 +240,10 @@ module.exports = async (job) => {
                         const newErrorMessage = { func_error: error.message, message: 'Error during standardization of data', step: i }
                         throw new Error(JSON.stringify(newErrorMessage));
                     }
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Data standardized...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(5/11) : Data standardized...` }))
                     break;
                 case 6: // Transforming and creating the training data // setting step, trainSplit, xTrain, xHistory,  yTrain, xTrainTest, lastSets, yTrainTest, output_layer_neurons, feature_count
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Creating the training data...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(6/11) : Creating the training data...` }))
                     parameters = {
                         model_type,
                         stdData: JSON.parse(await redisStep.hget(modelCheckpointName, 'stdData')),
@@ -282,10 +282,10 @@ module.exports = async (job) => {
                         const newErrorMessage = { func_error: error.message, message: 'Error in transforming and creating data', step: i }
                         throw new Error(JSON.stringify(newErrorMessage));
                     }
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Training data created...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(6/11) : Training data created...` }))
                     break;
                 case 7: // Getting dates and verifying correctness // setting step, dates
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Generating dates for test set data...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(7/11) : Generating dates for test set data...` }))
                     parameters = {
                         ticker_history: JSON.parse(await redisStep.hget(modelCheckpointName, 'tickerHistory')),
                         train_split: JSON.parse(await redisStep.hget(modelCheckpointName, 'trainSplit')),
@@ -311,7 +311,7 @@ module.exports = async (job) => {
                     }
                     break;
                 case 8: // Creating the model // setting step
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Creating the model...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(8/11) : Creating the model...` }))
                     const input_layer_neurons = 64;
                     const rnn_output_neurons = 16;
                     parameters = {
@@ -336,10 +336,10 @@ module.exports = async (job) => {
                         const newErrorMessage = { func_error: error.message, message: 'Error creating model', step: i }
                         throw new Error(JSON.stringify(newErrorMessage));
                     }
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> TF Model created...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(8/11) : TF Model created...` }))
                     break;
                 case 9: // Training the model // setting step
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Training the model...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(9/11) : Training the model...` }))
                     parameters = {
                         model: model_,
                         learning_rate,
@@ -373,10 +373,10 @@ module.exports = async (job) => {
                     // @ts-ignore
                     trained_model_ = result.model
                     console.log('Optimizer : ', trained_model_.optimizer_.learningRate, trained_model_.optimizer_.beta1, trained_model_.optimizer_.beta2, trained_model_.optimizer_.epsilon)
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> TF Model trained...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(9/11) : TF Model trained...` }))
                     break;
                 case 10: // Saving the model, weights  and cleaning up // setting step
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Saving the model...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(10/11) : Saving the model...` }))
                     try {
                         await step(trained_model_, model_id)
                         await redisStep.hset(modelCheckpointName, {
@@ -388,7 +388,7 @@ module.exports = async (job) => {
                     }
                     break;
                 case 11: // Evaluating the model on test set // setting step
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> Evaluating the model on test set...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(11/11) : Evaluating the model on test set...` }))
                     // trained_model_ = null
                     let modelForEvaluation = trained_model_ || await TF_Model.loadModel(model_id)
                     trained_model_ = modelForEvaluation
@@ -418,7 +418,7 @@ module.exports = async (job) => {
                         const newErrorMessage = { func_error: error.message, message: 'Error during evaluation', step: i }
                         throw new Error(JSON.stringify(newErrorMessage));
                     }
-                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `----> TF Model evaluation completed...` }))
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(11/11) : TF Model evaluation completed...` }))
                     redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'prediction_completed', uid, id: model_id }))
 
                     const allData = await redisStep.hgetall(modelCheckpointName)

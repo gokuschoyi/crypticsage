@@ -22,6 +22,7 @@ export const executeAllSelectedFunctions = createAsyncThunk(
 
 const initialState = {
     toolTipOn: false,
+    showPredictions: true,
     barsFromTo: { from: 0, to: 0 },
     barsFromToPredictions: { from: 0, to: 0 },
     selectedTickerName: '',
@@ -61,6 +62,7 @@ const initialState = {
             scaled: []
         },
         predictionPaletteId: 0,
+        lastLookAheadPredictions: [],
         score: {
             over_all_score: 0,
             scores: []
@@ -103,6 +105,7 @@ const cryptoModuleSlice = createSlice({
         setStandardizedAndScaledPredictions: (state, action) => {
             state.modelData.predictedValues.standardized = action.payload.standardized;
             state.modelData.predictedValues.scaled = action.payload.scaled;
+            state.modelData.lastLookAheadPredictions = action.payload.lastData
         },
         setBarsFromToPredictions: (state, action) => {
             state.barsFromToPredictions = action.payload;
@@ -134,6 +137,7 @@ const cryptoModuleSlice = createSlice({
                 scores: []
             };
             state.barsFromToPredictions = { from: 0, to: 0 };
+            state.modelData.lastLookAheadPredictions = [];
         },
         resetModelData: (state) => {
             state.modelData.model_id = '';
@@ -142,6 +146,7 @@ const cryptoModuleSlice = createSlice({
             state.modelData.training_parameters = initialState.modelData.training_parameters;
             state.modelData.epoch_results = [];
             state.modelData.epoch_no = initialState.modelData.epoch_no;
+            state.modelData.lastLookAheadPredictions = [];
             state.modelData.predictedValues = {
                 dates: [],
                 standardized: [],
@@ -157,6 +162,9 @@ const cryptoModuleSlice = createSlice({
         },
         toggleToolTipSwitch: (state) => {
             state.toolTipOn = !state.toolTipOn;
+        },
+        toggleShowPredictionSwitch: (state) => {
+            state.showPredictions = !state.showPredictions;
         },
         setBarsFromTo: (state, action) => {
             state.barsFromTo = action.payload;
@@ -648,6 +656,7 @@ export const {
     , resetPredictionsValue
     , resetModelData
     , toggleToolTipSwitch
+    , toggleShowPredictionSwitch
     , setBarsFromTo
     , toggleProcessSelectedFunctionsOnMoreData
     , setTalibDescription

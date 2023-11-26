@@ -22,7 +22,12 @@
 }
 
 .talib-func-hint {
-    max-width: 290px;
+    max-width: 190px;
+    transition: all 0.2s ease-in-out;
+}
+
+.selected-function-hint {
+    max-width: 100%;
     transition: all 0.2s ease-in-out;
 }
 
@@ -151,14 +156,14 @@ tr:hover .prediction-mse {
 }
 
 .tool-tip-indicators {
-    width: 130px;
+    width: 115px;
     background-color: #fff;
     color: #000;
     position: absolute;
     display: none;
-    padding: 8px;
+    padding: 6px;
     box-sizing: border-box;
-    font-size: 12px;
+    font-size: 11px;
     text-align: left;
     z-index: 1000;
     top: 12px;
@@ -175,6 +180,10 @@ tr:hover .prediction-mse {
 .trainmodel-title,
 .tensor-flow-grid {
     background-color: var(--mui-palette-background-paper);
+}
+
+.model-parameters-grid {
+    width: 100%;
 }
 
 .function-accordian {
@@ -196,6 +205,21 @@ tr:hover .prediction-mse {
     display: flex;
     justify-content: center;
     height: 60vh;
+}
+
+.chart-cont-dom {
+    height: 58vh;
+}
+
+.token-chart-box {
+    height: 100%;
+}
+
+.tooltip-prediction-box {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: flex-start;
 }
 
 .MuiTabs-flexContainer {
@@ -577,6 +601,10 @@ tr:hover .prediction-mse {
         max-width: 240px;
         transition: all 0.2s ease-in-out;
     }
+
+    .model-parameters-grid {
+        max-width: 80%;
+    }
 }
 
 @media screen and (max-width: 800px) {
@@ -641,8 +669,29 @@ tr:hover .prediction-mse {
         width: 100%;
     }
 
-    .chart-action-box{
-        width:100%
+    .chart-action-box {
+        width: 100%
+    }
+
+    .ticker-period-selector-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tooltip-prediction-box {
+        justify-content: space-between;
+        width: 100%;
+        align-items: center;
+    }
+
+    .tooltip-prediction-box>span {
+        text-align: end;
+        width: 100%;
+    }
+
+    .function-selector,
+    .model-metrics {
+        width: 100%;
     }
 
     /* .border-right {

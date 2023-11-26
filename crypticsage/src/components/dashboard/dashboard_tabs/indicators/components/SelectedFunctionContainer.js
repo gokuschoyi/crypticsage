@@ -1,6 +1,6 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, AccordionActions, IconButton, Tooltip, TextField, Autocomplete, useTheme } from '@mui/material'
+import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, AccordionActions, IconButton, Tooltip, TextField, Autocomplete, useTheme, CircularProgress } from '@mui/material'
 import { executeTalibFunction } from '../../../../../api/adminController'
 import {
     setSelectedFunctions
@@ -115,6 +115,8 @@ const SelectedFunctionContainer = (props) => {
         dispatch(toggleShowHideChartFlag({ id: id, name: name }))
     }
 
+    const [talibExecuting, setTalibExecuting] = React.useState(false)
+
     // handle generate query for each function
     const handleGenerateQuery = (params) => {
         const { id } = params
@@ -204,12 +206,15 @@ const SelectedFunctionContainer = (props) => {
             }
 
             console.log(payload)
+            setTalibExecuting(true)
             executeTalibFunction({ token, payload })
                 .then((res) => {
                     console.log(res.data)
                     dispatch(setTalibResult({ id: id, name: name, optInputs: optInputs, result: res.data.result }))
+                    setTalibExecuting(false)
                 })
                 .catch(err => {
+                    setTalibExecuting(false)
                     console.log(err)
                 })
         }
@@ -293,18 +298,18 @@ const SelectedFunctionContainer = (props) => {
                                         {outputAvailable &&
                                             <IconButton size='small' aria-label="Hide shart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: id, name: name })}>
                                                 {show_chart_flag ?
-                                                    <VisibilityOffIcon className='small-icon' />
-                                                    :
                                                     <VisibilityIcon className='small-icon' />
+                                                    :
+                                                    <VisibilityOffIcon className='small-icon' />
                                                 }
                                             </IconButton>
                                         }
 
                                         <IconButton size='small' aria-label="execute query" color="secondary" onClick={handleGenerateQuery.bind(null, { id: id })}>
-                                            {outputAvailable ?
-                                                <RestartAltIcon className='small-icon' />
-                                                :
-                                                <PlayArrowIcon className='small-icon' />
+                                            {
+                                                outputAvailable
+                                                    ? (talibExecuting ? <CircularProgress color="error" sx={{ margin: '2.5px' }} size={15} /> : <RestartAltIcon className='small-icon' />)
+                                                    : (talibExecuting ? <CircularProgress color="error" sx={{ margin: '2.5px' }} size={15} /> : <PlayArrowIcon className='small-icon' />)
                                             }
                                         </IconButton>
 
