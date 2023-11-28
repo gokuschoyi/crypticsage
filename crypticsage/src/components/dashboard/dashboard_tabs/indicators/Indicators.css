@@ -106,8 +106,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
     transition: all 0.5s ease;
+    border: 1px solid var(--mui-palette-background-default);
+    white-space: nowrap;
+    padding: 4px 3px;
+    text-align: left;
     /* Animation effect */
 }
+
+/* .MuiLinearProgress-bar {
+    transition: none;
+}
+ */
 
 /* Define hover behavior for the entire row */
 tr:hover .prediction-mse {
@@ -220,6 +229,19 @@ tr:hover .prediction-mse {
     flex-direction: row;
     gap: 16px;
     align-items: flex-start;
+}
+
+.tooltip-prediction-box-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.prediction-days {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
 }
 
 .MuiTabs-flexContainer {
@@ -382,6 +404,7 @@ tr:hover .prediction-mse {
     width: 300px;
 }
 
+.mse-table-main,
 .table-main {
     border-collapse: collapse;
     width: 100%;
@@ -389,6 +412,7 @@ tr:hover .prediction-mse {
     /* table-layout: fixed; */
 }
 
+.mse-table-main,
 .table-main,
 .table-head,
 .new-table-head {
@@ -447,6 +471,14 @@ tr:hover .prediction-mse {
 
 .data-table {
     table-layout: fixed;
+}
+
+.mse-table-head {
+    border: 1px solid var(--mui-palette-background-default);
+    background-color: var(--mui-palette-background-paper);
+    white-space: nowrap;
+    padding: 4px 3px;
+    text-align: left;
 }
 
 .table-container {
@@ -605,12 +637,27 @@ tr:hover .prediction-mse {
     .model-parameters-grid {
         max-width: 80%;
     }
+
+    .tooltip-prediction-box {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .ticker-period-selector-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 @media screen and (max-width: 800px) {
     .talib-func-hint {
         max-width: 150px;
         transition: all 0.2s ease-in-out;
+    }
+
+    .tooltip-prediction-box-controls {
+        flex-direction: column;
+        
     }
 
 }
@@ -631,9 +678,11 @@ tr:hover .prediction-mse {
         width: 100%;
     }
 
+    .mse-table-head,
     .table-head {
         text-align: center;
     }
+
 
     .table-data {
         text-align: center;
@@ -650,7 +699,7 @@ tr:hover .prediction-mse {
     }
 
     .batch-end-text {
-        width: 85px;
+        width: 100px;
     }
 
     .talib-func-hint {
@@ -673,25 +722,29 @@ tr:hover .prediction-mse {
         width: 100%
     }
 
-    .ticker-period-selector-top {
+    /* .ticker-period-selector-top {
         flex-direction: column;
         align-items: flex-start;
-    }
+    } */
 
     .tooltip-prediction-box {
         justify-content: space-between;
         width: 100%;
-        align-items: center;
+        align-items: flex-start;
     }
 
     .tooltip-prediction-box>span {
         text-align: end;
-        width: 100%;
+        /* width: 100%; */
     }
 
     .function-selector,
     .model-metrics {
         width: 100%;
+    }
+
+    .chart-action-box {
+        align-items: flex-start;
     }
 
     /* .border-right {

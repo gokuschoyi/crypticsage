@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useMemo } from 'react'
 import { Box, useTheme, Skeleton, Typography, Paper } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { useSelector, useDispatch } from 'react-redux';
-import { setBarsFromToPredictions, setStandardizedAndScaledPredictions } from '../modules/CryptoModuleSlice'
+import { setBarsFromToPredictions, setStandardizedAndScaledPredictions } from '../../modules/CryptoModuleSlice'
 
 const calculateMetrics = (data, thresholdLower = 0.01, thresholdUpper = 0.02) => {
     let TP = 0;
@@ -70,6 +70,7 @@ const PredictionsChart = (props) => {
     const theme = useTheme()
     const dispatch = useDispatch()
     const chartBackgroundColor = theme.palette.background.default
+    const textColor = theme.palette.primary.newWhite
 
     const chartData = useSelector(state => state.cryptoModule.modelData.predictedValues)
     // console.log(chartData)
@@ -191,9 +192,11 @@ const PredictionsChart = (props) => {
                 },
                 grid: {
                     vertLines: {
+                        visible: false,
                         color: 'rgba(197, 203, 206, 0.5)',
                     },
                     horzLines: {
+                        visible: false,
                         color: 'rgba(197, 203, 206, 0.5)',
                     },
                 },
@@ -208,7 +211,6 @@ const PredictionsChart = (props) => {
                 },
             });
             chart.current.timeScale().fitContent();
-            let markers = []
 
             const actual_values = predictedValueRedux
                 .filter((prediction) => prediction.actual !== null)
@@ -254,17 +256,7 @@ const PredictionsChart = (props) => {
                 lineWidth: 2,
             });
 
-            markers.push({
-                time: predicted_values[predicted_values.length - lookAhead].time,
-                position: 'aboveBar',
-                color: 'red',
-                shape: 'circle',
-                text: 'prediction',
-                size: 0.4
-            })
-
             predictedValueRef.current.setData(predicted_values);
-            predictedValueRef.current.setMarkers(markers)
 
             window.addEventListener('resize', handleResize);
         }
@@ -305,6 +297,18 @@ const PredictionsChart = (props) => {
         if (predictedValueRedux.length === 0 || !predictionsChartRef.current) {
             return
         } else {
+            let markers = []
+            let values = chartData[predictionChartType]
+            markers.push({
+                time: values[values.length - lookAhead].open,
+                position: 'aboveBar',
+                color: 'red',
+                shape: 'circle',
+                text: 'prediction',
+                size: 0.4
+            })
+            // console.log(lookAhead, markers)
+
             predictedValueRef.current.applyOptions({
                 color: predictedColor,
             });
@@ -337,7 +341,7 @@ const PredictionsChart = (props) => {
                     };
                 });
 
-            predictedValueRef.current.setMarkers(tpMarkers)
+            predictedValueRef.current.setMarkers([...tpMarkers, ...markers])
 
         }
     }, [chartData, predictedValueRedux, predictionChartType, lookAhead, tp_upColor, tp_downColor, actualColor, predictedColor, forecastColor])
@@ -511,11 +515,11 @@ const PredictionsChart = (props) => {
                         type: 'solid',
                         color: chartBackgroundColor,
                     },
-                    textColor: 'rgba(255, 255, 255, 0.9)',
+                    textColor: textColor,
                 }
             })
         }
-    }, [chartBackgroundColor, predictedValueRedux])
+    }, [chartBackgroundColor, predictedValueRedux, textColor])
 
     return (
         <Box width="100%" className='prediction-chart-component-box'>

@@ -52,6 +52,8 @@ const initialState = {
             scaledLearningRate: 0.01
         },
         talibExecuteQueries: [],
+        modelStartTime: '',
+        modelEndTime: '',
         startWebSocket: false,
         progress_message: [],
         epoch_no: 0,
@@ -91,6 +93,12 @@ const cryptoModuleSlice = createSlice({
         },
         setStartWebSocket: (state, action) => {
             state.modelData.startWebSocket = action.payload;
+        },
+        setModelStartTime: (state, action) => {
+            state.modelData.modelStartTime = action.payload;
+        },
+        setModelEndTime: (state, action) => {
+            state.modelData.modelEndTime = action.payload;
         },
         setPredictedValues: (state, action) => {
             state.modelData.predictedValues = { ...state.modelData.predictedValues, ...action.payload };
@@ -138,27 +146,31 @@ const cryptoModuleSlice = createSlice({
             };
             state.barsFromToPredictions = { from: 0, to: 0 };
             state.modelData.lastLookAheadPredictions = [];
+            state.modelData.model_id = '';
+            state.modelData.modelStartTime = '';
+            state.modelData.modelEndTime = '';
         },
         resetModelData: (state) => {
-            state.modelData.model_id = '';
-            state.modelData.model_name = '';
-            state.modelData.model_saved_to_db = false;
-            state.modelData.training_parameters = initialState.modelData.training_parameters;
             state.modelData.epoch_results = [];
             state.modelData.epoch_no = initialState.modelData.epoch_no;
-            state.modelData.lastLookAheadPredictions = [];
             state.modelData.predictedValues = {
                 dates: [],
                 standardized: [],
                 scaled: []
             };
             state.modelData.progress_message = [];
-            state.modelData.talibExecuteQueries = [];
+            state.modelData.model_name = '';
             state.modelData.score = {
                 over_all_score: 0,
                 scores: []
             };
             state.barsFromToPredictions = { from: 0, to: 0 }
+            state.modelData.lastLookAheadPredictions = [];
+            state.modelData.model_id = '';
+            state.modelData.modelEndTime = '';
+            state.modelData.model_saved_to_db = false;
+            state.modelData.training_parameters = initialState.modelData.training_parameters;
+            state.modelData.talibExecuteQueries = [];
         },
         toggleToolTipSwitch: (state) => {
             state.toolTipOn = !state.toolTipOn;
@@ -597,6 +609,8 @@ const cryptoModuleSlice = createSlice({
         resetCryptoStockModule: (state) => {
             state.selectedTickerName = '';
             state.barsFromTo = { from: 0, to: 0 };
+            state.barsFromToPredictions = { from: 0, to: 0 };
+            state.toolTipOn = false;
             state.selectedTickerPeriod = '4h';
             state.talibDescription = [];
             state.talibDescriptionCopy = [];
@@ -644,6 +658,8 @@ export const {
     , setModelId
     , setTrainingParameters
     , setStartWebSocket
+    , setModelStartTime
+    , setModelEndTime
     , setPredictedValues
     , setPredictionPaletteId
     , setPredictionScores

@@ -1,7 +1,6 @@
 import React from 'react'
 import Header from '../../../global/Header';
-import CryptoTable from '../components/CryptoTable';
-import StocksTable from '../components/StocksTable';
+import { CryptoTable, StocksTable } from '../components';
 import {
     Box
     , Tabs

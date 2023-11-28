@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { Box, useTheme, IconButton, Button, Card, CardContent, CardActions, Typography, Autocomplete, TextField, Tooltip, } from '@mui/material'
 import { createChart } from 'lightweight-charts';
-import { updateTickerWithOneDataPoint, getHistoricalTickerDataFroDb } from '../../../../../api/adminController'
+import { updateTickerWithOneDataPoint, getHistoricalTickerDataFroDb } from '../../../../../../api/adminController'
 import { useSelector, useDispatch } from 'react-redux'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -20,9 +20,9 @@ import {
     , setSelectedFunctionOptionalInputValues
     , toggleProcessSelectedFunctionsOnMoreData
     , resetStreamedTickerDataRedux
-} from '../modules/CryptoModuleSlice'
+} from '../../modules/CryptoModuleSlice'
 
-import { executeAllSelectedFunctions } from '../modules/CryptoModuleSlice'
+import { executeAllSelectedFunctions } from '../../modules/CryptoModuleSlice'
 
 const EXTRA_DATA_FETCH_POINT_FRACTION = 0.3;
 
@@ -266,6 +266,7 @@ const MainChart = (props) => {
     const toolTipSwitchFlag = useSelector(state => state.cryptoModule.toolTipOn)
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
+    const textColor = theme.palette.primary.newWhite
 
     const dispatch = useDispatch()
     const processMore = useSelector(state => state.cryptoModule.processSelectedFunctionsOnMoreData)
@@ -489,7 +490,7 @@ const MainChart = (props) => {
         // console.log(predictionLineChart)
         if (lastLookAheadPredictions.length === 0 || !chart.current) {
             if (predictionLineChart) {
-                console.log('model deleted')
+                // console.log('model deleted')
                 chart.current.removeSeries(predictionLineChart);
                 setPredictionLineChart(null);
             }
@@ -724,6 +725,7 @@ const MainChart = (props) => {
         let cHeight = tokenDom.clientHeight;
 
         const tooltip = document.getElementsByClassName('tool-tip-indicators')[0]
+        const ohlcvTooltip = document.getElementsByClassName('ohlcv-box')[0]
 
         const toolTipMargin = 15;
 
@@ -809,8 +811,10 @@ const MainChart = (props) => {
 
         if (toolTipSwitchFlag) {
             chart.current.subscribeCrosshairMove(toolTipHandler);
+            ohlcvTooltip.style.display = 'none'
         } else {
             tooltip.style.display = 'none';
+            ohlcvTooltip.style.display = 'flex'
             chart.current.unsubscribeCrosshairMove(toolTipHandler)
         }
 
@@ -829,11 +833,11 @@ const MainChart = (props) => {
                         type: 'solid',
                         color: chartBackgroundColor,
                     },
-                    textColor: 'rgba(255, 255, 255, 0.9)',
+                    textColor: textColor,
                 }
             })
         }
-    }, [chartBackgroundColor])
+    }, [chartBackgroundColor, textColor])
 
     const [chartSeriesState, setChartSeriesState] = useState([])
     const removePaneFlag = useRef(false)
@@ -1254,7 +1258,6 @@ const MainChart = (props) => {
         }
         return final
     }
-
     return (
         <Box className='chart-cont-dom' width="100%" height="100%" >
             <Box className='selected-function-legend'>

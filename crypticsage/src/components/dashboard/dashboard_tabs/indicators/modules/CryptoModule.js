@@ -11,6 +11,8 @@ import {
     setTrainingParameters,
     setPredictionPaletteId,
     setStartWebSocket,
+    setModelStartTime,
+    setModelEndTime,
     resetCurrentModelData,
     resetModelData,
     setCryptoDataInDbRedux,
@@ -24,8 +26,9 @@ import {
 
 import useWebSocket from './WebSocket';
 
-import MainChart from '../components/MainChartCopy';
-import SelectedFunctionContainer from '../components/SelectedFunctionContainer';
+import { DeleteCurrentModal, SaveCurrentModal, ResetTrainedModelModal } from '../components/crypto_components/modals';
+import { MainChart, SelectedFunctionContainer, PredictionsChart, CustomSlider, LinearProgressWithLabel, MultiSelect } from '../components'
+
 import { useSelector } from 'react-redux'
 import {
     Box
@@ -38,17 +41,15 @@ import {
     , Switch
     , FormControlLabel
     , Button
-    , Slider
     , CircularProgress
     , IconButton
     , Paper
     , Chip
+    , useMediaQuery
 } from '@mui/material'
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import SaveIcon from '@mui/icons-material/Save';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
@@ -56,7 +57,6 @@ import AspectRatioIcon from '@mui/icons-material/AspectRatio';
 
 import { Success, Info } from '../../../global/CustomToasts'
 
-import PredictionsChart from '../components/PredictionsChart';
 
 const colorCombinations = [
     {
@@ -134,44 +134,6 @@ const MODEL_OPTIONS_VALUE = {
     "Multi Step Multiple Output": "multi_input_multi_output_step"
 }
 
-const NEW_MODEL_DESCRIPTION = {
-    "Single Step Single Output": {
-        "model_type": "multi_input_single_output_no_step",
-        "input": "multiple",
-        "output": 'single',
-        "chart_type": "line",
-        "description": "This model is designed to train on multiple input time series datasets with the goal of predicting a single value (Predictions flag), one step ahead. It's important to note that this model focuses on predicting a single value one time-step ahead",
-        "step": false,
-        "prediction_flag": true
-    },
-    "Single Step Multiple Output": {
-        "model_type": "multi_input_multi_output_no_step",
-        "input": "multiple",
-        "output": 'multiple',
-        "chart_type": "candleStick",
-        "description": "The purpose of this model is to train on various input time series datasets, aiming to predict future values for all input features, one step ahead. It's crucial to understand that this model concentrates on predicting all the features for a single step in the future.",
-        "step": false,
-        "prediction_flag": false
-    },
-    "Multi Step Single Output": {
-        "model_type": "multi_input_single_output_step",
-        "input": "multiple",
-        "output": 'multiple',
-        "chart_type": "line",
-        "description": "The purpose of this model is to train on various input time series datasets, aiming to predict future values for look ahead values.",
-        "step": true,
-        "prediction_flag": true
-    },
-    "Multi Step Multiple Output": {
-        "model_type": "multi_input_multi_output_step",
-        "input": "multiple",
-        "output": 'multiple',
-        "chart_type": "candleStick",
-        "description": "The purpose of this model is to train on various input time series datasets, aiming to predict future values for all input features, for look ahead values.",
-        "step": true,
-        "prediction_flag": false
-    }
-}
 const thresholdLower = 1;
 const thresholdUpper = 2
 const CRITERIA_DATA = [
@@ -180,6 +142,20 @@ const CRITERIA_DATA = [
     { Condition: 'TN', Range: `x > ${thresholdUpper}%`, Criteria: `All precent changes tha lie more than ${thresholdUpper}% than the actual value` },
     { Condition: 'FN', Range: `${thresholdLower}% < x < ${thresholdUpper}%`, Criteria: `All precent changes tha lie within ${thresholdLower}% and  ${thresholdUpper}% of the actual value` }
 ];
+
+const NoMaxWidthTooltip = styled(({ className, ...props }) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+))({
+    [`& .${tooltipClasses.tooltip}`]: {
+        maxWidth: 'none',
+    },
+});
+
+const Dot = ({ color }) => {
+    return (
+        <Box sx={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: color }}></Box>
+    )
+}
 
 const ClassificationTable = ({ data }) => {
     return (
@@ -207,31 +183,23 @@ const ClassificationTable = ({ data }) => {
     );
 };
 
-const NoMaxWidthTooltip = styled(({ className, ...props }) => (
-    <Tooltip {...props} classes={{ popper: className }} />
-))({
-    [`& .${tooltipClasses.tooltip}`]: {
-        maxWidth: 'none',
-    },
-});
-
 const PredictionMSETable = ({ data }) => {
     // console.log(data)
 
     return (
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>MSE</th>
-                    <th>RMSE</th>
+        <table className="mse-table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
+            <thead className='table-group'>
+                <tr className='table-row'>
+                    <th className='mse-table-head'>Date</th>
+                    <th className='mse-table-head'>MSE</th>
+                    <th className='mse-table-head'>RMSE</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody className='table-body'>
                 {data.map((item, index) => {
                     return (
-                        <tr key={index}>
-                            <td>{item.date}</td>
+                        <tr className='table-row' key={index}>
+                            <td className='prediction-mse'>{item.date}</td>
                             <td className='prediction-mse'>{item.rmse * item.rmse}</td>
                             <td className='prediction-mse'>{item.rmse}</td>
                         </tr>
@@ -242,57 +210,26 @@ const PredictionMSETable = ({ data }) => {
     )
 }
 
-const Dot = ({ color }) => {
-    return (
-        <Box sx={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: color }}></Box>
-    )
-}
+const formatMillisecond = (milliseconds) => {
+    if (milliseconds < 1000) {
+        return milliseconds.toFixed(3) + ' ms';
+    } else if (milliseconds < 60000) {
+        return (milliseconds / 1000).toFixed(3) + ' s';
+    } else {
+        const hours = Math.floor(milliseconds / 3600000);
+        const minutes = Math.floor((milliseconds % 3600000) / 60000);
+        const seconds = Math.floor((milliseconds % 60000) / 1000);
+        const remainingMilliseconds = milliseconds % 1000;
 
-const MultiSelect = (props) => {
-    const theme = useTheme()
-    const { inputLabel, inputOptions, selectedInputOptions, handleInputOptions, fieldName, toolTipTitle } = props
-    const [tooltipMessage, setTooltipMessage] = useState(toolTipTitle)
-    useEffect(() => {
-        if (inputLabel === 'Model type') {
-            const model_data = NEW_MODEL_DESCRIPTION[selectedInputOptions]
-            setTooltipMessage(model_data.description)
-        }
-    }, [inputLabel, selectedInputOptions])
+        const formattedTime = [
+            hours.toString().padStart(2, '0'),
+            minutes.toString().padStart(2, '0'),
+            seconds.toString().padStart(2, '0'),
+            remainingMilliseconds.toString().padStart(3, '0')
+        ].join(':');
 
-    return (
-        <Paper elevation={8}>
-            <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'40px'} pl={'4px'} pr={'4px'} pt={1} pb={1}>
-                <Box sx={{ width: '100%' }}>
-                    <Autocomplete
-                        size='small'
-                        disableClearable
-                        disablePortal={false}
-                        id={`select-input-${fieldName}`}
-                        name='multiSelectValue'
-                        options={inputOptions}
-                        value={selectedInputOptions} // Set the selected value
-                        onChange={(event, newValue) => handleInputOptions(event, newValue)} // Handle value change
-                        sx={{ width: 'auto' }}
-                        renderInput={(params) => <TextField {...params}
-                            variant="standard"
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    '& fieldset': {
-                                        borderColor: `${theme.palette.text.secondary}`,
-                                    }
-                                }
-                            }}
-                            label={`${inputLabel}`}
-                            color="secondary"
-                        />}
-                    />
-                </Box>
-                <Tooltip title={tooltipMessage} placement='top' sx={{ cursor: 'pointer' }}>
-                    <InfoOutlinedIcon className='small-icon' />
-                </Tooltip>
-            </Box>
-        </Paper>
-    )
+        return formattedTime;
+    }
 }
 
 const periodToMilliseconds = (period) => {
@@ -405,67 +342,6 @@ const checkIfNewTickerFetchIsRequired = ({ openTime, selectedTokenPeriod }) => {
     return [fetchLength, finalDate]
 }
 
-const CustomSlider = (props) => {
-    const { sliderValue, name, handleModelParamChange, label, min, max, sliderMin, sliderMax, scaledLearningRate, disabled } = props
-    const [slideValue, setSlideValue] = useState(min)
-
-    useEffect(() => {
-        setSlideValue(sliderValue)
-    }, [sliderValue])
-
-    const handleChange = (e) => {
-        const { value } = e.target
-        if (value < min || value > max || value === slideValue) {
-            return
-        } else {
-            setSlideValue(value)
-        }
-    }
-
-    const handleSliderValueChange = (e, value) => {
-        if (value < min) {
-            value = min
-        } else if (value > max) {
-            value = max
-        }
-        handleModelParamChange(name, value)
-    }
-
-    return (
-        <Paper elevation={6}>
-            <Box p={'4px 8px'} display='flex' flexDirection='column' alignItems='start'>
-                <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%'>
-                    <Typography id="training-size-slider" variant='custom'>{label} : {scaledLearningRate === undefined ? `${sliderValue}${label === 'Training size' ? '%' : ''}` : scaledLearningRate.toExponential(2)}</Typography>
-                    <Typography variant='custom'>(Min: {min}, Max: {max})</Typography>
-                </Box>
-
-                <Box sx={{ width: "100%" }}>
-                    <Slider
-                        size='small'
-                        color='secondary'
-                        disabled={disabled}
-                        value={slideValue}
-                        name={name}
-                        id={name}
-                        valueLabelDisplay={'auto'}
-                        scale={(val) => {
-                            if (scaledLearningRate !== undefined) {
-                                return val / 100;
-                            }
-                            return val;
-                        }}
-                        step={1}
-                        min={sliderMin}
-                        max={sliderMax}
-                        onChange={(e) => handleChange(e)}
-                        onChangeCommitted={(e, val) => handleSliderValueChange(e, val)}
-                    />
-                </Box>
-            </Box>
-        </Paper>
-    )
-}
-
 const CryptoModule = () => {
     const dispatch = useDispatch();
     const theme = useTheme()
@@ -495,6 +371,12 @@ const CryptoModule = () => {
             items_per_page: 500
         })
         tickerDataRef.current = false
+    }
+
+    const handleMainChartPredictionLookaAhead = (newValue) => {
+        const lookAhead = parseInt(newValue.split('+')[1])
+        setPredictionLookAhead(lookAhead)
+        // console.log(lookAhead)
     }
 
     // to fetch ticker data
@@ -808,7 +690,7 @@ const CryptoModule = () => {
             }
             console.log('Execute query + Model parameters', fTalibExecuteQuery, model_training_parameters)
             dispatch(setStartWebSocket(true))
-
+            dispatch(setModelStartTime(new Date().getTime()))
             startModelTraining({
                 token,
                 payload: {
@@ -817,8 +699,10 @@ const CryptoModule = () => {
                 }
             }).then((res) => {
                 dispatch(resetModelData())
+                dispatch(setModelEndTime(''))
                 const modelId = res.data.job_id
                 const model_name = generateRandomModelName()
+                Success(res.data.message)
                 setModelName(model_name)
                 dispatch(setModelId({ model_id: modelId, model_name: model_name }))
                 dispatch(setTrainingParameters({ model_params: modelParams, selected_functions: fTalibExecuteQuery }))
@@ -836,16 +720,42 @@ const CryptoModule = () => {
         }
     }, [selectedFunctions, noFuncSelected])
 
+    // resetting entire training params and model data
     const handleClearModelData = () => {
+        if (model_data.model_id !== '') {
+            console.log('Model present, resetting Redux model and deleting from BE')
+            deleteModel({ token, payload: { model_id: model_data.model_id } })
+                .then((res) => {
+                    Success(res.data.message)
+                })
+                .catch((err) => {
+                    console.log(err.message)
+                })
+        } else {
+            console.log('No model present')
+        }
+        setModelParams(() => ({ ...model_parameters }))
         dispatch(resetModelData())
         dispatch(setStartWebSocket(false))
-        for (const key of Object.keys(model_parameters)) {
-            if (model_parameters[key] !== modelParams[key]) {
-                setModelParams(model_parameters)
-                break
-            }
-        }
     }
+
+    useEffect(() => {
+        // console.log('UE : setting model parameters')
+        setModelParams(() => ({ ...model_parameters }))
+    }, [model_parameters])
+
+    const modelProcessDurationRef = useRef('')
+    useEffect(() => {
+        // console.log('UE : Calculating model training time')
+        // console.log(model_data.modelStartTime)
+        if (model_data.modelEndTime !== '' && model_data.modelStartTime !== '') {
+            const diff = model_data.modelEndTime - model_data.modelStartTime
+            modelProcessDurationRef.current = formatMillisecond(diff)
+        } else {
+            // console.log('Process tome not available')
+            modelProcessDurationRef.current = ''
+        }
+    }, [model_data.modelEndTime, model_data.modelStartTime])
 
     const handleSaveModel = () => {
         const saveModelPayload = {
@@ -902,7 +812,6 @@ const CryptoModule = () => {
     }
 
     const [predictionLookAhead, setPredictionLookAhead] = useState(1) //for slider
-    // console.log(predictionLookAhead)
     const handelPredictionLookAheadSlider = (name, value) => {
         setPredictionLookAhead(value)
     }
@@ -919,8 +828,21 @@ const CryptoModule = () => {
     const [batchResult, setBatchResult] = useState(false)
     const [evaluating, setEvaluating] = useState(false)
     const [trainingStartedFlag, setTrainingStartedFlag] = useState(startWebSocket)
-    const { webSocket, createModelProgressWebSocket } = useWebSocket(webSocketURL, notifyMessageBoxRef, batchResult, evaluating, setBatchResult, setEvaluating, setTrainingStartedFlag, dispatch)
-
+    const batchLinearProgressRef = useRef(null)
+    const evalLinearProgressRef = useRef(null)
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    const { webSocket, createModelProgressWebSocket } = useWebSocket(
+        webSocketURL,
+        notifyMessageBoxRef,
+        batchResult,
+        evaluating,
+        batchLinearProgressRef,
+        evalLinearProgressRef,
+        setBatchResult,
+        setEvaluating,
+        setTrainingStartedFlag,
+        dispatch
+    )
     // WebSocket connection
     useEffect(() => {
         // console.log('UE : Socket start')
@@ -1014,10 +936,10 @@ const CryptoModule = () => {
                                 />
                             </Box>
                             <Box className='tooltip-prediction-box'>
-                                <Box display='flex' flexDirection='column' width='100%' alignItems='baseline'>
+                                <Box className='tooltip-prediction-box-controls'>
                                     <FormControlLabel
                                         value="start"
-                                        sx={{ marginLeft: '0px' }}
+                                        sx={{ marginLeft: '0px', marginRight: '0px' }}
                                         control={<Switch size="small" color="secondary" />}
                                         label={toolTipSwitchFlag ? 'Hide Tooltips' : 'Show Tooltips'}
                                         labelPlacement="start"
@@ -1025,18 +947,46 @@ const CryptoModule = () => {
                                         onChange={() => dispatch(toggleToolTipSwitch())}
                                     />
                                     {predictedVlauesRedux.length !== 0 &&
-                                        <FormControlLabel
-                                            value="start"
-                                            sx={{ marginLeft: '0px' }}
-                                            control={<Switch size="small" color="secondary" />}
-                                            label={showPredictionSwitchFlag ? 'Hide Predictions' : 'Show Predictions'}
-                                            labelPlacement="start"
-                                            checked={showPredictionSwitchFlag}
-                                            onChange={() => dispatch(toggleShowPredictionSwitch())}
-                                        />
+                                        <Box className='prediction-days'>
+                                            <FormControlLabel
+                                                value="start"
+                                                sx={{ marginLeft: '0px' }}
+                                                control={<Switch size="small" color="secondary" />}
+                                                label={showPredictionSwitchFlag ? 'Hide Predictions' : 'Show Predictions'}
+                                                labelPlacement="start"
+                                                checked={showPredictionSwitchFlag}
+                                                onChange={() => dispatch(toggleShowPredictionSwitch())}
+                                            />
+                                            {showPredictionSwitchFlag &&
+                                                <Autocomplete
+                                                    size='small'
+                                                    disableClearable
+                                                    disablePortal={false}
+                                                    id="selec-look-ahead-period"
+                                                    options={Array.from({ length: modelParams.lookAhead }, (_, i) => `+${i + 1}`)}
+                                                    value={`+${predictionLookAhead}`} // Set the selected value
+                                                    onChange={(event, newValue) => handleMainChartPredictionLookaAhead(newValue)} // Handle value change
+                                                    sx={{ width: 'auto' }}
+                                                    renderInput={(params) => <TextField size='small' {...params}
+                                                        sx={{
+                                                            '& .MuiOutlinedInput-root': {
+                                                                '& fieldset': {
+                                                                    borderColor: `${theme.palette.primary.newWhite} !important`,
+                                                                }
+                                                            },
+                                                            '& .MuiInputBase-input': {
+                                                                height: '10px'
+                                                            },
+                                                        }}
+                                                        label="LookAhead"
+                                                        color="secondary"
+                                                    />}
+                                                />
+                                            }
+                                        </Box>
                                     }
                                 </Box>
-                                <Typography variant='custom' sx={{ textAlign: 'justify' }}>AF:{actualFetchLength}, R:{ohlcData.length} / {ohlcData.length / 500}</Typography>
+                                <Typography variant='custom' sx={{ textAlign: 'justify' }}>AF:{actualFetchLength}, R:{ohlcData.length} / {Math.round(ohlcData.length / 500)}</Typography>
                             </Box>
                         </Box>
                         <Box className='chart-container' display='flex' flexDirection='column' height='100%' pl={2} pr={2} pt={2}>
@@ -1187,13 +1137,10 @@ const CryptoModule = () => {
                                         >
                                             {trainingStartedFlag ? 'Training' : 'Train'}
                                         </Button>
-                                        <Tooltip title={'Reset training data. (This will reset your entire model parameters to default and remove all models and predictions) WARN -  Save before resetting '} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                            <span>
-                                                <IconButton disabled={trainingStartedFlag} onClick={handleClearModelData.bind(null)}>
-                                                    <RestartAltIcon className='small-icon' />
-                                                </IconButton>
-                                            </span>
-                                        </Tooltip>
+                                        <ResetTrainedModelModal
+                                            handleClearModelData={handleClearModelData}
+                                            disabled={trainingStartedFlag}
+                                            model_present={model_data.model_id === '' ? false : true} />
                                     </Box>
                                 </Box>
                                 {noFuncSelected !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{noFuncSelected}</Typography>}
@@ -1237,7 +1184,7 @@ const CryptoModule = () => {
                             <Box display='flex' flexDirection='column' pb={1}>
                                 <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='flex-start' className='prediction-chart-header'>
                                     <Box display='flex' flexDirection='column' alignItems='start'>
-                                        <Typography variant='h6' textAlign='start'>Predictions {predictionChartType}</Typography>
+                                        <Typography variant={predictedVlauesRedux.length !== 0 ? 'h6' : 'h5'} textAlign='start'>Predictions {predictedVlauesRedux.length !== 0 && predictionChartType}</Typography>
                                     </Box>
                                     {predictedVlauesRedux.length !== 0 &&
                                         <Box className='chart-action-box'>
@@ -1253,22 +1200,12 @@ const CryptoModule = () => {
                                                     }}
                                                 />
                                                 <Box className='model-chart-action-box'>
-                                                    <Tooltip title={'Save Model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                                        <span>
-                                                            <IconButton onClick={handleSaveModel.bind(null, {})}>
-                                                                <SaveIcon className='small-icon' />
-                                                            </IconButton>
-                                                        </span>
-                                                    </Tooltip>
+                                                    <SaveCurrentModal handleSaveModel={handleSaveModel} />
+
                                                     {!model_data.model_saved_to_db &&
-                                                        <Tooltip title={'Delete the current model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                                            <span>
-                                                                <IconButton onClick={handleDeleteModel.bind(null, {})}>
-                                                                    <DeleteForeverIcon className='small-icon' />
-                                                                </IconButton>
-                                                            </span>
-                                                        </Tooltip>
+                                                        <DeleteCurrentModal handleDeleteModel={handleDeleteModel} />
                                                     }
+
                                                     {modelParams.modelType !== 'Single Step Multiple Output' &&
                                                         <React.Fragment>
                                                             <Tooltip title={'Normalized values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
@@ -1290,7 +1227,7 @@ const CryptoModule = () => {
                                                 </Box>
                                             </Box>
 
-                                            <Box display='flex' flexDirection='row' gap='17px' paddingRight='6px'>
+                                            <Box display='flex' flexDirection='row' gap='17px' paddingRight='6px' paddingLeft='6px'>
                                                 {colorCombinations.map((palette, index) => (
                                                     <Box key={index} sx={{
                                                         width: "10px",
@@ -1320,6 +1257,7 @@ const CryptoModule = () => {
                             />
 
                             <Box className='main-training-status-box' pt={1} gap={'4px'} display='flex' flexDirection='column'>
+                                <Typography sx={{ textAlign: 'start' }} variant='custom'>{modelProcessDurationRef.current !== '' ? `Time taken : ${modelProcessDurationRef.current}` : ''}</Typography>
 
                                 {/* epoch end results */}
                                 {epochResults.length > 0 && (
@@ -1343,7 +1281,7 @@ const CryptoModule = () => {
 
                                 {/* Prediction set RMSE results */}
                                 {model_data.score.over_all_score !== 0 &&
-                                    <Box width='100%' className='test-set-prediction-result'>
+                                    <Box width='100%' className='test-set-prediction-result' display='flex' flexDirection='column' gap='5px'>
                                         <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
                                             <thead className='table-group'>
                                                 <tr className='table-row'>
@@ -1356,24 +1294,26 @@ const CryptoModule = () => {
                                                 <tr className='table-row'>
                                                     <td className='table-data' style={{ textAlign: 'start' }}>
                                                         <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
-                                                            Test Set (Tensor)
-                                                            <NoMaxWidthTooltip
-                                                                title={(
-                                                                    <PredictionMSETable data={model_data.score.scores.map((item, index) => {
-                                                                        const { value, unit } = generateMSESteps(selectedTickerPeriod);
-                                                                        return (
-                                                                            {
-                                                                                date: `+${value * (index + 1)}${unit}`,
-                                                                                rmse: item
-                                                                            }
-                                                                        )
-                                                                    })} />
-                                                                )}
-                                                                placement='right'
-                                                                arrow
-                                                            >
-                                                                <AspectRatioIcon sx={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                                                            </NoMaxWidthTooltip>
+                                                            Test Set
+                                                            {!sm &&
+                                                                <NoMaxWidthTooltip
+                                                                    title={(
+                                                                        <PredictionMSETable data={model_data.score.scores.map((item, index) => {
+                                                                            const { value, unit } = generateMSESteps(selectedTickerPeriod);
+                                                                            return (
+                                                                                {
+                                                                                    date: `+${value * (index + 1)}${unit}`,
+                                                                                    rmse: item
+                                                                                }
+                                                                            )
+                                                                        })} />
+                                                                    )}
+                                                                    placement='right'
+                                                                    arrow
+                                                                >
+                                                                    <AspectRatioIcon sx={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                                                                </NoMaxWidthTooltip>
+                                                            }
                                                         </Box>
                                                     </td>
                                                     <td className='table-data'>{model_data.score.over_all_score * model_data.score.over_all_score}</td>
@@ -1381,20 +1321,33 @@ const CryptoModule = () => {
                                                 </tr>
                                             </tbody>
                                         </table>
+                                        {sm &&
+                                            <PredictionMSETable data={model_data.score.scores.map((item, index) => {
+                                                const { value, unit } = generateMSESteps(selectedTickerPeriod);
+                                                return (
+                                                    {
+                                                        date: `+${value * (index + 1)}${unit}`,
+                                                        rmse: item
+                                                    }
+                                                )
+                                            })} />
+                                        }
                                     </Box>
                                 }
 
                                 {/* epoch batch results */}
                                 {batchResult && (
                                     <Box className='batch-end-progress-box' pt={1}>
+                                        <Box id='progress-line' sx={{ width: '100%' }}>
+                                            <LinearProgressWithLabel value={0} type={'Batch'} cRef={batchLinearProgressRef} />
+                                        </Box>
                                         <Box className={`epoch_{} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
                                             <Box className={`model-progress_{}`} width='100%' variant='h6'>
                                                 <div className='batch-end'>
-                                                    <div style={{ fontWeight: '600', fontSize: '0.75rem', minWidth: '105px', textAlign: 'start' }} id='batch-no'></div>
                                                     <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
-                                                        <div className='batch-end-text' id='loss'></div>
-                                                        <div className='batch-end-text' id='mse'></div>
-                                                        <div className='batch-end-text' id='mae'></div>
+                                                        <div className='batch-end-text' id='loss'>Loss : 0.04927649209355232</div>
+                                                        <div className='batch-end-text' id='mse'>MSE : 0.04927649209355232</div>
+                                                        <div className='batch-end-text' id='mae'>RMSE : 0.04927649209355232</div>
                                                     </div>
                                                 </div>
                                             </Box>
@@ -1406,12 +1359,8 @@ const CryptoModule = () => {
                                 {/* Test set evaluating result */}
                                 {evaluating && (
                                     <Box className='evaluating-set-progress-box' pt={1}>
-                                        <Box className={`epoch_{} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
-                                            <Box className={`model-progress_{}`} variant='h6'>
-                                                <div className='eval-end'>
-                                                    <div style={{ fontWeight: '600', fontSize: '0.75rem', width: '150px', textAlign: 'start' }} id='eval-no'></div>
-                                                </div>
-                                            </Box>
+                                        <Box id='progress-line' sx={{ width: '100%' }}>
+                                            <LinearProgressWithLabel value={0} type={'Evaluating'} cRef={evalLinearProgressRef} />
                                         </Box>
                                     </Box>
                                 )

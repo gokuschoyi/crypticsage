@@ -1,11 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { setCryptoDataRedux, setCryptoPreferencesRedux } from '../IndicatorsSlice'
-import { setSelectedTickerName, resetDataLoadedState, resetShowSettingsFlag, setCryptoDataInDbRedux } from '../modules/CryptoModuleSlice'
-import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../global/Icons';
-import { getLatestCryptoData } from '../../../../../api/crypto'
-import { convert, getLastUpdatedTimeString, getDateTime, getCurrencySymbol } from '../../../../../utils/Utils'
+import { setCryptoDataRedux, setCryptoPreferencesRedux } from '../../IndicatorsSlice'
+import { setSelectedTickerName, resetDataLoadedState, resetShowSettingsFlag, setCryptoDataInDbRedux } from '../../modules/CryptoModuleSlice'
+import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../../global/Icons';
+import { getLatestCryptoData } from '../../../../../../api/crypto'
+import { convert, getLastUpdatedTimeString, getDateTime, getCurrencySymbol } from '../../../../../../utils/Utils'
 import {
     Box
     , Typography

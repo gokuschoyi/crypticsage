@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, AccordionActions, IconButton, Tooltip, TextField, Autocomplete, useTheme, CircularProgress } from '@mui/material'
-import { executeTalibFunction } from '../../../../../api/adminController'
+import { executeTalibFunction } from '../../../../../../api/adminController'
 import {
     setSelectedFunctions
     , setSelectedFunctionInputValues
@@ -10,7 +10,7 @@ import {
     , removeFromSelectedFunction
     , setFunctionInputErrorFlagAndMessage
     , setTalibResult
-} from '../modules/CryptoModuleSlice'
+} from '../../modules/CryptoModuleSlice'
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';

@@ -32,6 +32,7 @@ const persistConfig = {
     key: 'root',
     storage: localforage,
     stateReconciler: autoMergeLevel2,
+    version: 1
 }
 
 const persistedReducer = persistReducer(persistConfig, reducer);

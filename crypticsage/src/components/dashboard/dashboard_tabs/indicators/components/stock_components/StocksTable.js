@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
-import { getLatestStocksData } from '../../../../../api/crypto'
-import { convert, getLastUpdatedTimeString, getDateTime } from '../../../../../utils/Utils'
-import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../global/Icons';
+import { getLatestStocksData } from '../../../../../../api/crypto'
+import { convert, getLastUpdatedTimeString, getDateTime } from '../../../../../../utils/Utils'
+import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../../global/Icons';
 import {
     Box
     , Typography
@@ -19,8 +19,8 @@ import {
     , Collapse
 } from '@mui/material'
 
-import { setStocksDataRedux } from '../IndicatorsSlice'
-import { setSelectedStockName, resetStateOnStockNameChange } from '../modules/StockModuleSlice'
+import { setStocksDataRedux } from '../../IndicatorsSlice'
+import { setSelectedStockName, resetStateOnStockNameChange } from '../../modules/StockModuleSlice'
 import { useNavigate } from 'react-router-dom';
 
 function Row(props) {

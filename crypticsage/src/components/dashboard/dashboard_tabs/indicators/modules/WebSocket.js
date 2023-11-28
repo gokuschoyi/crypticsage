@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Success, Error } from '../../../global/CustomToasts'
 import {
-    setProgressMessage,
+    setModelEndTime,
     setEpochNo,
     setEpochResults,
     setPredictedValues,
@@ -11,24 +11,42 @@ import {
 
 // Function to add a new message
 function addMessage(notifyMessageBoxRef, messageText) {
-    /* const messageContainer = document.getElementById('messageDiv');
-    // Create a new message element
-    if (!notifyMessageBoxRef.current) return
-    const messageElement = document.createElement('p');
-    messageElement.classList.add('socket-message');
-    messageElement.textContent = messageText;
-
-    // Insert the new message at the beginning of the container
-    notifyMessageBoxRef.current.insertBefore(messageElement, notifyMessageBoxRef.current.firstChild); */
-
-
     if (!notifyMessageBoxRef.current) return
     notifyMessageBoxRef.current.classList.add('socket-message')
     notifyMessageBoxRef.current.textContent = messageText
 }
 
+function interpolateColor(color1, color2, factor) {
+    let result = "#";
+    for (let i = 1; i <= 5; i += 2) {
+        let hex1 = parseInt(color1.substr(i, 2), 16);
+        let hex2 = parseInt(color2.substr(i, 2), 16);
+        let blended = Math.round(hex1 + (hex2 - hex1) * factor).toString(16);
+        while (blended.length < 2) blended = '0' + blended; // pad with zero
+        result += blended;
+    }
+    return result;
+}
 
-const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, evaluating, setBatchResult, setEvaluating, setTrainingStartedFlag, dispatch) => {
+function getColorForValue(value, min, max, startColor, endColor) {
+    let factor = (value - min) / (max - min);
+    factor = Math.max(0, Math.min(1, factor)); // Clamp factor between 0 and 1
+    return interpolateColor(startColor, endColor, factor);
+}
+
+
+const useWebSocket = (
+    webSocketURL,
+    notifyMessageBoxRef,
+    batchResult,
+    evaluating,
+    batchLinearProgressRef,
+    evalLinearProgressRef,
+    setBatchResult,
+    setEvaluating,
+    setTrainingStartedFlag,
+    dispatch
+) => {
     const webSocket = useRef(null);
     const ACTIONS = {
         NOTIFY: 'notify',
@@ -58,7 +76,7 @@ const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, evaluating
             webSocket.current.onmessage = (e) => {
                 // console.log('WS: MESSAGE RECEIVED');
                 const data = JSON.parse(e.data);
-                let batchEndBox, evalBox
+                let batchEndBox
 
                 switch (data.action) {
                     case ACTIONS.NOTIFY:
@@ -75,9 +93,20 @@ const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, evaluating
                         break;
                     case ACTIONS.BATCH_END:
                         if (!batchResult) { setBatchResult(true) }
+                        const percentageCompleted = parseFloat(((data.log.batch / data.log.totalNoOfBatch) * 100).toFixed(2)) || 0
+                        const bgColor = getColorForValue(percentageCompleted, 0, 100, '#FF0000', '#00FF00');
+                        if (batchLinearProgressRef.current) {
+                            const linearProgress = batchLinearProgressRef.current.querySelector('#linear-progress')
+                            let progressBar = linearProgress.querySelector('span')
+
+                            linearProgress.style.backgroundColor = bgColor;
+                            progressBar.style.transform = `translateX(-${100 - percentageCompleted}%)`
+
+                            const batchCount = batchLinearProgressRef.current.querySelector('#batch-count')
+                            batchCount.innerHTML = `(${percentageCompleted}%) ${data.log.batch}/${data.log.totalNoOfBatch}`
+                        }
                         batchEndBox = document.querySelector('.batch-end')
                         if (batchEndBox) {
-                            batchEndBox.querySelector('#batch-no').textContent = `Batch : ${data.log.batch}/${data.log.totalNoOfBatch}`;
                             batchEndBox.querySelector('#loss').textContent = `Loss : ${data.log.loss}`;
                             batchEndBox.querySelector('#mse').textContent = `MSE : ${data.log.mse}`;
                             batchEndBox.querySelector('#mae').textContent = `MAE : ${data.log.mae}`;
@@ -87,21 +116,29 @@ const useWebSocket = (webSocketURL, notifyMessageBoxRef, batchResult, evaluating
                         // setTrainingStartedFlag(false)
                         break;
                     case ACTIONS.EVALUATING:
-                        setEvaluating(true)
-                        evalBox = document.querySelector('.eval-end')
-                        if (evalBox) {
-                            evalBox.querySelector('#eval-no').textContent = `Evaluating : ${data.log.batch}/${data.log.totalNoOfBatch}`
+                        if (!evaluating) { setEvaluating(true) }
+                        if (evalLinearProgressRef.current) {
+                            const evalPercentageCompleted = parseFloat(((data.log.batch / data.log.totalNoOfBatch) * 100).toFixed(2)) || 0
+                            const evalBgColor = getColorForValue(evalPercentageCompleted, 0, 100, '#FF0000', '#00FF00');
+
+                            const evalLinearProgress = evalLinearProgressRef.current.querySelector('#linear-progress')
+                            let evalProgressBar = evalLinearProgress.querySelector('span')
+
+                            evalLinearProgress.style.backgroundColor = evalBgColor;
+                            evalProgressBar.style.transform = `translateX(-${100 - evalPercentageCompleted}%)`
+
+                            const evalCount = evalLinearProgressRef.current.querySelector('#batch-count')
+                            evalCount.innerHTML = `(${evalPercentageCompleted}%) ${data.log.batch}/${data.log.totalNoOfBatch}`
                         }
-                        // console.log('Evaluating', data.log.batch, data.log.totalNoOfBatch)
                         break;
                     case ACTIONS.EVAL_COMPLETE:
-                        // setEvaluating((prev) => !prev)
+                        setEvaluating(false)
                         dispatch(setPredictionScores(data.scores))
                         break;
                     case ACTIONS.PREDICTION_COMPLETED:
-                        setEvaluating(false)
                         setTrainingStartedFlag(false)
                         dispatch(setPredictedValues(data.predictions))
+                        dispatch(setModelEndTime(new Date().getTime()))
                         dispatch(setStartWebSocket(false))
                         Success('Training completed successfully')
                         break;

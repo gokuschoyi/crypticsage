@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import gsap from "gsap";
 
-import CustomBarChart from '../components/BarChart';
+import { CustomBarChart } from '../components';
 import { convert } from '../../../../../utils/Utils'
 
 const isObjectEmpty = (obj) => {
