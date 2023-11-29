@@ -25,6 +25,10 @@ redisSubscriber.on('message', async (channel, message) => {
     // console.log(`Received message from channel : ${channel}`)
     const messageData = JSON.parse(message)
     const userWS = userConnections.get(messageData.uid)
+    if (!userWS) {
+        // console.log(`No WS connection found for user : ${messageData.uid}`)
+        return
+    }
     switch (messageData.event) {
         case 'notify':
             userWS.send(JSON.stringify({ action: 'notify', message: messageData.message }));

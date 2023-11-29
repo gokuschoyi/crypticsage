@@ -513,11 +513,23 @@ const MainChart = (props) => {
             // console.log(predictionLineChart, chart.current);
 
             let newLineChart = chart.current.addLineSeries({
-                color: 'red',
+                color: 'orange',
                 lineWidth: 1
             });
+            let markers = []
+            if (chartData.length === 1) {
+                markers.push({
+                    time: chartData[0].time,
+                    position: 'aboveBar',
+                    color: 'orange',
+                    shape: 'circle',
+                    text: 'prediction',
+                    size: 0.4
+                })
+            }
 
             newLineChart.setData(chartData);
+            newLineChart.setMarkers(markers)
             // console.log(chartData, newLineChart);
             setPredictionLineChart(newLineChart);
         }

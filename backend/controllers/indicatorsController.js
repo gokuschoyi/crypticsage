@@ -22,6 +22,7 @@ const redisPublisher = new Redis();
 const tf = require('@tensorflow/tfjs-node');
 const path = require('path');
 
+const TFMUtil = require('../utils/tf_modelUtil')
 
 const e_type = {
     "open": 0,
@@ -226,7 +227,7 @@ const procssModelTraining = async (req, res) => {
         const model_queue = new Queue(model_training_queue, { connection });
 
         const modelTrainingProcessorFile = path.join(__dirname, '../workers/modelTrainer')
-        console.log('modelTrainingProcessorFile : ', modelTrainingProcessorFile)
+        // console.log('modelTrainingProcessorFile : ', modelTrainingProcessorFile)
         const model_worker = new Worker(model_training_queue, modelTrainingProcessorFile, { connection, useWorkerThreads: true });
 
         const modelTrainingCompletedListener = (job) => {
@@ -260,7 +261,7 @@ const procssModelTraining = async (req, res) => {
             job_name,
             { fTalibExecuteQuery, model_training_parameters, model_id, uid },
             {
-                attempts: 2,
+                attempts: 1,
                 backoff: {
                     type: 'exponential',
                     delay: 2000,
@@ -409,8 +410,42 @@ const generateTestData = async (req, res) => {
     lookAhead = lookAhead
     try {
 
+        const n = 10; // The length of the outermost array
+        const m = 3; // The length of the inner arrays
+        const p = 3; // The length of the innermost arrays
+
+        const arr = Array.from({ length: n }, () =>
+            Array.from({ length: m }, () =>
+                Array.from({ length: p }, (_, i) => i + 1)
+            )
+        );
+
+        // console.log(arr)
+        const testTF = tf.tensor(arr)
+        // console.log(testTF.shape)
+
+        // @ts-ignore
+        let n_input = testTF.shape[1] * testTF.shape[2]
+        let transfX = testTF.reshape([testTF.shape[0], n_input])
+
+        // console.log(transfX.shape, transfX.arraySync())
+
         const testArray =
-            [[10, 15, 25],
+            [
+                [[10]],
+                [[20]],
+                [[30]],
+                [[40]],
+                [[50]],
+                [[60]],
+                [[70]],
+                [[80]],
+                [[90]],
+                [[100]],
+            ]
+
+        const arrN = [
+            [10, 15, 25],
             [20, 25, 45],
             [30, 35, 65],
             [40, 45, 85],
@@ -419,14 +454,55 @@ const generateTestData = async (req, res) => {
             [70, 75, 145],
             [80, 85, 165],
             [90, 95, 185],
-            [100, 105, 205],
-            [105, 110, 215],
-            ]
-        const trainX = []
-        const trainY = []
+            
+
+        ]
+        const testarrayTensor = tf.tensor(testArray)
+        // console.log('Original tensor shape : ', testarrayTensor.shape, testarrayTensor.arraySync())
+
+        let reshaped = testarrayTensor.reshape([testarrayTensor.shape[0], 1])
+        // console.log('Reshaped tensor : ', reshaped.shape, reshaped.arraySync())
+
+        // @ts-ignore
+        let transformedBack = reshaped.reshape([reshaped.shape[0], reshaped.shape[1], 1])
+        // console.log('Transformed back tensor : ', transformedBack.shape, transformedBack.arraySync())
+
+        const reshapeArray = (yTrain) => {
+            const yTrainTensor = tf.tensor(yTrain)
+            const newOuter = yTrainTensor.shape[0]
+            const newMiddle = 2
+            const newInner = yTrainTensor.shape[2]
+            const reshapedArray = []
+
+            console.log(newOuter, newMiddle, newInner)
+
+            for (let i = 0; i < newOuter; i++) {
+                const middleArray = [];
+                for (let j = 0; j < newMiddle; j++) {
+                    // Duplicating the original element for each new middle element
+                    const innerArray = [];
+                    // @ts-ignore
+                    for (let k = 0; k < newInner; k++) {
+                        innerArray.push(yTrain[i][0][0]);
+                    }
+                    middleArray.push(innerArray);
+                }
+                reshapedArray.push(middleArray);
+            }
+
+            return reshapedArray
+        }
+
+        /* const reshapedArray = reshapeArray(testArray)
+        const reshapedTensor = tf.tensor(reshapedArray)
+
+        console.log(reshapedTensor.shape) */
+
+        res.status(200).send({ message: 'Test data generated successfully' })
+
 
         let simulatedData = [];
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 20; i++) {
             simulatedData.push({
                 openTime: Date.now() + i * 3600000, // hourly timestamps
                 open: Math.random() * 100,
@@ -439,6 +515,92 @@ const generateTestData = async (req, res) => {
 
         let features = simulatedData.map(item => [item.open, item.high, item.low, item.close, item.volume]);
         console.log(features[features.length - (lookAhead + 1)])
+
+        const { trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest } = await TFMUtil.createTrainingData(
+            {
+                model_type: 'multi_input_single_output_step',
+                stdData: arrN,
+                timeStep: timeStep,
+                lookAhead: lookAhead,
+                e_key: 'low',
+                training_size: 85
+            })
+
+        const xTensor = tf.tensor(xTrain)
+        const yTensor = tf.tensor(yTrain)
+        const xTestTensor = tf.tensor(xTrainTest)
+        const yTestTensor = tf.tensor(yTrainTest)
+        const lastSetTensor = tf.tensor(lastSets)
+
+        // @ts-ignore
+        const reshapedYTensor = yTensor.reshape([yTensor.shape[0], yTensor.shape[1]])
+        console.log('Reshaped Y tensor : ', reshapedYTensor.shape)
+
+        console.log(trainSplit)
+        console.log(xTensor.shape, yTensor.shape, xTestTensor.shape, yTestTensor.shape, lastSetTensor.shape)
+
+        try {
+            const model = tf.sequential();
+            let n_feature = xTensor.shape[2]
+            // Add a 1D convolutional layer
+            model.add(tf.layers.conv1d({
+                filters: 64,
+                kernelSize: 2,
+                activation: 'relu',
+                inputShape: [timeStep, n_feature]
+            }));
+
+            // Add a MaxPooling1D layer
+            model.add(tf.layers.maxPooling1d({
+                poolSize: 2
+            }));
+
+            // Add a Flatten layer
+            model.add(tf.layers.flatten());
+
+            // Add a dense layer with 50 units and ReLU activation
+            model.add(tf.layers.dense({
+                units: 50,
+                activation: 'relu'
+            }));
+
+            // Add a dense layer with n_features units (no activation specified, defaults to linear)
+            model.add(tf.layers.dense({
+                units: 1
+            }));
+
+            model.compile({
+                optimizer: tf.train.adam(),
+                loss: 'meanSquaredError',
+                metrics: ['mse', 'mae'],
+            });
+
+            console.log(model.summary())
+
+            await model.fit(xTensor, reshapedYTensor, {
+                batchSize: 32,
+                epochs: 3000,
+                verbose: 0
+            })
+
+            // @ts-ignore
+            const predictions = await model.predict(xTestTensor).arraySync()
+
+            const testData = [[[70, 75],[80, 85], [90, 95]]]
+            const testDTensor = tf.tensor(testData)
+
+            // @ts-ignore
+            const newPred = await model.predict(testDTensor).arraySync()
+
+            console.log('Predictions', predictions)
+            console.log('New pred:' + newPred)
+
+        } catch (error) {
+            console.log(error)
+        }
+
+        // console.log(trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest)
+        /* 
 
         /* for (let i = 0; i <= testArray.length - timeStep - lookAhead; i++) {
             // Extracting features for X
@@ -488,7 +650,7 @@ const generateTestData = async (req, res) => {
         // @ts-ignore
         // console.log(xTrainTest[xTrainTest.length - 1])
         // console.log(features)
-        console.table(features)
+        // console.table(features)
         /* 
                 let lastSetStr = ''
                 // @ts-ignore
@@ -539,7 +701,7 @@ const generateTestData = async (req, res) => {
         // console.log(strXT)
 
 
-        const act = [
+        /* const act = [
             [0.9313037991523743],
             [0.9217190742492676],
             [0.9200571179389954],
@@ -553,7 +715,7 @@ const generateTestData = async (req, res) => {
             [0.9347333908081055],
             [0.920935869216919],
             [0.9096674919128418]
-        ]
+        ] */
 
         /* const act =[
             [1],
@@ -572,27 +734,27 @@ const generateTestData = async (req, res) => {
             [2.99]
         ] */
 
-        const actual = [
-            [
-                [0.9350184202194214],
-                [0.9322802424430847],
-                [0.938884437084198],
-                [0.9322348237037659],
-                [0.957306981086731],
-                [0.95747971534729],
-                [1.0089547634124756]
-            ],
-            [
-                [0.6027020215988159],
-                [0.8523806929588318],
-                [0.9281507134437561],
-                [0.9427933096885681],
-                [0.9405898451805115],
-                [0.9360988736152649],
-                [0.9328845739364624]
-            ]
-        ];
-        const predicted = [
+        /*  const actual = [
+             [
+                 [0.9350184202194214],
+                 [0.9322802424430847],
+                 [0.938884437084198],
+                 [0.9322348237037659],
+                 [0.957306981086731],
+                 [0.95747971534729],
+                 [1.0089547634124756]
+             ],
+             [
+                 [0.6027020215988159],
+                 [0.8523806929588318],
+                 [0.9281507134437561],
+                 [0.9427933096885681],
+                 [0.9405898451805115],
+                 [0.9360988736152649],
+                 [0.9328845739364624]
+             ]
+         ]; */
+        /* const predicted = [
             [
                 [0.6027020215988159],
                 [0.8523806929588318],
@@ -611,7 +773,7 @@ const generateTestData = async (req, res) => {
                 [0.9208111763000488],
                 [0.9176720976829529]
             ]
-        ]
+        ] */
 
 
         /* const frmse = calculateRMSE(actual, predicted);
@@ -658,8 +820,8 @@ const generateTestData = async (req, res) => {
         console.log(model.summary()) */
 
         // const allData = await redisStep.hgetall('model_training_checkpoint_b288539f-a863-48ff-a830-c8418a8e9028')
-        const tickerHistory = await fetchEntireHistDataFromDb({ type: 'crypto', ticker_name: 'BTCUSDT', period: '4h' })
-        res.status(200).send({ message: 'Test data generated successfully', tickerHistory })
+        /* const tickerHistory = await fetchEntireHistDataFromDb({ type: 'crypto', ticker_name: 'BTCUSDT', period: '4h' }) */
+
 
     } catch (err) {
         log.error(err.stack)

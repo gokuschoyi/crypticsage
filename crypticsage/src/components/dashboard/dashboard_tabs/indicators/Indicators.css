@@ -113,6 +113,14 @@
     /* Animation effect */
 }
 
+.epoch-end-progress-box{
+    display: flex;
+    flex-direction: column;
+    max-height: 150px;
+    overflow-y: scroll;
+    
+}
+
 /* .MuiLinearProgress-bar {
     transition: none;
 }

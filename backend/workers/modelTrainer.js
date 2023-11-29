@@ -99,7 +99,7 @@ module.exports = async (job) => {
     console.log('Model parameters : ', model_training_parameters)
 
     const modelCheckpointName = `model_training_checkpoint_${model_id}`
-    console.log('Model step name : ', modelCheckpointName)
+    console.log('Model checkpoint name : ', modelCheckpointName)
 
     try {
         const checkpoint = await redisStep.hget(modelCheckpointName, 'step')
@@ -343,6 +343,7 @@ module.exports = async (job) => {
                     parameters = {
                         model: model_,
                         learning_rate,
+                        look_ahead,
                         xTrain: JSON.parse(await redisStep.hget(modelCheckpointName, 'xTrain')),
                         yTrain: JSON.parse(await redisStep.hget(modelCheckpointName, 'yTrain')),
                         epochs: epochCount,
@@ -378,6 +379,7 @@ module.exports = async (job) => {
                 case 10: // Saving the model, weights  and cleaning up // setting step
                     redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(10/11) : Saving the model...` }))
                     try {
+                        // throw new Error('Test error')
                         await step(trained_model_, model_id)
                         await redisStep.hset(modelCheckpointName, {
                             step: i + 1,
@@ -399,6 +401,7 @@ module.exports = async (job) => {
                     parameters = {
                         trained_model_,
                         model_id,
+                        look_ahead,
                         xTrainTest: evaluationData,
                         yTrainTest: JSON.parse(await redisStep.hget(modelCheckpointName, 'yTrainTest')),
                         dates: JSON.parse(await redisStep.hget(modelCheckpointName, 'dates')),
@@ -415,6 +418,7 @@ module.exports = async (job) => {
                             step: i + 1,
                         })
                     } catch (error) {
+                        console.log(error.stack)
                         const newErrorMessage = { func_error: error.message, message: 'Error during evaluation', step: i }
                         throw new Error(JSON.stringify(newErrorMessage));
                     }

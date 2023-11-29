@@ -731,6 +731,7 @@ const CryptoModule = () => {
                 .catch((err) => {
                     console.log(err.message)
                 })
+            modelProcessDurationRef.current = ''
         } else {
             console.log('No model present')
         }
@@ -795,6 +796,7 @@ const CryptoModule = () => {
         deleteModel({ token, payload: { model_id } })
             .then((res) => {
                 Success(res.data.message)
+                modelProcessDurationRef.current = ''
                 dispatch(resetCurrentModelData())
             })
             .catch((err) => {
@@ -1168,9 +1170,9 @@ const CryptoModule = () => {
                                     <CustomSlider sliderValue={modelParams.trainingDatasetSize} name={'trainingDatasetSize'} handleModelParamChange={handleModelParamChange} label={'Training size'} min={50} max={95} sliderMin={0} sliderMax={100} disabled={trainingStartedFlag} />
                                     <CustomSlider sliderValue={modelParams.timeStep} name={'timeStep'} handleModelParamChange={handleModelParamChange} label={'Step Size'} min={2} max={100} sliderMin={2} sliderMax={100} disabled={trainingStartedFlag} />
                                     {(modelParams.modelType === 'Multi Step Single Output' || modelParams.modelType === 'Multi Step Multiple Output') &&
-                                        <CustomSlider sliderValue={modelParams.lookAhead} name={'lookAhead'} handleModelParamChange={handleModelParamChange} label={'Look Ahead'} min={2} max={30} sliderMin={2} sliderMax={30} disabled={trainingStartedFlag} />
+                                        <CustomSlider sliderValue={modelParams.lookAhead} name={'lookAhead'} handleModelParamChange={handleModelParamChange} label={'Look Ahead'} min={1} max={30} sliderMin={1} sliderMax={30} disabled={trainingStartedFlag} />
                                     }
-                                    <CustomSlider sliderValue={modelParams.epoch} name={'epoch'} handleModelParamChange={handleModelParamChange} label={'Epochs'} min={1} max={20} sliderMin={1} sliderMax={20} disabled={trainingStartedFlag} />
+                                    <CustomSlider sliderValue={modelParams.epoch} name={'epoch'} handleModelParamChange={handleModelParamChange} label={'Epochs'} min={1} max={500} sliderMin={1} sliderMax={500} disabled={trainingStartedFlag} />
                                     {modelParams.modelType !== 'Multi Step Single Output' &&
                                         <CustomSlider sliderValue={modelParams.hiddenLayer} name={'hiddenLayer'} handleModelParamChange={handleModelParamChange} label={'Hidden Layers'} min={1} max={20} sliderMin={1} sliderMax={10} disabled={trainingStartedFlag} />
                                     }
@@ -1265,7 +1267,7 @@ const CryptoModule = () => {
                                         {epochResults.map((result, index) => {
                                             return (
                                                 <Box key={index} className={`epoch_${index} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px', justifyContent: 'space-between' }}>
-                                                    <div className='epoch-no' style={{ fontWeight: '600', fontSize: '0.75rem', minWidth: '60px', textAlign: 'start' }}>E : {result.epoch}</div>
+                                                    <div className='epoch-no' style={{ fontWeight: '600', fontSize: '0.75rem', minWidth: '60px', textAlign: 'start' }}>E : {result.epoch + 1}</div>
                                                     <Box className={`model-progress_${index}`} variant='h6'>
                                                         <div className='epoch-end'>
                                                             <div className='batch-end-text'>Loss : {result.loss}</div>

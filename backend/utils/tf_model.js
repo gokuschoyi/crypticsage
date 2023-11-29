@@ -28,6 +28,8 @@ function displayDataInTable(data, name) {
     console.table(objectifiedData);
 }
 
+const type = 'CNN_One_Step'
+
 /**
  * Creates a model with the given parameters
  * @param {Object} model_parama
@@ -77,21 +79,59 @@ const createModel = (model_parama) => {
             break;
         case 'multi_input_single_output_step':
             let lstm_units = 100;
+            if (look_ahead === 1) {
+                switch (type) {
+                    case 'CNN_One_Step':
+                        model.add(tf.layers.conv1d({
+                            filters: 64,
+                            kernelSize: 2,
+                            activation: 'relu',
+                            inputShape: [input_layer_shape, feature_count]
+                        }));
 
-            for (let index = 0; index < n_layers; index++) {
-                lstm_cells.push(tf.layers.lstmCell({ units: rnn_output_neurons }));
+                        // Add a MaxPooling1D layer
+                        model.add(tf.layers.maxPooling1d({
+                            poolSize: 2
+                        }));
+
+                        // Add a Flatten layer
+                        model.add(tf.layers.flatten());
+
+                        // Add a dense layer with 50 units and ReLU activation
+                        model.add(tf.layers.dense({
+                            units: 50,
+                            activation: 'relu'
+                        }));
+
+                        // Add a dense layer with n_features units (no activation specified, defaults to linear)
+                        model.add(tf.layers.dense({
+                            units: 1
+                        }));
+                        break;
+                    default:
+                        let n_input = input_layer_shape * feature_count
+                        let n_output = 1
+                        model.add(tf.layers.dense({
+                            units: 100,
+                            inputShape: [n_input],
+                            activation: 'relu',
+                        }));
+                        model.add(tf.layers.dense({
+                            units: n_output
+                        }));
+                        break;
+                }
+            } else {
+                /* for (let index = 0; index < n_layers; index++) {
+                    lstm_cells.push(tf.layers.lstmCell({ units: rnn_output_neurons }));
+                } */
+
+                model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', inputShape: [input_layer_shape, feature_count] }));
+                model.add(tf.layers.repeatVector({ n: look_ahead }));
+                // model.add(tf.layers.dropout({ rate: 0.1 }));
+                model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', returnSequences: true }));
+                model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [look_ahead, lstm_units] }));
             }
-
-            model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', inputShape: [input_layer_shape, feature_count] }));
-            model.add(tf.layers.repeatVector({ n: look_ahead }));
-            // model.add(tf.layers.dropout({ rate: 0.1 }));
-            model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', returnSequences: true }));
-            /* model.add(tf.layers.rnn({
-                cell: lstm_cells,
-                inputShape: [look_ahead, lstm_units],
-                returnSequences: true
-            })); */
-            model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [look_ahead, lstm_units] }));
             break;
         default:
             break;
@@ -127,12 +167,69 @@ const earlyStopping = tf.callbacks.earlyStopping({
     verbose: 2
 });
 
-const trainModel = async ({ model, learning_rate, xTrain, yTrain, epochs, batch_size, uid }) => {
-    const totalNoOfBatch = Math.round(xTrain.length / batch_size)
-    const xTrainTensor = tf.tensor(xTrain)
+const reshapeArray = (yTrain) => {
     const yTrainTensor = tf.tensor(yTrain)
+    const newOuter = yTrainTensor.shape[0]
+    const newMiddle = 2
+    const newInner = yTrainTensor.shape[2]
+    const reshapedArray = []
+
+    console.log(newOuter, newMiddle, newInner)
+
+    for (let i = 0; i < newOuter; i++) {
+        const middleArray = [];
+        for (let j = 0; j < newMiddle; j++) {
+            // Duplicating the original element for each new middle element
+            const innerArray = [];
+            // @ts-ignore
+            for (let k = 0; k < newInner; k++) {
+                innerArray.push(yTrain[i][0][0]);
+            }
+            middleArray.push(innerArray);
+        }
+        reshapedArray.push(middleArray);
+    }
+
+    return reshapedArray
+}
+
+const trainModel = async ({ model, learning_rate, look_ahead, xTrain, yTrain, epochs, batch_size, uid }) => {
+    const totalNoOfBatch = Math.round(xTrain.length / batch_size)
+    let xTrainTensor, xTTensor
+    let yTrainTensor, yTTesnor
+    // const xTrainTensor = tf.tensor(xTrain)
+
+    if (look_ahead === 1) {
+        console.log('Look ahead is 1, reshaping x-train and y-train')
+        switch (type) {
+            case 'CNN_One_Step':
+                yTTesnor = tf.tensor(yTrain)
+
+                // @ts-ignore
+                const reshapedYTensor = yTTesnor.reshape([yTTesnor.shape[0], yTTesnor.shape[1]])
+
+                xTrainTensor = tf.tensor(xTrain)
+                yTrainTensor = reshapedYTensor
+                break;
+            default:
+                xTTensor = tf.tensor(xTrain)
+                yTTesnor = tf.tensor(yTrain)
+
+                // @ts-ignore
+                let n_input = xTTensor.shape[1] * xTTensor.shape[2]
+
+                xTrainTensor = xTTensor.reshape([xTTensor.shape[0], n_input])
+                yTrainTensor = yTTesnor.reshape([yTTesnor.shape[0], 1])
+                break;
+        }
+    } else {
+        console.log('Look ahead is > 1')
+        xTrainTensor = tf.tensor(xTrain)
+        yTrainTensor = tf.tensor(yTrain)
+    }
 
     if (config.debug_flag === 'true') {
+        // @ts-ignore
         log.info(`xTrain tensor shape: ${xTrainTensor.shape}, yTrain tensor shape : ${yTrainTensor.shape}`)
     }
 
@@ -170,14 +267,35 @@ const trainModel = async ({ model, learning_rate, xTrain, yTrain, epochs, batch_
     return { model, history }
 }
 
-const evaluateModelOnTestSet = async ({ trained_model_, model_id, xTrainTest, yTrainTest, dates, label_mean, label_variance, uid }) => {
-    const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.legacy);
+const evaluateModelOnTestSet = async ({ trained_model_, model_id, look_ahead, xTrainTest: xTTest, yTrainTest, dates, label_mean, label_variance, uid }) => {
+    let xTrainTest = []
+    if (look_ahead === 1) {
+        console.log('Look ahead is 1, reshaping x-train')
+        let reshaped
+        switch (type) {
+            case 'CNN_One_Step':
+                xTrainTest = xTTest
+                break;
+            default:
+                const xTTensor = tf.tensor(xTTest)
+                // @ts-ignore
+                let n_input = xTTensor.shape[1] * xTTensor.shape[2]
+                reshaped = xTTensor.reshape([xTTensor.shape[0], n_input])
+                console.log('Eval reshaped : ', reshaped.shape)
+                // @ts-ignore
+                xTrainTest = reshaped.arraySync()
+                break;
+        }
+
+    } else {
+        xTrainTest = xTTest
+    }
+
     let history = [xTrainTest[0]]
     let predictions = []
     let lastPrediction = []
     const updateFreq = 10 // Number of predictions to make before sending an update to the client
     try {
-        bar1.start(xTrainTest.length - 1, 0);
         for (let i = 1; i < xTrainTest.length - 1; i++) {
             if (i % updateFreq === 0) {
                 let log = {
@@ -186,25 +304,47 @@ const evaluateModelOnTestSet = async ({ trained_model_, model_id, xTrainTest, yT
                 }
                 redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'evaluating', uid, log }))
             }
-            bar1.update(i + 1);
             let inputHist = history.slice(-1)
             let historySequence = await forecast(trained_model_, inputHist)
             predictions.push(historySequence)
             history.push(xTrainTest[i])
         }
-        bar1.stop();
-        const lastInputHist = xTrainTest.slice(-1)
 
+        const lastInputHist = xTrainTest.slice(-1)
         lastPrediction = await forecast(trained_model_, lastInputHist)
+
+        if (look_ahead === 1) {
+            // console.log('Last prediction', lastPrediction)
+            let predTensor = tf.tensor(predictions)
+            let lastPredTensor = tf.tensor(lastPrediction)
+            // @ts-ignore
+            let transformedPredictions = predTensor.reshape([predTensor.shape[0], predTensor.shape[1], 1])
+            console.log('Transformed Predictions shape : ' + transformedPredictions.shape)
+            // @ts-ignore
+            let transforemdLastPrediction = lastPredTensor.reshape([lastPredTensor.shape[0], 1, 1])
+            console.log('Transformed Last Prediction shape : ' + transforemdLastPrediction.shape)
+            // @ts-ignore
+            predictions = transformedPredictions.arraySync()
+            // @ts-ignore
+            lastPrediction = transforemdLastPrediction.arraySync()
+        }
+
+
+        // console.log('Predictions : ', predictions.slice(-10))
+        // console.log('Ytrain test : ', yTrainTest.slice(-10))
 
         let [score, scores] = evaluateForecast(yTrainTest, predictions)
         redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'eval_complete', uid, scores: { rmse: score, scores: scores } }))
 
         if (config.debug_flag === 'true') {
             log.notice(`xTrain test length : ${xTrainTest.length}, yTrain test length : ${yTrainTest.length}`)
-            displayDataInTable(xTrainTest[xTrainTest.length - 1], 'xTrainTest last element')
+            if (look_ahead !== 1) {
+                displayDataInTable(xTrainTest[xTrainTest.length - 1], 'xTrainTest last element')
+            }
             console.log(yTrainTest.length, predictions.length)
             console.log('RMSE: ', score)
+            // @ts-ignore
+            console.log('MSE: ', (score * score))
             summarizeScores('LSTM', score, scores)
         }
 

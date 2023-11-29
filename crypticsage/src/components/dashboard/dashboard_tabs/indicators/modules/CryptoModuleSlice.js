@@ -42,7 +42,7 @@ const initialState = {
         training_parameters: {
             trainingDatasetSize: 80,
             timeStep: 14,
-            lookAhead: 2,
+            lookAhead: 1,
             epoch: 1,
             hiddenLayer: 1,
             multiSelectValue: 'close',

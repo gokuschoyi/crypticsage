@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Paper, Box, Typography, Slider } from '@mui/material'
+import { Paper, Box, Typography, Slider, Input } from '@mui/material'
 
 const CustomSlider = (props) => {
     const { sliderValue, name, handleModelParamChange, label, min, max, sliderMin, sliderMax, scaledLearningRate, disabled } = props
@@ -16,7 +16,18 @@ const CustomSlider = (props) => {
         } else {
             setSlideValue(value)
         }
+
     }
+    const handleInputChange = (event) => {
+        const { value: val } = event.target;
+        const value = parseInt(val)
+        if (value < min || value > max || value === slideValue) {
+            return
+        } else {
+            setSlideValue(value)
+            handleModelParamChange(name, value)
+        }
+    };
 
     const handleSliderValueChange = (e, value) => {
         if (value < min) {
@@ -27,6 +38,15 @@ const CustomSlider = (props) => {
         handleModelParamChange(name, value)
     }
 
+    /* const handleBlur = () => {
+        if (slideValue < sliderMin) {
+            setSlideValue(sliderMin);
+        } else if (slideValue > sliderMax) {
+            setSlideValue(sliderMax);
+        }
+    } */
+
+
     return (
         <Paper elevation={6}>
             <Box p={'4px 8px'} display='flex' flexDirection='column' alignItems='start'>
@@ -35,7 +55,7 @@ const CustomSlider = (props) => {
                     <Typography variant='custom'>(Min: {min}, Max: {max})</Typography>
                 </Box>
 
-                <Box sx={{ width: "100%" }}>
+                <Box sx={{ width: "100%", display: 'flex', flexDirection: 'row', gap:'16px' }}>
                     <Slider
                         size='small'
                         color='secondary'
@@ -56,6 +76,20 @@ const CustomSlider = (props) => {
                         onChange={(e) => handleChange(e)}
                         onChangeCommitted={(e, val) => handleSliderValueChange(e, val)}
                     />
+                    {label === 'Epochs' &&
+                        <Input
+                            value={sliderValue}
+                            size="small"
+                            onChange={handleInputChange}
+                            inputProps={{
+                                step: 1,
+                                min: sliderMin,
+                                max: sliderMax,
+                                type: 'number',
+                                'aria-labelledby': 'input-slider',
+                            }}
+                        />
+                    }
                 </Box>
             </Box>
         </Paper>
