@@ -31,9 +31,9 @@ const CryptoStocksTableModule = () => {
     };
     return (
         <Box className='crypto-stocks-table-module'>
-            <Box width='-webkit-fill-available' display="flex" justifyContent="space-between" alignItems='center'>
+            <Box className='crypto-stocks-table-module-header'>
                 <Header title="Indicators" />
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', height: '45px' }} mr={4}>
+                <Box className='crypto-stock-button' sx={{ borderBottom: 1, borderColor: 'divider', height: '45px' }} mr={4}>
                     <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example" textColor="secondary" indicatorColor="primary">
                         <Tab className='tab' label="CRYPTO" {...a11yProps(0)} />
                         <Tab className='tab' label="STOCKS" {...a11yProps(1)} />

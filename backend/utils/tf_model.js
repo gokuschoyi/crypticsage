@@ -1,10 +1,10 @@
 const logger = require('../middleware/logger/Logger');
 const log = logger.create(__filename.slice(__dirname.length + 1))
 const tf = require('@tensorflow/tfjs-node');
-const cliProgress = require('cli-progress');
 const RedisUtil = require('./redis_util')
 const config = require('../config')
 const Redis = require("ioredis");
+const { sqrt } = require('@tensorflow/tfjs-core');
 // @ts-ignore
 const redisPublisher = new Redis();
 
@@ -315,11 +315,17 @@ const evaluateModelOnTestSet = async ({ trained_model_, model_id, look_ahead, xT
 
         if (look_ahead === 1) {
             // console.log('Last prediction', lastPrediction)
+            let yTensor = tf.tensor(yTrainTest)
             let predTensor = tf.tensor(predictions)
             let lastPredTensor = tf.tensor(lastPrediction)
+
             // @ts-ignore
             let transformedPredictions = predTensor.reshape([predTensor.shape[0], predTensor.shape[1], 1])
             console.log('Transformed Predictions shape : ' + transformedPredictions.shape)
+
+            const overAllRMSE = sqrt(tf.losses.meanSquaredError(yTensor, transformedPredictions)).arraySync()
+            console.log('New RMSE : ', overAllRMSE)
+
             // @ts-ignore
             let transforemdLastPrediction = lastPredTensor.reshape([lastPredTensor.shape[0], 1, 1])
             console.log('Transformed Last Prediction shape : ' + transforemdLastPrediction.shape)
@@ -327,6 +333,17 @@ const evaluateModelOnTestSet = async ({ trained_model_, model_id, look_ahead, xT
             predictions = transformedPredictions.arraySync()
             // @ts-ignore
             lastPrediction = transforemdLastPrediction.arraySync()
+        } else {
+            let trimmedYTrainTest = yTrainTest.slice(0, -1)
+            let trimmedPredictions = predictions.slice(0, -look_ahead)
+
+            let yTensor = tf.tensor(trimmedYTrainTest)
+            let predTensor = tf.tensor(trimmedPredictions)
+
+            console.log('Lookahead > 1 : ', yTensor.shape, predTensor.shape)
+
+            const overAllRMSE = sqrt(tf.losses.meanSquaredError(yTensor, predTensor)).arraySync()
+            console.log('New RMSE : ', overAllRMSE)
         }
 
 
@@ -340,6 +357,8 @@ const evaluateModelOnTestSet = async ({ trained_model_, model_id, look_ahead, xT
             log.notice(`xTrain test length : ${xTrainTest.length}, yTrain test length : ${yTrainTest.length}`)
             if (look_ahead !== 1) {
                 displayDataInTable(xTrainTest[xTrainTest.length - 1], 'xTrainTest last element')
+            } else {
+                console.log('xTrainTest last element', xTrainTest[xTrainTest.length - 1][0])
             }
             console.log(yTrainTest.length, predictions.length)
             console.log('RMSE: ', score)

@@ -27,7 +27,7 @@ import {
 import useWebSocket from './WebSocket';
 
 import { DeleteCurrentModal, SaveCurrentModal, ResetTrainedModelModal } from '../components/crypto_components/modals';
-import { MainChart, SelectedFunctionContainer, PredictionsChart, CustomSlider, LinearProgressWithLabel, MultiSelect } from '../components'
+import { MainChart, SelectedFunctionContainer, PredictionsChart, CustomSlider, LinearProgressWithLabel, MultiSelect, ReorderList } from '../components'
 
 import { useSelector } from 'react-redux'
 import {
@@ -575,6 +575,9 @@ const CryptoModule = () => {
         })
     }
 
+    const [transformationOrder, setTransformationOrder] = useState(model_parameters.transformation_order)
+    // console.log('Changed order list: ', transformationOrder.findIndex(elem=> elem.value === 'close'))
+    // console.log(transformationOrder)
 
     // setting converted learning rate
     useEffect(() => {
@@ -603,7 +606,7 @@ const CryptoModule = () => {
             console.log('Select an indicator to plot')
             setNoFuncSelected('Select a function first to model')
         } else {
-            console.log('Sending model training query...')
+            console.log('Sending model training query...', modelParams)
             setTrainingStartedFlag(true)
 
             let fTalibExecuteQuery = []
@@ -687,6 +690,7 @@ const CryptoModule = () => {
                 batchSize: modelParams.batchSize,
                 learning_rate: modelParams.scaledLearningRate,
                 hidden_layers: modelParams.hiddenLayer,
+                transformation_order: transformationOrder
             }
             console.log('Execute query + Model parameters', fTalibExecuteQuery, model_training_parameters)
             dispatch(setStartWebSocket(true))
@@ -705,7 +709,7 @@ const CryptoModule = () => {
                 Success(res.data.message)
                 setModelName(model_name)
                 dispatch(setModelId({ model_id: modelId, model_name: model_name }))
-                dispatch(setTrainingParameters({ model_params: modelParams, selected_functions: fTalibExecuteQuery }))
+                dispatch(setTrainingParameters({ model_params: modelParams, selected_functions: fTalibExecuteQuery, transformationOrder: transformationOrder }))
             }).catch((err) => {
                 console.log(err.message)
                 setTrainingStartedFlag(false)
@@ -995,21 +999,19 @@ const CryptoModule = () => {
                             {chartData.length === 0 ?
                                 (
                                     <Box className='token-chart-box' alignItems='center' justifyContent='center' display='flex'>
-                                        <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
+                                        <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="95%" height="95%" />
                                     </Box>
                                 )
                                 :
                                 (
-                                    <Box className='token-chart-box'>
-                                        <MainChart
-                                            latestTime={chartData[chartData.length - 1].time * 1000 + 60000}
-                                            new_fetch_offset={newTickerLength}
-                                            symbol={cryptotoken}
-                                            selectedTokenPeriod={selectedTokenPeriod}
-                                            module={module}
-                                            fetchValues={fetchValues}
-                                        />
-                                    </Box>
+                                    <MainChart
+                                        latestTime={chartData[chartData.length - 1].time * 1000 + 60000}
+                                        new_fetch_offset={newTickerLength}
+                                        symbol={cryptotoken}
+                                        selectedTokenPeriod={selectedTokenPeriod}
+                                        module={module}
+                                        fetchValues={fetchValues}
+                                    />
                                 )
                             }
                         </Box>
@@ -1179,6 +1181,7 @@ const CryptoModule = () => {
                                     <CustomSlider sliderValue={modelParams.batchSize} name={'batchSize'} handleModelParamChange={handleModelParamChange} label={'Batch Size'} min={1} max={100} sliderMin={1} sliderMax={100} disabled={trainingStartedFlag} />
                                     <CustomSlider sliderValue={modelParams.learningRate} name={'learningRate'} handleModelParamChange={handleModelParamChange} label={'L Rate'} min={1} max={100} sliderMin={1} sliderMax={100} scaledLearningRate={modelParams.scaledLearningRate} disabled={trainingStartedFlag} />
                                 </Box>
+                                <ReorderList orderList={transformationOrder} setOrderList={setTransformationOrder} />
                             </Box>
                         </Grid>
 
@@ -1252,33 +1255,33 @@ const CryptoModule = () => {
                                 predictionChartType={predictionChartType}
                                 trainingStartedFlag={startWebSocket}
                                 model_type={MODEL_OPTIONS_VALUE[modelParams.modelType]}
-                                lookAhead={modelParams.lookAhead}
+                                lookAhead={model_parameters.lookAhead}
                                 predictionLookAhead={predictionLookAhead}
                                 setModelMetrics={setModelMetrics}
                                 predictionsPalette={predictionChartPalette}
                             />
 
-                            <Box className='main-training-status-box' pt={1} gap={'4px'} display='flex' flexDirection='column'>
+                            <Box className='main-training-status-box' pt={1} gap={'12px'} display='flex' flexDirection='column'>
                                 <Typography sx={{ textAlign: 'start' }} variant='custom'>{modelProcessDurationRef.current !== '' ? `Time taken : ${modelProcessDurationRef.current}` : ''}</Typography>
 
                                 {/* epoch end results */}
                                 {epochResults.length > 0 && (
-                                    <Box className='epoch-end-progress-box' pt={1}>
+                                    <Paper elevation={8} className='epoch-end-progress-box' pt={1}>
+                                    <Typography variant='custom' sx={{textAlign:'start'}}>Training Losses</Typography>
                                         {epochResults.map((result, index) => {
                                             return (
                                                 <Box key={index} className={`epoch_${index} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px', justifyContent: 'space-between' }}>
                                                     <div className='epoch-no' style={{ fontWeight: '600', fontSize: '0.75rem', minWidth: '60px', textAlign: 'start' }}>E : {result.epoch + 1}</div>
                                                     <Box className={`model-progress_${index}`} variant='h6'>
                                                         <div className='epoch-end'>
-                                                            <div className='batch-end-text'>Loss : {result.loss}</div>
-                                                            <div className='batch-end-text'>MSE : {result.mse}</div>
-                                                            <div className='batch-end-text'>MAE : {result.mae}</div>
+                                                            <div className='epoch-end-text'>Loss/MSE : {result.loss}</div>
+                                                            <div className='epoch-end-text'>MAE : {result.mae}</div>
                                                         </div>
                                                     </Box>
                                                 </Box>
                                             )
                                         })}
-                                    </Box>
+                                    </Paper>
                                 )}
 
                                 {/* Prediction set RMSE results */}

@@ -47,8 +47,15 @@ const initialState = {
             hiddenLayer: 1,
             multiSelectValue: 'close',
             modelType: 'Multi Step Single Output',
-            learningRate: 50,
             batchSize: 32,
+            transformation_order: [
+                { id: '1', name: 'OPEN', value: 'open' },
+                { id: '2', name: 'HIGH', value: 'high' },
+                { id: '3', name: 'LOW', value: 'low' },
+                { id: '4', name: 'CLOSE', value: 'close' },
+                { id: '5', name: 'VOLUME', value: 'volume' },
+            ],
+            learningRate: 50,
             scaledLearningRate: 0.01
         },
         talibExecuteQueries: [],
@@ -88,7 +95,7 @@ const cryptoModuleSlice = createSlice({
             state.modelData.model_name = action.payload.model_name;
         },
         setTrainingParameters: (state, action) => {
-            state.modelData.training_parameters = action.payload.model_params;
+            state.modelData.training_parameters = { ...action.payload.model_params, transformation_order: action.payload.transformationOrder };
             state.modelData.talibExecuteQueries = action.payload.selected_functions;
         },
         setStartWebSocket: (state, action) => {
@@ -131,6 +138,13 @@ const cryptoModuleSlice = createSlice({
             state.modelData.predictedValues = {};
         },
         resetCurrentModelData: (state) => {
+            state.modelData.training_parameters.transformation_order = [
+                { id: '1', name: 'OPEN', value: 'open' },
+                { id: '2', name: 'HIGH', value: 'high' },
+                { id: '3', name: 'LOW', value: 'low' },
+                { id: '4', name: 'CLOSE', value: 'close' },
+                { id: '5', name: 'VOLUME', value: 'volume' },
+            ];
             state.modelData.epoch_results = [];
             state.modelData.epoch_no = initialState.modelData.epoch_no;
             state.modelData.predictedValues = {

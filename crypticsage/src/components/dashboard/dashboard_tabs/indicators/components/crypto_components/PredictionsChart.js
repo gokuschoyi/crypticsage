@@ -3,6 +3,7 @@ import { Box, useTheme, Skeleton, Typography, Paper } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { useSelector, useDispatch } from 'react-redux';
 import { setBarsFromToPredictions, setStandardizedAndScaledPredictions } from '../../modules/CryptoModuleSlice'
+import { useElementSize } from '../../../../../../utils/Utils';
 
 const calculateMetrics = (data, thresholdLower = 0.01, thresholdUpper = 0.02) => {
     let TP = 0;
@@ -165,17 +166,12 @@ const PredictionsChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictionLookAhead, predictionChartType, dates, allPredictions, chartData.forecast, chartData.label_variance, chartData.label_mean, dispatch])
 
+    const { width } = useElementSize('predictions-chart-grid')
     // creates the chart
     useEffect(() => {
         // console.log('UE : Predctions Chart Rendering')
         const chartGrid = document.getElementsByClassName('predictions-chart-grid')[0]
         let cWidth = chartGrid.clientWidth - 30
-
-        const handleResize = () => {
-            cWidth = chartGrid.clientWidth - 30;
-            // console.log(cWidth)
-            chart.current.applyOptions({ width: cWidth });
-        };
 
         if (predictedValueRedux.length === 0 || !predictionsChartRef.current) {
             return
@@ -257,19 +253,29 @@ const PredictionsChart = (props) => {
             });
 
             predictedValueRef.current.setData(predicted_values);
-
-            window.addEventListener('resize', handleResize);
         }
 
         return () => {
             // console.log('UE Return : Predctions Chart')
-            window.removeEventListener('resize', handleResize);
             chart.current.timeScale().unsubscribeVisibleTimeRangeChange(barsInChartHandler)
             chart.current.remove()
             chart.current = null
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictedValueRedux])
+
+    // setting height and width on resize
+    useEffect(() => {
+        if (!chart.current) {
+            return
+        } else {
+            // console.log(width, height)
+
+            chart.current.applyOptions({
+                width: width,
+            })
+        }
+    }, [width])
 
     // This useEffect is used to calculate the metrics of the model
     useEffect(() => {

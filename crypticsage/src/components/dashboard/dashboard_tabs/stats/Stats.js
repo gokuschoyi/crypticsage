@@ -135,6 +135,11 @@ const Stats = (props) => {
                     itemBg[0].style.transform = `translateX(${left}px) translateY(${top + scrollTop}px)`;
                 })
                 box.addEventListener('mouseout', () => {
+                    const { left,top } = box.getBoundingClientRect();
+                    let scrollTop = window.pageYOffset
+                    itemBg[0].style.transform = `translateX(${left}px) translateY(${top + scrollTop}px)`;
+                    itemBg[0].style.width = `${0}px`;
+                    itemBg[0].style.height = `${0}px`;
                     itemBg[0].classList.remove('active');
                 })
             })

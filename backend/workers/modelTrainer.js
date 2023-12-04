@@ -86,15 +86,16 @@ module.exports = async (job) => {
     const { asset_type, ticker_name, period } = db_query;
     // Model parameters
     const {
+        model_type,
+        to_predict,
         training_size,
         time_step,
         look_ahead,
         epochs: epochCount,
         batchSize,
-        hidden_layers,
         learning_rate,
-        to_predict,
-        model_type
+        hidden_layers,
+        transformation_order
     } = model_training_parameters
     console.log('Model parameters : ', model_training_parameters)
 
@@ -197,7 +198,8 @@ module.exports = async (job) => {
                     redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(4/11) : Transforming and combining the OHLCV and function data for model training...` }))
                     parameters = {
                         tickerHist: JSON.parse(await redisStep.hget(modelCheckpointName, 'tickerHistory')),
-                        finalTalibResult: JSON.parse(await redisStep.hget(modelCheckpointName, 'finalTalibResult'))
+                        finalTalibResult: JSON.parse(await redisStep.hget(modelCheckpointName, 'finalTalibResult')),
+                        transformation_order
                     }
                     // console.log(Object.keys(parameters))
 
@@ -220,7 +222,7 @@ module.exports = async (job) => {
                     parameters = {
                         model_type,
                         features: JSON.parse(await redisStep.hget(modelCheckpointName, 'features')),
-                        to_predict,
+                        to_predict: transformation_order.findIndex(item => item.value === to_predict),
                     }
                     // console.log(Object.keys(parameters))
 
@@ -249,7 +251,7 @@ module.exports = async (job) => {
                         stdData: JSON.parse(await redisStep.hget(modelCheckpointName, 'stdData')),
                         timeStep: time_step,
                         lookAhead: look_ahead,
-                        e_key: to_predict,
+                        e_key: transformation_order.findIndex(item => item.value === to_predict),
                         training_size,
                     }
                     // console.log(Object.keys(parameters))
@@ -379,7 +381,6 @@ module.exports = async (job) => {
                 case 10: // Saving the model, weights  and cleaning up // setting step
                     redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(10/11) : Saving the model...` }))
                     try {
-                        // throw new Error('Test error')
                         await step(trained_model_, model_id)
                         await redisStep.hset(modelCheckpointName, {
                             step: i + 1,
@@ -418,7 +419,6 @@ module.exports = async (job) => {
                             step: i + 1,
                         })
                     } catch (error) {
-                        console.log(error.stack)
                         const newErrorMessage = { func_error: error.message, message: 'Error during evaluation', step: i }
                         throw new Error(JSON.stringify(newErrorMessage));
                     }

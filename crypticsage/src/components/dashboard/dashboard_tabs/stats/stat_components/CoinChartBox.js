@@ -217,7 +217,7 @@ const CoinChartBox = () => {
                 </Box>
             </Box>
             {chartData.length === 0 ?
-                <Box className='coin-chart-box' height="100%" alignItems='center' justifyContent='center' display='flex'>
+                <Box className='coin-chart-box' height="320px" alignItems='center' justifyContent='center' display='flex'>
                     <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
                 </Box>
                 :

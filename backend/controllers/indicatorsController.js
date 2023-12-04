@@ -261,7 +261,7 @@ const procssModelTraining = async (req, res) => {
             job_name,
             { fTalibExecuteQuery, model_training_parameters, model_id, uid },
             {
-                attempts: 1,
+                attempts: 3,
                 backoff: {
                     type: 'exponential',
                     delay: 2000,
@@ -410,7 +410,50 @@ const generateTestData = async (req, res) => {
     lookAhead = lookAhead
     try {
 
-        const n = 10; // The length of the outermost array
+        const tickerHist = [
+            {
+                "openTime": 1628582400000,
+                "open": 1.1,
+                "high": 1.2,
+                "low": 1.3,
+                "close": 1.4,
+                "volume": 1.5
+            },
+            {
+                "openTime": 1628593200000,
+                "open": 2.1,
+                "high": 2.2,
+                "low": 2.3,
+                "close": 2.4,
+                "volume": 2.5
+            },
+            {
+                "openTime": 1628604000000,
+                "open": 3.1,
+                "high": 3.2,
+                "low": 3.3,
+                "close": 3.4,
+                "volume": 3.5
+            }
+        ]
+
+        const finalTalibResult = {
+            "DEMA_outReal": [1.0, 2.0, 3.0]
+        }
+
+        const transformation_order = [
+            { id: '1', name: 'OPEN', value: 'open' },
+            { id: '6', name: 'DEMA_outReal', value: 'DEMA_outReal' },
+            { id: '3', name: 'LOW', value: 'low' },
+            { id: '2', name: 'HIGH', value: 'high' },
+            { id: '4', name: 'CLOSE', value: 'close' },
+            { id: '5', name: 'VOLUME', value: 'volume' },
+        ]
+
+        const featuresX = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult, transformation_order })
+        const toPredictIndex = transformation_order.findIndex(item => item.value === 'close')
+        console.log(toPredictIndex)
+        /* const n = 10; // The length of the outermost array
         const m = 3; // The length of the inner arrays
         const p = 3; // The length of the innermost arrays
 
@@ -418,19 +461,19 @@ const generateTestData = async (req, res) => {
             Array.from({ length: m }, () =>
                 Array.from({ length: p }, (_, i) => i + 1)
             )
-        );
+        ); */
 
         // console.log(arr)
-        const testTF = tf.tensor(arr)
+        // const testTF = tf.tensor(arr)
         // console.log(testTF.shape)
 
         // @ts-ignore
-        let n_input = testTF.shape[1] * testTF.shape[2]
-        let transfX = testTF.reshape([testTF.shape[0], n_input])
+        /* let n_input = testTF.shape[1] * testTF.shape[2]
+        let transfX = testTF.reshape([testTF.shape[0], n_input]) */
 
         // console.log(transfX.shape, transfX.arraySync())
 
-        const testArray =
+        /* const testArray =
             [
                 [[10]],
                 [[20]],
@@ -442,9 +485,9 @@ const generateTestData = async (req, res) => {
                 [[80]],
                 [[90]],
                 [[100]],
-            ]
+            ] */
 
-        const arrN = [
+        /* const arrN = [
             [10, 15, 25],
             [20, 25, 45],
             [30, 35, 65],
@@ -454,20 +497,20 @@ const generateTestData = async (req, res) => {
             [70, 75, 145],
             [80, 85, 165],
             [90, 95, 185],
-            
 
-        ]
-        const testarrayTensor = tf.tensor(testArray)
+
+        ] */
+        // const testarrayTensor = tf.tensor(testArray)
         // console.log('Original tensor shape : ', testarrayTensor.shape, testarrayTensor.arraySync())
 
-        let reshaped = testarrayTensor.reshape([testarrayTensor.shape[0], 1])
+        // let reshaped = testarrayTensor.reshape([testarrayTensor.shape[0], 1])
         // console.log('Reshaped tensor : ', reshaped.shape, reshaped.arraySync())
 
         // @ts-ignore
-        let transformedBack = reshaped.reshape([reshaped.shape[0], reshaped.shape[1], 1])
+        // let transformedBack = reshaped.reshape([reshaped.shape[0], reshaped.shape[1], 1])
         // console.log('Transformed back tensor : ', transformedBack.shape, transformedBack.arraySync())
 
-        const reshapeArray = (yTrain) => {
+        /* const reshapeArray = (yTrain) => {
             const yTrainTensor = tf.tensor(yTrain)
             const newOuter = yTrainTensor.shape[0]
             const newMiddle = 2
@@ -491,17 +534,17 @@ const generateTestData = async (req, res) => {
             }
 
             return reshapedArray
-        }
+        } */
 
         /* const reshapedArray = reshapeArray(testArray)
         const reshapedTensor = tf.tensor(reshapedArray)
 
         console.log(reshapedTensor.shape) */
 
-        res.status(200).send({ message: 'Test data generated successfully' })
+        res.status(200).send({ message: 'Test data generated successfully', featuresX })
 
 
-        let simulatedData = [];
+        /* let simulatedData = [];
         for (let i = 0; i < 20; i++) {
             simulatedData.push({
                 openTime: Date.now() + i * 3600000, // hourly timestamps
@@ -586,7 +629,7 @@ const generateTestData = async (req, res) => {
             // @ts-ignore
             const predictions = await model.predict(xTestTensor).arraySync()
 
-            const testData = [[[70, 75],[80, 85], [90, 95]]]
+            const testData = [[[70, 75], [80, 85], [90, 95]]]
             const testDTensor = tf.tensor(testData)
 
             // @ts-ignore
@@ -597,7 +640,7 @@ const generateTestData = async (req, res) => {
 
         } catch (error) {
             console.log(error)
-        }
+        } */
 
         // console.log(trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest)
         /* 

@@ -5,6 +5,13 @@
     align-items: center;
 }
 
+.crypto-stocks-table-module-header {
+    display: flex;
+    width: -webkit-fill-available;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .selected-function-legend {
     display: flex;
     flex-direction: column;
@@ -99,6 +106,16 @@
     text-overflow: ellipsis;
 }
 
+.epoch-end-text {
+    width: 195px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-align: start;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .prediction-mse {
     max-width: 100px !important;
     text-align: start;
@@ -113,12 +130,12 @@
     /* Animation effect */
 }
 
-.epoch-end-progress-box{
+.epoch-end-progress-box {
     display: flex;
     flex-direction: column;
     max-height: 150px;
-    overflow-y: scroll;
-    
+    overflow-y: auto;
+    padding: 8px
 }
 
 /* .MuiLinearProgress-bar {
@@ -665,12 +682,25 @@ tr:hover .prediction-mse {
 
     .tooltip-prediction-box-controls {
         flex-direction: column;
-        
+    }
+
+    .epoch-end-text{
+        width: 160px;
     }
 
 }
 
 @media screen and (max-width: 600px) {
+    .crypto-stocks-table-module-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-bottom: 8px;
+    }
+
+    .crypto-stock-button {
+        margin-left: 32px;
+    }
+
     .last-updated-date-refresh {
         display: flex;
         justify-content: space-between;
@@ -708,6 +738,10 @@ tr:hover .prediction-mse {
 
     .batch-end-text {
         width: 100px;
+    }
+
+    .epoch-end-text{
+        width: 140px;
     }
 
     .talib-func-hint {
@@ -848,15 +882,20 @@ tr:hover .prediction-mse {
 }
 
 
-/* .stock-header>h3 ::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 2px;
-    background-color: blue;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s;
-} */
+/* reo-order  CSS*/
+
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+ul {
+    padding-left: 0px;
+    list-style: none;
+}
+
+.ordering-li {
+    cursor: move;
+    cursor: -webkit-grabbing;
+    text-align: start;
+    /* Other styling as needed */
+}

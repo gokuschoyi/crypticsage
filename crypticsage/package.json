@@ -41,6 +41,7 @@
     "reactjs-social-login": "^2.6.2",
     "recharts": "^2.7.3",
     "redux-persist": "^6.0.0",
+    "sortablejs": "^1.15.0",
     "swiper": "^9.1.0",
     "three": "^0.148.0",
     "typed.js": "^2.0.12",

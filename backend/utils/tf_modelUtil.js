@@ -134,21 +134,35 @@ const trimDataBasedOnTalibSmallestLength = async ({ finalTalibResult, tickerHist
  * @param {Object} param
  * @param {Array} param.tickerHist
  * @param {Object} param.finalTalibResult
+ * @param {Array} param.transformation_order
  * @returns {Promise<array>}
  */
-const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult }) => {
+const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult, transformation_order }) => {
 
-    // Extract OHLCV and technical indicator data
+    /* // Extract OHLCV and technical indicator data
     const ohlcvData = tickerHist.map((item) => [parseFloat(item.open), parseFloat(item.high), parseFloat(item.low), parseFloat(item.close), parseFloat(item.volume)])
-
     // Combine OHLCV data with technical indicator data
     const features = ohlcvData.map((ohlcv, i) => {
         const additionalData = Object.values(finalTalibResult).map((result) => result[i]);
         return [...ohlcv, ...additionalData];
+    }); */
+
+    const features = tickerHist.map((item, i) => {
+        return transformation_order.map(order => {
+            if (order.value in item) {
+                // Fetching OHLCV data
+                return parseFloat(item[order.value]);
+            } else if (order.value in finalTalibResult) {
+                // Fetching technical indicator data
+                return finalTalibResult[order.value][i];
+            }
+            return null; // Or a default value if the feature is not found
+        });
     });
 
     if (config.debug_flag === 'true') {
-        console.log('Transformed OHLCV Length : ', ohlcvData.length, 'Sample data : ', ohlcvData[0], ohlcvData[ohlcvData.length - 1])
+        console.log('Final talib keys : ', Object.keys(finalTalibResult))
+        // console.log('Transformed OHLCV Length : ', ohlcvData.length, 'Sample data : ', ohlcvData[0], ohlcvData[ohlcvData.length - 1])
         console.log('Combined with features Length : ', features.length, 'Sample data : ', features[features.length - 1])
     }
 
@@ -168,15 +182,15 @@ const standardizeData = ({ model_type, features, to_predict }) => {
     const standardizedFeatures = tf.div(tf.sub(tf.tensor(features), mean), tf.sqrt(variance));
     const stdData = standardizedFeatures.arraySync();
 
-    let e;
+    // let e;
     let label_mean, label_variance
     // console.log(model_type)
     switch (model_type) {
         case 'multi_input_single_output_no_step':
         case 'multi_input_single_output_step':
-            e = e_type[to_predict]
-            label_mean = mean.arraySync()[e];
-            label_variance = variance.arraySync()[e];
+            // e = e_type[to_predict]
+            label_mean = mean.arraySync()[to_predict];
+            label_variance = variance.arraySync()[to_predict];
             break;
         case 'multi_input_multi_output_no_step':
             label_mean = mean.arraySync();
@@ -189,6 +203,7 @@ const standardizeData = ({ model_type, features, to_predict }) => {
     if (config.debug_flag === 'true') {
         // @ts-ignore
         console.log('Standardized Data Length : ', stdData.length, 'Sample data : ', stdData[stdData.length - 1])
+        console.log('E_ key : ', to_predict)
     }
 
     // @ts-ignore
@@ -215,20 +230,20 @@ const createTrainingData = async ({ model_type, stdData, timeStep, lookAhead, e_
     let subsetf, subsetl, str, e
     switch (model_type) {
         case 'multi_input_single_output_step':
-            e = e_type[e_key]
+            // e = e_type[e_key]
             for (let i = 0; i <= stdData.length - timeStep - lookAhead; i++) {
                 let featureSlice = stdData.slice(i, i + timeStep).map(row => {
-                    let filteredRow = row.filter((_, index) => index !== e);
+                    let filteredRow = row.filter((_, index) => index !== e_key);
                     return filteredRow;
                 });
                 standardized_features.push(featureSlice);
-                standardized_labels.push(stdData.slice(i + timeStep, i + timeStep + lookAhead).map((row) => [row[e]]));
+                standardized_labels.push(stdData.slice(i + timeStep, i + timeStep + lookAhead).map((row) => [row[e_key]]));
             }
 
             const lastFeatureSetsToPredict = stdData.slice(stdData.length - (timeStep + lookAhead - 1))
             for (let i = 0; i <= lastFeatureSetsToPredict.length - timeStep; i++) {
                 let featureSlice = lastFeatureSetsToPredict.slice(i, i + timeStep).map(row => {
-                    let filteredRow = row.filter((_, index) => index !== e);
+                    let filteredRow = row.filter((_, index) => index !== e_key);
                     return filteredRow;
                 });
                 lastSets.push(featureSlice)
@@ -254,19 +269,19 @@ const createTrainingData = async ({ model_type, stdData, timeStep, lookAhead, e_
             if (config.debug_flag === 'true') {
                 // console.log(subsetf)
                 // console.log(subsetl)
+                console.log('E_ key : ', e_key)
                 console.log('From function test array length', stdData.length)
                 console.log('Offset length  : ', stdData.length - timeStep - lookAhead + 1)
                 console.log('Training_features : ', standardized_features.length, 'Training_labels : ', standardized_labels.length)
-                displayDataInTable(stdData.slice(-lookAhead).map((row) => [row[e]]), 'Last train set labels')
+                displayDataInTable(stdData.slice(-lookAhead).map((row) => [row[e_key]]), 'Last train set labels')
                 console.log(str)
             }
             break;
         case 'multi_input_single_output_no_step':
-            e = e_type[e_key]
             // @ts-ignore first timeStep values are not inclded 
             for (let i = timeStep; i < stdData.length - lookAhead + 1; i++) {
                 standardized_features.push(stdData.slice(i - timeStep, i));
-                standardized_labels.push([stdData[i + lookAhead - 1][e]]);
+                standardized_labels.push([stdData[i + lookAhead - 1][e_key]]);
             }
 
             console.log('Standardized_features : ', standardized_features.length, 'standardized_labels : ', standardized_labels.length)
@@ -287,7 +302,7 @@ const createTrainingData = async ({ model_type, stdData, timeStep, lookAhead, e_
                 })
             })
 
-            console.log(stdData[timeStep + lookAhead - 1][e])
+            console.log(stdData[timeStep + lookAhead - 1][e_key])
             console.log(str)
             break;
         case 'multi_input_multi_output_no_step':

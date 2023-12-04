@@ -7,6 +7,7 @@ import PredictionsChart from "./crypto_components/PredictionsChart";
 import CryptoTable from "./crypto_components/CryptoTable";
 import StocksTable from "./stock_components/StocksTable";
 import CustomBarChart from "./stock_components/BarChart";
+import ReorderList from "./crypto_components/ReorderList";
 
 export {
     CustomSlider,
@@ -18,4 +19,5 @@ export {
     CryptoTable,
     StocksTable,
     CustomBarChart,
+    ReorderList
 }

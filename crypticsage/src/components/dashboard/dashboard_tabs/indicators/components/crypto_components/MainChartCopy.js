@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { Box, useTheme, IconButton, Button, Card, CardContent, CardActions, Typography, Autocomplete, TextField, Tooltip, } from '@mui/material'
+import { Box, Skeleton, useTheme, IconButton, Button, Card, CardContent, CardActions, Typography, Autocomplete, TextField, Tooltip, } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { updateTickerWithOneDataPoint, getHistoricalTickerDataFroDb } from '../../../../../../api/adminController'
 import { useSelector, useDispatch } from 'react-redux'
@@ -21,6 +21,8 @@ import {
     , toggleProcessSelectedFunctionsOnMoreData
     , resetStreamedTickerDataRedux
 } from '../../modules/CryptoModuleSlice'
+
+import { useElementSize } from '../../../../../../utils/Utils'
 
 import { executeAllSelectedFunctions } from '../../modules/CryptoModuleSlice'
 
@@ -386,21 +388,9 @@ const MainChart = (props) => {
         let tData = checkForUniqueAndTransform(tDataRedux)
 
         let tokenDom = document.getElementsByClassName('chart-cont-dom')[0]
-        let cWidth = tokenDom.clientWidth;
         let cHeight = tokenDom.clientHeight;
 
-        // console.log(cWidth, cHeight)
-
-        // paddiing causing some resize fit issue. Check later -- fixed by changing margin with padding
-        const handleResize = () => {
-            cWidth = tokenDom.clientWidth;
-            cHeight = tokenDom.clientHeight;
-            // console.log(cWidth, cHeight)
-            chart.current.applyOptions({ width: cWidth, height: cHeight });
-        };
-
         chart.current = createChart(chartboxRef.current, {
-            width: cWidth,
             height: cHeight,
             layout: {
                 background: {
@@ -471,16 +461,29 @@ const MainChart = (props) => {
         const volDat = calculateVolumeData(tData)
         candleStickVolumeSeriesRef.current.setData(volDat);
 
-        window.addEventListener('resize', handleResize);
-
         return () => {
             // console.log('UE RETURN 2 : Main chart')
-            window.removeEventListener('resize', handleResize);
             chart.current.remove();
             setChartSeriesState([])
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [symbol, selectedTokenPeriod])
+
+    const { width, height } = useElementSize('chart-cont-dom');
+    // console.log('cont dom', width, height)
+    // setting height and width on resize
+    useEffect(() => {
+        if (!chart.current) {
+            return
+        } else {
+            // console.log(width, height)
+            chart.current.applyOptions({
+                width: width,
+                height: height,
+            })
+        }
+    }, [width, height])
+
 
     const [predictionLineChart, setPredictionLineChart] = useState(null)
 
@@ -728,11 +731,10 @@ const MainChart = (props) => {
     // Tooltip useEffect to show/hide
     useEffect(() => {
         // console.log("UE : tooltip subscribe")
-        let tokenChartBox = document.getElementsByClassName('token-chart-box')[0].getBoundingClientRect()
+        let tokenDom = document.getElementsByClassName('chart-cont-dom')[0]
+        let tokenChartBox = tokenDom.getBoundingClientRect()
         let offsetLeft = Math.round(tokenChartBox.left);
         let offsetTop = Math.round(tokenChartBox.top)
-
-        let tokenDom = document.getElementsByClassName('chart-cont-dom')[0]
         let cWidth = tokenDom.clientWidth;
         let cHeight = tokenDom.clientHeight;
 

@@ -72,7 +72,7 @@ const Topbar = (props) => {
     const colorMode = useContext(ColorModeContext);
 
     const userTheme = useSelector(state => state.auth.preferences.theme);
-    
+
     const toggleTheme = () => {
         dispatch(setUserTheme({ theme: !userTheme }))
     }
@@ -87,48 +87,45 @@ const Topbar = (props) => {
     }, [userTheme, mode, colorMode])
 
 
-    const smallScreenSidebarLoad = useRef(false)
+    /* const smallScreenSidebarLoad = useRef(false)
     useEffect(() => {
         if (!smallScreenSidebarLoad.current) { // Only run if the component is mounted
-            if (!toggleSmallScreenSidebar) {
-                let sidebar = document.getElementsByClassName('sidebar')[0]
-                let content = document.getElementsByClassName('content')[0]
+            let sidebar = document.getElementsByClassName('sidebar')[0]
+            // let content = document.getElementsByClassName('content')[0]
+            if (!smallScreenToggleState && sidebar !== undefined) {
+                smallScreenSidebarLoad.current = true // Set the mount state to true after the first run
 
-                if (sidebar === undefined || content === undefined) {
-                    smallScreenSidebarLoad.current = false
-                    console.log("undefined")
-                    return
-                } else {
-                    smallScreenSidebarLoad.current = true // Set the mount state to true after the first run
-
-                    sidebar.classList.remove('show-sidebar');
-                    content.style.setProperty('--marginLeft', '0px !important');
-                    handleToggleSmallScreenSidebar()
-                    dispatch(handleReduxToggleSmallScreenSidebar({ value: !toggleSmallScreenSidebar }))
-                    console.log('hide sidebar');
-                }
-            } else { smallScreenSidebarLoad.current = true }
+                sidebar.classList.remove('show-sidebar');
+                sidebar.classList.add('hide-sidebar');
+                // content.style.setProperty('--marginLeft', '0px !important');
+                // handleToggleSmallScreenSidebar()
+                // dispatch(handleReduxToggleSmallScreenSidebar({ value: !smallScreenToggleState }))
+                console.log('hide sidebar for small screen');
+            }
         }
-    })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [smallScreenToggleState]) */
 
     const showSidebar = () => {
-        if (toggleSmallScreenSidebar) {
+        if (!smallScreenToggleState) {
             let sidebar = document.getElementsByClassName('sidebar')[0]
-            let content = document.getElementsByClassName('content')[0]
+            // let content = document.getElementsByClassName('content')[0]
 
             sidebar.classList.add('show-sidebar');
-            content.style.setProperty('--marginLeft', '80px!important');
-            handleToggleSmallScreenSidebar()
-            dispatch(handleReduxToggleSmallScreenSidebar({ value: !toggleSmallScreenSidebar }))
+            sidebar.classList.remove('hide-sidebar');
+            // content.style.setProperty('--marginLeft', '80px!important');
+            // handleToggleSmallScreenSidebar()
+            dispatch(handleReduxToggleSmallScreenSidebar({ value: !smallScreenToggleState }))
             console.log('show sidebar');
         } else {
             let sidebar = document.getElementsByClassName('sidebar')[0]
-            let content = document.getElementsByClassName('content')[0]
+            // let content = document.getElementsByClassName('content')[0]
 
             sidebar.classList.remove('show-sidebar');
-            content.style.setProperty('--marginLeft', '0px !important');
-            handleToggleSmallScreenSidebar()
-            dispatch(handleReduxToggleSmallScreenSidebar({ value: !toggleSmallScreenSidebar }))
+            sidebar.classList.add('hide-sidebar');
+            // content.style.setProperty('--marginLeft', '0px !important');
+            // handleToggleSmallScreenSidebar()
+            dispatch(handleReduxToggleSmallScreenSidebar({ value: !smallScreenToggleState }))
             console.log('hide sidebar');
         }
     }
@@ -248,8 +245,7 @@ const Topbar = (props) => {
     return (
         <Box
             className="topbar"
-            display="flex"
-            sx={{ borderBottom: mode === 'light' ? '1px solid #000000' : '' }}
+            sx={{ borderBottom: '#3f3f3f 1px solid' }}
             justifyContent={sm ? "space-between" : "flex-end"}
             p={2}
             backgroundColor={theme.palette.primary.newBlack}
@@ -257,7 +253,7 @@ const Topbar = (props) => {
             {sm && (
                 <Box display="flex">
                     <IconButton
-                        className={smallScreenToggleState ? 'remove-rotate-icon' : 'rotate-icon-topbar'}
+                        className={smallScreenToggleState ? 'rotate-icon-topbar' : 'remove-rotate-icon'}
                         sx={{ color: `${theme.palette.secondary.main}` }}
                         onClick={(e) => showSidebar(e)}>
                         <ArrowForwardIcon />

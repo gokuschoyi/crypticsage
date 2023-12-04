@@ -1,3 +1,55 @@
+import { useState, useEffect } from "react";
+
+export const useElementSize = (className, delay = 0) => {
+    const [size, setSize] = useState({ width: 0, height: 0 });
+
+    useEffect(() => {
+        const element = document.getElementsByClassName(className)[0];
+
+        if (!element) {
+            console.warn(`Element with class ${className} not found.`);
+            return;
+        }
+
+        // Debounce function
+        let timeoutId = null;
+        const debounce = (func, delay) => {
+            return (...args) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    func(...args);
+                }, delay);
+            };
+        };
+
+        // Create a Resize Observer
+        const resizeObserver = new ResizeObserver(entries => {
+            if (entries[0]) {
+                const { width, height } = entries[0].contentRect;
+                debounceUpdateSize(width, height);
+            }
+        });
+
+        const debounceUpdateSize = debounce((newWidth, newHeight) => {
+            // Only update if the size is different
+            if ((newWidth !== size.width || newHeight !== size.height) && (newWidth !== 0 && newHeight !== 0)) {
+                setSize({ width: Math.round(newWidth), height: Math.round(newHeight) });
+            }
+        }, delay);
+
+        // Observe the element
+        resizeObserver.observe(element);
+
+        // Cleanup function
+        return () => {
+            resizeObserver.disconnect();
+            clearTimeout(timeoutId);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [className, delay]);
+    return size;
+}
+
 export const shortenDate = (dateString) => {
     if (dateString === '') { return '' } else {
         const [date, time] = dateString.split(", ");

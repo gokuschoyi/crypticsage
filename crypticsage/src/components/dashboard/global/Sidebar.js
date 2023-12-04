@@ -18,7 +18,7 @@ import {
     AdminPanelSettingsIcon,
     CandlestickChartIcon
 } from "./Icons";
-import { setSidebarState } from "./SideBarSlice";
+import { setSidebarState, handleReduxToggleSmallScreenSidebar } from "./SideBarSlice";
 
 const SidebarC = () => {
     const theme = useTheme();
@@ -26,7 +26,7 @@ const SidebarC = () => {
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const md = useMediaQuery(theme.breakpoints.down('md'));
     const dispatch = useDispatch();
-    const { sidebarTab } = useSelector(state => state.sidebar);
+    const { sidebarTab, toggleSmallScreenSidebarState } = useSelector(state => state.sidebar);
     const { admin_status } = useSelector(state => state.auth);
     const userCollapsedSidebar = useSelector(state => state.auth.preferences.collapsedSidebar);
     const { collapseSidebar, collapsed } = useProSidebar();
@@ -56,24 +56,28 @@ const SidebarC = () => {
         return () => {
             isFirestRender.current = true;
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch, location.pathname])
 
     //add md to dep to triggrer collapseSidebar
     //adding collapsed prevetents opening the sidebar
     useEffect(() => {
-        if (md) {
+        // console.log(sm, md, collapsed)
+        if (md && !sm) {
             if (!collapsed) {
-                collapseSidebar();
+                // console.log('md and collapsing')
+                collapseSidebar(true);
             }
         }
         if (sm) {
+            // dispatch(handleReduxToggleSmallScreenSidebar({ value: false }))
             if (!collapsed) {
-                collapseSidebar();
+                // console.log('sm and collapsing')
+                collapseSidebar(true);
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [collapseSidebar, md, sm])
+    }, [md, sm])
 
     const handleOnClick = (name) => {
         if (name === 'admin') {
@@ -85,8 +89,8 @@ const SidebarC = () => {
     }
 
     return (
-        <div className='sidebar' style={{ display: 'flex', height: '100%', position: 'fixed' }}>
-            <Sidebar transitionDuration={700} defaultCollapsed={userCollapsedSidebar} width="300px" style={{ height: '100vh' }} rootStyles={{
+        <div className={toggleSmallScreenSidebarState ? 'sidebar show-sidebar' : 'sidebar hide-sidebar'}>
+            <Sidebar transitionDuration={500} defaultCollapsed={userCollapsedSidebar} width="250px" style={{ height: '100vh', borderRight:`#3f3f3f 1px solid` }} rootStyles={{
                 [`.ps-sidebar-container`]: {
                     backgroundColor: `${theme.palette.primary.newBlack}`,
                 },
@@ -144,6 +148,7 @@ const SidebarC = () => {
                             style={{
                                 backgroundColor: sidebarTab === "dashboardTab" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
                                 color: sidebarTab === "dashboardTab" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
+                                borderTop: `#3f3f3f 1px solid`
                             }}
                             onClick={() => handleOnClick("dashboardTab")}
                             icon={<HomeOutlinedIcon />}

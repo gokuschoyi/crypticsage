@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { createChart } from 'lightweight-charts';
 import { Box, useTheme } from '@mui/material'
+import { useElementSize } from '../../../../../utils/Utils'
 
 const DashboardChart = (props) => {
     const { chartData, selectedTokenName, tokenUrl, gridLineToggle } = props;
@@ -8,8 +9,11 @@ const DashboardChart = (props) => {
     const chartBackgroundColor = theme.palette.background.default
     // console.log(chartBackgroundColor)
 
+    const { width, height } = useElementSize('chart-holder-box');
+
     const chartContainerRef = useRef();
     const chart = useRef();
+    // creating the chart
     useEffect(() => {
         // console.log("from DC chart")
 
@@ -67,8 +71,7 @@ const DashboardChart = (props) => {
         if (fData.length > 0) {
             // console.log(cWidth, cHeight)
             chart.current = createChart(chartContainerRef.current, {
-                width: cWidth,
-                height: cHeight,
+                autoSize: true,
                 layout: {
                     background: {
                         type: 'solid',
@@ -162,8 +165,24 @@ const DashboardChart = (props) => {
             chartDom.removeEventListener('touchmove', handleTouchMove)
             chart.current.remove();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chartData])
 
+    // setting height and width on resize
+    useEffect(() => {
+        if (!chart.current) {
+            return
+        } else {
+            // console.log(width, height)
+
+            chart.current.applyOptions({
+                width: width,
+                height: height,
+            })
+        }
+    }, [width, height])
+
+    // applying theme to chart
     useEffect(() => {
         if (chart.current !== undefined || chart.current !== null) {
             chart.current.applyOptions({

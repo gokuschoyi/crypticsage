@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
-import { useProSidebar } from "react-pro-sidebar";
-import useMediaQuery from '@mui/material/useMediaQuery';
+// import { useProSidebar } from "react-pro-sidebar";
+// import useMediaQuery from '@mui/material/useMediaQuery';
 import 'react-toastify/dist/ReactToastify.css';
 import SidebarC from '../../components/dashboard/global/Sidebar';
 import Topbar from '../../components/dashboard/global/Topbar';
 import { Outlet } from 'react-router-dom';
 import './Dashboard.css'
-import { Box, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 const Dashboard = (props) => {
     const [toggleUser, setToggleUser] = React.useState(false);
     const handleToggleUser = () => {
@@ -52,10 +52,9 @@ const Dashboard = (props) => {
         }
     })
     const toggleSmallScreenSidebarState = useSelector(state => state.sidebar.toggleSmallScreenSidebarState);
-    // console.log(toggleSmallScreenSidebarState)
-    const { collapsed } = useProSidebar();
-    const theme = useTheme();
-    const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    // const { collapsed } = useProSidebar();
+    // const theme = useTheme();
+    // const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const [toggleSmallScreenSidebar, setToggleSmallScreenSidebar] = useState(toggleSmallScreenSidebarState)
     const handleToggleSmallScreenSidebar = () => {
         setToggleSmallScreenSidebar((prev) => !prev)
@@ -81,8 +80,6 @@ const Dashboard = (props) => {
                 }}
                 sx={{
                     flexGrow: 1,
-                    marginLeft: sm ? (toggleSmallScreenSidebar ? "0px !important" : "80px !important") : (collapsed ? "80px !important" : "300px !important"),
-                    transition: "margin-left 0.7s ease",
                     overflow: "auto",
                 }}
             >
