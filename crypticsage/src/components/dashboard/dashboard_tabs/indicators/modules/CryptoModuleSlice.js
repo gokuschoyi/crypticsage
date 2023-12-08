@@ -55,6 +55,7 @@ const initialState = {
                 { id: '4', name: 'CLOSE', value: 'close' },
                 { id: '5', name: 'VOLUME', value: 'volume' },
             ],
+            doValidation: false,
             learningRate: 50,
             scaledLearningRate: 0.01
         },
@@ -449,6 +450,7 @@ const cryptoModuleSlice = createSlice({
 
                     // Update the inputs array within the function
                     updatedFunction.outputAvailable = true;
+                    updatedFunction.display_name = `${name}_${optInputs[0].defaultValue}`;
 
                     // Update the function within the found function's functions array
                     foundFunction.functions[foundFunctionToUpdateIndex] = updatedFunction;

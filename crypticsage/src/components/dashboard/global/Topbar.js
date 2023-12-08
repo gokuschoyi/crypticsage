@@ -75,14 +75,29 @@ const Topbar = (props) => {
 
     const toggleTheme = () => {
         dispatch(setUserTheme({ theme: !userTheme }))
+        localStorage.setItem('userTheme', !userTheme)
     }
 
     useEffect(() => {
         // console.log('UE : theme setting', userTheme, mode)
-        if (userTheme === true && mode !== 'dark') {
-            colorMode.toggleColorMode()
-        } else if (userTheme === false && mode !== 'light') {
-            colorMode.toggleColorMode()
+        if (userTheme === true) {
+            // console.log('user prefers dark mode')
+            if (mode === 'dark') {
+                // console.log('current mode dark', mode)
+                return
+            } else {
+                // console.log('current mode light', mode)
+                colorMode.toggleColorMode()
+            }
+        } else {
+            // console.log('user prefers light mode')
+            if (mode === 'light') {
+                // console.log('current mode light', mode)
+                return
+            } else {
+                // console.log('current mode dark', mode)
+                colorMode.toggleColorMode()
+            }
         }
     }, [userTheme, mode, colorMode])
 

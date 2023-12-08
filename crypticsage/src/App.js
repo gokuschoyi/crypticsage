@@ -33,34 +33,34 @@ function App() {
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <Provider store={store}>
                 <PersistGate loading={null} persistor={persistor}>
-                  <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID}>
-                    <div className="App">
-                      <Routes>
-                        <Route index element={
-                          <LandingPage />
-                        } />
-                        <Route path="auth" element={
-                          <Suspense fallback={<LoginSkeleton />}>
+                  <div className="App">
+                    <Routes>
+                      <Route index element={
+                        <LandingPage />
+                      } />
+                      <Route path="auth" element={
+                        <Suspense fallback={<LoginSkeleton />}>
+                          <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_OAUTH_CLIENT_ID}>
                             <Auth />
-                          </Suspense>
-                        } />
-                        <Route path="dashboard" element={
-                          <ProtectedRoute >
-                            <Dashboard />
-                          </ProtectedRoute>
-                        }>
-                          {TabRoutes}
-                        </Route>
-                        <Route path="admin-dashboard" element={
-                          <ProtectedRoute >
-                            <Admin />
-                          </ProtectedRoute>
-                        } >
-                          {AdminRoutes}
-                        </Route>
-                      </Routes>
-                    </div>
-                  </GoogleOAuthProvider>
+                          </GoogleOAuthProvider>
+                        </Suspense>
+                      } />
+                      <Route path="dashboard" element={
+                        <ProtectedRoute >
+                          <Dashboard />
+                        </ProtectedRoute>
+                      }>
+                        {TabRoutes}
+                      </Route>
+                      <Route path="admin-dashboard" element={
+                        <ProtectedRoute >
+                          <Admin />
+                        </ProtectedRoute>
+                      } >
+                        {AdminRoutes}
+                      </Route>
+                    </Routes>
+                  </div>
                 </PersistGate>
               </Provider>
             </LocalizationProvider>

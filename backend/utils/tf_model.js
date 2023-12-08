@@ -162,7 +162,7 @@ const onTrainEndCallback = (uid) => {
 
 // Define your early stopping callback
 const earlyStopping = tf.callbacks.earlyStopping({
-    monitor: 'loss',
+    monitor: 'mse',
     patience: 2,
     verbose: 2
 });
@@ -193,7 +193,7 @@ const reshapeArray = (yTrain) => {
     return reshapedArray
 }
 
-const trainModel = async ({ model, learning_rate, look_ahead, xTrain, yTrain, epochs, batch_size, uid }) => {
+const trainModel = async ({ model, do_validation, learning_rate, look_ahead, xTrain, yTrain, epochs, batch_size, uid }) => {
     const totalNoOfBatch = Math.round(xTrain.length / batch_size)
     let xTrainTensor, xTTensor
     let yTrainTensor, yTTesnor
@@ -246,7 +246,7 @@ const trainModel = async ({ model, learning_rate, look_ahead, xTrain, yTrain, ep
             batchSize: batch_size,
             epochs: epochs,
             verbose: 2,
-            // validationSplit: 0.1,
+            validationSplit: do_validation ? 0.1 : 0,
             callbacks: {
                 earlyStopping,
                 onEpochBegin: async (epoch) => {
@@ -264,7 +264,8 @@ const trainModel = async ({ model, learning_rate, look_ahead, xTrain, yTrain, ep
             }
         });
 
-    return { model, history }
+    console.log('History : ', history)
+    return { model }
 }
 
 const evaluateModelOnTestSet = async ({ trained_model_, model_id, look_ahead, xTrainTest: xTTest, yTrainTest, dates, label_mean, label_variance, uid }) => {

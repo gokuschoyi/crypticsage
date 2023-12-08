@@ -154,7 +154,9 @@ export const ColorModeContext = createContext({
 })
 
 export const useMode = () => {
-    const [mode, setMode] = useState('dark');
+    const modeInLocalStorage = localStorage.getItem('userTheme') === 'false' ? 'light' : 'dark';
+    const [mode, setMode] = useState(modeInLocalStorage);
+    // console.log('mode from theme.js', mode, modeInLocalStorage)
 
     const colorMode = useMemo(
         () => ({

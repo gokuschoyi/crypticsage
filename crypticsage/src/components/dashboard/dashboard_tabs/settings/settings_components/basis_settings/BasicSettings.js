@@ -298,6 +298,7 @@ const BasicSettings = () => {
                 let res = await updatePreferences(data)
                 dispatch(setUserPreferences(editedPreferences))
                 // console.log(editedPreferences)
+                localStorage.setItem('userTheme', editedPreferences.theme)
                 Success(res.data.message)
             } catch (err) {
                 if (err.response) {

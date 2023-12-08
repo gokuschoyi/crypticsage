@@ -4,45 +4,7 @@ import { createChart } from 'lightweight-charts';
 import { useSelector, useDispatch } from 'react-redux';
 import { setBarsFromToPredictions, setStandardizedAndScaledPredictions } from '../../modules/CryptoModuleSlice'
 import { useElementSize } from '../../../../../../utils/Utils';
-
-const calculateMetrics = (data, thresholdLower = 0.01, thresholdUpper = 0.02) => {
-    let TP = 0;
-    let FP = 0;
-    let TN = 0;
-    let FN = 0;
-    data = data.filter((value) => value.actual !== null && value.predicted !== null)
-    for (let i = 0; i < data.length; i++) {
-        const actualChange = data[i].actual;
-        const predictedChange = data[i].predicted;
-        const percentChange = (predictedChange - actualChange) / actualChange;
-        // console.log(percentChange * 100)
-        if (percentChange >= -thresholdLower && percentChange <= thresholdLower) {
-            TP++;
-        } else if (percentChange >= thresholdLower && percentChange <= thresholdUpper) {
-            FN++;
-        } else if (percentChange > thresholdUpper) {
-            TN++;
-        } else if (percentChange < -thresholdLower) {
-            FP++;
-        }
-    }
-
-    const accuracy = (TP + TN) / (TP + FP + TN + FN); // how close the predicted values are to the actual values based on the threshold. Higher the value better the model
-    const precision = TP / (TP + FP); // how many of the predicted values are actually correct. Higher the value better the model
-    const recall = TP / (TP + FN); // how many of the actual values are predicted correctly. Higher the value better the model
-    const f1 = (2 * precision * recall) / (precision + recall); // harmonic mean of precision and recall. Higher the value better the model
-
-    return {
-        TP,
-        FP,
-        TN,
-        FN,
-        accuracy: accuracy.toFixed(4),
-        precision: precision.toFixed(4),
-        recall: recall.toFixed(4),
-        f1: f1.toFixed(4)
-    };
-}
+import { calculateTolerance } from '../../modules/CryptoModuleUtils'
 
 function calculateMSE(actual, predicted) {
     if (actual.length !== predicted.length) {
@@ -277,13 +239,16 @@ const PredictionsChart = (props) => {
         }
     }, [width])
 
+    const tolerance = 1
     // This useEffect is used to calculate the metrics of the model
     useEffect(() => {
         // console.log('UE : Predctions Chart metrics')
         if (predictedValueRedux.length === 0 || !predictionsChartRef.current) {
             return
         } else {
-            const metrics = calculateMetrics(predictedValueRedux);
+            // const metrics = calculateMetrics(predictedValueRedux);
+            const metrics = calculateTolerance(predictedValueRedux, tolerance)
+
             // console.log(metrics)
 
             let mse = calculateMSE(predictedValueRedux.map((value) => value.actual), predictedValueRedux.map((value) => value.predicted))
@@ -323,6 +288,29 @@ const PredictionsChart = (props) => {
                 color: actualColor,
             });
 
+            const newTPMarkers = chartData[predictionChartType]
+                .filter(data => {
+                    const { actual, predicted } = data
+                    const tol = tolerance / 100 * actual
+                    return Math.abs(actual - predicted) <= tol
+                })
+                .map(data => {
+                    const { actual, predicted } = data
+                    const isActualPositive = actual > predicted;
+
+                    let shape = isActualPositive ? 'arrowDown' : 'arrowUp';
+                    let tpColor = isActualPositive ? tp_downColor : tp_upColor;
+
+                    return {
+                        time: data.open,
+                        position: 'aboveBar',
+                        color: tpColor,
+                        shape: shape,
+                        size: 0.1
+                    };
+                })
+            // console.log(newTPMarkers)
+
             let thresholdLower = 0.01
             const tpMarkers = chartData[predictionChartType]
                 .filter(data => {
@@ -346,8 +334,9 @@ const PredictionsChart = (props) => {
                         size: 0.1
                     };
                 });
+            // console.log(tpMarkers)
 
-            predictedValueRef.current.setMarkers([...tpMarkers, ...markers])
+            predictedValueRef.current.setMarkers([...newTPMarkers, ...markers])
 
         }
     }, [chartData, predictedValueRedux, predictionChartType, lookAhead, tp_upColor, tp_downColor, actualColor, predictedColor, forecastColor])

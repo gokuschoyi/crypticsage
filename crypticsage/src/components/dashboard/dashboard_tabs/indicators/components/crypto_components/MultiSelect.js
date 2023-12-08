@@ -43,7 +43,7 @@ const NEW_MODEL_DESCRIPTION = {
 
 const MultiSelect = (props) => {
     const theme = useTheme()
-    const { inputLabel, inputOptions, selectedInputOptions, handleInputOptions, fieldName, toolTipTitle } = props
+    const { inputLabel, inputOptions, selectedInputOptions, handleInputOptions, fieldName, toolTipTitle, trainingStartedFlag } = props
     const [tooltipMessage, setTooltipMessage] = useState(toolTipTitle)
     useEffect(() => {
         if (inputLabel === 'Model type') {
@@ -57,6 +57,7 @@ const MultiSelect = (props) => {
             <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'40px'} pl={'4px'} pr={'4px'} pt={1} pb={1}>
                 <Box sx={{ width: '100%' }}>
                     <Autocomplete
+                        disabled={trainingStartedFlag}
                         size='small'
                         disableClearable
                         disablePortal={false}

@@ -6,10 +6,31 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SidebarC from '../../components/dashboard/global/Sidebar';
 import Topbar from '../../components/dashboard/global/Topbar';
+import { useOnlineStatus } from '../../utils/Utils';
+import { Error, Info } from '../../components/dashboard/global/CustomToasts'
 import { Outlet } from 'react-router-dom';
 import './Dashboard.css'
 import { Box } from '@mui/material';
 const Dashboard = (props) => {
+    const isOnline = useOnlineStatus();
+
+    const isOnlineCheckRef = React.useRef(false);
+    useEffect(() => {
+        if (isOnlineCheckRef.current) {
+            // Subsequent checks after the initial render
+            if (isOnline) {
+                console.log('Connection is back'); // Replace with your Info function or notification
+                // Info('Connection is back')
+            } else {
+                // console.log('No internet'); // Replace with your Error function or notification
+                Error('No internet')
+            }
+        } else {
+            // Skip the first check on initial render
+            isOnlineCheckRef.current = true;
+        }
+    }, [isOnline]);
+
     const [toggleUser, setToggleUser] = React.useState(false);
     const handleToggleUser = () => {
         setToggleUser(!toggleUser);

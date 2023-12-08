@@ -58,6 +58,13 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CandlestickChartIcon from '@mui/icons-material/CandlestickChart';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
+import AspectRatioIcon from '@mui/icons-material/AspectRatio';
+
+
 export { 
     LightModeOutlinedIcon, 
     DarkModeOutlinedIcon, 
@@ -107,5 +114,10 @@ export {
     RemoveIcon,
     ArrowForwardIcon,
     CandlestickChartIcon,
-    AutorenewIcon
+    AutorenewIcon,
+    InfoOutlinedIcon,
+    DeleteForeverIcon,
+    OpenInFullIcon,
+    CloseFullscreenIcon,
+    AspectRatioIcon
 }

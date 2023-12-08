@@ -5,8 +5,8 @@ import { KeyboardDoubleArrowRightOutlinedIcon, CheckOutlinedIcon, CloseIcon } fr
 import { Box, IconButton, Button, CircularProgress, Grid, CardContent, Typography, CardActions, useTheme } from '@mui/material'
 
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchLessons } from '../../../../../../api/db'
-import { setLessons, clearLessons, setSectionId, setLessonId } from '../../SectionSlice'
+import { fetchSections, fetchLessons } from '../../../../../../api/db'
+import { setSections, setLessons, clearLessons, setSectionId, setLessonId } from '../../SectionSlice'
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { shortenDate, capitalizeFirstLetter } from '../../../../../../utils/Utils'
@@ -30,10 +30,44 @@ const LessonCard = () => {
         }
     }) */
 
+    const sectionFetchRef = useRef(false)
+    useEffect(() => {
+        if (sections.length === 0 && !sectionFetchRef.current) {
+            sectionFetchRef.current = true
+            // console.log('no sections, fetching sections')
+            dispatch(setSectionId(sectId))
+            let data = {
+                token: token
+            }
+            fetchSections(data)
+                .then(res => {
+                    let sect = res.data.sections;
+                    const combinedArray = sect.map(section => {
+                        const sectionId = section.sectionId;
+                        if (allStatus[sectionId]) {
+                            return {
+                                ...section,
+                                section_status: allStatus[sectionId]
+                            };
+                        } else {
+                            return {
+                                ...section,
+                                section_status: []
+                            }
+                        }
+                    });
+                    dispatch(setSections(combinedArray))
+                })
+        } else {
+            // console.log('section exists in redux')
+            return
+        }
+    })
+
     // Fetch lessons from the database
     const fetchLessonMounted = useRef(false)
     useEffect(() => {
-        if (!fetchLessonMounted.current) {
+        if (!fetchLessonMounted.current && sections.length > 0) {
             fetchLessonMounted.current = true
             let data = {
                 token: token,
@@ -207,7 +241,7 @@ const LessonCard = () => {
                         sx={{
                             ':hover': {
                                 color: `${theme.palette.text.primary} !important`,
-                                backgroundColor:  `${theme.palette.background.paper} !important`,
+                                backgroundColor: `${theme.palette.background.paper} !important`,
                             },
                         }}>Go Back</Button>
                 </Box>

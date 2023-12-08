@@ -13,7 +13,7 @@ const ReorderList = ({ orderList, setOrderList }) => { // orderList is the initi
     // const epochResult = useSelector(state => state.cryptoModule.modelData.epoch_results)
     // console.log(epochResult)
     useEffect(() => {
-        console.log('UE : adding talib indicators to list');
+        // console.log('UE : adding talib indicators to list');
         let updatedIndicators = indicators.slice(); // Create a shallow copy of the current indicators
         // console.log('indicators : ', indicators)
         let order = updatedIndicators.length + 1;

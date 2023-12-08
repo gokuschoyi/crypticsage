@@ -60,7 +60,7 @@ const useWebSocket = (
         ERROR: 'error'
     };
 
-    const createModelProgressWebSocket = () => {
+    const createModelProgressWebSocket = (doValidation) => {
         if (webSocket.current && webSocket.current.readyState === WebSocket.OPEN) {
             notifyMessageBoxRef.current = document.getElementById('loader-message-text');
             console.log('UE: WebSocket connection is already open', webSocket.current);
@@ -85,15 +85,24 @@ const useWebSocket = (
                     case ACTIONS.EPOCH_BEGIN:
                         setBatchResult(true)
                         let epoch = data.epoch
+                        batchEndBox = document.querySelector('.batch-end')
+                        if (batchEndBox) {
+                            batchEndBox.querySelector('#epoch').textContent = `E : ${epoch + 1}`
+                        }
                         dispatch(setEpochNo(epoch))
                         break;
                     case ACTIONS.EPOCH_END:
                         dispatch(setEpochResults({ ...data.log, epoch: data.epoch }))
-                        setBatchResult(false)
                         break;
                     case ACTIONS.BATCH_END:
                         if (!batchResult) { setBatchResult(true) }
-                        const percentageCompleted = parseFloat(((data.log.batch / data.log.totalNoOfBatch) * 100).toFixed(2)) || 0
+                        let totalNoOfBatch = 0
+                        if (doValidation) {
+                            totalNoOfBatch = Math.round(data.log.totalNoOfBatch * 0.9)
+                        } else {
+                            totalNoOfBatch = data.log.totalNoOfBatch
+                        }
+                        const percentageCompleted = parseFloat(((data.log.batch / totalNoOfBatch) * 100).toFixed(2)) || 0
                         const bgColor = getColorForValue(percentageCompleted, 0, 100, '#FF0000', '#00FF00');
                         if (batchLinearProgressRef.current) {
                             const linearProgress = batchLinearProgressRef.current.querySelector('#linear-progress')
@@ -103,7 +112,7 @@ const useWebSocket = (
                             progressBar.style.transform = `translateX(-${100 - percentageCompleted}%)`
 
                             const batchCount = batchLinearProgressRef.current.querySelector('#batch-count')
-                            batchCount.innerHTML = `(${percentageCompleted}%) ${data.log.batch}/${data.log.totalNoOfBatch}`
+                            batchCount.innerHTML = `(${percentageCompleted}%) ${data.log.batch}/${totalNoOfBatch}`
                         }
                         batchEndBox = document.querySelector('.batch-end')
                         if (batchEndBox) {
@@ -113,6 +122,7 @@ const useWebSocket = (
                         }
                         break;
                     case ACTIONS.TRAINING_END:
+                        setBatchResult(false)
                         // setTrainingStartedFlag(false)
                         break;
                     case ACTIONS.EVALUATING:

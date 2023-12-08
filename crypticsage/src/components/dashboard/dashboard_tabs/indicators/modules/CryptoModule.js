@@ -1,9 +1,45 @@
 import React, { useState, useEffect, useRef } from 'react'
+import Header from '../../../global/Header';
+import useWebSocket from './WebSocket';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import Header from '../../../global/Header';
 import { Indicators } from '../components/IndicatorDescription';
-import { getHistoricalTickerDataFroDb, fetchLatestTickerForUser, startModelTraining, getUserModels, saveModel, deleteModelForUser, deleteModel } from '../../../../../api/adminController'
+import { useSelector } from 'react-redux'
+import { Success, Info } from '../../../global/CustomToasts'
+
+import {
+    Box
+    , Typography
+    , Autocomplete
+    , TextField
+    , Grid
+    , Skeleton
+    , useTheme
+    , Switch
+    , FormControlLabel
+    , Button
+    , CircularProgress
+    , IconButton
+    , Paper
+    , Chip
+    , useMediaQuery
+    , Tooltip
+    , Accordion
+    , AccordionDetails
+    , AccordionSummary
+    , Collapse
+} from '@mui/material'
+
+import {
+    getHistoricalTickerDataFroDb,
+    fetchLatestTickerForUser,
+    startModelTraining,
+    getUserModels,
+    saveModel,
+    deleteModelForUser,
+    deleteModel
+} from '../../../../../api/adminController'
+
 import {
     setUserModels,
     setModelSavedToDb,
@@ -24,39 +60,46 @@ import {
     setSelectedFlagInTalibDescription
 } from './CryptoModuleSlice'
 
-import useWebSocket from './WebSocket';
-
-import { DeleteCurrentModal, SaveCurrentModal, ResetTrainedModelModal } from '../components/crypto_components/modals';
-import { MainChart, SelectedFunctionContainer, PredictionsChart, CustomSlider, LinearProgressWithLabel, MultiSelect, ReorderList } from '../components'
-
-import { useSelector } from 'react-redux'
 import {
-    Box
-    , Typography
-    , Autocomplete
-    , TextField
-    , Grid
-    , Skeleton
-    , useTheme
-    , Switch
-    , FormControlLabel
-    , Button
-    , CircularProgress
-    , IconButton
-    , Paper
-    , Chip
-    , useMediaQuery
-} from '@mui/material'
-import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
-import { styled } from '@mui/material/styles';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import OpenInFullIcon from '@mui/icons-material/OpenInFull';
-import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
-import AspectRatioIcon from '@mui/icons-material/AspectRatio';
+    Dot,
+    NoMaxWidthTooltip,
+    ClassificationTable,
+    PredictionMSETable,
+    ModelHistoryTable,
+    formatMillisecond,
+    generateMSESteps,
+    generateRandomModelName,
+    checkForUniqueAndTransform,
+    checkIfNewTickerFetchIsRequired
+} from './CryptoModuleUtils'
 
-import { Success, Info } from '../../../global/CustomToasts'
+import {
+    DeleteCurrentModal,
+    SaveCurrentModal,
+    ResetTrainedModelModal
+} from '../components/crypto_components/modals';
 
+import {
+    MainChart,
+    SelectedFunctionContainer,
+    PredictionsChart,
+    CustomSlider,
+    LinearProgressWithLabel,
+    MultiSelect,
+    ReorderList,
+    ModelHistoryChart
+} from '../components'
+
+import {
+    InfoOutlinedIcon,
+    DeleteForeverIcon,
+    OpenInFullIcon,
+    CloseFullscreenIcon,
+    AspectRatioIcon,
+    ExpandMoreIcon,
+    ArrowDropDownIcon,
+    ArrowDropUpIcon
+} from '../../../global/Icons'
 
 const colorCombinations = [
     {
@@ -136,211 +179,19 @@ const MODEL_OPTIONS_VALUE = {
 
 const thresholdLower = 1;
 const thresholdUpper = 2
-const CRITERIA_DATA = [
+const tolerance = 1
+/* const CRITERIA_DATA = [
     { Condition: 'TP', Range: `-${thresholdLower}% < x < +${thresholdLower}%`, Criteria: `All precent changes tha lie within ±${thresholdLower}% of the actual value` },
     { Condition: 'FP', Range: `x < -${thresholdLower}%`, Criteria: `All precent changes tha lie below -${thresholdLower}% than the actual value` },
     { Condition: 'TN', Range: `x > ${thresholdUpper}%`, Criteria: `All precent changes tha lie more than ${thresholdUpper}% than the actual value` },
     { Condition: 'FN', Range: `${thresholdLower}% < x < ${thresholdUpper}%`, Criteria: `All precent changes tha lie within ${thresholdLower}% and  ${thresholdUpper}% of the actual value` }
-];
-
-const NoMaxWidthTooltip = styled(({ className, ...props }) => (
-    <Tooltip {...props} classes={{ popper: className }} />
-))({
-    [`& .${tooltipClasses.tooltip}`]: {
-        maxWidth: 'none',
-    },
-});
-
-const Dot = ({ color }) => {
-    return (
-        <Box sx={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: color }}></Box>
-    )
-}
-
-const ClassificationTable = ({ data }) => {
-    return (
-        <div>
-            <h2>Classification Criteria</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Con</th>
-                        <th style={{ width: '80px' }}>Range</th>
-                        <th>Criteria</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map((item, index) => (
-                        <tr key={index}>
-                            <td>{item.Condition}</td>
-                            <td>{item.Range}</td>
-                            <td>{item.Criteria}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-};
-
-const PredictionMSETable = ({ data }) => {
-    // console.log(data)
-
-    return (
-        <table className="mse-table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
-            <thead className='table-group'>
-                <tr className='table-row'>
-                    <th className='mse-table-head'>Date</th>
-                    <th className='mse-table-head'>MSE</th>
-                    <th className='mse-table-head'>RMSE</th>
-                </tr>
-            </thead>
-            <tbody className='table-body'>
-                {data.map((item, index) => {
-                    return (
-                        <tr className='table-row' key={index}>
-                            <td className='prediction-mse'>{item.date}</td>
-                            <td className='prediction-mse'>{item.rmse * item.rmse}</td>
-                            <td className='prediction-mse'>{item.rmse}</td>
-                        </tr>
-                    );
-                })}
-            </tbody>
-        </table>
-    )
-}
-
-const formatMillisecond = (milliseconds) => {
-    if (milliseconds < 1000) {
-        return milliseconds.toFixed(3) + ' ms';
-    } else if (milliseconds < 60000) {
-        return (milliseconds / 1000).toFixed(3) + ' s';
-    } else {
-        const hours = Math.floor(milliseconds / 3600000);
-        const minutes = Math.floor((milliseconds % 3600000) / 60000);
-        const seconds = Math.floor((milliseconds % 60000) / 1000);
-        const remainingMilliseconds = milliseconds % 1000;
-
-        const formattedTime = [
-            hours.toString().padStart(2, '0'),
-            minutes.toString().padStart(2, '0'),
-            seconds.toString().padStart(2, '0'),
-            remainingMilliseconds.toString().padStart(3, '0')
-        ].join(':');
-
-        return formattedTime;
-    }
-}
-
-const periodToMilliseconds = (period) => {
-    switch (period) {
-        case '1m':
-            return 1000 * 60;
-        case '1h':
-            return 1000 * 60 * 60;
-        case '4h':
-            return 1000 * 60 * 60 * 4;
-        case '6h':
-            return 1000 * 60 * 60 * 6;
-        case '8h':
-            return 1000 * 60 * 60 * 8;
-        case '12h':
-            return 1000 * 60 * 60 * 12;
-        case '1d':
-            return 1000 * 60 * 60 * 24;
-        case '3d':
-            return 1000 * 60 * 60 * 24 * 3;
-        case '1w':
-            return 1000 * 60 * 60 * 24 * 7;
-        default:
-            return 1000 * 60 * 60 * 24;
-    }
-}
-
-const generateMSESteps = (period) => {
-    switch (period) {
-        case '1m':
-            return { value: 1, unit: 'm' };
-        case '1h':
-            return { value: 1, unit: 'h' };
-        case '4h':
-            return { value: 4, unit: 'h' };
-        case '6h':
-            return { value: 6, unit: 'h' };
-        case '8h':
-            return { value: 8, unit: 'h' };
-        case '12h':
-            return { value: 12, unit: 'h' };
-        case '1d':
-            return { value: 1, unit: 'd' };
-        case '3d':
-            return { value: 3, unit: 'd' };
-        case '1w':
-            return { value: 1, unit: 'w' };
-        default:
-            return { value: 24, unit: 'h' };
-    }
-};
-
-const generateRandomModelName = () => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const length = 10;
-    let modelName = 'model_';
-
-    for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        modelName += characters.charAt(randomIndex);
-    }
-
-    return modelName;
-}
-
-const checkForUniqueAndTransform = (data) => {
-    const uniqueData = [];
-    const seenTimes = new Set();
-
-    data.forEach((item) => {
-        if (!seenTimes.has(item.openTime)) {
-            uniqueData.push({
-                time: (item.openTime / 1000),
-                open: parseFloat(item.open),
-                high: parseFloat(item.high),
-                low: parseFloat(item.low),
-                close: parseFloat(item.close),
-                volume: parseFloat(item.volume),
-            })
-            seenTimes.add(item.openTime);
-        } else {
-            console.log('Duplicate found', item.openTime)
-        }
-    })
-    return uniqueData
-}
-
-const checkIfNewTickerFetchIsRequired = ({ openTime, selectedTokenPeriod }) => {
-    const periodInMilli = periodToMilliseconds(selectedTokenPeriod)
-    const currentTime = new Date().getTime()
-
-    let fetchLength = Math.floor((currentTime - openTime) / periodInMilli)
-
-    let end
-    switch (selectedTokenPeriod) {
-        case '1m':
-            end = new Date()
-            end.setMinutes(end.getMinutes() - 1)
-            end.setSeconds(59)
-            break;
-        default:
-            let endAdded = new Date(openTime).getTime() + (fetchLength * periodInMilli) - 1000
-            end = new Date(endAdded)
-            break;
-    }
-
-    // console.log(new Date(openTime).toLocaleString(), new Date(end).toLocaleString())
-    let finalDate = end.getTime()
-    fetchLength = fetchLength - 1 // to avoid fetching the last ticker
-    return [fetchLength, finalDate]
-}
+]; */
+const CRITERIA_DATA = [
+    { Condition: 'TP', Criteria: `Prediction is within ${tolerance}%, class of interest belongs to - actual > predicted.` },
+    { Condition: 'FP', Criteria: `Prediction is within ${tolerance}%, class of interest belongs to - actual < predicted.` },
+    { Condition: 'FN', Criteria: `Prediction is outside ${tolerance}%, class of interest belongs to - actual > predicted.` },
+    { Condition: 'TN', Criteria: `Prediction is outside ${tolerance}%, class of interest belongs to - actual < predicted.` },
+]
 
 const CryptoModule = () => {
     const dispatch = useDispatch();
@@ -540,6 +391,11 @@ const CryptoModule = () => {
 
     }
 
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    const [trainingParametersAccordianCollapse, setTrainingParametersAccordianCollapse] = useState(!sm)
+    const handleParametersAccordianCollapse = () => {
+        setTrainingParametersAccordianCollapse((prev) => !prev)
+    }
 
     // Model training parameters
     const model_parameters = useSelector(state => state.cryptoModule.modelData.training_parameters)
@@ -571,6 +427,16 @@ const CryptoModule = () => {
             return {
                 ...prev,
                 'modelType': newValue
+            }
+        })
+    }
+
+    const handleDoValidation = () => {
+        console.log('toggle validation')
+        setModelParams((prev) => {
+            return {
+                ...prev,
+                'doValidation': !prev.doValidation
             }
         })
     }
@@ -690,7 +556,8 @@ const CryptoModule = () => {
                 batchSize: modelParams.batchSize,
                 learning_rate: modelParams.scaledLearningRate,
                 hidden_layers: modelParams.hiddenLayer,
-                transformation_order: transformationOrder
+                transformation_order: transformationOrder,
+                do_validation: modelParams.doValidation
             }
             console.log('Execute query + Model parameters', fTalibExecuteQuery, model_training_parameters)
             dispatch(setStartWebSocket(true))
@@ -726,8 +593,9 @@ const CryptoModule = () => {
 
     // resetting entire training params and model data
     const handleClearModelData = () => {
-        if (model_data.model_id !== '') {
-            console.log('Model present, resetting Redux model and deleting from BE')
+        console.log(model_data.model_id, model_data.model_saved_to_db)
+        if (model_data.model_id !== '' && !model_data.model_saved_to_db) { // check if saved and then delete
+            console.log('Model present and not saved, resetting Redux model and deleting from BE')
             deleteModel({ token, payload: { model_id: model_data.model_id } })
                 .then((res) => {
                     Success(res.data.message)
@@ -737,7 +605,7 @@ const CryptoModule = () => {
                 })
             modelProcessDurationRef.current = ''
         } else {
-            console.log('No model present')
+            console.log('No model present or model has been saved')
         }
         setModelParams(() => ({ ...model_parameters }))
         dispatch(resetModelData())
@@ -836,7 +704,6 @@ const CryptoModule = () => {
     const [trainingStartedFlag, setTrainingStartedFlag] = useState(startWebSocket)
     const batchLinearProgressRef = useRef(null)
     const evalLinearProgressRef = useRef(null)
-    const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const { webSocket, createModelProgressWebSocket } = useWebSocket(
         webSocketURL,
         notifyMessageBoxRef,
@@ -854,8 +721,9 @@ const CryptoModule = () => {
         // console.log('UE : Socket start')
         if (startWebSocket) {
             if (webSocket.current === null) {
+                const doValidation = modelParams.doValidation
                 // console.log('Starting socket, flag = true and socket = null')
-                createModelProgressWebSocket()
+                createModelProgressWebSocket(doValidation)
             } else {
                 // console.log('WS already present, socket not null')
             }
@@ -910,7 +778,7 @@ const CryptoModule = () => {
                 <Header title={cryptotoken} />
             </Box>
 
-            <Box m={2} className='crypto-module-container-box'>
+            <Box mr={2} mb={2} ml={2} className='crypto-module-container-box'>
 
                 <Grid container className='indicator-chart-grid' pt={2} pb={2}>
                     <Grid item xs={12} sm={12} md={12} lg={9} xl={9}>
@@ -1123,66 +991,91 @@ const CryptoModule = () => {
                         <Typography variant='h4'>Model Training</Typography>
                     </Box>
                     <Grid container className='tensor-flow-grid'>
-                        <Grid item xs={12} sm={12} md={4} lg={3} xl={3} p={2} className='model-parameters-grid'>
-                            <Box display='flex' flexDirection='column' pb={2}>
-                                <Box display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
-                                    <Typography variant='h5' textAlign='start'>Parameters</Typography>
-                                    <Box display='flex' alignItems='center' gap='10px'>
-                                        <Button
-                                            sx={{
-                                                height: '26px',
-                                            }}
-                                            variant='outlined'
-                                            size='small'
-                                            color='secondary'
-                                            disabled={trainingStartedFlag}
-                                            onClick={(e) => handleStartModelTraining()}
-                                            endIcon={trainingStartedFlag && <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />}
-                                        >
-                                            {trainingStartedFlag ? 'Training' : 'Train'}
-                                        </Button>
-                                        <ResetTrainedModelModal
-                                            handleClearModelData={handleClearModelData}
-                                            disabled={trainingStartedFlag}
-                                            model_present={model_data.model_id === '' ? false : true} />
+                        <Grid item xs={12} sm={12} md={4} lg={3} xl={3} p={2} >
+                            <Paper elevtion={4} className='model-parameter-expandd-collapse-box' sx={{ display: "flex", flexDirection: "row", justifyContent: 'space-between', alignItems: 'center', padding: '4px', boxShadow: `${trainingParametersAccordianCollapse && 'none'}` }}>
+                                <Typography variant='h5'>Edit training parameters</Typography>
+                                <IconButton sx={{ padding: '6px' }} onClick={handleParametersAccordianCollapse.bind(null, {})}>
+                                    {trainingParametersAccordianCollapse ? <ArrowDropUpIcon className='small-icon' /> : <ArrowDropDownIcon className='small-icon' />}
+                                </IconButton>
+                            </Paper>
+
+                            <Collapse in={trainingParametersAccordianCollapse}>
+                                <Box className='model-parameters-grid' pt={1}>
+                                    <Box display='flex' flexDirection='column' pb={2}>
+                                        <Box display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
+                                            <Typography variant='h5' textAlign='start'>Parameters</Typography>
+                                            <Box display='flex' alignItems='center' gap='10px'>
+                                                <Button
+                                                    sx={{
+                                                        height: '26px',
+                                                    }}
+                                                    variant='outlined'
+                                                    size='small'
+                                                    color='secondary'
+                                                    disabled={trainingStartedFlag}
+                                                    onClick={(e) => handleStartModelTraining()}
+                                                    endIcon={trainingStartedFlag && <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />}
+                                                >
+                                                    {trainingStartedFlag ? 'Training' : 'Train'}
+                                                </Button>
+                                                <ResetTrainedModelModal
+                                                    handleClearModelData={handleClearModelData}
+                                                    disabled={trainingStartedFlag}
+                                                    model_present={model_data.model_id === '' ? false : true} />
+                                            </Box>
+                                        </Box>
+                                        {noFuncSelected !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{noFuncSelected}</Typography>}
+                                    </Box>
+
+                                    <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' gap='8px'>
+                                        <Box display='flex' flexDirection='column' gap='8px' width='100%'>
+                                            <Paper sx={{ padding: '4px' }}>
+                                                <FormControlLabel
+                                                    value="start"
+                                                    sx={{ marginLeft: '0px', marginRight: '0px', width: '100%', justifyContent: 'space-between' }}
+                                                    control={<Switch disabled={trainingStartedFlag} size="small" color="secondary" />}
+                                                    label='Do validation on test set'
+                                                    labelPlacement="start"
+                                                    checked={modelParams.doValidation}
+                                                    onChange={() => handleDoValidation()}
+                                                />
+                                            </Paper>
+                                            <MultiSelect
+                                                inputLabel={'Model type'}
+                                                inputOptions={MODEL_OPTIONS}
+                                                selectedInputOptions={modelParams.modelType}
+                                                handleInputOptions={handleModelTypeOptions}
+                                                fieldName={'Model type'}
+                                                toolTipTitle={'Select a model type'}
+                                                trainingStartedFlag={trainingStartedFlag}
+                                            />
+                                            {modelParams.modelType !== 'Single Step Multiple Output' &&
+                                                <MultiSelect
+                                                    inputLabel={'Prediction flag'}
+                                                    inputOptions={INPUT_OPTIONS}
+                                                    selectedInputOptions={modelParams.multiSelectValue}
+                                                    handleInputOptions={handleMultiselectOptions}
+                                                    fieldName={'To predict'}
+                                                    toolTipTitle={'Select one of the flags to be used to predict'}
+                                                    trainingStartedFlag={trainingStartedFlag}
+                                                />
+                                            }
+                                            <CustomSlider sliderValue={modelParams.trainingDatasetSize} name={'trainingDatasetSize'} handleModelParamChange={handleModelParamChange} label={'Training size'} min={50} max={95} sliderMin={0} sliderMax={100} disabled={trainingStartedFlag} />
+                                            <CustomSlider sliderValue={modelParams.timeStep} name={'timeStep'} handleModelParamChange={handleModelParamChange} label={'Step Size'} min={2} max={100} sliderMin={2} sliderMax={100} disabled={trainingStartedFlag} />
+                                            {(modelParams.modelType === 'Multi Step Single Output' || modelParams.modelType === 'Multi Step Multiple Output') &&
+                                                <CustomSlider sliderValue={modelParams.lookAhead} name={'lookAhead'} handleModelParamChange={handleModelParamChange} label={'Look Ahead'} min={1} max={30} sliderMin={1} sliderMax={30} disabled={trainingStartedFlag} />
+                                            }
+                                            <CustomSlider sliderValue={modelParams.epoch} name={'epoch'} handleModelParamChange={handleModelParamChange} label={'Epochs'} min={1} max={500} sliderMin={1} sliderMax={500} disabled={trainingStartedFlag} />
+                                            {modelParams.modelType !== 'Multi Step Single Output' &&
+                                                <CustomSlider sliderValue={modelParams.hiddenLayer} name={'hiddenLayer'} handleModelParamChange={handleModelParamChange} label={'Hidden Layers'} min={1} max={20} sliderMin={1} sliderMax={10} disabled={trainingStartedFlag} />
+                                            }
+                                            <CustomSlider sliderValue={modelParams.batchSize} name={'batchSize'} handleModelParamChange={handleModelParamChange} label={'Batch Size'} min={1} max={100} sliderMin={1} sliderMax={100} disabled={trainingStartedFlag} />
+                                            <CustomSlider sliderValue={modelParams.learningRate} name={'learningRate'} handleModelParamChange={handleModelParamChange} label={'L Rate'} min={1} max={100} sliderMin={1} sliderMax={100} scaledLearningRate={modelParams.scaledLearningRate} disabled={trainingStartedFlag} />
+                                        </Box>
+                                        <ReorderList orderList={transformationOrder} setOrderList={setTransformationOrder} />
                                     </Box>
                                 </Box>
-                                {noFuncSelected !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{noFuncSelected}</Typography>}
-                            </Box>
-
-                            <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' gap='10px'>
-                                <Box display='flex' flexDirection='column' gap='5px' width='100%'>
-                                    <MultiSelect
-                                        inputLabel={'Model type'}
-                                        inputOptions={MODEL_OPTIONS}
-                                        selectedInputOptions={modelParams.modelType}
-                                        handleInputOptions={handleModelTypeOptions}
-                                        fieldName={'Model type'}
-                                        toolTipTitle={'Select a model type'}
-                                    />
-                                    {modelParams.modelType !== 'Single Step Multiple Output' &&
-                                        <MultiSelect
-                                            inputLabel={'Prediction flag'}
-                                            inputOptions={INPUT_OPTIONS}
-                                            selectedInputOptions={modelParams.multiSelectValue}
-                                            handleInputOptions={handleMultiselectOptions}
-                                            fieldName={'To predict'}
-                                            toolTipTitle={'Select one of the flags to be used to predict'}
-                                        />}
-                                    <CustomSlider sliderValue={modelParams.trainingDatasetSize} name={'trainingDatasetSize'} handleModelParamChange={handleModelParamChange} label={'Training size'} min={50} max={95} sliderMin={0} sliderMax={100} disabled={trainingStartedFlag} />
-                                    <CustomSlider sliderValue={modelParams.timeStep} name={'timeStep'} handleModelParamChange={handleModelParamChange} label={'Step Size'} min={2} max={100} sliderMin={2} sliderMax={100} disabled={trainingStartedFlag} />
-                                    {(modelParams.modelType === 'Multi Step Single Output' || modelParams.modelType === 'Multi Step Multiple Output') &&
-                                        <CustomSlider sliderValue={modelParams.lookAhead} name={'lookAhead'} handleModelParamChange={handleModelParamChange} label={'Look Ahead'} min={1} max={30} sliderMin={1} sliderMax={30} disabled={trainingStartedFlag} />
-                                    }
-                                    <CustomSlider sliderValue={modelParams.epoch} name={'epoch'} handleModelParamChange={handleModelParamChange} label={'Epochs'} min={1} max={500} sliderMin={1} sliderMax={500} disabled={trainingStartedFlag} />
-                                    {modelParams.modelType !== 'Multi Step Single Output' &&
-                                        <CustomSlider sliderValue={modelParams.hiddenLayer} name={'hiddenLayer'} handleModelParamChange={handleModelParamChange} label={'Hidden Layers'} min={1} max={20} sliderMin={1} sliderMax={10} disabled={trainingStartedFlag} />
-                                    }
-                                    <CustomSlider sliderValue={modelParams.batchSize} name={'batchSize'} handleModelParamChange={handleModelParamChange} label={'Batch Size'} min={1} max={100} sliderMin={1} sliderMax={100} disabled={trainingStartedFlag} />
-                                    <CustomSlider sliderValue={modelParams.learningRate} name={'learningRate'} handleModelParamChange={handleModelParamChange} label={'L Rate'} min={1} max={100} sliderMin={1} sliderMax={100} scaledLearningRate={modelParams.scaledLearningRate} disabled={trainingStartedFlag} />
-                                </Box>
-                                <ReorderList orderList={transformationOrder} setOrderList={setTransformationOrder} />
-                            </Box>
+                            </Collapse>
                         </Grid>
 
                         <Grid item xs={12} sm={12} md={8} lg={6} xl={6} p={2} className='predictions-chart-grid'>
@@ -1264,80 +1157,90 @@ const CryptoModule = () => {
                             <Box className='main-training-status-box' pt={1} gap={'12px'} display='flex' flexDirection='column'>
                                 <Typography sx={{ textAlign: 'start' }} variant='custom'>{modelProcessDurationRef.current !== '' ? `Time taken : ${modelProcessDurationRef.current}` : ''}</Typography>
 
-                                {/* epoch end results */}
-                                {epochResults.length > 0 && (
-                                    <Paper elevation={8} className='epoch-end-progress-box' pt={1}>
-                                    <Typography variant='custom' sx={{textAlign:'start'}}>Training Losses</Typography>
-                                        {epochResults.map((result, index) => {
-                                            return (
-                                                <Box key={index} className={`epoch_${index} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px', justifyContent: 'space-between' }}>
-                                                    <div className='epoch-no' style={{ fontWeight: '600', fontSize: '0.75rem', minWidth: '60px', textAlign: 'start' }}>E : {result.epoch + 1}</div>
-                                                    <Box className={`model-progress_${index}`} variant='h6'>
-                                                        <div className='epoch-end'>
-                                                            <div className='epoch-end-text'>Loss/MSE : {result.loss}</div>
-                                                            <div className='epoch-end-text'>MAE : {result.mae}</div>
-                                                        </div>
-                                                    </Box>
-                                                </Box>
-                                            )
-                                        })}
-                                    </Paper>
-                                )}
+                                {/* epoch end results plotting on chart */}
+                                {model_parameters.epoch > 2 &&
+                                    <ModelHistoryChart
+                                        epochResults={epochResults}
+                                        predictionsPalette={predictionChartPalette}
+                                        isValidatingOnTestSet={model_parameters.doValidation}
+                                        totalEpochs={modelParams.epoch}
+                                    />
+                                }
+
+                                {/* epoch results in table */}
+                                {epochResults.length === model_parameters.epoch &&
+                                    <Accordion defaultExpanded={false} sx={{ overflowX: 'auto', backgroundColor: `${theme.palette.background.paperOne}`, borderRadius: '5px' }}>
+                                        <AccordionSummary
+                                            expandIcon={<ExpandMoreIcon />}
+                                            aria-controls="panel1bh-content"
+                                            id="panel1bh-header"
+                                        >
+                                            <Typography sx={{ color: 'text.secondary', width: '33%', flexShrink: 0, textAlign: 'start' }}>
+                                                Training Loss
+                                            </Typography>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                            <ModelHistoryTable data={epochResults} />
+                                        </AccordionDetails>
+                                    </Accordion>
+                                }
 
                                 {/* Prediction set RMSE results */}
                                 {model_data.score.over_all_score !== 0 &&
-                                    <Box width='100%' className='test-set-prediction-result' display='flex' flexDirection='column' gap='5px'>
-                                        <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
-                                            <thead className='table-group'>
-                                                <tr className='table-row'>
-                                                    <th className='table-head'>Type</th>
-                                                    <th className='table-head'>MSE</th>
-                                                    <th className='table-head'>RMSE</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className='table-body'>
-                                                <tr className='table-row'>
-                                                    <td className='table-data' style={{ textAlign: 'start' }}>
-                                                        <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
-                                                            Test Set
-                                                            {!sm &&
-                                                                <NoMaxWidthTooltip
-                                                                    title={(
-                                                                        <PredictionMSETable data={model_data.score.scores.map((item, index) => {
-                                                                            const { value, unit } = generateMSESteps(selectedTickerPeriod);
-                                                                            return (
-                                                                                {
-                                                                                    date: `+${value * (index + 1)}${unit}`,
-                                                                                    rmse: item
-                                                                                }
-                                                                            )
-                                                                        })} />
-                                                                    )}
-                                                                    placement='right'
-                                                                    arrow
-                                                                >
-                                                                    <AspectRatioIcon sx={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                                                                </NoMaxWidthTooltip>
-                                                            }
-                                                        </Box>
-                                                    </td>
-                                                    <td className='table-data'>{model_data.score.over_all_score * model_data.score.over_all_score}</td>
-                                                    <td className='table-data'>{model_data.score.over_all_score}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        {sm &&
-                                            <PredictionMSETable data={model_data.score.scores.map((item, index) => {
-                                                const { value, unit } = generateMSESteps(selectedTickerPeriod);
-                                                return (
-                                                    {
-                                                        date: `+${value * (index + 1)}${unit}`,
-                                                        rmse: item
-                                                    }
-                                                )
-                                            })} />
-                                        }
-                                    </Box>
+                                    <Paper elevation={4} sx={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
+                                        <Box width='100%' className='test-set-prediction-result' display='flex' flexDirection='column' gap='5px'>
+                                            <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
+                                                <thead className='table-group'>
+                                                    <tr className='table-row'>
+                                                        <th className='table-head'>Type</th>
+                                                        <th className='table-head'>MSE</th>
+                                                        <th className='table-head'>RMSE</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className='table-body'>
+                                                    <tr className='table-row'>
+                                                        <td className='table-data' style={{ textAlign: 'start' }}>
+                                                            <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
+                                                                Test Set
+                                                                {!sm &&
+                                                                    <NoMaxWidthTooltip
+                                                                        title={(
+                                                                            <PredictionMSETable data={model_data.score.scores.map((item, index) => {
+                                                                                const { value, unit } = generateMSESteps(selectedTickerPeriod);
+                                                                                return (
+                                                                                    {
+                                                                                        date: `+${value * (index + 1)}${unit}`,
+                                                                                        rmse: item
+                                                                                    }
+                                                                                )
+                                                                            })} />
+                                                                        )}
+                                                                        placement='right'
+                                                                        arrow
+                                                                    >
+                                                                        <AspectRatioIcon sx={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                                                                    </NoMaxWidthTooltip>
+                                                                }
+                                                            </Box>
+                                                        </td>
+                                                        <td className='table-data'>{model_data.score.over_all_score * model_data.score.over_all_score}</td>
+                                                        <td className='table-data'>{model_data.score.over_all_score}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            {sm &&
+                                                <PredictionMSETable data={model_data.score.scores.map((item, index) => {
+                                                    const { value, unit } = generateMSESteps(selectedTickerPeriod);
+                                                    return (
+                                                        {
+                                                            date: `+${value * (index + 1)}${unit}`,
+                                                            rmse: item
+                                                        }
+                                                    )
+                                                })} />
+                                            }
+                                        </Box>
+                                    </Paper>
                                 }
 
                                 {/* epoch batch results */}
@@ -1350,6 +1253,7 @@ const CryptoModule = () => {
                                             <Box className={`model-progress_{}`} width='100%' variant='h6'>
                                                 <div className='batch-end'>
                                                     <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
+                                                        <div style={{ fontSize: '0.7rem', fontWeight: '500', textAlign: 'start' }} id='epoch'></div>
                                                         <div className='batch-end-text' id='loss'>Loss : 0.04927649209355232</div>
                                                         <div className='batch-end-text' id='mse'>MSE : 0.04927649209355232</div>
                                                         <div className='batch-end-text' id='mae'>RMSE : 0.04927649209355232</div>
@@ -1373,7 +1277,7 @@ const CryptoModule = () => {
 
                                 {/* Prediction set metrics */}
                                 {(predictedVlauesRedux.length !== 0) &&
-                                    <Box display='flex' flexDirection='column' gap='4px'>
+                                    <Paper elevation={4} sx={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
                                         {(predictionLookAhead && modelParams.lookAhead > 1) &&
                                             <CustomSlider
                                                 sliderValue={predictionLookAhead}
@@ -1396,12 +1300,12 @@ const CryptoModule = () => {
                                                             </Paper>
                                                             <Paper elevation={4} style={{ width: '100%', justifyContent: 'space-between', display: 'flex', flexDirection: 'row', gap: '4px', padding: '0px 10px' }}>
                                                                 <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TP</span> : {modelMetrics.metrics.TP}</Typography>
+                                                                <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FP</span> : {modelMetrics.metrics.FP}</Typography>
                                                                 <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FN</span> : {modelMetrics.metrics.FN}</Typography>
                                                                 <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TN</span> : {modelMetrics.metrics.TN}</Typography>
-                                                                <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FP</span> : {modelMetrics.metrics.FP}</Typography>
                                                             </Paper>
                                                         </Box>
-                                                        <Tooltip
+                                                        <NoMaxWidthTooltip
                                                             arrow
                                                             className='metrics-tooltip'
                                                             title=
@@ -1412,7 +1316,7 @@ const CryptoModule = () => {
                                                             )}
                                                             placement='top' sx={{ cursor: 'pointer' }}>
                                                             <InfoOutlinedIcon className='small-icon' />
-                                                        </Tooltip>
+                                                        </NoMaxWidthTooltip>
                                                     </Box>
                                                     <Box width='100%'>
                                                         <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
@@ -1458,7 +1362,7 @@ const CryptoModule = () => {
                                                 }
                                             </Box>
                                         </Box>
-                                    </Box>
+                                    </Paper>
                                 }
 
                             </Box>
@@ -1522,8 +1426,6 @@ const CryptoModule = () => {
                         </Grid>
                     </Grid>
                 </Box>
-
-                {/* <Box className='test-chart' ref={testChartRef}></Box> */}
 
                 <Indicators symbol={cryptotoken} fetchValues={fetchValues} />
             </Box >

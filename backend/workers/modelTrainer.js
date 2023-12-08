@@ -95,7 +95,8 @@ module.exports = async (job) => {
         batchSize,
         learning_rate,
         hidden_layers,
-        transformation_order
+        transformation_order,
+        do_validation
     } = model_training_parameters
     console.log('Model parameters : ', model_training_parameters)
 
@@ -344,6 +345,7 @@ module.exports = async (job) => {
                     redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(9/11) : Training the model...` }))
                     parameters = {
                         model: model_,
+                        do_validation,
                         learning_rate,
                         look_ahead,
                         xTrain: JSON.parse(await redisStep.hget(modelCheckpointName, 'xTrain')),

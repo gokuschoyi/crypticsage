@@ -27,6 +27,7 @@ import Header from '../../global/Header';
 import {
     Box,
     Grid,
+    Skeleton
 } from '@mui/material';
 import CoinChartBox from './stat_components/CoinChartBox';
 
@@ -135,7 +136,7 @@ const Stats = (props) => {
                     itemBg[0].style.transform = `translateX(${left}px) translateY(${top + scrollTop}px)`;
                 })
                 box.addEventListener('mouseout', () => {
-                    const { left,top } = box.getBoundingClientRect();
+                    const { left, top } = box.getBoundingClientRect();
                     let scrollTop = window.pageYOffset
                     itemBg[0].style.transform = `translateX(${left}px) translateY(${top + scrollTop}px)`;
                     itemBg[0].style.width = `${0}px`;
@@ -157,8 +158,15 @@ const Stats = (props) => {
         navigate('sections/5119f37b-ef44-4272-a536-04af51ef4bbc')
     };
     const redirectToQuiz = () => {
+        console.log('redirect to quiz')
         dispatch(setSidebarState("quiz"))
         navigate('quiz/2c4a5ef5-8ab4-409c-8b0f-4d8b2c063fe1')
+    }
+
+    const initialRedirectToQuiz = () => {
+        console.log('initial redirect to quiz')
+        dispatch(setSidebarState("quiz"))
+        navigate('quiz')
     }
 
     const recentLessonAndQuiz = useSelector(state => state.stats.recent_lesson_quiz)
@@ -226,7 +234,9 @@ const Stats = (props) => {
                                         title='Take your first Quiz'
                                         value=""
                                         date={new Date().toLocaleString('au', { hour12: true })}
-                                        buttonName="START" />
+                                        buttonName="START"
+                                        buttonHandler={initialRedirectToQuiz}
+                                    />
                                     :
                                     <CustomCard
                                         title='Recent Quiz'
@@ -241,39 +251,41 @@ const Stats = (props) => {
                                 <UploadTradingViewDataCard title='Upload Trading-View Files' subtitle='Upload your Trading View Files' buttonName="UPLOAD" />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
-                                <Swiper
-                                    centeredSlides={true}
-                                    /* autoplay={{
-                                        delay: 2500,
-                                        disableOnInteraction: false,
-                                    }} */ /* weird ws call in network tab. Check Later*/
-                                    loop={true}
-                                    pagination={{
-                                        clickable: true,
-                                        dynamicBullets: true,
-                                    }}
-                                    navigation={false}
-                                    modules={[Autoplay, Pagination]}
-                                    className="mySwiper"
-                                >
-                                    {cryptoData && cryptoData.map((token, index) => {
-                                        return (
-                                            <SwiperSlide key={index}>
-                                                <CustomTokenCard
-                                                    title={token.symbol}
-                                                    price={`$ ${token.current_price.toFixed(2)}`}
-                                                    image={`${token.image_url}`}
-                                                    price_change_24h={token.price_change_24h}
-                                                    price_change_percentage_24h={token.price_change_percentage_24h}
-                                                    market_cap_rank={token.market_cap_rank}
-                                                    high_24h={token.high_24h}
-                                                    low_24h={token.low_24h}
-                                                    symbol={token.matched}
-                                                />
-                                            </SwiperSlide>
-                                        )
-                                    })}
-                                </Swiper>
+                                {cryptoData === null ? <Skeleton variant="rectangle" sx={{ borderRadius: '20px' }} width="100%" height='100%' /> :
+                                    <Swiper
+                                        centeredSlides={true}
+                                        /* autoplay={{
+                                            delay: 2500,
+                                            disableOnInteraction: false,
+                                        }} */ /* weird ws call in network tab. Check Later*/
+                                        loop={true}
+                                        pagination={{
+                                            clickable: true,
+                                            dynamicBullets: true,
+                                        }}
+                                        navigation={false}
+                                        modules={[Autoplay, Pagination]}
+                                        className="mySwiper"
+                                    >
+                                        {cryptoData && cryptoData.map((token, index) => {
+                                            return (
+                                                <SwiperSlide key={index}>
+                                                    <CustomTokenCard
+                                                        title={token.symbol}
+                                                        price={`$ ${token.current_price.toFixed(2)}`}
+                                                        image={`${token.image_url}`}
+                                                        price_change_24h={token.price_change_24h}
+                                                        price_change_percentage_24h={token.price_change_percentage_24h}
+                                                        market_cap_rank={token.market_cap_rank}
+                                                        high_24h={token.high_24h}
+                                                        low_24h={token.low_24h}
+                                                        symbol={token.matched}
+                                                    />
+                                                </SwiperSlide>
+                                            )
+                                        })}
+                                    </Swiper>
+                                }
                             </Grid>
                         </Grid>
                     </Grid>

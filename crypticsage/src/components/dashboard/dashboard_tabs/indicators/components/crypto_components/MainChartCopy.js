@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { Box, Skeleton, useTheme, IconButton, Button, Card, CardContent, CardActions, Typography, Autocomplete, TextField, Tooltip, } from '@mui/material'
+import { Box, useTheme, IconButton, Button, Card, CardContent, CardActions, Typography, Autocomplete, TextField, Tooltip, Dialog, CircularProgress } from '@mui/material'
 import { createChart } from 'lightweight-charts';
-import { updateTickerWithOneDataPoint, getHistoricalTickerDataFroDb } from '../../../../../../api/adminController'
+import { updateTickerWithOneDataPoint, getHistoricalTickerDataFroDb, executeTalibFunction } from '../../../../../../api/adminController'
 import { useSelector, useDispatch } from 'react-redux'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -19,12 +19,13 @@ import {
     , setSelectedFunctionInputValues
     , setSelectedFunctionOptionalInputValues
     , toggleProcessSelectedFunctionsOnMoreData
+    , setTalibResult
     , resetStreamedTickerDataRedux
 } from '../../modules/CryptoModuleSlice'
 
 import { useElementSize } from '../../../../../../utils/Utils'
 
-import { executeAllSelectedFunctions } from '../../modules/CryptoModuleSlice'
+import { executeAllSelectedFunctions, setFunctionInputErrorFlagAndMessage } from '../../modules/CryptoModuleSlice'
 
 const EXTRA_DATA_FETCH_POINT_FRACTION = 0.3;
 
@@ -127,8 +128,10 @@ const MultiSelect = (props) => {
 }
 
 const SettingsCard = (props) => {
-    const { selectedFunctionNameAndId } = props
+    const { selectedFunctionNameAndId, fetchValues } = props
     const { slId, slName } = selectedFunctionNameAndId
+    const token = useSelector(state => state.auth.accessToken);
+    const histDataLength = useSelector(state => state.cryptoModule.cryptoDataInDb).length
     const selectedFunctionData = useSelector(state => state.cryptoModule.selectedFunctions)
     const functionData = selectedFunctionData.find((func) => func.name === slName)
     const selectedFunc = functionData.functions.find((func) => func.id === slId)
@@ -148,20 +151,130 @@ const SettingsCard = (props) => {
         dispatch(setSelectedFunctionOptionalInputValues({ fieldName: nm, value, id, name: name }))
     }
 
+    const [talibExecuting, setTalibExecuting] = React.useState(false)
+    const handleExecuteTalibQuery = (param) => {
+        const { name, id } = param
+
+        const talibFuncType = selectedFunctionData.find((func) => func.name === name)
+        const { outputs } = talibFuncType
+        const functionTOGenerateQueryFor = talibFuncType.functions.find((func_) => func_.id === id)
+        const { inputs, optInputs } = functionTOGenerateQueryFor
+
+        let selectedInputOptions = [...inputs]
+
+        let talibExecuteQuery = {}
+        let tOITypes = {}
+        const transformedOptionalInputs = optInputs.reduce((result, item) => {
+            result[item.name] = item.defaultValue
+            tOITypes[item.name] = item.type;
+            return result;
+        }, {})
+
+        let outputkeys = {}
+        let outputsCopy = [...outputs]
+        outputkeys = outputsCopy.reduce((result, output) => {
+            result[output.name] = output.name;
+            return result;
+        }, {});
+
+        let converted = {}
+        let checked = selectedInputOptions.map((input) => {
+            if (input.flags) {
+                Object.keys(input.flags).forEach((key) => {
+                    converted[input.flags[key]] = input.flags[key];
+                })
+                return input
+            } else {
+                if (input.value === '') {
+                    return {
+                        ...input,
+                        errorFlag: true,
+                        helperText: 'Please select a valid input',
+                    };
+                } else {
+                    converted[input.name] = input.value;
+                    return {
+                        ...input,
+                        errorFlag: false,
+                        helperText: '',
+                    };
+                }
+            }
+        })
+
+        console.log(name, id, checked)
+
+        const filtered = checked.filter((item) => !item.flags);
+        let hasEmptyValues
+        if (filtered.length > 0) {
+            hasEmptyValues = filtered.every((item) => {
+                if (!item.flags) {
+                    // If there are no flags
+                    return item.value === '';
+                }
+                return false; // If there are flags, we consider it as not having empty values
+            });
+        } else {
+            hasEmptyValues = false
+        }
+        console.log(hasEmptyValues)
+
+        if (hasEmptyValues) {
+            dispatch(setFunctionInputErrorFlagAndMessage({ name: name, id: id, inputs: checked }))
+        } else {
+            delete fetchValues['items_per_page']
+            delete fetchValues['page_no']
+
+            talibExecuteQuery['name'] = name;
+            talibExecuteQuery['startIdx'] = 0;
+            talibExecuteQuery['endIdx'] = histDataLength - 1;
+            talibExecuteQuery = { ...talibExecuteQuery, ...converted, ...transformedOptionalInputs }
+
+            let payload = {
+                func_query: talibExecuteQuery,
+                func_param_input_keys: converted,
+                func_param_optional_input_keys: tOITypes,
+                func_param_output_keys: outputkeys,
+                db_query: {
+                    ...fetchValues,
+                    fetch_count: histDataLength
+                }
+            }
+
+            console.log(payload)
+            setTalibExecuting(true)
+            executeTalibFunction({ token, payload })
+                .then((res) => {
+                    console.log(res.data)
+                    dispatch(setTalibResult({ id: id, name: name, optInputs: optInputs, result: res.data.result }))
+                    setTalibExecuting(false)
+                    dispatch(toggleShowSettingsFlag({ id: id, name: name }))
+                })
+                .catch(err => {
+                    setTalibExecuting(false)
+                    console.log(err)
+                })
+        }
+
+    }
+
     const handleCloseSettings = (param) => {
         const { name, id } = param
         dispatch(toggleShowSettingsFlag({ id: id, name: name }))
     }
 
     return (
-        <Card sx={{ width: 265 }}>
-            <CardContent sx={{ padding: '4px' }}>
-                <Typography textAlign='start' gutterBottom variant="body1">
-                    SETTINGS  : {name}
-                </Typography>
+        <Card sx={{ width: 265, padding: '4px 8px' }}>
+            <CardContent sx={{ padding: '0px' }}>
+                <Box display='flex' flexDirection='row' justifyContent='space-between'>
+                    <Typography textAlign='start' gutterBottom variant="h6">
+                        SETTINGS  : {name}
+                    </Typography>
+                    {talibExecuting ? <CircularProgress color="error" sx={{ margin: '2.5px' }} size={15} /> : ''}
+                </Box>
                 <Box>
                     <Box className='settings-inputs'>
-                        <Typography variant='h6' textAlign='start' fontWeight='500'>INPUTS</Typography>
+                        <Typography variant='custom' textAlign='start' fontWeight='500'>INPUTS</Typography>
                         {inputs.length > 0 && inputs.map((input, index) => {
                             const { value, errorFlag, helperText } = input
                             return (
@@ -200,7 +313,7 @@ const SettingsCard = (props) => {
                         })}
                     </Box>
                     <Box className='settings-optional-inputs' pt={1}>
-                        <Typography variant='h6' textAlign='start' fontWeight='500'>OPTIONAL INPUTS</Typography>
+                        <Typography variant='custom' textAlign='start' fontWeight='500'>OPTIONAL INPUTS</Typography>
                         {optInputs.length === 0 ?
                             (
                                 <Box pt={1}>
@@ -212,7 +325,7 @@ const SettingsCard = (props) => {
                                 optInputs && optInputs.map((optionalInput, index) => {
                                     const { displayName, hint, name, defaultValue, errorFlag, helperText } = optionalInput
                                     return (
-                                        <Box pt={'15px'} key={index} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
+                                        <Box pt={'8px'} key={index} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
                                             <TextField
                                                 inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', style: { height: '10px' } }}
                                                 error={errorFlag}
@@ -254,16 +367,16 @@ const SettingsCard = (props) => {
                     </Box>
                 </Box>
             </CardContent>
-            <CardActions>
-                <Button color='secondary' size="small">Run</Button>
-                <Button color='secondary' size="small" onClick={handleCloseSettings.bind(null, { id: id, name: name })}>Close</Button>
+            <CardActions sx={{ padding: '16px 0px 8px 0px' }}>
+                <Button color='secondary' variant='outlined' size="small" onClick={handleExecuteTalibQuery.bind(null, { id: id, name: name })}>Run</Button>
+                <Button color='secondary' variant='outlined' size="small" onClick={handleCloseSettings.bind(null, { id: id, name: name })}>Close</Button>
             </CardActions>
         </Card>
     )
 }
 
 const MainChart = (props) => {
-    const { latestTime, new_fetch_offset, symbol, selectedTokenPeriod, module } = props;
+    const { latestTime, new_fetch_offset, symbol, selectedTokenPeriod, module, fetchValues } = props;
     const token = useSelector(state => state.auth.accessToken);
     const toolTipSwitchFlag = useSelector(state => state.cryptoModule.toolTipOn)
     const theme = useTheme()
@@ -864,15 +977,28 @@ const MainChart = (props) => {
             return;
         }
 
-        const lineColors = [
-            "#FFAA00",
-            "#DDBB77",
-            "#EECC99",
-            "#CCAACC",
-            "#DDDD88",
-            "#FF9966",
-            "#FFBB88",
-        ]
+        let lineColors = [
+            '#FF5733', // Red
+            '#33FF57', // Green
+            '#3357FF', // Blue
+            '#FF33FB', // Pink
+            '#33FFF6', // Cyan
+            '#F3FF33', // Yellow
+            '#FF8633', // Orange
+            '#9D33FF', // Purple
+            '#33FF8B', // Light Green
+            '#FF3333', // Bright Red
+            '#33B2FF', // Sky Blue
+            '#FFDA33', // Gold
+            '#FF33A8', // Magenta
+            '#6E33FF', // Indigo
+            '#33FF57', // Lime
+            '#FF5733', // Coral
+            '#33FFD5', // Turquoise
+            '#FF9A33', // Amber
+            '#B8FF33', // Chartreuse
+            '#FF333D'  // Scarlet
+        ];
 
         // console.time('Chart Load Time');
 
@@ -897,14 +1023,16 @@ const MainChart = (props) => {
         } else { // console.log("No new data for chart") 
         }
 
+        let lineColorsCopy = lineColors
         // checking and rendering chart
         selectedFunctionData.forEach((func) => {
             const funcIds = func.functions.map((f) => f.id) // if count = 1 then it is a single function else if 2 a copy of same function is present
             // console.log("Func id from redux", funcIds)
             funcIds.forEach((id) => {
                 const filtered = reduxDataCopy.filter((chartData) => chartData.id === id);
+                console.log('f length', filtered.length)
                 // console.log("Filtered", filtered)
-                filtered.forEach((f) => {
+                filtered.forEach((f, i) => {
                     // console.log(f.splitPane)
                     const existingInStateIndex = chartSeriesState.findIndex((series) => series.id === f.id && series.key === f.key);
                     // console.log("Existing in state index", existingInStateIndex)
@@ -929,7 +1057,8 @@ const MainChart = (props) => {
                         }
                     } else {
                         // console.log("Does not exist in state", f.key)
-                        const color = lineColors[Math.floor(Math.random() * lineColors.length)];
+                        console.log(i)
+                        const color = lineColorsCopy[i];
                         const newSeries = chart.current.addLineSeries({
                             color: color,
                             lineWidth: 1,
@@ -952,6 +1081,8 @@ const MainChart = (props) => {
                         ]);
                     }
                 });
+                lineColorsCopy = lineColorsCopy.slice(filtered.length)
+
             });
         });
 
@@ -1019,10 +1150,12 @@ const MainChart = (props) => {
 
             toShow.forEach((series) => {
                 const seriesValue = seriesDataMap.get(series.series);
+                // console.log(series.color)
                 if (seriesValue !== undefined && series.visible) {
                     const divToInsertDataTo = document.querySelector(`.${series.name}_${series.id}_${series.key}`);
                     if (divToInsertDataTo) {
                         let displayKey = convertKeysForDisplay(series.key)
+                        divToInsertDataTo.style.color = series.color
                         divToInsertDataTo.innerHTML = `${displayKey} : ${seriesValue.value.toFixed(2)}`
                     }
                 }
@@ -1282,12 +1415,12 @@ const MainChart = (props) => {
                     return (
                         <Box key={index} className='selected-function-unique sel-func' justifyContent='space-between' alignItems='center'>
                             {selectedFunc.map((func, i) => {
-                                const { id, name, outputAvailable, show_chart_flag, show_settings } = func
+                                const { id, name, display_name, outputAvailable, show_chart_flag, show_settings } = func
                                 return (
                                     <Box key={i} display='flex' flexDirection='row' alignItems='flex-start' className='data-plus-settins-box'>
                                         <Box className='single-data-box' display='flex' flexDirection='row' alignItems='center' gap={'5px'}>
                                             <Box className='function-title' display='flex' flexDirection='row' gap='5px'>
-                                                <Box>{name}</Box>
+                                                <Box>{display_name}</Box>
                                                 {outputs.map((output, j) => (
                                                     <Box key={j} className={`${name}_${id}_${output.name}`}></Box>
                                                 ))}
@@ -1326,11 +1459,22 @@ const MainChart = (props) => {
                                                 <DeleteOutlineIcon className='smaller-icon' />
                                             </IconButton>
                                         </Box>
-                                        <Box id={id} className={`settings-box ${show_settings ? 'show' : 'hide'}`}>
+                                        <Dialog
+                                            open={show_settings}
+                                            onClose={
+                                                (e, reason) => {
+                                                    if (reason === 'backdropClick') {
+                                                        console.log('backdrop clicked')
+                                                        dispatch(toggleShowSettingsFlag({ id: id, name: name }))
+                                                    }
+                                                }
+                                            }
+                                        >
                                             <SettingsCard
                                                 selectedFunctionNameAndId={{ slId: id, slName: name }}
+                                                fetchValues={fetchValues}
                                             />
-                                        </Box>
+                                        </Dialog>
                                     </Box>
                                 )
                             })}
