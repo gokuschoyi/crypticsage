@@ -336,34 +336,20 @@ const BasicSettings = () => {
                                 <IconButton
                                     onClick={cancelChange}
                                     size='small'
-                                    variant="text"
+                                    variant="outlined"
                                     style={{
-                                        color: `#000000`,
-                                        backgroundColor: 'red',
                                         margin: '5px'
                                     }}
-                                    sx={{
-                                        ':hover': {
-                                            color: `black !important`,
-                                            backgroundColor: 'white !important',
-                                        },
-                                    }}><ClearOutlinedIcon className='basicsetting-icon' /></IconButton>
+                                    ><ClearOutlinedIcon className='basicsetting-icon' /></IconButton>
 
                                 <IconButton
                                     onClick={saveChange}
                                     size='small'
                                     variant="text"
                                     style={{
-                                        color: `#000000`,
-                                        backgroundColor: 'red',
                                         margin: '5px'
                                     }}
-                                    sx={{
-                                        ':hover': {
-                                            color: `black !important`,
-                                            backgroundColor: 'white !important',
-                                        },
-                                    }}><CheckOutlinedIcon className='basicsetting-icon' />
+                                    ><CheckOutlinedIcon className='basicsetting-icon' />
                                 </IconButton>
                             </Box>
                         }
@@ -403,9 +389,8 @@ const BasicSettings = () => {
                                 <Button
                                     onClick={(e) => handleUserDetailsSave(e)}
                                     size='small'
-                                    variant="text"
-                                    style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginLeft: '10px' }}
-                                    sx={{ ':hover': { color: `black !important`, backgroundColor: 'white !important', } }}
+                                    variant="outlined"
+                                    style={{ margin: '5px', marginLeft: '10px' }}
                                 >
                                     Update</Button>
                             </Box>
@@ -453,9 +438,8 @@ const BasicSettings = () => {
                                     <Button
                                         onClick={(e) => handleUserPreferenceSave(e)}
                                         size='small'
-                                        variant="text"
-                                        style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginLeft: '10px' }}
-                                        sx={{ ':hover': { color: `black !important`, backgroundColor: 'white !important', } }}
+                                        variant="outlined"
+                                        style={{ margin: '5px', marginLeft: '10px' }}
                                     >
                                         Save</Button>
                                 </Box>
@@ -509,9 +493,8 @@ const BasicSettings = () => {
                                         />
                                         <Button
                                             onClick={verifyCurrentPassword} size='small'
-                                            variant="text"
-                                            style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginLeft: '10px' }}
-                                            sx={{ ':hover': { color: `black !important`, backgroundColor: 'white !important', } }}
+                                            variant="outlined"
+                                            style={{ margin: '5px', marginLeft: '10px' }}
                                         >Submit</Button>
                                     </Box>
                                 </Box>

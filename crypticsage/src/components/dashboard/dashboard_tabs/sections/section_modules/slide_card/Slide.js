@@ -205,14 +205,14 @@ const SlideComponent = (props) => {
 
         const highlights = document.getElementsByClassName("highlight");
         for (const highlight of highlights) {
-            highlight.style.color = `red`
+            highlight.style.color = `${theme.palette.primary.light}`
             highlight.addEventListener("mouseover", function () {
                 this.style.backgroundColor = "white";
                 this.style.color = "black";
             });
             highlight.addEventListener("mouseout", function () {
                 this.style.backgroundColor = "";
-                this.style.color = "red";
+                this.style.color =  `${theme.palette.primary.light}`;
             });
             highlight.addEventListener("click", event => {
                 var word = event.target.textContent
@@ -267,7 +267,7 @@ const SlideComponent = (props) => {
             <WordDialog open={open} handleClose={handleClose} word={clickedWord.word} meaning={clickedWord.meaning} />
             <Grid container spacing={{ xs: 4, sm: 3, md: 2 }} className='slide-container'>
                 <Grid item xs={12} sm={12} md={12} lg={6} xl={6} display='flex' alignItems='center'>
-                    <Box className='chapter-slide-container' sx={{ color: `${theme.palette.secondary.main}` }}>
+                    <Box className='chapter-slide-container' >
                         {ChapterSlide({ chapterTitle })}
                     </Box>
                 </Grid>
@@ -288,39 +288,24 @@ const SlideComponent = (props) => {
                         {started ? null :
                             <Button
                                 onClick={prev}
-                                variant="text"
-                                style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '25px', height: '30px' }}
-                                sx={{
-                                    ':hover': {
-                                        color: `${theme.palette.text.primary} !important`,
-                                        backgroundColor: `${theme.palette.background.paper} !important`,
-                                    },
-                                }}>PREV</Button>
+                                variant="outlined"
+                                style={{ margin: '5px', marginRight: '25px', height: '30px' }}
+                            >PREV</Button>
                         }
                         {finished
                             ?
                             <Button
                                 onClick={(e) => completeLesson(e)}
-                                variant="text"
-                                style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '25px', height: '30px' }}
-                                sx={{
-                                    ':hover': {
-                                        color: `${theme.palette.text.primary} !important`,
-                                        backgroundColor: `${theme.palette.background.paper} !important`
-                                    },
-                                }}>COMPLETE
+                                variant="outlined"
+                                style={{ margin: '5px', marginRight: '25px', height: '30px' }}
+                            >COMPLETE
                             </Button>
                             :
                             <Button
                                 onClick={next}
-                                variant="text"
-                                style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '25px', height: '30px' }}
-                                sx={{
-                                    ':hover': {
-                                        color: `${theme.palette.text.primary} !important`,
-                                        backgroundColor: `${theme.palette.background.paper} !important`,
-                                    },
-                                }}>NEXT
+                                variant="outlined"
+                                style={{ margin: '5px', marginRight: '25px', height: '30px' }}
+                            >NEXT
                             </Button>
                         }
                     </Box>

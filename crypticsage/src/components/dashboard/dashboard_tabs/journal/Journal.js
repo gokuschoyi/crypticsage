@@ -110,14 +110,12 @@ const Journal = (props) => {
                     <FormControlLabel
                         sx={{
                             backgroundColor: `${theme.palette.secondary.dark}`,
-                            color: `${theme.palette.secondary.contrastText}`,
                             width: '120px',
                             height: '40px',
                             borderRadius: '10px',
                         }}
                         control={
                             <Switch
-                                style={{ color: `${toggle ? theme.palette.secondary.main : theme.palette.text.primary}` }}
                                 inputProps={{ 'aria-label': 'primary checkbox' }}
                                 onChange={toggleJournal}
                             />
@@ -235,32 +233,20 @@ const Journal = (props) => {
                         <Box className='journal-submit-button'>
                             <Button
                                 onClick={resetJournal}
-                                variant="text"
+                                size='small'
+                                variant="outlined"
                                 style={{
-                                    color: `#000000`,
-                                    backgroundColor: 'red',
                                     margin: '5px'
                                 }}
-                                sx={{
-                                    ':hover': {
-                                        color: `black !important`,
-                                        backgroundColor: 'white !important',
-                                    },
-                                }}>RESET</Button>
+                            >RESET</Button>
                             <Button
                                 onClick={display}
-                                variant="text"
+                                size='small'
+                                variant="outlined"
                                 style={{
-                                    color: `#000000`,
-                                    backgroundColor: 'red',
                                     margin: '5px'
                                 }}
-                                sx={{
-                                    ':hover': {
-                                        color: `black !important`,
-                                        backgroundColor: 'white !important',
-                                    },
-                                }}>SAVE</Button>
+                            >SAVE</Button>
                         </Box>
                     </Box>)
                     :

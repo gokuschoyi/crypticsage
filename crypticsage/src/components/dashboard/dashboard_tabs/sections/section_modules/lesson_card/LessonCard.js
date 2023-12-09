@@ -117,8 +117,10 @@ const LessonCard = () => {
     }
 
     const openSlide = (lessonId) => {
+        
         dispatch(setLessonId(lessonId))
         let lessonUrl = `/dashboard/sections/${sectionId}/${lessonId}`;
+        console.log('asasa', lessonUrl)
         navigate(lessonUrl)
     }
 
@@ -163,7 +165,7 @@ const LessonCard = () => {
                                         <Typography variant="h6" textAlign='start'>
                                             Not Completed
                                         </Typography>
-                                        <CloseIcon sx={{ color: `${theme.palette.error.main}` }} />
+                                        <CloseIcon sx={{ color: `${theme.palette.primary.dark}` }} />
                                     </Box>
                                 </Box>
                             )
@@ -175,13 +177,8 @@ const LessonCard = () => {
                         onClick={(e) => openSlide(lessonId)}
                         variant="outlined"
                         size='small'
-                        style={{ color: 'white', backgroundColor: 'red', margin: '5px' }}
-                        sx={{
-                            ':hover': {
-                                color: `${theme.palette.text.primary} !important`,
-                                backgroundColor: `${theme.palette.background.paper} !important`
-                            }
-                        }}>
+                        color='primary'
+                    >
                         <KeyboardDoubleArrowRightOutlinedIcon className='lesson-card-icon' />
                     </IconButton>
                 </CardActions>
@@ -196,14 +193,9 @@ const LessonCard = () => {
                 <Box display='flex' justifyContent='flex-end'>
                     <Button
                         onClick={goBackToSections}
-                        variant="text"
-                        style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '20px', height: '30px', width: '80px' }}
-                        sx={{
-                            ':hover': {
-                                color: `${theme.palette.text.primary} !important`,
-                                backgroundColor: `${theme.palette.background.paper} !important`,
-                            },
-                        }}>Go Back</Button>
+                        variant="outlined"
+                        style={{ margin: '5px', marginRight: '20px', height: '30px' }}
+                    >Go Back</Button>
                 </Box>
             </Box>
             <Box>
@@ -236,14 +228,9 @@ const LessonCard = () => {
                 <Box display='flex' justifyContent='flex-end'>
                     <Button
                         onClick={goBackToSections}
-                        variant="text"
-                        style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '20px', height: '30px', width: '80px' }}
-                        sx={{
-                            ':hover': {
-                                color: `${theme.palette.text.primary} !important`,
-                                backgroundColor: `${theme.palette.background.paper} !important`,
-                            },
-                        }}>Go Back</Button>
+                        variant="outlined"
+                        style={{ margin: '5px', marginRight: '20px', height: '30px' }}
+                    >Go Back</Button>
                 </Box>
             </Box>
         </React.Fragment>

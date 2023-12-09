@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Typography, Paper } from '@mui/material'
+import { Box, Typography, Paper, useTheme } from '@mui/material'
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedTickerName, resetShowSettingsFlag, resetDataLoadedState, setCryptoDataInDbRedux } from '../../indicators/modules/CryptoModuleSlice';
@@ -9,6 +9,7 @@ const CustomTokenCard = (props) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const selectedToken = useSelector(state => state.cryptoModule.selectedTickerName);
+    const theme = useTheme();
 
     const handleSymbolClick = ({ symbol }) => {
         if (symbol === 'N/A') return
@@ -32,7 +33,7 @@ const CustomTokenCard = (props) => {
                     <Typography onClick={handleSymbolClick.bind(null, { symbol })} variant='h5' className={symbol !== 'N/A' ? "underline-animation" : ''} sx={{ margin: '0px', fontSize: 20, fontWeight: '500', textAlign: 'left' }} gutterBottom>
                         {symbol !== 'N/A' ? symbol.toUpperCase() : title.toUpperCase()}
                     </Typography>
-                    <Box display='flex' flexDirection='row' gap='1rem' alignContent='center'>
+                    <Box display='flex' flexDirection='row' gap='1rem' alignContent='center' alignItems={'center'}>
                         {market_cap_rank &&
                             <Typography variant='h5' sx={{ margin: '0px', fontSize: 16, fontWeight: '300', textAlign: 'left' }} gutterBottom>
                                 {market_cap_rank}
@@ -45,11 +46,11 @@ const CustomTokenCard = (props) => {
                     {price}
                 </Typography>
                 <Box className='token-diff-box'>
-                    <Typography className='price_change_24h' sx={{ fontSize: 16, fontWeight: '600', textAlign: 'left', color: price_change_24h > 0 ? 'green' : 'red' }} gutterBottom>
+                    <Typography className='price_change_24h' sx={{ fontSize: 16, fontWeight: '600', textAlign: 'left', color: price_change_24h > 0 ? `${theme.palette.success.main}` : `${theme.palette.primary.main}` }} gutterBottom>
                         {price_change_24h.toFixed(5)}
                     </Typography>
-                    {price_change_24h > 0 ? <ArrowDropUpIcon sx={{ color: 'green' }} /> : <ArrowDropDownIcon sx={{ color: 'red' }} />}
-                    <Typography sx={{ fontSize: 16, fontWeight: '600', textAlign: 'left', color: price_change_percentage_24h < 0 ? 'red' : 'green' }} gutterBottom>
+                    {price_change_24h > 0 ? <ArrowDropUpIcon sx={{ color:  `${theme.palette.success.main}` }} /> : <ArrowDropDownIcon sx={{ color: `${theme.palette.primary.main}` }} />}
+                    <Typography sx={{ fontSize: 16, fontWeight: '600', textAlign: 'left', color: price_change_percentage_24h < 0 ? `${theme.palette.primary.main}` :  `${theme.palette.success.main}` }} gutterBottom>
                         {`${price_change_percentage_24h.toFixed(2)}%`}
                     </Typography>
                 </Box>

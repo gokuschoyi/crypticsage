@@ -165,32 +165,27 @@ const Topbar = (props) => {
         return (
             <Box className="user-nav" style={toggleUser ? mountedStyle : unmountedStyle}>
                 <Box mr={2} className="user-cta-small">
-                    <Typography className='user-nav-title' variant="h6" sx={{ color: 'white' }}>Profile Settings</Typography>
+                    <Typography className='user-nav-title' variant="h6"  color={'primary'}>Profile Settings</Typography>
                     <Divider />
-                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
+                    <Box className="user-nav-item-small">
                         <a className="user-nav-link-small" href="#userprofile">
                             <ExploreOutlinedIcon className="user-nav-icon-small" />
                             <span>Explore Creators</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
+                    <Box className="user-nav-item-small">
                         <a className="user-nav-link-small" href="#userprofile">
                             <AddReactionOutlinedIcon className="user-nav-icon-small" />
                             <span>Invite</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
+                    <Box className="user-nav-item-small">
                         <a className="user-nav-link-small" href="#userprofile">
                             <HelpOutlineOutlinedIcon className="user-nav-icon-small" />
                             <span>About</span>
                         </a>
                     </Box>
-                    <Button onClick={logOut} variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px' }} sx={{
-                        ':hover': {
-                            color: `black !important`,
-                            backgroundColor: 'white !important',
-                        },
-                    }}>LOG OUT</Button>
+                    <Button onClick={logOut} size="small" variant="outlined" >LOG OUT</Button>
                 </Box>
             </Box>
         )
@@ -200,39 +195,39 @@ const Topbar = (props) => {
         return (
             <Box className="user-nav" style={toggleSettings ? mountedStyle : unmountedStyle}>
                 <Box mr={2} className="user-cta-small">
-                    <Typography className='user-nav-title' variant="h6" sx={{ color: 'white' }}>Settings</Typography>
+                    <Typography className='user-nav-title' variant="h6" color={'primary'}>Settings</Typography>
                     <Divider />
-                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
+                    <Box className="user-nav-item-small">
                         <a className="user-nav-link-small" href="#userprofile">
                             <ManageAccountsOutlinedIcon className="user-nav-icon-small" />
                             <span>Your Profile</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
+                    <Box className="user-nav-item-small">
                         <a className="user-nav-link-small" href="#userprofile">
                             <RoomPreferencesOutlinedIcon className="user-nav-icon-small" />
                             <span>Preferences</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
+                    <Box className="user-nav-item-small">
                         <a className="user-nav-link-small" href="#userprofile">
                             <AddCardOutlinedIcon className="user-nav-icon-small" />
                             <span>Subscriptions</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
+                    <Box className="user-nav-item-small">
                         <a className="user-nav-link-small" href="#userprofile">
                             <QuizOutlinedIcon className="user-nav-icon-small" />
                             <span>F.A.Q</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
+                    <Box className="user-nav-item-small">
                         <a className="user-nav-link-small" href="#userprofile">
                             <AdminPanelSettingsOutlinedIcon className="user-nav-icon-small" />
                             <span>Privacy Policy</span>
                         </a>
                     </Box>
-                    <Box className="user-nav-item-small" sx={{ color: 'white' }}>
+                    <Box className="user-nav-item-small">
                         <a className="user-nav-link-small" href="#userprofile">
                             <HeadphonesOutlinedIcon className="user-nav-icon-small" />
                             <span>Support</span>

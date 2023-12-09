@@ -145,7 +145,7 @@ const CoinChartBox = () => {
         <Box className='token-chart-container' display='flex' flexDirection='column' height='100%'>
             <Box className='token-selector-box'>
                 <Box className='token-selector'>
-                    <Typography sx={{ fontSize: 26, fontWeight: '600', textAlign: 'left', color: `${theme.palette.secondary.main}`, marginBottom: '0px' }} gutterBottom>Coin</Typography>
+                    <Typography sx={{ fontSize: 26, fontWeight: '600', textAlign: 'left', marginBottom: '0px' }} gutterBottom>Coin</Typography>
                     {options && options.length > 0 &&
                         <Box>
                             <Autocomplete
@@ -161,8 +161,11 @@ const CoinChartBox = () => {
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             '& fieldset': {
-                                                borderColor: 'white',
-                                            }
+                                                borderColor: `${theme.palette.secondary.main}`,
+                                            },
+                                            '&:hover fieldset': {
+                                                borderColor: `${theme.palette.primary.main}`,
+                                            },
                                         }
                                     }}
                                     {...params}
@@ -177,19 +180,19 @@ const CoinChartBox = () => {
                     <Box className='time-period-checkbox'>
                         <FormControlLabel
                             value="30m"
-                            control={<Checkbox name='minute' onChange={handleTimePeriodChange} checked={timePeriod.minute.checked} color='secondary' />}
+                            control={<Checkbox size='small' name='minute' onChange={handleTimePeriodChange} checked={timePeriod.minute.checked}  />}
                             label="Mins"
                             labelPlacement="start"
                         />
                         <FormControlLabel
                             value="2h"
-                            control={<Checkbox name='hour' onChange={handleTimePeriodChange} checked={timePeriod.hour.checked} color='secondary' />}
+                            control={<Checkbox size='small' name='hour' onChange={handleTimePeriodChange} checked={timePeriod.hour.checked}  />}
                             label="Hrs"
                             labelPlacement="start"
                         />
                         <FormControlLabel
                             value="1D"
-                            control={<Checkbox name='day' onChange={handleTimePeriodChange} checked={timePeriod.day.checked} color='secondary' />}
+                            control={<Checkbox size='small' name='day' onChange={handleTimePeriodChange} checked={timePeriod.day.checked}  />}
                             label="Days"
                             labelPlacement="start"
                         />
@@ -204,14 +207,15 @@ const CoinChartBox = () => {
                                             backgroundColor: '#e3d1d1'
                                         }
                                     }}
+                                    size="small"
                                     checked={checked}
-                                    color="warning"
+                                    color="primary"
                                     onChange={handleChange}
                                     inputProps={{ 'aria-label': 'controlled' }}
                                 />
                             }
                             label="GridLine"
-                            labelPlacement="top"
+                            labelPlacement="start"
                         />
                     </Box>
                 </Box>

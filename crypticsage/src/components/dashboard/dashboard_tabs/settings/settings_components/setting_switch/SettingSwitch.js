@@ -35,22 +35,16 @@ const SettingSwitch = (props) => {
             <Grid item xs={12} sm={6} md={4} lg={3} xl={2} className='grid-item-hover'>
                 <Button
                     onClick={(e) => dispatch(setSettingsState(e.target.textContent))}
-                    variant="text"
+                    variant="outlined"
+                    size='small'
                     style={{
-                        color: `#000000`,
-                        backgroundColor: 'red',
+                        
                         margin: '5px',
                         marginRight: '20px',
-                        height: '40px',
+                        height: '35px',
                         width: '-webkit-fill-available'
                     }}
-                    sx={{
-                        fontSize: '16px',
-                        ':hover': {
-                            color: `black !important`,
-                            backgroundColor: 'white !important',
-                        },
-                    }}>{heading}</Button>
+                    >{heading}</Button>
             </Grid>
         )
     }

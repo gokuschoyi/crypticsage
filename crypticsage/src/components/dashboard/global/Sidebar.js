@@ -112,10 +112,10 @@ const SidebarC = () => {
                                 ml="15px"
                                 sx={{ height: '72px' }}
                             >
-                                <Typography variant="h3" color={theme.palette.secondary.main}>
+                                <Typography variant="h3" color={theme.palette.primary.main}>
                                     CRYPTICSAGE
                                 </Typography>
-                                <IconButton sx={{ color: `${theme.palette.secondary.main}` }} onClick={() => collapseSidebar()}>
+                                <IconButton sx={{ color: `${theme.palette.primary.main}` }} onClick={() => collapseSidebar()}>
                                     <MenuOutlinedIcon />
                                 </IconButton>
                             </Box>
@@ -129,7 +129,7 @@ const SidebarC = () => {
                                 sx={{ height: '72px' }}
                             >
                                 {!sm ?
-                                    (<IconButton style={{ color: `${theme.palette.text.primary}` }} onClick={() => collapseSidebar()}>
+                                    (<IconButton style={{ color: `${theme.palette.primary.main}` }} onClick={() => collapseSidebar()}>
                                         <MenuOutlinedIcon />
                                     </IconButton>)
                                     :
@@ -161,13 +161,13 @@ const SidebarC = () => {
                         <Typography
                             className='sidebar-label'
                             variant="h6"
-                            color='red'
+                            color={theme.palette.primary.main}
                             sx={{
                                 m: `${collapsed ? '5px 0px 5px 0px' : '15px 0 5px 20px'}`,
                                 textAlign: `${collapsed ? 'center' : 'left'}`
                             }}
                         >
-                            TOOLS
+                            PAGES
                         </Typography>
 
                         <MenuItem
@@ -257,7 +257,7 @@ const SidebarC = () => {
                         <Typography
                             className='sidebar-label'
                             variant="h6"
-                            color='red'
+                            color={theme.palette.primary.main}
                             sx={{ m: `${collapsed ? '5px 0px 5px 0px' : '15px 0 5px 20px'}`, textAlign: `${collapsed ? 'center' : 'left'}` }}
                         >
                             ACCOUNT

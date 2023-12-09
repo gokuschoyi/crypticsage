@@ -14,20 +14,20 @@ const Notifications = (props) => {
     return (
         <Box className='notification-container'>
             <Box className='notification-header' display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
-                <Typography className='notification-title' variant="h6" sx={{ color: 'white' }}>Notifications</Typography>
+                <Typography className='notification-title' variant="h6" color={'primary'}>Notifications</Typography>
                 <FormControlLabel
                     control={
                         <Switch
                             onChange={toggleFilter}
-                            style={{ color: `${!showUnreadOnly ? theme.palette.primary.newBlack : theme.palette.primary.light}` }}
+                            style={{ color: `${theme.palette.primary.main}` }}
                         />
                     }
                     label="UnRead"
-                    sx={{ color: 'white' }}
+                    
                 />
             </Box>
 
-            <Box className='notification-body' sx={{ color: 'white' }}>
+            <Box className='notification-body' >
                 {(!notifications.length ||
                     (unreadCount === 0 && showUnreadOnly)) && (
                         <h4>
@@ -65,18 +65,8 @@ const Notifications = (props) => {
             </Box>
 
             <Box className='notification-footer' display='flex' flexDirection='row' justifyContent='space-between'>
-                <Button onClick={clear} variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px' }} sx={{
-                    ':hover': {
-                        color: `black !important`,
-                        backgroundColor: 'white !important',
-                    },
-                }}>CLEAR</Button>
-                <Button onClick={markAllAsRead} variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px' }} sx={{
-                    ':hover': {
-                        color: `black !important`,
-                        backgroundColor: 'white !important',
-                    },
-                }}>MARK All AS READ</Button>
+                <Button onClick={clear} variant="outlined" size='small' >CLEAR</Button>
+                <Button onClick={markAllAsRead} variant="outlined" size='small' >MARK All AS READ</Button>
             </Box>
         </Box>
     )

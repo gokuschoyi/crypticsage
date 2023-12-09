@@ -91,19 +91,13 @@ const Glossary = (props) => {
             <Button
                 onClick={(e) => handleFilterChange(e)}
                 value={filterValue}
-                variant="text"
+                variant="outlined"
+                size='small'
                 style={{
-                    color: `#000000`,
-                    backgroundColor: 'red',
                     margin: '5px',
                     fontWeight: '600'
                 }}
-                sx={{
-                    ':hover': {
-                        color: `${theme.palette.primary.dark} !important`,
-                        backgroundColor: `${theme.palette.secondary.main} !important`,
-                    },
-                }}>{name}</Button>
+                >{name}</Button>
         )
     }
 
@@ -113,10 +107,10 @@ const Glossary = (props) => {
             <React.Fragment>
                 <Grid className='glossary-card' container spacing={2} justifyContent='center'>
                     <Grid item xs={11} sm={11} md={4} lg={4}>
-                        <Typography className='glossary-card-word' textAlign='start' variant='h4' sx={{ color: `${theme.palette.secondary.main}` }}>{word}</Typography>
+                        <Typography className='glossary-card-word' textAlign='start' variant='h4'>{word}</Typography>
                     </Grid>
                     <Grid item xs={11} sm={11} md={8} lg={8}>
-                        <Typography textAlign='start' variant='body1' sx={{ color: `${theme.palette.secondary.main}` }} >{definition}</Typography>
+                        <Typography textAlign='start' variant='body1'>{definition}</Typography>
                     </Grid>
                 </Grid>
                 <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} />
@@ -153,8 +147,7 @@ const Glossary = (props) => {
                                     sx={{
                                         ml: 2,
                                         flex: 1,
-                                        backgroundColor: 'white',
-                                        color: theme.palette.primary.dark,
+                                        variant: 'outlined',
                                         borderRadius: '5px',
                                         borderBottom: '0px !important',
                                         ' .MuiInputBase-input': {
@@ -168,7 +161,7 @@ const Glossary = (props) => {
                                     sx={{
                                         ':hover': {
                                             color: `${theme.palette.primary.dark} !important`,
-                                            backgroundColor: `${theme.palette.secondary.main} !important`,
+                                            transition: '0.3s ease-in-out'
                                         }
                                     }}
                                 />

@@ -61,7 +61,7 @@
   position: absolute;
   width: 250px;
   padding: 10px;
-  background-color: rgb(39, 33, 33);
+  background-color: var(--mui-palette-background-paper);
   top: 0;
   right: 0;
   margin-top: 115px;
@@ -103,10 +103,11 @@
 }
 
 .user-nav-item-small :hover {
-  color: red;
+  color: var(--mui-palette-primary-main) !important;
   transition: all 0.3s ease-in-out;
   background-color: antiquewhite;
-  scale: 1.1 !important;
+  scale: 1.04 !important;
+  border-radius: 4px;
 }
 
 .user-nav-link-small {
@@ -155,7 +156,7 @@
   width: 350px;
   height: 420px;
   padding: 10px;
-  background-color: rgb(39, 33, 33);
+  background-color: var(--mui-palette-background-paper);
   top: 0;
   right: 0;
   margin-top: 115px;

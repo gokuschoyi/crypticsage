@@ -26,32 +26,32 @@ export const themeSettings = (mode) => {
             ...(mode === 'dark'
                 ? {
                     primary: {
-                        main: colors.colorOne[500],
-                        light: colors.colorOne[300],
-                        dark: colors.colorOne[700],
-                        extraDark: colors.colorOne[900],
+                        main: '#ef0938',
+                        light: '#f53b61',
+                        dark: '#a60627',
                         contrastText: colors.colorTwo[500],
+                        extraDark: colors.colorOne[900],
                         new: colors.colorOne[500],
                         newWhite: '#ffffff',
                         newBlack: '#000000',
                     },
                     secondary: {
-                        main: colors.colorTwo[500],
-                        light: colors.colorTwo[300],
-                        dark: colors.colorTwo[700],
+                        main: '#e02f2f',
+                        light: '#e65858',
+                        dark: '#9c2020',
                         contrastText: colors.colorTwo[500],
                     },
                     text: {
-                        primary: colors.colorTwo[700],
-                        secondary: colors.colorTwo[300],
-                        disabled: colors.colorThree[100],
-                        hint: colors.colorThree[100],
+                        primary: '#969696',
+                        secondary: '#fcfcfc',
+                        disabled: '#fef4da',
+                        hint: '#f9c846',
                         dark: colors.colorThree[900],
                     },
                     background: {
-                        default: colors.colorOne[900],
+                        default: '#070707',
                         paper: '#212121',
-                        paperOne:'#2d2c2c'
+                        paperOne: '#2d2c2c'
                     },
                     error: {
                         main: '#F44336',
@@ -106,7 +106,7 @@ export const themeSettings = (mode) => {
                     background: {
                         default: '#fff',
                         paper: '#f5f5f5',
-                        paperOne:'#e7e7e7'
+                        paperOne: '#e7e7e7'
                     },
                     error: {
                         main: '#F44336',

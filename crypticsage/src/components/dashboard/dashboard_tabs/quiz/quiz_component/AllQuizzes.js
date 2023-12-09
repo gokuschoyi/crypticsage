@@ -70,19 +70,13 @@ const AllQuizzes = (props) => {
                 <Box className='quiz-action'>
                     <Button
                         onClick={(e) => loadQuiz(quizID)}
-                        variant="text"
+                        variant="outlined"
+                        size='small'
                         style={{
-                            color: qid === quizID ? 'white' : 'black',
-                            backgroundColor: qid === quizID ? 'black' : 'white',
                             border: qid === quizID ? '1px solid white' : '',
                             margin: '5px'
                         }}
-                        sx={{
-                            ':hover': {
-                                color: `black !important`,
-                                backgroundColor: 'red !important',
-                            },
-                        }}>{quizCompleted ? 'Retake' : 'Take Quiz'}</Button>
+                        >{quizCompleted ? 'Retake' : 'Take Quiz'}</Button>
                 </Box>
             </Box>
         )
@@ -103,7 +97,7 @@ const AllQuizzes = (props) => {
                                     <Slide key={index} direction="up" timeout={500} in={true} >
                                         <Box className='quiz-collection'>
                                             <Box sx={{ backgroundColor: `${theme.palette.background.paper}` }} mb={1} pt={1} pb={1}>
-                                                <Typography variant='h4' textAlign='start' sx={{ spadding: '4px 16px' }}>{section.sectionName}</Typography>
+                                                <Typography variant='h4' textAlign='start' sx={{ padding: '4px 16px' }}>{section.sectionName}</Typography>
                                             </Box>
                                             {section.lessons.map((lesson, index) => {
                                                 return (

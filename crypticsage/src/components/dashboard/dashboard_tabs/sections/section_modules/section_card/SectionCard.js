@@ -82,6 +82,7 @@ const SectionCard = () => {
     }
 
     const openLesson = (sectionId) => {
+        console.log('asasa')
         const sectionUrl = `/dashboard/sections/${sectionId}`;
         dispatch(setSectionId(sectionId))
         navigate(sectionUrl);
@@ -103,26 +104,20 @@ const SectionCard = () => {
                         </Typography>
                     </Box>
                 </Box>
-                <Box className='section-grid-card-padding button-progress'>
+                <Box className='section-grid-card-padding button-progress' pt={2} gap={2} display={'flex'} alignContent={'center'} flexDirection={'row'}>
                     <Box className='section-button-container'>
                         <IconButton aria-label="delete"
                             onClick={(e) => openLesson(sectionId)}
                             variant="text"
-                            style={{ color: `#000000`, backgroundColor: 'red', margin: '5px' }}
-                            sx={{
-                                ':hover': {
-                                    color: `black !important`,
-                                    backgroundColor: 'white !important',
-                                },
-                            }}
+                            color='primary'
                         >
                             <KeyboardDoubleArrowRightOutlinedIcon className='section-card-icon' />
                         </IconButton>
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', marginTop: '10px', marginLeft: '5px' }}>
-                        <Box sx={{ width: '100%', mr: 1, color: 'red' }}>
-                            <LinearProgress color='primary' variant="determinate" value={calculatePercentageCompleted(section_status)} />
-                        </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center'}}>
+                        {/* <Box sx={{ width: '100%', mr: 1, color: 'red' }}>
+                            <LinearProgress  variant="determinate" value={calculatePercentageCompleted(section_status)} />
+                        </Box> */}
                         <Box sx={{ minWidth: 35 }}>
                             <Typography variant="body2" color="text.secondary">{calculatePercentageCompleted(section_status)} %</Typography>
                         </Box>

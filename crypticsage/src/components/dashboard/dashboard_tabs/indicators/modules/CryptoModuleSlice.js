@@ -3,6 +3,29 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from "axios";
 const baseUrl = process.env.NODE_ENV === 'development' ? process.env.REACT_APP_BASEURL : process.env.REACT_APP_NGROK_URL;
 
+const lineColors = [
+    '#D32F2F', // Red
+    '#F57C00', // Orange
+    '#1976D2', // Blue
+    '#7B1FA2', // Purple
+    '#00796B', // Teal
+    '#689F38', // Light Green
+    '#512DA8', // Deep Purple
+    '#0097A7', // Cyan
+    '#C2185B', // Pink
+    '#388E3C', // Green
+    '#303F9F', // Indigo
+    '#AFB42B', // Lime
+    '#FFA000', // Amber
+    '#5D4037', // Brown
+    '#616161', // Gray
+    '#FBC02D', // Yellow
+    '#E64A19', // Deep Orange
+    '#0288D1', // Light Blue
+    '#C0CA33', // Lime Green
+    '#455A64', // Blue Gray
+];
+
 export const executeAllSelectedFunctions = createAsyncThunk(
     'cryptoModule/sendApiRequests',
     async (finalTalibExecuteQuery, thunkAPI) => {
@@ -278,9 +301,10 @@ const cryptoModuleSlice = createSlice({
                     ]
                 }
                 state.selectedFunctions.push(objectToPush)
-
+                let colorsTaken = state.modifiedSelectedFunctionWithDataToRender.map((func) => func.color);
+                let colorsAvailableForCharts = lineColors.filter((color) => !colorsTaken.includes(color));
                 // console.log(result)
-                result.forEach((differentOutputs) => {
+                result.forEach((differentOutputs, i) => {
                     const objectForChart = {
                         id: newId,
                         name: name,
@@ -291,6 +315,7 @@ const cryptoModuleSlice = createSlice({
                         differentiatorValue: diffVal,
                         isDataNew: false,
                         splitPane: splitPane,
+                        color: colorsAvailableForCharts[i]
                     }
                     state.modifiedSelectedFunctionWithDataToRender.push(objectForChart)
                 })
@@ -482,7 +507,8 @@ const cryptoModuleSlice = createSlice({
                     // If an object with the same 'key' exists, update it
                     objectForChart.visible = true;
                     objectForChart.isDataNew = true;
-                    state.modifiedSelectedFunctionWithDataToRender[existingObjectIndex] = objectForChart;
+                    objectForChart.color = state.modifiedSelectedFunctionWithDataToRender[existingObjectIndex].color;
+                    state.modifiedSelectedFunctionWithDataToRender[existingObjectIndex] = { ...state.modifiedSelectedFunctionWithDataToRender[existingObjectIndex], ...objectForChart };
                 } else {
                     // If no object with the same 'key' exists, push the new object
                     state.modifiedSelectedFunctionWithDataToRender.push(objectForChart);

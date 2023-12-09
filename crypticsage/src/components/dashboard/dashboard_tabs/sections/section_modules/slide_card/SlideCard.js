@@ -46,14 +46,9 @@ const SlideCard = (props) => {
                 <Box>
                     <Button
                         onClick={goBackToLessons}
-                        variant="text"
-                        style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '20px', height: '30px' }}
-                        sx={{
-                            ':hover': {
-                                color: `${theme.palette.text.primary} !important`,
-                                backgroundColor: `${theme.palette.background.paper} !important`
-                            },
-                        }}>Go Back</Button>
+                        variant="outlined"
+                        style={{ margin: '5px', marginRight: '20px', height: '30px' }}
+                    >Go Back</Button>
                 </Box>
             </Box>
             <Box className='slides' pl={4} pr={4}>

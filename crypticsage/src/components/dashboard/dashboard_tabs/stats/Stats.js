@@ -215,7 +215,7 @@ const Stats = (props) => {
                                         title='Welcome to CrypticSage'
                                         value=""
                                         date={new Date().toLocaleString('au', { hour12: true })}
-                                        buttonName="Start" />
+                                        buttonName="START" />
 
                                     :
                                     <CustomCard

@@ -26,12 +26,12 @@
 }
 
 .menu-item :hover {
-  color: red !important;
+  color: var(--mui-palette-primary-main) !important;
   transition: all 0.2s ease-in-out;
 }
 
-@media screen and (min-width: 1400px) {
-}
+/* @media screen and (min-width: 1400px) {
+} */
 
 /* @media screen and (max-width: 600px) {
   .content {

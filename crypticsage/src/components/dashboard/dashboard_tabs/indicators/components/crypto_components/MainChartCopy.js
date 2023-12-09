@@ -15,11 +15,11 @@ import {
     , setBarsFromTo
     , toggleShowHideChartFlag
     , removeFromSelectedFunction
-    , toggleShowSettingsFlag
     , setSelectedFunctionInputValues
     , setSelectedFunctionOptionalInputValues
     , toggleProcessSelectedFunctionsOnMoreData
     , setTalibResult
+    , toggleShowSettingsFlag
     , resetStreamedTickerDataRedux
 } from '../../modules/CryptoModuleSlice'
 
@@ -128,7 +128,7 @@ const MultiSelect = (props) => {
 }
 
 const SettingsCard = (props) => {
-    const { selectedFunctionNameAndId, fetchValues } = props
+    const { selectedFunctionNameAndId, fetchValues, setOpenSettings } = props
     const { slId, slName } = selectedFunctionNameAndId
     const token = useSelector(state => state.auth.accessToken);
     const histDataLength = useSelector(state => state.cryptoModule.cryptoDataInDb).length
@@ -248,7 +248,7 @@ const SettingsCard = (props) => {
                     console.log(res.data)
                     dispatch(setTalibResult({ id: id, name: name, optInputs: optInputs, result: res.data.result }))
                     setTalibExecuting(false)
-                    dispatch(toggleShowSettingsFlag({ id: id, name: name }))
+                    setOpenSettings(false)
                 })
                 .catch(err => {
                     setTalibExecuting(false)
@@ -260,7 +260,8 @@ const SettingsCard = (props) => {
 
     const handleCloseSettings = (param) => {
         const { name, id } = param
-        dispatch(toggleShowSettingsFlag({ id: id, name: name }))
+        console.log(name, id)
+        setOpenSettings(false)
     }
 
     return (
@@ -977,29 +978,6 @@ const MainChart = (props) => {
             return;
         }
 
-        let lineColors = [
-            '#FF5733', // Red
-            '#33FF57', // Green
-            '#3357FF', // Blue
-            '#FF33FB', // Pink
-            '#33FFF6', // Cyan
-            '#F3FF33', // Yellow
-            '#FF8633', // Orange
-            '#9D33FF', // Purple
-            '#33FF8B', // Light Green
-            '#FF3333', // Bright Red
-            '#33B2FF', // Sky Blue
-            '#FFDA33', // Gold
-            '#FF33A8', // Magenta
-            '#6E33FF', // Indigo
-            '#33FF57', // Lime
-            '#FF5733', // Coral
-            '#33FFD5', // Turquoise
-            '#FF9A33', // Amber
-            '#B8FF33', // Chartreuse
-            '#FF333D'  // Scarlet
-        ];
-
         // console.time('Chart Load Time');
 
         const reduxDataCopy = JSON.parse(JSON.stringify(modifiedSelectedFunctionWithDataToRender));
@@ -1023,14 +1001,12 @@ const MainChart = (props) => {
         } else { // console.log("No new data for chart") 
         }
 
-        let lineColorsCopy = lineColors
         // checking and rendering chart
         selectedFunctionData.forEach((func) => {
             const funcIds = func.functions.map((f) => f.id) // if count = 1 then it is a single function else if 2 a copy of same function is present
             // console.log("Func id from redux", funcIds)
             funcIds.forEach((id) => {
                 const filtered = reduxDataCopy.filter((chartData) => chartData.id === id);
-                console.log('f length', filtered.length)
                 // console.log("Filtered", filtered)
                 filtered.forEach((f, i) => {
                     // console.log(f.splitPane)
@@ -1057,10 +1033,8 @@ const MainChart = (props) => {
                         }
                     } else {
                         // console.log("Does not exist in state", f.key)
-                        console.log(i)
-                        const color = lineColorsCopy[i];
                         const newSeries = chart.current.addLineSeries({
-                            color: color,
+                            color: f.color,
                             lineWidth: 1,
                             visible: f.visible,
                             priceLineVisible: false,
@@ -1076,13 +1050,11 @@ const MainChart = (props) => {
                             key: f.key,
                             pane: f.splitPane ? 1 : 0,
                             visible: f.visible,
-                            color: color
+                            color: f.color
                         }
                         ]);
                     }
                 });
-                lineColorsCopy = lineColorsCopy.slice(filtered.length)
-
             });
         });
 
@@ -1342,11 +1314,16 @@ const MainChart = (props) => {
         dispatch(toggleShowHideChartFlag({ id: id, name: name }))
     }
 
+    const [openSettings, setOpenSettings] = useState(false)
+    const [talibProps, setTalibProps] = useState({ id: '', name: '' })
+
     const handleOpenSettings = (param) => {
         const { id, name } = param
-        dispatch(toggleShowSettingsFlag({ id: id, name: name }))
+        setTalibProps({ id: id, name: name })
+        setOpenSettings(true)
         // console.log(name, id)
     }
+    // console.log(talibProps)
 
     // handles the delete button
     const handleDeleteQuery = (param) => {
@@ -1459,28 +1436,28 @@ const MainChart = (props) => {
                                                 <DeleteOutlineIcon className='smaller-icon' />
                                             </IconButton>
                                         </Box>
-                                        <Dialog
-                                            open={show_settings}
-                                            onClose={
-                                                (e, reason) => {
-                                                    if (reason === 'backdropClick') {
-                                                        console.log('backdrop clicked')
-                                                        dispatch(toggleShowSettingsFlag({ id: id, name: name }))
-                                                    }
-                                                }
-                                            }
-                                        >
-                                            <SettingsCard
-                                                selectedFunctionNameAndId={{ slId: id, slName: name }}
-                                                fetchValues={fetchValues}
-                                            />
-                                        </Dialog>
                                     </Box>
                                 )
                             })}
                         </Box>
                     )
                 })}
+                <Dialog open={openSettings}
+                    onClose={
+                        (e, reason) => {
+                            if (reason === 'backdropClick') {
+                                console.log('backdrop clicked')
+                                setOpenSettings(false)
+                            }
+                        }
+                    }
+                >
+                    <SettingsCard
+                        selectedFunctionNameAndId={{ slId: talibProps.id, slName: talibProps.name }}
+                        fetchValues={fetchValues}
+                        setOpenSettings={setOpenSettings}
+                    />
+                </Dialog>
             </Box>
             <Box ref={chartboxRef}></Box>
             <Box className='tool-tip-indicators'></Box>
