@@ -242,7 +242,7 @@ const SelectedFunctionContainer = (props) => {
         <Box width='100%' p={'5px'} className='indicator-function-box'>
             <Accordion TransitionProps={{ mountOnEnter: true }} className='function-accordian' expanded={expanded === `${name}`} onChange={handleChange(`${name}`)}>
                 <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
+                    expandIcon={<ExpandMoreIcon sx={{color: `${theme.palette.primary.dark}`}}/>}
                     aria-controls="panel1a-content"
                     id="panel1a-header"
                     sx={{

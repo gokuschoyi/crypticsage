@@ -64,6 +64,8 @@ import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import AspectRatioIcon from '@mui/icons-material/AspectRatio';
 
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+
 
 export { 
     LightModeOutlinedIcon, 
@@ -119,5 +121,6 @@ export {
     DeleteForeverIcon,
     OpenInFullIcon,
     CloseFullscreenIcon,
-    AspectRatioIcon
+    AspectRatioIcon,
+    ShowChartIcon
 }

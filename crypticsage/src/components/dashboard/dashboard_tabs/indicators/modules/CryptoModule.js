@@ -797,7 +797,7 @@ const CryptoModule = () => {
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
                                                 '& fieldset': {
-                                                    borderColor: `${theme.palette.primary.newWhite} !important`,
+                                                    borderColor: `${theme.palette.primary.main} !important`,
                                                 }
                                             },
                                             '& .MuiInputBase-input': {

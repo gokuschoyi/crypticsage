@@ -45,7 +45,8 @@
 .card-holder {
   /* color: var(--mui-palette-secondary-main) !important; */
   /* border: 2px solid; */
-  padding: 20px !important;
+  padding: 16px !important;
+  gap: 8px;
   border-radius: 20px !important;
   /* margin: 15px !important; */
   min-height: 220px !important;
@@ -56,6 +57,25 @@
   transition: all 0.3s ease-in-out;
   /* cursor: pointer; */
   background-color: var(--mui-palette-background-paper);
+}
+
+.stats-next-lesson,
+.stats-last-lesson,
+.stats-next-quiz,
+.stats-last-quiz {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stats-last-quiz-status,
+.stats-last-lesson-status {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
 
 .card-holder-long {
@@ -93,23 +113,29 @@
 .card-holder-slider {
   /* color: var(--mui-palette-secondary-main) !important; */
   background-color: var(--mui-palette-background-paper);
-  padding: 15px 10px 20px 20px !important;
+  padding: 16px 12px 20px 16px !important;
   border-radius: 20px !important;
-  /* margin: 15px !important; */
+  /* margin: 0px 4px 0px 4px !important; */
   /* border: 2px solid; */
   /* min-height: 250px !important; */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
-  height: 181px !important;
+  height: 183px !important;
   /* cursor: pointer; */
 }
+
+/* .info-box{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+  height: -webkit-fill-available;
+} */
 
 .underline-animation {
   cursor: pointer;
   position: relative;
-  display: inline-block;
 }
 
 .underline-animation::after {
@@ -118,8 +144,10 @@
   bottom: 0;
   left: 0;
   width: 0;
-  height: 2px; /* You can adjust the thickness of the underline here */
-  background-color: var(--mui-palette-primary-light); /* Or set to a specific color */
+  height: 2px;
+  /* You can adjust the thickness of the underline here */
+  background-color: var(--mui-palette-primary-light);
+  /* Or set to a specific color */
   transition: width 0.3s ease;
 }
 
@@ -132,7 +160,7 @@
   justify-content: flex-start;
 }
 
-.action-box > a {
+.action-box>a {
   color: var(--mui-palette-primary-light);
 }
 
@@ -154,12 +182,36 @@
 }
 
 .swiper-pagination {
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 .swiper-pagination span {
   background-color: #fff;
   overflow: hidden;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  color: var(--mui-palette-primary-light) !important;
+  height: 20px !important;
+  width: 20px !important;
+  top: 93% !important;
+}
+
+.swiper-button-next {
+  right: 16px !important;
+}
+
+.swiper-button-prev {
+  left: 16px !important;
+}
+
+.swiper-button-next:after {
+  font-size: 20px !important;
+}
+
+.swiper-button-prev:after {
+  font-size: 20px !important;
 }
 
 .span-selection-test {
@@ -176,9 +228,10 @@
   background-color: bisque;
 }
 
-.coin-chart-box{
+.coin-chart-box {
   padding: 8px;
-  background-color: var(--mui-palette-background-paper)
+  background-color: var(--mui-palette-background-paper);
+  border-radius: 8px;
 }
 
 /* .span-selection-test span
@@ -189,7 +242,7 @@
 .item-bg {
   width: 300px;
   height: 400px;
-  z-index: -1;
+  z-index: -100;
   position: absolute;
   top: 30px;
   background: var(--mui-palette-primary-light);
@@ -213,7 +266,6 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  gap: 2rem;
 }
 
 .token-image {
@@ -229,14 +281,15 @@
 .high-low-box {
   display: flex;
   flex-direction: row;
-  gap: 1rem;
+  justify-content: space-between;
 }
 
 .center-col {
   display: flex;
   flex-direction: row;
-  gap: 1rem;
+  justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 
 .token-selector-box {
@@ -248,9 +301,10 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0px 10px;
-  margin: 10px;
+  /* gap: 1rem; */
+  padding: 8px 0px;
+  /* margin: 10px; */
+  align-items: center;
 }
 
 .time-period-toggleGrid-box {
@@ -258,9 +312,10 @@
   flex-direction: row;
   justify-content: space-between;
   padding-right: 10px;
+  gap: 8px;
 }
 
-.toggle-grid-toggler{
+.toggle-grid-toggler {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -271,6 +326,7 @@
   flex-direction: row;
   justify-content: space-around;
   width: stretch;
+  gap:8px;
   /* gap: 1rem; */
   /* padding: 0px 20px; */
   /* margin:10px; */
@@ -278,6 +334,30 @@
 
 .tokenSelector-autocomplete {
   cursor: pointer;
+}
+
+@media screen and (min-width:1200px) {
+
+  .stats-next-lesson,
+  .stats-last-lesson,
+  .stats-next-quiz,
+  .stats-last-quiz {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stats-last-quiz-status,
+  .stats-last-lesson-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0px;
+  }
+
+  .stats-last-quiz-status h6:nth-of-type(2),
+  .stats-last-lesson-status h6:nth-of-type(2) {
+    font-size: 12px;
+    font-weight: 500;
+  }
 }
 
 @media screen and (min-width: 1400px) {
@@ -290,5 +370,19 @@
   .token-selector {
     display: flex;
     flex-direction: column !important;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .time-period-toggleGrid-box {
+    width: -webkit-fill-available;
+  }
+
+  .stats-next-lesson,
+  .stats-last-lesson,
+  .stats-next-quiz,
+  .stats-last-quiz {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

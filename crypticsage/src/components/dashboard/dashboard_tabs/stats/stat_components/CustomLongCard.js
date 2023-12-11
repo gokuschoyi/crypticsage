@@ -5,13 +5,13 @@ const CustomLongCard = (props) => {
     return (
         <Box className='card-holder-long hover'>
             <Box className='info-box'>
-                <Typography sx={{ fontSize: 20, fontWeight: '500', textAlign: 'left' }} gutterBottom>
+                <Typography variant='h4' sx={{ fontWeight: '500', textAlign: 'left' }} gutterBottom>
                     {title} :
                 </Typography>
-                <Typography sx={{ fontSize: 20, fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} gutterBottom>
+                <Typography variant='h5' sx={{ fontWeight: '300', textAlign: 'left', marginBottom: '0px' }} gutterBottom>
                     {content}
                 </Typography>
-                <Typography sx={{ fontSize: 16, fontWeight: '300', textAlign: 'left' }} gutterBottom>
+                <Typography variant='h5' sx={{ fontWeight: '300', textAlign: 'left' }} gutterBottom>
                     {subtitle}
                 </Typography>
             </Box>

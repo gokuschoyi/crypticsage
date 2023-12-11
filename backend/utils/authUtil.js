@@ -133,10 +133,10 @@ const transformQuizData = async (userQuizStatus, quizCollection) => {
             quizTitle,
             quizDescription,
             questions,
-            quiz_completed:quizCompleted,
-            quiz_completed_date:quizCompletedDate,
-            quiz_score:quizScore,
-            quiz_total:quizTotal,
+            quiz_completed: quizCompleted,
+            quiz_completed_date: quizCompletedDate,
+            quiz_score: quizScore,
+            quiz_total: quizTotal,
         });
     }
     return { outputObject };
@@ -191,8 +191,8 @@ const processUploadedCsv = async (req) => {
     }
 }
 
-const getRecentLessonAndQuiz = async (lessonStatus, quizStatus) => {
-
+const getRecentLessonAndQuiz = async (lessonStatus, quizStatus, sectionIDs) => {
+    let nextLesson = {};
     let latestLesson = {};
     for (const key in lessonStatus) {
         const lessons = lessonStatus[key];
@@ -206,9 +206,34 @@ const getRecentLessonAndQuiz = async (lessonStatus, quizStatus) => {
     }
 
     const mostRecentLesson = latestLesson
+    // console.log(Object.keys(mostRecentLesson).length !== 0)
+    if (Object.keys(mostRecentLesson).length !== 0) {
+        const sectionId = mostRecentLesson.section_id;
+        const lessonId = mostRecentLesson.lesson_id;
+        const allLessonForSection = lessonStatus[sectionId]
+
+        const latestSectionIndex = sectionIDs.findIndex((section) => section.sectionId === sectionId)
+        const latestLessonIndex = allLessonForSection.findIndex((lesson) => lesson.lesson_id === lessonId)
+        // console.log("Latest lesson index", latestLessonIndex, "Latest section index", latestSectionIndex)
+
+        if (latestLessonIndex === allLessonForSection.length - 1) {
+            nextLesson
+            const nextSectionID = sectionIDs[latestSectionIndex + 1].sectionId
+            nextLesson = lessonStatus[nextSectionID][0]
+        } else {
+            nextLesson = allLessonForSection[latestLessonIndex + 1]
+            // console.log("Next lesson is", nextLesson)
+        }
+    } else {
+        const firstSectionID = sectionIDs[0].sectionId
+        // console.log('First section ID when initial',firstSectionID)
+        nextLesson = lessonStatus[firstSectionID][0]
+        // console.log('No lesson completed yet, initial')
+    }
 
     let latestDate = null;
     let mostRecentQuiz = {};
+    let nextQuiz = {};
     try {
         for (const sectionId in quizStatus) {
             const lesson = quizStatus[sectionId];
@@ -222,7 +247,46 @@ const getRecentLessonAndQuiz = async (lessonStatus, quizStatus) => {
                 }
             }
         }
-        return { mostRecentLesson, mostRecentQuiz }
+
+        if (Object.keys(mostRecentQuiz).length !== 0) {
+            const mostRecentQuiz_sectionID = mostRecentQuiz.section_id;
+            const mostRecentQuiz_lessonID = mostRecentQuiz.lesson_id;
+            const mostRecentQuiz_quizID = mostRecentQuiz.quiz_id;
+            const allLessonForSection_ = lessonStatus[mostRecentQuiz_sectionID]
+            const latestSectionIndex_ = sectionIDs.findIndex((section) => section.sectionId === mostRecentQuiz_sectionID)
+            let nextLesson_ = {};
+
+            const allQuizForLesson = quizStatus[mostRecentQuiz_sectionID][mostRecentQuiz_lessonID]
+            const latestQuizIndex = allQuizForLesson.findIndex((quiz) => quiz.quiz_id === mostRecentQuiz_quizID)
+            // console.log("Latest quiz index", latestQuizIndex)
+
+            if (latestQuizIndex === allQuizForLesson.length - 1) {
+                // console.log("Last quiz done for lesson")
+                const lessonIndex = allLessonForSection_.findIndex((lesson) => lesson.lesson_id === mostRecentQuiz_lessonID)
+                // console.log("Lesson index", lessonIndex)
+                if (lessonIndex === allLessonForSection_.length - 1) {
+                    const nextSectionID = sectionIDs[latestSectionIndex_ + 1].sectionId
+                    nextLesson_ = lessonStatus[nextSectionID][0]
+                    nextQuiz = quizStatus[nextSectionID][nextLesson_.lesson_id][0]
+                } else {
+                    nextLesson_ = allLessonForSection_[lessonIndex + 1]
+                    nextQuiz = quizStatus[mostRecentQuiz_sectionID][nextLesson_.lesson_id][0]
+                }
+            } else {
+                nextQuiz = allQuizForLesson[latestQuizIndex + 1]
+            }
+            // console.log("Next quiz is", nextQuiz)
+        } else {
+            const firstSectionID = sectionIDs[0].sectionId
+            // console.log('First section ID when initial',firstSectionID)
+            const all_lessons = quizStatus[firstSectionID]
+            const firstLessonID = Object.keys(all_lessons)[0]
+            // console.log('First lesson ID when initial',firstLessonID)
+            nextQuiz = quizStatus[firstSectionID][firstLessonID][0]
+            // console.log('No quiz completed yet, initial')
+        }
+
+        return { mostRecentLesson, nextLesson, mostRecentQuiz, nextQuiz }
     } catch (error) {
         log.error(error.stack)
         throw error

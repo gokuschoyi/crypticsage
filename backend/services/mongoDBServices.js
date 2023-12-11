@@ -726,6 +726,30 @@ const getAllDocumentsFromCollection = async (collectionName, filter) => {
     }
 }
 
+
+/**
+ * Fetechs the ids of all the sections in order
+ * @returns {Promise<array>} An array of section ids
+ */
+const getSectionIDs = async () => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const sectionCollection = db.collection('sections')
+        const keysToIncude = { _id: 0, sectionId: 1, title: 1 }
+
+        const sectionIds = await sectionCollection.aggregate([
+            {
+                $project: keysToIncude
+            }
+        ]).toArray()
+
+        return sectionIds
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
 /**
  * Inserts a new document to a collection
  * @async
@@ -2484,6 +2508,7 @@ module.exports = {
     , getQuizDataById
     , updateQuizStatusForUser
     , getAllDocumentsFromCollection
+    , getSectionIDs
     , checkForDocumentInCollection
     , insertDocumentToCollection
     , deleteOneDocumentFromCollection

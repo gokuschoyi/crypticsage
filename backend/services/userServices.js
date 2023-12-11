@@ -446,9 +446,10 @@ const processSubmitQuiz = async ({ email, sectionId, lessonId, quizId, quizData 
 const processGetRecentLessonAndQuiz = async ({ email }) => {
     try {
         let user = await MDBServices.getUserByEmail(email)
+        const sectionIDs = await MDBServices.getSectionIDs()
         let lessonStatus = user[0].lesson_status
         let quizStatus = user[0].quiz_status
-        let recentLessonQuizStatus = await AuthUtil.getRecentLessonAndQuiz(lessonStatus, quizStatus)
+        let recentLessonQuizStatus = await AuthUtil.getRecentLessonAndQuiz(lessonStatus, quizStatus, sectionIDs)
         return recentLessonQuizStatus
     } catch (error) {
         log.error(error.stack)

@@ -174,7 +174,7 @@ const ReorderList = ({ orderList, setOrderList }) => { // orderList is the initi
                 </Tooltip>
             </Box>
             {indicators.length === 5 &&
-                <Typography variant='custom' >
+                <Typography variant='custom' sx={{textAlign:'start'}}>
                     Please add indicators to reorder them
                 </Typography>
             }

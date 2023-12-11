@@ -145,87 +145,94 @@ const CoinChartBox = () => {
         <Box className='token-chart-container' display='flex' flexDirection='column' height='100%'>
             <Box className='token-selector-box'>
                 <Box className='token-selector'>
-                    <Typography sx={{ fontSize: 26, fontWeight: '600', textAlign: 'left', marginBottom: '0px' }} gutterBottom>Coin</Typography>
                     {options && options.length > 0 &&
-                        <Box>
-                            <Autocomplete
-                                size='small'
-                                disableClearable={true}
-                                className='tokenSelector-autocomplete'
-                                value={inputValue}
-                                onChange={(event, newInputValue) => handleInputChange(event, newInputValue)}
-                                id="controllable-states-demo"
-                                options={options}
-                                sx={{ width: 300 }}
-                                renderInput={(params) => <TextField
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            '& fieldset': {
-                                                borderColor: `${theme.palette.secondary.main}`,
-                                            },
-                                            '&:hover fieldset': {
-                                                borderColor: `${theme.palette.primary.main}`,
-                                            },
-                                        }
-                                    }}
-                                    {...params}
-                                    label="Select a Token"
-                                    color="secondary"
-                                />}
+                        <Autocomplete
+                            size='small'
+                            disableClearable={true}
+                            className='tokenSelector-autocomplete'
+                            value={inputValue}
+                            onChange={(event, newInputValue) => handleInputChange(event, newInputValue)}
+                            id="controllable-states-demo"
+                            options={options}
+                            sx={{ width: 150 }}
+                            renderInput={(params) => <TextField
+                                sx={{
+                                    '& .MuiInputBase-input': {
+                                        height: '10px'
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        top: '-5px'
+                                    },
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: `${theme.palette.secondary.main}`,
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: `${theme.palette.primary.main}`,
+                                        },
+                                    }
+                                }}
+                                {...params}
+                                label="Select a Token"
+                                color="secondary"
+                            />}
+                        />
+                    }
+
+                    <Box className='time-period-toggleGrid-box'>
+                        <Box className='time-period-checkbox'>
+                            <FormControlLabel
+                            sx={{marginLeft:'0px'}}
+                                value="30m"
+                                control={<Checkbox size='small' name='minute' onChange={handleTimePeriodChange} checked={timePeriod.minute.checked} />}
+                                label="Mins"
+                                labelPlacement="start"
+                            />
+                            <FormControlLabel
+                            sx={{marginLeft:'0px'}}
+                                value="2h"
+                                control={<Checkbox size='small' name='hour' onChange={handleTimePeriodChange} checked={timePeriod.hour.checked} />}
+                                label="Hrs"
+                                labelPlacement="start"
+                            />
+                            <FormControlLabel
+                            sx={{marginLeft:'0px'}}
+                                value="1D"
+                                control={<Checkbox size='small' name='day' onChange={handleTimePeriodChange} checked={timePeriod.day.checked} />}
+                                label="Days"
+                                labelPlacement="start"
                             />
                         </Box>
-                    }
-                </Box>
-                <Box className='time-period-toggleGrid-box'>
-                    <Box className='time-period-checkbox'>
-                        <FormControlLabel
-                            value="30m"
-                            control={<Checkbox size='small' name='minute' onChange={handleTimePeriodChange} checked={timePeriod.minute.checked}  />}
-                            label="Mins"
-                            labelPlacement="start"
-                        />
-                        <FormControlLabel
-                            value="2h"
-                            control={<Checkbox size='small' name='hour' onChange={handleTimePeriodChange} checked={timePeriod.hour.checked}  />}
-                            label="Hrs"
-                            labelPlacement="start"
-                        />
-                        <FormControlLabel
-                            value="1D"
-                            control={<Checkbox size='small' name='day' onChange={handleTimePeriodChange} checked={timePeriod.day.checked}  />}
-                            label="Days"
-                            labelPlacement="start"
-                        />
-                    </Box>
-                    <Box className='toggle-grid-toggler'>
-                        <FormControlLabel
-                            value="top"
-                            control={
-                                <Switch
-                                    sx={{
-                                        '& .MuiSwitch-track': {
-                                            backgroundColor: '#e3d1d1'
-                                        }
-                                    }}
-                                    size="small"
-                                    checked={checked}
-                                    color="primary"
-                                    onChange={handleChange}
-                                    inputProps={{ 'aria-label': 'controlled' }}
-                                />
-                            }
-                            label="GridLine"
-                            labelPlacement="start"
-                        />
+                        <Box className='toggle-grid-toggler'>
+                            <FormControlLabel
+                                value="top"
+                                control={
+                                    <Switch
+                                        sx={{
+                                            '& .MuiSwitch-track': {
+                                                backgroundColor: `${theme.palette.secondary.main}`,
+                                            }
+                                        }}
+                                        size="small"
+                                        checked={checked}
+                                        color="primary"
+                                        onChange={handleChange}
+                                        inputProps={{ 'aria-label': 'controlled' }}
+                                    />
+                                }
+                                label="GridLine"
+                                labelPlacement="start"
+                            />
+                        </Box>
                     </Box>
                 </Box>
             </Box>
             {chartData.length === 0 ?
-                <Box className='coin-chart-box' height="320px" alignItems='center' justifyContent='center' display='flex'>
-                    <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="80%" height="80%" />
+                <Box className='coin-chart-box' height="400px" alignItems='center' justifyContent='center' display='flex'>
+                    <Skeleton variant="rounded" sx={{ bgcolor: '#3f3f40' }} width="95%" height="95%" />
                 </Box>
                 :
-                <Box className='coin-chart-box' height="320px">
+                <Box className='coin-chart-box' height="400px">
                     <DashboardChart chartData={chartData} gridLineToggle={checked} selectedTokenName={selectedTokenName} />
                 </Box>
             }

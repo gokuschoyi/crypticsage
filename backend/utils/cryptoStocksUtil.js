@@ -185,7 +185,7 @@ const fetchTopTickerByMarketCap = async ({ length }) => {
 
         const filteredCryptoDataWithMatched = filteredCryptoData.map(crypto => {
             // Find the ticker with the same symbol
-            const ticker = tickerSymbol.find(t => t.ticker_name.includes(crypto.symbol));
+            const ticker = tickerSymbol.find(t => t.ticker_name.startsWith(crypto.symbol));
             // If a matching ticker is found, use its matched value, otherwise use false
             const matched = ticker ? ticker.ticker_name : 'N/A';
             // Return a new object with the matched key

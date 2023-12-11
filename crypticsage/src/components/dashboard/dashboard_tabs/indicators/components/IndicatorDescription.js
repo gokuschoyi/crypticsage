@@ -273,7 +273,7 @@ const FunctionContainer = (props) => {
         <Box width='100%' p={'5px'} className='indicator-function-box'>
             <Accordion TransitionProps={{ mountOnEnter: true }} className='function-accordian' expanded={expanded === `${name}`} onChange={handleChange(`${name}`)}>
                 <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
+                    expandIcon={<ExpandMoreIcon sx={{ color: `${theme.palette.secondary.dark}` }} />}
                     aria-controls="panel1a-content"
                     id="panel1a-header"
                     sx={{
@@ -454,6 +454,7 @@ const Indicators = (props) => {
     const token = useSelector(state => state.auth.accessToken);
     const dispatch = useDispatch()
     const histDataLength = useSelector(state => state.cryptoModule.cryptoDataInDb).length
+    const theme = useTheme()
 
     // const [copyRawTalibDesc, setCopyRawTalibDesc] = useState([])
     const talibDescriptionRedux = useSelector(state => state.cryptoModule.talibDescription);
@@ -556,11 +557,11 @@ const Indicators = (props) => {
                                     <Box width='100%' pt={1} pb={1}  >
                                         <Accordion TransitionProps={{ mountOnEnter: true }} >
                                             <AccordionSummary
-                                                expandIcon={<ExpandMoreIcon />}
+                                                expandIcon={<ExpandMoreIcon sx={{ color: `${theme.palette.primary.dark}` }} />}
                                                 aria-controls="panel1a-content"
                                                 id="panel1a-header"
                                             >
-                                                <Typography variant='h5'>({index + 1}) : {group_name} <span style={{ color: 'red' }}>({functions.length})</span></Typography>
+                                                <Typography variant='h5'><span style={{ color: `${theme.palette.primary.main}` }}>({index + 1})</span> : {group_name} <span style={{ color: `${theme.palette.primary.main}` }}>({functions.length})</span></Typography>
                                             </AccordionSummary>
                                             <AccordionDetails>
                                                 <Grid container spacing={1} className='indicator-data-container'>

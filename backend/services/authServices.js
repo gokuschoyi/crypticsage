@@ -97,6 +97,7 @@ const generateUserObjectForLogin = async (user, adminStatus, token) => {
 const handleEmailPasswordLogin = async (email, password) => {
     try {
         const user = await MDBServices.getUserByEmail(email)
+        const sectionIDs = await MDBServices.getSectionIDs()
         if (user.length === 0) {
             throw new Error("There is no account associated with your email. Register first. (Username/Password)")
         } else {
@@ -110,7 +111,7 @@ const handleEmailPasswordLogin = async (email, password) => {
                 const token = await generateJWTToken(email, user_name, uid)
                 let lesson_status = user[0].lesson_status
                 let quiz_status = user[0].quiz_status
-                let recent_lesson_quiz = await authUtil.getRecentLessonAndQuiz(lesson_status, quiz_status)
+                let recent_lesson_quiz = await authUtil.getRecentLessonAndQuiz(lesson_status, quiz_status, sectionIDs)
 
                 let userData = await generateUserObjectForLogin(user, adminStatus, token)
 
@@ -140,6 +141,7 @@ const handleGoogleLogin = async (credential) => {
         } else {
             let email = payload.email;
             const user = await MDBServices.getUserByEmail(email)
+            const sectionIDs = await MDBServices.getSectionIDs()
             if (user.length === 0) {
                 throw new Error("There is no account associated with your email. Register first. (Google Login)")
             } else {
@@ -149,7 +151,7 @@ const handleGoogleLogin = async (credential) => {
                 const token = await generateJWTToken(email, user_name, uid)
                 let lesson_status = user[0].lesson_status
                 let quiz_status = user[0].quiz_status
-                let recent_lesson_quiz = await authUtil.getRecentLessonAndQuiz(lesson_status, quiz_status)
+                let recent_lesson_quiz = await authUtil.getRecentLessonAndQuiz(lesson_status, quiz_status,sectionIDs)
 
                 let userData = await generateUserObjectForLogin(user, adminStatus, token)
 
@@ -174,6 +176,7 @@ const handleGoogleLogin = async (credential) => {
 const handleFacebookLogin = async (facebook_email) => {
     try {
         const user = await MDBServices.getUserByEmail(facebook_email)
+        const sectionIDs = await MDBServices.getSectionIDs()
         if (user.length === 0) {
             throw new Error("There is no account associated with your email. Register first. (Facebook Login)")
         } else {
@@ -182,7 +185,7 @@ const handleFacebookLogin = async (facebook_email) => {
             const token = await generateJWTToken(email, user_name, uid)
             let lesson_status = user[0].lesson_status
             let quiz_status = user[0].quiz_status
-            let recent_lesson_quiz = await authUtil.getRecentLessonAndQuiz(lesson_status, quiz_status)
+            let recent_lesson_quiz = await authUtil.getRecentLessonAndQuiz(lesson_status, quiz_status, sectionIDs)
 
             let userData = await generateUserObjectForLogin(user, adminStatus, token)
 

@@ -14,8 +14,9 @@ import './Stats.css'
 import { getCryptoData, getWordOfTheDay } from '../../../../api/crypto';
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper";
+import { Autoplay, Pagination, Navigation, Mousewheel } from "swiper";
 import "swiper/css/pagination";
+import 'swiper/css/navigation';
 import "swiper/css";
 
 import CustomCard from './stat_components/CustomCard.js';
@@ -130,15 +131,19 @@ const Stats = (props) => {
                 box.addEventListener('mouseover', () => {
                     let scrollTop = window.pageYOffset
                     const { left, top, width, height } = box.getBoundingClientRect();
+                    const centerX = left + width / 2 - width / 2;
+                    const centerY = top + height / 2 - height / 2;
                     itemBg[0].classList.add('active');
                     itemBg[0].style.width = `${width}px`;
                     itemBg[0].style.height = `${height}px`;
-                    itemBg[0].style.transform = `translateX(${left}px) translateY(${top + scrollTop}px)`;
+                    itemBg[0].style.transform = `translateX(${centerX}px) translateY(${centerY + scrollTop}px)`;
                 })
                 box.addEventListener('mouseout', () => {
-                    const { left, top } = box.getBoundingClientRect();
+                    const { left, top, width, height } = box.getBoundingClientRect();
                     let scrollTop = window.pageYOffset
-                    itemBg[0].style.transform = `translateX(${left}px) translateY(${top + scrollTop}px)`;
+                    const centerX = left + width / 2 - width / 2;
+                    const centerY = top + height / 2 - height / 2;
+                    itemBg[0].style.transform = `translateX(${centerX}px) translateY(${centerY + scrollTop}px)`;
                     itemBg[0].style.width = `${0}px`;
                     itemBg[0].style.height = `${0}px`;
                     itemBg[0].classList.remove('active');
@@ -150,26 +155,45 @@ const Stats = (props) => {
         }
     })
 
+    const recentLessonAndQuiz = useSelector(state => state.stats.recent_lesson_quiz)
+
     //set sectionId in redux store
-    const redirectToLesson = () => {
-        dispatch(setSidebarState("sections"))
-        dispatch(setSectionFlag(false))
-        dispatch(setLessonFlag(true))
-        navigate('sections/5119f37b-ef44-4272-a536-04af51ef4bbc')
+    const redirectToLesson = ({ type }) => {
+        if (type === 'initial') {
+            console.log('redirect to lesson', type)
+            dispatch(setSidebarState("sections"))
+            dispatch(setSectionFlag(false))
+            dispatch(setLessonFlag(true))
+            const url = `sections/${recentLessonAndQuiz.nextLesson.section_id}`
+            // console.log(url)
+            navigate(url)
+        } else {
+            console.log('redirect to lesson', type)
+            dispatch(setSidebarState("sections"))
+            dispatch(setSectionFlag(false))
+            dispatch(setLessonFlag(true))
+            const url = `sections/${recentLessonAndQuiz.nextLesson.section_id}`
+            // console.log(url)
+            navigate(url)
+        }
     };
     const redirectToQuiz = () => {
         console.log('redirect to quiz')
+        const url = `quiz/${recentLessonAndQuiz.nextQuiz.quiz_id}`
+        console.log(url)
         dispatch(setSidebarState("quiz"))
-        navigate('quiz/2c4a5ef5-8ab4-409c-8b0f-4d8b2c063fe1')
+        navigate(url)
     }
 
     const initialRedirectToQuiz = () => {
         console.log('initial redirect to quiz')
+        const url = `quiz/${recentLessonAndQuiz.nextQuiz.quiz_id}`
+        console.log(url)
         dispatch(setSidebarState("quiz"))
-        navigate('quiz')
+        navigate(url)
     }
 
-    const recentLessonAndQuiz = useSelector(state => state.stats.recent_lesson_quiz)
+
 
     function isEmptyObject(obj) {
         if (typeof obj !== 'object' || obj === null) {
@@ -212,18 +236,21 @@ const Stats = (props) => {
                                 {isEmptyObject(recentLessonAndQuiz.mostRecentLesson) === true
                                     ?
                                     <CustomCard
-                                        title='Welcome to CrypticSage'
-                                        value=""
-                                        date={new Date().toLocaleString('au', { hour12: true })}
-                                        buttonName="START" />
-
+                                        cardType={'lesson'}
+                                        title='Welcome to CSage'
+                                        next={recentLessonAndQuiz && recentLessonAndQuiz.nextLesson}
+                                        mostRecent={'initial_lesson'}
+                                        buttonName="START"
+                                        buttonHandler={redirectToLesson.bind(null, { type: 'initial' })}
+                                    />
                                     :
                                     <CustomCard
-                                        title='Recent Chapter'
-                                        value={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentLesson.lesson_name}
-                                        date={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentLesson.lesson_completed_date}
+                                        cardType={'lesson'}
+                                        title='Lessons'
+                                        next={recentLessonAndQuiz && recentLessonAndQuiz.nextLesson}
+                                        mostRecent={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentLesson}
                                         buttonName="NEXT LESSON"
-                                        buttonHandler={redirectToLesson}
+                                        buttonHandler={redirectToLesson.bind(null, { type: 'not-initial' })}
                                     />
                                 }
                             </Grid>
@@ -231,18 +258,20 @@ const Stats = (props) => {
                                 {isEmptyObject(recentLessonAndQuiz.mostRecentQuiz) === true
                                     ?
                                     <CustomCard
+                                        cardType={'quiz'}
                                         title='Take your first Quiz'
-                                        value=""
-                                        date={new Date().toLocaleString('au', { hour12: true })}
+                                        next={recentLessonAndQuiz && recentLessonAndQuiz.nextQuiz}
+                                        mostRecent={'initial_quiz'}
                                         buttonName="START"
                                         buttonHandler={initialRedirectToQuiz}
                                     />
                                     :
                                     <CustomCard
-                                        title='Recent Quiz'
-                                        value={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentQuiz.quiz_name}
-                                        date={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentQuiz.quiz_completed_date}
-                                        buttonName="GO TO QUIZ"
+                                        cardType={'quiz'}
+                                        title='Quizzes'
+                                        next={recentLessonAndQuiz && recentLessonAndQuiz.nextQuiz}
+                                        mostRecent={recentLessonAndQuiz && recentLessonAndQuiz.mostRecentQuiz}
+                                        buttonName="NEXT QUIZ"
                                         buttonHandler={redirectToQuiz}
                                     />
                                 }
@@ -259,12 +288,15 @@ const Stats = (props) => {
                                             disableOnInteraction: false,
                                         }} */ /* weird ws call in network tab. Check Later*/
                                         loop={true}
+                                        spaceBetween={30}
                                         pagination={{
                                             clickable: true,
                                             dynamicBullets: true,
                                         }}
-                                        navigation={false}
-                                        modules={[Autoplay, Pagination]}
+                                        navigation={true}
+                                        mousewheel={true}
+                                        modules={[Autoplay, Pagination, Navigation, Mousewheel]}
+
                                         className="mySwiper"
                                     >
                                         {cryptoData && cryptoData.map((token, index) => {
@@ -293,7 +325,16 @@ const Stats = (props) => {
                         <CoinChartBox />
                     </Grid>
                 </Grid>
-                <Grid container spacing={2} pt={4}>
+                <Grid container spacing={3} pt={4}>
+                    <Grid item xs={12} sm={12} md={6} lg={4}>
+                        <CustomLongCard title='IN-COMPLETE JOURNAL ENTRY' subtitle='20/10/2022' content='Complete your last entry' buttonName="GO TO JOURNAL" />
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={6} lg={4}>
+                        <CustomLongCard title='JOURNAL ENTRY' subtitle='20/10/2022' content='Make an entry to your Journal' buttonName="GO TO JOURNAL" />
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={6} lg={4}>
+                        <CustomLongCard title='GO TO MODELS' subtitle='20/10/2023' content='View your various models' buttonName="GO TO MODELS" />
+                    </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={12}>
                         {Object.keys(wordOfTheDay).length !== 0 &&
                             <CustomLongCard
@@ -303,12 +344,6 @@ const Stats = (props) => {
                                 link={wordOfTheDay.url}
                             />
                         }
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={6} lg={6}>
-                        <CustomLongCard title='IN-COMPLETE JOURNAL ENTRY' subtitle='20/10/2022' content='Complete your last entry' buttonName="GO TO JOURNAL" />
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={6} lg={6}>
-                        <CustomLongCard title='JOURNAL ENTRY' subtitle='20/10/2022' content='Make an entry to your Journal' buttonName="GO TO JOURNAL" />
                     </Grid>
                 </Grid>
             </Box>
