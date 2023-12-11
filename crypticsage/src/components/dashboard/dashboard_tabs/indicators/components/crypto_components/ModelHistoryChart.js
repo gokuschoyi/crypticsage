@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { Box, useTheme, FormControl, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import { createChart } from 'lightweight-charts';
-import { useElementSize } from '../../../../../../utils/Utils';
 const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTestSet, totalEpochs }) => {
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
@@ -9,7 +8,6 @@ const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTes
     const chartContainerRef = useRef()
     const chart = useRef(null)
     const metricLineSeriesRef = useRef({})
-    const metricsToPlot = ['val_mse', 'val_mae', 'mse', 'mae']
     const metricColors = Object.keys(predictionsPalette).map(key => predictionsPalette[key])
 
     const [lossChartType, setLossChartType] = React.useState('both');
@@ -23,8 +21,7 @@ const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTes
         if (chart.current === null && (epochResults.length === 1 || epochResults.length === totalEpochs)) {
             // console.log('Chart not present and epoch = 1 or epoch = totalEpochs')
             chart.current = createChart(chartContainerRef.current, {
-                width: chartContainerRef.current.clientWidth,
-                height: chartContainerRef.current.clientHeight,
+                autoSize: true,
                 layout: {
                     background: {
                         type: 'solid',
@@ -306,17 +303,19 @@ const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTes
         }
     }, [predictionsPalette])
 
-    // resizes the chart based on the size of the parent element
-    const { width } = useElementSize('model-history-chart-box')
+    const resizeObserver = useRef();
+    // Resize chart on container resizes.
     useEffect(() => {
-        if (!chart.current) {
-            return
-        } else {
-            chart.current.applyOptions({
-                width: width,
-            })
-        }
-    }, [width])
+        resizeObserver.current = new ResizeObserver((entries) => {
+            const { width, height } = entries[0].contentRect;
+            // console.log(width, height);
+            chart.current && chart.current.applyOptions({ width, height });
+        });
+
+        resizeObserver.current.observe(chartContainerRef.current);
+
+        return () => resizeObserver.current.disconnect();
+    }, []);
 
     // sets the background color of the chart based on theme
     useEffect(() => {
@@ -401,7 +400,7 @@ const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTes
                 <Box className='model-hist-legend'>
                     <Box className='model-hist-tooltip'></Box>
                 </Box>
-                <Box ref={chartContainerRef} height='100%'></Box>
+                <Box ref={chartContainerRef} height='100%' width='100%'></Box>
             </Box>
         </Box>
     )

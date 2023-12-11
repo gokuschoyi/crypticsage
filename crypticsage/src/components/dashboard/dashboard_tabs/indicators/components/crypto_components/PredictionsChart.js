@@ -3,7 +3,6 @@ import { Box, useTheme, Skeleton, Typography, Paper } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { useSelector, useDispatch } from 'react-redux';
 import { setBarsFromToPredictions, setStandardizedAndScaledPredictions } from '../../modules/CryptoModuleSlice'
-import { useElementSize } from '../../../../../../utils/Utils';
 import { calculateTolerance } from '../../modules/CryptoModuleUtils'
 
 function calculateMSE(actual, predicted) {
@@ -128,19 +127,14 @@ const PredictionsChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictionLookAhead, predictionChartType, dates, allPredictions, chartData.forecast, chartData.label_variance, chartData.label_mean, dispatch])
 
-    const { width } = useElementSize('predictions-chart-grid')
     // creates the chart
     useEffect(() => {
         // console.log('UE : Predctions Chart Rendering')
-        const chartGrid = document.getElementsByClassName('predictions-chart-grid')[0]
-        let cWidth = chartGrid.clientWidth - 30
-
         if (predictedValueRedux.length === 0 || !predictionsChartRef.current) {
             return
         } else {
             chart.current = createChart(predictionsChartRef.current, {
-                width: cWidth,
-                height: 300,
+                autoSize: true,
                 layout: {
                     background: {
                         type: 'solid',
@@ -226,18 +220,19 @@ const PredictionsChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictedValueRedux])
 
-    // setting height and width on resize
+    const resizeObserver = useRef();
+    // Resize chart on container resizes.
     useEffect(() => {
-        if (!chart.current) {
-            return
-        } else {
-            // console.log(width, height)
+        resizeObserver.current = new ResizeObserver((entries) => {
+            const { width, height } = entries[0].contentRect;
+            // console.log(width, height);
+            chart.current && chart.current.applyOptions({ width, height });
+        });
 
-            chart.current.applyOptions({
-                width: width,
-            })
-        }
-    }, [width])
+        resizeObserver.current.observe(predictionsChartRef.current);
+
+        return () => resizeObserver.current.disconnect();
+    }, []);
 
     const tolerance = 1
     // This useEffect is used to calculate the metrics of the model
@@ -551,7 +546,7 @@ const PredictionsChart = (props) => {
                         <Box className='predictions-value-box' p={'5px'}></Box>
                     </Box>
                 }
-                <Box className='prediction-chart-ref-box' ref={predictionsChartRef}></Box>
+                <Box className='prediction-chart-ref-box' ref={predictionsChartRef} width="100%" height="100%"></Box>
             </Box >
         </Box >
     )

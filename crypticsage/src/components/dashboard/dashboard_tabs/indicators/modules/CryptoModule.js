@@ -863,7 +863,7 @@ const CryptoModule = () => {
                                 <Typography variant='custom' sx={{ textAlign: 'justify' }}>AF:{actualFetchLength}, R:{ohlcData.length} / {Math.round(ohlcData.length / 500)}</Typography>
                             </Box>
                         </Box>
-                        <Box className='chart-container' display='flex' flexDirection='column' height='100%' pl={2} pr={2} pt={2}>
+                        <Box className='chart-container' display='flex' flexDirection='column' width='100%' pl={2} pr={2} pt={2}>
                             {chartData.length === 0 ?
                                 (
                                     <Box className='token-chart-box' alignItems='center' justifyContent='center' display='flex'>

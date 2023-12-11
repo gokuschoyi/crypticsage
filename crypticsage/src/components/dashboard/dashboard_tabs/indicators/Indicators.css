@@ -298,9 +298,9 @@ tr:hover .prediction-mse {
     height: 60vh;
 }
 
-.chart-cont-dom {
+/* .chart-cont-dom {
     height: 58vh;
-}
+} */
 
 .token-chart-box {
     height: 100%;

@@ -501,11 +501,8 @@ const MainChart = (props) => {
         // console.log("UE 2 : Main chart")
         let tData = checkForUniqueAndTransform(tDataRedux)
 
-        let tokenDom = document.getElementsByClassName('chart-cont-dom')[0]
-        let cHeight = tokenDom.clientHeight;
-
         chart.current = createChart(chartboxRef.current, {
-            height: cHeight,
+            autoSize: true,
             layout: {
                 background: {
                     type: 'solid',
@@ -583,21 +580,19 @@ const MainChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [symbol, selectedTokenPeriod])
 
-    const { width, height } = useElementSize('chart-cont-dom');
-    // console.log('cont dom', width, height)
-    // setting height and width on resize
+    const resizeObserver = useRef();
+    // Resize chart on container resizes.
     useEffect(() => {
-        if (!chart.current) {
-            return
-        } else {
-            // console.log(width, height)
-            chart.current.applyOptions({
-                width: width,
-                height: height,
-            })
-        }
-    }, [width, height])
+        resizeObserver.current = new ResizeObserver((entries) => {
+            const { width, height } = entries[0].contentRect;
+            // console.log(width, height);
+            chart.current.applyOptions({ width, height });
+        });
 
+        resizeObserver.current.observe(chartboxRef.current);
+
+        return () => resizeObserver.current.disconnect();
+    }, []);
 
     const [predictionLineChart, setPredictionLineChart] = useState(null)
 
@@ -1459,7 +1454,7 @@ const MainChart = (props) => {
                     />
                 </Dialog>
             </Box>
-            <Box ref={chartboxRef}></Box>
+            <Box ref={chartboxRef} width="100%" height="100%"></Box>
             <Box className='tool-tip-indicators'></Box>
         </Box>
     )

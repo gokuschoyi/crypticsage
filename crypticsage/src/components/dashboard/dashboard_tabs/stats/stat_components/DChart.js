@@ -1,15 +1,12 @@
 import React, { useEffect, useRef } from 'react'
 import { createChart } from 'lightweight-charts';
 import { Box, useTheme } from '@mui/material'
-import { useElementSize } from '../../../../../utils/Utils'
 
 const DashboardChart = (props) => {
     const { chartData, selectedTokenName, tokenUrl, gridLineToggle } = props;
     const theme = useTheme();
     const chartBackgroundColor = theme.palette.background.default
     // console.log(chartBackgroundColor)
-
-    const { width, height } = useElementSize('chart-holder-box');
 
     const chartContainerRef = useRef();
     const chart = useRef();
@@ -168,19 +165,19 @@ const DashboardChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chartData])
 
-    // setting height and width on resize
+    // Resize chart on container resizes.
+    const resizeObserver = useRef();
     useEffect(() => {
-        if (!chart.current) {
-            return
-        } else {
-            // console.log(width, height)
+        resizeObserver.current = new ResizeObserver((entries) => {
+            const { width, height } = entries[0].contentRect;
+            // console.log(width, height);
+            chart.current.applyOptions({ width, height });
+        });
 
-            chart.current.applyOptions({
-                width: width,
-                height: height,
-            })
-        }
-    }, [width, height])
+        resizeObserver.current.observe(chartContainerRef.current);
+
+        return () => resizeObserver.current.disconnect();
+    }, []);
 
     // applying theme to chart
     useEffect(() => {
@@ -199,7 +196,7 @@ const DashboardChart = (props) => {
 
     return (
         <Box className='chart-holder-box' width="100%" height="100%">
-            <Box ref={chartContainerRef}></Box>
+            <Box ref={chartContainerRef} width="100%" height="100%"></Box>
             <Box className='tool-tip'></Box>
         </Box>
     )

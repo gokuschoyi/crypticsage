@@ -461,11 +461,11 @@ const cryptoModuleSlice = createSlice({
             const currentState = state.selectedFunctions;
             // Find the index of the function by name
             const foundFunctionIndex = currentState.findIndex((func) => func.name === name);
-
+            let splitPane
             // setting outputAvailable to true
             if (foundFunctionIndex !== -1) {
                 const foundFunction = currentState[foundFunctionIndex];
-
+                splitPane = foundFunction.splitPane
                 // Find the index of the function to update within the found function's functions array
                 const foundFunctionToUpdateIndex = foundFunction.functions.findIndex((func) => func.id === id);
 
@@ -489,7 +489,9 @@ const cryptoModuleSlice = createSlice({
             state.selectedFunctions = currentState;
 
             const diffVal = optInputs.length > 0 ? optInputs[0].defaultValue : ''
-            result.forEach((differentOutputs) => {
+            let colorsTaken = state.modifiedSelectedFunctionWithDataToRender.map((func) => func.color);
+            let colorsAvailableForCharts = lineColors.filter((color) => !colorsTaken.includes(color));
+            result.forEach((differentOutputs, i) => {
                 const objectForChart = {
                     id: id,
                     name: name,
@@ -498,7 +500,9 @@ const cryptoModuleSlice = createSlice({
                     visible: false,
                     key: differentOutputs.key,
                     differentiatorValue: diffVal,
-                    isDataNew: false
+                    isDataNew: false,
+                    color: colorsAvailableForCharts[i],
+                    splitPane: splitPane
                 }
 
                 // Check if an object with the same 'key' exists in the array
