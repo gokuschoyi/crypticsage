@@ -79,6 +79,7 @@ const initialState = {
                 { id: '5', name: 'VOLUME', value: 'volume' },
             ],
             doValidation: false,
+            earlyStopping: false,
             learningRate: 50,
             scaledLearningRate: 0.01
         },

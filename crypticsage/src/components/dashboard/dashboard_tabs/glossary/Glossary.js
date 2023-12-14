@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { useOutletContext } from "react-router-dom";
 import Header from '../../global/Header';
 import { Box, Typography, Button, useTheme, Grid, Divider, Input } from '@mui/material';
 import './Glossary.css'
@@ -12,10 +11,7 @@ const Glossary = (props) => {
     const theme = useTheme();
     const { title, subtitle } = props
 
-    const [setTest] = useOutletContext();
-    const hide = () => {
-        setTest(true);
-    }
+
 
     const [filterValue, setFilterValue] = useState('A-C')
     const [glossaryData, setGlossaryData] = useState(GLOSSARY_DATA.A_C)
@@ -121,7 +117,7 @@ const Glossary = (props) => {
     // console.log(search)
 
     return (
-        <Box className='glossary-container' onClick={hide}>
+        <Box className='glossary-container'>
             <Box width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
             </Box>

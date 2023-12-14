@@ -66,6 +66,12 @@ import AspectRatioIcon from '@mui/icons-material/AspectRatio';
 
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import ReportOutlinedIcon from '@mui/icons-material/ReportOutlined';
+import CheckIcon from '@mui/icons-material/Check';
+import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
+
 
 export { 
     LightModeOutlinedIcon, 
@@ -122,5 +128,10 @@ export {
     OpenInFullIcon,
     CloseFullscreenIcon,
     AspectRatioIcon,
-    ShowChartIcon
+    CheckIcon,
+    ShowChartIcon,
+    ThumbUpOutlinedIcon,
+    ReportProblemIcon,
+    ReportOutlinedIcon,
+    MarkEmailReadOutlinedIcon
 }

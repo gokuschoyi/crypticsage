@@ -151,6 +151,39 @@
     padding: 8px
 }
 
+.model-metrics-calculated-box-paper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metricpaper-indi {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 4px;
+    padding: 0px 10px;
+    width: 100%;
+}
+
+.metricpaper-indi-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 0px 10px;
+    width: 100%;
+}
+
+.prediction-lookahead-slider-box {
+    width: 50%;
+}
+
+.saved-model-name{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: break-word;
+    white-space: nowrap;
+}
+
 /* .MuiLinearProgress-bar {
     transition: none;
 }
@@ -729,6 +762,10 @@ tr:hover .prediction-mse {
         flex-direction: column;
         align-items: flex-start;
     }
+
+    .metricpaper-indi{
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 @media screen and (max-width: 800px) {
@@ -811,6 +848,20 @@ tr:hover .prediction-mse {
         width: 140px;
     }
 
+    .metricpaper-indi {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .metricpaper-indi-two {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .prediction-lookahead-slider-box{
+        width: 100%;
+    }
+
     .talib-func-hint {
         max-width: 270px;
         transition: all 0.2s ease-in-out;
@@ -847,9 +898,15 @@ tr:hover .prediction-mse {
         /* width: 100%; */
     }
 
+    .model-metrics-calculated-box-paper {
+        flex-direction: column;
+        gap: 16px;
+    }
+
     .function-selector,
     .model-metrics {
         width: 100%;
+        flex-direction: column;
     }
 
     .chart-action-box {

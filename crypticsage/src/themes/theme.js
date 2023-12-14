@@ -50,6 +50,7 @@ export const themeSettings = (mode) => {
                     },
                     background: {
                         default: '#070707',
+                        nav:'#181818',
                         paper: '#212121',
                         paperOne: '#2d2c2c'
                     },
@@ -105,6 +106,7 @@ export const themeSettings = (mode) => {
                     },
                     background: {
                         default: '#fff',
+                        nav:'#ededed',
                         paper: '#f5f5f5',
                         paperOne: '#e7e7e7'
                     },

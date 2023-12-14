@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { useOutletContext, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import {
     setCryptoDataAutoComplete,
@@ -36,10 +36,6 @@ const Stats = (props) => {
     const { title, subtitle } = props
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [setTest] = useOutletContext();
-    const hide = () => {
-        setTest(true);
-    }
 
     const [cryptoData, setCryptoData] = useState(null);
     const token = useSelector(state => state.auth.accessToken);
@@ -222,7 +218,7 @@ const Stats = (props) => {
     }) */
 
     return (
-        <Box className='stat-container' onClick={hide}>
+        <Box className='stat-container'>
             <Box width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
                 <Box id="w-socket"></Box>

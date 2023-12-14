@@ -18,10 +18,6 @@ import {
 } from '../../dashboard/global/Icons'
 const AdminTopbar = (props) => {
     const {
-        toggleSettings,
-        setToggleSettings,
-        toggleNotifications,
-        setToggleNotifications,
         toggleSmallScreenAdminSidebar,
         handleToggleSmallScreenAdminSidebar
     } = props;
@@ -36,15 +32,9 @@ const AdminTopbar = (props) => {
 
     const theme = useTheme();
 
-    const mountedStyle = { animation: "inAnimation 250ms ease-in" };
-    const unmountedStyle = {
-        animation: "outAnimation 270ms ease-out",
-        animationFillMode: "forwards"
-    };
-
-    const settingsContainer = () => {
+    const SettingsContainer = () => {
         return (
-            <Box className="user-nav" style={toggleSettings ? mountedStyle : unmountedStyle}>
+            <Box className="user-settings">
                 <Box mr={2} className="user-cta-small">
                     <Typography className='user-nav-title' variant="h6" sx={{ color: theme.palette.secondary.main }}>Settings</Typography>
                     <Divider />
@@ -89,9 +79,9 @@ const AdminTopbar = (props) => {
         )
     }
 
-    const notificationCenter = () => {
+    const NotificationCenter = () => {
         return (
-            <Box className="user-notification" style={toggleNotifications ? mountedStyle : unmountedStyle}>
+            <Box className="user-notification">
                 <Notifications
                     notifications={notifications}
                     clear={clear}
@@ -101,6 +91,21 @@ const AdminTopbar = (props) => {
                 />
             </Box>
         )
+    }
+
+    const toggleAdminNotifications = () => {
+        console.log('toggleUserNotifications')
+        const notificationDropdown = document.getElementsByClassName('user-notification')[0];
+        const settingsDropdown = document.getElementsByClassName('user-settings')[0];
+        notificationDropdown.classList.toggle('show-notification')
+        settingsDropdown.classList.remove('show-settings')
+    }
+    const toggleAdminSettingsContainer = () => {
+        console.log('toggleSettingsContainer')
+        const settingsDropdown = document.getElementsByClassName('user-settings')[0];
+        const notificationDropdown = document.getElementsByClassName('user-notification')[0];
+        settingsDropdown.classList.toggle('show-settings')
+        notificationDropdown.classList.remove('show-notification')
     }
 
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
@@ -172,17 +177,17 @@ const AdminTopbar = (props) => {
                 </Box>
             )}
             <Box display='flex' padding='10px'>
-                <IconButton onClick={setToggleNotifications}>
+                <IconButton onClick={toggleAdminNotifications}>
                     <Badge badgeContent={unreadCount || 0}>
                         <NotificationsOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
                     </Badge>
                 </IconButton>
-                <IconButton onClick={setToggleSettings}>
+                <IconButton onClick={toggleAdminSettingsContainer}>
                     <SettingsOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
                 </IconButton>
             </Box>
-            {settingsContainer()}
-            {notificationCenter()}
+            <SettingsContainer />
+            <NotificationCenter />
         </Box>
     )
 }

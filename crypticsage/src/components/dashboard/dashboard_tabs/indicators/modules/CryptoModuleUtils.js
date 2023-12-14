@@ -16,10 +16,10 @@ export const NoMaxWidthTooltip = styled(({ className, ...props }) => (
     },
 });
 
-export const ClassificationTable = ({ data }) => {
+export const ClassificationTable = ({ data, title }) => {
     return (
         <div>
-            <h2>Classification Criteria</h2>
+            <h2>{title}</h2>
             <table>
                 <thead>
                     <tr>
@@ -176,10 +176,10 @@ export const generateMSESteps = (period) => {
     }
 };
 
-export const generateRandomModelName = () => {
+export const generateRandomModelName = (tokenPeriod, selectedTokenPeriod) => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const length = 10;
-    let modelName = 'model_';
+    let modelName = `model_${tokenPeriod}_${selectedTokenPeriod}_`;
 
     for (let i = 0; i < length; i++) {
         const randomIndex = Math.floor(Math.random() * characters.length);

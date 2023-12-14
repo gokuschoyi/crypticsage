@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux';
 import './Quiz.css'
-import { useOutletContext } from "react-router-dom";
 import AdminHeader from '../global/AdminHeader'
 import AddQuiz from './quiz_components/addQuiz/AddQuiz'
 import { Success, Error } from '../../dashboard/global/CustomToasts'
@@ -20,10 +19,7 @@ const Quiz = (props) => {
     const theme = useTheme();
     const token = useSelector(state => state.auth.accessToken);
 
-    const [setTest] = useOutletContext();
-    const hide = () => {
-        setTest(true);
-    }
+
 
     // quiz mode toggle
     const [quizMode, setQuizMode] = useState('add');
@@ -653,7 +649,7 @@ const Quiz = (props) => {
     }
 
     return (
-        <Box className='admin-dashboard-container' onClick={hide}>
+        <Box className='admin-dashboard-container'>
             <Box height='100%' width='-webkit-fill-available'>
                 <AdminHeader title={title} subtitle={subtitle} />
             </Box>

@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Success, Error } from '../../../global/CustomToasts'
+import { Success, Error, Warning } from '../../../global/CustomToasts'
 import {
     setModelEndTime,
     setEpochNo,
@@ -37,6 +37,7 @@ function getColorForValue(value, min, max, startColor, endColor) {
 
 const useWebSocket = (
     webSocketURL,
+    userSelectedEpoch,
     notifyMessageBoxRef,
     batchResult,
     evaluating,
@@ -73,6 +74,7 @@ const useWebSocket = (
                 webSocket.current.send(JSON.stringify({ action: 'Socket connection established' })); // Now that the connection is open, you can send data.
             }
 
+            let currentEpoch = 0;
             webSocket.current.onmessage = (e) => {
                 // console.log('WS: MESSAGE RECEIVED');
                 const data = JSON.parse(e.data);
@@ -93,6 +95,7 @@ const useWebSocket = (
                         break;
                     case ACTIONS.EPOCH_END:
                         dispatch(setEpochResults({ ...data.log, epoch: data.epoch }))
+                        currentEpoch++
                         break;
                     case ACTIONS.BATCH_END:
                         if (!batchResult) { setBatchResult(true) }
@@ -103,7 +106,7 @@ const useWebSocket = (
                             totalNoOfBatch = data.log.totalNoOfBatch
                         }
                         const percentageCompleted = parseFloat(((data.log.batch / totalNoOfBatch) * 100).toFixed(2)) || 0
-                        const bgColor = getColorForValue(percentageCompleted, 0, 100, '#FF0000', '#00FF00');
+                        const bgColor = getColorForValue(percentageCompleted, 0, 100, '#C2185B', '#388E3C');
                         if (batchLinearProgressRef.current) {
                             const linearProgress = batchLinearProgressRef.current.querySelector('#linear-progress')
                             let progressBar = linearProgress.querySelector('span')
@@ -123,13 +126,19 @@ const useWebSocket = (
                         break;
                     case ACTIONS.TRAINING_END:
                         setBatchResult(false)
+                        if (currentEpoch < userSelectedEpoch) {
+                            console.log('Early stopping', currentEpoch, userSelectedEpoch)
+                            Warning(`Early stopping, Epochs completed : ${currentEpoch}, Epochs selected : ${userSelectedEpoch}`)
+                        } else {
+                            console.log('Model trained for all epochs')
+                        }
                         // setTrainingStartedFlag(false)
                         break;
                     case ACTIONS.EVALUATING:
                         if (!evaluating) { setEvaluating(true) }
                         if (evalLinearProgressRef.current) {
                             const evalPercentageCompleted = parseFloat(((data.log.batch / data.log.totalNoOfBatch) * 100).toFixed(2)) || 0
-                            const evalBgColor = getColorForValue(evalPercentageCompleted, 0, 100, '#FF0000', '#00FF00');
+                            const evalBgColor = getColorForValue(evalPercentageCompleted, 0, 100, '#C2185B', '#388E3C');
 
                             const evalLinearProgress = evalLinearProgressRef.current.querySelector('#linear-progress')
                             let evalProgressBar = evalLinearProgress.querySelector('span')
@@ -150,6 +159,7 @@ const useWebSocket = (
                         dispatch(setPredictedValues(data.predictions))
                         dispatch(setModelEndTime(new Date().getTime()))
                         dispatch(setStartWebSocket(false))
+                        currentEpoch = 0
                         Success('Training completed successfully')
                         break;
                     case ACTIONS.ERROR:

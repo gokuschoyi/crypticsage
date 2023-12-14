@@ -335,6 +335,21 @@ const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTes
         }
     }, [chartBackgroundColor, epochResults, textColor])
 
+    /* useEffect(() => {
+        let positive = 0
+        let negative = 0
+        if (epochResults.length === totalEpochs) {
+            epochResults.forEach((item, index) => {
+                if (item.val_mse > item.mse) {
+                    positive++
+                } else {
+                    negative++
+                }
+            })
+        }
+        console.log(positive, negative)
+    }) */
+
     return (
         <Box>
             {isValidatingOnTestSet && epochResults.length > 0 &&
@@ -394,6 +409,7 @@ const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTes
                                 label="MAE" />
                         </RadioGroup>
                     </FormControl>
+                    <Box></Box>
                 </Box>
             }
             <Box className='model-history-chart-box' sx={{ height: epochResults.length > 0 ? '280px' : '0px' }}>

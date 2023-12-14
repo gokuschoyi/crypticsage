@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Box, Typography, Paper, Tooltip, IconButton } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import Sortable from 'sortablejs';
-const ReorderList = ({ orderList, setOrderList }) => { // orderList is the initial state of the list that changes on re-order
+const ReorderList = ({ orderList, setOrderList, disabled }) => { // orderList is the initial state of the list that changes on re-order
     const transformationOrder = useSelector(state => state.cryptoModule.modelData.training_parameters.transformation_order) // initial state 5
     // console.log('original state : ', orderList)
 
@@ -115,27 +115,40 @@ const ReorderList = ({ orderList, setOrderList }) => { // orderList is the initi
         setOrderList(reorderedIndicators)
     };
 
+    const sortableRef = useRef(null);
     useEffect(() => {
         // console.log('UE : Sortable init')
         // Initialize SortableJS when the component mounts
-        const sortable = new Sortable(listRef.current, {
+        sortableRef.current = new Sortable(listRef.current, {
             animation: 150,
             ghostClass: 'sortable-ghost',
             onEnd: () => {
                 // When the order changes, call onOrderChange with the new order
-                const newOrder = sortable.toArray();
+                const newOrder = sortableRef.current.toArray();
                 handleOrderChange(newOrder);
             }
         }, []);
 
         // Clean up when the component unmounts
         return () => {
-            if (sortable) {
-                sortable.destroy();
+            if (sortableRef.current) {
+                sortableRef.current.destroy();
             }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [indicators]);
+
+    useEffect(() => {
+        if (sortableRef.current) {
+            var currentState = sortableRef.current.option('disabled');
+            // console.log('UE : sortable disabled state', currentState, disabled)
+            if (currentState !== disabled) {
+                sortableRef.current.option('disabled', disabled);
+            } else {
+                // console.log('UE : sortable disabled state is same')
+            }
+        }
+    }, [disabled])
 
     const handleOrderReset = () => {
         console.log('Reset order clicked')
@@ -167,14 +180,14 @@ const ReorderList = ({ orderList, setOrderList }) => { // orderList is the initi
                 <Typography variant='h6' textAlign={'start'}>Order of Input</Typography>
                 <Tooltip title={'Reset order.'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                     <span>
-                        <IconButton onClick={handleOrderReset}>
+                        <IconButton disabled={disabled} onClick={handleOrderReset}>
                             <RestartAltIcon className='small-icon' />
                         </IconButton>
                     </span>
                 </Tooltip>
             </Box>
             {indicators.length === 5 &&
-                <Typography variant='custom' sx={{textAlign:'start'}}>
+                <Typography variant='custom' sx={{ textAlign: 'start' }}>
                     Please add indicators to reorder them
                 </Typography>
             }

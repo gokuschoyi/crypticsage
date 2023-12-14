@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useEffect } from "react";
 import { Box, IconButton, useTheme, Button, Typography, Divider, Badge, Avatar } from "@mui/material";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useContext } from "react";
@@ -36,34 +36,25 @@ import "./Global.css"
 import { useNotificationCenter } from "react-toastify/addons/use-notification-center";
 import Notifications from "./Notifications";
 
-const Topbar = (props) => {
+const notification_from_localStorage = JSON.parse(localStorage.getItem('user_notifications')) || []
+
+const Topbar = () => {
+    // console.log('notification data local storage : ', notification_from_localStorage)
     const {
         notifications,
         clear,
+        remove,
         markAllAsRead,
         markAsRead,
         unreadCount
-    } = useNotificationCenter();
+    } = useNotificationCenter(
+        {
+            data: notification_from_localStorage,
+        }
+    );
 
     const profileImage = useSelector(state => state.auth.photoUrl);
     const smallScreenToggleState = useSelector(state => state.sidebar.toggleSmallScreenSidebarState)
-
-    const {
-        toggleUser,
-        setToggleUser,
-        toggleSettings,
-        setToggleSettings,
-        toggleNotifications,
-        setToggleNotifications,
-        toggleSmallScreenSidebar,
-        handleToggleSmallScreenSidebar,
-    } = props;
-
-    const mountedStyle = { animation: "inAnimation 250ms ease-in" };
-    const unmountedStyle = {
-        animation: "outAnimation 270ms ease-out",
-        animationFillMode: "forwards"
-    };
 
     const theme = useTheme();
     const mode = theme.palette.mode;
@@ -101,26 +92,6 @@ const Topbar = (props) => {
         }
     }, [userTheme, mode, colorMode])
 
-
-    /* const smallScreenSidebarLoad = useRef(false)
-    useEffect(() => {
-        if (!smallScreenSidebarLoad.current) { // Only run if the component is mounted
-            let sidebar = document.getElementsByClassName('sidebar')[0]
-            // let content = document.getElementsByClassName('content')[0]
-            if (!smallScreenToggleState && sidebar !== undefined) {
-                smallScreenSidebarLoad.current = true // Set the mount state to true after the first run
-
-                sidebar.classList.remove('show-sidebar');
-                sidebar.classList.add('hide-sidebar');
-                // content.style.setProperty('--marginLeft', '0px !important');
-                // handleToggleSmallScreenSidebar()
-                // dispatch(handleReduxToggleSmallScreenSidebar({ value: !smallScreenToggleState }))
-                console.log('hide sidebar for small screen');
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [smallScreenToggleState]) */
-
     const showSidebar = () => {
         if (!smallScreenToggleState) {
             let sidebar = document.getElementsByClassName('sidebar')[0]
@@ -145,7 +116,6 @@ const Topbar = (props) => {
         }
     }
 
-
     // console.log(toggleNotifications);
     const dispatch = useDispatch();
     const logOut = async () => {
@@ -159,13 +129,15 @@ const Topbar = (props) => {
         dispatch(resetIndicatorsState());
         dispatch(resetCryptoStockModule());
         dispatch(resetStocksDataInDbRedux());
+        localStorage.removeItem('user_notifications');
     }
 
     const userContainer = () => {
         return (
-            <Box className="user-nav" style={toggleUser ? mountedStyle : unmountedStyle}>
+            <Box className="user-nav">
+                <Box mr={2} className="bottom-arrow-user"></Box>
                 <Box mr={2} className="user-cta-small">
-                    <Typography className='user-nav-title' variant="h6"  color={'primary'}>Profile Settings</Typography>
+                    <Typography className='user-nav-title' variant="h6" color={'primary'}>Profile Settings</Typography>
                     <Divider />
                     <Box className="user-nav-item-small">
                         <a className="user-nav-link-small" href="#userprofile">
@@ -193,7 +165,8 @@ const Topbar = (props) => {
 
     const settingsContainer = () => {
         return (
-            <Box className="user-nav" style={toggleSettings ? mountedStyle : unmountedStyle}>
+            <Box className="user-settings">
+                <Box mr={2} className="bottom-arrow-settings"></Box>
                 <Box mr={2} className="user-cta-small">
                     <Typography className='user-nav-title' variant="h6" color={'primary'}>Settings</Typography>
                     <Divider />
@@ -240,16 +213,69 @@ const Topbar = (props) => {
 
     const notificationCenter = () => {
         return (
-            <Box className="user-notification" style={toggleNotifications ? mountedStyle : unmountedStyle}>
+            <Box className="user-notification">
+                <Box mr={2} className="bottom-arrow-notification"></Box>
                 <Notifications
                     notifications={notifications}
                     clear={clear}
+                    remove={remove}
                     markAllAsRead={markAllAsRead}
                     markAsRead={markAsRead}
                     unreadCount={unreadCount}
                 />
             </Box>
         )
+    }
+
+    const toggleTopBarNotification = ({ type }) => {
+        const notificationDropdown = document.getElementsByClassName('user-notification')[0];
+        const settingsDropdown = document.getElementsByClassName('user-settings')[0];
+        const userNavDropdown = document.getElementsByClassName('user-nav')[0];
+        switch (type) {
+            case 'notification':
+                notificationDropdown.classList.toggle('show-notification')
+                if (settingsDropdown.classList.contains('show-settings')) {
+                    settingsDropdown.classList.toggle('show-settings');
+                }
+
+                if (userNavDropdown.classList.contains('show-user-nav')) {
+                    userNavDropdown.classList.toggle('show-user-nav');
+                }
+                break;
+            case 'settings':
+                settingsDropdown.classList.toggle('show-settings')
+                if (notificationDropdown.classList.contains('show-notification')) {
+                    notificationDropdown.classList.toggle('show-notification');
+                }
+
+                if (userNavDropdown.classList.contains('show-user-nav')) {
+                    userNavDropdown.classList.toggle('show-user-nav');
+                }
+                break;
+            case 'user':
+                userNavDropdown.classList.toggle('show-user-nav')
+                if (notificationDropdown.classList.contains('show-notification')) {
+                    notificationDropdown.classList.toggle('show-notification');
+                }
+
+                if (settingsDropdown.classList.contains('show-settings')) {
+                    settingsDropdown.classList.toggle('show-settings');
+                }
+                break;
+            default:
+                if (notificationDropdown.classList.contains('show-notification')) {
+                    notificationDropdown.classList.toggle('show-notification');
+                }
+
+                if (settingsDropdown.classList.contains('show-settings')) {
+                    settingsDropdown.classList.toggle('show-settings');
+                }
+
+                if (userNavDropdown.classList.contains('show-user-nav')) {
+                    userNavDropdown.classList.toggle('show-user-nav');
+                }
+                break;
+        }
     }
 
     return (
@@ -301,15 +327,15 @@ const Topbar = (props) => {
                             <IconButton onClick={toggleTheme}>
                                 <LightModeOutlinedIcon />
                             </IconButton>
-                            <IconButton onClick={setToggleNotifications}>
+                            <IconButton onClick={toggleTopBarNotification.bind(null, { type: 'notification' })}>
                                 <Badge badgeContent={unreadCount || 0}>
                                     <NotificationsOutlinedIcon />
                                 </Badge>
                             </IconButton>
-                            <IconButton onClick={setToggleSettings}>
+                            <IconButton onClick={toggleTopBarNotification.bind(null, { type: 'settings' })}>
                                 <SettingsOutlinedIcon />
                             </IconButton>
-                            <IconButton onClick={setToggleUser}>
+                            <IconButton onClick={toggleTopBarNotification.bind(null, { type: 'user' })}>
                                 {profileImage ? <Avatar sx={{ width: 24, height: 24 }} src={profileImage} /> : <PersonOutlinedIcon />}
                             </IconButton>
                         </Box>
@@ -320,15 +346,15 @@ const Topbar = (props) => {
                             <IconButton onClick={toggleTheme}>
                                 <DarkModeOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
                             </IconButton>
-                            <IconButton onClick={setToggleNotifications}>
+                            <IconButton onClick={toggleTopBarNotification.bind(null, { type: 'notification' })}>
                                 <Badge badgeContent={unreadCount || 0} sx={{ color: `${theme.palette.primary.newWhite}` }}>
                                     <NotificationsOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
                                 </Badge>
                             </IconButton>
-                            <IconButton onClick={setToggleSettings}>
+                            <IconButton onClick={toggleTopBarNotification.bind(null, { type: 'settings' })}>
                                 <SettingsOutlinedIcon sx={{ color: `${theme.palette.primary.newWhite}` }} />
                             </IconButton>
-                            <IconButton onClick={setToggleUser}>
+                            <IconButton onClick={toggleTopBarNotification.bind(null, { type: 'user' })}>
                                 {profileImage ? <Avatar sx={{ width: 24, height: 24 }} src={profileImage} /> : <PersonOutlinedIcon />}
                             </IconButton>
                         </Box>

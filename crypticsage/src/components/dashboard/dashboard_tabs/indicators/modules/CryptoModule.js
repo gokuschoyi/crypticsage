@@ -422,14 +422,14 @@ const CryptoModule = () => {
         })
     }
 
-    const handleModelTypeOptions = (event, newValue) => {
+    /* const handleModelTypeOptions = (event, newValue) => {
         setModelParams((prev) => {
             return {
                 ...prev,
                 'modelType': newValue
             }
         })
-    }
+    } */
 
     const handleDoValidation = () => {
         console.log('toggle validation')
@@ -437,6 +437,16 @@ const CryptoModule = () => {
             return {
                 ...prev,
                 'doValidation': !prev.doValidation
+            }
+        })
+    }
+
+    const handleEarlyStopping = () => {
+        console.log('toggle early stopping')
+        setModelParams((prev) => {
+            return {
+                ...prev,
+                'earlyStopping': !prev.earlyStopping
             }
         })
     }
@@ -557,7 +567,8 @@ const CryptoModule = () => {
                 learning_rate: modelParams.scaledLearningRate,
                 hidden_layers: modelParams.hiddenLayer,
                 transformation_order: transformationOrder,
-                do_validation: modelParams.doValidation
+                do_validation: modelParams.doValidation,
+                early_stopping_flag: modelParams.earlyStopping
             }
             console.log('Execute query + Model parameters', fTalibExecuteQuery, model_training_parameters)
             dispatch(setStartWebSocket(true))
@@ -572,7 +583,7 @@ const CryptoModule = () => {
                 dispatch(resetModelData())
                 dispatch(setModelEndTime(''))
                 const modelId = res.data.job_id
-                const model_name = generateRandomModelName()
+                const model_name = generateRandomModelName(cryptotoken, selectedTokenPeriod)
                 Success(res.data.message)
                 setModelName(model_name)
                 dispatch(setModelId({ model_id: modelId, model_name: model_name }))
@@ -702,10 +713,12 @@ const CryptoModule = () => {
     const [batchResult, setBatchResult] = useState(false)
     const [evaluating, setEvaluating] = useState(false)
     const [trainingStartedFlag, setTrainingStartedFlag] = useState(startWebSocket)
+    const userSelectedEpoch = modelParams.epoch
     const batchLinearProgressRef = useRef(null)
     const evalLinearProgressRef = useRef(null)
     const { webSocket, createModelProgressWebSocket } = useWebSocket(
         webSocketURL,
+        userSelectedEpoch,
         notifyMessageBoxRef,
         batchResult,
         evaluating,
@@ -1029,7 +1042,7 @@ const CryptoModule = () => {
 
                                     <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' gap='8px'>
                                         <Box display='flex' flexDirection='column' gap='8px' width='100%'>
-                                            <Paper sx={{ padding: '4px' }}>
+                                            <Paper elevation={4} sx={{ padding: '4px' }}>
                                                 <FormControlLabel
                                                     value="start"
                                                     sx={{ marginLeft: '0px', marginRight: '0px', width: '100%', justifyContent: 'space-between' }}
@@ -1040,7 +1053,19 @@ const CryptoModule = () => {
                                                     onChange={() => handleDoValidation()}
                                                 />
                                             </Paper>
-                                            <MultiSelect
+
+                                            <Paper elevation={4} sx={{ padding: '4px' }}>
+                                                <FormControlLabel
+                                                    value="start"
+                                                    sx={{ marginLeft: '0px', marginRight: '0px', width: '100%', justifyContent: 'space-between' }}
+                                                    control={<Switch disabled={trainingStartedFlag} size="small" color="secondary" />}
+                                                    label='Perform Early Stopping'
+                                                    labelPlacement="start"
+                                                    checked={modelParams.earlyStopping}
+                                                    onChange={() => handleEarlyStopping()}
+                                                />
+                                            </Paper>
+                                            {/* <MultiSelect
                                                 inputLabel={'Model type'}
                                                 inputOptions={MODEL_OPTIONS}
                                                 selectedInputOptions={modelParams.modelType}
@@ -1048,7 +1073,7 @@ const CryptoModule = () => {
                                                 fieldName={'Model type'}
                                                 toolTipTitle={'Select a model type'}
                                                 trainingStartedFlag={trainingStartedFlag}
-                                            />
+                                            /> */}
                                             {modelParams.modelType !== 'Single Step Multiple Output' &&
                                                 <MultiSelect
                                                     inputLabel={'Prediction flag'}
@@ -1072,7 +1097,7 @@ const CryptoModule = () => {
                                             <CustomSlider sliderValue={modelParams.batchSize} name={'batchSize'} handleModelParamChange={handleModelParamChange} label={'Batch Size'} min={1} max={100} sliderMin={1} sliderMax={100} disabled={trainingStartedFlag} />
                                             <CustomSlider sliderValue={modelParams.learningRate} name={'learningRate'} handleModelParamChange={handleModelParamChange} label={'L Rate'} min={1} max={100} sliderMin={1} sliderMax={100} scaledLearningRate={modelParams.scaledLearningRate} disabled={trainingStartedFlag} />
                                         </Box>
-                                        <ReorderList orderList={transformationOrder} setOrderList={setTransformationOrder} />
+                                        <ReorderList orderList={transformationOrder} setOrderList={setTransformationOrder} disabled={trainingStartedFlag}/>
                                     </Box>
                                 </Box>
                             </Collapse>
@@ -1082,14 +1107,14 @@ const CryptoModule = () => {
                             <Box display='flex' flexDirection='column' pb={1}>
                                 <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='flex-start' className='prediction-chart-header'>
                                     <Box display='flex' flexDirection='column' alignItems='start'>
-                                        <Typography variant={predictedVlauesRedux.length !== 0 ? 'h6' : 'h5'} textAlign='start'>Predictions {predictedVlauesRedux.length !== 0 && predictionChartType}</Typography>
+                                        <Typography variant={predictedVlauesRedux.length !== 0 ? 'h6' : 'h5'} textAlign='start'>Predictions - {predictedVlauesRedux.length !== 0 && predictionChartType === 'scaled' ? 'original' : predictionChartType}</Typography>
                                     </Box>
                                     {predictedVlauesRedux.length !== 0 &&
                                         <Box className='chart-action-box'>
                                             <Box display='flex' flexDirection='row' gap={'4px'} alignItems='center' className='model-chart-action-container'>
                                                 <TextField
                                                     size='small'
-                                                    inputProps={{ style: { height: '10px' } }}
+                                                    inputProps={{ style: { height: '10px', width:'150px' } }}
                                                     id="outlined-controlled"
                                                     label="Model name"
                                                     value={modelName}
@@ -1106,17 +1131,17 @@ const CryptoModule = () => {
 
                                                     {modelParams.modelType !== 'Single Step Multiple Output' &&
                                                         <React.Fragment>
-                                                            <Tooltip title={'Normalized values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                            <Tooltip title={'Standardized values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                                                                 <span>
                                                                     <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "standardized" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })}>
-                                                                        <OpenInFullIcon className='small-icon' />
+                                                                        <CloseFullscreenIcon className='small-icon' />
                                                                     </IconButton>
                                                                 </span>
                                                             </Tooltip>
-                                                            <Tooltip title={'Scaled values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                            <Tooltip title={'Original values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                                                                 <span>
                                                                     <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })}>
-                                                                        <CloseFullscreenIcon className='small-icon' />
+                                                                        <OpenInFullIcon className='small-icon' />
                                                                     </IconButton>
                                                                 </span>
                                                             </Tooltip>
@@ -1157,6 +1182,101 @@ const CryptoModule = () => {
                             <Box className='main-training-status-box' pt={1} gap={'12px'} display='flex' flexDirection='column'>
                                 <Typography sx={{ textAlign: 'start' }} variant='custom'>{modelProcessDurationRef.current !== '' ? `Time taken : ${modelProcessDurationRef.current}` : ''}</Typography>
 
+                                {/* Prediction set metrics */}
+                                {(predictedVlauesRedux.length !== 0) &&
+                                    <Paper elevation={4} sx={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
+                                        {(predictionLookAhead && modelParams.lookAhead > 1) &&
+                                            <Box className='prediction-lookahead-slider-box'>
+                                                <CustomSlider
+                                                    sliderValue={predictionLookAhead}
+                                                    name={'prediction_look_ahead'}
+                                                    handleModelParamChange={handelPredictionLookAheadSlider}
+                                                    label={'Prediction Look Ahead'}
+                                                    min={1}
+                                                    max={model_parameters.lookAhead}
+                                                    sliderMin={1}
+                                                    sliderMax={model_parameters.lookAhead}
+                                                    disabled={trainingStartedFlag} />
+                                            </Box>
+                                        }
+                                        <Box display='flex' flexDirection='column' gap='5px'>
+                                            {Object.keys(modelMetrics.metrics).length > 0 && (
+                                                <Box display='flex' flexDirection='column' gap='4px' className='model-metrics-calculated-box'>
+                                                    <Paper elevation={4} style={{ justifyContent: 'space-between', display: 'flex', flexDirection: 'row', gap: '4px', padding: '0px 10px', width: 'fit-content' }}>
+                                                        <Typography variant='custom' textAlign='start'>{predictionChartType}</Typography>
+                                                    </Paper>
+                                                    <Box className='model-metrics-calculated-box-paper'>
+
+                                                        <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%' gap='5px'>
+                                                            <Box display='flex' flexDirection='row' gap='16px' width='95%' justifyContent='space-between' className='model-metrics'>
+                                                                <Paper className='metricpaper-indi' elevation={2}>
+                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TP</span> : {modelMetrics.metrics.TP}</Typography>
+                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FP</span> : {modelMetrics.metrics.FP}</Typography>
+                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FN</span> : {modelMetrics.metrics.FN}</Typography>
+                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TN</span> : {modelMetrics.metrics.TN}</Typography>
+                                                                </Paper>
+                                                            </Box>
+                                                            <NoMaxWidthTooltip
+                                                                arrow
+                                                                className='metrics-tooltip'
+                                                                title=
+                                                                {(
+                                                                    <Box>
+                                                                        <ClassificationTable title={"Classification Criteria"} data={CRITERIA_DATA} />
+                                                                    </Box>
+                                                                )}
+                                                                placement='top' sx={{ cursor: 'pointer' }}>
+                                                                <InfoOutlinedIcon className='small-icon' />
+                                                            </NoMaxWidthTooltip>
+                                                        </Box>
+
+                                                        <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%' gap='5px'>
+                                                            <Box display='flex' flexDirection='row' gap='16px' width='95%' alignItems='center' justifyContent='space-between' className='model-metrics'>
+                                                                <Paper className='metricpaper-indi' elevation={2}>
+                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>Accuracy</span> : {modelMetrics.metrics.accuracy}</Typography>
+                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>Precision</span> : {modelMetrics.metrics.precision}</Typography>
+                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>F1</span> : {modelMetrics.metrics.f1}</Typography>
+                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>Recall</span> : {modelMetrics.metrics.recall}</Typography>
+                                                                </Paper>
+                                                            </Box>
+                                                            <NoMaxWidthTooltip
+                                                                arrow
+                                                                className='metrics-tooltip'
+                                                                title=
+                                                                {(
+                                                                    <Box>
+                                                                        <ClassificationTable title={"Metrics"} data={[
+                                                                            { "Condition": "Accuracy", "Criteria": "(TP + TN) / (TP + FP + TN + FN)" },
+                                                                            { "Condition": "Precision", "Criteria": "TP / (TP + FP)" },
+                                                                            { "Condition": "F1", "Criteria": "TP / (TP + FN)" },
+                                                                            { "Condition": "Recall", "Criteria": "(2 * prec * recall) / (prec + recall)" }]} />
+                                                                    </Box>
+                                                                )}
+                                                                placement='top' sx={{ cursor: 'pointer' }}>
+                                                                <InfoOutlinedIcon className='small-icon' />
+                                                            </NoMaxWidthTooltip>
+                                                        </Box>
+
+                                                        {(Object.keys(modelMetrics.mse).length > 0) &&
+                                                            <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%' gap='5px'>
+                                                                <Box display='flex' flexDirection='row' gap='16px' width='95%' alignItems='center' justifyContent='space-between' className='model-metrics'>
+                                                                    <Paper className='metricpaper-indi-two' elevation={2}>
+                                                                        <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>RMSE</span> : {predictionChartType === 'scaled' ? modelMetrics.mse.rmse.toFixed(2) : modelMetrics.mse.rmse}</Typography>
+                                                                        <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>MSE</span> : {predictionChartType === 'scaled' ? modelMetrics.mse.mse.toFixed(2) : modelMetrics.mse.mse}</Typography>
+                                                                    </Paper>
+                                                                </Box>
+                                                                <Tooltip title='Prediction chart RMSE and MSE'>
+                                                                    <InfoOutlinedIcon className='small-icon' />
+                                                                </Tooltip>
+                                                            </Box>
+                                                        }
+                                                    </Box>
+                                                </Box>
+                                            )}
+                                        </Box>
+                                    </Paper>
+                                }
+
                                 {/* epoch end results plotting on chart */}
                                 {model_parameters.epoch > 2 &&
                                     <ModelHistoryChart
@@ -1168,7 +1288,7 @@ const CryptoModule = () => {
                                 }
 
                                 {/* epoch results in table */}
-                                {epochResults.length === model_parameters.epoch &&
+                                {epochResults.length > 0 &&
                                     <Accordion defaultExpanded={false} sx={{ overflowX: 'auto', backgroundColor: `${theme.palette.background.paperOne}`, borderRadius: '5px' }}>
                                         <AccordionSummary
                                             expandIcon={<ExpandMoreIcon />}
@@ -1275,96 +1395,6 @@ const CryptoModule = () => {
                                 )
                                 }
 
-                                {/* Prediction set metrics */}
-                                {(predictedVlauesRedux.length !== 0) &&
-                                    <Paper elevation={4} sx={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
-                                        {(predictionLookAhead && modelParams.lookAhead > 1) &&
-                                            <CustomSlider
-                                                sliderValue={predictionLookAhead}
-                                                name={'prediction_look_ahead'}
-                                                handleModelParamChange={handelPredictionLookAheadSlider}
-                                                label={'Prediction Look Ahead'}
-                                                min={1}
-                                                max={model_parameters.lookAhead}
-                                                sliderMin={1}
-                                                sliderMax={model_parameters.lookAhead}
-                                                disabled={trainingStartedFlag} />
-                                        }
-                                        <Box display='flex' flexDirection='column' gap='5px'>
-                                            {Object.keys(modelMetrics.metrics).length > 0 && (
-                                                <Box display='flex' flexDirection='column' gap='4px'>
-                                                    <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%' gap='5px'>
-                                                        <Box display='flex' flexDirection='row' gap='16px' width='70%' justifyContent='space-between' className='model-metrics'>
-                                                            <Paper elevation={4} style={{ justifyContent: 'space-between', display: 'flex', flexDirection: 'row', gap: '4px', padding: '0px 10px' }}>
-                                                                <Typography variant='custom' textAlign='start'>{predictionChartType}</Typography>
-                                                            </Paper>
-                                                            <Paper elevation={4} style={{ width: '100%', justifyContent: 'space-between', display: 'flex', flexDirection: 'row', gap: '4px', padding: '0px 10px' }}>
-                                                                <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TP</span> : {modelMetrics.metrics.TP}</Typography>
-                                                                <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FP</span> : {modelMetrics.metrics.FP}</Typography>
-                                                                <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FN</span> : {modelMetrics.metrics.FN}</Typography>
-                                                                <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TN</span> : {modelMetrics.metrics.TN}</Typography>
-                                                            </Paper>
-                                                        </Box>
-                                                        <NoMaxWidthTooltip
-                                                            arrow
-                                                            className='metrics-tooltip'
-                                                            title=
-                                                            {(
-                                                                <Box>
-                                                                    <ClassificationTable data={CRITERIA_DATA} />
-                                                                </Box>
-                                                            )}
-                                                            placement='top' sx={{ cursor: 'pointer' }}>
-                                                            <InfoOutlinedIcon className='small-icon' />
-                                                        </NoMaxWidthTooltip>
-                                                    </Box>
-                                                    <Box width='100%'>
-                                                        <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
-                                                            <thead className='table-group'>
-                                                                <tr className='table-row'>
-                                                                    <th className='table-head'>Accuracy</th>
-                                                                    <th className='table-head'>Precision</th>
-                                                                    <th className='table-head'>F1</th>
-                                                                    <th className='table-head'>Recall</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody className='table-body'>
-                                                                <tr className='table-row'>
-                                                                    <td className='table-data'>{modelMetrics.metrics.accuracy}</td>
-                                                                    <td className='table-data'>{modelMetrics.metrics.precision}</td>
-                                                                    <td className='table-data'>{modelMetrics.metrics.f1}</td>
-                                                                    <td className='table-data'>{modelMetrics.metrics.recall}</td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </Box>
-                                                </Box>
-                                            )}
-
-                                            <Box display='flex' flexDirection='row' justifyContent='space-between'>
-                                                {(Object.keys(modelMetrics.mse).length > 0) &&
-                                                    <Box width='100%'>
-                                                        <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
-                                                            <thead className='table-group'>
-                                                                <tr className='table-row'>
-                                                                    <th className='table-head'>MSE</th>
-                                                                    <th className='table-head'>RMSE</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody className='table-body'>
-                                                                <tr className='table-row'>
-                                                                    <td className='table-data'>{modelMetrics.mse.mse}</td>
-                                                                    <td className='table-data'>{modelMetrics.mse.rmse}</td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </Box>
-                                                }
-                                            </Box>
-                                        </Box>
-                                    </Paper>
-                                }
-
                             </Box>
                         </Grid>
 
@@ -1386,8 +1416,8 @@ const CryptoModule = () => {
                                             return (
                                                 <Paper key={index} elevation={4}>
                                                     <Box display='flex' alignItems='center' justifyContent='space-between' pl={'5px'} pr={'5px'}>
-                                                        <Typography>{model_name}</Typography>
-                                                        <Box>
+                                                        <Typography className='saved-model-name'>{model_name}</Typography>
+                                                        <Box display='flex'>
                                                             <Tooltip title={'View Model Data'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                                                                 <span>
                                                                     <IconButton onClick={handleExpandSelectedModel.bind(null, { model_id: model_id })} sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} >

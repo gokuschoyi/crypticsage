@@ -96,7 +96,8 @@ module.exports = async (job) => {
         learning_rate,
         hidden_layers,
         transformation_order,
-        do_validation
+        do_validation,
+        early_stopping_flag
     } = model_training_parameters
     console.log('Model parameters : ', model_training_parameters)
 
@@ -346,6 +347,7 @@ module.exports = async (job) => {
                     parameters = {
                         model: model_,
                         do_validation,
+                        early_stopping_flag,
                         learning_rate,
                         look_ahead,
                         xTrain: JSON.parse(await redisStep.hget(modelCheckpointName, 'xTrain')),

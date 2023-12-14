@@ -11,32 +11,6 @@ import './Admin.css'
 import { Box, useTheme } from '@mui/material'
 const Admin = (props) => {
     const [test, setTest] = useState(false)
-    const hide = () => {
-        setToggleSettings(false)
-        setToggleNotifications(false)
-        setTest(false)
-    }
-    useEffect(() => {
-        if (test) {
-            hide();
-        }
-    })
-
-    const [toggleSettings, setToggleSettings] = React.useState(false);
-    const handleToggleSettings = () => {
-        setToggleSettings(!toggleSettings);
-        if (toggleNotifications) {
-            setToggleNotifications(false);
-
-        }
-    }
-    const [toggleNotifications, setToggleNotifications] = React.useState(false);
-    const handleToggleNotifications = () => {
-        setToggleNotifications(!toggleNotifications);
-        if (toggleSettings) {
-            setToggleSettings(false)
-        }
-    }
 
     const toggleSmallScreenAdminSidebarState = useSelector(state => state.adminSidebar.toggleSmallScreenAdminSidebarState);
     // console.log(toggleSmallScreenAdminSidebarState)
@@ -74,10 +48,6 @@ const Admin = (props) => {
                 }}
             >
                 <AdminTopbar
-                    toggleSettings={toggleSettings}
-                    setToggleSettings={handleToggleSettings}
-                    toggleNotifications={toggleNotifications}
-                    setToggleNotifications={handleToggleNotifications}
                     toggleSmallScreenAdminSidebar={toggleSmallScreenAdminSidebar}
                     handleToggleSmallScreenAdminSidebar={handleToggleSmallScreenAdminSidebar}
                 />

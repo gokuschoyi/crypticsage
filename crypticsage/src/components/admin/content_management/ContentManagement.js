@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useOutletContext } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import AdminHeader from '../global/AdminHeader';
 import NewLessonDialog from './edit_components/addLesson/NewLessonDialog';
@@ -38,10 +37,6 @@ const Admin = (props) => {
     const { title, subtitle } = props
     const theme = useTheme();
 
-    const [setTest] = useOutletContext();
-    const hide = () => {
-        setTest(true);
-    }
     const [open, setOpen] = useState(false);
 
     // new lesson dialog box
@@ -996,7 +991,7 @@ const Admin = (props) => {
     }
 
     return (
-        <Box className='admin-container' onClick={hide}>
+        <Box className='admin-container'>
             <Box height='100%' width='-webkit-fill-available'>
                 <AdminHeader title={title} subtitle={subtitle} />
             </Box>

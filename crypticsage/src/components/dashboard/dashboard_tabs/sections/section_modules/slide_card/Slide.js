@@ -3,7 +3,6 @@ import './Slide.css'
 import { Box, Button, useTheme, CardMedia, Grid } from '@mui/material'
 import TreeView from '@mui/lab/TreeView';
 import TreeItem from '@mui/lab/TreeItem';
-import { useOutletContext } from "react-router-dom";
 import { ChevronRightIcon, ExpandMoreIcon } from '../../../../global/Icons';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -24,11 +23,7 @@ const SlideComponent = (props) => {
     const { slides, counter } = useSelector(state => state.section);
     const sectionData = useSelector(state => state.section.sections)
     const lessonsData = useSelector(state => state.section.lessons)
-    const [setTest] = useOutletContext();
     const videoContent = document.getElementById('slide-video')
-    const hide = () => {
-        setTest(true);
-    }
     const slideData = slides.lessonData
     const renderTree = () => {
         return (
@@ -260,7 +255,7 @@ const SlideComponent = (props) => {
     // console.log("currentLessonStatus", currentLessonStatus)
 
     return (
-        <Box className='introduction-container' onClick={hide}>
+        <Box className='introduction-container'>
             <Box className='lesson-tree' sx={{ color: `${theme.palette.secondary.main}` }}>
                 {renderTree()}
             </Box>

@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react'
 import { ToastContainer } from 'react-toastify';
-// import { useProSidebar } from "react-pro-sidebar";
-// import useMediaQuery from '@mui/material/useMediaQuery';
 import 'react-toastify/dist/ReactToastify.css';
 import SidebarC from '../../components/dashboard/global/Sidebar';
 import Topbar from '../../components/dashboard/global/Topbar';
@@ -31,55 +28,31 @@ const Dashboard = (props) => {
         }
     }, [isOnline]);
 
-    const [toggleUser, setToggleUser] = React.useState(false);
-    const handleToggleUser = () => {
-        setToggleUser(!toggleUser);
-        if (toggleSettings || toggleNotifications) {
-            setToggleSettings(false);
-            setToggleNotifications(false);
-        }
-    }
-
-    const [toggleSettings, setToggleSettings] = React.useState(false);
-    const handleToggleSettings = () => {
-        setToggleSettings(!toggleSettings);
-        if (toggleUser || toggleNotifications) {
-            setToggleUser(false);
-            setToggleNotifications(false);
-        }
-    }
-
-    const [toggleNotifications, setToggleNotifications] = React.useState(false);
-    const handleToggleNotifications = () => {
-        setToggleNotifications(!toggleNotifications);
-        if (toggleUser || toggleSettings) {
-            setToggleUser(false);
-            setToggleSettings(false);
-        }
-    }
-
-    const hide = () => {
-        setToggleUser(false);
-        setToggleSettings(false);
-        setToggleNotifications(false);
-        setTest(false);
-    }
-
-    const [test, setTest] = React.useState(false);
-
     useEffect(() => {
-        if (test) {
-            hide();
+        const outsideClickHandler = () => {
+            const notificationDropdown = document.getElementsByClassName('user-notification')[0];
+            const settingsDropdown = document.getElementsByClassName('user-settings')[0];
+            const userNavDropdown = document.getElementsByClassName('user-nav')[0];
+
+            if (notificationDropdown.classList.contains('show-notification')) {
+                notificationDropdown.classList.toggle('show-notification');
+            }
+            if (settingsDropdown.classList.contains('show-settings')) {
+                settingsDropdown.classList.toggle('show-settings');
+            }
+
+            if (userNavDropdown.classList.contains('show-user-nav')) {
+                userNavDropdown.classList.toggle('show-user-nav');
+            }
+        }
+
+        const content = document.getElementsByClassName('content-box')[0];
+        content.addEventListener('click', outsideClickHandler);
+
+        return () => {
+            content.removeEventListener('click', outsideClickHandler);
         }
     })
-    const toggleSmallScreenSidebarState = useSelector(state => state.sidebar.toggleSmallScreenSidebarState);
-    // const { collapsed } = useProSidebar();
-    // const theme = useTheme();
-    // const sm = useMediaQuery(theme.breakpoints.down('sm'));
-    const [toggleSmallScreenSidebar, setToggleSmallScreenSidebar] = useState(toggleSmallScreenSidebarState)
-    const handleToggleSmallScreenSidebar = () => {
-        setToggleSmallScreenSidebar((prev) => !prev)
-    }
 
     return (
         <Box className="dashboard-container" >
@@ -104,18 +77,9 @@ const Dashboard = (props) => {
                     overflow: "auto",
                 }}
             >
-                <Topbar
-                    toggleUser={toggleUser}
-                    setToggleUser={handleToggleUser}
-                    toggleSettings={toggleSettings}
-                    setToggleSettings={handleToggleSettings}
-                    toggleNotifications={toggleNotifications}
-                    setToggleNotifications={handleToggleNotifications}
-                    toggleSmallScreenSidebar={toggleSmallScreenSidebar}
-                    handleToggleSmallScreenSidebar={handleToggleSmallScreenSidebar}
-                />
+                <Topbar />
                 <Box className='content-box'>
-                    <Outlet context={[setTest]} />
+                    <Outlet />
                 </Box>
             </Box>
         </Box>
