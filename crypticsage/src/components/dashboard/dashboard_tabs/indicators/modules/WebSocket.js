@@ -61,7 +61,7 @@ const useWebSocket = (
         ERROR: 'error'
     };
 
-    const createModelProgressWebSocket = (doValidation) => {
+    const createModelProgressWebSocket = () => {
         if (webSocket.current && webSocket.current.readyState === WebSocket.OPEN) {
             notifyMessageBoxRef.current = document.getElementById('loader-message-text');
             console.log('UE: WebSocket connection is already open', webSocket.current);
@@ -99,12 +99,7 @@ const useWebSocket = (
                         break;
                     case ACTIONS.BATCH_END:
                         if (!batchResult) { setBatchResult(true) }
-                        let totalNoOfBatch = 0
-                        if (doValidation) {
-                            totalNoOfBatch = Math.round(data.log.totalNoOfBatch * 0.9)
-                        } else {
-                            totalNoOfBatch = data.log.totalNoOfBatch
-                        }
+                        let totalNoOfBatch = data.log.totalNoOfBatch
                         const percentageCompleted = parseFloat(((data.log.batch / totalNoOfBatch) * 100).toFixed(2)) || 0
                         const bgColor = getColorForValue(percentageCompleted, 0, 100, '#C2185B', '#388E3C');
                         if (batchLinearProgressRef.current) {

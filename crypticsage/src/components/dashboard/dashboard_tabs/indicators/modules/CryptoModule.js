@@ -457,20 +457,20 @@ const CryptoModule = () => {
 
     // setting converted learning rate
     useEffect(() => {
-        const minValue = 0.00001;
-        const maxValue = 0.1;
+        const minValue = 0.0001;
+        const maxValue = 0.01;
 
         // Calculate the exponentially scaled value
         const normalizedValue = (modelParams.learningRate - 1) / (100 - 1);
         const scaledValue = minValue * Math.pow(maxValue / minValue, normalizedValue);
 
         // Calculate the exponentially scaled value
-        // console.log(scaledValue)
+        // console.log(parseFloat(scaledValue.toFixed(4)))
 
         setModelParams((prev) => {
             return {
                 ...prev,
-                'scaledLearningRate': scaledValue
+                'scaledLearningRate': parseFloat(scaledValue.toFixed(4))
             }
         })
     }, [modelParams.learningRate])
@@ -734,9 +734,8 @@ const CryptoModule = () => {
         // console.log('UE : Socket start')
         if (startWebSocket) {
             if (webSocket.current === null) {
-                const doValidation = modelParams.doValidation
                 // console.log('Starting socket, flag = true and socket = null')
-                createModelProgressWebSocket(doValidation)
+                createModelProgressWebSocket()
             } else {
                 // console.log('WS already present, socket not null')
             }

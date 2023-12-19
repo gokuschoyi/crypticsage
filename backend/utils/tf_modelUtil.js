@@ -6,17 +6,10 @@ var talib = require('talib/build/Release/talib')
 const tf = require('@tensorflow/tfjs-node');
 const { sqrt } = require('@tensorflow/tfjs-core');
 
-const TF_Model = require('./tf_model');
 const IUtil = require('./indicatorUtil');
 const RedisUtil = require('./redis_util')
 const { createTimer } = require('../utils/timer');
 
-const e_type = {
-    "open": 0,
-    "high": 1,
-    "low": 2,
-    "close": 3,
-}
 
 const displayDataInTable = (data, name) => {
     // Convert each sub-array into an object with named properties
@@ -113,10 +106,11 @@ const trimDataBasedOnTalibSmallestLength = async ({ finalTalibResult, tickerHist
     const diff = tickerHistory.length - smallestLength
     let tickerHist = tickerHistory.slice(diff, tickerHistory.length)
     if (config.debug_flag === 'true') {
+        console.log('Functions and history length after adjustment : ', smallestLength)
         console.log('Smallest length : ', smallestLength)
+        console.log('Ticker history length after adjustment : ', tickerHist.length)
         console.log("Max difference : ", diff)
-        console.log('Functions and  history length after adjustment : ', smallestLength)
-        console.log('Ticker history length after adjustment : ', tickerHist.length, tickerHist[0], tickerHist[tickerHist.length - 1])
+        console.log('Oldest : ', tickerHist[0], 'Latest', tickerHist[tickerHist.length - 1])
     }
     const resultKeys = Object.keys(finalTalibResult)
     resultKeys.forEach((key) => {
@@ -138,15 +132,6 @@ const trimDataBasedOnTalibSmallestLength = async ({ finalTalibResult, tickerHist
  * @returns {Promise<array>}
  */
 const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult, transformation_order }) => {
-
-    /* // Extract OHLCV and technical indicator data
-    const ohlcvData = tickerHist.map((item) => [parseFloat(item.open), parseFloat(item.high), parseFloat(item.low), parseFloat(item.close), parseFloat(item.volume)])
-    // Combine OHLCV data with technical indicator data
-    const features = ohlcvData.map((ohlcv, i) => {
-        const additionalData = Object.values(finalTalibResult).map((result) => result[i]);
-        return [...ohlcv, ...additionalData];
-    }); */
-
     const features = tickerHist.map((item, i) => {
         return transformation_order.map(order => {
             if (order.value in item) {
@@ -161,9 +146,9 @@ const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult, tran
     });
 
     if (config.debug_flag === 'true') {
+        console.log('Combined with features Length : ', features.length)
         console.log('Final talib keys : ', Object.keys(finalTalibResult))
-        // console.log('Transformed OHLCV Length : ', ohlcvData.length, 'Sample data : ', ohlcvData[0], ohlcvData[ohlcvData.length - 1])
-        console.log('Combined with features Length : ', features.length, 'Sample data : ', features[features.length - 1])
+        console.log('Last transformed data : ', features[features.length - 1])
     }
 
     return features
@@ -174,27 +159,20 @@ const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult, tran
  * @param {Object} param
  * @param {string} param.model_type
  * @param {array} param.features
- * @param {string} param.to_predict
- * @returns {Promise<{ stdData: Array, label_mean: number, label_variance: number}>}
+ * @returns {Promise<{ stdData: Array, mean: Array, variance: Array}>}
  */
-const standardizeData = ({ model_type, features, to_predict }) => {
+const standardizeData = ({ model_type, features }) => {
     const { mean, variance } = tf.moments(tf.tensor(features), 0);
     const standardizedFeatures = tf.div(tf.sub(tf.tensor(features), mean), tf.sqrt(variance));
     const stdData = standardizedFeatures.arraySync();
 
     // let e;
-    let label_mean, label_variance
+    let feature_mean, feature_variance
     // console.log(model_type)
     switch (model_type) {
-        case 'multi_input_single_output_no_step':
         case 'multi_input_single_output_step':
-            // e = e_type[to_predict]
-            label_mean = mean.arraySync()[to_predict];
-            label_variance = variance.arraySync()[to_predict];
-            break;
-        case 'multi_input_multi_output_no_step':
-            label_mean = mean.arraySync();
-            label_variance = variance.arraySync();
+            feature_mean = mean.arraySync();
+            feature_variance = variance.arraySync();
             break;
         default:
             break;
@@ -202,12 +180,14 @@ const standardizeData = ({ model_type, features, to_predict }) => {
 
     if (config.debug_flag === 'true') {
         // @ts-ignore
-        console.log('Standardized Data Length : ', stdData.length, 'Sample data : ', stdData[stdData.length - 1])
-        console.log('E_ key : ', to_predict)
+        console.log('Standardized Data Length : ', stdData.length)
+        // @ts-ignore
+        console.log('Last data: ', stdData[stdData.length - 1])
+        console.log('Mean : ', feature_mean, 'Variance : ', feature_variance)
     }
 
     // @ts-ignore
-    return { stdData, label_mean, label_variance };
+    return { stdData, mean: feature_mean, variance: feature_variance };
 }
 
 
@@ -219,138 +199,55 @@ const standardizeData = ({ model_type, features, to_predict }) => {
  * @param {number} param.timeStep
  * @param {number} param.lookAhead
  * @param {string} param.e_key
- * @param {number} param.training_size 
- * @returns {Promise<{ trainSplit: number, xTrain:array, yTrain:array, xTrainTest:array, lastSets:array, yTrainTest:array  }>}
+ * @returns {Promise<{  xTrain:array, yTrain:array  }>}
  */
-const createTrainingData = async ({ model_type, stdData, timeStep, lookAhead, e_key, training_size }) => {
-    const standardized_features = []
-    const standardized_labels = []
-    const lastSets = []
+const createTrainingData = async ({ model_type, stdData, timeStep, lookAhead, e_key }) => {
+    const features = []
+    const labels = []
+    // const lastSets = []
 
     let subsetf, subsetl, str, e
     switch (model_type) {
         case 'multi_input_single_output_step':
-            // e = e_type[e_key]
             for (let i = 0; i <= stdData.length - timeStep - lookAhead; i++) {
                 let featureSlice = stdData.slice(i, i + timeStep).map(row => {
                     let filteredRow = row.filter((_, index) => index !== e_key);
                     return filteredRow;
                 });
-                standardized_features.push(featureSlice);
-                standardized_labels.push(stdData.slice(i + timeStep, i + timeStep + lookAhead).map((row) => [row[e_key]]));
+                features.push(featureSlice);
+                labels.push(stdData.slice(i + timeStep, i + timeStep + lookAhead).map((row) => [row[e_key]]));
             }
-
-            const lastFeatureSetsToPredict = stdData.slice(stdData.length - (timeStep + lookAhead - 1))
-            for (let i = 0; i <= lastFeatureSetsToPredict.length - timeStep; i++) {
-                let featureSlice = lastFeatureSetsToPredict.slice(i, i + timeStep).map(row => {
-                    let filteredRow = row.filter((_, index) => index !== e_key);
-                    return filteredRow;
-                });
-                lastSets.push(featureSlice)
-            }
-
-            subsetf = standardized_features.slice(-1)
-            subsetl = standardized_labels.slice(-1)
-
-
-            str = ''
-            subsetf.forEach((element, index) => {
-                element.forEach((row, ind) => {
-                    let rowStr = ''
-                    if (ind === element.length - 1) {
-                        rowStr += row.join(', ') + ` - ${subsetl[index].join(', ')}` + '\n' + '\n'
-                    } else {
-                        rowStr = row.join(', ') + '\n'
-                    }
-                    str += rowStr
-                })
-            })
 
             if (config.debug_flag === 'true') {
+                subsetf = features.slice(-1)
+                subsetl = labels.slice(-1)
+
+                str = ''
+                subsetf.forEach((element, index) => {
+                    element.forEach((row, ind) => {
+                        let rowStr = ''
+                        if (ind === element.length - 1) {
+                            rowStr += row.join(', ') + ` - ${subsetl[index].join(', ')}` + '\n' + '\n'
+                        } else {
+                            rowStr = row.join(', ') + '\n'
+                        }
+                        str += rowStr
+                    })
+                })
                 // console.log(subsetf)
                 // console.log(subsetl)
-                console.log('E_ key : ', e_key)
-                console.log('From function test array length', stdData.length)
+                console.log('Total training features length', stdData.length)
                 console.log('Offset length  : ', stdData.length - timeStep - lookAhead + 1)
-                console.log('Training_features : ', standardized_features.length, 'Training_labels : ', standardized_labels.length)
+                console.log('E_ key : ', e_key)
+                console.log('Training_features/xTrain : ', features.length, 'Training_labels/yTrain : ', labels.length)
                 displayDataInTable(stdData.slice(-lookAhead).map((row) => [row[e_key]]), 'Last train set labels')
                 console.log(str)
             }
             break;
-        case 'multi_input_single_output_no_step':
-            // @ts-ignore first timeStep values are not inclded 
-            for (let i = timeStep; i < stdData.length - lookAhead + 1; i++) {
-                standardized_features.push(stdData.slice(i - timeStep, i));
-                standardized_labels.push([stdData[i + lookAhead - 1][e_key]]);
-            }
-
-            console.log('Standardized_features : ', standardized_features.length, 'standardized_labels : ', standardized_labels.length)
-
-            subsetf = standardized_features.slice(0, 1)
-            subsetl = standardized_labels.slice(0, 1)
-
-            str = ''
-            subsetf.forEach((element, index) => {
-                element.forEach((row, ind) => {
-                    let rowStr = ''
-                    if (ind === element.length - 1) {
-                        rowStr += row.join(', ') + ` - ${subsetl[index][0]}` + '\n' + '\n'
-                    } else {
-                        rowStr = row.join(', ') + '\n'
-                    }
-                    str += rowStr
-                })
-            })
-
-            console.log(stdData[timeStep + lookAhead - 1][e_key])
-            console.log(str)
-            break;
-        case 'multi_input_multi_output_no_step':
-            for (let i = timeStep; i < stdData.length - lookAhead + 1; i++) {
-                standardized_features.push(stdData.slice(i - timeStep, i));
-                standardized_labels.push(stdData[i + lookAhead - 1].slice(0, 5));
-            }
-
-            console.log('Standardized_features : ', standardized_features.length, 'standardized_labels : ', standardized_labels.length)
-
-            subsetf = standardized_features.slice(0, 1)
-            subsetl = standardized_labels.slice(0, 1)
-
-            str = ''
-            subsetf.forEach((element, index) => {
-                element.forEach((row, ind) => {
-                    let rowStr = ''
-                    if (ind === element.length - 1) {
-                        rowStr += row.join(', ') + ` - ${subsetl[index].join(', ')}` + '\n' + '\n'
-                    } else {
-                        rowStr = row.join(', ') + '\n'
-                    }
-                    str += rowStr
-                })
-            })
-
-            console.log(stdData[timeStep + lookAhead - 1])
-            console.log(str)
-            break;
         default:
             break;
     }
-
-    const trainSplitRatio = training_size / 100
-    const trainSplit = Math.floor(standardized_features.length * trainSplitRatio)
-
-    const xTrain = standardized_features.slice(0, trainSplit)
-    const yTrain = standardized_labels.slice(0, trainSplit)
-    const xTrainTest = standardized_features.slice(trainSplit, standardized_features.length)
-    const yTrainTest = standardized_labels.slice(trainSplit, standardized_labels.length)
-
-    if (config.debug_flag === 'true') {
-        console.log('Split Index: ', trainSplit)
-        console.log('xTrain : ', xTrain.length, 'xTrain test : ', xTrainTest.length)
-        console.log('yTrain : ', yTrain.length, 'yTrain test : ', yTrainTest.length)
-        console.log('Total Training plus Test : ', xTrain.length + xTrainTest.length)
-    }
-    return { trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest }
+    return { xTrain: features, yTrain: labels }
 }
 
 /**
@@ -427,6 +324,112 @@ const getDateRangeForTestSet = ({ ticker_history, train_split, time_step, look_a
     return dates
 }
 
+/**
+ * generates the test data for evaluation
+ * @param {Object} param
+ * @param {string} param.model_type
+ * @param {array} param.mean
+ * @param {array} param.variance
+ * @param {number} param.e_key
+ * @param {array} param.ticker_history
+ * @param {array} param.test_features
+ * @param {number} param.train_split
+ * @param {number} param.time_step
+ * @param {number} param.look_ahead
+ * @returns {Promise<{ xTrainTest: array, yTrainTest: array, dates: DatesObj[] }>} 
+ */
+const generateEvaluationData = async (
+    {
+        model_type,
+        mean,
+        variance,
+        e_key,
+        ticker_history,
+        test_features,
+        train_split,
+        time_step,
+        look_ahead
+    }
+) => {
+    const meanTensor = tf.tensor(mean)
+    const varianceTensor = tf.tensor(variance)
+    const stdData = tf.div(tf.sub(tf.tensor(test_features), meanTensor), tf.sqrt(varianceTensor)).arraySync();
+
+    // @ts-ignore
+    let { xTrain: xTrainTest, yTrain: yTrainTest } = await createTrainingData({ model_type, stdData: stdData, timeStep: time_step, lookAhead: look_ahead, e_key: e_key })
+
+    // look ahead no of prediction for forecasting
+    const lastSets = []
+    // @ts-ignore
+    const lastFeatureSetsToPredict = stdData.slice(stdData.length - (time_step + look_ahead - 1))
+
+    for (let i = 0; i <= lastFeatureSetsToPredict.length - time_step; i++) {
+        let featureSlice = lastFeatureSetsToPredict.slice(i, i + time_step).map(row => {
+            let filteredRow = row.filter((_, index) => index !== e_key);
+            return filteredRow;
+        });
+        lastSets.push(featureSlice)
+    }
+
+    const lastTestTensor = tf.tensor(lastSets)
+
+    console.log('lastSets prediction shape', lastTestTensor.shape)
+    xTrainTest = [...xTrainTest, ...lastSets]
+
+    // setting test set dates for plotting
+    const lastDates = ticker_history.slice(train_split + time_step, ticker_history.length - (look_ahead - 1))
+    let dates = []
+    lastDates.forEach((item, index) => {
+        const strDate = new Date(item.openTime).toLocaleString();
+        const actualValue = yTrainTest[index][0][0];
+
+        dates.push({
+            openTime: strDate,
+            open: item.openTime / 1000,
+            actual: actualValue,
+        })
+    })
+
+    console.log('Original dates length : ', dates.length, new Date(dates[dates.length - 1].open * 1000).toLocaleString())
+
+    let lastOriginal = yTrainTest[yTrainTest.length - 1]
+    let latestTime = dates[dates.length - 1].open * 1000 // look_ahead no of ticker behind
+    let tickerPeriodInMilliSecond = (dates[1].open - dates[0].open) * 1000
+
+    for (let i = 1; i < look_ahead; i++) {
+        dates.push({
+            openTime: new Date(latestTime + (tickerPeriodInMilliSecond * (i))).toLocaleString(),
+            open: (latestTime + (tickerPeriodInMilliSecond * (i))) / 1000,
+            actual: lastOriginal[i - 1][0],
+        })
+    }
+
+    console.log('Dates length after addition: ', dates.length, new Date(dates[dates.length - 1].open * 1000).toLocaleString())
+
+
+    const fHistClose = parseFloat(lastDates[0].close).toFixed(2)
+    const yTrainFClose = calculateOriginalPrice(yTrainTest[0][0][0], variance[e_key], mean[e_key])
+    const lHistClose = parseFloat(lastDates[lastDates.length - 1].close).toFixed(2)
+    const yTrainLClose = calculateOriginalPrice(yTrainTest[yTrainTest.length - 1][0][0], variance[e_key], mean[e_key])
+
+    const firstHistStatus = fHistClose == yTrainFClose.toFixed(2) ? 'Same' : 'Different'
+    const lastHistStatus = lHistClose == yTrainLClose.toFixed(2) ? 'Same' : 'Different'
+
+    if (config.debug_flag === 'true') {
+        console.log('Last actual history close :', ticker_history[ticker_history.length - 1].close)
+        console.log('Last dates : ', lastDates.length, lastDates[0].close, lastDates[lastDates.length - 1].close)
+        console.log('Last close price, dates', lHistClose, new Date(lastDates[lastDates.length - 1].openTime).toLocaleString())
+        console.log('Last original close price', yTrainLClose, new Date(lastDates[lastDates.length - 1].openTime).toLocaleString())
+
+        console.log(xTrainTest.length, yTrainTest.length)
+        log.notice(`First hist status : ${firstHistStatus}`)
+        log.notice(`Last hist status : ${lastHistStatus}`)
+        log.info(`Final dates length :  ${dates.length}, ${new Date(dates[dates.length - 1].open * 1000).toLocaleString()}`)
+        log.info(`Final trainset length :  ${xTrainTest.length}`)
+    }
+
+    return { xTrainTest, yTrainTest, dates }
+}
 
 
 const evaluateForecast = async (actual, predicted) => {
@@ -800,5 +803,5 @@ module.exports = {
     standardizeData,
     createTrainingData,
     formatPredictedOutput,
-    getDateRangeForTestSet,
+    generateEvaluationData
 }

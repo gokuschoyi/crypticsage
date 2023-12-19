@@ -22,7 +22,7 @@ const TimeTracker = ({ createdAt }) => {
         };
     }, []);
     return (
-        <Box>
+        <Box title={dayjs(createdAt).format('lll')}>
             <Typography variant='body2'>{dayjs(createdAt).fromNow()}</Typography>
         </Box>
     );
@@ -134,9 +134,22 @@ const Notifications = (props) => {
                                         </Box>
 
                                         <Box pt={'2px'} display={'flex'} flexDirection={'row'} justifyContent={'space-between'} width={'100%'} alignItems={'center'}>
-                                            <Typography variant='body2'>
-                                                {notification.content}
-                                            </Typography>
+                                            <Box>
+                                                {notification.type === 'error' ?
+                                                    <Box>
+                                                        <Typography variant='body2' >
+                                                            {JSON.parse(notification.content).message} at step {JSON.parse(notification.content).step}
+                                                        </Typography>
+                                                        <Typography variant='body2'>
+                                                            {JSON.parse(notification.content).func_error}
+                                                        </Typography>
+                                                    </Box>
+                                                    :
+                                                    <Typography variant='body2'>
+                                                        {notification.content}
+                                                    </Typography>
+                                                }
+                                            </Box>
                                             <Box display={'flex'} flexDirection={'row'} gap={'4px'}>
                                                 <IconButton
                                                     className='small-icon-notification'

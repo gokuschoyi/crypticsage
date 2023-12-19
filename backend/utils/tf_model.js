@@ -39,10 +39,6 @@ const type = type2
  * @param {Number} model_parama.input_layer_shape
  * @param {Number} model_parama.look_ahead
  * @param {Number} model_parama.feature_count
- * @param {Number} model_parama.input_layer_neurons
- * @param {Number} model_parama.rnn_output_neurons
- * @param {Number} model_parama.output_layer_neurons
- * @param {Number} model_parama.n_layers 
  * @returns {tf.Sequential} model - A tensorflow model of type {@link tf.Sequential}
  */
 const createModel = (model_parama) => {
@@ -51,14 +47,9 @@ const createModel = (model_parama) => {
         input_layer_shape,
         look_ahead,
         feature_count,
-        input_layer_neurons,
-        rnn_output_neurons,
-        output_layer_neurons,
-        n_layers
     } = model_parama
 
     const model = tf.sequential();
-    let lstm_cells = [];
 
     switch (model_type) {
         case 'multi_input_single_output_step':
@@ -159,7 +150,7 @@ const createModel = (model_parama) => {
             } else {
                 model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', inputShape: [input_layer_shape, feature_count] }));
                 model.add(tf.layers.repeatVector({ n: look_ahead }));
-                // model.add(tf.layers.dropout({ rate: 0.1 }));
+                model.add(tf.layers.dropout({ rate: 0.1 }));
                 model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', returnSequences: true }));
                 model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [look_ahead, lstm_units] }));
             }
@@ -191,28 +182,53 @@ const onTrainEndCallback = (uid) => {
     redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'trainingEnd', uid }))
 }
 
-const trainModel = async ({ model, do_validation, early_stopping_flag, learning_rate, look_ahead, xTrain, yTrain, epochs, batch_size, uid }) => {
+const trainModel = async (
+    {
+        uid,
+        model,
+        epochs,
+        batch_size,
+        look_ahead,
+        do_validation,
+        early_stopping_flag,
+        xTrain,
+        yTrain,
+        xTrainTest,
+        yTrainTest,
+        learning_rate,
+    }
+) => {
     const totalNoOfBatch = Math.round(xTrain.length / batch_size)
     let xTrainTensor, xTTensor
     let yTrainTensor, yTTesnor
+    let xTrainTestTensor, yTrainTestTensor
     // const xTrainTensor = tf.tensor(xTrain)
     let reshapedYTensor
 
     if (look_ahead === 1) {
-        console.log('Look ahead is 1, reshaping y-train')
+        log.info('Train : Look ahead is 1, reshaping y-train')
         switch (type) {
             // @ts-ignore
             case 'CNN_One_Step':
             // @ts-ignore
             case 'CNN_MultiChannel':
-                console.log('Step 9 model type', type)
                 yTTesnor = tf.tensor(yTrain)
-
                 // @ts-ignore
                 reshapedYTensor = yTTesnor.reshape([yTTesnor.shape[0], yTTesnor.shape[1]])
-                console.log('Step 9 : reshape yTTensor : ', reshapedYTensor.shape)
+
+                const yTtestTensor = tf.tensor(yTrainTest)
+                // @ts-ignore
+                let reshapedYTestTensor = yTtestTensor.reshape([yTtestTensor.shape[0], yTtestTensor.shape[1]])
+
                 xTrainTensor = tf.tensor(xTrain)
                 yTrainTensor = reshapedYTensor
+
+                xTrainTestTensor = tf.tensor(xTrainTest.slice(0, -look_ahead))
+                yTrainTestTensor = reshapedYTestTensor
+
+                if (config.debug_flag === 'true') {
+                    console.log('Step 9 : model type', type)
+                }
                 break;
             default:
                 xTTensor = tf.tensor(xTrain)
@@ -226,14 +242,19 @@ const trainModel = async ({ model, do_validation, early_stopping_flag, learning_
                 break;
         }
     } else {
-        console.log('Look ahead is > 1')
+        log.info('Train : Look ahead is > 1')
         xTrainTensor = tf.tensor(xTrain)
         yTrainTensor = tf.tensor(yTrain)
+
+        xTrainTestTensor = tf.tensor(xTrainTest.slice(0, -look_ahead))
+        yTrainTestTensor = tf.tensor(yTrainTest)
     }
 
     if (config.debug_flag === 'true') {
         // @ts-ignore
         log.info(`xTrain tensor shape: ${xTrainTensor.shape}, yTrain tensor shape : ${yTrainTensor.shape}`)
+        // @ts-ignore
+        log.info(`xTrainTest tensor shape: ${xTrainTestTensor.shape}, yTrainTest tensor shape : ${yTrainTestTensor.shape}`)
     }
 
     // Define your early stopping callback
@@ -262,7 +283,7 @@ const trainModel = async ({ model, do_validation, early_stopping_flag, learning_
     ]
 
     model.compile({
-        optimizer: tf.train.adam(),
+        optimizer: tf.train.adam(learning_rate),
         loss: 'meanSquaredError',
         metrics: ['mse', 'mae'],
     });
@@ -274,18 +295,32 @@ const trainModel = async ({ model, do_validation, early_stopping_flag, learning_
             batchSize: batch_size,
             epochs: epochs,
             verbose: 1,
-            validationSplit: do_validation ? 0.1 : 0,
+            validationData: do_validation ? [xTrainTestTensor, yTrainTestTensor] : null,
             callbacks: custom_callbacks
         });
+
 
     console.log('History : ', history)
     return { model }
 }
 
-const evaluateModelOnTestSet = async ({ trained_model_, model_id, look_ahead, xTrainTest: xTTest, yTrainTest, dates, label_mean, label_variance, uid }) => {
+const evaluateModelOnTestSet = async (
+    {
+        trained_model_,
+        model_id,
+        look_ahead,
+        e_key,
+        xTrainTest: xTTest,
+        yTrainTest,
+        dates,
+        label_mean,
+        label_variance,
+        uid
+    }
+) => {
     let xTrainTest = []
     if (look_ahead === 1) {
-        console.log('Look ahead is 1, reshaping x-train')
+        // console.log('Look ahead is 1, reshaping x-train')
         let reshaped
         switch (type) {
             // @ts-ignore
@@ -313,7 +348,7 @@ const evaluateModelOnTestSet = async ({ trained_model_, model_id, look_ahead, xT
     let lastPrediction = []
     const updateFreq = 10 // Number of predictions to make before sending an update to the client
     try {
-        for (let i = 1; i < xTrainTest.length - 1; i++) {
+        for (let i = 1; i < xTrainTest.length; i++) {
             if (i % updateFreq === 0) {
                 let log = {
                     batch: i,
@@ -326,7 +361,7 @@ const evaluateModelOnTestSet = async ({ trained_model_, model_id, look_ahead, xT
             predictions.push(historySequence)
             history.push(xTrainTest[i])
         }
-
+        console.log('predictions length : ', predictions.length)
         const lastInputHist = xTrainTest.slice(-1)
         lastPrediction = await forecast(trained_model_, lastInputHist)
 
@@ -341,20 +376,23 @@ const evaluateModelOnTestSet = async ({ trained_model_, model_id, look_ahead, xT
                     let predTensor = tf.tensor(predictions)
                     let lastPredTensor = tf.tensor(lastPrediction)
 
-                    console.log('Y Tensor shape : ' + yTensor.shape)
-                    console.log('Predictions shape : ' + predTensor.shape)
-                    console.log('Last Prediction shape : ' + lastPredTensor.shape)
-
                     // @ts-ignore
                     let transformedPredictions = predTensor.reshape([predTensor.shape[0], predTensor.shape[1], 1])
-                    console.log('Transformed Predictions shape : ' + transformedPredictions.shape)
 
                     const overAllRMSE = sqrt(tf.losses.meanSquaredError(yTensor, transformedPredictions)).arraySync()
-                    console.log('New RMSE : ', overAllRMSE)
 
                     // @ts-ignore
                     let transforemdLastPrediction = lastPredTensor.reshape([lastPredTensor.shape[0], 1, 1])
-                    console.log('Transformed Last Prediction shape : ' + transforemdLastPrediction.shape)
+
+                    if (config.debug_flag === 'true') {
+                        console.log('Y Tensor shape : ' + yTensor.shape)
+                        console.log('Predictions shape : ' + predTensor.shape)
+                        console.log('New RMSE : ', overAllRMSE)
+                        console.log('Last Prediction shape : ' + lastPredTensor.shape)
+                        console.log('Transformed Predictions shape : ' + transformedPredictions.shape)
+                        console.log('Transformed Last Prediction shape : ' + transforemdLastPrediction.shape)
+                    }
+
                     // @ts-ignore
                     predictions = transformedPredictions.arraySync()
                     // @ts-ignore
@@ -364,16 +402,18 @@ const evaluateModelOnTestSet = async ({ trained_model_, model_id, look_ahead, xT
                     break;
             }
         } else {
-            let trimmedYTrainTest = yTrainTest.slice(0, -1)
-            let trimmedPredictions = predictions.slice(0, -look_ahead)
+            // let trimmedYTrainTest = yTrainTest.slice(0, -1)
+            let trimmedPredictions = predictions.slice(0, -(look_ahead - 1))
 
-            let yTensor = tf.tensor(trimmedYTrainTest)
+            let yTensor = tf.tensor(yTrainTest)
             let predTensor = tf.tensor(trimmedPredictions)
 
-            console.log('Lookahead > 1 : ', yTensor.shape, predTensor.shape)
-
             const overAllRMSE = sqrt(tf.losses.meanSquaredError(yTensor, predTensor)).arraySync()
-            console.log('New RMSE : ', overAllRMSE)
+
+            if (config.debug_flag === 'true') {
+                console.log('Lookahead > 1 : ', yTensor.shape, predTensor.shape)
+                console.log('New RMSE : ', overAllRMSE)
+            }
         }
 
 
@@ -401,8 +441,8 @@ const evaluateModelOnTestSet = async ({ trained_model_, model_id, look_ahead, xT
             dates: dates,
             predictions_array: predictions,
             forecast: lastPrediction,
-            label_mean,
-            label_variance,
+            label_mean: label_mean[e_key],
+            label_variance: label_variance[e_key],
         }
 
         RedisUtil.saveTestPredictions(model_id, finalData)

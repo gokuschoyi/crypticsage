@@ -1784,7 +1784,7 @@ const fetchEntireHistDataFromDb = async ({ type, ticker_name, period }) => {
         ]).toArray();
         if (config.debug_flag === 'true') {
             log.info(`Initial Total Length : ${tokenData.length}`)
-            console.log('Latest Data : ', tokenData[tokenData.length - 1])
+            console.log('Latest Data : ', tokenData[tokenData.length - 1], new Date(tokenData[tokenData.length - 1].openTime).toLocaleString())
             t.stopTimer(__filename.slice(__dirname.length + 1))
         }
         return tokenData

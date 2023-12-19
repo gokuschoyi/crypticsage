@@ -51,7 +51,7 @@ const CustomSlider = (props) => {
         <Paper elevation={6}>
             <Box p={'4px 8px'} display='flex' flexDirection='column' alignItems='start'>
                 <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%'>
-                    <Typography id="training-size-slider" variant='custom'>{label} : {scaledLearningRate === undefined ? `${sliderValue}${label === 'Training size' ? '%' : ''}` : scaledLearningRate.toExponential(2)}</Typography>
+                    <Typography id="training-size-slider" variant='custom'>{label} : {scaledLearningRate === undefined ? `${sliderValue}${label === 'Training size' ? '%' : ''}` : scaledLearningRate}</Typography>
                     <Typography variant='custom'>(Min: {min}, Max: {max})</Typography>
                 </Box>
 
