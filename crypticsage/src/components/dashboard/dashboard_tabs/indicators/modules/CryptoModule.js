@@ -10,24 +10,10 @@ import { Success, Info } from '../../../global/CustomToasts'
 import {
     Box
     , Typography
-    , Autocomplete
-    , TextField
     , Grid
     , Skeleton
     , useTheme
-    , Switch
-    , FormControlLabel
-    , Button
-    , CircularProgress
-    , IconButton
-    , Paper
-    , Chip
     , useMediaQuery
-    , Tooltip
-    , Accordion
-    , AccordionDetails
-    , AccordionSummary
-    , Collapse
 } from '@mui/material'
 
 import {
@@ -54,52 +40,34 @@ import {
     setCryptoDataInDbRedux,
     setSelectedTickerPeriod,
     resetStreamedTickerDataRedux,
-    toggleToolTipSwitch,
-    toggleShowPredictionSwitch,
     setSelectedFunctions,
     setSelectedFlagInTalibDescription
 } from './CryptoModuleSlice'
 
 import {
-    Dot,
-    NoMaxWidthTooltip,
-    ClassificationTable,
-    PredictionMSETable,
-    ModelHistoryTable,
     formatMillisecond,
-    generateMSESteps,
     generateRandomModelName,
     checkForUniqueAndTransform,
     checkIfNewTickerFetchIsRequired
 } from './CryptoModuleUtils'
 
-import {
-    DeleteCurrentModal,
-    SaveCurrentModal,
-    ResetTrainedModelModal
-} from '../components/crypto_components/modals';
 
 import {
     MainChart,
     SelectedFunctionContainer,
     PredictionsChart,
-    CustomSlider,
-    LinearProgressWithLabel,
-    MultiSelect,
-    ReorderList,
-    ModelHistoryChart
+    ModelHistoryChart,
+    SavedModels,
+    PredictionMetrics,
+    PredictionScoresTable,
+    TrainingLossTable,
+    BatchProgress,
+    EvaluationProgress,
+    PredictionOptions,
+    TrainingParameters,
+    IndicatorSearch,
+    MainChartOptions,
 } from '../components'
-
-import {
-    InfoOutlinedIcon,
-    DeleteForeverIcon,
-    OpenInFullIcon,
-    CloseFullscreenIcon,
-    AspectRatioIcon,
-    ExpandMoreIcon,
-    ArrowDropDownIcon,
-    ArrowDropUpIcon
-} from '../../../global/Icons'
 
 const colorCombinations = [
     {
@@ -139,59 +107,12 @@ const colorCombinations = [
     }
 ];
 
-const TICKER_PERIODS = [
-    '1m',
-    '1h',
-    '4h',
-    '6h',
-    '8h',
-    '12h',
-    "1d",
-    '3d',
-    '1w',
-]
-
-const INPUT_OPTIONS = [
-    "",
-    "high",
-    "low",
-    "open",
-    "close",
-]
-
-const mO_Copy = [
-    "Single Step Single Output",
-    "Single Step Multiple Output",
-    "Multi Step Single Output",
-    "Multi Step Multiple Output"
-]
-
-const MODEL_OPTIONS = [
-    "Multi Step Single Output",
-]
-
 const MODEL_OPTIONS_VALUE = {
     "Single Step Single Output": "multi_input_single_output_no_step",
     "Single Step Multiple Output": "multi_input_multi_output_no_step",
     "Multi Step Single Output": "multi_input_single_output_step",
     "Multi Step Multiple Output": "multi_input_multi_output_step"
 }
-
-const thresholdLower = 1;
-const thresholdUpper = 2
-const tolerance = 1
-/* const CRITERIA_DATA = [
-    { Condition: 'TP', Range: `-${thresholdLower}% < x < +${thresholdLower}%`, Criteria: `All precent changes tha lie within ±${thresholdLower}% of the actual value` },
-    { Condition: 'FP', Range: `x < -${thresholdLower}%`, Criteria: `All precent changes tha lie below -${thresholdLower}% than the actual value` },
-    { Condition: 'TN', Range: `x > ${thresholdUpper}%`, Criteria: `All precent changes tha lie more than ${thresholdUpper}% than the actual value` },
-    { Condition: 'FN', Range: `${thresholdLower}% < x < ${thresholdUpper}%`, Criteria: `All precent changes tha lie within ${thresholdLower}% and  ${thresholdUpper}% of the actual value` }
-]; */
-const CRITERIA_DATA = [
-    { Condition: 'TP', Criteria: `Prediction is within ${tolerance}%, class of interest belongs to - actual > predicted.` },
-    { Condition: 'FP', Criteria: `Prediction is within ${tolerance}%, class of interest belongs to - actual < predicted.` },
-    { Condition: 'FN', Criteria: `Prediction is outside ${tolerance}%, class of interest belongs to - actual > predicted.` },
-    { Condition: 'TN', Criteria: `Prediction is outside ${tolerance}%, class of interest belongs to - actual < predicted.` },
-]
 
 const CryptoModule = () => {
     const dispatch = useDispatch();
@@ -649,7 +570,10 @@ const CryptoModule = () => {
             ticker_period: selectedTickerPeriod,
             training_parameters: model_data.training_parameters,
             talibExecuteQueries: model_data.talibExecuteQueries,
-            predicted_result: model_data.predictedValues
+            predicted_result: model_data.predictedValues,
+            scores: model_data.score,
+            epoch_results: model_data.epoch_results,
+            train_duration: model_data.modelEndTime - model_data.modelStartTime
         }
         // console.log(saveModelPayload)
 
@@ -769,8 +693,24 @@ const CryptoModule = () => {
             })
     }
 
+    const [open, setOpen] = useState(false);
+    const [selectedSavedModelData, setSelectedSavedModelData] = useState(null);
+
     const handleExpandSelectedModel = ({ model_id }) => {
-        console.log(model_id)
+        const modelData = userModels.find((model) => model.model_id === model_id);
+        // Only toggle open state if the same model is clicked again
+        if (selectedSavedModelData?.model_id === model_id) {
+            setOpen((prevOpen) => !prevOpen);
+        } else {
+            setOpen(true);
+        }
+        setSelectedSavedModelData(modelData);
+    };
+
+    // console.log(selectedSavedModelData, open)
+
+    const handleExpandedSelectedModelClose = () => {
+        setOpen(false)
     }
 
     const [modelMetrics, setModelMetrics] = useState({ metrics: {}, mse: {} })
@@ -794,87 +734,18 @@ const CryptoModule = () => {
 
                 <Grid container className='indicator-chart-grid' pt={2} pb={2}>
                     <Grid item xs={12} sm={12} md={12} lg={9} xl={9}>
-                        <Box className='ticker-period-selector-top' pl={2} pr={2} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' gap='10px'>
-                            <Box className='autocomplete-select-box' width='200px'>
-                                <Autocomplete
-                                    size='small'
-                                    disableClearable
-                                    disablePortal={false}
-                                    id="selec-stock-select"
-                                    options={TICKER_PERIODS}
-                                    value={selectedTokenPeriod} // Set the selected value
-                                    onChange={(event, newValue) => handlePeriodChange(newValue)} // Handle value change
-                                    sx={{ width: 'auto' }}
-                                    renderInput={(params) => <TextField size='small' {...params}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
-                                                    borderColor: `${theme.palette.primary.main} !important`,
-                                                }
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                height: '10px'
-                                            },
-                                        }}
-                                        label="Select a period"
-                                        color="secondary"
-                                    />}
-                                />
-                            </Box>
-                            <Box className='tooltip-prediction-box'>
-                                <Box className='tooltip-prediction-box-controls'>
-                                    <FormControlLabel
-                                        value="start"
-                                        sx={{ marginLeft: '0px', marginRight: '0px' }}
-                                        control={<Switch size="small" color="secondary" />}
-                                        label={toolTipSwitchFlag ? 'Hide Tooltips' : 'Show Tooltips'}
-                                        labelPlacement="start"
-                                        checked={toolTipSwitchFlag}
-                                        onChange={() => dispatch(toggleToolTipSwitch())}
-                                    />
-                                    {predictedVlauesRedux.length !== 0 &&
-                                        <Box className='prediction-days'>
-                                            <FormControlLabel
-                                                value="start"
-                                                sx={{ marginLeft: '0px' }}
-                                                control={<Switch size="small" color="secondary" />}
-                                                label={showPredictionSwitchFlag ? 'Hide Predictions' : 'Show Predictions'}
-                                                labelPlacement="start"
-                                                checked={showPredictionSwitchFlag}
-                                                onChange={() => dispatch(toggleShowPredictionSwitch())}
-                                            />
-                                            {showPredictionSwitchFlag &&
-                                                <Autocomplete
-                                                    size='small'
-                                                    disableClearable
-                                                    disablePortal={false}
-                                                    id="selec-look-ahead-period"
-                                                    options={Array.from({ length: modelParams.lookAhead }, (_, i) => `+${i + 1}`)}
-                                                    value={`+${predictionLookAhead}`} // Set the selected value
-                                                    onChange={(event, newValue) => handleMainChartPredictionLookaAhead(newValue)} // Handle value change
-                                                    sx={{ width: 'auto' }}
-                                                    renderInput={(params) => <TextField size='small' {...params}
-                                                        sx={{
-                                                            '& .MuiOutlinedInput-root': {
-                                                                '& fieldset': {
-                                                                    borderColor: `${theme.palette.primary.newWhite} !important`,
-                                                                }
-                                                            },
-                                                            '& .MuiInputBase-input': {
-                                                                height: '10px'
-                                                            },
-                                                        }}
-                                                        label="LookAhead"
-                                                        color="secondary"
-                                                    />}
-                                                />
-                                            }
-                                        </Box>
-                                    }
-                                </Box>
-                                <Typography variant='custom' sx={{ textAlign: 'justify' }}>AF:{actualFetchLength}, R:{ohlcData.length} / {Math.round(ohlcData.length / 500)}</Typography>
-                            </Box>
-                        </Box>
+                        <MainChartOptions
+                            selectedTokenPeriod={selectedTokenPeriod}
+                            handlePeriodChange={handlePeriodChange}
+                            toolTipSwitchFlag={toolTipSwitchFlag}
+                            predictedVlauesRedux={predictedVlauesRedux}
+                            showPredictionSwitchFlag={showPredictionSwitchFlag}
+                            modelParams={modelParams}
+                            predictionLookAhead={predictionLookAhead}
+                            handleMainChartPredictionLookaAhead={handleMainChartPredictionLookaAhead}
+                            actualFetchLength={actualFetchLength}
+                            ohlcDataLength={ohlcData.length}
+                        />
                         <Box className='chart-container' display='flex' flexDirection='column' width='100%' pl={2} pr={2} pt={2}>
                             {chartData.length === 0 ?
                                 (
@@ -904,66 +775,13 @@ const CryptoModule = () => {
                 <Box mb={2} mt={2} className='selected-functions-box'>
                     <Grid container pt={2} pb={2}>
                         <Grid item xs={12} sm={12} md={12} lg={3} xl={3} pl={2} pr={2}>
-                            <Box className='search-indicator-box' display='flex' flexDirection='row' alignItems='center' >
-                                <Box className='function-selector' width='350px'>
-                                    {transformedFunctionsList.length > 0 &&
-                                        <Autocomplete
-                                            sx={{ backgroundColor: `${theme.palette.background.paperOne}` }}
-                                            disableCloseOnSelect={true}
-                                            value={searchedFunctions}
-                                            size='small'
-                                            multiple
-                                            limitTags={2}
-                                            id="tags-filled"
-                                            options={transformedFunctionsList.sort((a, b) => -b.group.localeCompare(a.group))}
-                                            getOptionDisabled={(option) => transformedFunctionsList.filter((item) => item.label === option.label)[0].func_selected || searchedFunctions.includes(option.label)}
-                                            groupBy={(option) => option.group}
-                                            freeSolo
-                                            onChange={(event, newValue) => {
-                                                handleSearchedFunctions(newValue)
-                                            }}
-                                            renderTags={(value, getTagProps) =>
-                                                value.map((option, index) => (
-                                                    <Chip variant="outlined" label={option.label} {...getTagProps({ index })} />
-                                                ))
-                                            }
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    variant="filled"
-                                                    label="Search for a function"
-                                                    placeholder="Search..."
-                                                />
-                                            )}
-                                        />
-                                    }
-                                    {searchedFunctions.length > 0 &&
-                                        <Box display='flex' alignItems='start' pt={1}>
-                                            <Button size='small' color='secondary' variant='outlined' onClick={handleAddSelectedFunction.bind(null)}>Add Functions</Button>
-                                        </Box>
-                                    }
-                                </Box>
-                            </Box>
-                            {selectedFunctions.length !== 0 &&
-                                <Box display='flex' flexDirection='column' alignItems='start' pt={1} pb={2}>
-                                    {selectedFunctions.map((funcRedux, index) => {
-                                        const { hint, functions } = funcRedux;
-                                        return (
-                                            <Box key={index}>
-                                                {functions.map((func, funcIndex) => {
-                                                    const { outputAvailable } = func;
-                                                    return (
-                                                        <Box key={funcIndex} display='flex' flexDirection='row' gap='4px' alignItems='center'>
-                                                            <Dot color={outputAvailable ? 'green' : 'red'} />
-                                                            <Typography className='selected-function-hint' variant='custom' sx={{ textAlign: 'start' }}>{hint}</Typography>
-                                                        </Box>
-                                                    );
-                                                })}
-                                            </Box>
-                                        );
-                                    })}
-                                </Box>
-                            }
+                            <IndicatorSearch
+                                searchedFunctions={searchedFunctions}
+                                selectedFunctions={selectedFunctions}
+                                transformedFunctionsList={transformedFunctionsList}
+                                handleSearchedFunctions={handleSearchedFunctions}
+                                handleAddSelectedFunction={handleAddSelectedFunction}
+                            />
                         </Grid>
 
                         <Grid item xs={12} sm={12} md={12} lg={9} xl={9} pl={2} pr={2}>
@@ -1004,169 +822,39 @@ const CryptoModule = () => {
                     </Box>
                     <Grid container className='tensor-flow-grid'>
                         <Grid item xs={12} sm={12} md={4} lg={3} xl={3} p={2} >
-                            <Paper elevtion={4} className='model-parameter-expandd-collapse-box' sx={{ display: "flex", flexDirection: "row", justifyContent: 'space-between', alignItems: 'center', padding: '4px', boxShadow: `${trainingParametersAccordianCollapse && 'none'}` }}>
-                                <Typography variant='h5'>Edit training parameters</Typography>
-                                <IconButton sx={{ padding: '6px' }} onClick={handleParametersAccordianCollapse.bind(null, {})}>
-                                    {trainingParametersAccordianCollapse ? <ArrowDropUpIcon className='small-icon' /> : <ArrowDropDownIcon className='small-icon' />}
-                                </IconButton>
-                            </Paper>
-
-                            <Collapse in={trainingParametersAccordianCollapse}>
-                                <Box className='model-parameters-grid' pt={1}>
-                                    <Box display='flex' flexDirection='column' pb={2}>
-                                        <Box display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
-                                            <Typography variant='h5' textAlign='start'>Parameters</Typography>
-                                            <Box display='flex' alignItems='center' gap='10px'>
-                                                <Button
-                                                    sx={{
-                                                        height: '26px',
-                                                    }}
-                                                    variant='outlined'
-                                                    size='small'
-                                                    color='secondary'
-                                                    disabled={trainingStartedFlag}
-                                                    onClick={(e) => handleStartModelTraining()}
-                                                    endIcon={trainingStartedFlag && <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />}
-                                                >
-                                                    {trainingStartedFlag ? 'Training' : 'Train'}
-                                                </Button>
-                                                <ResetTrainedModelModal
-                                                    handleClearModelData={handleClearModelData}
-                                                    disabled={trainingStartedFlag}
-                                                    model_present={model_data.model_id === '' ? false : true} />
-                                            </Box>
-                                        </Box>
-                                        {noFuncSelected !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{noFuncSelected}</Typography>}
-                                    </Box>
-
-                                    <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' gap='8px'>
-                                        <Box display='flex' flexDirection='column' gap='8px' width='100%'>
-                                            <Paper elevation={4} sx={{ padding: '4px' }}>
-                                                <FormControlLabel
-                                                    value="start"
-                                                    sx={{ marginLeft: '0px', marginRight: '0px', width: '100%', justifyContent: 'space-between' }}
-                                                    control={<Switch disabled={trainingStartedFlag} size="small" color="secondary" />}
-                                                    label='Do validation on test set'
-                                                    labelPlacement="start"
-                                                    checked={modelParams.doValidation}
-                                                    onChange={() => handleDoValidation()}
-                                                />
-                                            </Paper>
-
-                                            <Paper elevation={4} sx={{ padding: '4px' }}>
-                                                <FormControlLabel
-                                                    value="start"
-                                                    sx={{ marginLeft: '0px', marginRight: '0px', width: '100%', justifyContent: 'space-between' }}
-                                                    control={<Switch disabled={trainingStartedFlag} size="small" color="secondary" />}
-                                                    label='Perform Early Stopping'
-                                                    labelPlacement="start"
-                                                    checked={modelParams.earlyStopping}
-                                                    onChange={() => handleEarlyStopping()}
-                                                />
-                                            </Paper>
-                                            {/* <MultiSelect
-                                                inputLabel={'Model type'}
-                                                inputOptions={MODEL_OPTIONS}
-                                                selectedInputOptions={modelParams.modelType}
-                                                handleInputOptions={handleModelTypeOptions}
-                                                fieldName={'Model type'}
-                                                toolTipTitle={'Select a model type'}
-                                                trainingStartedFlag={trainingStartedFlag}
-                                            /> */}
-                                            {modelParams.modelType !== 'Single Step Multiple Output' &&
-                                                <MultiSelect
-                                                    inputLabel={'Prediction flag'}
-                                                    inputOptions={INPUT_OPTIONS}
-                                                    selectedInputOptions={modelParams.multiSelectValue}
-                                                    handleInputOptions={handleMultiselectOptions}
-                                                    fieldName={'To predict'}
-                                                    toolTipTitle={'Select one of the flags to be used to predict'}
-                                                    trainingStartedFlag={trainingStartedFlag}
-                                                />
-                                            }
-                                            <CustomSlider sliderValue={modelParams.trainingDatasetSize} name={'trainingDatasetSize'} handleModelParamChange={handleModelParamChange} label={'Training size'} min={50} max={95} sliderMin={0} sliderMax={100} disabled={trainingStartedFlag} />
-                                            <CustomSlider sliderValue={modelParams.timeStep} name={'timeStep'} handleModelParamChange={handleModelParamChange} label={'Step Size'} min={2} max={100} sliderMin={2} sliderMax={100} disabled={trainingStartedFlag} />
-                                            {(modelParams.modelType === 'Multi Step Single Output' || modelParams.modelType === 'Multi Step Multiple Output') &&
-                                                <CustomSlider sliderValue={modelParams.lookAhead} name={'lookAhead'} handleModelParamChange={handleModelParamChange} label={'Look Ahead'} min={1} max={30} sliderMin={1} sliderMax={30} disabled={trainingStartedFlag} />
-                                            }
-                                            <CustomSlider sliderValue={modelParams.epoch} name={'epoch'} handleModelParamChange={handleModelParamChange} label={'Epochs'} min={1} max={500} sliderMin={1} sliderMax={500} disabled={trainingStartedFlag} />
-                                            {modelParams.modelType !== 'Multi Step Single Output' &&
-                                                <CustomSlider sliderValue={modelParams.hiddenLayer} name={'hiddenLayer'} handleModelParamChange={handleModelParamChange} label={'Hidden Layers'} min={1} max={20} sliderMin={1} sliderMax={10} disabled={trainingStartedFlag} />
-                                            }
-                                            <CustomSlider sliderValue={modelParams.batchSize} name={'batchSize'} handleModelParamChange={handleModelParamChange} label={'Batch Size'} min={1} max={100} sliderMin={1} sliderMax={100} disabled={trainingStartedFlag} />
-                                            <CustomSlider sliderValue={modelParams.learningRate} name={'learningRate'} handleModelParamChange={handleModelParamChange} label={'L Rate'} min={1} max={100} sliderMin={1} sliderMax={100} scaledLearningRate={modelParams.scaledLearningRate} disabled={trainingStartedFlag} />
-                                        </Box>
-                                        <ReorderList orderList={transformationOrder} setOrderList={setTransformationOrder} disabled={trainingStartedFlag}/>
-                                    </Box>
-                                </Box>
-                            </Collapse>
+                            <TrainingParameters
+                                model_data={model_data}
+                                modelParams={modelParams}
+                                transformationOrder={transformationOrder}
+                                trainingParametersAccordianCollapse={trainingParametersAccordianCollapse}
+                                noFuncSelected={noFuncSelected}
+                                trainingStartedFlag={trainingStartedFlag}
+                                setTransformationOrder={setTransformationOrder}
+                                handleModelParamChange={handleModelParamChange}
+                                handleMultiselectOptions={handleMultiselectOptions}
+                                handleDoValidation={handleDoValidation}
+                                handleEarlyStopping={handleEarlyStopping}
+                                handleStartModelTraining={handleStartModelTraining}
+                                handleClearModelData={handleClearModelData}
+                                handleParametersAccordianCollapse={handleParametersAccordianCollapse}
+                            />
                         </Grid>
 
-                        <Grid item xs={12} sm={12} md={8} lg={6} xl={6} p={2} className='predictions-chart-grid'>
-                            <Box display='flex' flexDirection='column' pb={1}>
-                                <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='flex-start' className='prediction-chart-header'>
-                                    <Box display='flex' flexDirection='column' alignItems='start'>
-                                        <Typography variant={predictedVlauesRedux.length !== 0 ? 'h6' : 'h5'} textAlign='start'>Predictions - {predictedVlauesRedux.length !== 0 && predictionChartType === 'scaled' ? 'original' : predictionChartType}</Typography>
-                                    </Box>
-                                    {predictedVlauesRedux.length !== 0 &&
-                                        <Box className='chart-action-box'>
-                                            <Box display='flex' flexDirection='row' gap={'4px'} alignItems='center' className='model-chart-action-container'>
-                                                <TextField
-                                                    size='small'
-                                                    inputProps={{ style: { height: '10px', width:'150px' } }}
-                                                    id="outlined-controlled"
-                                                    label="Model name"
-                                                    value={modelName}
-                                                    onChange={(event) => {
-                                                        setModelName(event.target.value);
-                                                    }}
-                                                />
-                                                <Box className='model-chart-action-box'>
-                                                    <SaveCurrentModal handleSaveModel={handleSaveModel} />
-
-                                                    {!model_data.model_saved_to_db &&
-                                                        <DeleteCurrentModal handleDeleteModel={handleDeleteModel} />
-                                                    }
-
-                                                    {modelParams.modelType !== 'Single Step Multiple Output' &&
-                                                        <React.Fragment>
-                                                            <Tooltip title={'Standardized values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                                                <span>
-                                                                    <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "standardized" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })}>
-                                                                        <CloseFullscreenIcon className='small-icon' />
-                                                                    </IconButton>
-                                                                </span>
-                                                            </Tooltip>
-                                                            <Tooltip title={'Original values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                                                <span>
-                                                                    <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })}>
-                                                                        <OpenInFullIcon className='small-icon' />
-                                                                    </IconButton>
-                                                                </span>
-                                                            </Tooltip>
-                                                        </React.Fragment>
-                                                    }
-                                                </Box>
-                                            </Box>
-
-                                            <Box display='flex' flexDirection='row' gap='17px' paddingRight='6px' paddingLeft='6px'>
-                                                {colorCombinations.map((palette, index) => (
-                                                    <Box key={index} sx={{
-                                                        width: "10px",
-                                                        height: "10px",
-                                                        borderRadius: "50%",
-                                                        backgroundColor: `${palette.actual}`,
-                                                        cursor: 'pointer',
-                                                        border: `${paletteIdRedux === index ? '1px solid #fff' : 'none'}`,
-                                                    }}
-                                                        onClick={handlePredictionChartPalette.bind(null, { id: index })}
-                                                    />
-                                                ))}
-                                            </Box>
-                                        </Box>
-                                    }
-                                </Box>
-                            </Box>
+                        <Grid item xs={12} sm={12} md={8} lg={9} xl={9} p={2} className='predictions-chart-grid'>
+                            <PredictionOptions
+                                modelName={modelName}
+                                model_data={model_data}
+                                modelParams={modelParams}
+                                predictedVlauesRedux={predictedVlauesRedux}
+                                predictionChartType={predictionChartType}
+                                colorCombinations={colorCombinations}
+                                paletteIdRedux={paletteIdRedux}
+                                setModelName={setModelName}
+                                handleSaveModel={handleSaveModel}
+                                handleDeleteModel={handleDeleteModel}
+                                handlePredictionsChartType={handlePredictionsChartType}
+                                handlePredictionChartPalette={handlePredictionChartPalette}
+                            />
 
                             <PredictionsChart
                                 predictionChartType={predictionChartType}
@@ -1183,97 +871,15 @@ const CryptoModule = () => {
 
                                 {/* Prediction set metrics */}
                                 {(predictedVlauesRedux.length !== 0) &&
-                                    <Paper elevation={4} sx={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
-                                        {(predictionLookAhead && modelParams.lookAhead > 1) &&
-                                            <Box className='prediction-lookahead-slider-box'>
-                                                <CustomSlider
-                                                    sliderValue={predictionLookAhead}
-                                                    name={'prediction_look_ahead'}
-                                                    handleModelParamChange={handelPredictionLookAheadSlider}
-                                                    label={'Prediction Look Ahead'}
-                                                    min={1}
-                                                    max={model_parameters.lookAhead}
-                                                    sliderMin={1}
-                                                    sliderMax={model_parameters.lookAhead}
-                                                    disabled={trainingStartedFlag} />
-                                            </Box>
-                                        }
-                                        <Box display='flex' flexDirection='column' gap='5px'>
-                                            {Object.keys(modelMetrics.metrics).length > 0 && (
-                                                <Box display='flex' flexDirection='column' gap='4px' className='model-metrics-calculated-box'>
-                                                    <Paper elevation={4} style={{ justifyContent: 'space-between', display: 'flex', flexDirection: 'row', gap: '4px', padding: '0px 10px', width: 'fit-content' }}>
-                                                        <Typography variant='custom' textAlign='start'>{predictionChartType}</Typography>
-                                                    </Paper>
-                                                    <Box className='model-metrics-calculated-box-paper'>
-
-                                                        <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%' gap='5px'>
-                                                            <Box display='flex' flexDirection='row' gap='16px' width='95%' justifyContent='space-between' className='model-metrics'>
-                                                                <Paper className='metricpaper-indi' elevation={2}>
-                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TP</span> : {modelMetrics.metrics.TP}</Typography>
-                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FP</span> : {modelMetrics.metrics.FP}</Typography>
-                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>FN</span> : {modelMetrics.metrics.FN}</Typography>
-                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>TN</span> : {modelMetrics.metrics.TN}</Typography>
-                                                                </Paper>
-                                                            </Box>
-                                                            <NoMaxWidthTooltip
-                                                                arrow
-                                                                className='metrics-tooltip'
-                                                                title=
-                                                                {(
-                                                                    <Box>
-                                                                        <ClassificationTable title={"Classification Criteria"} data={CRITERIA_DATA} />
-                                                                    </Box>
-                                                                )}
-                                                                placement='top' sx={{ cursor: 'pointer' }}>
-                                                                <InfoOutlinedIcon className='small-icon' />
-                                                            </NoMaxWidthTooltip>
-                                                        </Box>
-
-                                                        <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%' gap='5px'>
-                                                            <Box display='flex' flexDirection='row' gap='16px' width='95%' alignItems='center' justifyContent='space-between' className='model-metrics'>
-                                                                <Paper className='metricpaper-indi' elevation={2}>
-                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>Accuracy</span> : {modelMetrics.metrics.accuracy}</Typography>
-                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>Precision</span> : {modelMetrics.metrics.precision}</Typography>
-                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>F1</span> : {modelMetrics.metrics.f1}</Typography>
-                                                                    <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>Recall</span> : {modelMetrics.metrics.recall}</Typography>
-                                                                </Paper>
-                                                            </Box>
-                                                            <NoMaxWidthTooltip
-                                                                arrow
-                                                                className='metrics-tooltip'
-                                                                title=
-                                                                {(
-                                                                    <Box>
-                                                                        <ClassificationTable title={"Metrics"} data={[
-                                                                            { "Condition": "Accuracy", "Criteria": "(TP + TN) / (TP + FP + TN + FN)" },
-                                                                            { "Condition": "Precision", "Criteria": "TP / (TP + FP)" },
-                                                                            { "Condition": "F1", "Criteria": "TP / (TP + FN)" },
-                                                                            { "Condition": "Recall", "Criteria": "(2 * prec * recall) / (prec + recall)" }]} />
-                                                                    </Box>
-                                                                )}
-                                                                placement='top' sx={{ cursor: 'pointer' }}>
-                                                                <InfoOutlinedIcon className='small-icon' />
-                                                            </NoMaxWidthTooltip>
-                                                        </Box>
-
-                                                        {(Object.keys(modelMetrics.mse).length > 0) &&
-                                                            <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%' gap='5px'>
-                                                                <Box display='flex' flexDirection='row' gap='16px' width='95%' alignItems='center' justifyContent='space-between' className='model-metrics'>
-                                                                    <Paper className='metricpaper-indi-two' elevation={2}>
-                                                                        <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>RMSE</span> : {predictionChartType === 'scaled' ? modelMetrics.mse.rmse.toFixed(2) : modelMetrics.mse.rmse}</Typography>
-                                                                        <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>MSE</span> : {predictionChartType === 'scaled' ? modelMetrics.mse.mse.toFixed(2) : modelMetrics.mse.mse}</Typography>
-                                                                    </Paper>
-                                                                </Box>
-                                                                <Tooltip title='Prediction chart RMSE and MSE'>
-                                                                    <InfoOutlinedIcon className='small-icon' />
-                                                                </Tooltip>
-                                                            </Box>
-                                                        }
-                                                    </Box>
-                                                </Box>
-                                            )}
-                                        </Box>
-                                    </Paper>
+                                    <PredictionMetrics
+                                        predictionLookAhead={predictionLookAhead}
+                                        model_parameters={model_parameters}
+                                        modelParams={modelParams}
+                                        modelMetrics={modelMetrics}
+                                        predictionChartType={predictionChartType}
+                                        trainingStartedFlag={trainingStartedFlag}
+                                        handelPredictionLookAheadSlider={handelPredictionLookAheadSlider}
+                                    />
                                 }
 
                                 {/* epoch end results plotting on chart */}
@@ -1288,170 +894,61 @@ const CryptoModule = () => {
 
                                 {/* epoch results in table */}
                                 {epochResults.length > 0 &&
-                                    <Accordion defaultExpanded={false} sx={{ overflowX: 'auto', backgroundColor: `${theme.palette.background.paperOne}`, borderRadius: '5px' }}>
-                                        <AccordionSummary
-                                            expandIcon={<ExpandMoreIcon />}
-                                            aria-controls="panel1bh-content"
-                                            id="panel1bh-header"
-                                        >
-                                            <Typography sx={{ color: 'text.secondary', width: '33%', flexShrink: 0, textAlign: 'start' }}>
-                                                Training Loss
-                                            </Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            <ModelHistoryTable data={epochResults} />
-                                        </AccordionDetails>
-                                    </Accordion>
+                                    <TrainingLossTable
+                                        epochResults={epochResults}
+                                    />
                                 }
 
-                                {/* Prediction set RMSE results */}
+                                {/* Prediction set RMSE results/scores */}
                                 {model_data.score.over_all_score !== 0 &&
-                                    <Paper elevation={4} sx={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
-                                        <Box width='100%' className='test-set-prediction-result' display='flex' flexDirection='column' gap='5px'>
-                                            <table width='100%' className="table-main" style={{ fontWeight: '600', fontSize: '11px' }}>
-                                                <thead className='table-group'>
-                                                    <tr className='table-row'>
-                                                        <th className='table-head'>Type</th>
-                                                        <th className='table-head'>MSE</th>
-                                                        <th className='table-head'>RMSE</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className='table-body'>
-                                                    <tr className='table-row'>
-                                                        <td className='table-data' style={{ textAlign: 'start' }}>
-                                                            <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
-                                                                Test Set
-                                                                {!sm &&
-                                                                    <NoMaxWidthTooltip
-                                                                        title={(
-                                                                            <PredictionMSETable data={model_data.score.scores.map((item, index) => {
-                                                                                const { value, unit } = generateMSESteps(selectedTickerPeriod);
-                                                                                return (
-                                                                                    {
-                                                                                        date: `+${value * (index + 1)}${unit}`,
-                                                                                        rmse: item
-                                                                                    }
-                                                                                )
-                                                                            })} />
-                                                                        )}
-                                                                        placement='right'
-                                                                        arrow
-                                                                    >
-                                                                        <AspectRatioIcon sx={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                                                                    </NoMaxWidthTooltip>
-                                                                }
-                                                            </Box>
-                                                        </td>
-                                                        <td className='table-data'>{model_data.score.over_all_score * model_data.score.over_all_score}</td>
-                                                        <td className='table-data'>{model_data.score.over_all_score}</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                            {sm &&
-                                                <PredictionMSETable data={model_data.score.scores.map((item, index) => {
-                                                    const { value, unit } = generateMSESteps(selectedTickerPeriod);
-                                                    return (
-                                                        {
-                                                            date: `+${value * (index + 1)}${unit}`,
-                                                            rmse: item
-                                                        }
-                                                    )
-                                                })} />
-                                            }
-                                        </Box>
-                                    </Paper>
+                                    <PredictionScoresTable
+                                        sm={sm}
+                                        score={model_data.score}
+                                        selectedTickerPeriod={selectedTickerPeriod}
+                                    />
                                 }
 
                                 {/* epoch batch results */}
                                 {batchResult && (
-                                    <Box className='batch-end-progress-box' pt={1}>
-                                        <Box id='progress-line' sx={{ width: '100%' }}>
-                                            <LinearProgressWithLabel value={0} type={'Batch'} cRef={batchLinearProgressRef} />
-                                        </Box>
-                                        <Box className={`epoch_{} epoch`} sx={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
-                                            <Box className={`model-progress_{}`} width='100%' variant='h6'>
-                                                <div className='batch-end'>
-                                                    <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
-                                                        <div style={{ fontSize: '0.7rem', fontWeight: '500', textAlign: 'start' }} id='epoch'></div>
-                                                        <div className='batch-end-text' id='loss'>Loss : 0.04927649209355232</div>
-                                                        <div className='batch-end-text' id='mse'>MSE : 0.04927649209355232</div>
-                                                        <div className='batch-end-text' id='mae'>RMSE : 0.04927649209355232</div>
-                                                    </div>
-                                                </div>
-                                            </Box>
-                                        </Box>
-                                    </Box>
+                                    <BatchProgress
+                                        batchLinearProgressRef={batchLinearProgressRef}
+                                    />
                                 )
                                 }
 
                                 {/* Test set evaluating result */}
                                 {evaluating && (
-                                    <Box className='evaluating-set-progress-box' pt={1}>
-                                        <Box id='progress-line' sx={{ width: '100%' }}>
-                                            <LinearProgressWithLabel value={0} type={'Evaluating'} cRef={evalLinearProgressRef} />
-                                        </Box>
-                                    </Box>
+                                    <EvaluationProgress
+                                        evalLinearProgressRef={evalLinearProgressRef}
+                                    />
                                 )
                                 }
 
                             </Box>
                         </Grid>
 
-                        <Grid item xs={12} sm={12} md={12} lg={3} xl={3} p={2}>
-                            <Box className='saved-models' display='flex' flexDirection='column' pb={2}>
+                        <Grid item xs={12} sm={12} md={12} lg={12} xl={12} p={2} sx={{ minHeight: '300px' }}>
+                            <Box className='saved-models-title' display='flex' flexDirection='column' pb={2}>
                                 <Box height='32px' display='flex' alignItems='center'>
                                     <Typography variant='h5' textAlign='start'>Saved Models</Typography>
                                 </Box>
                             </Box>
-                            <Box>
-                                {userModels.length === 0 ?
-                                    <Box display='flex' alignItems='start'>
-                                        <Typography>No Saved Models</Typography>
-                                    </Box>
-                                    :
-                                    <Box display='flex' flexDirection='column' gap='5px'>
-                                        {userModels.map((model, index) => {
-                                            const { model_name, model_id } = model
-                                            return (
-                                                <Paper key={index} elevation={4}>
-                                                    <Box display='flex' alignItems='center' justifyContent='space-between' pl={'5px'} pr={'5px'}>
-                                                        <Typography className='saved-model-name'>{model_name}</Typography>
-                                                        <Box display='flex'>
-                                                            <Tooltip title={'View Model Data'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                                                <span>
-                                                                    <IconButton onClick={handleExpandSelectedModel.bind(null, { model_id: model_id })} sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} >
-                                                                        <AspectRatioIcon className='small-icon' />
-                                                                    </IconButton>
-                                                                </span>
-                                                            </Tooltip>
-                                                            <Tooltip
-                                                                placement='top'
-                                                                sx={{ cursor: 'pointer', padding: '6px' }}
-                                                                title={
-                                                                    (
-                                                                        <Box
-                                                                            display='flex' flexDirection='row' gap='5px'
-                                                                        >
-                                                                            <Button color='error' variant='contained' size='small' onClick={handleModelDeletFromSaved.bind(null, { model_id: model_id })}>Yes</Button>
-                                                                            <Button color='warning' variant='contained' size='small' onClick={() => console.log('No')}>No</Button>
-                                                                        </Box>
-                                                                    )
-                                                                }
-                                                            >
-                                                                <span>
-                                                                    <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} >
-                                                                        <DeleteForeverIcon className='small-icon' />
-                                                                    </IconButton>
-                                                                </span>
-                                                            </Tooltip>
-                                                        </Box>
-                                                    </Box>
-                                                </Paper>
-                                            )
-                                        })}
-                                    </Box>
-                                }
-                            </Box>
+                            {userModels.length === 0 ?
+                                <Box display='flex' alignItems='start'>
+                                    <Typography>No Saved Models</Typography>
+                                </Box>
+                                :
+                                <SavedModels
+                                    selected_ticker_period={selectedTickerPeriod}
+                                    open={open}
+                                    token={token}
+                                    userModels={userModels}
+                                    selectedSavedModelData={selectedSavedModelData}
+                                    handleModelDeletFromSaved={handleModelDeletFromSaved}
+                                    handleExpandSelectedModel={handleExpandSelectedModel}
+                                    handleExpandedSelectedModelClose={handleExpandedSelectedModelClose}
+                                />
+                            }
                         </Grid>
                     </Grid>
                 </Box>

@@ -305,13 +305,16 @@ const getModel = async (req, res) => {
 }
 
 const saveModel = async (req, res) => {
-    const { model_id, model_name, ticker_name, ticker_period, predicted_result, talibExecuteQueries, training_parameters } = req.body.payload
+    const { model_id, model_name, ticker_name, ticker_period, predicted_result, talibExecuteQueries, training_parameters, scores, epoch_results, train_duration } = req.body.payload
     try {
         const uid = res.locals.data.uid;
         const model_data = {
             training_parameters,
             talibExecuteQueries,
             predicted_result,
+            scores,
+            epoch_results,
+            train_duration,
         }
         const [model_save_status, modelSaveResult] = await MDBServices.saveModelForUser(uid, ticker_name, ticker_period, model_id, model_name, model_data)
         res.status(200).json({ message: 'Model saved successfully', model_save_status, modelSaveResult, user_id: uid })
@@ -365,6 +368,33 @@ const deleteModelFromLocalDirectory = async (model_id) => {
         } else {
             log.info(`Model file not found for : ${model_id}`)
         }
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const checkIfModelExists = async (req, res) => {
+    const { model_id } = req.body
+    try {
+        const path = `./models/${model_id}`
+        if (fs.existsSync(path)) {
+            res.status(200).json({ message: 'Model data present', status: true })
+        } else {
+            res.status(200).json({ message: 'Model data not present', status: false })
+        }
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const getModelResult = async (req, res) => {
+    const { model_id } = req.body
+    const uid = res.locals.data.uid;
+    try {
+        const model_data = await MDBServices.getModelResult(uid, model_id)
+        res.status(200).json({ message: 'Model data fetched successfully', model_data })
     } catch (error) {
         log.error(error.stack)
         throw error
@@ -497,8 +527,8 @@ const generateTestData = async (req, res) => {
             [70, 75, 145],
             [80, 85, 165],
             [90, 95, 185],
-
-
+ 
+ 
         ] */
         // const testarrayTensor = tf.tensor(testArray)
         // console.log('Original tensor shape : ', testarrayTensor.shape, testarrayTensor.arraySync())
@@ -516,9 +546,9 @@ const generateTestData = async (req, res) => {
             const newMiddle = 2
             const newInner = yTrainTensor.shape[2]
             const reshapedArray = []
-
+ 
             console.log(newOuter, newMiddle, newInner)
-
+ 
             for (let i = 0; i < newOuter; i++) {
                 const middleArray = [];
                 for (let j = 0; j < newMiddle; j++) {
@@ -532,13 +562,13 @@ const generateTestData = async (req, res) => {
                 }
                 reshapedArray.push(middleArray);
             }
-
+ 
             return reshapedArray
         } */
 
         /* const reshapedArray = reshapeArray(testArray)
         const reshapedTensor = tf.tensor(reshapedArray)
-
+ 
         console.log(reshapedTensor.shape) */
 
         res.status(200).send({ message: 'Test data generated successfully', featuresX })
@@ -555,10 +585,10 @@ const generateTestData = async (req, res) => {
                 volume: Math.random() * 1000
             });
         }
-
+ 
         let features = simulatedData.map(item => [item.open, item.high, item.low, item.close, item.volume]);
         console.log(features[features.length - (lookAhead + 1)])
-
+ 
         const { trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest } = await TFMUtil.createTrainingData(
             {
                 model_type: 'multi_input_single_output_step',
@@ -568,20 +598,20 @@ const generateTestData = async (req, res) => {
                 e_key: 'low',
                 training_size: 85
             })
-
+ 
         const xTensor = tf.tensor(xTrain)
         const yTensor = tf.tensor(yTrain)
         const xTestTensor = tf.tensor(xTrainTest)
         const yTestTensor = tf.tensor(yTrainTest)
         const lastSetTensor = tf.tensor(lastSets)
-
+ 
         // @ts-ignore
         const reshapedYTensor = yTensor.reshape([yTensor.shape[0], yTensor.shape[1]])
         console.log('Reshaped Y tensor : ', reshapedYTensor.shape)
-
+ 
         console.log(trainSplit)
         console.log(xTensor.shape, yTensor.shape, xTestTensor.shape, yTestTensor.shape, lastSetTensor.shape)
-
+ 
         try {
             const model = tf.sequential();
             let n_feature = xTensor.shape[2]
@@ -592,59 +622,59 @@ const generateTestData = async (req, res) => {
                 activation: 'relu',
                 inputShape: [timeStep, n_feature]
             }));
-
+ 
             // Add a MaxPooling1D layer
             model.add(tf.layers.maxPooling1d({
                 poolSize: 2
             }));
-
+ 
             // Add a Flatten layer
             model.add(tf.layers.flatten());
-
+ 
             // Add a dense layer with 50 units and ReLU activation
             model.add(tf.layers.dense({
                 units: 50,
                 activation: 'relu'
             }));
-
+ 
             // Add a dense layer with n_features units (no activation specified, defaults to linear)
             model.add(tf.layers.dense({
                 units: 1
             }));
-
+ 
             model.compile({
                 optimizer: tf.train.adam(),
                 loss: 'meanSquaredError',
                 metrics: ['mse', 'mae'],
             });
-
+ 
             console.log(model.summary())
-
+ 
             await model.fit(xTensor, reshapedYTensor, {
                 batchSize: 32,
                 epochs: 3000,
                 verbose: 0
             })
-
+ 
             // @ts-ignore
             const predictions = await model.predict(xTestTensor).arraySync()
-
+ 
             const testData = [[[70, 75], [80, 85], [90, 95]]]
             const testDTensor = tf.tensor(testData)
-
+ 
             // @ts-ignore
             const newPred = await model.predict(testDTensor).arraySync()
-
+ 
             console.log('Predictions', predictions)
             console.log('New pred:' + newPred)
-
+ 
         } catch (error) {
             console.log(error)
         } */
 
         // console.log(trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest)
         /* 
-
+ 
         /* for (let i = 0; i <= testArray.length - timeStep - lookAhead; i++) {
             // Extracting features for X
             let x = testArray.slice(i, i + timeStep).map(step => step.slice(0, -1));
@@ -670,7 +700,7 @@ const generateTestData = async (req, res) => {
 
         /* let tensorX = tf.tensor(trainX)
         let tensorY = tf.tensor(trainY)
-
+ 
         console.log(testArray.length)
         console.log(testArray.length - timeStep - lookAhead + 1)
         console.log(tensorX.shape)
@@ -751,7 +781,7 @@ const generateTestData = async (req, res) => {
             [0.9195137023925781],
             [0.9114740490913391]
         ]
-
+ 
         const pred = [
             [0.7829376459121704],
             [0.9296842813491821],
@@ -770,7 +800,7 @@ const generateTestData = async (req, res) => {
             8/11 7AM : act : 35399.12, pred : 35341.42   57.7
             8/11 11AM : act : 35269.68, pred : 35314.25  -44.57
         ]
-
+ 
         const pred =[
             [0.499192],
             [1.99],
@@ -821,22 +851,22 @@ const generateTestData = async (req, res) => {
 
         /* const frmse = calculateRMSE(actual, predicted);
         console.log("FunctionRMSE:", frmse);
-
+ 
         let act_tensor = tf.tensor(actual)
         let pred_tensor = tf.tensor(predicted)
-
-
+ 
+ 
         console.log(act_tensor.shape)
         console.log(pred_tensor.shape)
-
+ 
         let mse = tf.losses.meanSquaredError(act_tensor, pred_tensor)
-
+ 
         console.log(mse.arraySync())
-
+ 
         let rmse = tf.sqrt(mse)
-
+ 
         console.log(rmse.arraySync())
-
+ 
         let lstm_cells = [];
         for (let index = 0; index < 4; index++) {
             lstm_cells.push(tf.layers.lstmCell({ units: 16 }));
@@ -852,14 +882,14 @@ const generateTestData = async (req, res) => {
             returnSequences: true
         }));
         model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [7, 50] }));
-
-
+ 
+ 
         model.compile({
             optimizer: tf.train.adam(),
             loss: 'meanSquaredError',
             metrics: ['mse', 'mae'],
         });
-
+ 
         console.log(model.summary()) */
 
         // const allData = await redisStep.hgetall('model_training_checkpoint_b288539f-a863-48ff-a830-c8418a8e9028')
@@ -881,4 +911,6 @@ module.exports = {
     deleteModel,
     deleteUserModel,
     generateTestData,
+    checkIfModelExists,
+    getModelResult,
 }

@@ -6,6 +6,12 @@ import { setBarsFromToPredictions, setStandardizedAndScaledPredictions } from '.
 import { calculateTolerance } from '../../modules/CryptoModuleUtils'
 
 function calculateMSE(actual, predicted) {
+    // Filter out null values from actual
+    actual = actual.filter(value => value !== null);
+
+    // Slice predicted to match the length of actual
+    predicted = predicted.slice(0, actual.length);
+
     if (actual.length !== predicted.length) {
         throw new Error("Arrays should be of equal length");
     }
@@ -306,8 +312,8 @@ const PredictionsChart = (props) => {
                 })
             // console.log(newTPMarkers)
 
-            let thresholdLower = 0.01
-            const tpMarkers = chartData[predictionChartType]
+            // let thresholdLower = 0.01
+            /* const tpMarkers = chartData[predictionChartType]
                 .filter(data => {
                     const actualChange = data.actual;
                     const predictedChange = data.predicted;
@@ -328,7 +334,7 @@ const PredictionsChart = (props) => {
                         shape: shape,
                         size: 0.1
                     };
-                });
+                }); */
             // console.log(tpMarkers)
 
             predictedValueRef.current.setMarkers([...newTPMarkers, ...markers])
@@ -445,7 +451,7 @@ const PredictionsChart = (props) => {
 
                         let toolTipText = `
                             <div class='value-box' style="flex-direction:column">
-                                <div style="width:110px; text-align:start">${date}</div>
+                                <div style="width:110px; text-align:flex-start">${date}</div>
                                 <Typography style="display:flex; align-items:center; gap:4px;" variant='custom'><div style="width:8px; height:8px; border-radius:10px; background-color:${actualColor}"></div>Actual : ${act_val}</Typography>
                                 <Typography style="display:flex; align-items:center; gap:4px;" variant='custom'><div style="width:8px; height:8px; border-radius:10px; background-color:${predictedColor}"></div>Predicted : ${pred_val}</Typography>
                                 <Typography variant='custom'>${diff > 0 ? 'Over : ' : 'Under '}<span style="color:${diff > 0 ? predictedColor : actualColor}">${`${diff},`} ${`${percentageChange}%`}</span></Typography>
@@ -462,11 +468,11 @@ const PredictionsChart = (props) => {
                         const low = data.low;
                         let newString = `
                         <div class="value-box">
-                            <div style="width:110px; text-align:start">${date}</div>
-                            <div style="width:73px; text-align:start">O : <span id="openValue">${Math.round(100 * open) / 100}</span></div>
-                            <div style="width:73px; text-align:start">H : <span id="highValue">${Math.round(100 * high) / 100}</span></div>
-                            <div style="width:73px; text-align:start">L : <span id="lowValue">${Math.round(100 * low) / 100}</span></div>
-                            <div style="width:73px; text-align:start">C : <span id="closeValue">${Math.round(100 * close) / 100}</span></div>
+                            <div style="width:110px; text-align:flex-start">${date}</div>
+                            <div style="width:73px; text-align:flex-start">O : <span id="openValue">${Math.round(100 * open) / 100}</span></div>
+                            <div style="width:73px; text-align:flex-start">H : <span id="highValue">${Math.round(100 * high) / 100}</span></div>
+                            <div style="width:73px; text-align:flex-start">L : <span id="lowValue">${Math.round(100 * low) / 100}</span></div>
+                            <div style="width:73px; text-align:flex-start">C : <span id="closeValue">${Math.round(100 * close) / 100}</span></div>
                         </div>
                         `
 

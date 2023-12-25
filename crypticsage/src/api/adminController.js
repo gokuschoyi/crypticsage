@@ -229,3 +229,25 @@ export const deleteModel = async ({ token, payload }) => {
     })
     return response;
 }
+
+export const checkIfModelDataExists = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const { model_id } = payload;
+    const response = await axios.post(`${baseUrl}/indicators/check_for_model`, { model_id }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
+export const getModelResult = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const { model_id } = payload;
+    const response = await axios.post(`${baseUrl}/indicators/get_model_result`, { model_id }, config, {
+        withCredentials: true
+    })
+    return response;
+}

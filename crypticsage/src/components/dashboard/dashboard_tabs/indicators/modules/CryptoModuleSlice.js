@@ -135,6 +135,21 @@ const cryptoModuleSlice = createSlice({
         setPredictedValues: (state, action) => {
             state.modelData.predictedValues = { ...state.modelData.predictedValues, ...action.payload };
         },
+        updatePredictedValues: (state, action) => {
+            const { model_id, rmse, forecast, predictions_array, initial_forecast } = action.payload
+            const currentState = state.userModels
+            const foundIndex = currentState.findIndex((model) => model.model_id === model_id);
+
+            if (foundIndex !== -1) {
+                currentState[foundIndex].model_data.predicted_result = {
+                    ...currentState[foundIndex].model_data.predicted_result,
+                    rmse: rmse,
+                    forecast: forecast,
+                    predictions_array: predictions_array,
+                    initial_forecast: initial_forecast
+                }
+            }
+        },
         setPredictionPaletteId: (state, action) => {
             state.modelData.predictionPaletteId = action.payload;
         },
@@ -708,6 +723,7 @@ export const {
     , setModelStartTime
     , setModelEndTime
     , setPredictedValues
+    , updatePredictedValues
     , setPredictionPaletteId
     , setPredictionScores
     , setStandardizedAndScaledPredictions

@@ -1,0 +1,144 @@
+.saved-models-body {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+}
+
+.three-diff-params {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 16px;
+}
+
+.charts-predictions-box,
+.temp-flex {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+}
+
+
+
+.basic-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    text-align: left;
+    gap: 0px 16px;
+}
+
+.model-training-parameters {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.selected-indicators-saved-box {
+    max-height: 240px;
+    display: flex;
+    padding: 4px;
+    flex-direction: column;
+    min-width: 200px;
+    gap: 8px;
+    overflow: auto;
+}
+
+.single-indicator-saved {
+    display: flex;
+    padding: 4px;
+    flex-direction: column;
+    min-width: 200px;
+}
+
+.custom-tooltip {
+    background-color: var(--mui-palette-background-default);
+    margin: 0px 4px;
+    padding: 0px 4px;
+    font-size: 12px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.custom-tooltip-line {
+    background-color: var(--mui-palette-background-default);
+    width: max-content;
+    border-radius: 4px;
+}
+
+.custom-tooltip-line .label {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 1px 4px;
+    margin: 0px 0px;
+    width: fit-content;
+}
+
+.rechart-chart {
+    border-radius: 4px;
+    padding: 4px;
+    box-shadow: 0px 0px 4px 0px var(--mui-palette-background-default)
+}
+
+@media screen and (max-width: 1410px) {
+    .three-diff-params {
+        flex-direction: column;
+    }
+}
+
+@media screen and (max-width: 1300px) {
+    .basic-details {
+        grid-template-columns: 1fr 1fr;
+        text-align: left;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .saved-models-body {
+        flex-direction: column;
+    }
+
+    .basic-details>p>span {
+        width: 110px !important;
+    }
+
+    .three-diff-params {
+        flex-direction: row;
+    }
+}
+
+@media screen and (max-width: 1070px) {
+    .three-diff-params {
+        flex-direction: column;
+    }
+}
+
+@media screen and (max-width: 700px) {
+    .charts-predictions-box {
+        flex-direction: column;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .three-diff-params {
+        flex-direction: column;
+    }
+
+    .basic-details {
+        grid-template-columns: 1fr;
+    }
+
+    .temp-flex {
+        flex-direction: row;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .temp-flex {
+        flex-direction: column;
+    }
+
+    .rechart-chart {
+        width: 100% !important;
+    }
+
+}

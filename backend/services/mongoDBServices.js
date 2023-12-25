@@ -10,6 +10,7 @@ const { MongoClient } = require('mongodb');
 const config = require('../config');
 const { createTimer } = require('../utils/timer')
 const authUtil = require('../utils/authUtil')
+const IUtil = require('../utils/indicatorUtil')
 
 const CRYPTICSAGE_DATABASE_NAME = 'crypticsage'
 const HISTORICAL_DATABASE_NAME = 'historical_data'
@@ -2459,7 +2460,13 @@ const fetchUserModels = async (user_id) => {
             },
             // You can add additional stages here as needed
             {
-                $unset: ['model_data.predicted_result']
+                $unset: [
+                    'model_data.predicted_result.dates',
+                    'model_data.predicted_result.standardized',
+                    'model_data.predicted_result.scaled',
+                    'model_data.predicted_result.predictions_array',
+                    'model_data.predicted_result.forecast',
+                ]
             }
         ];
 
@@ -2473,6 +2480,70 @@ const fetchUserModels = async (user_id) => {
             return []
         }
 
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const getModelResult = async (user_id, model_id) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const model_collection = db.collection('models')
+
+        const projection_field = {
+            _id: 0,
+            model_data: 1,
+            ticker_period: 1
+        }
+
+        const pipeline = [
+            {
+                $match: { user_id, model_id }
+            },
+            {
+                $addFields: {
+                    'model_data.predicted_result.initial_forecast': {
+                        $slice: [
+                            '$model_data.predicted_result.scaled',
+                            { $multiply: ['$model_data.training_parameters.lookAhead', -1] }
+                        ]
+                    }
+                }
+            },
+            {
+                $project: projection_field
+            },
+            {
+                $unset: [
+                    'model_data.training_parameters',
+                    'model_data.talibExecuteQueries',
+                    'model_data.scores',
+                    'model_data.epoch_results',
+                    'model_data.train_duration',
+                    'model_data.predicted_result.standardized',
+                    'model_data.predicted_result.scaled',
+                ]
+            }
+        ]
+
+        const modelResult = await model_collection.aggregate(pipeline).toArray()
+
+        if (modelResult.length > 0) {
+            const result = modelResult[0].model_data.predicted_result
+            const { dates, predictions_array, label_mean, label_variance, forecast } = result
+            const rmse = IUtil.calculateScaledRMSE(dates, predictions_array, label_variance, label_mean, modelResult[0].ticker_period)
+            const slicedPredictions = predictions_array.slice(-forecast.length)
+            delete result.dates
+            delete result.label_mean
+            delete result.label_variance
+            result.predictions_array = slicedPredictions
+            result.rmse = rmse
+            return result
+        }
+        else {
+            return []
+        }
     } catch (error) {
         log.error(error.stack)
         throw error
@@ -2543,5 +2614,6 @@ module.exports = {
     , isMetadatAvailable
     , saveModelForUser
     , fetchUserModels
+    , getModelResult
     , deleteUserModel
 }

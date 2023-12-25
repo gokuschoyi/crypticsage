@@ -16,6 +16,9 @@ router.post('/save_model', IController.saveModel)
 router.post('/delete_model', IController.deleteModel)
 router.post('/delete_user_model', IController.deleteUserModel)
 
+router.post('/check_for_model', IController.checkIfModelExists)
+router.post('/get_model_result', IController.getModelResult)
+
 router.post('/generate_test_data', IController.generateTestData)
 
 

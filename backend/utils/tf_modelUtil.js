@@ -373,7 +373,7 @@ const generateEvaluationData = async (
 
     const lastTestTensor = tf.tensor(lastSets)
 
-    console.log('lastSets prediction shape', lastTestTensor.shape)
+    console.log('lastSets prediction shape', lastTestTensor.shape, '\n')
     xTrainTest = [...xTrainTest, ...lastSets]
 
     // setting test set dates for plotting
@@ -400,11 +400,11 @@ const generateEvaluationData = async (
         dates.push({
             openTime: new Date(latestTime + (tickerPeriodInMilliSecond * (i))).toLocaleString(),
             open: (latestTime + (tickerPeriodInMilliSecond * (i))) / 1000,
-            actual: lastOriginal[i - 1][0],
+            actual: lastOriginal[i][0],
         })
     }
 
-    console.log('Dates length after addition: ', dates.length, new Date(dates[dates.length - 1].open * 1000).toLocaleString())
+    console.log('Dates length after addition: ', dates.length, new Date(dates[dates.length - 1].open * 1000).toLocaleString(), '\n')
 
 
     const fHistClose = parseFloat(lastDates[0].close).toFixed(2)
@@ -418,7 +418,7 @@ const generateEvaluationData = async (
     if (config.debug_flag === 'true') {
         console.log('Last actual history close :', ticker_history[ticker_history.length - 1].close)
         console.log('Last dates : ', lastDates.length, lastDates[0].close, lastDates[lastDates.length - 1].close)
-        console.log('Last close price, dates', lHistClose, new Date(lastDates[lastDates.length - 1].openTime).toLocaleString())
+        console.log('Last close price, lastdates', lHistClose, new Date(lastDates[lastDates.length - 1].openTime).toLocaleString())
         console.log('Last original close price', yTrainLClose, new Date(lastDates[lastDates.length - 1].openTime).toLocaleString())
 
         console.log(xTrainTest.length, yTrainTest.length)
