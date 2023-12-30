@@ -7,9 +7,9 @@ const CustomTooltip = ({ active, payload, label }) => {
         return (
             <div className="custom-tooltip-line">
                 <p className="label">{`${label}`}</p>
-                {!isNaN(payload[1].value) && <p className="label">A: {`${payload[1].value}`}</p>}
-                <p className="label">P: {`${payload[0].value}`}</p>
-                {!isNaN(payload[1].value) && <p className="label">D: {`${(payload[1].value - payload[0].value).toFixed(2)}`}</p>}
+                {payload[1] && !isNaN(payload[1].value) && payload[1].value !== undefined && <p className="label">A: {`${payload[1].value}`}</p>}
+                {payload[0] && !isNaN(payload[0].value) && payload[0].value !== undefined && <p className="label">P: {`${payload[0].value}`}</p>}
+                {payload[1] && payload[0] && !isNaN(payload[1].value - payload[0].value) && (payload[1].value - payload[0].value) !== undefined && <p className="label">D: {`${(payload[1].value - payload[0].value).toFixed(2)}`}</p>}
             </div>
         );
     }
@@ -21,12 +21,15 @@ const InitialForecastLineChart = ({ data }) => {
     // console.log(data)
     const theme = useTheme();
     return (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width='100%' height={210}>
             <LineChart
-                width={250}
-                height={300}
                 data={data}
-
+                margin={{
+                    bottom: -2,
+                    top: 8,
+                    left: 8,
+                    right: 8,
+                }}
             >
                 <XAxis dataKey="openTime" hide='true' />
                 <YAxis type="number" hide='true' domain={['dataMin', 'dataMax']} />

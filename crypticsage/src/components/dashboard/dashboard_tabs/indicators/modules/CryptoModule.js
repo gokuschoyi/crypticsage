@@ -22,7 +22,6 @@ import {
     startModelTraining,
     getUserModels,
     saveModel,
-    deleteModelForUser,
     deleteModel
 } from '../../../../../api/adminController'
 
@@ -674,45 +673,6 @@ const CryptoModule = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [startWebSocket])
 
-
-    const handleModelDeletFromSaved = ({ model_id }) => {
-        console.log('clicked', model_id)
-        deleteModelForUser({ token, model_id })
-            .then((res) => {
-                Success(res.data.message)
-                if (model_id === model_data.model_id) {
-                    dispatch(resetCurrentModelData())
-                }
-                getUserModels({ token, payload: { user_id: userId } })
-                    .then((res) => {
-                        dispatch(setUserModels(res.data.models))
-                    })
-            })
-            .catch((err) => {
-                console.log(err)
-            })
-    }
-
-    const [open, setOpen] = useState(false);
-    const [selectedSavedModelData, setSelectedSavedModelData] = useState(null);
-
-    const handleExpandSelectedModel = ({ model_id }) => {
-        const modelData = userModels.find((model) => model.model_id === model_id);
-        // Only toggle open state if the same model is clicked again
-        if (selectedSavedModelData?.model_id === model_id) {
-            setOpen((prevOpen) => !prevOpen);
-        } else {
-            setOpen(true);
-        }
-        setSelectedSavedModelData(modelData);
-    };
-
-    // console.log(selectedSavedModelData, open)
-
-    const handleExpandedSelectedModelClose = () => {
-        setOpen(false)
-    }
-
     const [modelMetrics, setModelMetrics] = useState({ metrics: {}, mse: {} })
 
     const paletteIdRedux = useSelector(state => state.cryptoModule.modelData.predictionPaletteId)
@@ -816,7 +776,7 @@ const CryptoModule = () => {
                     </Grid>
                 </Box>
 
-                <Box className='model-training-container'>
+                <Box mb={2} mt={2} className='model-training-container'>
                     <Box alignItems='start' display='flex' pl={2} pt={2} pb={1} className='trainmodel-title'>
                         <Typography variant='h4'>Model Training</Typography>
                     </Box>
@@ -841,96 +801,107 @@ const CryptoModule = () => {
                         </Grid>
 
                         <Grid item xs={12} sm={12} md={8} lg={9} xl={9} p={2} className='predictions-chart-grid'>
-                            <PredictionOptions
-                                modelName={modelName}
-                                model_data={model_data}
-                                modelParams={modelParams}
-                                predictedVlauesRedux={predictedVlauesRedux}
-                                predictionChartType={predictionChartType}
-                                colorCombinations={colorCombinations}
-                                paletteIdRedux={paletteIdRedux}
-                                setModelName={setModelName}
-                                handleSaveModel={handleSaveModel}
-                                handleDeleteModel={handleDeleteModel}
-                                handlePredictionsChartType={handlePredictionsChartType}
-                                handlePredictionChartPalette={handlePredictionChartPalette}
-                            />
-
-                            <PredictionsChart
-                                predictionChartType={predictionChartType}
-                                trainingStartedFlag={startWebSocket}
-                                model_type={MODEL_OPTIONS_VALUE[modelParams.modelType]}
-                                lookAhead={model_parameters.lookAhead}
-                                predictionLookAhead={predictionLookAhead}
-                                setModelMetrics={setModelMetrics}
-                                predictionsPalette={predictionChartPalette}
-                            />
-
-                            <Box className='main-training-status-box' pt={1} gap={'12px'} display='flex' flexDirection='column'>
-                                <Typography sx={{ textAlign: 'start' }} variant='custom'>{modelProcessDurationRef.current !== '' ? `Time taken : ${modelProcessDurationRef.current}` : ''}</Typography>
-
-                                {/* Prediction set metrics */}
-                                {(predictedVlauesRedux.length !== 0) &&
-                                    <PredictionMetrics
-                                        predictionLookAhead={predictionLookAhead}
-                                        model_parameters={model_parameters}
+                            <Grid container spacing={2}>
+                                <Grid item md={12} lg={12} xl={6} sx={{ width: '100%' }}>
+                                    <PredictionOptions
+                                        modelName={modelName}
+                                        model_data={model_data}
                                         modelParams={modelParams}
-                                        modelMetrics={modelMetrics}
+                                        predictedVlauesRedux={predictedVlauesRedux}
                                         predictionChartType={predictionChartType}
-                                        trainingStartedFlag={trainingStartedFlag}
-                                        handelPredictionLookAheadSlider={handelPredictionLookAheadSlider}
+                                        colorCombinations={colorCombinations}
+                                        paletteIdRedux={paletteIdRedux}
+                                        setModelName={setModelName}
+                                        handleSaveModel={handleSaveModel}
+                                        handleDeleteModel={handleDeleteModel}
+                                        handlePredictionsChartType={handlePredictionsChartType}
+                                        handlePredictionChartPalette={handlePredictionChartPalette}
                                     />
-                                }
 
-                                {/* epoch end results plotting on chart */}
-                                {model_parameters.epoch > 2 &&
-                                    <ModelHistoryChart
-                                        epochResults={epochResults}
+                                    <PredictionsChart
+                                        predictionChartType={predictionChartType}
+                                        trainingStartedFlag={startWebSocket}
+                                        model_type={MODEL_OPTIONS_VALUE[modelParams.modelType]}
+                                        lookAhead={model_parameters.lookAhead}
+                                        predictionLookAhead={predictionLookAhead}
+                                        setModelMetrics={setModelMetrics}
                                         predictionsPalette={predictionChartPalette}
-                                        isValidatingOnTestSet={model_parameters.doValidation}
-                                        totalEpochs={modelParams.epoch}
                                     />
-                                }
+                                </Grid>
 
-                                {/* epoch results in table */}
-                                {epochResults.length > 0 &&
-                                    <TrainingLossTable
-                                        epochResults={epochResults}
-                                    />
-                                }
+                                <Grid item md={12} lg={12} xl={6} sx={{ width: '100%' }}>
+                                    <Box className='main-training-status-box' gap={'8px'} display='flex' flexDirection='column'>
+                                        <Typography sx={{ textAlign: 'start' }} variant='h6'>{modelProcessDurationRef.current !== '' ? `Time taken : ${modelProcessDurationRef.current}` : ''}</Typography>
 
-                                {/* Prediction set RMSE results/scores */}
-                                {model_data.score.over_all_score !== 0 &&
-                                    <PredictionScoresTable
-                                        sm={sm}
-                                        score={model_data.score}
-                                        selectedTickerPeriod={selectedTickerPeriod}
-                                    />
-                                }
+                                        {/* epoch end results plotting on chart */}
+                                        {model_parameters.epoch > 2 &&
+                                            <ModelHistoryChart
+                                                epochResults={epochResults}
+                                                predictionsPalette={predictionChartPalette}
+                                                isValidatingOnTestSet={model_parameters.doValidation}
+                                                totalEpochs={modelParams.epoch}
+                                            />
+                                        }
 
-                                {/* epoch batch results */}
-                                {batchResult && (
-                                    <BatchProgress
-                                        batchLinearProgressRef={batchLinearProgressRef}
-                                    />
-                                )
-                                }
+                                        {/* Prediction set metrics */}
+                                        {(predictedVlauesRedux.length !== 0) &&
+                                            <PredictionMetrics
+                                                predictionLookAhead={predictionLookAhead}
+                                                model_parameters={model_parameters}
+                                                modelParams={modelParams}
+                                                modelMetrics={modelMetrics}
+                                                predictionChartType={predictionChartType}
+                                                trainingStartedFlag={trainingStartedFlag}
+                                                handelPredictionLookAheadSlider={handelPredictionLookAheadSlider}
+                                            />
+                                        }
 
-                                {/* Test set evaluating result */}
-                                {evaluating && (
-                                    <EvaluationProgress
-                                        evalLinearProgressRef={evalLinearProgressRef}
-                                    />
-                                )
-                                }
+                                        {/* epoch results in table */}
+                                        {epochResults.length > 0 &&
+                                            <TrainingLossTable
+                                                epochResults={epochResults}
+                                            />
+                                        }
 
-                            </Box>
+                                        {/* Prediction set RMSE results/scores */}
+                                        {model_data.score.over_all_score !== 0 &&
+                                            <PredictionScoresTable
+                                                sm={sm}
+                                                score={model_data.score}
+                                                selectedTickerPeriod={selectedTickerPeriod}
+                                            />
+                                        }
+
+                                        {/* epoch batch results */}
+                                        {batchResult && (
+                                            <BatchProgress
+                                                batchLinearProgressRef={batchLinearProgressRef}
+                                            />
+                                        )
+                                        }
+
+                                        {/* Test set evaluating result */}
+                                        {evaluating && (
+                                            <EvaluationProgress
+                                                evalLinearProgressRef={evalLinearProgressRef}
+                                            />
+                                        )
+                                        }
+
+                                    </Box>
+                                </Grid>
+                            </Grid>
                         </Grid>
 
+                    </Grid>
+                </Box>
+
+                <Box className='user-saved-models-container'>
+                    <Grid container>
                         <Grid item xs={12} sm={12} md={12} lg={12} xl={12} p={2} sx={{ minHeight: '300px' }}>
                             <Box className='saved-models-title' display='flex' flexDirection='column' pb={2}>
                                 <Box height='32px' display='flex' alignItems='center'>
-                                    <Typography variant='h5' textAlign='start'>Saved Models</Typography>
+                                    <Typography variant='h4' textAlign='start'>Saved Models</Typography>
                                 </Box>
                             </Box>
                             {userModels.length === 0 ?
@@ -940,13 +911,7 @@ const CryptoModule = () => {
                                 :
                                 <SavedModels
                                     selected_ticker_period={selectedTickerPeriod}
-                                    open={open}
-                                    token={token}
-                                    userModels={userModels}
-                                    selectedSavedModelData={selectedSavedModelData}
-                                    handleModelDeletFromSaved={handleModelDeletFromSaved}
-                                    handleExpandSelectedModel={handleExpandSelectedModel}
-                                    handleExpandedSelectedModelClose={handleExpandedSelectedModelClose}
+                                    selected_ticker_name={selectedTickerName}
                                 />
                             }
                         </Grid>

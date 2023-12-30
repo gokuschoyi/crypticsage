@@ -109,7 +109,17 @@ const cryptoModuleSlice = createSlice({
     initialState,
     reducers: {
         setUserModels: (state, action) => {
-            state.userModels = action.payload
+            // Remove models that are not present in the payload
+            state.userModels = state.userModels.filter(model =>
+                action.payload.find(payloadModel => payloadModel.model_id === model.model_id)
+            );
+
+            // Add new models from the payload
+            action.payload.forEach(payloadModel => {
+                if (!state.userModels.find(model => model.model_id === payloadModel.model_id)) {
+                    state.userModels.push(payloadModel);
+                }
+            });
         },
         setModelSavedToDb: (state, action) => {
             state.modelData.model_saved_to_db = action.payload.status
@@ -149,6 +159,41 @@ const cryptoModuleSlice = createSlice({
                     initial_forecast: initial_forecast
                 }
             }
+        },
+        setModelDataAvailableFlag: (state, action) => {
+            const { model_id, status } = action.payload
+            const currentState = state.userModels
+            const foundIndex = currentState.findIndex((model) => model.model_id === model_id);
+
+            if (foundIndex !== -1) {
+                currentState[foundIndex]['model_data_available'] = status
+            }
+            state.userModels = currentState;
+        },
+        setNewForecastData: (state, action) => {
+            const { model_id, new_forecast_dates, new_forecast, lastPrediction } = action.payload
+            const currentState = state.userModels
+
+            const foundIndex = currentState.findIndex((model) => model.model_id === model_id);
+
+            if (foundIndex !== -1) {
+                currentState[foundIndex].model_data.latest_forecast_result = {
+                    new_forecast_dates: new_forecast_dates,
+                    new_forecast: new_forecast,
+                    lastPrediction: lastPrediction
+                }
+            }
+            state.userModels = currentState;
+        },
+        renameModel: (state, action) => {
+            const { model_id, newModelName } = action.payload
+            const currentState = state.userModels
+            const foundIndex = currentState.findIndex((model) => model.model_id === model_id);
+
+            if (foundIndex !== -1) {
+                currentState[foundIndex].model_name = newModelName
+            }
+            state.userModels = currentState;
         },
         setPredictionPaletteId: (state, action) => {
             state.modelData.predictionPaletteId = action.payload;
@@ -724,6 +769,9 @@ export const {
     , setModelEndTime
     , setPredictedValues
     , updatePredictedValues
+    , setModelDataAvailableFlag
+    , setNewForecastData
+    , renameModel
     , setPredictionPaletteId
     , setPredictionScores
     , setStandardizedAndScaledPredictions

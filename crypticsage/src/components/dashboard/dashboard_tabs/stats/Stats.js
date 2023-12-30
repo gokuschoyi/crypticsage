@@ -49,7 +49,7 @@ const Stats = (props) => {
         if (!isMounted.current) { // Only run if the component is mounted
             isMounted.current = true; // Set the mount state to true after the first run
             if (optionsLength === 0) {
-                console.log('initial load of token data for charts', optionsLength)
+                // console.log('initial load of token data for charts', optionsLength)
                 let result;
                 try {
                     let data = {

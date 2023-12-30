@@ -98,7 +98,7 @@ const calculateScaledRMSE = (dates, predictions_array, label_variance, label_mea
     for (let i = 0; i < predictions_array[0].length; i++) {
         let predictions = []
         predictions_array.forEach((prediction) => {
-            let predictionScaled = calculateOriginalPrice({ value: prediction[i], variance: label_variance, mean: label_mean })
+            let predictionScaled = calculateOriginalPrice({ value: prediction[i][0], variance: label_variance, mean: label_mean })
             predictions.push(predictionScaled)
         })
         predictionsObj[i] = predictions

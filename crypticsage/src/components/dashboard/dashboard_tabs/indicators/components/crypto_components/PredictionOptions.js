@@ -17,13 +17,13 @@ const PredictionOptions = ({
     handlePredictionChartPalette
 }) => {
     return (
-        <Box display='flex' flexDirection='column' pb={1}>
-            <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='flex-start' className='prediction-chart-header'>
+        <Box display='flex' flexDirection='column'>
+            <Box display='flex' flexDirection='column' justifyContent='space-between' alignItems='flex-start' className='prediction-chart-header'>
                 <Box display='flex' flexDirection='column' alignItems='start'>
                     <Typography variant={predictedVlauesRedux.length !== 0 ? 'h6' : 'h5'} textAlign='start'>Predictions - {predictedVlauesRedux.length !== 0 && predictionChartType === 'scaled' ? 'original' : predictionChartType}</Typography>
                 </Box>
                 {predictedVlauesRedux.length !== 0 &&
-                    <Box className='chart-action-box'>
+                    <Box className='chart-action-box' pt={1}>
                         <Box display='flex' flexDirection='row' gap={'4px'} alignItems='center' className='model-chart-action-container'>
                             <TextField
                                 size='small'
@@ -44,15 +44,15 @@ const PredictionOptions = ({
 
                                 {modelParams.modelType !== 'Single Step Multiple Output' &&
                                     <React.Fragment>
-                                        <Tooltip title={'Standardized values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                            <span>
+                                        <Tooltip title={'Standardized values'} placement='top' style={{ cursor: 'pointer', padding: '6px' }}>
+                                            <span style={{ padding: '0px' }}>
                                                 <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "standardized" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'standardized' })}>
                                                     <CloseFullscreenIcon className='small-icon' />
                                                 </IconButton>
                                             </span>
                                         </Tooltip>
-                                        <Tooltip title={'Original values'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                                            <span>
+                                        <Tooltip title={'Original values'} placement='top' style={{ cursor: 'pointer', padding: '6px' }}>
+                                            <span style={{ padding: '0px' }}>
                                                 <IconButton sx={{ padding: '6px' }} disabled={predictionChartType === "scaled" ? true : false} onClick={handlePredictionsChartType.bind(null, { type: 'scaled' })}>
                                                     <OpenInFullIcon className='small-icon' />
                                                 </IconButton>

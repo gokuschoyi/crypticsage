@@ -71,7 +71,7 @@ const Login = (props) => {
     const [isLodaing, setIsLoading] = useState(false)
 
     const signinUser = async () => {
-        console.log("clicked")
+        // console.log("clicked")
         if (email === '' || password === '') {
             setError('Please fill all the fields')
         }

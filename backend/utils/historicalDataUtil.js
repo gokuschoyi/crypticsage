@@ -735,4 +735,5 @@ module.exports = {
     , fetchBinanceHistoricalBetweenPeriods
     , fetchData
     , convertData
+    , periodToMilliseconds
 }

@@ -150,6 +150,7 @@ export default function WordCloud(props) {
     // console.log('FUNC : WordCloud')
     const { setSelectedWord, handleOpenWordMeaning, setWordList } = props
     const [generatedWords, setGeneratedWords] = useState(null)
+    const canvasRef = useRef()
 
     useEffect(() => {
         if (!generatedWords) {
@@ -158,13 +159,22 @@ export default function WordCloud(props) {
             setGeneratedWords(words)
             // console.log(randomWordsList, words)
         }
+
+        return () => {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            const canvas = canvasRef.current;
+            const renderer = canvas?.getContext('word-globe');
+            if (renderer) renderer.dispose();
+        };
     }, [generatedWords, setGeneratedWords, setWordList])
 
     return (
-        <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 38], fov: 90 }}>
-            <ambientLight intensity={0.5} />
-            <spotLight position={[0, 0, 50]} angle={0.3} penumbra={1} intensity={2} castShadow />
-            {generatedWords && <WordlGlobeMesh words={generatedWords} setSelectedWord={setSelectedWord} handleOpenWordMeaning={handleOpenWordMeaning} />}
-        </Canvas>
+        <div className="word-globe">
+            <Canvas ref={canvasRef} dpr={[1, 2]} camera={{ position: [0, 0, 38], fov: 90 }}>
+                <ambientLight intensity={0.5} />
+                <spotLight position={[0, 0, 50]} angle={0.3} penumbra={1} intensity={2} castShadow />
+                {generatedWords && <WordlGlobeMesh words={generatedWords} setSelectedWord={setSelectedWord} handleOpenWordMeaning={handleOpenWordMeaning} />}
+            </Canvas>
+        </div>
     )
 }

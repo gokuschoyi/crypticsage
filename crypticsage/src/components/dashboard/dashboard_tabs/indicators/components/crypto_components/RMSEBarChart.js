@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTheme } from '@mui/material';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, Cell, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -14,21 +14,29 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null;
 };
 
-const RMSEBarChart = ({ data, barChartOnClickHandler }) => {
+const RMSEBarChart = ({ data, selectedRMSEIndex, setSelectedRMSEIndex }) => {
     const theme = useTheme();
+    const localBarChartHandler = useCallback((entry, index) => {
+        setSelectedRMSEIndex(index)
+    }, [setSelectedRMSEIndex])
     return (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width='100%' height={220}>
             <BarChart
-                width={250}
-                height={300}
                 data={data}
                 margin={{
-                    bottom: -10,
+                    bottom: -2,
+                    top: 8,
                 }}
             >
                 <XAxis dataKey="name" />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="rmse" fill={`${theme.palette.primary.dark}`} onClick={barChartOnClickHandler} style={{cursor:'pointer'}}/>
+                <Bar dataKey="rmse" onClick={localBarChartHandler} style={{ cursor: 'pointer' }}>
+                    {
+                        data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={index === selectedRMSEIndex ? `${theme.palette.primary.dark}` : `${theme.palette.secondary.main}`} />
+                        ))
+                    }
+                </Bar>
             </BarChart>
         </ResponsiveContainer>
     )

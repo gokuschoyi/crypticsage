@@ -18,6 +18,9 @@ router.post('/delete_user_model', IController.deleteUserModel)
 
 router.post('/check_for_model', IController.checkIfModelExists)
 router.post('/get_model_result', IController.getModelResult)
+router.post('/rename_model', IController.renameModel)
+
+router.post('/make_new_prediction', IController.makeNewForecast)
 
 router.post('/generate_test_data', IController.generateTestData)
 

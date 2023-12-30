@@ -11,7 +11,7 @@ let LOG_LEVEL = 'info'
 const syslogColors = {
     debug: "rainbow",
     info: "cyan",
-    notice: "white",
+    notice: "italic white",
     warn: "yellow",
     error: "bold red",
     crit: "inverse yellow",

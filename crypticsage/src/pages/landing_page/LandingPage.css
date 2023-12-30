@@ -12,11 +12,18 @@
 /* .content{
   padding-top: 88px;
 } */
+.parallax-star,
 .webgl {
   width: 100vw;
   height: 100vh;
   background-color: black;
 }
+
+.word-globe {
+  width: 400px !important;
+  height: 400px !important;
+}
+
 
 .login {
   position: absolute;
@@ -25,5 +32,3 @@
   top: 50%;
   left: 50%;
 }
-
-  

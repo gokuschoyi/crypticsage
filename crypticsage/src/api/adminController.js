@@ -251,3 +251,24 @@ export const getModelResult = async ({ token, payload }) => {
     })
     return response;
 }
+
+export const makeNewPrediction = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/indicators/make_new_prediction`, { payload }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
+export const renameModel = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const { model_id, model_name } = payload;
+    const response = await axios.post(`${baseUrl}/indicators/rename_model`, { model_id, model_name }, config, {
+        withCredentials: true
+    })
+    return response;
+}

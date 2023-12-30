@@ -28,9 +28,7 @@ function displayDataInTable(data, name) {
     console.table(objectifiedData);
 }
 
-const type1 = 'CNN_One_Step'
-const type2 = 'CNN_MultiChannel'
-const type = type2
+const type = config.single_step_type_two
 
 /**
  * Creates a model with the given parameters
@@ -443,6 +441,8 @@ const evaluateModelOnTestSet = async (
             forecast: lastPrediction,
             label_mean: label_mean[e_key],
             label_variance: label_variance[e_key],
+            mean_array: label_mean,
+            variance_array: label_variance,
         }
 
         RedisUtil.saveTestPredictions(model_id, finalData)

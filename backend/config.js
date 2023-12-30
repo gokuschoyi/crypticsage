@@ -17,7 +17,9 @@ const {
     GOOGLE_OAUTH_CLIENT_ID,
     SCHEDULER_FLAG,
     HTTPS_FLAG,
-    MODEL_TRAINING_DEBUG_FLAG
+    MODEL_TRAINING_DEBUG_FLAG,
+    SINGLE_STEP_TYPE_ONE,
+    SINGLE_STEP_TYPE_TWO
 } = process.env;
 
 assert(PORT, 'PORT is required');
@@ -30,12 +32,14 @@ module.exports = {
     redis_host: REDIS_HOST,
     redis_port: REDIS_PORT,
     websocketFlag: WEBSOCKET_FLAG,
-    wsPort : SOCKET_PORT,
+    wsPort: SOCKET_PORT,
     mongoUri: MONGO_URI,
     tokenKey: TOKEN_SECRET_KEY,
     tokenExpirationTime: TOKEN_EXPIRATION_TIME,
     googleOAuthClientId: GOOGLE_OAUTH_CLIENT_ID,
     schedulerFlag: SCHEDULER_FLAG,
     https_flag: HTTPS_FLAG,
-    debug_flag: MODEL_TRAINING_DEBUG_FLAG
+    debug_flag: MODEL_TRAINING_DEBUG_FLAG,
+    single_step_type_one: SINGLE_STEP_TYPE_ONE,
+    single_step_type_two: SINGLE_STEP_TYPE_TWO
 };

@@ -2474,6 +2474,14 @@ const fetchUserModels = async (user_id) => {
         const userModels = await model_collection.aggregate(pipeline).toArray();
 
         if (userModels.length > 0) {
+            userModels.map((model) => {
+                const m_data = model.model_data
+                m_data['latest_forecast_result'] = {}
+                return {
+                    ...model,
+                    model_data: m_data
+                }
+            })
             return userModels
         }
         else {
@@ -2550,6 +2558,22 @@ const getModelResult = async (user_id, model_id) => {
     }
 }
 
+const renameModelForUser = async (user_id, model_id, model_name) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const model_collection = db.collection('models')
+
+        const query = { user_id, model_id }
+        const update = { $set: { model_name } }
+        const updated = await model_collection.updateOne(query, update)
+
+        return updated
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
 const deleteUserModel = async (user_id, model_id) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
@@ -2615,5 +2639,6 @@ module.exports = {
     , saveModelForUser
     , fetchUserModels
     , getModelResult
+    , renameModelForUser
     , deleteUserModel
 }

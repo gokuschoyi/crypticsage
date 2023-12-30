@@ -5,24 +5,26 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setBarsFromToPredictions, setStandardizedAndScaledPredictions } from '../../modules/CryptoModuleSlice'
 import { calculateTolerance } from '../../modules/CryptoModuleUtils'
 
-function calculateMSE(actual, predicted) {
-    // Filter out null values from actual
-    actual = actual.filter(value => value !== null);
-
-    // Slice predicted to match the length of actual
-    predicted = predicted.slice(0, actual.length);
-
-    if (actual.length !== predicted.length) {
-        throw new Error("Arrays should be of equal length");
-    }
+function calculateMSE(dates, allPredictions, mean, variance, predictionChartType, predictionLookAhead) {
+    let actual = []
+    let predictions = []
+    dates.forEach((date) => {
+        let actualScaled = predictionChartType === 'standardized' ? date.actual : calculateOriginalPrice(date.actual, variance, mean)
+        actual.push(actualScaled)
+    })
+    allPredictions.forEach((prediction) => {
+        let predicted = predictionChartType === 'standardized' ? prediction[predictionLookAhead - 1][0] : calculateOriginalPrice(prediction[predictionLookAhead - 1][0], variance, mean)
+        predictions.push(predicted)
+    })
 
     let sum = 0;
     for (let i = 0; i < actual.length; i++) {
-        sum += Math.pow(predicted[i] - actual[i], 2);
+        let diff = predictions[i] - actual[i];
+        sum += diff * diff;
     }
 
-    let mse = sum / actual.length;
-    let rmse = Math.sqrt(mse);
+    const mse = sum / actual.length;
+    const rmse = Math.sqrt(mse);
     return { mse, rmse };
 }
 
@@ -52,6 +54,8 @@ const PredictionsChart = (props) => {
     const predictedValueRef = useRef(null)
     const allPredictions = useSelector(state => state.cryptoModule.modelData.predictedValues.predictions_array)
     const dates = useSelector(state => state.cryptoModule.modelData.predictedValues.dates)
+    const mean = useSelector(state => state.cryptoModule.modelData.predictedValues.label_mean)
+    const variance = useSelector(state => state.cryptoModule.modelData.predictedValues.label_variance)
 
     // This useEffect is used to shift the predicted values to the right based on the prediction look ahead
     useEffect(() => {
@@ -94,7 +98,7 @@ const PredictionsChart = (props) => {
                 }
             } else {
                 let predict = allPredictions.slice(-predIndex)
-                // console.log(predict)
+                // console.log('Predict length', predict.length)
                 predict.forEach((value, index) => {
                     forecastResult.push({
                         openTime: new Date(lastDate + (tickerPeriodInMilliSecond * (index + 1))).toLocaleString(),
@@ -103,20 +107,25 @@ const PredictionsChart = (props) => {
                         predicted: value[predIndex][0]
                     })
                 })
+                // console.log('first', forecastResult)
 
                 const newLastDate = forecastResult[forecastResult.length - 1].open * 1000
-                for (let i = predictionLookAhead; i <= chartData.forecast.length; i++) {
+                // console.log('first last date', new Date(newLastDate).toLocaleString(), predIndex, chartData.forecast.length)
+                for (let i = predIndex; i < chartData.forecast.length; i++) {
                     forecastResult.push({
-                        openTime: new Date(newLastDate + (tickerPeriodInMilliSecond * (i - 1))).toLocaleString(),
-                        open: (newLastDate + (tickerPeriodInMilliSecond * (i - 1))) / 1000,
+                        openTime: new Date(newLastDate + (tickerPeriodInMilliSecond * (i - predIndex + 1))).toLocaleString(),
+                        open: (newLastDate + (tickerPeriodInMilliSecond * (i - predIndex + 1))) / 1000,
                         actual: null,
-                        predicted: chartData.forecast[i - 1][0]
+                        predicted: chartData.forecast[i][0]
                     })
                 }
+                // console.log('second', forecastResult)
             }
 
 
             shiftedPredictedValues = [...shiftedPredictedValues, ...forecastResult]
+            // console.log('third', forecastResult)
+            // console.log(shiftedPredictedValues.slice(-10))
 
             const scaledDataAfterShifting = shiftedPredictedValues.map((value) => ({
                 ...value,
@@ -125,7 +134,7 @@ const PredictionsChart = (props) => {
             }))
 
             const lastData = scaledDataAfterShifting.slice(-lookAhead)
-            // console.log(lastData)
+            // console.log('last scaled data',lastData)
 
             dispatch(setStandardizedAndScaledPredictions({ standardized: shiftedPredictedValues, scaled: scaledDataAfterShifting, lastData: lastData }))
         }
@@ -252,7 +261,7 @@ const PredictionsChart = (props) => {
 
             // console.log(metrics)
 
-            let mse = calculateMSE(predictedValueRedux.map((value) => value.actual), predictedValueRedux.map((value) => value.predicted))
+            let mse = calculateMSE(dates, allPredictions, mean, variance, predictionChartType, predictionLookAhead)
             // console.log('New MSE : ', mse)
 
             setModelMetrics((prev) => prev = {
@@ -261,7 +270,8 @@ const PredictionsChart = (props) => {
             })
             // console.log(predictionChartType, predictionLookAhead, metrics, mscSt, mse)
         }
-    }, [chartData.standardized, chartData.scaled, predictedValueRedux, predictionChartType, predictionLookAhead, setModelMetrics])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [predictedValueRedux, predictionChartType, predictionLookAhead])
 
     // setting markers and applying theme
     useEffect(() => {
@@ -519,7 +529,7 @@ const PredictionsChart = (props) => {
 
     return (
         <Box width="100%" className='prediction-chart-component-box'>
-            <Box className='predictionChart-box' display='flex' flexDirection='column' gap='20px' width="100%" height='310px' >
+            <Box className='predictionChart-box' display='flex' flexDirection='column' gap='20px' width="100%" height='280px' >
                 {trainingStartedFlag ? (
                     <Box className='prediction-loader' position='relative' width='100%' height='100%'>
                         <Skeleton variant="rectangular" width="100%" height='100%' />

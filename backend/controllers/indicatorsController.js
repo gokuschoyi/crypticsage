@@ -1,6 +1,8 @@
 const logger = require('../middleware/logger/Logger');
 const log = logger.create(__filename.slice(__dirname.length + 1))
+const config = require('../config');
 const IUtil = require('../utils/indicatorUtil');
+const HDUtil = require('../utils/historicalDataUtil')
 // @ts-ignore
 var talib = require('talib/build/Release/talib')
 const { v4: uuidv4 } = require('uuid');
@@ -11,7 +13,6 @@ const connection = redisClient // Create a Redis connection
 const { createTimer } = require('../utils/timer')
 
 const { getValuesFromRedis } = require('../utils/redis_util');
-const { fetchEntireHistDataFromDb } = require('../services/mongoDBServices')
 const fs = require('fs')
 const MDBServices = require('../services/mongoDBServices')
 
@@ -398,6 +399,178 @@ const getModelResult = async (req, res) => {
     } catch (error) {
         log.error(error.stack)
         throw error
+    }
+}
+
+// calculate the no of ticker data to fetch based on the model_first_prediction_date
+const calcuteTotalTickerCountForForecast = (train_period, first_date) => {
+    const periofInMs = HDUtil.periodToMilliseconds(train_period)
+    const dateNow = Date.now()
+    const diff = dateNow - first_date
+    const totalTickerCount = Math.floor(diff / periofInMs)
+    return totalTickerCount
+}
+
+const makeNewForecast = async (req, res) => {
+    const { training_parameters, talibExecuteQueries, model_id, model_first_prediction_date, model_train_period, mean_array, variance_array } = req.body.payload
+    const uid = res.locals.data.uid;
+    log.info(`Starting forcast for model : ${model_id}`)
+
+    try {
+        const { transformation_order, timeStep, lookAhead, multiSelectValue } = training_parameters
+        // console.log('Training parameters : ', model_train_period, model_first_prediction_date, timeStep, lookAhead, multiSelectValue)
+
+        const totalTickerCount = calcuteTotalTickerCountForForecast(model_train_period, model_first_prediction_date) // total no of ticker since initial model prediction
+        const lastDate = model_first_prediction_date + (totalTickerCount * HDUtil.periodToMilliseconds(model_train_period))
+        log.notice(`Total ticker count since initial forecast : ${totalTickerCount}`)
+        log.notice(`New forecast start date : ${new Date(lastDate).toLocaleString()}`)
+
+        // Step 1
+        // fetching the ticker data from db, fetching the last 100 data points as it is difficult ot figure out the exact length to fetch 
+        // as the talin execute queries have varying offset values for calculation
+        const { payload: { db_query: { asset_type, period, ticker_name } } } = talibExecuteQueries[0];
+        const tickerDataForProcessing = await MDBServices.fetchTickerHistDataFromDb(asset_type, ticker_name, period, 1, 300, 0)
+
+        // Step 2
+        // Calculating the taib functions for the ticker data
+        const talibResult = await TFMUtil.processSelectedFunctionsForModelTraining({
+            selectedFunctions: talibExecuteQueries,
+            tickerHistory: tickerDataForProcessing.ticker_data,
+        })
+
+        // Step 3
+        // Trim the tricker and talib result data based on smalles length
+        // @ts-ignore
+        const { tickerHist, finalTalibResult } = await TFMUtil.trimDataBasedOnTalibSmallestLength({
+            tickerHistory: tickerDataForProcessing.ticker_data,
+            finalTalibResult: talibResult,
+        })
+
+        // Step 4
+        // Transforiming the data to required shape before tranforming to tensor/2D array
+        const featuresX = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult, transformation_order })
+        log.notice(`featuresX length : ${featuresX.length}`)
+
+        // Step 5
+        // Standardize the array of features
+        const mean_tensor = tf.tensor(mean_array)
+        const variance_tensor = tf.tensor(variance_array)
+        const standardized_features = tf.div(tf.sub(tf.tensor(featuresX), mean_tensor), tf.sqrt(variance_tensor));
+        const standardizedData = standardized_features.arraySync();
+        // @ts-ignore
+        log.notice(`Standardized data length : ${standardizedData.length}`)
+
+        // Step 6
+        // Reshape the standardized data for model prediction/create forecast data 3D array
+        const features = []
+        const e_key = transformation_order.findIndex(item => item.value === multiSelectValue)
+        // @ts-ignore
+        for (let i = 0; i <= standardizedData.length - timeStep; i++) {
+            // @ts-ignore
+            let featureSlice = standardizedData.slice(i, i + timeStep).map(row => {
+                let filteredRow = row.filter((_, index) => index !== e_key);
+                return filteredRow;
+            });
+            features.push(featureSlice);
+        }
+
+        // @ts-ignore
+        log.notice(`E_ key : ${e_key}`)
+        log.notice(`Features length : ${features.length}`)
+
+        // Step 7
+        // Load the saved model from local directory
+        let forecast = []
+        let model = null;
+        let dates = []
+        const model_path = `file://./models/${model_id}/model.json`
+        try {
+            model = await tf.loadLayersModel(model_path);
+            // @ts-ignore
+            let predictions = await model.predict(tf.tensor(features)).arraySync();
+            model.dispose();
+            const oneStepModelType = config.single_step_type_two
+            // console.log('One step model type : ', oneStepModelType)
+
+            if (lookAhead === 1) {
+                switch (oneStepModelType) {
+                    // @ts-ignore
+                    case 'CNN_One_Step':
+                    // @ts-ignore
+                    case 'CNN_MultiChannel':
+                        let predTensor = tf.tensor(predictions)
+                        // @ts-ignore
+                        let transformedPredictions = predTensor.reshape([predTensor.shape[0], predTensor.shape[1], 1])
+                        // @ts-ignore
+                        forecast = transformedPredictions.arraySync()
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                // @ts-ignore
+                forecast = predictions
+            }
+            log.notice(`Final forecast length : ${forecast.length}`)
+
+            // getting dates to plot
+
+            const slicedTickerHist = tickerHist.slice(-(forecast.length - 1))
+            log.notice(`Sliced ticker hist length : ${slicedTickerHist.length}`)
+            log.notice(`Last prediction date : ${slicedTickerHist[slicedTickerHist.length - 1].date}`)
+
+            slicedTickerHist.forEach((item, index) => {
+                const strDate = new Date(item.openTime).toLocaleString();
+                const actualValue = parseFloat(item[multiSelectValue])
+                // const predictedValue = calculateOriginalPrice(forecast[index][0][0], variance_array[e_key], mean_array[e_key])
+
+                dates.push({
+                    openTime: strDate,
+                    open: item.openTime / 1000,
+                    actual: actualValue,
+                })
+            })
+
+            log.notice(`Dates length : ${dates.length}`)
+
+            let filtered_dates = dates.filter((item) => item.open * 1000 >= model_first_prediction_date)
+            if (filtered_dates.length !== 0) {
+                dates = filtered_dates
+            } else {
+                dates = dates
+            }
+            log.notice(`Dates length after slice : ${dates.length}`)
+            log.notice(`Model Lookahead : ${lookAhead}`)
+        } catch (error) {
+            log.error(error.stack)
+            throw error
+        }
+
+        const final_result_obj = {
+            new_forecast_dates: dates,
+            new_forecast: forecast.slice((forecast.length - dates.length - lookAhead - 1), (forecast.length - 1)),
+            lastPrediction: forecast.slice(-1)[0]
+        }
+
+        log.notice(`Final forecast length : ${final_result_obj.new_forecast.length}`)
+
+        // @ts-ignore
+        res.status(200).json({ message: 'Model forcast started', final_result_obj });
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model training failed', error: error.message })
+    }
+}
+
+const renameModel = async (req, res) => {
+    const { model_id, model_name } = req.body
+    try {
+        const uid = res.locals.data.uid;
+        const model_name_save_status = await MDBServices.renameModelForUser(uid, model_id, model_name)
+        res.status(200).json({ message: 'Model renamed successfully', status: model_name_save_status ? true : false })
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model renaming failed' })
     }
 }
 
@@ -913,4 +1086,6 @@ module.exports = {
     generateTestData,
     checkIfModelExists,
     getModelResult,
+    makeNewForecast,
+    renameModel
 }

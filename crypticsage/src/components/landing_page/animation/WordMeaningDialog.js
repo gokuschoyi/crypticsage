@@ -12,14 +12,7 @@ import {
 const WordMeaningDialog = (props) => {
     const { open, heading, wordMeaning, handleCloseWordMeaning } = props
     const theme = useTheme()
-    const buttonStyle = {
-        ':hover': {
-            color: 'black !important',
-            backgroundColor: '#d11d1d !important',
-            transition: '0.5s'
-        },
-        backgroundColor: `${theme.palette.secondary.main}`
-    }
+    
     return (
         <Dialog
             sx={{
@@ -40,7 +33,7 @@ const WordMeaningDialog = (props) => {
                 </Box>
             </DialogContent>
             <DialogActions sx={{ paddingRight: '25px' }}>
-                <Button size='small' sx={buttonStyle} onClick={handleCloseWordMeaning}>CLOSE</Button>
+                <Button size='small' variant='outlined' onClick={handleCloseWordMeaning}>CLOSE</Button>
             </DialogActions>
         </Dialog>
     )

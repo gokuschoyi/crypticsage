@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Points, PointMaterial } from '@react-three/drei'
 import * as random from 'maath/random/dist/maath-random.esm'
@@ -6,9 +6,19 @@ import { ArcballControls } from '@react-three/drei'
 import gsap from "gsap";
 
 export default function ParallaxStar() {
+    const canvasRef = useRef()
+    useEffect(() => {
+        return () => {
+            // console.log('UE : ParallaxStar : return')
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            const canvas = canvasRef.current;
+            const renderer = canvas?.getContext('parallax-star');
+            if (renderer) renderer.dispose();
+        };
+    })
     return (
-        <div className="webgl">
-            <Canvas camera={{ position: [0, 0, 1] }}>
+        <div className="parallax-star">
+            <Canvas ref={canvasRef} camera={{ position: [0, 0, 1] }}>
                 <Stars />
                 <ArcballControls />
             </Canvas>
@@ -42,9 +52,17 @@ function Stars(props) {
     const ref = useRef()
     const [sphere] = useState(() => random.inCircle(new Float32Array(5000), { radius: 1.2 }))
 
+    useEffect(() => {
+        return () => {
+            // console.log('UE : ParallaxStar Stars : return')
+            const canvas = ref.current;
+            if (canvas) ref.current = undefined;
+        };
+    })
+
     useFrame((state, delta) => {
         // console.log(state)
-        ref.current.rotation.z= state.clock.elapsedTime * 0.01
+        ref.current.rotation.z = state.clock.elapsedTime * 0.01
         gsap.to(ref.current.rotation, {
             y: mouseX * 0.04,
             x: mouseY * 0.04,

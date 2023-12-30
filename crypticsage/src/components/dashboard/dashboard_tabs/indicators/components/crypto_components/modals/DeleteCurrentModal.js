@@ -17,8 +17,8 @@ const DeleteCurrentModal = ({ handleDeleteModel }) => {
 
     return (
         <React.Fragment>
-            <Tooltip title={'Delete the current model'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
-                <span>
+            <Tooltip title={'Delete the current model'} placement='top' style={{ cursor: 'pointer', padding: '6px' }}>
+                <span style={{ padding: '0px' }}>
                     <IconButton onClick={handleClickOpen}>
                         <DeleteForeverIcon className='small-icon' />
                     </IconButton>
