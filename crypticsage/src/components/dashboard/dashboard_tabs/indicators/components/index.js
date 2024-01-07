@@ -20,7 +20,7 @@ import TrainingParameters from "./crypto_components/TrainingParameters";
 import IndicatorSearch from "./crypto_components/IndicatorSearch";
 import MainChartOptions from "./crypto_components/MainChartOptions";
 import RMSEBarChart from "./crypto_components/RMSEBarChart";
-
+import CorelationMatrix from "./crypto_components/CorelationMatrix";
 export {
     CustomSlider,
     LinearProgressWithLabel,
@@ -44,4 +44,5 @@ export {
     IndicatorSearch,
     MainChartOptions,
     RMSEBarChart,
+    CorelationMatrix,
 }

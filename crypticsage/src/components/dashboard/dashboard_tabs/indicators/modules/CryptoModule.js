@@ -66,6 +66,7 @@ import {
     TrainingParameters,
     IndicatorSearch,
     MainChartOptions,
+    CorelationMatrix,
 } from '../components'
 
 const colorCombinations = [
@@ -888,6 +889,10 @@ const CryptoModule = () => {
                                         )
                                         }
 
+
+                                        <CorelationMatrix
+                                            transformation_order={model_parameters.transformation_order}
+                                        />
                                     </Box>
                                 </Grid>
                             </Grid>

@@ -33,7 +33,8 @@ const ReorderList = ({ orderList, setOrderList, disabled }) => { // orderList is
                 talibList.push({
                     id: indicatorId,
                     name: indicatorName,
-                    value: indicatorName
+                    value: indicatorName,
+                    key: key
                 })
             })
 
@@ -59,7 +60,8 @@ const ReorderList = ({ orderList, setOrderList, disabled }) => { // orderList is
                     return {
                         id: id,
                         name: indicator.name,
-                        value: indicator.value
+                        value: indicator.value,
+                        key: indicator.key
                     };
                 });
 
@@ -77,7 +79,8 @@ const ReorderList = ({ orderList, setOrderList, disabled }) => { // orderList is
                     return {
                         id: `${indicators.length + index + 1}`,
                         name: indicator.name,
-                        value: indicator.value
+                        value: indicator.value,
+                        key: indicator.key
                     }
                 })
                 // console.log('func filtered', funcFiltered, removedFromTalibResult, finalTalibWithModifiedId)

@@ -6,7 +6,8 @@ import {
     setEpochResults,
     setPredictedValues,
     setPredictionScores,
-    setStartWebSocket
+    setStartWebSocket,
+    setFeatureCorrelationData
 } from '../modules/CryptoModuleSlice'
 
 // Function to add a new message
@@ -50,6 +51,7 @@ const useWebSocket = (
 ) => {
     const webSocket = useRef(null);
     const ACTIONS = {
+        FEATURE_RELATIONS: 'feature_relations',
         NOTIFY: 'notify',
         EPOCH_BEGIN: 'epochBegin',
         EPOCH_END: 'epochEnd',
@@ -81,6 +83,9 @@ const useWebSocket = (
                 let batchEndBox
 
                 switch (data.action) {
+                    case ACTIONS.FEATURE_RELATIONS:
+                        dispatch(setFeatureCorrelationData(data.relations))
+                        break;
                     case ACTIONS.NOTIFY:
                         addMessage(notifyMessageBoxRef, data.message);
                         break;
@@ -158,6 +163,7 @@ const useWebSocket = (
                         Success('Training completed successfully')
                         break;
                     case ACTIONS.ERROR:
+                        setBatchResult(false)
                         dispatch(setStartWebSocket(false))
                         setTrainingStartedFlag(false)
                         Error(data.message)

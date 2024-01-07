@@ -3,12 +3,17 @@ const log = logger.create(__filename.slice(__dirname.length + 1))
 const config = require('../config')
 // @ts-ignore
 var talib = require('talib/build/Release/talib')
+const ss = require('simple-statistics');
+const jstat = require('jstat')
 const tf = require('@tensorflow/tfjs-node');
 const { sqrt } = require('@tensorflow/tfjs-core');
 
 const IUtil = require('./indicatorUtil');
 const RedisUtil = require('./redis_util')
 const { createTimer } = require('../utils/timer');
+const Redis = require("ioredis");
+// @ts-ignore
+const redisPublisher = new Redis();
 
 
 const displayDataInTable = (data, name) => {
@@ -124,14 +129,68 @@ const trimDataBasedOnTalibSmallestLength = async ({ finalTalibResult, tickerHist
 }
 
 /**
+ * This function calculates and returns the correlation matrix for the given data.
+ * Each element in the matrix is an object with the following properties:
+ * - r: The Pearson correlation coefficient.
+ * - p: The p-value for a hypothesis test whose null hypothesis is that the population correlation coefficient is 0.
+ * - cov: The covariance.
+ * - stat: The statistic value.
+ *
+ * @param {Object} param - The transposed data for which to calculate the correlation matrix.
+ * @param {Array} param.features - The transposed data for which to calculate the correlation matrix.
+ * @returns {Promise<Array<Array<{r: number, p: number, cov: number, stat: number}>>>} The correlation matrix. Each element in the matrix is an object with properties r, p, cov, and stat.
+ */
+const calculateFeatureMetrics = async ({ features }) => {
+    function transpose(array) {
+        return array[0].map((_, colIndex) => array.map(row => row[colIndex]));
+    }
+
+    const transposedData = transpose(features);
+    const data_length = features.length
+    const fData = []
+
+    for (let i = 0; i < transposedData.length; i++) {
+        let temp = []
+        for (let j = 0; j < transposedData.length; j++) {
+            // calculating Pearson Correlation
+            const r = ss.sampleCorrelation(transposedData[i], transposedData[j]);
+
+            // calculating Statistic value
+            const S = Math.sqrt((1 - (r * r)) / (data_length - 2))
+            const stat = ((r - 0) / S)
+
+            // calculating Covariance
+            const cov = ss.sampleCovariance(transposedData[i], transposedData[j]);
+
+            // calculating p Value
+            const t = r * (Math.sqrt((data_length - 2) / (1 - r * r)));
+            const df = features.length - 2;
+            // @ts-ignore
+            const pValue = 2 * (1 - jstat.studentt.cdf(Math.abs(t), df));
+
+            const res_obj = {
+                r: r,
+                p: pValue,
+                cov: cov,
+                stat: stat
+            }
+            temp.push(res_obj)
+        }
+        fData.push(temp)
+    }
+    return fData
+}
+
+/**
  * Transforms the OHLCV and function data to required shape for model training
  * @param {Object} param
  * @param {Array} param.tickerHist
  * @param {Object} param.finalTalibResult
  * @param {Array} param.transformation_order
+ * @param {string} [param.uid]
  * @returns {Promise<array>}
  */
-const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult, transformation_order }) => {
+const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult, transformation_order, uid }) => {
     const features = tickerHist.map((item, i) => {
         return transformation_order.map(order => {
             if (order.value in item) {
@@ -150,6 +209,10 @@ const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult, tran
         console.log('Final talib keys : ', Object.keys(finalTalibResult))
         console.log('Last transformed data : ', features[features.length - 1])
     }
+
+    const metrics = await calculateFeatureMetrics({ features })
+    console.log("New metrics : ", metrics)
+    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'feature_relations', uid, metrics }))
 
     return features
 }
@@ -649,7 +712,7 @@ const formatPredictedOutput = async ({ dates, model_type, look_ahead, tickerHist
             // console.log('Final result length', predPlusActual.length, predPlusActual[0], predPlusActual[predPlusActual.length - 1])
             // console.log('Final result scaled', originalData.length, originalData[0], originalData[originalData.length - 1])
             RedisUtil.saveTestPredictions(id, finalData)
-            // TF_Model.eventEmitter.emit('prediction_completed', id)
+        // TF_Model.eventEmitter.emit('prediction_completed', id)
 
         //adjusting for the look-ahead missing values which are present in the last prediction
         // const lastOriginal = yTrainTest[yTrainTest.length - 1]

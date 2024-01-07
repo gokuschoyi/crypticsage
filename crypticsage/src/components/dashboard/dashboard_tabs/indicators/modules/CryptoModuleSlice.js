@@ -72,11 +72,11 @@ const initialState = {
             modelType: 'Multi Step Single Output',
             batchSize: 32,
             transformation_order: [
-                { id: '1', name: 'OPEN', value: 'open' },
-                { id: '2', name: 'HIGH', value: 'high' },
-                { id: '3', name: 'LOW', value: 'low' },
-                { id: '4', name: 'CLOSE', value: 'close' },
-                { id: '5', name: 'VOLUME', value: 'volume' },
+                { id: '1', name: 'OPEN', value: 'open', key: 'open' },
+                { id: '2', name: 'HIGH', value: 'high', key: 'high' },
+                { id: '3', name: 'LOW', value: 'low', key: 'low' },
+                { id: '4', name: 'CLOSE', value: 'close', key: 'close' },
+                { id: '5', name: 'VOLUME', value: 'volume', key: 'volume' },
             ],
             doValidation: false,
             earlyStopping: false,
@@ -89,6 +89,7 @@ const initialState = {
         startWebSocket: false,
         progress_message: [],
         epoch_no: 0,
+        correlation_data: null,
         epoch_results: [],
         predictedValues: {
             dates: [],
@@ -141,6 +142,9 @@ const cryptoModuleSlice = createSlice({
         },
         setModelEndTime: (state, action) => {
             state.modelData.modelEndTime = action.payload;
+        },
+        setFeatureCorrelationData: (state, action) => {
+            state.modelData.correlation_data = action.payload;
         },
         setPredictedValues: (state, action) => {
             state.modelData.predictedValues = { ...state.modelData.predictedValues, ...action.payload };
@@ -231,6 +235,7 @@ const cryptoModuleSlice = createSlice({
                 { id: '5', name: 'VOLUME', value: 'volume' },
             ];
             state.modelData.epoch_results = [];
+            state.modelData.correlation_data = null;
             state.modelData.epoch_no = initialState.modelData.epoch_no;
             state.modelData.predictedValues = {
                 dates: [],
@@ -251,6 +256,7 @@ const cryptoModuleSlice = createSlice({
         },
         resetModelData: (state) => {
             state.modelData.epoch_results = [];
+            state.modelData.correlation_data = null;
             state.modelData.epoch_no = initialState.modelData.epoch_no;
             state.modelData.predictedValues = {
                 dates: [],
@@ -767,6 +773,7 @@ export const {
     , setStartWebSocket
     , setModelStartTime
     , setModelEndTime
+    , setFeatureCorrelationData
     , setPredictedValues
     , updatePredictedValues
     , setModelDataAvailableFlag

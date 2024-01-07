@@ -201,7 +201,8 @@ module.exports = async (job) => {
                     parameters = {
                         tickerHist: JSON.parse(await redisStep.hget(modelCheckpointName, 'tickerHistory')),
                         finalTalibResult: JSON.parse(await redisStep.hget(modelCheckpointName, 'finalTalibResult')),
-                        transformation_order
+                        transformation_order,
+                        uid
                     }
                     // console.log(Object.keys(parameters))
 
@@ -372,6 +373,7 @@ module.exports = async (job) => {
                             step: 8,
                         })
                         const newErrorMessage = { func_error: error.message, message: 'Error during training the model', step: i }
+                        console.log(error.stack)
                         throw new Error(JSON.stringify(newErrorMessage));
                     }
                     // @ts-ignore

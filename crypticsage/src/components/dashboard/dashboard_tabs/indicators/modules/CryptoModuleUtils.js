@@ -2,6 +2,57 @@ import { Tooltip, Box } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { tooltipClasses } from '@mui/material/Tooltip';
 
+export const convertKeysForDisplay = (key) => {
+    let final = ''
+    switch (key) {
+        case 'outRealUpperBand':
+            final = 'U'
+            break;
+        case 'outRealLowerBand':
+            final = 'L'
+            break;
+        case 'outRealMiddleBand':
+            final = 'M'
+            break;
+        case 'outInPhase':
+            final = 'Phase'
+            break;
+        case 'outQuadrature':
+            final = 'Quad'
+            break;
+        case 'outSine':
+            final = 'Sine'
+            break;
+        case 'outLeadSine':
+            final = 'LeadSine'
+            break;
+        case 'outMACD':
+            final = 'Out'
+            break;
+        case 'outMACDSignal':
+            final = 'Signal'
+            break;
+        case 'outMACDHist':
+            final = 'Hist'
+            break;
+        case 'outSlowK':
+            final = 'SlowK'
+            break;
+        case 'outSlowD':
+            final = 'SlowD'
+            break;
+        case 'outFastK':
+            final = 'FastK'
+            break;
+        case 'outFastD':
+            final = 'FastD'
+            break;
+        default:
+            break;
+    }
+    return final
+}
+
 export const Dot = ({ color }) => {
     return (
         <Box sx={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: color }}></Box>

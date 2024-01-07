@@ -30,6 +30,9 @@ redisSubscriber.on('message', async (channel, message) => {
         return
     }
     switch (messageData.event) {
+        case 'feature_relations':
+            userWS.send(JSON.stringify({ action: 'feature_relations', relations: messageData.metrics }));
+            break;
         case 'notify':
             userWS.send(JSON.stringify({ action: 'notify', message: messageData.message }));
             break;

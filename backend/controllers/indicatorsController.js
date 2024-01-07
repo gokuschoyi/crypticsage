@@ -3,6 +3,8 @@ const log = logger.create(__filename.slice(__dirname.length + 1))
 const config = require('../config');
 const IUtil = require('../utils/indicatorUtil');
 const HDUtil = require('../utils/historicalDataUtil')
+const ss = require('simple-statistics');
+const jstat = require('jstat')
 // @ts-ignore
 var talib = require('talib/build/Release/talib')
 const { v4: uuidv4 } = require('uuid');
@@ -262,7 +264,7 @@ const procssModelTraining = async (req, res) => {
             job_name,
             { fTalibExecuteQuery, model_training_parameters, model_id, uid },
             {
-                attempts: 3,
+                attempts: 1,
                 backoff: {
                     type: 'exponential',
                     delay: 2000,
@@ -609,469 +611,215 @@ function calculateRMSE(actual, predicted) {
 
 
 const generateTestData = async (req, res) => {
-    let { timeStep, lookAhead } = req.body
-    lookAhead = lookAhead
+    let { timeStep: time_step, lookAhead: look_ahead } = req.body
+    console.log('TS : ', time_step, 'LA : ', look_ahead)
+    let feature_count = 8
     try {
+        const model = tf.sequential()
+        const inputShape = [time_step, feature_count]; // replace timeSteps and features with actual numbers
 
-        const tickerHist = [
-            {
-                "openTime": 1628582400000,
-                "open": 1.1,
-                "high": 1.2,
-                "low": 1.3,
-                "close": 1.4,
-                "volume": 1.5
-            },
-            {
-                "openTime": 1628593200000,
-                "open": 2.1,
-                "high": 2.2,
-                "low": 2.3,
-                "close": 2.4,
-                "volume": 2.5
-            },
-            {
-                "openTime": 1628604000000,
-                "open": 3.1,
-                "high": 3.2,
-                "low": 3.3,
-                "close": 3.4,
-                "volume": 3.5
-            }
-        ]
-
-        const finalTalibResult = {
-            "DEMA_outReal": [1.0, 2.0, 3.0]
-        }
-
-        const transformation_order = [
-            { id: '1', name: 'OPEN', value: 'open' },
-            { id: '6', name: 'DEMA_outReal', value: 'DEMA_outReal' },
-            { id: '3', name: 'LOW', value: 'low' },
-            { id: '2', name: 'HIGH', value: 'high' },
-            { id: '4', name: 'CLOSE', value: 'close' },
-            { id: '5', name: 'VOLUME', value: 'volume' },
-        ]
-
-        const featuresX = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult, transformation_order })
-        const toPredictIndex = transformation_order.findIndex(item => item.value === 'close')
-        console.log(toPredictIndex)
-        /* const n = 10; // The length of the outermost array
-        const m = 3; // The length of the inner arrays
-        const p = 3; // The length of the innermost arrays
-
-        const arr = Array.from({ length: n }, () =>
-            Array.from({ length: m }, () =>
-                Array.from({ length: p }, (_, i) => i + 1)
-            )
-        ); */
-
-        // console.log(arr)
-        // const testTF = tf.tensor(arr)
-        // console.log(testTF.shape)
-
-        // @ts-ignore
-        /* let n_input = testTF.shape[1] * testTF.shape[2]
-        let transfX = testTF.reshape([testTF.shape[0], n_input]) */
-
-        // console.log(transfX.shape, transfX.arraySync())
-
-        /* const testArray =
-            [
-                [[10]],
-                [[20]],
-                [[30]],
-                [[40]],
-                [[50]],
-                [[60]],
-                [[70]],
-                [[80]],
-                [[90]],
-                [[100]],
-            ] */
-
-        /* const arrN = [
-            [10, 15, 25],
-            [20, 25, 45],
-            [30, 35, 65],
-            [40, 45, 85],
-            [50, 55, 105],
-            [60, 65, 125],
-            [70, 75, 145],
-            [80, 85, 165],
-            [90, 95, 185],
- 
- 
-        ] */
-        // const testarrayTensor = tf.tensor(testArray)
-        // console.log('Original tensor shape : ', testarrayTensor.shape, testarrayTensor.arraySync())
-
-        // let reshaped = testarrayTensor.reshape([testarrayTensor.shape[0], 1])
-        // console.log('Reshaped tensor : ', reshaped.shape, reshaped.arraySync())
-
-        // @ts-ignore
-        // let transformedBack = reshaped.reshape([reshaped.shape[0], reshaped.shape[1], 1])
-        // console.log('Transformed back tensor : ', transformedBack.shape, transformedBack.arraySync())
-
-        /* const reshapeArray = (yTrain) => {
-            const yTrainTensor = tf.tensor(yTrain)
-            const newOuter = yTrainTensor.shape[0]
-            const newMiddle = 2
-            const newInner = yTrainTensor.shape[2]
-            const reshapedArray = []
- 
-            console.log(newOuter, newMiddle, newInner)
- 
-            for (let i = 0; i < newOuter; i++) {
-                const middleArray = [];
-                for (let j = 0; j < newMiddle; j++) {
-                    // Duplicating the original element for each new middle element
-                    const innerArray = [];
-                    // @ts-ignore
-                    for (let k = 0; k < newInner; k++) {
-                        innerArray.push(yTrain[i][0][0]);
-                    }
-                    middleArray.push(innerArray);
-                }
-                reshapedArray.push(middleArray);
-            }
- 
-            return reshapedArray
-        } */
-
-        /* const reshapedArray = reshapeArray(testArray)
-        const reshapedTensor = tf.tensor(reshapedArray)
- 
-        console.log(reshapedTensor.shape) */
-
-        res.status(200).send({ message: 'Test data generated successfully', featuresX })
-
-
-        /* let simulatedData = [];
-        for (let i = 0; i < 20; i++) {
-            simulatedData.push({
-                openTime: Date.now() + i * 3600000, // hourly timestamps
-                open: Math.random() * 100,
-                high: Math.random() * 100,
-                low: Math.random() * 100,
-                close: Math.random() * 100,
-                volume: Math.random() * 1000
-            });
-        }
- 
-        let features = simulatedData.map(item => [item.open, item.high, item.low, item.close, item.volume]);
-        console.log(features[features.length - (lookAhead + 1)])
- 
-        const { trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest } = await TFMUtil.createTrainingData(
-            {
-                model_type: 'multi_input_single_output_step',
-                stdData: arrN,
-                timeStep: timeStep,
-                lookAhead: lookAhead,
-                e_key: 'low',
-                training_size: 85
-            })
- 
-        const xTensor = tf.tensor(xTrain)
-        const yTensor = tf.tensor(yTrain)
-        const xTestTensor = tf.tensor(xTrainTest)
-        const yTestTensor = tf.tensor(yTrainTest)
-        const lastSetTensor = tf.tensor(lastSets)
- 
-        // @ts-ignore
-        const reshapedYTensor = yTensor.reshape([yTensor.shape[0], yTensor.shape[1]])
-        console.log('Reshaped Y tensor : ', reshapedYTensor.shape)
- 
-        console.log(trainSplit)
-        console.log(xTensor.shape, yTensor.shape, xTestTensor.shape, yTestTensor.shape, lastSetTensor.shape)
- 
-        try {
-            const model = tf.sequential();
-            let n_feature = xTensor.shape[2]
-            // Add a 1D convolutional layer
-            model.add(tf.layers.conv1d({
-                filters: 64,
-                kernelSize: 2,
-                activation: 'relu',
-                inputShape: [timeStep, n_feature]
-            }));
- 
-            // Add a MaxPooling1D layer
-            model.add(tf.layers.maxPooling1d({
-                poolSize: 2
-            }));
- 
-            // Add a Flatten layer
-            model.add(tf.layers.flatten());
- 
-            // Add a dense layer with 50 units and ReLU activation
-            model.add(tf.layers.dense({
-                units: 50,
-                activation: 'relu'
-            }));
- 
-            // Add a dense layer with n_features units (no activation specified, defaults to linear)
-            model.add(tf.layers.dense({
-                units: 1
-            }));
- 
-            model.compile({
-                optimizer: tf.train.adam(),
-                loss: 'meanSquaredError',
-                metrics: ['mse', 'mae'],
-            });
- 
-            console.log(model.summary())
- 
-            await model.fit(xTensor, reshapedYTensor, {
-                batchSize: 32,
-                epochs: 3000,
-                verbose: 0
-            })
- 
-            // @ts-ignore
-            const predictions = await model.predict(xTestTensor).arraySync()
- 
-            const testData = [[[70, 75], [80, 85], [90, 95]]]
-            const testDTensor = tf.tensor(testData)
- 
-            // @ts-ignore
-            const newPred = await model.predict(testDTensor).arraySync()
- 
-            console.log('Predictions', predictions)
-            console.log('New pred:' + newPred)
- 
-        } catch (error) {
-            console.log(error)
-        } */
-
-        // console.log(trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest)
-        /* 
- 
-        /* for (let i = 0; i <= testArray.length - timeStep - lookAhead; i++) {
-            // Extracting features for X
-            let x = testArray.slice(i, i + timeStep).map(step => step.slice(0, -1));
-            
-            // Extracting labels for Y
-            let y = [];
-            for (let j = i + timeStep; j < i + timeStep + lookAhead; j++) {
-                y.push([testArray[j][testArray[j].length - 1]]);
-            }
-    
-            trainX.push(x);
-            trainY.push(y);
-        } */
-
-        /* for (let i = timeStep; i <= testArray.length - lookAhead + 1; i++) {
-            trainX.push(testArray.slice(i - timeStep, i))
-            trainY.push(testArray.slice(i, i + lookAhead - 1).map((row) => [row[2]]))
-        } */
-
-        // console.log(str)
-        /* console.log(trainX)
-        console.log(trainY) */
-
-        /* let tensorX = tf.tensor(trainX)
-        let tensorY = tf.tensor(trainY)
- 
-        console.log(testArray.length)
-        console.log(testArray.length - timeStep - lookAhead + 1)
-        console.log(tensorX.shape)
-        console.log(tensorY.shape) */
-
-        /* const [trainSplit, xTrain, yTrain, xTrainTest, lastSets, yTrainTest] = await TFMUtil.createTrainingData(
-            {
-                model_type: 'multi_input_single_output_step',
-                stdData: features,
-                timeStep: timeStep,
-                lookAhead: lookAhead,
-                e_key: 'low',
-                training_size: 80
-            }) */
-
-        /* console.log(xTrain[0])
-        console.log(yTrain[0])
-        console.log(yTrainTest[0]) */
-
-        // @ts-ignore
-        // console.log(xTrainTest[xTrainTest.length - 1])
-        // console.log(features)
-        // console.table(features)
-        /* 
-                let lastSetStr = ''
-                // @ts-ignore
-                lastSets.forEach((element, index) => {
-                    element.forEach((row, ind) => {
-                        let rowStr = ''
-                        if (ind === element.length - 1) {
-                            rowStr += row.join(', ') + '\n' + '\n'
-                        } else {
-                            rowStr = row.join(', ') + '\n'
-                        }
-                        lastSetStr += rowStr
-                    })
-                })
-        
-                console.log(lastSetStr) */
-
-        /* let strX = ''
-        // @ts-ignore
-        xTrain.forEach((element, index) => {
-            element.forEach((row, ind) => {
-                let rowStr = ''
-                if (ind === element.length - 1) {
-                    rowStr += row.join(', ') + ` - ${yTrain[index]}` + '\n' + '\n'
-                } else {
-                    rowStr = row.join(', ') + '\n'
-                }
-                strX += rowStr
-            })
-        }) */
-
-        // console.log(strX)
-
-        /* let strXT = ''
-        // @ts-ignore
-        xTrainTest.forEach((element, index) => {
-            element.forEach((row, ind) => {
-                let rowStr = ''
-                if (ind === element.length - 1) {
-                    rowStr += row.join(', ') + ` - ${yTrainTest[index]}` + '\n' + '\n'
-                } else {
-                    rowStr = row.join(', ') + '\n'
-                }
-                strXT += rowStr
-            })
-        }) */
-
-        // console.log(strXT)
-
-
-        /* const act = [
-            [0.9313037991523743],
-            [0.9217190742492676],
-            [0.9200571179389954],
-            [0.9195137023925781],
-            [0.9114740490913391]
-        ]
- 
-        const pred = [
-            [0.7829376459121704],
-            [0.9296842813491821],
-            [0.9347333908081055],
-            [0.920935869216919],
-            [0.9096674919128418]
-        ] */
-
-        /* const act =[
-            [1],
-            [2],
-            [3]
-            7/11 7PM : act : 34627.83, pred :  35219.68  -591.85
-            7/11 11PM : act : 34721.23, pred : 35296.62  -575.39
-            8/11 3AM : act : 35453.98, pred : 35347.19   106.79
-            8/11 7AM : act : 35399.12, pred : 35341.42   57.7
-            8/11 11AM : act : 35269.68, pred : 35314.25  -44.57
-        ]
- 
-        const pred =[
-            [0.499192],
-            [1.99],
-            [2.99]
-        ] */
-
-        /*  const actual = [
-             [
-                 [0.9350184202194214],
-                 [0.9322802424430847],
-                 [0.938884437084198],
-                 [0.9322348237037659],
-                 [0.957306981086731],
-                 [0.95747971534729],
-                 [1.0089547634124756]
-             ],
-             [
-                 [0.6027020215988159],
-                 [0.8523806929588318],
-                 [0.9281507134437561],
-                 [0.9427933096885681],
-                 [0.9405898451805115],
-                 [0.9360988736152649],
-                 [0.9328845739364624]
-             ]
-         ]; */
-        /* const predicted = [
-            [
-                [0.6027020215988159],
-                [0.8523806929588318],
-                [0.9281507134437561],
-                [0.9427933096885681],
-                [0.9405898451805115],
-                [0.9360988736152649],
-                [0.9328845739364624]
-            ],
-            [
-                [0.5892080068588257],
-                [0.8353583812713623],
-                [0.9115362763404846],
-                [0.9267987608909607],
-                [0.9250696301460266],
-                [0.9208111763000488],
-                [0.9176720976829529]
-            ]
-        ] */
-
-
-        /* const frmse = calculateRMSE(actual, predicted);
-        console.log("FunctionRMSE:", frmse);
- 
-        let act_tensor = tf.tensor(actual)
-        let pred_tensor = tf.tensor(predicted)
- 
- 
-        console.log(act_tensor.shape)
-        console.log(pred_tensor.shape)
- 
-        let mse = tf.losses.meanSquaredError(act_tensor, pred_tensor)
- 
-        console.log(mse.arraySync())
- 
-        let rmse = tf.sqrt(mse)
- 
-        console.log(rmse.arraySync())
- 
-        let lstm_cells = [];
-        for (let index = 0; index < 4; index++) {
-            lstm_cells.push(tf.layers.lstmCell({ units: 16 }));
-        } */
-
-        /* const model = tf.sequential();
-        model.add(tf.layers.lstm({ units: 50, activation: 'relu', inputShape: [24, 10] }));
-        model.add(tf.layers.repeatVector({ n: 7 }));
-        model.add(tf.layers.lstm({ units: 50, activation: 'relu', returnSequences: true }));
-        model.add(tf.layers.rnn({
-            cell: lstm_cells,
-            inputShape: [7, 50],
-            returnSequences: true
+        // Bi-directional GRU layer
+        model.add(tf.layers.bidirectional({
+            layer: tf.layers.gru({ units: look_ahead, returnSequences: true }), inputShape: inputShape,
         }));
-        model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [7, 50] }));
- 
- 
+
+        // Dropout layer after BiGRU
+        // model.add(tf.layers.dropout({ rate: 0.2 })); // Adjust dropout rate as needed
+
+        // Three LSTM layers with dropout after each
+        const lstmUnits = [40, 80, 40]; // replace with actual numbers
+        for (let i = 0; i < lstmUnits.length; i++) {
+            model.add(tf.layers.lstm({
+                units: lstmUnits[i], returnSequences: true
+            }));
+            // model.add(tf.layers.dropout({ rate: 0.2 })); // Adjust dropout rate as needed
+        }
+
+        /* // Reshape the output to [null, 7, lstmUnits3]
+        model.add(tf.layers.reshape({ targetShape: [look_ahead, lstmUnits[lstmUnits.length - 1]] })); */
+
+        // Fully connected layer to map each [null, 7, 150] to [null, 7, 7]
+        /* model.add(tf.layers.timeDistributed({
+            layer: tf.layers.dense({ units: look_ahead, activation: 'relu' })
+        })); */
+
+        // Output layer: TimeDistributed dense layer to map [null, 7, 7] to [null, 7, 1]
+        model.add(tf.layers.timeDistributed({
+            layer: tf.layers.dense({ units: 1, activation: 'linear', inputShape: [look_ahead, lstmUnits[lstmUnits.length - 1]] }) // Outputs [null, 7, 1]
+        }));
+        model.add(tf.layers.reshape({ targetShape: [look_ahead, 1] }));
+
         model.compile({
             optimizer: tf.train.adam(),
             loss: 'meanSquaredError',
             metrics: ['mse', 'mae'],
         });
- 
+
+        console.log(model.summary())
+
+        /* let lstm_cells = [];
+        for (let index = 0; index < 4; index++) {
+            lstm_cells.push(tf.layers.lstmCell({ units: 16 }));
+        }
+
+        const model = tf.sequential();
+        model.add(tf.layers.lstm({ units: 50, activation: 'relu', inputShape: [14, 8] }));
+        model.add(tf.layers.repeatVector({ n: 7 }));
+        model.add(tf.layers.lstm({ units: 50, activation: 'relu', returnSequences: true }));       
+        model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [7, 50] }));
+
+
+        model.compile({
+            optimizer: tf.train.adam(),
+            loss: 'meanSquaredError',
+            metrics: ['mse', 'mae'],
+        });
+
         console.log(model.summary()) */
 
         // const allData = await redisStep.hgetall('model_training_checkpoint_b288539f-a863-48ff-a830-c8418a8e9028')
         /* const tickerHistory = await fetchEntireHistDataFromDb({ type: 'crypto', ticker_name: 'BTCUSDT', period: '4h' }) */
 
+        res.status(200).json({ message: 'Test data generation started' })
 
     } catch (err) {
         log.error(err.stack)
         res.status(400).json({ message: 'Test data generation failed' })
+    }
+}
+
+const calculateCoRelationMatrix = (req, res) => {
+    try {
+        const data = [
+            [1, 5, 2, 20],  // Row 1 with features for observation 1
+            [2, 4, 2, 42],  // Row 2 with features for observation 2
+            [3, 3, 3, 22],  // Row 3 with features for observation 3
+            [4, 2, 3, 89],  // Row 4 with features for observation 4
+            [5, 1, 4, 64],  // Row 5 with features for observation 5
+        ];
+
+        /* const data = [
+            [1500, 33, 80],
+            [1200, 33, 82.5],
+            [2200, 34, 100.8],
+            [2100, 42, 90],
+            [1500, 29, 67],
+            [1700, 19, 60],
+            [3000, 50, 77],
+            [3000, 55, 77],
+            [2800, 31, 87],
+            [2900, 46, 70],
+            [2780, 36, 57],
+            [2550, 48, 64]
+        ] */
+
+        /* function calcMean(data) {
+            return data.reduce((sum, value) => sum + value, 0) / data.length;
+        } */
+
+        /* function standardDeviation(data) {
+            const dataMean = calcMean(data);
+            return Math.sqrt(data.reduce((sq, n) => sq + (n - dataMean) ** 2, 0) / data.length);
+        }
+
+        function covariance(data1, data2) {
+            const data1Mean = calcMean(data1);
+            const data2Mean = calcMean(data2);
+            const dataLength = data1.length;
+            let cov = 0;
+
+            for (let i = 0; i < dataLength; i++) {
+                cov += (data1[i] - data1Mean) * (data2[i] - data2Mean);
+            }
+
+            return cov / dataLength;
+        } */
+
+        /* function pearsonCorrelation(data1, data2) {
+            if (data1.length !== data2.length) {
+                throw new Error('Arrays have different lengths!');
+            }
+            const data1StandardDeviation = standardDeviation(data1);
+            const data2StandardDeviation = standardDeviation(data2);
+
+            if (data1StandardDeviation === 0 || data2StandardDeviation === 0) {
+                return 0; // If no variation, correlation is 0
+            }
+
+            return covariance(data1, data2) / (data1StandardDeviation * data2StandardDeviation);
+        } */
+
+        /* function calculateCorrelationMatrix(data) {
+            // First, transpose the data to column-wise format
+            const transposedData = transpose(data);
+            console.log('Transposed data', transposedData)
+
+            const matrix = [];
+            for (let i = 0; i < transposedData.length; i++) {
+                matrix[i] = [];
+                for (let j = 0; j < transposedData.length; j++) {
+                    if (i === j) {
+                        // @ts-ignore
+                        matrix[i][j] = 1; // Correlation with itself is always 1
+                    } else {
+                        // @ts-ignore
+                        matrix[i][j] = pearsonCorrelation(transposedData[i], transposedData[j]);
+                    }
+                }
+            }
+            return matrix;
+        } */
+
+        function transpose(array) {
+            return array[0].map((_, colIndex) => array.map(row => row[colIndex]));
+        }
+
+        const fData = []
+        const calcCorrelationMatri = (data) => {
+            const transposedData = transpose(data);
+            // console.log('Transposed data', transposedData)
+
+            const data_length = data.length
+            for (let i = 0; i < transposedData.length; i++) {
+                let temp = []
+                for (let j = 0; j < transposedData.length; j++) {
+                    // calculating Pearson Correlation
+                    const r = ss.sampleCorrelation(transposedData[i], transposedData[j]);
+
+                    // calculating Statistic value
+                    const S = Math.sqrt((1 - (r * r)) / (data_length - 2))
+                    const stat = ((r - 0) / S)
+
+                    // calculating Covariance
+                    const cov = ss.sampleCovariance(transposedData[i], transposedData[j]);
+
+                    // calculating p Value
+                    const t = r * (Math.sqrt((data_length - 2) / (1 - r * r)));
+                    const df = data.length - 2;
+                    // @ts-ignore
+                    const pValue = 2 * (1 - jstat.studentt.cdf(Math.abs(t), df));
+
+                    const res_obj = {
+                        r: r,
+                        p: pValue,
+                        cov: cov,
+                        stat: stat
+                    }
+                    temp.push(res_obj)
+                }
+                fData.push(temp)
+            }
+            console.log(fData)
+            return fData
+        }
+
+        const final_data = calcCorrelationMatri(data);
+
+        res.status(200).json({ message: 'Test data generation started', final_data })
+
+    } catch (err) {
+        log.error(err.stack)
+        res.status(400).json({ message: 'calculate co-relation matrix failed' })
     }
 }
 
@@ -1083,9 +831,10 @@ module.exports = {
     saveModel,
     deleteModel,
     deleteUserModel,
-    generateTestData,
     checkIfModelExists,
     getModelResult,
     makeNewForecast,
-    renameModel
+    renameModel,
+    generateTestData,
+    calculateCoRelationMatrix
 }

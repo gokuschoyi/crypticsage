@@ -42,7 +42,7 @@ const type = config.single_step_type_two
 const createModel = (model_parama) => {
     const {
         model_type,
-        input_layer_shape,
+        input_layer_shape: time_step,
         look_ahead,
         feature_count,
     } = model_parama
@@ -60,7 +60,7 @@ const createModel = (model_parama) => {
                             filters: 64,
                             kernelSize: 2,
                             activation: 'relu',
-                            inputShape: [input_layer_shape, feature_count]
+                            inputShape: [time_step, feature_count]
                         }));
 
                         // Add a MaxPooling1D layer
@@ -94,7 +94,7 @@ const createModel = (model_parama) => {
                             filters: 32,
                             kernelSize: 3,
                             activation: 'relu',
-                            inputShape: [input_layer_shape, feature_count]
+                            inputShape: [time_step, feature_count]
                         }));
 
                         model.add(tf.layers.conv1d({
@@ -133,7 +133,7 @@ const createModel = (model_parama) => {
                         }));
                         break;
                     default:
-                        let n_input = input_layer_shape * feature_count
+                        let n_input = time_step * feature_count
                         let n_output = 1
                         model.add(tf.layers.dense({
                             units: 100,
@@ -146,7 +146,7 @@ const createModel = (model_parama) => {
                         break;
                 }
             } else {
-                model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', inputShape: [input_layer_shape, feature_count] }));
+                model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', inputShape: [time_step, feature_count] }));
                 model.add(tf.layers.repeatVector({ n: look_ahead }));
                 model.add(tf.layers.dropout({ rate: 0.1 }));
                 model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', returnSequences: true }));
