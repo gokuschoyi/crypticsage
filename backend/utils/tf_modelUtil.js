@@ -211,7 +211,7 @@ const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult, tran
     }
 
     const metrics = await calculateFeatureMetrics({ features })
-    console.log("New metrics : ", metrics)
+    // console.log("New metrics : ", metrics)
     redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'feature_relations', uid, metrics }))
 
     return features
@@ -253,6 +253,63 @@ const standardizeData = ({ model_type, features }) => {
     return { stdData, mean: feature_mean, variance: feature_variance };
 }
 
+// remove later
+/**
+ * Normalizes the data to the range (-1, 1)
+ * @param {Object} param
+ * @param {array} param.features
+ * @returns {Promise<{normalized_data: Array, mins_array: Array, maxs_array: Array}>}
+ */
+const normalizeData = async ({ features }) => {
+    // Initialize arrays to hold the min and max for each column
+    let mins_array = new Array(features[0].length).fill(Infinity);
+    let maxs_array = new Array(features[0].length).fill(-Infinity);
+
+    // Find the min and max values for each column
+    features.forEach(row => {
+        row.forEach((value, index) => {
+            if (value < mins_array[index]) mins_array[index] = value;
+            if (value > maxs_array[index]) maxs_array[index] = value;
+        });
+    });
+
+    // Scale the features to the range (-1, 1)
+    let normalized_data = features.map(row => {
+        return row.map((value, index) => {
+            return (-1 + 2 * (value - mins_array[index]) / (maxs_array[index] - mins_array[index]))
+        });
+    });
+
+    if (config.debug_flag === 'true') {
+        // @ts-ignore
+        console.log('Normalized Data Length : ', normalized_data.length)
+        // @ts-ignore
+        console.log('First data: ', normalized_data[0])
+        console.log('Last data: ', normalized_data[normalized_data.length - 1])
+        console.log('Mins : ', mins_array)
+        console.log('Maxes : ', maxs_array)
+    }
+
+    return { normalized_data, mins_array, maxs_array };
+}
+
+/**
+ * 
+ * @param {Object} param
+ * @param {array} param.normalized_data
+ * @param {array} param.mins_array
+ * @param {array} param.maxs_array
+ * @returns {Promise<array>}
+ */
+const inverseNormalizeData = async ({ normalized_data, mins_array, maxs_array }) => {
+    let originalData = normalized_data.map(row => {
+        return row.map((scaledValue, index) => {
+            return mins_array[index] + ((scaledValue + 1) / 2) * (maxs_array[index] - mins_array[index]);
+        });
+    });
+
+    return originalData;
+}
 
 /**
  * 
@@ -311,6 +368,70 @@ const createTrainingData = async ({ model_type, stdData, timeStep, lookAhead, e_
             break;
     }
     return { xTrain: features, yTrain: labels }
+}
+// remove later
+/**
+ * @param {Object} param
+ * @param {array} param.normalizedData
+ * @param {number} param.timeStep
+ * @param {number} param.lookAhead
+ * @param {number} param.e_key
+ * @returns {Promise<{  xTrain:array, yTrain:array, yTrainPast: array  }>}
+ */
+const generateModelTrainigData = async ({ normalizedData, timeStep, lookAhead, e_key }) => {
+    let features = []
+    let labels = []
+    let yPast = []
+
+    for (let i = 0; i <= normalizedData.length - timeStep - lookAhead; i++) {
+        // xtrain features
+        /* let featureSlice = normalizedData.slice(i, i + timeStep).map(row => {
+            let filteredRow = row.filter((_, index) => index !== e_key);
+            return filteredRow;
+        }) */;
+        let featureSlice = normalizedData.slice(i, i + timeStep)
+        features.push(featureSlice);
+
+        //past y lables
+        let pastYSlice = normalizedData.slice(i, i + timeStep).map(row => {
+            let filteredRow = row.filter((_, index) => index === e_key);
+            return filteredRow;
+        });
+        yPast.push(pastYSlice)
+
+        // to predict y labels
+        labels.push(normalizedData.slice(i + timeStep, i + timeStep + lookAhead).map((row) => row[e_key]));
+    }
+
+    if (config.debug_flag === 'true') {
+        let subsetf = features.slice(-1)
+        let subsetl = labels.slice(-1)
+        let subsetYpast = yPast.slice(-1)
+
+        let str = ''
+        subsetf.forEach((element, index) => {
+            element.forEach((row, ind) => {
+                let rowStr = ''
+                if (ind === element.length - 1) {
+                    rowStr += row.join(', ') + ` - ${subsetl[index].join(', ')}` + '\n' + '\n'
+                } else {
+                    rowStr = row.join(', ') + '\n'
+                }
+                str += rowStr
+            })
+        })
+        // console.log(subsetf)
+        // console.log(subsetl)
+        console.log('Total training features length', normalizedData.length)
+        console.log('Offset length  : ', normalizedData.length - timeStep - lookAhead + 1)
+        console.log('E_ key : ', e_key)
+        console.log('Training_features/xTrain : ', features.length, 'Training_labels/yTrain : ', labels.length)
+        // displayDataInTable(normalizedData.slice(-lookAhead).map((row) => [row[e_key]]), 'Last train set labels')
+        // console.log(str)
+        // console.log('yPast last vals : ', subsetYpast)
+    }
+
+    return { xTrain: features, yTrain: labels, yTrainPast: yPast }
 }
 
 /**
@@ -864,7 +985,11 @@ module.exports = {
     trimDataBasedOnTalibSmallestLength,
     transformDataToRequiredShape,
     standardizeData,
+    normalizeData,
+    inverseNormalizeData,
     createTrainingData,
+    generateModelTrainigData,
     formatPredictedOutput,
-    generateEvaluationData
+    generateEvaluationData,
+    calculateFeatureMetrics
 }

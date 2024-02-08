@@ -564,16 +564,17 @@ const CryptoModule = () => {
 
     const handleSaveModel = () => {
         const saveModelPayload = {
+            scores: model_data.score,
             model_id: model_data.model_id,
             model_name: modelName,
             ticker_name: selectedTickerName,
             ticker_period: selectedTickerPeriod,
+            epoch_results: model_data.epoch_results,
+            train_duration: model_data.modelEndTime - model_data.modelStartTime,
+            correlation_data: model_data.correlation_data,
+            predicted_result: model_data.predictedValues,
             training_parameters: model_data.training_parameters,
             talibExecuteQueries: model_data.talibExecuteQueries,
-            predicted_result: model_data.predictedValues,
-            scores: model_data.score,
-            epoch_results: model_data.epoch_results,
-            train_duration: model_data.modelEndTime - model_data.modelStartTime
         }
         // console.log(saveModelPayload)
 

@@ -14,6 +14,7 @@ const connection = redisClient // Create a Redis connection
 
 const { createTimer } = require('../utils/timer')
 
+const { fetchEntireHistDataFromDb } = require('../services/mongoDBServices')
 const { getValuesFromRedis } = require('../utils/redis_util');
 const fs = require('fs')
 const MDBServices = require('../services/mongoDBServices')
@@ -22,10 +23,21 @@ const Redis = require("ioredis");
 // @ts-ignore
 const redisPublisher = new Redis();
 
+// @ts-ignore
+const wganpgDataRedis = new Redis()
+
 const tf = require('@tensorflow/tfjs-node');
 const path = require('path');
+const celery = require('celery-node');
+
+const pyClient = celery.createClient(
+    `redis://${config.redis_host}:${config.redis_port}`,
+    `redis://${config.redis_host}:${config.redis_port}`,
+    'wgan_gp_training'
+);
 
 const TFMUtil = require('../utils/tf_modelUtil')
+const GAN_Model = require('../utils/tf_model_GAN')
 
 const e_type = {
     "open": 0,
@@ -223,72 +235,276 @@ const procssModelTraining = async (req, res) => {
     const { fTalibExecuteQuery, model_training_parameters } = req.body.payload
     const uid = res.locals.data.uid;
     const model_id = uuidv4();
+
     log.info(`Starting model training with id : ${model_id}`)
-    const model_training_queue = "MODEL_TRAINING_QUEUE"
-    const job_name = "MODEL_TRAINING_JOB_" + model_id
+
     try {
-        const model_queue = new Queue(model_training_queue, { connection });
+        const isModelGAN = model_training_parameters.model_type === 'GAN' ? true : false // GAN or multi_input_single_output_step
 
-        const modelTrainingProcessorFile = path.join(__dirname, '../workers/modelTrainer')
-        // console.log('modelTrainingProcessorFile : ', modelTrainingProcessorFile)
-        const model_worker = new Worker(model_training_queue, modelTrainingProcessorFile, { connection, useWorkerThreads: true });
+        if (isModelGAN) {
+            console.log(`Statring ${model_training_parameters.model_type} Initialization`)
+            console.log('Model parameters : ', model_training_parameters)
+            const { db_query } = fTalibExecuteQuery[0].payload;
+            const { asset_type, ticker_name, period } = db_query
+            const redis_key_for_hist_data = `${asset_type}-${ticker_name}-${period}_historical_data`
 
-        const modelTrainingCompletedListener = (job) => {
-            log.info(`Model Training Completed ${job.id}`)
-            // model_queue.close()
-            model_worker.close()
-            model_worker.removeListener('completed', modelTrainingCompletedListener)
-        }
+            console.log('GAN redis data key name : ', redis_key_for_hist_data)
 
-        const modelTrainingFailedListener = (job, error) => {
-            console.log('Job Data', job.failedReason)
-            console.log('Model Training Failed : ', error.stack)
-            console.log('Model Training Failed : ', error.message)
+            // Model parameters
+            const {
+                model_type,
+                to_predict,
+                training_size,
+                time_step,
+                look_ahead,
+                epochs,
+                batchSize,
+                learning_rate,
+                hidden_layers,
+                transformation_order,
+                do_validation,
+                early_stopping_flag
+            } = model_training_parameters
 
-            const redisCommand = `hgetall bull:${model_training_queue}:${job.id}`
-            log.error(`Model training failed for : ${job.name}, " with id : ${job.id}`)
-            log.warn(`Check Redis for more info : ${redisCommand}`)
-            if (job.failedReason !== 'job stalled more than allowable limit') {
-                redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'error', uid, message: error.message }))
+            // check if the historical data is present in redis or not
+            const isHistoricalDataPresent = await wganpgDataRedis.exists(redis_key_for_hist_data)
+            if (isHistoricalDataPresent === 1) {
+                console.log('historical data is present in redis, calling celery worker : ', isHistoricalDataPresent)
+                // set the modified features in the redis store
+                const features = JSON.parse(await wganpgDataRedis.hget(redis_key_for_hist_data, 'features'))
+                const metrics = await TFMUtil.calculateFeatureMetrics({ features })
+                // console.log("New metrics : ", metrics)
+                redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'feature_relations', uid, metrics }))
+
+                await wganpgDataRedis.hset(redis_key_for_hist_data, {
+                    training_parameters: JSON.stringify({
+                        to_predict,
+                        training_size,
+                        time_step,
+                        look_ahead,
+                        epochs,
+                        batchSize,
+                        transformation_order,
+                        do_validation,
+                        early_stopping_flag
+                    })
+                })
+
+                redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `Features present in redis, Celery worker called...` }))
+
+                // call the celery python worker
+                const task = pyClient.createTask("celeryTasks.trainModel");
+                task.delay({
+                    message: 'Request from node to start WGAN_GP model training',
+                    uid,
+                    m_id: model_id,
+                    model_proces_id: redis_key_for_hist_data
+                });
+
+                res.status(200).json({ message: 'Gan model training started', finalRs: [], job_id: model_id });
+            } else {
+                const model_training_order = [
+                    {
+                        function: fetchEntireHistDataFromDb,
+                        message: '----> Step 1 : Fetching the ticker data from db'
+                    },
+                    {
+                        function: TFMUtil.processSelectedFunctionsForModelTraining,
+                        message: '----> Step 2 : Executing the talib functions'
+                    },
+                    {
+                        function: TFMUtil.trimDataBasedOnTalibSmallestLength,
+                        message: '----> Step 3 : Finding smallest array to adjust ticker hist and function data'
+                    },
+                    {
+                        function: TFMUtil.transformDataToRequiredShape,
+                        message: '----> Step 4 : Transforming and combining the data to required format for model training'
+                    },
+                    {
+                        function: null,
+                        message: '----> Step 5 : Saving features to redis and calling Celery Worker'
+                    }
+                ]
+
+                let ticker_history, talib_results, trimmed, features
+                // fetch and [rocess] the data and store the result in the redis cache
+                for (let i = 1; i <= model_training_order.length; i++) {
+                    const teststr = model_training_order[i - 1].message;
+                    const arrowIndex = teststr.indexOf('---->');
+                    const arrow = teststr.substring(0, arrowIndex + 5); // +5 because the length of '---->' is 5
+                    const message = teststr.substring(arrowIndex + 5).trim(); // .trim() to remove any leading/trailing whitespace
+
+                    const modifiedMessage = `${arrow} (${uid}) (${model_id}) ${message}`
+                    log.alert(modifiedMessage)
+                    const step_function = model_training_order[i - 1].function
+
+                    switch (i) {
+                        case 1:  // Fetching the ticker data from db
+                            const history_payload = {
+                                type: asset_type,
+                                ticker_name,
+                                period
+                            }
+                            try {
+                                // @ts-ignore
+                                ticker_history = await step_function(history_payload)
+                            } catch (error) {
+                                const newErrorMessage = { func_error: error.message, message: 'Error fetching data from db', step: i }
+                                throw new Error(JSON.stringify(newErrorMessage));
+                            }
+                            redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(1) : Fetched ${ticker_history.length} tickers from db...` }))
+                            break;
+                        case 2: // Calculate the talib functions for the ticker history
+                            const talib_payload = {
+                                selectedFunctions: fTalibExecuteQuery,
+                                tickerHistory: ticker_history,
+                            }
+                            try {
+                                // @ts-ignore
+                                talib_results = await step_function(talib_payload)
+                            } catch (error) {
+                                const newErrorMessage = { func_error: error.message, message: 'Error in executing selected functions', step: i }
+                                throw new Error(JSON.stringify(newErrorMessage));
+                            }
+                            redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(2) : Talib functions executed...` }))
+                            break;
+                        case 3: // Trim the ticker history and talib results based on the smallest length
+                            const trim_payload = {
+                                finalTalibResult: talib_results,
+                                tickerHistory: ticker_history,
+                            }
+                            try {
+                                // @ts-ignore
+                                trimmed = await step_function(trim_payload)
+                            } catch (error) {
+                                const newErrorMessage = { func_error: error.message, message: 'Error adjusting the ticker and talib result length', step: i }
+                                throw new Error(JSON.stringify(newErrorMessage));
+                            }
+                            redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(3) : Data trimmed based on talib smallest length...` }))
+                            break;
+                        case 4: // Transforming and combining the data to required format for model training
+                            // @ts-ignore
+                            const { tickerHist, finalTalibResult } = trimmed
+                            const transform_payload = {
+                                tickerHist,
+                                finalTalibResult,
+                                transformation_order,
+                                uid
+                            }
+                            try {
+                                // @ts-ignore
+                                features = await step_function(transform_payload)
+                            } catch (error) {
+                                const newErrorMessage = { func_error: error.message, message: 'Error in combining OHLCV and selected function data', step: i }
+                                throw new Error(JSON.stringify(newErrorMessage));
+                            }
+                            redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(4) : Transformed and combined the OHLCV and talib function data...` }))
+                            break;
+                        case 5: // Call the celery python worker
+                            await wganpgDataRedis.hset(redis_key_for_hist_data, {
+                                // @ts-ignore
+                                features: JSON.stringify(features.slice(-1000)), // remove slice after testing
+                                training_parameters: JSON.stringify({
+                                    to_predict,
+                                    training_size,
+                                    time_step,
+                                    look_ahead,
+                                    epochs,
+                                    batchSize,
+                                    transformation_order,
+                                    do_validation,
+                                    early_stopping_flag
+                                })
+                            })
+
+                            const task = pyClient.createTask("celeryTasks.trainModel");
+                            task.delay({
+                                message: 'Request from node to start WGAN_GP model training',
+                                uid,
+                                m_id: model_id,
+                                model_proces_id: redis_key_for_hist_data
+                            });
+                            redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(5) : Features saved to redis and Celery worker called...` }))
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                res.status(200).json({ message: 'Gan model training started', finalRs: [], job_id: model_id });
+
+            }
+
+        } else { // for non GAN models
+            console.log(`Statring ${model_training_parameters.model_type} Initialization`)
+
+            const model_training_queue = "MODEL_TRAINING_QUEUE"
+            const job_name = "MODEL_TRAINING_JOB_" + model_id
+            const model_queue = new Queue(model_training_queue, { connection });
+
+            const modelTrainingProcessorFile = path.join(__dirname, '../worker_bullmq/modelTrainer')
+            console.log('modelTrainingProcessorFile : ', modelTrainingProcessorFile)
+
+            const model_worker = new Worker(model_training_queue, modelTrainingProcessorFile, { connection, useWorkerThreads: true });
+
+            const modelTrainingCompletedListener = (job) => {
+                log.info(`Model Training Completed ${job.id}`)
+                // model_queue.close()
+                model_worker.close()
+                model_worker.removeListener('completed', modelTrainingCompletedListener)
+            }
+
+            const modelTrainingFailedListener = (job, error) => {
+                console.log('Job Data', job.failedReason)
+                console.log('Model Training Failed : ', error.stack)
+                console.log('Model Training Failed : ', error.message)
+
+                const redisCommand = `hgetall bull:${model_training_queue}:${job.id}`
+                log.error(`Model training failed for : ${job.name}, " with id : ${job.id}`)
+                log.warn(`Check Redis for more info : ${redisCommand}`)
+                if (job.failedReason !== 'job stalled more than allowable limit') {
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'error', uid, message: error.message }))
+                }
+            }
+
+            model_worker.on('completed', modelTrainingCompletedListener)
+            model_worker.on('failed', modelTrainingFailedListener)
+
+            model_worker.on('error', (error) => {
+                console.log('Model Training Error : ', error)
+            })
+
+            await model_queue.add(
+                job_name,
+                { fTalibExecuteQuery, model_training_parameters, model_id, uid },
+                {
+                    attempts: 1,
+                    backoff: {
+                        type: 'exponential',
+                        delay: 2000,
+                    },
+                    removeOnComplete: {
+                        age: 3600, // keep up to 1 min
+                        count: 1000, // keep up to 1000 jobs
+                    },
+                    removeOnFail: {
+                        age: 3600, // keep up to 1 min
+                    },
+                    jobId: model_id,
+                }
+            )
+
+            const isActive = model_worker.isRunning();
+            if (isActive) {
+                const message = "Model Training started"
+                res.status(200).json({ message, finalRs: [], job_id: model_id });
+            } else {
+                model_worker.run()
+                const message = "Model Training started"
+                res.status(200).json({ message, finalRs: [], job_id: model_id });
             }
         }
 
-        model_worker.on('completed', modelTrainingCompletedListener)
-        model_worker.on('failed', modelTrainingFailedListener)
-
-        model_worker.on('error', (error) => {
-            console.log('Model Training Error : ', error)
-        })
-
-        await model_queue.add(
-            job_name,
-            { fTalibExecuteQuery, model_training_parameters, model_id, uid },
-            {
-                attempts: 1,
-                backoff: {
-                    type: 'exponential',
-                    delay: 2000,
-                },
-                removeOnComplete: {
-                    age: 3600, // keep up to 1 min
-                    count: 1000, // keep up to 1000 jobs
-                },
-                removeOnFail: {
-                    age: 3600, // keep up to 1 min
-                },
-                jobId: model_id,
-            }
-        )
-
-        const isActive = model_worker.isRunning();
-        if (isActive) {
-            const message = "Model Training started"
-            res.status(200).json({ message, finalRs: [], job_id: model_id });
-        } else {
-            model_worker.run()
-            const message = "Model Training started"
-            res.status(200).json({ message, finalRs: [], job_id: model_id });
-        }
     } catch (error) {
         log.error(error.stack)
         throw error
@@ -308,16 +524,29 @@ const getModel = async (req, res) => {
 }
 
 const saveModel = async (req, res) => {
-    const { model_id, model_name, ticker_name, ticker_period, predicted_result, talibExecuteQueries, training_parameters, scores, epoch_results, train_duration } = req.body.payload
+    const {
+        scores,
+        model_id,
+        model_name,
+        ticker_name,
+        ticker_period,
+        epoch_results,
+        train_duration,
+        correlation_data,
+        predicted_result,
+        training_parameters,
+        talibExecuteQueries,
+    } = req.body.payload
     try {
         const uid = res.locals.data.uid;
         const model_data = {
-            training_parameters,
-            talibExecuteQueries,
-            predicted_result,
             scores,
             epoch_results,
             train_duration,
+            correlation_data,
+            predicted_result,
+            training_parameters,
+            talibExecuteQueries,
         }
         const [model_save_status, modelSaveResult] = await MDBServices.saveModelForUser(uid, ticker_name, ticker_period, model_id, model_name, model_data)
         res.status(200).json({ message: 'Model saved successfully', model_save_status, modelSaveResult, user_id: uid })
@@ -428,10 +657,10 @@ const makeNewForecast = async (req, res) => {
         log.notice(`New forecast start date : ${new Date(lastDate).toLocaleString()}`)
 
         // Step 1
-        // fetching the ticker data from db, fetching the last 100 data points as it is difficult ot figure out the exact length to fetch 
+        // fetching the ticker data from db, fetching the last 100 data points as it is difficult ot figure out the exact length to fetch
         // as the talin execute queries have varying offset values for calculation
         const { payload: { db_query: { asset_type, period, ticker_name } } } = talibExecuteQueries[0];
-        const tickerDataForProcessing = await MDBServices.fetchTickerHistDataFromDb(asset_type, ticker_name, period, 1, 300, 0)
+        const tickerDataForProcessing = await MDBServices.fetchTickerHistDataFromDb(asset_type, ticker_name, period, 1, 1500, 0)
 
         // Step 2
         // Calculating the taib functions for the ticker data
@@ -576,6 +805,82 @@ const renameModel = async (req, res) => {
     }
 }
 
+// @ts-ignore
+
+
+
+
+// @ts-ignore
+
+
+const testNewModel = async (req, res) => {
+    const { fTalibExecuteQuery, model_training_parameters, data } = req.body.payload
+    const {
+        model_type,
+        to_predict,
+        training_size,
+        time_step,
+        look_ahead,
+        epochs: epochCount,
+        batchSize,
+        learning_rate,
+        hidden_layers,
+        transformation_order,
+        do_validation,
+        early_stopping_flag
+    } = model_training_parameters
+    try {
+        console.log('Model start time', performance.now())
+        console.log('Initial num of Tensors ' + tf.memory().numTensors);
+        log.info(`Initial data length : ${data.length}`)
+        const features = data.map((item, i) => {
+            return transformation_order.map(order => {
+                if (order.value in item) {
+                    // Fetching OHLCV data
+                    return parseFloat(item[order.value]);
+                }
+                // return null; // Or a default value if the feature is not found
+            })
+                .filter(value => value !== undefined);;
+        });
+        log.info(`Features length : ${features.length}`)
+        console.log('First Feature : ', features[0])
+        console.log('last Feature : ', features[features.length - 1])
+
+
+        const { normalized_data, mins_array, maxs_array } = await TFMUtil.normalizeData({ features })
+        log.info(`Normalized data length : ${normalized_data.length}`)
+        const { xTrain, yTrain, yTrainPast } = await TFMUtil.generateModelTrainigData(
+            {
+                normalizedData: normalized_data,
+                timeStep: time_step,
+                lookAhead: look_ahead,
+                e_key: transformation_order.findIndex(item => item.value === to_predict)
+            })
+        const feature_size = xTrain[0][0].length
+        const model_proces_id = uuidv4()
+
+        await wganpgDataRedis.hset(model_proces_id, {
+            mins_array: JSON.stringify(mins_array),
+            maxs_array: JSON.stringify(maxs_array),
+        })
+
+        const task = pyClient.createTask("celeryTasks.testLogging");
+        task.delay({ message: 'testing', id: 123456787, feature_size, model_proces_id });
+
+
+        // const [trainHist, preds, Generated_price] = await GAN_Model.train(xTrain, yTrain, yTrainPast, epochCount, time_step, look_ahead, feature_size, batchSize)
+        console.log('Final num of Tensors ' + tf.memory().numTensors);
+        console.log('Total bytes ' + tf.memory().numBytes);
+        res.status(200).json({ message: 'new Model trainign' })
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model training failed' })
+    }
+}
+
+
+
 
 function calculateRMSE(actual, predicted) {
     // Check if the dimensions of actual and predicted arrays match
@@ -609,23 +914,743 @@ function calculateRMSE(actual, predicted) {
     return rmse;
 }
 
-
 const generateTestData = async (req, res) => {
-    let { timeStep: time_step, lookAhead: look_ahead } = req.body
-    console.log('TS : ', time_step, 'LA : ', look_ahead)
-    let feature_count = 8
-    try {
-        const model = tf.sequential()
-        const inputShape = [time_step, feature_count]; // replace timeSteps and features with actual numbers
+    /* const model = tf.sequential();
+    model.add(tf.layers.lstm({ units: 75, activation: 'relu', inputShape: [14, 5] })); // 14, 8
+    model.add(tf.layers.repeatVector({ n: 5 })); // 5
+    model.add(tf.layers.dropout({ rate: 0.1 }));
+    model.add(tf.layers.lstm({ units: 75, activation: 'relu', returnSequences: true }));
+    model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [5, 75] }));
+    model.add(tf.layers.reshape({targetShape:[5]}))
+    model.summary() */
 
+    const weight_initializers = tf.initializers.randomNormal({ mean: 0.0, stddev: 0.02 });
+    // console.log(input_dimension, output_dimension, feature_size, weight_initializers)
+
+    const generator_model = tf.sequential();
+
+    generator_model.add(tf.layers.conv1d({
+        filters: 32,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: weight_initializers,
+        batchInputShape: [null, 14, 5],
+    }))
+
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+
+    generator_model.add(tf.layers.bidirectional({
+        layer: tf.layers.lstm({
+            units: 80,
+            activation: 'relu',
+            kernelInitializer: weight_initializers,
+            returnSequences: false,
+            dropout: 0.3,
+            recurrentDropout: 0.0
+        })
+    }))
+
+    // ERROR: Error: Input 0 is incompatible with layer flatten_Flatten1: expected min_ndim=3, found ndim=2.
+    // The reason for this error is that you are trying to flatten an already flat layer. from bidirectional
+    // model.add(tf.layers.flatten())
+
+    generator_model.add(tf.layers.dense({ units: 64, activation: 'linear' }))
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    generator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    generator_model.add(tf.layers.dense({ units: 32, activation: 'linear' }))
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    generator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    generator_model.add(tf.layers.dense({ units: 5 }))
+    console.log(generator_model.summary())
+
+    const input = tf.input({ shape: [14, 5] })
+    // console.log(input)
+    const output = generator_model.apply(input)
+    console.log(output.shape)
+    // console.log(output)
+    const predictions = tf.layers.dense({ units: 5, inputShape: output.shape[1] }).apply(output)
+    // console.log(predictions)
+
+    const final = tf.model({ inputs: input, outputs: predictions })
+
+    console.log(final.summary())
+
+    const dt = tf.ones([1, 14, 5])
+    console.log(dt.shape)
+
+    const result = final.apply(dt)
+
+    const resultWT = final.apply(dt, { training: true })
+    const resultWF = final.apply(dt, { training: false })
+    const pred = final.predict(dt)
+    console.log(result.shape)
+    console.log(result.arraySync())
+    // console.log(resultWT.arraySync())
+    // console.log(resultWF.arraySync())
+    // console.log(pred.arraySync())
+
+    const eps = tf.randomUniform([82, 19, 1], -1.0, 1.0)
+    console.log(eps.arraySync()[0])
+
+    const eps2 = tf.randomStandardNormal([82, 19, 1], 'float32')
+    console.log(eps2.arraySync()[0])
+
+
+
+    /* const data = tf.tensor([
+        [
+            [0.0001328508515143767],
+            [0.00009782375127542764],
+            [-0.0008963076397776604],
+            [0.0004017833562102169],
+            [0.000012839038390666246],
+            [0.0007723102462477982],
+            [0.00025670218747109175],
+            [0.00024178772582672536],
+            [0.0009538659360259771],
+            [0.0003660211805254221],
+            [0.00018731615273281932],
+            [-0.0008398985955864191],
+            [-0.000011556971003301442],
+            [0.0003482191823422909],
+            [-0.0001776097487891093],
+            [0.0007150094024837017],
+            [-0.00011951666965615004],
+            [-0.0010030386038124561],
+            [0.0006570029072463512]
+        ],
+        [
+            [-0.0003606318205129355],
+            [0.001308008679188788],
+            [0.00013122377276886255],
+            [0.0002781917864922434],
+            [-0.0012376485392451286],
+            [-0.0023580784909427166],
+            [0.00026319053722545505],
+            [0.0009982612682506442],
+            [0.0008057521772570908],
+            [0.0011556555982679129],
+            [0.00005961134593235329],
+            [0.0014554434455931187],
+            [-0.001035070396028459],
+            [-0.001772983348928392],
+            [-0.002082324121147394],
+            [-0.002064791973680258],
+            [-0.0019586090929806232],
+            [-0.0015365128638222814],
+            [-0.0026596931274980307]
+        ]
+    ])
+ 
+    const data2 = tf.tensor([
+        [[-0.0003606318205129355]],
+        [[-0.0003606318205129355]]
+    ])
+ 
+    console.log(data.shape)
+    console.log(data2.shape)
+    const concat = data.concat(data2, 1)
+    console.log(concat.shape)
+ 
+ 
+ 
+    const model = tf.sequential()
+    const weight_initializers = tf.initializers.randomNormal({ mean: 0.0, stddev: 0.02 })
+    const dOptimizer = tf.train.adam(0.0004, 0.5, 0.9);
+    // console.log(dOptimizer)
+ 
+    model.add(tf.layers.lstm({ units: 50, activation: 'relu', inputShape: [19, 1] }));
+    model.add(tf.layers.repeatVector({ n: 5 }));
+    model.add(tf.layers.dropout({ rate: 0.1 }));
+    model.add(tf.layers.lstm({ units: 50, activation: 'relu', returnSequences: true }));
+    model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [5, 50] }));
+ 
+    model.add(tf.layers.conv1d({
+        filters: 32,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: weight_initializers,
+        batchInputShape: [null, 5, 1]
+    }))
+ 
+    model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+ 
+    model.add(tf.layers.bidirectional({
+        layer: tf.layers.lstm({
+            units: 64,
+            activation: 'relu',
+            kernelInitializer: weight_initializers,
+            returnSequences: false,
+            dropout: 0.3,
+            recurrentDropout: 0.0
+        })
+    }))
+ 
+    model.add(tf.layers.dense({ units: 64, activation: 'linear' }))
+    model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    model.add(tf.layers.dropout({ rate: 0.2 }))
+ 
+    model.add(tf.layers.dense({ units: 32, activation: 'linear' }))
+    model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    model.add(tf.layers.dropout({ rate: 0.2 }))
+ 
+    model.add(tf.layers.dense({ units: 5 }))
+    model.add(tf.layers.reshape({ targetShape: [5, 1] }))
+ 
+    const result_pred = await model.predict(data)
+    const result_apply_f = model.apply(data, { training: false })
+    const result_apply_t = model.apply(data, { training: true })
+    console.log('result ', result_pred.arraySync())
+    console.log('result apply', result_apply_f.arraySync())
+    console.log('result apply', result_apply_t.arraySync()) */
+
+    /* model.add(tf.layers.lstm({ units: 50, activation: 'relu', inputShape: [14, 5] }));
+    model.add(tf.layers.repeatVector({ n: 5 }));
+    model.add(tf.layers.dropout({ rate: 0.1 }));
+    model.add(tf.layers.lstm({ units: 50, activation: 'relu', returnSequences: true }));
+    model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [5, 50] })); */
+
+    // console.log(model.summary())
+
+    /* const x = tf.tensor([[
+        [0.032575394958257675],
+        [0.0890781506896019],
+        [-0.0004112944006919861],
+        [-0.013574089854955673],
+        [0.111392080783844],
+        [0.2740894556045532],
+        [0.12742707133293152],
+        [-0.03399523347616196],
+        [-0.06803381443023682],
+        [0.05581254884600639],
+        [0.0010944008827209473],
+        [-0.3425717353820801],
+        [-0.16037702560424805],
+        [0.9127311706542969],
+        [2.1757612228393555],
+        [2.479887008666992],
+        [2.6789770126342773],
+        [2.1039485931396484],
+        [-2.3113415241241455]
+    ]])
+    console.log('shape', x.shape)
+    // console.log(x.square().arraySync())
+    console.log('sq sum ', x.square().sum([1, 2]).arraySync())
+    console.log('sq sum sqt ', x.square().sum([1, 2]).sqrt().arraySync())
+    console.log('GP ', x.square().sum([1, 2]).sqrt().sub(tf.scalar(1)).square().mean().arraySync())
+ 
+    const grad = x.square().sum([1, 2]).sqrt()
+    console.log('slopes :', grad.arraySync())
+    console.log('GP test ', tf.clipByValue(grad.sub(tf.scalar(1)), -1, 1).square().mean().arraySync())
+ 
+    console.log('new GP', tf.square(grad).sub(1).mean().arraySync()) */
+    /* const weight_initializers = tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 });
+    const discriminator_model = tf.sequential();
+ 
+    discriminator_model.add(tf.layers.conv1d({
+        filters: 32,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: weight_initializers,
+        inputShape: [14 + 5, 1]
+    }))
+ 
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+ 
+    discriminator_model.add(tf.layers.conv1d({
+        filters: 64,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: weight_initializers,
+    }))
+ 
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.flatten())
+ 
+    discriminator_model.add(tf.layers.dense({ units: 64, activation: 'linear', useBias: true }))
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.dropout({ rate: 0.2 }))
+ 
+    discriminator_model.add(tf.layers.dense({ units: 32, activation: 'linear', useBias: true }))
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.dropout({ rate: 0.2 }))
+ 
+    discriminator_model.add(tf.layers.dense({ units: 1, activation: 'linear' }))
+ 
+    discriminator_model.add(tf.layers.layerNormalization({ axis: 1, center: true, scale: true }))
+ 
+    console.log(discriminator_model.summary()) */
+    res.status(200).json({ message: 'Test data generation started', })
+
+
+    // let { timeStep: time_step, lookAhead: look_ahead } = req.body
+    // console.log('TS : ', time_step, 'LA : ', look_ahead)
+    // let feature_count = 8
+    // const params = req.body.params
+    // console.log(params)
+    // const result = await HDUtil.getHistoricalYFinanceData(params)
+    // console.log('Result length :', result.length)
+    /* let t1 = tf.tensor([[[1, 2, -3, -4], [-1, -2, 3, 4]]])
+    let t2 = tf.tensor([[[-1, 2, -3, 4], [1, -2, 3, -4]]])
+    console.log(tf.sign(t1).dataSync())
+    console.log(tf.sign(t2).dataSync())
+    console.log(tf.abs(tf.sign(t1).sub(tf.sign(t2))).dataSync())
+    console.log(tf.abs(tf.sign(t1).sub(tf.sign(t2))).mean().dataSync()) */
+    /*
+ 
+    const fake = tf.tensor([
+        [0.0001328508515143767],
+        [0.00009782375127542764],
+        [-0.0008963076397776604],
+        [0.0004017833562102169],
+        [0.000012839038390666246],
+        [0.0007723102462477982],
+        [0.00025670218747109175],
+        [0.00024178772582672536],
+        [0.0009538659360259771],
+        [0.0003660211805254221],
+        [0.00018731615273281932],
+        [-0.0008398985955864191],
+        [-0.000011556971003301442],
+        [0.0003482191823422909],
+        [-0.0001776097487891093],
+        [0.0007150094024837017],
+        [-0.00011951666965615004],
+        [-0.0010030386038124561],
+        [0.0006570029072463512]
+    ])
+ 
+    const real = tf.tensor([
+        [-0.0003606318205129355],
+        [0.001308008679188788],
+        [0.00013122377276886255],
+        [0.0002781917864922434],
+        [-0.0012376485392451286],
+        [-0.0023580784909427166],
+        [0.00026319053722545505],
+        [0.0009982612682506442],
+        [0.0008057521772570908],
+        [0.0011556555982679129],
+        [0.00005961134593235329],
+        [0.0014554434455931187],
+        [-0.001035070396028459],
+        [-0.001772983348928392],
+        [-0.002082324121147394],
+        [-0.002064791973680258],
+        [-0.0019586090929806232],
+        [-0.0015365128638222814],
+        [-0.0026596931274980307]
+    ]) */
+
+    // console.log('fake shape', fake.shape)
+    // console.log('real shape', real.shape)
+    // const gp = tf.scalar(0.9998788)
+    // console.log(fake.mean().arraySync(), real.mean().arraySync())
+    // console.log(fake.mean().sub(real.mean()).arraySync())
+    // console.log(fake.mean().sub(real.mean()).add(gp.mul(10.0)).arraySync())
+    /* const x = tf.tensor(data[0])
+    const y = tf.tensor(data[1])
+    console.log(tf.sign(x).dataSync())
+    console.log(tf.sign(y).dataSync())
+    console.log((tf.sign(x).sub(tf.sign(y))).arraySync())
+    console.log(tf.abs(tf.sign(x).sub(tf.sign(y))).arraySync())
+    console.log(tf.abs(tf.sign(x).sub(tf.sign(y))).mean().arraySync())
+    res.status(200).json({ message: 'Test data generation started', })
+ */
+
+    /*    const dt = tf.tensor(
+           [[0.0001328508515143767],
+           [0.00009782375127542764],
+           [-0.0008963076397776604],
+           [0.0004017833562102169],
+           [0.000012839038390666246],
+           [0.0007723102462477982],
+           [0.00025670218747109175],
+           [0.00024178772582672536],
+           [0.0009538659360259771],
+           [0.0003660211805254221],
+           [0.00018731615273281932],
+           [-0.0008398985955864191],
+           [-0.000011556971003301442],
+           [0.0003482191823422909],
+           [-0.0001776097487891093],
+           [0.0007150094024837017],
+           [-0.00011951666965615004],
+           [-0.0010030386038124561],
+           [0.0006570029072463512]
+           ])
+       console.log('mean :', dt.mean().mul(-1).dataSync())
+ 
+       let ss = 0
+       data[0].forEach(ele => {
+           let elm = ele[0]
+           ss += elm
+       })
+       console.log(ss / data[0].length)
+ 
+       let sum = 0
+       data[0].forEach(ele => {
+           let elm = ele[0]
+           sum += Math.pow(elm, 2)
+       })
+       console.log('sum :', Math.sqrt(sum))
+       console.log(Math.sqrt(sum) - 1)
+       console.log(Math.pow((Math.sqrt(sum) - 1), 2))
+       console.log('---------------------------------------')
+ 
+       const dataTensor = tf.tensor(data)
+       console.log(dataTensor.shape)
+       const gn = dataTensor.square().sum([1, 2]).sqrt()
+       console.log('GN: ', gn.arraySync())
+ 
+       const gp = gn.sub(tf.scalar(1)).square().mean()
+       console.log('GP: ', gp.arraySync()) */
+    /* const dt = tf.tensor([
+        [[0.0001328508515143767],
+        [0.00009782375127542764],
+        [-0.0008963076397776604],
+        [0.0004017833562102169],
+        [0.000012839038390666246],
+        ]])
+ 
+    const dc = tf.tensor([[
+        [0.0007723102462477982],
+        [0.00025670218747109175],
+        [0.00024178772582672536],
+        [0.0009538659360259771],
+        [0.0003660211805254221],
+        [0.00018731615273281932],
+        [-0.0008398985955864191],
+        [-0.000011556971003301442],
+        [0.0003482191823422909],
+        [-0.0001776097487891093],
+        [0.0007150094024837017],
+        [-0.00011951666965615004],
+        [-0.0010030386038124561],
+        [0.0006570029072463512]
+    ]])
+ 
+    const final = dc.concat(dt, 1)
+ 
+        console.log(dt.shape)
+    console.log(dc.shape)
+    console.log(final.shape)
+    console.log(final.arraySync()) */
+
+    /* const data = [
+        [
+            [0.0001328508515143767],
+            [0.00009782375127542764],
+            [-0.0008963076397776604],
+            [0.0004017833562102169],
+            [0.000012839038390666246],
+            [0.0007723102462477982],
+            [0.00025670218747109175],
+            [0.00024178772582672536],
+            [0.0009538659360259771],
+            [0.0003660211805254221],
+            [0.00018731615273281932],
+            [-0.0008398985955864191],
+            [-0.000011556971003301442],
+            [0.0003482191823422909],
+            [-0.0001776097487891093],
+            [0.0007150094024837017],
+            [-0.00011951666965615004],
+            [-0.0010030386038124561],
+            [0.0006570029072463512]
+        ],
+        [
+            [-0.0003606318205129355],
+            [0.001308008679188788],
+            [0.00013122377276886255],
+            [0.0002781917864922434],
+            [-0.0012376485392451286],
+            [-0.0023580784909427166],
+            [0.00026319053722545505],
+            [0.0009982612682506442],
+            [0.0008057521772570908],
+            [0.0011556555982679129],
+            [0.00005961134593235329],
+            [0.0014554434455931187],
+            [-0.001035070396028459],
+            [-0.001772983348928392],
+            [-0.002082324121147394],
+            [-0.002064791973680258],
+            [-0.0019586090929806232],
+            [-0.0015365128638222814],
+            [-0.0026596931274980307]
+        ]
+    ]
+ 
+ 
+    console.log('E Norm : ', tf.euclideanNorm(x, 1).arraySync())
+    console.log('E Norm - 1 : ', tf.euclideanNorm(x, 1).sub(tf.scalar(1)).arraySync())
+    console.log('E Norm - 1 square : ', tf.euclideanNorm(x, 1).sub(tf.scalar(1)).square().arraySync())
+    console.log('E Norm - 1 square mean : ', tf.euclideanNorm(x, 1).sub(tf.scalar(1)).square().mean().arraySync())
+ 
+    console.log('E Norm gp : ', tf.euclideanNorm(x, 0).arraySync())
+    console.log('E Norm gp -1 : ', tf.euclideanNorm(x, 0).sub(tf.scalar(1)).arraySync())
+    console.log('E Norm gp -1 square: ', tf.euclideanNorm(x, 0).sub(tf.scalar(1)).square().arraySync())
+    console.log('E Norm gp -1 square mean: ', tf.euclideanNorm(x, 0).sub(tf.scalar(1)).square().mean().arraySync())
+ 
+    const newData = tf.tensor([
+        [0.0001328508515143767],
+        [0.00009782375127542764],
+        [-0.0008963076397776604],
+        [0.0004017833562102169],
+        [0.000012839038390666246],
+        [0.0007723102462477982],
+        [0.00025670218747109175],
+        [0.00024178772582672536],
+        [0.0009538659360259771],
+        [0.0003660211805254221],
+        [0.00018731615273281932],
+        [-0.0008398985955864191],
+        [-0.000011556971003301442],
+        [0.0003482191823422909],
+        [-0.0001776097487891093],
+        [0.0007150094024837017],
+        [-0.00011951666965615004],
+        [-0.0010030386038124561],
+        [0.0006570029072463512]
+    ])
+ 
+    console.log(newData.shape)
+    console.log(newData.mean().arraySync())
+    console.log(newData.mean(1).dataSync())
+    console.log(tf.tensor(data).mean(1).arraySync()) */
+    // console.log(x.square().sum([1, 2]).sqrt().sub(tf.scalar(1)).arraySync())
+    // console.log(x.square().sum([1, 2]).sqrt().sub(tf.scalar(1)).square().arraySync())
+    // console.log(x.square().sum([1, 2]).sqrt().sub(tf.scalar(1)).square().mean().arraySync())
+
+
+
+    try {
+        /*  const data = tf.tensor([
+             [
+                 [0.0001328508515143767],
+                 [0.00009782375127542764],
+                 [-0.0008963076397776604],
+                 [0.0004017833562102169],
+                 [0.000012839038390666246],
+                 [0.0007723102462477982],
+                 [0.00025670218747109175],
+                 [0.00024178772582672536],
+                 [0.0009538659360259771],
+                 [0.0003660211805254221],
+                 [0.00018731615273281932],
+                 [-0.0008398985955864191],
+                 [-0.000011556971003301442],
+                 [0.0003482191823422909],
+                 [-0.0001776097487891093],
+                 [0.0007150094024837017],
+                 [-0.00011951666965615004],
+                 [-0.0010030386038124561],
+                 [0.0006570029072463512]
+             ],
+             [
+                 [-0.0003606318205129355],
+                 [0.001308008679188788],
+                 [0.00013122377276886255],
+                 [0.0002781917864922434],
+                 [-0.0012376485392451286],
+                 [-0.0023580784909427166],
+                 [0.00026319053722545505],
+                 [0.0009982612682506442],
+                 [0.0008057521772570908],
+                 [0.0011556555982679129],
+                 [0.00005961134593235329],
+                 [0.0014554434455931187],
+                 [-0.001035070396028459],
+                 [-0.001772983348928392],
+                 [-0.002082324121147394],
+                 [-0.002064791973680258],
+                 [-0.0019586090929806232],
+                 [-0.0015365128638222814],
+                 [-0.0026596931274980307]
+             ]
+         ])
+ 
+         console.log(data.shape)
+         const model = tf.sequential()
+         const weight_initializers = tf.initializers.randomNormal({ mean: 0.0, stddev: 0.02 })
+         const dOptimizer = tf.train.adam(0.0004, 0.5, 0.9);
+         // console.log(dOptimizer)
+ 
+         model.add(tf.layers.conv1d({
+             filters: 32,
+             kernelSize: 2,
+             strides: 1,
+             padding: 'same',
+             kernelInitializer: weight_initializers,
+             batchInputShape: [null, 19, 5]
+         }))
+ 
+         model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+ 
+         model.add(tf.layers.bidirectional({
+             layer: tf.layers.lstm({
+                 units: 64,
+                 activation: 'relu',
+                 kernelInitializer: weight_initializers,
+                 returnSequences: false,
+                 dropout: 0.3,
+                 recurrentDropout: 0.0
+             })
+         }))
+ 
+         model.add(tf.layers.dense({ units: 64, activation: 'linear' }))
+         model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+         model.add(tf.layers.dropout({ rate: 0.2 }))
+ 
+         model.add(tf.layers.dense({ units: 32, activation: 'linear' }))
+         model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+         model.add(tf.layers.dropout({ rate: 0.2 }))
+ 
+         model.add(tf.layers.dense({ units: 1 }))
+         // model.add(tf.layers.reshape({ targetShape: [19, 1] }));
+ 
+         // model.add(tf.layers.lstm({ units: 50, activation: 'relu', inputShape: [19, 1] }));
+         // model.add(tf.layers.repeatVector({ n: 5 }));
+         // model.add(tf.layers.dropout({ rate: 0.1 }));
+         // model.add(tf.layers.lstm({ units: 50, activation: 'relu', returnSequences: true }));
+         // model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [5, 50] }));
+ 
+         console.log(model.getWeights().length)
+         console.log(model.summary())
+         console.log(model.resetStates()) */
+
+        // let predict = model.predict(data)
+        // console.log(predict.arraySync())
+
+        // console.log(model.trainable)
+
+        /* let xT = tf.tensor([[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]])
+        let predict = model.predict(xT)
+        // @ts-ignore
+        console.log('Prediction : ', predict.dataSync())
+ 
+        const x = tf.tensor1d([1.234567890, 2.5, 3]);
+        tf.cast(x, 'float32').print(); */
+
+        /* const model = tf.sequential()
+        const weight_initializers = tf.initializers.randomNormal({ mean: 0.0, stddev: 0.02 })
+        model.add(tf.layers.conv1d({
+            filters: 32,
+            kernelSize: 2,
+            strides: 1,
+            padding: 'same',
+            kernelInitializer: weight_initializers,
+            inputShape: [19, 1]
+        }))
+ 
+        model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+ 
+        model.add(tf.layers.conv1d({
+            filters: 64,
+            kernelSize: 2,
+            strides: 1,
+            padding: 'same',
+            kernelInitializer: weight_initializers,
+        }))
+ 
+        model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+ 
+        model.add(tf.layers.flatten())
+ 
+        model.add(tf.layers.dense({ units: 64, activation: 'linear', useBias: true }))
+        model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+        model.add(tf.layers.dropout({ rate: 0.2 }))
+ 
+        model.add(tf.layers.dense({ units: 32, activation: 'linear', useBias: true }))
+        model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+        model.add(tf.layers.dropout({ rate: 0.2 }))
+ 
+        model.add(tf.layers.dense({ units: 1 }))
+        // model.summary()
+ 
+        const data = tf.tensor([
+            [
+                [0.0001328508515143767],
+                [0.00009782375127542764],
+                [-0.0008963076397776604],
+                [0.0004017833562102169],
+                [0.000012839038390666246],
+                [0.0007723102462477982],
+                [0.00025670218747109175],
+                [0.00024178772582672536],
+                [0.0009538659360259771],
+                [0.0003660211805254221],
+                [0.00018731615273281932],
+                [-0.0008398985955864191],
+                [-0.000011556971003301442],
+                [0.0003482191823422909],
+                [-0.0001776097487891093],
+                [0.0007150094024837017],
+                [-0.00011951666965615004],
+                [-0.0010030386038124561],
+                [0.0006570029072463512]
+            ],
+            [
+                [-0.0003606318205129355],
+                [0.001308008679188788],
+                [0.00013122377276886255],
+                [0.0002781917864922434],
+                [-0.0012376485392451286],
+                [-0.0023580784909427166],
+                [0.00026319053722545505],
+                [0.0009982612682506442],
+                [0.0008057521772570908],
+                [0.0011556555982679129],
+                [0.00005961134593235329],
+                [0.0014554434455931187],
+                [-0.001035070396028459],
+                [-0.001772983348928392],
+                [-0.002082324121147394],
+                [-0.002064791973680258],
+                [-0.0019586090929806232],
+                [-0.0015365128638222814],
+                [-0.0026596931274980307]
+            ]
+        ])
+ 
+        console.log(data.shape) */
+
+        // let test = tf.tensor([[[1], [0.001], [0.03], [0.04], [-0.05], [-0.0006], [0.0007], [-0.08], [0.09], [0.10], [0.2], [0.4], [0.6], [0.11]]])
+        // console.log(test.shape)
+        /* let pred = model.apply(data, { training: true })
+        console.log(pred.shape)
+        console.log(pred.arraySync()) */
+
+
+
+        /* model.compile({
+            optimizer: tf.train.adam(),
+            loss: 'meanSquaredError',
+            metrics: ['mse', 'mae'],
+        });
+        let xT = tf.tensor([[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]])
+        let yT = tf.tensor([[[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]])
+        model.fit(xT, yT)
+ 
+        // console.log(model.summary())
+ 
+        /* const inputShape = [time_step, feature_count]; // replace timeSteps and features with actual numbers
+ 
         // Bi-directional GRU layer
         model.add(tf.layers.bidirectional({
             layer: tf.layers.gru({ units: look_ahead, returnSequences: true }), inputShape: inputShape,
         }));
-
+ 
         // Dropout layer after BiGRU
         // model.add(tf.layers.dropout({ rate: 0.2 })); // Adjust dropout rate as needed
-
+ 
         // Three LSTM layers with dropout after each
         const lstmUnits = [40, 80, 40]; // replace with actual numbers
         for (let i = 0; i < lstmUnits.length; i++) {
@@ -634,7 +1659,7 @@ const generateTestData = async (req, res) => {
             }));
             // model.add(tf.layers.dropout({ rate: 0.2 })); // Adjust dropout rate as needed
         }
-
+    */
         /* // Reshape the output to [null, 7, lstmUnits3]
         model.add(tf.layers.reshape({ targetShape: [look_ahead, lstmUnits[lstmUnits.length - 1]] })); */
 
@@ -644,43 +1669,37 @@ const generateTestData = async (req, res) => {
         })); */
 
         // Output layer: TimeDistributed dense layer to map [null, 7, 7] to [null, 7, 1]
-        model.add(tf.layers.timeDistributed({
+        /* model.add(tf.layers.timeDistributed({
             layer: tf.layers.dense({ units: 1, activation: 'linear', inputShape: [look_ahead, lstmUnits[lstmUnits.length - 1]] }) // Outputs [null, 7, 1]
         }));
-        model.add(tf.layers.reshape({ targetShape: [look_ahead, 1] }));
+        model.add(tf.layers.reshape({ targetShape: [look_ahead, 1] })); */
 
-        model.compile({
-            optimizer: tf.train.adam(),
-            loss: 'meanSquaredError',
-            metrics: ['mse', 'mae'],
-        });
 
-        console.log(model.summary())
 
         /* let lstm_cells = [];
         for (let index = 0; index < 4; index++) {
             lstm_cells.push(tf.layers.lstmCell({ units: 16 }));
         }
-
+ 
         const model = tf.sequential();
         model.add(tf.layers.lstm({ units: 50, activation: 'relu', inputShape: [14, 8] }));
         model.add(tf.layers.repeatVector({ n: 7 }));
-        model.add(tf.layers.lstm({ units: 50, activation: 'relu', returnSequences: true }));       
+        model.add(tf.layers.lstm({ units: 50, activation: 'relu', returnSequences: true }));
         model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [7, 50] }));
-
-
+ 
+ 
         model.compile({
             optimizer: tf.train.adam(),
             loss: 'meanSquaredError',
             metrics: ['mse', 'mae'],
         });
-
+ 
         console.log(model.summary()) */
 
         // const allData = await redisStep.hgetall('model_training_checkpoint_b288539f-a863-48ff-a830-c8418a8e9028')
         /* const tickerHistory = await fetchEntireHistDataFromDb({ type: 'crypto', ticker_name: 'BTCUSDT', period: '4h' }) */
 
-        res.status(200).json({ message: 'Test data generation started' })
+
 
     } catch (err) {
         log.error(err.stack)
@@ -688,7 +1707,7 @@ const generateTestData = async (req, res) => {
     }
 }
 
-const calculateCoRelationMatrix = (req, res) => {
+const calculateCoRelationMatrix = async (req, res) => {
     try {
         const data = [
             [1, 5, 2, 20],  // Row 1 with features for observation 1
@@ -697,6 +1716,18 @@ const calculateCoRelationMatrix = (req, res) => {
             [4, 2, 3, 89],  // Row 4 with features for observation 4
             [5, 1, 4, 64],  // Row 5 with features for observation 5
         ];
+
+        const result = await TFMUtil.normalizeData({ features: data })
+        const minMaxed = result.normalized_data
+        const min = result.mins_array
+        const max = result.maxs_array
+        console.log('minmax', minMaxed)
+
+
+        const inversedTransformed = await TFMUtil.inverseNormalizeData({ normalized_data: minMaxed, mins_array: min, maxs_array: max })
+
+        console.log('reversed ', inversedTransformed)
+
 
         /* const data = [
             [1500, 33, 80],
@@ -712,63 +1743,6 @@ const calculateCoRelationMatrix = (req, res) => {
             [2780, 36, 57],
             [2550, 48, 64]
         ] */
-
-        /* function calcMean(data) {
-            return data.reduce((sum, value) => sum + value, 0) / data.length;
-        } */
-
-        /* function standardDeviation(data) {
-            const dataMean = calcMean(data);
-            return Math.sqrt(data.reduce((sq, n) => sq + (n - dataMean) ** 2, 0) / data.length);
-        }
-
-        function covariance(data1, data2) {
-            const data1Mean = calcMean(data1);
-            const data2Mean = calcMean(data2);
-            const dataLength = data1.length;
-            let cov = 0;
-
-            for (let i = 0; i < dataLength; i++) {
-                cov += (data1[i] - data1Mean) * (data2[i] - data2Mean);
-            }
-
-            return cov / dataLength;
-        } */
-
-        /* function pearsonCorrelation(data1, data2) {
-            if (data1.length !== data2.length) {
-                throw new Error('Arrays have different lengths!');
-            }
-            const data1StandardDeviation = standardDeviation(data1);
-            const data2StandardDeviation = standardDeviation(data2);
-
-            if (data1StandardDeviation === 0 || data2StandardDeviation === 0) {
-                return 0; // If no variation, correlation is 0
-            }
-
-            return covariance(data1, data2) / (data1StandardDeviation * data2StandardDeviation);
-        } */
-
-        /* function calculateCorrelationMatrix(data) {
-            // First, transpose the data to column-wise format
-            const transposedData = transpose(data);
-            console.log('Transposed data', transposedData)
-
-            const matrix = [];
-            for (let i = 0; i < transposedData.length; i++) {
-                matrix[i] = [];
-                for (let j = 0; j < transposedData.length; j++) {
-                    if (i === j) {
-                        // @ts-ignore
-                        matrix[i][j] = 1; // Correlation with itself is always 1
-                    } else {
-                        // @ts-ignore
-                        matrix[i][j] = pearsonCorrelation(transposedData[i], transposedData[j]);
-                    }
-                }
-            }
-            return matrix;
-        } */
 
         function transpose(array) {
             return array[0].map((_, colIndex) => array.map(row => row[colIndex]));
@@ -809,7 +1783,7 @@ const calculateCoRelationMatrix = (req, res) => {
                 }
                 fData.push(temp)
             }
-            console.log(fData)
+            // console.log(fData)
             return fData
         }
 
@@ -835,6 +1809,6 @@ module.exports = {
     getModelResult,
     makeNewForecast,
     renameModel,
-    generateTestData,
-    calculateCoRelationMatrix
+    testNewModel,
+    generateTestData
 }

@@ -4,8 +4,8 @@ const winston = require('winston')
 const { createLogger, format, transports } = winston
 const { combine, label, timestamp, colorize, align, printf, errors } = format;
 
-const APP_LOG_LOG_PATH = `${__dirname}/logs/app.log`
-const ACCESS_LOG_PATH = `${__dirname}/logs/access.log`
+const APP_LOG_LOG_PATH = `${__dirname}/logs/app_p2.log`
+const ACCESS_LOG_PATH = `${__dirname}/logs/access_p2.log`
 let LOG_LEVEL = 'info'
 
 const syslogColors = {

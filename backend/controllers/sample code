@@ -211,3 +211,3105 @@ model.add(tf.layers.lstm({ units: 64 }))
 model.add(tf.layers.dropout({ rate: 0.2 }))
 
 model.add(tf.layers.dense({ units: y_Train[0].length })) */
+
+/*  const dGrads = tf.grad(loss => {
+                 return dLossValue(data, time_step, look_ahead)
+             })(trainable_weights); */
+
+// const dGrads = dOptimizer.computeGradients(lossFunction, trainable_weights);
+// const dGrads = tf.variableGrads(lossFunction, trainable_weights);
+// const dGrads = dOptimizer.computeGradients(() => dLossValue, trainable_weights);
+
+// console.log(trainable_weights)
+/* const varList = discriminator.trainableWeights;
+console.log(Object.keys(varList))
+
+const dGrads = dOptimizer.computeGradients(() => dLossValue);
+console.log('Discriminator grads : ', dGrads)
+
+const gradsAndVars = {};
+for (let i = 0; i < varList.length; i++) {
+    gradsAndVars[discriminator.trainableWeights[i].name] = dGrads[i];
+} */
+
+// console.log('Discriminator grads and vars : ', gradsAndVars)
+
+
+
+
+/* let newVarList = []
+varList.forEach((v, i) => {
+    // console.log(v)
+    newVarList.push(v)
+})
+console.log('trainable weights length', newVarList.length)
+console.log('trainable weights', typeof newVarList)
+
+console.log('trainable weights first', newVarList[0]) */
+
+/* const varListTensor = tf.tensor(varList);
+const varListVariable = tf.variable(varListTensor); */
+
+
+/* // Create a function that computes the discriminator loss
+const computeLoss = dLossValue => dLossValue;
+
+// Create a function that computes gradients of the loss with respect to the trainable variables
+const gradFn = tf.grads(computeLoss);
+
+// Compute the gradients of the discriminator loss
+const dGrads = gradFn([dLossValue], discriminator.trainableWeights);
+console.log('Discriminator grads : ', dGrads) */
+
+// const dGrads = tf.grad(dLoss => dLoss)(dLossValue);
+// Create a function that computes gradients of the loss with respect to the trainable variables
+// const gradFn = tf.grad(dLoss => dLoss);
+/*  const Fn = dLoss => tf.tensor([dLoss])
+ console.log('Function : ', Fn(dLossValue))
+
+ const dGrads = tf.grad(Fn)
+
+
+
+ // const dGrads = gradFn([dLossValue], discriminator.trainableWeights);
+ console.log('Discriminator grads : ', dGrads) */
+
+// Use tf.tidy to manage memory during gradient computation
+/* const dGrads = tf.tidy(() => {
+    // Compute the gradients of the discriminator loss
+    return computeGradients([dLossValue], discriminator.trainableWeights);
+}); */
+
+// Compute the gradients of the loss with respect to the discriminator's trainable weights
+/* const dGrads = tf.grads(dLoss => dLoss)([dLossValue]);
+console.log(dGrads)
+
+// Apply gradients
+dOptimizer.applyGradients(zip(dGrads, trainable_weights)); */
+
+/* // Compute gradients of the loss with respect to the discriminator's trainable weights
+const computeGradients = tf.grads(dLossCalculator);
+
+// Call computeGradients and pass null for each trainable weight (since computeGradients expects the same number of arguments as dLossCalculator's inputs)
+const dGrads = computeGradients(trainable_weights);
+console.log(dGrads)
+
+const tArr =[]
+trainable_weights.forEach((v, i) => {
+    // console.log(v.dataSync())
+    tArr.push(v.dataSync())
+})
+
+// console.log('trainable weights', tArr)
+const tArrTensor = tf.tensor(tArr)
+console.log('trainable weights tensor', tArrTensor.shape)
+// console.log('trainable weights tensor', tArrTensor)
+
+console.log('Total tensors in memory', tf.memory().numTensors)
+console.log('Total memory bytes', tf.memory().numBytes)
+
+const dGrads = tf.grad(() => dLossCalculator())
+const gradients = dGrads(tArrTensor) // Convert the array of tensors to a single tensor
+console.log('dGrads', gradients) */
+
+// const dGrads = dOptimizer.computeGradients(() => dLossCalculator(data, time_step, look_ahead))
+
+/* const dGrads = (data, time_step, look_ahead) => tf.grad((data, time_step, look_ahead) => {
+    let loss = dLossCalculator(data, time_step, look_ahead);
+    console.log('Loss from compute gradients', loss);
+    return loss;
+});
+
+// Call dGrads with the arguments of dLossCalculator
+const gradients = dGrads([data, time_step, look_ahead]);
+
+console.log('dGrads', gradients) */
+
+/* const dLossValue = dLossCalculator(data, time_step, look_ahead)
+const dGrads = dOptimizer.computeGradients(() => {
+    const loss = dLossCalculator(data, time_step, look_ahead)
+    console.log('Loss from compute gradients', loss)
+    return loss
+})
+console.log('dGrads', dGrads) */
+
+/* const lossFunction = (loss) => tf.cast(loss, 'float32')
+const dGrads = tf.grads(dLossCalculator);
+
+
+const [result] = dGrads([data, time_step, look_ahead])
+result.print() */
+
+// dGrads(dLossValue).print()
+// const dGrads = dOptimizer.computeGradients(() => lossFunction(dLossValue))
+
+/*  console.log(lossFunction())
+dOptimizer.computeGradients(() => dLossValue(data, time_step, look_ahead))
+//
+
+console.log(dGrads)
+
+// Update the weights of the discriminator using the discriminator optimizer
+dOptimizer.applyGradients(tf.data.zip([dGrads, discriminator.trainableWeights])); */
+/* console.log('trainable weights', trainable_weights.forEach((v, i) => {
+    console.log(v.dataSync())
+})) */
+
+// dOptimizer.minimize(() => dLossValue(data, time_step, look_ahead), true, discriminator_.trainableWeights);
+
+
+
+/* let grads = tf.grad(discriminatorOutput => {
+        return discriminator.apply(discriminatorOutput, { training: true });
+    })(interpolated); */
+
+/* tf.keep(interpolated);
+let predictions
+const pred = (...interpolated) => {
+    console.log('Calculating pred on interpolated data', interpolated)
+    predictions = tf.variable(discriminator.apply(interpolated[0], { training: true }));
+    console.log('Predictions shape : ', predictions.shape)
+    return predictions
+} */
+
+/* const predicted = pred(interpolated)
+console.log('predicted form GP : ', predicted) */
+
+/* const xs = [interpolated]
+let getGrads = tf.grads(pred);
+
+const gradients = getGrads(xs);
+
+console.log('Grads shape : ', gradients)
+
+// Calculate the norm of the gradients
+const norm = gradients.square().sum([1, 2]).sqrt();
+const gp = norm.sub(tf.scalar(1.0)).square().mean(); */
+
+
+
+for (let i = 0; i < 5; i++) {
+    log.info(`Training discriminator ${i + 1}`)
+
+    dLossValue = () => tf.tidy(() => {
+        log.info('calculating discriminator loss')
+
+        generatedData = generator_.apply(xTrainTensor, { training: true }); // Generate fake output
+        let generatedDataReshape = generatedData.reshape([generatedData.shape[0], generatedData.shape[1], 1]); // Reshape the predicted data from 2D to 3D                
+        let generatedOutput = tf.concat([generatedDataReshape, tf.cast(pastYTrainTensor, 'float32')], 1); // Concatenate the real data with the generated data
+
+        realYReshape = yTrainTensor.reshape([yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);// reshaping actual data from 2D to 3D
+        let realOutput = tf.concat([realYReshape.cast('float32'), tf.cast(pastYTrainTensor, 'float32')], 1); // Concatenate the real data with the actual data ytrain and pastY
+
+        let DReal, DGenerated;
+
+        // Get the logits for the real and generated data
+        DReal = discriminator_.apply(realOutput, { training: true });
+        DGenerated = discriminator_.apply(generatedOutput, { training: true });
+
+        // Calculate discriminator loss using generated and real logits
+        const realLoss = DReal.mean().cast('float32');
+        const generatedLoss = DGenerated.mean().cast('float32');
+        const dCost = generatedLoss.sub(realLoss);
+
+        // Calculate the gradient penalty
+        // const gp = newGradientPenalty(discriminator_, realOutput, generatedOutput);
+        // gp = tf.tensor(1)
+
+        let alpha = tf.randomNormal([batchSize, time_step + look_ahead, 1], 0.0, 1.0);
+        let diff = generatedOutput.sub(tf.cast(realOutput, 'float32'));
+        let interpolated = tf.cast(realOutput, 'float32').add(alpha.mul(diff));
+
+        const pred_func = (interpolated) => {
+            console.log('calling GP pred func', interpolated.shape)
+            let pred = discriminator_.apply(interpolated, { training: true });
+            console.log(' pred shaoe  ', pred.shape)
+            return pred
+        }
+
+        const getGradients = tf.grad(pred_func)
+        const gradients = getGradients(interpolated)
+
+        console.log('Gradients shape : ', gradients.shape)
+        // Calculate the L2 norm of the gradients
+        const gradientsNorm = gradients.square().sum([1, 2]).sqrt();
+        console.log('Norm shape : ', gradientsNorm.shape)
+
+        // Calculate the gradient penalty: (norm - 1)^2
+        gp = gradientsNorm.sub(tf.scalar(1.0)).square().mean();
+
+
+        // Add the gradient penalty to the original discriminator loss
+        let d_loss = dCost.add(gp.mul(10))
+
+        console.log('Discriminator cost : ', dCost.dataSync())
+        console.log('Gradient penalty : ', gp.dataSync())
+        console.log('d_loss_value : ', d_loss.dataSync())
+
+        if (debug_flag) {
+            // const go = generatedOutput.arraySync()
+            // console.log('Past Y + generated first : ', go[0])
+
+            // const ro = realOutput.arraySync()
+            // console.log('Real output first : ', ro[0])
+
+            console.log('Generator output shape : ', generatedData.shape)
+            console.log('Generator output first element : ', generatedData.arraySync()[0])
+            console.log('\n')
+
+            console.log('Reshaped generated output shape : ', generatedDataReshape.shape)
+            console.log('\n')
+
+            console.log('Past Y + generated concat shape : ', generatedOutput.shape)
+            console.log('\n')
+
+            console.log('Reshaped real price shape : ', realYReshape.shape)
+            console.log('\n')
+
+            console.log('Real output shape after concatnate : ', realOutput.shape)
+            console.log('\n')
+
+            console.log('Discriminator real output shape : ', DReal.shape)
+            console.log('\n')
+
+            console.log('Discriminator generated output shape : ', DGenerated.shape)
+            console.log('\n')
+
+            console.log('Discriminator loss : ', dCost.dataSync())
+            console.log('\n')
+
+        }
+
+        return dCost.add(gp.mul(10)).asScalar();
+    })
+
+    console.log('\n', 'Outside loss')
+    // const { value, grads } = dOptimizer.computeGradients(dLossValue);
+    const grads = tf.variableGrads(dLossValue);
+    // console.log('Grad values : ', grads.value.dataSync())
+    dOptimizer.applyGradients(grads.grads);
+
+    /* let trainable_weights = discriminator_.getWeights()
+    console.log('trainable weights length', trainable_weights.length) */
+
+    // Compute gradients
+    /* const gradsFn = tf.grads(dLossValue);
+    const dGrads = gradsFn(trainable_weights); */
+
+    // Apply gradients
+    // dOptimizer.applyGradients(zip(dGrads, discriminator_.trainableWeights));
+}
+
+[
+    {
+        "conv1d_Conv1D1/kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                2,
+                4,
+                32
+            ],
+            "dtype": "float32",
+            "size": 256,
+            "strides": [
+                128,
+                32
+            ],
+            "dataId": {},
+            "id": 30557,
+            "rankType": 3,
+            "scopeId": 20192
+        },
+        "conv1d_Conv1D1/bias": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                32
+            ],
+            "dtype": "float32",
+            "size": 32,
+            "strides": [],
+            "dataId": {},
+            "id": 30551,
+            "rankType": 1,
+            "scopeId": 20192
+        },
+        "bidirectional_Bidirectional1/forward_lstm_LSTM1/kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                32,
+                256
+            ],
+            "dtype": "float32",
+            "size": 8192,
+            "strides": [
+                256
+            ],
+            "dataId": {},
+            "id": 30519,
+            "rankType": 2,
+            "scopeId": 20192
+        },
+        "bidirectional_Bidirectional1/forward_lstm_LSTM1/recurrent_kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                64,
+                256
+            ],
+            "dtype": "float32",
+            "size": 16384,
+            "strides": [
+                256
+            ],
+            "dataId": {},
+            "id": 30512,
+            "rankType": 2,
+            "scopeId": 20192
+        },
+        "bidirectional_Bidirectional1/forward_lstm_LSTM1/bias": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                256
+            ],
+            "dtype": "float32",
+            "size": 256,
+            "strides": [],
+            "dataId": {},
+            "id": 30501,
+            "rankType": 1,
+            "scopeId": 20192
+        },
+        "bidirectional_Bidirectional1/backward_lstm_LSTM1/kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                32,
+                256
+            ],
+            "dtype": "float32",
+            "size": 8192,
+            "strides": [
+                256
+            ],
+            "dataId": {},
+            "id": 28796,
+            "rankType": 2,
+            "scopeId": 20192
+        },
+        "bidirectional_Bidirectional1/backward_lstm_LSTM1/recurrent_kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                64,
+                256
+            ],
+            "dtype": "float32",
+            "size": 16384,
+            "strides": [
+                256
+            ],
+            "dataId": {},
+            "id": 28789,
+            "rankType": 2,
+            "scopeId": 20192
+        },
+        "bidirectional_Bidirectional1/backward_lstm_LSTM1/bias": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                256
+            ],
+            "dtype": "float32",
+            "size": 256,
+            "strides": [],
+            "dataId": {},
+            "id": 28778,
+            "rankType": 1,
+            "scopeId": 20192
+        },
+        "dense_Dense1/kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                128,
+                64
+            ],
+            "dtype": "float32",
+            "size": 8192,
+            "strides": [
+                64
+            ],
+            "dataId": {},
+            "id": 27084,
+            "rankType": 2,
+            "scopeId": 20192
+        },
+        "dense_Dense1/bias": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                64
+            ],
+            "dtype": "float32",
+            "size": 64,
+            "strides": [],
+            "dataId": {},
+            "id": 27082,
+            "rankType": 1,
+            "scopeId": 20192
+        },
+        "dense_Dense2/kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                64,
+                32
+            ],
+            "dtype": "float32",
+            "size": 2048,
+            "strides": [
+                32
+            ],
+            "dataId": {},
+            "id": 27062,
+            "rankType": 2,
+            "scopeId": 20192
+        },
+        "dense_Dense2/bias": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                32
+            ],
+            "dtype": "float32",
+            "size": 32,
+            "strides": [],
+            "dataId": {},
+            "id": 27060,
+            "rankType": 1,
+            "scopeId": 20192
+        },
+        "dense_Dense3/kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                32,
+                5
+            ],
+            "dtype": "float32",
+            "size": 160,
+            "strides": [
+                5
+            ],
+            "dataId": {},
+            "id": 27040,
+            "rankType": 2,
+            "scopeId": 20192
+        },
+        "dense_Dense3/bias": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                5
+            ],
+            "dtype": "float32",
+            "size": 5,
+            "strides": [],
+            "dataId": {},
+            "id": 27038,
+            "rankType": 1,
+            "scopeId": 20192
+        },
+        "conv1d_Conv1D2/kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                2,
+                1,
+                32
+            ],
+            "dtype": "float32",
+            "size": 64,
+            "strides": [
+                32,
+                32
+            ],
+            "dataId": {},
+            "id": 27023,
+            "rankType": 3,
+            "scopeId": 20192
+        },
+        "conv1d_Conv1D2/bias": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                32
+            ],
+            "dtype": "float32",
+            "size": 32,
+            "strides": [],
+            "dataId": {},
+            "id": 27013,
+            "rankType": 1,
+            "scopeId": 20192
+        },
+        "conv1d_Conv1D3/kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                2,
+                32,
+                64
+            ],
+            "dtype": "float32",
+            "size": 4096,
+            "strides": [
+                2048,
+                64
+            ],
+            "dataId": {},
+            "id": 26997,
+            "rankType": 3,
+            "scopeId": 20192
+        },
+        "conv1d_Conv1D3/bias": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                64
+            ],
+            "dtype": "float32",
+            "size": 64,
+            "strides": [],
+            "dataId": {},
+            "id": 26987,
+            "rankType": 1,
+            "scopeId": 20192
+        },
+        "dense_Dense4/kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                1216,
+                64
+            ],
+            "dtype": "float32",
+            "size": 77824,
+            "strides": [
+                64
+            ],
+            "dataId": {},
+            "id": 26967,
+            "rankType": 2,
+            "scopeId": 20192
+        },
+        "dense_Dense4/bias": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                64
+            ],
+            "dtype": "float32",
+            "size": 64,
+            "strides": [],
+            "dataId": {},
+            "id": 26965,
+            "rankType": 1,
+            "scopeId": 20192
+        },
+        "dense_Dense5/kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                64,
+                32
+            ],
+            "dtype": "float32",
+            "size": 2048,
+            "strides": [
+                32
+            ],
+            "dataId": {},
+            "id": 26946,
+            "rankType": 2,
+            "scopeId": 20192
+        },
+        "dense_Dense5/bias": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                32
+            ],
+            "dtype": "float32",
+            "size": 32,
+            "strides": [],
+            "dataId": {},
+            "id": 26944,
+            "rankType": 1,
+            "scopeId": 20192
+        },
+        "dense_Dense6/kernel": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                32,
+                1
+            ],
+            "dtype": "float32",
+            "size": 32,
+            "strides": [
+                1
+            ],
+            "dataId": {},
+            "id": 26925,
+            "rankType": 2,
+            "scopeId": 20192
+        },
+        "dense_Dense6/bias": {
+            "kept": false,
+            "isDisposedInternal": false,
+            "shape": [
+                1
+            ],
+            "dtype": "float32",
+            "size": 1,
+            "strides": [],
+            "dataId": {},
+            "id": 26923,
+            "rankType": 1,
+            "scopeId": 20192
+        }
+    }
+]
+
+/* const dloss = () => tf.tidy(() => {
+    // Generate fake data
+    const generatorData = generateNoise(generator_, pastYTrainTensor, xTrainTensor)
+
+    // Get predictions from discriminator
+    const DReal = discriminator_.apply(realOutput, { training: true }) // shape [batchSize, 1]
+    const DFake = discriminator_.apply(generatorData, { training: true }) // shape [batchSize, 1]
+    // console.log('D : ', DReal.arraySync()[0][0], DFake.arraySync()[0][0])
+
+    // Wasserstein Loss - If this value is 0 that means 
+    // both the distributions are same and discriminator is 
+    // guessing 50% of the time
+    const dCost = (tf.cast(DReal, 'float32').mean().sub(tf.cast(DFake, 'float32').mean())).mul(-1);
+    // console.log('Real loss: ', DReal.mean().dataSync()[0], 'Fake loss: ', DFake.mean().dataSync()[0], 'D cost: ', dCost.dataSync()[0])
+
+    const gp = gradientPenalty(batchSize, time_step, look_ahead, discriminator_, generatorData, realOutput)
+    dLossValue = dCost.add(gp.mul(LAMBDA)).dataSync();;
+    return dCost.add(gp.mul(LAMBDA));
+
+})
+
+const disc_layers = discriminator_.getWeights()
+
+const discriminatorGradientFunc = tf.grad(dloss);
+const discGradsAndVars = {};
+
+disc_layers.forEach((layer, index) => {
+    const layerGradients = discriminatorGradientFunc(layer);
+    discGradsAndVars[layer.name] = layerGradients
+})
+
+dOptimizer.applyGradients(discGradsAndVars) */
+
+/* const gLoss = () => tf.tidy(() => {
+    generatorData = generateNoise(generator_, pastYTrainTensor, xTrainTensor)
+    const realYReshape = yTrainTensor.reshape([yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);
+    const realOutput = tf.cast(pastYTrainTensor, 'float32').concat(tf.cast(realYReshape, 'float32'), 1);
+    // console.log('generatedData shape : ', generatedData.shape)
+    // console.log('actual values : ', realOutput.arraySync()[0][18])
+    // console.log('grenerator predictions : ', generatorData.arraySync()[0][18])
+
+    // Get the discriminator logits for fake data
+    const GGenerated = discriminator_.apply(generatorData, { training: true });
+
+    // Calculate the generator loss
+    const g_mean = GGenerated.mean().mul(-1)
+    const gMse = tf.losses.meanSquaredError(realOutput, generatorData)
+    const gSign = tf.abs(tf.sign(realOutput).sub(tf.sign(generatorData))).mean();
+    // console.log('gmean', g_mean.dataSync()[0], 'gmse', gMse.dataSync()[0], 'gsign', gSign.dataSync()[0])
+    gLossValue = g_mean.add(gMse.mul(lambda1)).add(gSign.mul(lambda2)).dataSync();
+    return g_mean.add(gMse.mul(lambda1)).add(gSign.mul(lambda2));
+})
+
+const gen_layers = generator_.getWeights()
+const generatorGradientFunc = tf.grad(gLoss);
+const genGradsAndVars = {};
+
+gen_layers.forEach((layer, index) => {
+    const layerGradients = generatorGradientFunc(layer);
+    genGradsAndVars[layer.name] = layerGradients
+})
+
+gOptimizer.applyGradients(genGradsAndVars) */
+
+const { value: g_value, grads: g_grads } = gOptimizer.computeGradients(() => tf.tidy(() => {
+    // Generate fake output
+    generatorData = generateNoise(generator_, pastYTrainTensor, xTrainTensor)
+    tf.keep(generatorData)
+    const realYReshape = yTrainTensor.reshape([yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);
+    const realOutput = tf.cast(pastYTrainTensor, 'float32').concat(tf.cast(realYReshape, 'float32'), 1);
+    // console.log('generatedData shape : ', generatedData.shape)
+    // console.log('actual values : ', realOutput.arraySync()[0][18])
+    // console.log('grenerator predictions : ', generatorData.arraySync()[0][18])
+
+    // Get the discriminator logits for fake data
+    const GGenerated = discriminator_.apply(generatorData, { training: true });
+
+    // Calculate the generator loss
+    const g_mean = GGenerated.mean().mul(-1)
+    const gMse = tf.losses.meanSquaredError(realOutput, generatorData)
+    const gSign = tf.abs(tf.sign(realOutput).sub(tf.sign(generatorData))).mean();
+    // console.log('gmean', g_mean.dataSync()[0], 'gmse', gMse.dataSync()[0], 'gsign', gSign.dataSync()[0])
+
+    const gLoss = g_mean.add(gMse.mul(lambda1)).add(gSign.mul(lambda2));
+    // console.log('gloss', gLoss.dataSync()[0])
+
+    return gLoss;
+}), generator_.getWeights());
+
+gLossValue = g_value.dataSync();
+// console.log(g_grads["conv1d_Conv1D1/kernel"].arraySync()[0])
+// console.log('G GRADS : ', Object.keys(g_grads).length)
+gOptimizer.applyGradients(g_grads);
+
+
+// full working code below./// backup before f-up
+const logger = require('../middleware/logger/Logger');
+const log = logger.create(__filename.slice(__dirname.length + 1))
+let tf = require('@tensorflow/tfjs-node');
+const { createTimer } = require('./timer')
+const config = require('../config')
+const Redis = require("ioredis");
+// @ts-ignore
+const redisPublisher = new Redis();
+
+/* __________________________________________________________________________________________
+Layer (type)                Input Shape               Output shape              Param #   
+==========================================================================================
+conv1d_Conv1D1 (Conv1D)     [[null,14,4]]             [null,14,32]              288       
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU1 (Lea [[null,14,32]]            [null,14,32]              0         
+__________________________________________________________________________________________
+bidirectional_Bidirectional [[null,14,32]]            [null,128]                49664     
+__________________________________________________________________________________________
+dense_Dense1 (Dense)        [[null,128]]              [null,64]                 8256      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU2 (Lea [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dropout_Dropout1 (Dropout)  [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dense_Dense2 (Dense)        [[null,64]]               [null,32]                 2080      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU3 (Lea [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dropout_Dropout2 (Dropout)  [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dense_Dense3 (Dense)        [[null,32]]               [null,5]                  165       
+==========================================================================================
+Total params: 60453
+Trainable params: 60453
+Non-trainable params: 0
+__________________________________________________________________________________________ */
+
+const generator = ({ input_dimension, output_dimension, feature_size, weight_initializers }) => {
+    // const weight_initializers = tf.initializers.randomNormal({ mean: 0.0, stddev: 0.02 });
+    // console.log(input_dimension, output_dimension, feature_size, weight_initializers)
+
+    const generator_model = tf.sequential();
+
+    generator_model.add(tf.layers.conv1d({
+        filters: 32,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: weight_initializers,
+        batchInputShape: [null, input_dimension, feature_size],
+    }))
+
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+
+    generator_model.add(tf.layers.bidirectional({
+        layer: tf.layers.lstm({
+            units: 64,
+            activation: 'relu',
+            kernelInitializer: weight_initializers,
+            returnSequences: false,
+            dropout: 0.3,
+        })
+    }))
+
+    // ERROR: Error: Input 0 is incompatible with layer flatten_Flatten1: expected min_ndim=3, found ndim=2.
+    // The reason for this error is that you are trying to flatten an already flat layer. from bidirectional
+    // model.add(tf.layers.flatten()) 
+
+    generator_model.add(tf.layers.dense({ units: 64, activation: 'linear' }))
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    generator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    generator_model.add(tf.layers.dense({ units: 32, activation: 'linear' }))
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    generator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    generator_model.add(tf.layers.dense({ units: output_dimension }))
+
+    const input = tf.input({ shape: [input_dimension, feature_size] })
+    const predictions = generator_model.apply(input)
+
+    return tf.model({ inputs: input, outputs: predictions })
+}
+
+/* ________________________________________________________________________________________
+Layer (type)                Input Shape               Output shape              Param #   
+==========================================================================================
+conv1d_Conv1D1 (Conv1D)     [[null,19,1]]             [null,19,32]              96        
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU1 (Lea [[null,19,32]]            [null,19,32]              0         
+__________________________________________________________________________________________
+conv1d_Conv1D2 (Conv1D)     [[null,19,32]]            [null,19,64]              4160      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU2 (Lea [[null,19,64]]            [null,19,64]              0         
+__________________________________________________________________________________________
+flatten_Flatten1 (Flatten)  [[null,19,64]]            [null,1216]               0         
+__________________________________________________________________________________________
+dense_Dense1 (Dense)        [[null,1216]]             [null,64]                 77888     
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU3 (Lea [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dropout_Dropout1 (Dropout)  [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dense_Dense2 (Dense)        [[null,64]]               [null,32]                 2080      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU4 (Lea [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dropout_Dropout2 (Dropout)  [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dense_Dense3 (Dense)        [[null,32]]               [null,1]                  33        
+==========================================================================================
+Total params: 84257
+Trainable params: 84257
+Non-trainable params: 0
+__________________________________________________________________________________________ */
+
+const discriminator = ({ timeStep, lookAhead, weight_initializers }) => {
+    const discriminator_model = tf.sequential();
+
+    discriminator_model.add(tf.layers.conv1d({
+        filters: 32,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: weight_initializers,
+        inputShape: [timeStep + lookAhead, 1]
+    }))
+
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+
+    discriminator_model.add(tf.layers.conv1d({
+        filters: 64,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: weight_initializers,
+    }))
+
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.flatten())
+
+    discriminator_model.add(tf.layers.dense({ units: 64, activation: 'linear', useBias: true }))
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    discriminator_model.add(tf.layers.dense({ units: 32, activation: 'linear', useBias: true }))
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    const fake_data = tf.input({ shape: [timeStep + lookAhead, 1] })
+    const discriminator_output = discriminator_model.apply(fake_data)
+
+    const realness_score = tf.layers.dense({ units: 1, activation: 'linear' }).apply(discriminator_output)
+
+    return tf.model({ inputs: fake_data, outputs: realness_score })
+}
+
+const DEBUG_FLAG = true
+const generateNoise = (generator_, pastYTrainTensor, xTrain_data) => tf.tidy(() => {
+    const generator_data = generator_.apply(xTrain_data, { training: true });
+    const generator_data_reshape = tf.reshape(generator_data, [generator_data.shape[0], generator_data.shape[1], 1]);
+    return tf.cast(pastYTrainTensor.concat(generator_data_reshape, 1), 'float32');
+})
+
+const gradientPenalty = (batchSize, time_step, look_ahead, discriminator_, fakeData, realData) => tf.tidy(() => {
+    const LAMBDA = tf.tensor(10.0, [1], 'float32') // Gradient penalty lambda hyperparameter
+    // Calculate gradient penalty 
+    const alpha = tf.randomNormal([batchSize, time_step + look_ahead, 1], 0, 1, 'float32');
+    const diff = fakeData.sub(realData);
+    const interpolated = realData.add(alpha.mul(diff));
+    // tf.keep(interpolated)
+
+    // const interpolated = realData.mul(alpha).add(tf.scalar(1).sub(alpha).mul(fakeData))
+
+    // console.log('Real Data : ', realData.arraySync()[0])
+    // console.log('Fake Data : ', fakeData.arraySync()[0])
+    // console.log('APLHA : ', alpha.arraySync()[0])
+    // console.log('DIFF : ', diff.arraySync()[0])
+    // console.log('Interpolated : ', interpolated.arraySync()[0])
+
+    const gradientsFn = tf.valueAndGrad((x) => tf.tidy(() => {
+        const pred = discriminator_.predict(x)
+        console.log('pred : ', pred.arraySync()[81])
+        return pred
+    }));
+    const { value, grad } = gradientsFn(interpolated)
+    const grad_fo_calc = tf.tensor(grad.arraySync())
+    tf.dispose([grad, value, gradientsFn])
+
+    // console.log('grad shape : ', grad_fo_calc.shape)
+    console.log('grad : ', grad_fo_calc.arraySync()[81][18])
+
+    const gradientsNorm = tf.euclideanNorm(grad_fo_calc, 1); // l2 norm`
+    const gp = gradientsNorm.sub(tf.scalar(1)).square().mean().mul(LAMBDA).asScalar();
+    console.log('NORM:', gradientsNorm.dataSync()[0], 'PENA: ', gp.dataSync()[0])
+    tf.dispose([gradientsNorm, grad_fo_calc, interpolated, alpha, diff, LAMBDA])
+    return gp
+})
+
+// Training Step for the WGAN-GP
+const trainStep = (data, time_step, look_ahead, generator_, discriminator_) => {
+    const [xTrainTensor, yTrainTensor, pastYTrainTensor] = data;
+    const batchSize = xTrainTensor.shape[0];
+    let dLossValue_;
+    let gLossValue_;
+    let gMse_;
+    let generatorData;
+    const lambda1 = 0.5; // Extra loss term for speeding up training
+    const lambda2 = 0.5; // Extra loss term for speeding up training
+
+    // Process real data
+    let realYReshape = tf.reshape(yTrainTensor, [yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);
+    let realOutput
+
+    try {
+        // Train the discriminator
+        const dOptimizer = tf.train.adam(0.0004, 0.5, 0.9)
+        for (let i = 0; i < 5; i++) {
+            // Calculate discriminator loss, compute gradients of the loss with respect to discriminator's inputs
+            const dLossValue = dOptimizer.minimize(() => tf.tidy(() => {
+                realOutput = tf.cast(pastYTrainTensor, 'float32').concat(tf.cast(realYReshape, 'float32'), 1);
+                // Generate fake data
+                const latentData = generateNoise(generator_, pastYTrainTensor, xTrainTensor)
+
+                // Get predictions from discriminator
+                const DReal = discriminator_.apply(realOutput, { training: true }) // shape [batchSize, 1]
+                const DFake = discriminator_.apply(latentData, { training: true }) // shape [batchSize, 1]
+
+                // Wasserstein Loss - If this value is 0 that means 
+                // both the distributions are same and discriminator is 
+                // guessing 50% of the time
+                const dCost = tf.sub(DFake.mean(), DReal.mean())
+
+                // Calculate gradient penalty 
+                const gp = gradientPenalty(batchSize, time_step, look_ahead, discriminator_, latentData, realOutput)
+
+                if (DEBUG_FLAG) {
+                    console.log('Noise Data DIS REAL : ', realOutput.arraySync()[0][14])
+                    console.log('Noise Data DIS : ', latentData.arraySync()[0][14])
+
+                    console.log('D PRED FAKE VALUE: ', DFake.arraySync()[0][0], 'D PRED REAL VALUE: ', DReal.arraySync()[0][0])
+                    console.log('Fake data loss: ', DFake.mean().dataSync()[0], 'Real data loss: ', DReal.mean().dataSync()[0])
+
+                    console.log('D cost: ', dCost.dataSync()[0])
+
+                    console.log('d loss from D grads', dCost.add(gp).dataSync()[0])
+                    console.log('<-------------------DISC----------------->')
+                }
+
+                const discriminatorLoss = tf.add(dCost, gp).asScalar();
+                tf.dispose([DReal, DFake, latentData, gp, dCost])
+
+                return discriminatorLoss;
+            }), true, discriminator_.getWeights());
+
+            dLossValue_ = dLossValue.dataSync()[0]
+            tf.dispose([dLossValue])
+
+            // dLossValue = d_value.dataSync();
+            // console.log('D GRADS : ', Object.keys(d_grads).length)
+            // console.log('GRADS AFTER : ', d_grads)
+            // console.log(d_grads['conv1d_Conv1D2/kernel'].arraySync())
+            // dOptimizer.applyGradients(d_grads)
+        }
+        dOptimizer.dispose()
+
+        console.log('<-------------------GENERATOR---------------------->')
+
+        const gOptimizer = tf.train.adam(0.0001, 0.5, 0.9);
+        // Train the generator only once. 
+        const gLossValue = gOptimizer.minimize(() => tf.tidy(() => {
+            realOutput = tf.cast(pastYTrainTensor, 'float32').concat(tf.cast(realYReshape, 'float32'), 1);
+
+            // Generate fake data
+            generatorData = generateNoise(generator_, pastYTrainTensor, xTrainTensor)
+            tf.keep(generatorData)
+
+            // Get the discriminator logits for fake data
+            // const discriminator_scores = discriminator_.apply(generatorData, { training: true });
+
+            // Calculate the generator loss
+            const g_mean = discriminator_.apply(generatorData, { training: true }).mean().mul(-1)
+            const gMse = tf.losses.meanSquaredError(realOutput, generatorData)
+            gMse_ = gMse.dataSync()[0]
+            const gSign = tf.abs(tf.sign(realOutput).sub(tf.sign(generatorData))).mean();
+
+            const gLoss = g_mean.add(gMse.mul(lambda1)).add(gSign.mul(lambda2));
+            // console.log('gloss', gLoss.dataSync()[0])
+
+            if (DEBUG_FLAG) {
+                console.log('Noise Data GEN REAL: ', realOutput.arraySync()[0][14])
+                console.log('Noise Data GEN : ', generatorData.arraySync()[0][14])
+
+                // console.log('generatedData shape : ', generatedData.shape)
+                // console.log('actual values : ', realOutput.arraySync()[0][18])
+                // console.log('grenerator predictions : ', generatorData.arraySync()[0][18])
+
+                console.log('gmean minus true', g_mean.dataSync()[0], 'gmse', gMse.dataSync()[0], 'gsign', gSign.dataSync()[0])
+            }
+
+            return gLoss.asScalar();
+        }), true, generator_.getWeights());
+
+        gLossValue_ = gLossValue.dataSync()[0]
+        gOptimizer.dispose()
+        tf.dispose([gLossValue, realYReshape])
+
+        // gLossValue = g_value.dataSync();
+        // console.log(g_grads["conv1d_Conv1D1/kernel"].arraySync()[0])
+        // console.log('G GRADS : ', Object.keys(g_grads).length)
+        // gOptimizer.applyGradients(g_grads);
+        // tf.dispose([realYReshape, realOutput])
+
+
+        return { generatorData, discriminatorLoss: dLossValue_, generatorLoss: gLossValue_, g_mse: gMse_ };
+    }
+    catch (e) {
+        console.log('Error in training discriminator')
+        console.log(e.stack)
+    }
+}
+
+async function train(XTrain, yTrain, pastY, epochs, time_step, look_ahead, feature_size, batchSize) {
+    const t = createTimer('GAN model training')
+    t.startTimer()
+    // Define the optimizer for both discriminator and generator
+    // const gOptimizer = tf.train.adam(0.0001, 0.5, 0.9);
+    // const dOptimizer = tf.train.adam(0.0004, 0.5, 0.9)
+
+    const weight_initializers = tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 });
+    const generator_ = generator({ input_dimension: time_step, output_dimension: look_ahead, feature_size, weight_initializers })
+    const discriminator_ = discriminator({ timeStep: time_step, lookAhead: look_ahead, weight_initializers })
+
+
+    const trainHist = {
+        losses: [],
+        D_losses: [],
+        G_losses: [],
+        per_epoch_times: [],
+        total_ptime: []
+    };
+    let Real_price
+    let Generated_price
+    let preds = []
+
+    const xTrainTensor = tf.tensor(XTrain);
+    const yTrainTensor = tf.tensor(yTrain);
+    const pastYTrainTensor = tf.tensor(pastY);
+
+    const data = [xTrainTensor, yTrainTensor, pastYTrainTensor];
+    for (let epoch = 0; epoch < epochs; epoch++) {
+        console.log('Gene weights 1st layer', generator_.getWeights(true)[0].arraySync()[0][0][0])
+        console.log('Disc weights 1st layer', discriminator_.getWeights(true)[0].arraySync()[0][0][0])
+        // log.error(`Epoch ${epoch + 1} of ${epochs}`);
+        // console.log(dOptimizer)
+        // console.log('Optimizer : ',dOptimizer.accumulatedFirstMoment[0])
+        const {
+            generatorData,
+            discriminatorLoss,
+            generatorLoss,
+            g_mse
+        } = await trainStep(data, time_step, look_ahead, generator_, discriminator_);
+
+        // console.log('yTrainTensor shape : ', yTrainTensor.shape)
+        // console.log('generatorData shape : ', generatorData.shape)
+        console.log('Generator Loss : ', generatorLoss, 'Discriminator Loss : ', discriminatorLoss)
+        // @ts-ignore
+        trainHist.losses.push({
+            d_loss: discriminatorLoss,
+            g_loss: generatorLoss,
+            mse: g_mse,
+            epoch: epoch + 1
+        })
+        // @ts-ignore
+        trainHist.D_losses.push(discriminatorLoss);
+        // @ts-ignore
+        trainHist.G_losses.push(generatorLoss);
+        Real_price = yTrain
+        // @ts-ignore
+        Generated_price = generatorData.arraySync()
+
+        tf.dispose([generatorData])
+        // Save the model every 100 epochs
+        /* if ((epoch + 1) % 100 === 0) {
+            // await generator.save(`gen_model_${epoch + 1}.json`);
+            console.log('epoch', epoch + 1, 'discriminator_loss', discriminatorLoss.dataSync(), 'generator_loss', generatorLoss.dataSync());
+        } */
+
+        // @ts-ignore
+        // trainHist.per_epoch_times.push(perEpochPtime);
+        log.error(`Epoch ${epoch + 1} of ${epochs}, G_loss: ${generatorLoss}, D_loss: ${discriminatorLoss}`);
+    }
+
+    t.stopTimer(__filename.slice(__dirname.length + 1))
+    // console.log(Real_price[0], Generated_price[0])
+    for (let i = 0; i < Real_price.length; i++) {
+        preds.push({ real: parseFloat(Real_price[i][0].toFixed(3)), generated: parseFloat(Generated_price[i][14][0].toFixed(3)), epoch: i + 1 })
+    }
+    generator_.dispose()
+    discriminator_.dispose()
+    tf.dispose([xTrainTensor, yTrainTensor, pastYTrainTensor])
+
+    const formattedTime = t.calculateTime()
+    console.log(`Training completed in ${formattedTime}`)
+
+    // Return the training history
+    return [trainHist, preds];
+}
+
+module.exports = {
+    train,
+}
+
+
+
+/// full workiing code with tf count comments
+
+const logger = require('../middleware/logger/Logger');
+const log = logger.create(__filename.slice(__dirname.length + 1))
+let tf = require('@tensorflow/tfjs-node');
+const { createTimer } = require('./timer')
+const config = require('../config')
+const Redis = require("ioredis");
+// @ts-ignore
+const redisPublisher = new Redis();
+
+/* __________________________________________________________________________________________
+Layer (type)                Input Shape               Output shape              Param #   
+==========================================================================================
+conv1d_Conv1D1 (Conv1D)     [[null,14,4]]             [null,14,32]              288       
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU1 (Lea [[null,14,32]]            [null,14,32]              0         
+__________________________________________________________________________________________
+bidirectional_Bidirectional [[null,14,32]]            [null,128]                49664     
+__________________________________________________________________________________________
+dense_Dense1 (Dense)        [[null,128]]              [null,64]                 8256      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU2 (Lea [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dropout_Dropout1 (Dropout)  [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dense_Dense2 (Dense)        [[null,64]]               [null,32]                 2080      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU3 (Lea [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dropout_Dropout2 (Dropout)  [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dense_Dense3 (Dense)        [[null,32]]               [null,5]                  165       
+==========================================================================================
+Total params: 60453
+Trainable params: 60453
+Non-trainable params: 0
+__________________________________________________________________________________________ */
+
+const generator = ({ input_dimension, output_dimension, feature_size }) => {
+    // const weight_initializers = tf.initializers.randomNormal({ mean: 0.0, stddev: 0.02 });
+    // console.log(input_dimension, output_dimension, feature_size, weight_initializers)
+
+    const generator_model = tf.sequential();
+
+    generator_model.add(tf.layers.conv1d({
+        filters: 32,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 }),
+        batchInputShape: [null, input_dimension, feature_size],
+    }))
+
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+
+    generator_model.add(tf.layers.bidirectional({
+        layer: tf.layers.lstm({
+            units: 64,
+            activation: 'relu',
+            kernelInitializer: tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 }),
+            returnSequences: false,
+            dropout: 0.3,
+            recurrentDropout: 0.0
+        })
+    }))
+
+    // ERROR: Error: Input 0 is incompatible with layer flatten_Flatten1: expected min_ndim=3, found ndim=2.
+    // The reason for this error is that you are trying to flatten an already flat layer. from bidirectional
+    // model.add(tf.layers.flatten()) 
+
+    generator_model.add(tf.layers.dense({ units: 64, activation: 'linear' }))
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    generator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    generator_model.add(tf.layers.dense({ units: 32, activation: 'linear' }))
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    generator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    const input = tf.input({ shape: [input_dimension, feature_size] })
+    const output = generator_model.apply(input)
+
+    const predictions = tf.layers.dense({ units: output_dimension }).apply(output)
+
+    return tf.model({ inputs: input, outputs: predictions })
+}
+
+/* ________________________________________________________________________________________
+Layer (type)                Input Shape               Output shape              Param #   
+==========================================================================================
+conv1d_Conv1D1 (Conv1D)     [[null,19,1]]             [null,19,32]              96        
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU1 (Lea [[null,19,32]]            [null,19,32]              0         
+__________________________________________________________________________________________
+conv1d_Conv1D2 (Conv1D)     [[null,19,32]]            [null,19,64]              4160      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU2 (Lea [[null,19,64]]            [null,19,64]              0         
+__________________________________________________________________________________________
+flatten_Flatten1 (Flatten)  [[null,19,64]]            [null,1216]               0         
+__________________________________________________________________________________________
+dense_Dense1 (Dense)        [[null,1216]]             [null,64]                 77888     
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU3 (Lea [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dropout_Dropout1 (Dropout)  [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dense_Dense2 (Dense)        [[null,64]]               [null,32]                 2080      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU4 (Lea [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dropout_Dropout2 (Dropout)  [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dense_Dense3 (Dense)        [[null,32]]               [null,1]                  33        
+==========================================================================================
+Total params: 84257
+Trainable params: 84257
+Non-trainable params: 0
+__________________________________________________________________________________________ */
+
+const discriminator = ({ timeStep, lookAhead }) => {
+    const discriminator_model = tf.sequential();
+
+    discriminator_model.add(tf.layers.conv1d({
+        filters: 32,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 }),
+        inputShape: [timeStep + lookAhead, 1]
+    }))
+
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+
+    discriminator_model.add(tf.layers.conv1d({
+        filters: 64,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 }),
+    }))
+
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.flatten())
+
+    discriminator_model.add(tf.layers.dense({ units: 64, activation: 'linear', useBias: true }))
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    discriminator_model.add(tf.layers.dense({ units: 32, activation: 'linear', useBias: true }))
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    const fake_data = tf.input({ shape: [timeStep + lookAhead, 1] })
+    const discriminator_output = discriminator_model.apply(fake_data)
+
+    const realness_score = tf.layers.dense({ units: 1 }).apply(discriminator_output)
+
+    return tf.model({ inputs: fake_data, outputs: realness_score })
+}
+
+const DEBUG_FLAG = false
+/* const generateNoise = (generator_, pastYTrainTensor, xTrain_data) => tf.tidy(() => {
+    const generator_data = generator_.apply(xTrain_data, { training: true });
+    const generator_data_reshape = tf.reshape(generator_data, [generator_data.shape[0], generator_data.shape[1], 1]);
+    return tf.cast(pastYTrainTensor.concat(generator_data_reshape, 1), 'float32');
+}) */
+
+// Calculate gradient penalty 
+const gradientPenalty = (batchSize, time_step, look_ahead, discriminator_, fakeData, realData) => tf.tidy(() => {
+    console.log('Inside GP START ' + tf.memory().numTensors);
+    const LAMBDA = tf.tensor(10.0, [1], 'float32') // Gradient penalty lambda hyperparameter
+    const alpha = tf.randomNormal([batchSize, time_step + look_ahead, 1], 0, 1, 'float32');
+    const diff = fakeData.sub(realData);
+    const interpolated = realData.mul(alpha).add(tf.scalar(1).sub(alpha).mul(fakeData))
+    console.log('Inside GP MID 1 ' + tf.memory().numTensors);
+
+    // const interpolated = realData.add(alpha.mul(diff));
+    // tf.keep(interpolated)
+
+
+    // console.log('Real Data : ', realData.arraySync()[0])
+    // console.log('Fake Data : ', fakeData.arraySync()[0])
+    // console.log('APLHA : ', alpha.arraySync()[0])
+    // console.log('DIFF : ', diff.arraySync()[0])
+    // console.log('Interpolated : ', interpolated.arraySync()[0])
+
+    const gradientsFn = tf.valueAndGrad((x) => {
+        const pred = discriminator_.apply(x, { training: true })
+        console.log('pred : ', pred.arraySync()[81])
+        return pred
+    });
+    const { value, grad } = gradientsFn(interpolated)
+    const grad_fo_calc = tf.tensor(grad.arraySync())
+    tf.dispose([grad, value, gradientsFn])
+    console.log('Inside GP MID 2 ' + tf.memory().numTensors);
+    // console.log('grad shape : ', grad_fo_calc.shape)
+    console.log('grad : ', grad_fo_calc.arraySync()[81][18])
+
+    const gradientsNorm = tf.euclideanNorm(grad_fo_calc, 1); // l2 norm`
+    const gp = gradientsNorm.sub(tf.scalar(1)).square().mean().mul(LAMBDA).asScalar();
+    console.log('NORM:', gradientsNorm.dataSync()[0], 'PENA: ', gp.dataSync()[0])
+    tf.dispose([gradientsNorm, grad_fo_calc, interpolated, alpha, diff, LAMBDA])
+    console.log('Inside GP END ' + tf.memory().numTensors);
+
+    return gp
+})
+
+// Training Step for the WGAN-GP
+const trainStep = (data, time_step, look_ahead, generator_, discriminator_) => {
+    console.log('INSIDE TRAIN STEP START ' + tf.memory().numTensors);
+    const [xTrainTensor, yTrainTensor, pastYTrainTensor] = data;
+    const batchSize = xTrainTensor.shape[0];
+    let dLossValue_ = 0;
+    let gLossValue_ = 0;
+    let gMse_ = 0;
+    const lambda1 = 0.5; // Extra loss term for speeding up training
+    let generatorData_;
+    const lambda2 = 0.5; // Extra loss term for speeding up training
+
+    // Process real data
+    // let realYReshape = tf.reshape(yTrainTensor, [yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);
+
+
+    try {
+        // Train the discriminator
+        for (let i = 0; i < 1; i++) {
+            console.log('BEFORE D LOSS LOOP ' + tf.memory().numTensors);
+            const dOptimizer = tf.train.adam(0.0004, 0.5, 0.9)
+            // Calculate discriminator loss, compute gradients of the loss with respect to discriminator's inputs
+            const dLossValue = dOptimizer.minimize(() => {
+                console.log('DLOSS MINIMIZE ' + tf.memory().numTensors);
+                // const realYReshape = tf.reshape(yTrainTensor, [yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);
+                // const realOutput = tf.cast(pastYTrainTensor, 'float32').concat(tf.cast(realYReshape, 'float32'), 1);
+
+                const realOutput = tf.tidy(() => {
+                    const realYReshape = yTrainTensor.reshape([yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);
+                    return tf.cast(pastYTrainTensor, 'float32').concat(tf.cast(realYReshape, 'float32'), 1);
+                })
+
+                console.log('REAL VASL ' + tf.memory().numTensors);
+
+                // Generate fake data
+                let generator_data = generator_.apply(xTrainTensor);
+                console.log('GENE PRED ' + tf.memory().numTensors);
+                const generator_data_reshape = generator_data.reshape([generator_data.shape[0], generator_data.shape[1], 1]);
+                const latentData = tf.cast(pastYTrainTensor.concat(generator_data_reshape, 1), 'float32');
+                console.log('AFTER LATENT DATA ' + tf.memory().numTensors);
+                // Get predictions from discriminator
+
+                const DReal = discriminator_.apply(realOutput).mean() // shape [batchSize, 1]
+                const DFake = discriminator_.apply(latentData).mean() // shape [batchSize, 1]
+                console.log('AFTER DISC PRED ON REAL AND FAKE ' + tf.memory().numTensors);
+                console.log('Fake data loss: ', DFake.dataSync()[0], 'Real data loss: ', DReal.dataSync()[0])
+                // Wasserstein Loss - If this value is 0 that means 
+                // both the distributions are same and discriminator is 
+                // guessing 50% of the time
+                // const dCost = DFake.sub(DReal)
+
+                // Calculate gradient penalty 
+                console.log('BEFORE GP ' + tf.memory().numTensors);
+                const gp = gradientPenalty(batchSize, time_step, look_ahead, discriminator_, latentData, realOutput)
+                // const gp = tf.tensor([1])
+                console.log('AFTER GP ' + tf.memory().numTensors);
+                if (DEBUG_FLAG) {
+                    console.log('Noise Data DIS REAL : ', realOutput.arraySync()[0][14])
+                    console.log('Noise Data DIS : ', latentData.arraySync()[0][14])
+
+                    console.log('D PRED FAKE VALUE: ', DFake.arraySync()[0][0], 'D PRED REAL VALUE: ', DReal.arraySync()[0][0])
+                    console.log('Fake data loss: ', DFake.mean().dataSync()[0], 'Real data loss: ', DReal.mean().dataSync()[0])
+
+                    console.log('D cost: ', dCost.dataSync()[0])
+
+                    console.log('d loss from D grads', dCost.add(gp).dataSync()[0])
+                    console.log('<-------------------DISC----------------->')
+                }
+
+                // const discriminatorLoss = tf.add(dCost, gp).asScalar();
+                tf.dispose([generator_data, generator_data_reshape, latentData])
+                console.log('D LOSS LOOP DISPOSE ' + tf.memory().numTensors);
+                return tf.add(DFake.sub(DReal), gp).asScalar();
+            }, true, discriminator_.getWeights());
+            console.log('AFTER D LOSS LOOP END Before dispose ' + tf.memory().numTensors);
+            // console.log(dOptimizer)
+            dLossValue_ = dLossValue.dataSync()[0]
+            dOptimizer.dispose()
+            tf.dispose([dLossValue])
+            console.log('AFTER D LOSS LOOP END ' + tf.memory().numTensors);
+            console.log('<-------------------DISCRIMINATOR---------------------->')
+        }
+
+        console.log('<-------------------GENERATOR---------------------->')
+        console.log('BEFORE G LOSS ' + tf.memory().numTensors);
+        // tf.dispose(generatorData)
+        const gOptimizer = tf.train.adam(0.0001, 0.5, 0.9);
+        // Train the generator only once. 
+        const gLossValue = gOptimizer.minimize(() => {
+            console.log('GLOSS MINIMIZE ' + tf.memory().numTensors);
+            const realOutput = tf.tidy(() => {
+                const realYReshape = yTrainTensor.reshape([yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);
+                return tf.cast(pastYTrainTensor, 'float32').concat(tf.cast(realYReshape, 'float32'), 1);
+            })
+            console.log('REAL VASL ' + tf.memory().numTensors);
+            // Generate fake data
+            let generator_data = generator_.apply(xTrainTensor);
+            console.log('REAL VASL MID 1 ' + tf.memory().numTensors); // 996
+            const generator_data_reshape = generator_data.reshape([generator_data.shape[0], generator_data.shape[1], 1]);
+            const generatorData = tf.cast(pastYTrainTensor.concat(generator_data_reshape, 1), 'float32');
+            generatorData_ = tf.keep(generatorData)
+            console.log('REAL VASL MID 2 ' + tf.memory().numTensors); // 6
+
+            // Calculate the generator loss
+            const g_mean = discriminator_.apply(generatorData).mean().mul(-1)
+            console.log('REAL VASL MID 3 ' + tf.memory().numTensors); // 57
+            const gMse = tf.losses.meanSquaredError(realOutput, generatorData)
+            // gMse_ = gMse.dataSync()[0]
+            const gSign = tf.abs(tf.sign(realOutput).sub(tf.sign(generatorData))).mean();
+            console.log('REAL VASL MID 4 ' + tf.memory().numTensors); // 15
+
+            // const gLoss = g_mean.add(gMse.mul(lambda1)).add(gSign.mul(lambda2));
+            // console.log('gloss', gLoss.dataSync()[0])
+
+            if (DEBUG_FLAG) {
+                console.log('Noise Data GEN REAL: ', realOutput.arraySync()[0][14])
+                console.log('Noise Data GEN : ', generatorData.arraySync()[0][14])
+
+                // console.log('generatedData shape : ', generatedData.shape)
+                // console.log('actual values : ', realOutput.arraySync()[0][18])
+                // console.log('grenerator predictions : ', generatorData.arraySync()[0][18])
+
+                console.log('gmean minus true', g_mean.dataSync()[0], 'gmse', gMse.dataSync()[0], 'gsign', gSign.dataSync()[0])
+            }
+
+            tf.dispose([generator_data, generator_data_reshape])
+            console.log('REAL VASL MID 5 ' + tf.memory().numTensors); // 2
+
+            return g_mean.add(gMse.mul(lambda1)).add(gSign.mul(lambda2)).asScalar();
+        }, true, generator_.getWeights());
+        console.log('REAL VASL MID 6 ' + tf.memory().numTensors);
+        // console.log(gOptimizer)
+        gLossValue_ = gLossValue.dataSync()[0]
+        gOptimizer.dispose()
+        tf.dispose([gLossValue])
+        console.log('AFTER G LOSS ' + tf.memory().numTensors);
+
+        console.log('INSIDE TRAIN STEP END ' + tf.memory().numTensors);
+
+        return { generatorData_, discriminatorLoss: dLossValue_, generatorLoss: gLossValue_, g_mse: gMse_ };
+    }
+    catch (e) {
+        console.log('Error in training discriminator')
+        console.log(e.stack)
+    }
+}
+
+async function train(XTrain, yTrain, pastY, epochs, time_step, look_ahead, feature_size, batchSize) {
+    const t = createTimer('GAN model training')
+    t.startTimer()
+    // Define the optimizer for both discriminator and generator
+    // const gOptimizer = tf.train.adam(0.0001, 0.5, 0.9);
+    // const dOptimizer = tf.train.adam(0.0004, 0.5, 0.9)
+    // const weight_initializers = tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 });
+    console.log('Before model creation ' + tf.memory().numTensors); // 0
+    const generator_ = generator({ input_dimension: time_step, output_dimension: look_ahead, feature_size })
+    const discriminator_ = discriminator({ timeStep: time_step, lookAhead: look_ahead })
+    console.log('After model creation ' + tf.memory().numTensors); //  24
+
+
+    const trainHist = {
+        losses: [],
+        D_losses: [],
+        G_losses: [],
+        per_epoch_times: [],
+        total_ptime: []
+    };
+    let Real_price
+    let Generated_price
+    let preds = []
+
+    // console.log('xtrain',XTrain[0][0] )
+    // console.log('ytrain',yTrain[0][0] )
+    // console.log('pastY',pastY[0][0] )
+    const xTrainTensor = tf.tensor(XTrain);
+    const yTrainTensor = tf.tensor(yTrain);
+    const pastYTrainTensor = tf.tensor(pastY); // 27
+    console.log('Data creation to tensor ' + tf.memory().numTensors);
+    const data = [xTrainTensor, yTrainTensor, pastYTrainTensor];
+    for (let epoch = 0; epoch < epochs; epoch++) {
+        console.log('inside trainig loop start ' + tf.memory().numTensors);
+
+        console.log('Gene weights 1st layer', generator_.getWeights(true)[0].arraySync()[0][0][0])
+        console.log('Disc weights 1st layer', discriminator_.getWeights(true)[0].arraySync()[0][0][0])
+        // log.error(`Epoch ${epoch + 1} of ${epochs}`);
+        // console.log(dOptimizer)
+        // console.log('Optimizer : ',dOptimizer.accumulatedFirstMoment[0])
+        const {
+            generatorData_,
+            discriminatorLoss,
+            generatorLoss,
+            g_mse
+        } = await trainStep(data, time_step, look_ahead, generator_, discriminator_);
+
+        // console.log('yTrainTensor shape : ', yTrainTensor.shape)
+        // console.log('generatorData_ shape : ', generatorData_.shape)
+        console.log('Generator Loss : ', generatorLoss, 'Discriminator Loss : ', discriminatorLoss)
+        // @ts-ignore
+        trainHist.losses.push({
+            d_loss: discriminatorLoss,
+            g_loss: generatorLoss,
+            mse: g_mse,
+            epoch: epoch + 1
+        })
+        // @ts-ignore
+        trainHist.D_losses.push(discriminatorLoss);
+        // @ts-ignore
+        trainHist.G_losses.push(generatorLoss);
+        Real_price = yTrain
+        // @ts-ignore
+        Generated_price = generatorData_.arraySync()
+
+        tf.dispose([generatorData_])
+        // Save the model every 100 epochs
+        /* if ((epoch + 1) % 100 === 0) {
+            // await generator.save(`gen_model_${epoch + 1}.json`);
+            console.log('epoch', epoch + 1, 'discriminator_loss', discriminatorLoss.dataSync(), 'generator_loss', generatorLoss.dataSync());
+        } */
+
+        // @ts-ignore
+        // trainHist.per_epoch_times.push(perEpochPtime);
+        log.error(`Epoch ${epoch + 1} of ${epochs}, G_loss: ${generatorLoss}, D_loss: ${discriminatorLoss}`);
+        console.log('inside trainig loop end ' + tf.memory().numTensors);
+    }
+
+    console.log('After trainig epoch ' + tf.memory().numTensors); // 35
+
+
+    t.stopTimer(__filename.slice(__dirname.length + 1))
+    // console.log(Real_price[0], Generated_price[0])
+    for (let i = 0; i < Real_price.length; i++) {
+        preds.push({ real: parseFloat(Real_price[i][0].toFixed(3)), generated: parseFloat(Generated_price[i][14][0].toFixed(3)), epoch: i + 1 })
+    }
+    generator_.dispose()
+    console.log('After trainig epoch gene disp ' + tf.memory().numTensors); // 21, 35-14
+    discriminator_.dispose()
+    console.log('After trainig epoch disc disp ' + tf.memory().numTensors); // 11 , 21-10
+    tf.dispose([xTrainTensor, yTrainTensor, pastYTrainTensor])
+
+    const formattedTime = t.calculateTime()
+    console.log(`Training completed in ${formattedTime}`)
+
+    // Return the training history
+    return [trainHist, preds];
+}
+
+module.exports = {
+    train,
+}
+
+// Another working code with change from above
+
+const logger = require('../middleware/logger/Logger');
+const log = logger.create(__filename.slice(__dirname.length + 1))
+let tf = require('@tensorflow/tfjs-node');
+const { createTimer } = require('./timer')
+const config = require('../config')
+const Redis = require("ioredis");
+// @ts-ignore
+const redisPublisher = new Redis();
+
+/* __________________________________________________________________________________________
+Layer (type)                Input Shape               Output shape              Param #   
+==========================================================================================
+conv1d_Conv1D1 (Conv1D)     [[null,14,4]]             [null,14,32]              288       
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU1 (Lea [[null,14,32]]            [null,14,32]              0         
+__________________________________________________________________________________________
+bidirectional_Bidirectional [[null,14,32]]            [null,128]                49664     
+__________________________________________________________________________________________
+dense_Dense1 (Dense)        [[null,128]]              [null,64]                 8256      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU2 (Lea [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dropout_Dropout1 (Dropout)  [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dense_Dense2 (Dense)        [[null,64]]               [null,32]                 2080      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU3 (Lea [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dropout_Dropout2 (Dropout)  [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dense_Dense3 (Dense)        [[null,32]]               [null,5]                  165       
+==========================================================================================
+Total params: 60453
+Trainable params: 60453
+Non-trainable params: 0
+__________________________________________________________________________________________ */
+
+const generator = ({ input_dimension, output_dimension, feature_size, weight_initializers }) => {
+    // const weight_initializers = tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 });
+    console.log(weight_initializers.getConfig())
+
+    const generator_model = tf.sequential();
+
+    generator_model.add(tf.layers.conv1d({
+        filters: 32,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: weight_initializers,
+        batchInputShape: [null, input_dimension, feature_size],
+    }))
+
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+
+    generator_model.add(tf.layers.bidirectional({
+        layer: tf.layers.lstm({
+            units: 64,
+            activation: 'relu',
+            kernelInitializer: weight_initializers,
+            returnSequences: false,
+            dropout: 0.3,
+            recurrentDropout: 0.0
+        })
+    }))
+
+    // ERROR: Error: Input 0 is incompatible with layer flatten_Flatten1: expected min_ndim=3, found ndim=2.
+    // The reason for this error is that you are trying to flatten an already flat layer. from bidirectional
+    // model.add(tf.layers.flatten()) 
+
+    generator_model.add(tf.layers.dense({ units: 64, activation: 'linear' }))
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    generator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    generator_model.add(tf.layers.dense({ units: 32, activation: 'linear' }))
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    generator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    const input = tf.input({ shape: [input_dimension, feature_size] })
+    const output = generator_model.apply(input)
+
+    const predictions = tf.layers.dense({ units: output_dimension, inputShape: output.shape[1] }).apply(output)
+    const g_model = tf.model({ inputs: input, outputs: predictions })
+    console.log(g_model.summary())
+
+    return g_model
+}
+
+/* ________________________________________________________________________________________
+Layer (type)                Input Shape               Output shape              Param #   
+==========================================================================================
+conv1d_Conv1D1 (Conv1D)     [[null,19,1]]             [null,19,32]              96        
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU1 (Lea [[null,19,32]]            [null,19,32]              0         
+__________________________________________________________________________________________
+conv1d_Conv1D2 (Conv1D)     [[null,19,32]]            [null,19,64]              4160      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU2 (Lea [[null,19,64]]            [null,19,64]              0         
+__________________________________________________________________________________________
+flatten_Flatten1 (Flatten)  [[null,19,64]]            [null,1216]               0         
+__________________________________________________________________________________________
+dense_Dense1 (Dense)        [[null,1216]]             [null,64]                 77888     
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU3 (Lea [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dropout_Dropout1 (Dropout)  [[null,64]]               [null,64]                 0         
+__________________________________________________________________________________________
+dense_Dense2 (Dense)        [[null,64]]               [null,32]                 2080      
+__________________________________________________________________________________________
+leaky_re_lu_LeakyReLU4 (Lea [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dropout_Dropout2 (Dropout)  [[null,32]]               [null,32]                 0         
+__________________________________________________________________________________________
+dense_Dense3 (Dense)        [[null,32]]               [null,1]                  33        
+==========================================================================================
+Total params: 84257
+Trainable params: 84257
+Non-trainable params: 0
+__________________________________________________________________________________________ */
+
+const discriminator = ({ timeStep, lookAhead, weight_initializers }) => {
+    // const weight_initializers = tf.initializers.randomNormal({ mean: 0.0, stddev: 0.02 });
+    console.log(weight_initializers.getConfig())
+
+    const discriminator_model = tf.sequential();
+
+    discriminator_model.add(tf.layers.conv1d({
+        filters: 32,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: weight_initializers,
+        inputShape: [timeStep + lookAhead, 1]
+    }))
+
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+
+    discriminator_model.add(tf.layers.conv1d({
+        filters: 64,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: weight_initializers,
+    }))
+
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.flatten())
+
+    discriminator_model.add(tf.layers.dense({ units: 64, activation: 'linear', useBias: true }))
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    discriminator_model.add(tf.layers.dense({ units: 32, activation: 'linear', useBias: true }))
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    const fake_data = tf.input({ shape: [timeStep + lookAhead, 1] })
+    const discriminator_output = discriminator_model.apply(fake_data)
+
+    const realness_score = tf.layers.dense({ units: 1 }).apply(discriminator_output)
+    const d_model = tf.model({ inputs: fake_data, outputs: realness_score })
+    console.log(d_model.summary())
+    return d_model
+}
+
+const DEBUG_FLAG = false
+/* const generateNoise = (generator_, pastYTrainTensor, xTrain_data) => tf.tidy(() => {
+    const generator_data = generator_.apply(xTrain_data, { training: true });
+    const generator_data_reshape = tf.reshape(generator_data, [generator_data.shape[0], generator_data.shape[1], 1]);
+    return tf.cast(pastYTrainTensor.concat(generator_data_reshape, 1), 'float32');
+}) */
+
+// Calculate gradient penalty 
+const gradientPenalty = (batchSize, time_step, look_ahead, discriminator_, fakeData, realData) => tf.tidy(() => {
+    // console.log('Inside GP START ' + tf.memory().numTensors);
+    const LAMBDA = tf.tensor(10.0, [1], 'float32') // Gradient penalty lambda hyperparameter
+    const alpha = tf.randomNormal([batchSize, time_step + look_ahead, 1], 0, 1, 'float32');
+    // const interpolated = realData.mul(alpha).add(tf.scalar(1).sub(alpha).mul(fakeData))
+    const interpolated = alpha.mul(realData).add(alpha.mul(fakeData.sub(realData)));
+    // console.log('Inside GP MID 1 ' + tf.memory().numTensors);
+
+    // const interpolated = realData.add(alpha.mul(diff));
+    // tf.keep(interpolated)
+
+
+    // console.log('Real Data : ', realData.arraySync()[0])
+    // console.log('Fake Data : ', fakeData.arraySync()[0])
+    // console.log('APLHA : ', alpha.arraySync()[0])
+    // console.log('DIFF : ', diff.arraySync()[0])
+    // console.log('Interpolated : ', interpolated.arraySync()[0])
+
+    const disc_output = discriminator_.apply(interpolated)
+    const gradient = tf.grad(() => disc_output)(interpolated)
+    console.log('New grad: ', gradient.arraySync()[81][18])
+
+    const gradientsFn = tf.valueAndGrad((x) => {
+        const pred = discriminator_.apply(x)
+        console.log('pred : ', pred.arraySync()[81])
+        return pred
+    });
+    const { value, grad } = gradientsFn(interpolated)
+    const grad_fo_calc = tf.tensor(grad.arraySync())
+    tf.dispose([grad, value, gradientsFn])
+    // console.log('Inside GP MID 2 ' + tf.memory().numTensors);
+    // console.log('grad shape : ', grad_fo_calc.shape)
+    console.log('grad : ', grad_fo_calc.arraySync()[81][18])
+
+    const gradientsNorm = tf.euclideanNorm(grad_fo_calc, 1); // l2 norm`
+    const gp = gradientsNorm.sub(tf.scalar(1)).square().mean().mul(LAMBDA).asScalar();
+    console.log('NORM:', gradientsNorm.dataSync()[0], 'PENA: ', gp.dataSync()[0])
+    tf.dispose([gradientsNorm, grad_fo_calc, interpolated, alpha, LAMBDA])
+    // console.log('Inside GP END ' + tf.memory().numTensors);
+
+    return gp
+})
+
+// Training Step for the WGAN-GP
+const trainStep = (data, time_step, look_ahead, generator_, discriminator_) => {
+    // console.log('INSIDE TRAIN STEP START ' + tf.memory().numTensors);
+    const [xTrainTensor, yTrainTensor, pastYTrainTensor] = data;
+    const batchSize = xTrainTensor.shape[0];
+    let dLossValue_ = 0;
+    let gLossValue_ = 0;
+    let gMse_ = 0;
+    const lambda1 = 0.5; // Extra loss term for speeding up training
+    let generatorData_;
+    const lambda2 = 0.5; // Extra loss term for speeding up training
+
+    // Process real data
+    // let realYReshape = tf.reshape(yTrainTensor, [yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);
+
+
+    try {
+        const realOutput = tf.tidy(() => {
+            const realYReshape = tf.tidy(() => { return yTrainTensor.reshape([yTrainTensor.shape[0], yTrainTensor.shape[1], 1]) })
+            return tf.cast(pastYTrainTensor, 'float32').concat(tf.cast(realYReshape, 'float32'), 1);
+        })
+
+        // console.log('REAL OUTPUT ' + tf.memory().numTensors);
+
+        const latentData = () => tf.tidy(() => {
+            const generator_data = tf.tidy(() => { return generator_.apply(xTrainTensor) });
+            // console.log('GENE PRED ' + tf.memory().numTensors);
+            const generator_data_reshape = tf.tidy(() => { return generator_data.reshape([generator_data.shape[0], generator_data.shape[1], 1]) })
+            tf.dispose([generator_data])
+            return tf.cast(pastYTrainTensor.concat(generator_data_reshape, 1), 'float32');
+        })
+
+        generator_.trainable = false
+        // Train the discriminator
+        const dOptimizer = tf.train.adam(0.0004, 0.5, 0.9)
+        for (let i = 0; i < 5; i++) {
+            // console.log('BEFORE D LOSS LOOP ' + tf.memory().numTensors);
+            // Calculate discriminator loss, compute gradients of the loss with respect to discriminator's inputs
+            const dLossValue = dOptimizer.minimize(() => {
+                // console.log('DLOSS MINIMIZE ' + tf.memory().numTensors);
+                // const realYReshape = tf.reshape(yTrainTensor, [yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);
+                // const realOutput = tf.cast(pastYTrainTensor, 'float32').concat(tf.cast(realYReshape, 'float32'), 1);
+
+                // Generate fake data
+                // let generator_data = generator_.apply(xTrainTensor);
+                // // console.log('GENE PRED ' + tf.memory().numTensors);
+                // const generator_data_reshape = generator_data.reshape([generator_data.shape[0], generator_data.shape[1], 1]);
+                // const latentData = tf.cast(pastYTrainTensor.concat(generator_data_reshape, 1), 'float32');
+                // Get predictions from discriminator
+                const l_d = latentData()
+                // console.log('AFTER LATENT DATA ' + tf.memory().numTensors);
+
+                const DReal = discriminator_.apply(realOutput) // shape [batchSize, 1]
+                const DFake = discriminator_.apply(l_d) // shape [batchSize, 1]
+                const real_loss = tf.cast(DReal.mean(), 'float32')
+                const fake_loss = tf.cast(DFake.mean(), 'float32')
+                // console.log('AFTER DISC PRED ON REAL AND FAKE ' + tf.memory().numTensors);
+                console.log('Fake data loss: ', fake_loss.dataSync()[0], 'Real data loss: ', real_loss.dataSync()[0], 'dCost : ', fake_loss.sub(real_loss).dataSync()[0])
+                // Wasserstein Loss - If this value is 0 that means 
+                // both the distributions are same and discriminator is 
+                // guessing 50% of the time
+                // const dCost = DFake.sub(DReal)
+
+                // Calculate gradient penalty 
+                // console.log('BEFORE GP ' + tf.memory().numTensors);
+                const gp = gradientPenalty(batchSize, time_step, look_ahead, discriminator_, l_d, realOutput)
+                // const gp = tf.tensor([1])
+                // console.log('AFTER GP ' + tf.memory().numTensors);
+                if (DEBUG_FLAG) {
+                    console.log('Noise Data DIS REAL : ', realOutput.arraySync()[0][14])
+                    console.log('Noise Data DIS : ', l_d.arraySync()[0][14])
+
+                    console.log('D PRED FAKE VALUE: ', DFake.arraySync()[0][0], 'D PRED REAL VALUE: ', DReal.arraySync()[0][0])
+                    console.log('Fake data loss: ', DFake.mean().dataSync()[0], 'Real data loss: ', DReal.mean().dataSync()[0])
+
+                    // console.log('D cost: ', dCost.dataSync()[0])
+
+                    // console.log('d loss from D grads', dCost.add(gp).dataSync()[0])
+                    // console.log('<-------------------DISC----------------->')
+                }
+
+                // const discriminatorLoss = tf.add(dCost, gp).asScalar();
+                // console.log('D LOSS LOOP DISPOSE ' + tf.memory().numTensors);
+                return tf.add(fake_loss.sub(real_loss), gp).asScalar();
+            }, true, discriminator_.getWeights());
+            // console.log('AFTER D LOSS LOOP END Before dispose ' + tf.memory().numTensors);
+            // console.log(dOptimizer)
+            dLossValue_ = dLossValue.dataSync()[0]
+            tf.dispose([dLossValue])
+            // console.log('AFTER D LOSS LOOP END ' + tf.memory().numTensors);
+            console.log('<-------------------DISCRIMINATOR---------------------->')
+        }
+        dOptimizer.dispose()
+
+        console.log('<-------------------GENERATOR---------------------->')
+        // console.log('BEFORE G LOSS ' + tf.memory().numTensors);
+        generator_.trainable = true
+        // tf.dispose(generatorData)
+        const gOptimizer = tf.train.adam(0.0001, 0.5, 0.9);
+        // Train the generator only once. 
+        const gLossValue = gOptimizer.minimize(() => {
+            // console.log('GLOSS MINIMIZE ' + tf.memory().numTensors);
+            // console.log('REAL VASL ' + tf.memory().numTensors);
+            // Generate fake data
+            // let generator_data = generator_.apply(xTrainTensor);
+            // console.log('REAL VASL MID 1 ' + tf.memory().numTensors); // 996
+            // const generator_data_reshape = generator_data.reshape([generator_data.shape[0], generator_data.shape[1], 1]);
+            // const generatorData = tf.cast(pastYTrainTensor.concat(generator_data_reshape, 1), 'float32');
+            const l_d = latentData()
+            console.log('Noise Data GEN : ', l_d.arraySync()[0][14])
+            generatorData_ = tf.keep(l_d)
+            // console.log('REAL VASL MID 2 ' + tf.memory().numTensors); // 6
+
+            // Calculate the generator loss
+            const g_mean = discriminator_.apply(l_d).mean().mul(-1)
+            // console.log('REAL VASL MID 3 ' + tf.memory().numTensors); // 57
+            const gMse = tf.losses.meanSquaredError(realOutput, l_d)
+            // gMse_ = gMse.dataSync()[0]
+            const gSign = tf.abs(tf.sign(realOutput).sub(tf.sign(l_d))).mean();
+            // console.log('REAL VASL MID 4 ' + tf.memory().numTensors); // 15
+
+            // const gLoss = g_mean.add(gMse.mul(lambda1)).add(gSign.mul(lambda2));
+            // console.log('gloss', gLoss.dataSync()[0])
+
+            console.log('Noise Data GEN REAL: ', realOutput.arraySync()[0][14])
+            console.log('Noise Data GEN : ', l_d.arraySync()[0][14])
+            if (DEBUG_FLAG) {
+
+                // console.log('generatedData shape : ', generatedData.shape)
+                // console.log('actual values : ', realOutput.arraySync()[0][18])
+                // console.log('grenerator predictions : ', generatorData.arraySync()[0][18])
+
+                console.log('gmean minus true', g_mean.dataSync()[0], 'gmse', gMse.dataSync()[0], 'gsign', gSign.dataSync()[0])
+            }
+
+            // console.log('REAL VASL MID 5 ' + tf.memory().numTensors); // 2
+
+            return g_mean.add(gMse.mul(lambda1)).add(gSign.mul(lambda2)).asScalar();
+        }, true, generator_.getWeights());
+        // console.log('REAL VASL MID 6 ' + tf.memory().numTensors);
+        // console.log(gOptimizer)
+        gLossValue_ = gLossValue.dataSync()[0]
+        gOptimizer.dispose()
+        tf.dispose([gLossValue, realOutput])
+        // console.log('AFTER G LOSS ' + tf.memory().numTensors);
+
+        // console.log('INSIDE TRAIN STEP END ' + tf.memory().numTensors);
+
+        return { generatorData_, discriminatorLoss: dLossValue_, generatorLoss: gLossValue_, g_mse: gMse_ };
+    }
+    catch (e) {
+        console.log('Error in training discriminator')
+        console.log(e.stack)
+    }
+}
+const { inspect } = require('util');
+async function train(XTrain, yTrain, pastY, epochs, time_step, look_ahead, feature_size, batchSize) {
+    const t = createTimer('GAN model training')
+    t.startTimer()
+    // Define the optimizer for both discriminator and generator
+    // const gOptimizer = tf.train.adam(0.0001, 0.5, 0.9);
+    // const dOptimizer = tf.train.adam(0.0004, 0.5, 0.9)
+    // console.log('Before model creation ' + tf.memory().numTensors); // 0
+    const weight_initializers = tf.initializers.randomNormal({ mean: 0.0, stddev: 0.02, seed: 1445341236789 })
+    const generator_ = generator({ input_dimension: time_step, output_dimension: look_ahead, feature_size, weight_initializers })
+    const discriminator_ = discriminator({ timeStep: time_step, lookAhead: look_ahead, weight_initializers })
+    // console.log('After model creation ' + tf.memory().numTensors); //  24
+
+
+
+    const trainHist = {
+        losses: [],
+        D_losses: [],
+        G_losses: [],
+        per_epoch_times: [],
+        total_ptime: []
+    };
+    let Real_price
+    let Generated_price
+    let preds = []
+
+    // console.log('xtrain',XTrain[0][0] )
+    // console.log('ytrain',yTrain[0][0] )
+    // console.log('pastY',pastY[0][0] )
+    const xTrainTensor = tf.tensor(XTrain);
+    const yTrainTensor = tf.tensor(yTrain);
+    const pastYTrainTensor = tf.tensor(pastY); // 27
+    // console.log('Data creation to tensor ' + tf.memory().numTensors);
+    const data = [xTrainTensor, yTrainTensor, pastYTrainTensor];
+    for (let epoch = 0; epoch < epochs; epoch++) {
+        // console.log('inside trainig loop start ' + tf.memory().numTensors);
+
+        console.log('Gene weights 1st layer', generator_.getWeights(true)[0].arraySync()[0][0][0])
+        console.log('Disc weights 1st layer', discriminator_.getWeights(true)[0].arraySync()[0][0][0])
+        // log.error(`Epoch ${epoch + 1} of ${epochs}`);
+        // console.log(dOptimizer)
+        // console.log('Optimizer : ',dOptimizer.accumulatedFirstMoment[0])
+        const {
+            generatorData_,
+            discriminatorLoss,
+            generatorLoss,
+            g_mse
+        } = await trainStep(data, time_step, look_ahead, generator_, discriminator_);
+
+        // console.log('yTrainTensor shape : ', yTrainTensor.shape)
+        // console.log('generatorData_ shape : ', generatorData_.shape)
+        console.log('Generator Loss : ', generatorLoss, 'Discriminator Loss : ', discriminatorLoss)
+        // @ts-ignore
+        trainHist.losses.push({
+            d_loss: discriminatorLoss,
+            g_loss: generatorLoss,
+            mse: g_mse,
+            epoch: epoch + 1
+        })
+        // @ts-ignore
+        trainHist.D_losses.push(discriminatorLoss);
+        // @ts-ignore
+        trainHist.G_losses.push(generatorLoss);
+        Real_price = yTrain
+        // @ts-ignore
+        Generated_price = generatorData_.arraySync()
+
+        tf.dispose([generatorData_])
+        // Save the model every 100 epochs
+        /* if ((epoch + 1) % 100 === 0) {
+            // await generator.save(`gen_model_${epoch + 1}.json`);
+            console.log('epoch', epoch + 1, 'discriminator_loss', discriminatorLoss.dataSync(), 'generator_loss', generatorLoss.dataSync());
+        } */
+
+        // @ts-ignore
+        // trainHist.per_epoch_times.push(perEpochPtime);
+        log.error(`Epoch ${epoch + 1} of ${epochs}, G_loss: ${generatorLoss}, D_loss: ${discriminatorLoss}`);
+        // console.log('inside trainig loop end ' + tf.memory().numTensors);
+    }
+
+    // console.log('After trainig epoch ' + tf.memory().numTensors); // 35
+
+
+    t.stopTimer(__filename.slice(__dirname.length + 1))
+    // console.log(Real_price[0], Generated_price[0])
+    for (let i = 0; i < Real_price.length; i++) {
+        preds.push({ real: parseFloat(Real_price[i][0].toFixed(8)), generated: parseFloat(Generated_price[i][14][0].toFixed(8)), epoch: i + 1 })
+    }
+    generator_.dispose()
+    // console.log('After trainig epoch gene disp ' + tf.memory().numTensors); // 21, 35-14
+    discriminator_.dispose()
+    // console.log('After trainig epoch disc disp ' + tf.memory().numTensors); // 11 , 21-10
+    tf.dispose([xTrainTensor, yTrainTensor, pastYTrainTensor])
+    // const tt = tf.tensor([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [3, 4])
+
+    // console.log(tf.engine())
+    console.log('-------------------')
+    // console.log(tf.engine().profiler)
+    console.log('-------------------')
+    // console.log(tf.engine().profiler.backendTimer.tensorMap.dataMover)
+    console.log('-------------------')
+    // console.log(tf.engine().profiler.backendTimer.tensorMap.dataMover.state)
+    // console.log(inspect(tf.engine().profiler.backendTimer.tensorMap.dataMover.state.tensorInfo, { showHidden: true }));
+    // console.log(tf.engine().profiler.backendTimer.tensorMap.dataMover)
+    console.log('-------------------')
+    const weak_map1 = tf.engine().profiler.backendTimer.tensorMap.dataMover.backendInstance.tensorMap.data
+    const weak_map = tf.engine().state.tensorInfo
+    // console.log(inspect(weak_map, { showHidden: true }));
+    console.log('-------------------')
+    // console.log(inspect(weak_map1, { showHidden: true }));
+    const formattedTime = t.calculateTime()
+    console.log(`Training completed in ${formattedTime}`)
+
+    // Return the training history
+    return [trainHist, preds, Generated_price];
+}
+
+module.exports = {
+    train,
+}
+
+// class based approach
+
+const logger = require('../middleware/logger/Logger');
+const log = logger.create(__filename.slice(__dirname.length + 1))
+let tf = require('@tensorflow/tfjs-node');
+const { createTimer } = require('./timer')
+const config = require('../config')
+const Redis = require("ioredis");
+// @ts-ignore
+const redisPublisher = new Redis();
+
+const generator = ({ input_dimension, output_dimension, feature_size }) => {
+    const generator_model = tf.sequential();
+
+    generator_model.add(tf.layers.conv1d({
+        filters: 32,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 }),
+        batchInputShape: [null, input_dimension, feature_size],
+    }))
+
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+
+    generator_model.add(tf.layers.bidirectional({
+        layer: tf.layers.lstm({
+            units: 64,
+            activation: 'relu',
+            kernelInitializer: tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 }),
+            returnSequences: false,
+            dropout: 0.3,
+            recurrentDropout: 0.0
+        })
+    }))
+
+    generator_model.add(tf.layers.dense({ units: 64, activation: 'linear' }))
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    generator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    generator_model.add(tf.layers.dense({ units: 32, activation: 'linear' }))
+    generator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    generator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    const input = tf.input({ shape: [input_dimension, feature_size] })
+    const output = generator_model.apply(input)
+
+    const predictions = tf.layers.dense({ units: output_dimension }).apply(output)
+
+    return tf.model({ inputs: input, outputs: predictions })
+}
+
+const discriminator = ({ timeStep, lookAhead }) => {
+    const discriminator_model = tf.sequential();
+
+    discriminator_model.add(tf.layers.conv1d({
+        filters: 32,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 }),
+        inputShape: [timeStep + lookAhead, 1]
+    }))
+
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+
+    discriminator_model.add(tf.layers.conv1d({
+        filters: 64,
+        kernelSize: 2,
+        strides: 1,
+        padding: 'same',
+        kernelInitializer: tf.initializers.randomNormal({ mean: 0.00, stddev: 0.02 }),
+    }))
+
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.flatten())
+
+    discriminator_model.add(tf.layers.dense({ units: 64, activation: 'linear', useBias: true }))
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    discriminator_model.add(tf.layers.dense({ units: 32, activation: 'linear', useBias: true }))
+    discriminator_model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+    discriminator_model.add(tf.layers.dropout({ rate: 0.2 }))
+
+    const fake_data = tf.input({ shape: [timeStep + lookAhead, 1] })
+    const discriminator_output = discriminator_model.apply(fake_data)
+
+    const realness_score = tf.layers.dense({ units: 1 }).apply(discriminator_output)
+
+    return tf.model({ inputs: fake_data, outputs: realness_score })
+}
+
+class WGANGP {
+    constructor(generator, discriminator, time_step, look_ahead) {
+        this.generator = generator;
+        this.discriminator = discriminator;
+        this.time_step = time_step;
+        this.look_ahead = look_ahead;
+        this.g_optimizer = tf.train.adam(0.0001, 0.5, 0.999);
+        this.d_optimizer = tf.train.adam(0.0004, 0.5, 0.999);
+        this.n_critic = 5;
+        this.lambda_ = 10;
+        this.lambda_1 = 0.5;
+        this.lambda_2 = 0.5;
+    }
+
+    getModelProperties() {
+        return {
+            time_step: this.time_step,
+            look_ahead: this.look_ahead,
+            n_critic: this.n_critic,
+            lambda_: this.lambda_,
+            lambda_1: this.lambda_1,
+            lambda_2: this.lambda_2
+        }
+    }
+
+    gradient_penalty(batchSize, fakeData, realData) {
+        console.log('Inside GP START ' + tf.memory().numTensors); // 1405
+        const alpha = tf.randomNormal([batchSize, this.time_step + this.look_ahead, 1], 0, 1, 'float32');
+        const diff = fakeData.sub(realData);
+        const interpolated = realData.mul(alpha).add(tf.scalar(1).sub(alpha).mul(fakeData))
+        console.log('Inside GP MID 1 ' + tf.memory().numTensors); // 1422
+
+        const gradientsFn = tf.valueAndGrad((x) => {
+            const pred = this.discriminator.apply(x, { training: true })
+            console.log('pred : ', pred.arraySync()[81])
+            return pred
+        });
+        const { value, grad } = gradientsFn(interpolated)
+        const grad_fo_calc = tf.tensor(grad.arraySync())
+        tf.dispose([grad, value, gradientsFn])
+        console.log('Inside GP MID 2 ' + tf.memory().numTensors);
+        // console.log('grad shape : ', grad_fo_calc.shape)
+        console.log('grad : ', grad_fo_calc.arraySync()[81][18])
+
+        const gradientsNorm = tf.euclideanNorm(grad_fo_calc, 1); // l2 norm`
+        const gp = gradientsNorm.sub(tf.scalar(1)).square().mean().mul(this.lambda_).asScalar();
+        console.log('NORM:', gradientsNorm.dataSync()[0], 'PENA: ', gp.dataSync()[0])
+        tf.dispose([gradientsNorm, grad_fo_calc, interpolated, alpha, diff, this.lambda_])
+        console.log('Inside GP END ' + tf.memory().numTensors);
+
+        return gp
+    }
+
+    async train_step(data) {
+        const DEBUG_FLAG = false
+        console.log('INSIDE TRAIN STEP START ' + tf.memory().numTensors);  // 31
+        const [xTrainTensor, yTrainTensor, pastYTrainTensor] = data;
+        const batchSize = xTrainTensor.shape[0];
+        let dLossValue_ = 0;
+        let gLossValue_ = 0;
+        let gMse_ = 0;
+        let generatorData_;
+
+
+
+        try {
+            // Train the discriminator
+            for (let i = 0; i < this.n_critic; i++) {
+                console.log('BEFORE D LOSS LOOP ' + tf.memory().numTensors);  // 31
+                // Calculate discriminator loss, compute gradients of the loss with respect to discriminator's inputs
+                const dLossValue = this.d_optimizer.minimize(() => {
+                    console.log('DLOSS MINIMIZE ' + tf.memory().numTensors);  // 31
+
+                    // Process real data
+                    const realOutput = tf.tidy(() => {
+                        const realYReshape = yTrainTensor.reshape([yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);
+                        return tf.cast(pastYTrainTensor, 'float32').concat(tf.cast(realYReshape, 'float32'), 1);
+                    })
+                    console.log('REAL OUTPUT ' + tf.memory().numTensors);  // 35
+                    // Generate fake data
+                    let generator_data = this.generator.apply(xTrainTensor, { training: true });
+                    console.log('GENE PRED ' + tf.memory().numTensors); // 1291
+                    const generator_data_reshape = generator_data.reshape([generator_data.shape[0], generator_data.shape[1], 1]);
+                    const latentData = tf.cast(pastYTrainTensor.concat(generator_data_reshape, 1), 'float32');
+
+                    console.log('AFTER LATENT DATA ' + tf.memory().numTensors); // 1297
+
+                    // Get predictions from discriminator
+                    const DReal = this.discriminator.apply(realOutput, { training: true }).mean() // shape [batchSize, 1]
+                    const DFake = this.discriminator.apply(latentData, { training: true }).mean() // shape [batchSize, 1]
+                    console.log('AFTER DISC PRED ON REAL AND FAKE ' + tf.memory().numTensors); // 1405
+
+                    // Calculate gradient penalty 
+                    console.log('BEFORE GP ' + tf.memory().numTensors); // 1405
+                    const gp = this.gradient_penalty(batchSize, latentData, realOutput)
+                    console.log('AFTER GP ' + tf.memory().numTensors);
+
+                    if (DEBUG_FLAG) {
+                        console.log('Noise Data DIS REAL : ', realOutput.arraySync()[0][14])
+                        console.log('Noise Data DIS : ', latentData.arraySync()[0][14])
+
+                        console.log('D PRED FAKE VALUE: ', DFake.arraySync()[0][0], 'D PRED REAL VALUE: ', DReal.arraySync()[0][0])
+                        console.log('Fake data loss: ', DFake.mean().dataSync()[0], 'Real data loss: ', DReal.mean().dataSync()[0])
+
+                        // console.log('D cost: ', dCost.dataSync()[0])
+
+                        // console.log('d loss from D grads', dCost.add(gp).dataSync()[0])
+                        console.log('<-------------------DISC----------------->')
+                    }
+
+                    // const discriminatorLoss = tf.add(dCost, gp).asScalar();
+                    tf.dispose([generator_data, generator_data_reshape, latentData])
+                    console.log('D LOSS LOOP DISPOSE ' + tf.memory().numTensors);
+
+                    return tf.add(DFake.sub(DReal), gp).asScalar();
+                }, true, this.discriminator.getWeights());
+                console.log('AFTER D LOSS LOOP END Before dispose ' + tf.memory().numTensors);
+
+                dLossValue_ = dLossValue.dataSync()[0]
+
+                tf.dispose([dLossValue])
+                console.log('AFTER D LOSS LOOP END ' + tf.memory().numTensors);
+                console.log('<-------------------DISCRIMINATOR---------------------->')
+            }
+
+            console.log('<-------------------GENERATOR---------------------->')
+            console.log('BEFORE G LOSS ' + tf.memory().numTensors);
+            // tf.dispose(generatorData)
+            // const gOptimizer = tf.train.adam(0.0001, 0.5, 0.9);
+            // Train the generator only once. 
+            const gLossValue = this.g_optimizer.minimize(() => {
+                console.log('GLOSS MINIMIZE ' + tf.memory().numTensors);
+                // Process real data
+                const realOutput = tf.tidy(() => {
+                    const realYReshape = yTrainTensor.reshape([yTrainTensor.shape[0], yTrainTensor.shape[1], 1]);
+                    return tf.cast(pastYTrainTensor, 'float32').concat(tf.cast(realYReshape, 'float32'), 1);
+                })
+
+                console.log('REAL VASL ' + tf.memory().numTensors);
+
+                // Generate fake data
+                let generator_data = this.generator.apply(xTrainTensor, { training: true });
+                console.log('REAL VASL MID 1 ' + tf.memory().numTensors); // 996
+                const generator_data_reshape = generator_data.reshape([generator_data.shape[0], generator_data.shape[1], 1]);
+                const generatorData = tf.cast(pastYTrainTensor.concat(generator_data_reshape, 1), 'float32');
+                generatorData_ = tf.keep(generatorData)
+                console.log('REAL VASL MID 2 ' + tf.memory().numTensors); // 6
+
+                // Calculate the generator loss
+                const g_mean = this.discriminator.apply(generatorData, { training: true }).mean().mul(-1)
+                console.log('REAL VASL MID 3 ' + tf.memory().numTensors); // 57
+                const gMse = tf.losses.meanSquaredError(realOutput, generatorData)
+                // gMse_ = gMse.dataSync()[0]
+                const gSign = tf.abs(tf.sign(realOutput).sub(tf.sign(generatorData))).mean();
+                console.log('REAL VASL MID 4 ' + tf.memory().numTensors); // 15
+
+                // const gLoss = g_mean.add(gMse.mul(lambda1)).add(gSign.mul(lambda2));
+                // console.log('gloss', gLoss.dataSync()[0])
+
+                if (DEBUG_FLAG) {
+                    console.log('Noise Data GEN REAL: ', realOutput.arraySync()[0][14])
+                    console.log('Noise Data GEN : ', generatorData.arraySync()[0][14])
+
+                    // console.log('generatedData shape : ', generatedData.shape)
+                    // console.log('actual values : ', realOutput.arraySync()[0][18])
+                    // console.log('grenerator predictions : ', generatorData.arraySync()[0][18])
+
+                    console.log('gmean minus true', g_mean.dataSync()[0], 'gmse', gMse.dataSync()[0], 'gsign', gSign.dataSync()[0])
+                }
+
+                tf.dispose([generator_data, generator_data_reshape])
+                console.log('REAL VASL MID 5 ' + tf.memory().numTensors); // 2
+
+                return g_mean.add(gMse.mul(this.lambda_1)).add(gSign.mul(this.lambda_2)).asScalar();
+            }, true, this.generator.getWeights());
+            console.log('REAL VASL MID 6 ' + tf.memory().numTensors);
+            // console.log(gOptimizer)
+            gLossValue_ = gLossValue.dataSync()[0]
+            // gOptimizer.dispose()
+            tf.dispose([gLossValue])
+            console.log('AFTER G LOSS ' + tf.memory().numTensors);
+
+            console.log('INSIDE TRAIN STEP END ' + tf.memory().numTensors);
+
+            return { generatorData_, discriminatorLoss: dLossValue_, generatorLoss: gLossValue_, g_mse: gMse_ };
+        }
+        catch (e) {
+            console.log('Error in training discriminator')
+            console.log(e.stack)
+        }
+    }
+
+    async train(XTrain, yTrain, pastY, epochs) {
+        const t = createTimer('GAN model training')
+        console.log('TRAIN START ' + tf.memory().numTensors); // 28
+        t.startTimer()
+
+        const trainHist = {
+            losses: [],
+            D_losses: [],
+            G_losses: [],
+            per_epoch_times: [],
+            total_ptime: []
+        };
+        let Real_price
+        let Generated_price
+        let preds = []
+
+        const xTrainTensor = tf.tensor(XTrain);
+        const yTrainTensor = tf.tensor(yTrain);
+        const pastYTrainTensor = tf.tensor(pastY);
+        console.log('Data creation to tensor ' + tf.memory().numTensors); // 31
+        const data = [xTrainTensor, yTrainTensor, pastYTrainTensor];
+
+        for (let epoch = 0; epoch < epochs; epoch++) {
+            console.log('inside trainig loop start ' + tf.memory().numTensors);  // 31
+
+            const {
+                generatorData_,
+                discriminatorLoss,
+                generatorLoss,
+                g_mse
+            } = await this.train_step(data);
+
+            console.log('Generator Loss : ', generatorLoss, 'Discriminator Loss : ', discriminatorLoss)
+
+            // @ts-ignore
+            trainHist.losses.push({
+                d_loss: discriminatorLoss,
+                g_loss: generatorLoss,
+                mse: g_mse,
+                epoch: epoch + 1
+            })
+            // @ts-ignore
+            trainHist.D_losses.push(discriminatorLoss);
+            // @ts-ignore
+            trainHist.G_losses.push(generatorLoss);
+            Real_price = yTrain
+            // @ts-ignore
+            Generated_price = generatorData_.arraySync()
+
+            tf.dispose([generatorData_])
+            log.error(`Epoch ${epoch + 1} of ${epochs}, G_loss: ${generatorLoss}, D_loss: ${discriminatorLoss}`);
+            console.log('inside trainig loop end ' + tf.memory().numTensors);
+        }
+
+        console.log('After trainig epoch ' + tf.memory().numTensors); // 35
+
+
+        t.stopTimer(__filename.slice(__dirname.length + 1))
+        // console.log(Real_price[0], Generated_price[0])
+        for (let i = 0; i < Real_price.length; i++) {
+            preds.push({ real: parseFloat(Real_price[i][0].toFixed(3)), generated: parseFloat(Generated_price[i][14][0].toFixed(3)), epoch: i + 1 })
+        }
+        this.generator.dispose()
+        console.log('After trainig epoch gene disp ' + tf.memory().numTensors); // 21, 35-14
+        this.discriminator.dispose()
+        console.log('After trainig epoch disc disp ' + tf.memory().numTensors); // 11 , 21-10
+        tf.dispose([xTrainTensor, yTrainTensor, pastYTrainTensor])
+
+        const formattedTime = t.calculateTime()
+        console.log(`Training completed in ${formattedTime}`)
+
+        // Return the training history
+        return [trainHist, preds];
+    }
+}
+
+module.exports = {
+    generator,
+    discriminator,
+    WGANGP
+}
+
+
+// python working whan code
+/* import numpy as np
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+import tensorflow as tf
+import keras
+from keras import Sequential
+from keras.layers import Bidirectional, LSTM, Dense, Flatten, Conv1D, Dropout, LeakyReLU
+from keras.initializers import RandomNormal
+import redis
+
+
+def load_data():
+    data = pd.read_json("./test_data.json")
+    X_train = data[["open", "high", "low", "volume", "close"]]
+    Y_train = data[["close"]]
+    print(X_train.head(5))
+    print(Y_train[:5])
+    print(X_train.tail(5))
+    return X_train, Y_train
+
+
+def scalar_function(x, y):
+    X_Scalar = MinMaxScaler(feature_range=(-1, 1))
+    Y_Scalar = MinMaxScaler(feature_range=(-1, 1))
+    X_Scalar.fit(x)
+    Y_Scalar.fit(y)
+
+    return X_Scalar, Y_Scalar
+
+
+def tranform_data(xTrain_norm, yTrain_norm):
+    X_data = np.array(xTrain_norm)
+    y_data = np.array(yTrain_norm)
+    print("Feature length:", len(xTrain_norm))
+    print("Labels length:", len(yTrain_norm))
+    X = list()
+    y = list()
+    past_y = list()
+    n_steps_in = 14
+    n_steps_out = 5
+    length = len(X_data)
+
+    for i in range(0, length, 1):
+        # print(i)
+        X_value = X_data[i : i + n_steps_in][:, :]
+        y_value = y_data[i + n_steps_in : i + (n_steps_in + n_steps_out)][:, 0]
+        past_y_value = y_data[i : i + n_steps_in][:, :]
+        # print(i, len(X_value), len(y_value))
+        if len(X_value) == n_steps_in and len(y_value) == n_steps_out:
+            X.append(X_value)
+            y.append(y_value)
+            past_y.append(past_y_value)
+
+    print("-------------------------")
+    print(np.array(X).shape)
+    print(np.array(y).shape)
+    print(np.array(past_y).shape)
+
+    print("-------------------------")
+    print(np.array(X)[0][0])
+    print(np.array(y)[0][0])
+    print(np.array(past_y)[0][0])
+
+    input_dim = np.array(X).shape[1]
+    feature_size = np.array(X).shape[2]
+    output_dim = np.array(y).shape[1]
+
+    print("-------------------------")
+    print("input_dim", input_dim)
+    print("feature_size", feature_size)
+    print("output_dim", output_dim)
+
+    return X, y, past_y
+
+
+def Generator(
+    input_dim, output_dim, feature_size, weight_initializer
+) -> keras.models.Model:
+    model = Sequential()
+    model.add(
+        Conv1D(
+            32,
+            kernel_size=2,
+            strides=1,
+            padding="same",
+            kernel_initializer=weight_initializer,
+            batch_input_shape=(None, input_dim, feature_size),
+        )
+    )
+    model.add(LeakyReLU(alpha=0.1))
+    model.add(
+        Bidirectional(
+            LSTM(
+                64,
+                activation="relu",
+                kernel_initializer=weight_initializer,
+                return_sequences=False,
+                dropout=0.3,
+                recurrent_dropout=0.0,
+            )
+        )
+    )
+    # model.add(Flatten())
+
+    model.add(Dense(64, activation="linear"))
+    model.add(LeakyReLU(alpha=0.1))
+    model.add(Dropout(0.2))
+    model.add(Dense(32, activation="linear"))
+    model.add(LeakyReLU(alpha=0.1))
+    model.add(Dropout(0.2))
+
+    model.add(Dense(output_dim))
+    return model
+
+
+def Discriminator(weight_initializer, n_steps_in, n_steps_out) -> keras.models.Model:
+    model = Sequential()
+    model.add(
+        Conv1D(
+            32,
+            kernel_size=2,
+            strides=1,
+            kernel_initializer=weight_initializer,
+            padding="same",
+            input_shape=(n_steps_in + n_steps_out, 1),
+        )
+    )
+    model.add(LeakyReLU(alpha=0.1))
+    model.add(
+        Conv1D(
+            64,
+            kernel_size=2,
+            strides=1,
+            kernel_initializer=weight_initializer,
+            padding="same",
+        )
+    )
+    model.add(LeakyReLU(alpha=0.1))
+    model.add(Flatten())
+
+    model.add(Dense(64, activation="linear", use_bias=True))
+    model.add(LeakyReLU(alpha=0.1))
+    model.add(Dropout(0.2))
+    model.add(Dense(32, activation="linear", use_bias=True))
+    model.add(LeakyReLU(alpha=0.1))
+    model.add(Dropout(0.2))
+
+    model.add(Dense(1, activation="linear"))
+    return model
+
+
+def gradient_penalty(
+    batch_size, real_output, generated_output, discriminator, n_steps_in, n_steps_out
+):
+    """Calculates the gradient penalty."""
+    # get the interpolated data
+    alpha = tf.random.normal([batch_size, n_steps_in + n_steps_out, 1], 0.0, 1.0)
+    diff = generated_output - tf.cast(real_output, tf.float32)
+    interpolated = tf.cast(real_output, tf.float32) + alpha * diff
+    # print('REAL : ',np.array(real_output)[0])
+    # print('FAKE : ',np.array(generated_output)[0])
+    # print('ALPHA : ',np.array(alpha)[0])
+    # print('DIFF : ',np.array(diff)[0])
+    # print('Iterpolated : ',np.array(interpolated)[0])
+    with tf.GradientTape() as gp_tape:
+        gp_tape.watch(interpolated)
+        # 1. Get the discriminator output for this interpolated data.
+        pred = discriminator(interpolated, training=True)
+        print("pred : ", np.array(pred)[81])
+
+    # 2. Calculate the gradients w.r.t to this interpolated data.
+    grads = gp_tape.gradient(pred, [interpolated])
+    if grads is not None:
+        grads = grads[0]
+        print("Gradients : ", grads.shape)
+    print("Gradients : ", np.array(grads)[81][18])
+    # print('Disc Predictions : ',np.array(pred)[0])
+    # print('Gradients : ',np.array(grads)[0])
+    # print('Gradients : ',grads.arraySync()[1])
+    # 3. Calculate the norm of the gradients
+    norm = tf.sqrt(tf.reduce_sum(tf.square(grads), axis=[1, 2]))
+    gp = tf.reduce_mean((norm - 1.0) ** 2)
+    print("NORM : ", np.array(norm)[0], "PENA :", np.array(gp))
+    return gp
+
+
+def get_batches(xTrain, yTrain, pastY, batch_size):
+    num_samples = xTrain.shape[0]
+    num_batches = num_samples // batch_size
+
+    for batch_idx in range(num_batches):
+        start_idx = batch_idx * batch_size
+        end_idx = (batch_idx + 1) * batch_size
+
+        batch_xTrain = xTrain[start_idx:end_idx]
+        batch_yTrain = yTrain[start_idx:end_idx]
+        batch_pastY = pastY[start_idx:end_idx]
+
+        yield batch_xTrain, batch_yTrain, batch_pastY
+
+    # Handle the last batch if it's smaller than batch_size
+    if num_samples % batch_size != 0:
+        start_idx = num_batches * batch_size
+        end_idx = num_samples
+
+        batch_xTrain = xTrain[start_idx:end_idx]
+        batch_yTrain = yTrain[start_idx:end_idx]
+        batch_pastY = pastY[start_idx:end_idx]
+
+        yield batch_xTrain, batch_yTrain, batch_pastY
+
+
+def train_step(generator, discriminator, data, d_optimizer, g_optimizer):
+    real_input, real_price, past_y = data
+    batch_size = real_input.shape[0]
+    print("batch size : ", batch_size)
+
+    # Train the discriminator (suggested: 5 times)
+    for i in range(5):
+        with tf.GradientTape() as d_tape:
+            # generate fake output
+            generated_data = generator(real_input, training=True)
+            # reshape the data
+            generated_data_reshape = tf.reshape(
+                generated_data, [generated_data.shape[0], generated_data.shape[1], 1]
+            )
+            generated_output = tf.concat(
+                [tf.cast(past_y, tf.float32), generated_data_reshape], axis=1
+            )
+            real_y_reshape = tf.reshape(
+                real_price, [real_price.shape[0], real_price.shape[1], 1]
+            )
+            real_output = tf.concat(
+                [tf.cast(past_y, tf.float32), tf.cast(real_y_reshape, tf.float32)],
+                axis=1,
+            )
+
+            # Get the logits for the real data
+            D_real = discriminator(real_output, training=True)
+            # Get the logits for the generated data
+            D_generated = discriminator(generated_output, training=True)
+            # print(np.array(D_generated))
+            # Calculate discriminator loss using generated and real logits
+            real_loss = tf.cast(tf.reduce_mean(D_real), tf.float32)
+            generated_loss = tf.cast(tf.reduce_mean(D_generated), tf.float32)
+
+            d_cost = generated_loss - real_loss
+
+            # Calculate the gradient penalty
+            gp = gradient_penalty(
+                batch_size,
+                real_output,
+                generated_output,
+                discriminator,
+                n_steps_in=real_input.shape[1],
+                n_steps_out=real_input.shape[2],
+            )
+            print("Noise Data DIS REAL : ", np.array(real_output)[0][14])
+            print("Noise Data DIS : ", np.array(generated_output)[0][14])
+            print(
+                "D PRED FAKE VAL : ",
+                np.array(D_generated)[0][0],
+                "D PRED Real VAL : ",
+                np.array(D_real)[0][0],
+            )
+            print(
+                "Fake data loss : ",
+                np.array(generated_loss),
+                "Real data loss : ",
+                np.array(real_loss),
+            )
+            print("d cost : ", np.array(d_cost))
+            print("d loss from D grads", np.array(d_cost + gp * 10))
+            # print(d_optimizer.get_config())
+            # print(d_optimizer.iterations)
+            print("------------------DISC---------------------")
+
+            # Add the gradient penalty to the original discriminator loss
+            d_loss = d_cost + gp * 10
+
+        # Get the gradients w.r.t the discriminator loss
+        d_grads = d_tape.gradient(d_loss, discriminator.trainable_variables)
+
+        # print('final D gradients : ', d_grads)
+        # Update the weights of the discriminator using the discriminator optimizer
+        d_optimizer.apply_gradients(zip(d_grads, discriminator.trainable_variables))
+    print("disc layer length", len(discriminator.trainable_variables))
+    # print(discriminator.trainable_variables[0])
+    print("d_loss : ", np.array(d_loss))
+
+    # Train the generator (default: 1 time)
+    print("------------------GENE---------------------")
+    for i in range(1):
+        with tf.GradientTape() as g_tape:
+            # generate fake output
+            generated_data = generator(real_input, training=True)
+            # reshape the data
+            generated_data_reshape = tf.reshape(
+                generated_data, [generated_data.shape[0], generated_data.shape[1], 1]
+            )
+            generated_output = tf.concat(
+                [tf.cast(past_y, tf.float32), generated_data_reshape], axis=1
+            )
+
+            print("Real generator data : ", np.array(real_output)[0][14])
+            print("generated generator data : ", np.array(generated_output)[0][14])
+            # print(g_optimizer.iterations)
+            print("Gene prediction", np.array(generated_output)[0][14])
+            # Get the discriminator logits for fake data
+            G_generated = discriminator(generated_output, training=True)
+            # Calculate the generator loss
+            lambda_1 = 0.5  # => adding extra losses significatively speeds up training and convergence
+            lambda_2 = 0.5  # => adding extra losses significatively speeds up training and convergence
+            g_mse = np.mean(keras.losses.MSE(real_y_reshape, generated_data_reshape))
+            g_sign = np.mean(
+                np.abs(np.sign(real_y_reshape) - np.sign(generated_data_reshape))
+            )
+            g_mean = (1) * (-tf.reduce_mean(G_generated))
+            print(
+                "gmean minus true  : ",
+                np.array(g_mean),
+                "gMSE  : ",
+                np.array(g_mse),
+                "gSIGN : ",
+                np.array(g_sign),
+            )
+            g_loss = g_mean + (lambda_1) * (g_mse) + (lambda_2) * (g_sign)
+            # print('Generator LOSS : ',np.array(g_loss))
+            # print('--------------------------')
+
+        # Get the gradients w.r.t the generator loss
+        g_grads = g_tape.gradient(g_loss, generator.trainable_variables)
+        # print('final D gradient : ',g_grads)
+        # Update the weights of the generator using the generator optimizer
+        g_optimizer.apply_gradients(zip(g_grads, generator.trainable_variables))
+    print("disc layer length", len(generator.trainable_variables))
+    return (
+        real_price,
+        generated_data,
+        {"discriminator_loss": d_loss, "generator_loss": g_loss},
+    )
+
+
+if __name__ == "__main__":
+    xTrain, yTrain = load_data()
+    xScalar, yScalar = scalar_function(xTrain, yTrain)
+
+    xTrain_normalized = xScalar.transform(xTrain)
+    yTrain_normalized = yScalar.transform(yTrain)
+
+    print(len(xTrain_normalized))
+    print(len(yTrain_normalized))
+    print(xTrain_normalized[0])
+    print(yTrain_normalized[0])
+
+    X, y, past_y = tranform_data(xTrain_normalized, yTrain_normalized)
+
+    X = np.array(X)
+    y = np.array(y)
+    past_y = np.array(past_y)
+
+    print(np.array(X).shape)
+    print(np.array(y).shape)
+    print(np.array(past_y).shape)
+
+    # batch_xTrain, batch_yTrain, batch_pastY = get_batches(X, y, past_y, batch_size=32)
+    c = 1
+    for batch_x, batch_y, batch_past_y in get_batches(X, y, past_y, batch_size=32):
+        print(np.array(batch_x).shape)
+        print(np.array(batch_y).shape)
+        print(np.array(batch_past_y).shape)
+        print(f"-----------{c}--------------")
+        c = c + 1
+
+    weight_initializer = RandomNormal(mean=0.00, stddev=0.02)
+
+    generator = Generator(14, 5, 5, weight_initializer)
+    discriminator = Discriminator(weight_initializer, 14, 5)
+    generator.summary()
+    discriminator.summary()
+
+    print("gene layer length", len(generator.get_weights()))
+    print("gene layer length", generator.get_weights()[0].shape)
+    print("disc layer length", len(discriminator.get_weights()))
+
+    d_optimizer = keras.optimizers.Adam(0.0004, beta_1=0.5, beta_2=0.9)
+    g_optimizer = keras.optimizers.Adam(0.0001, beta_1=0.5, beta_2=0.9)
+
+    def train():
+        x_values = np.array(X)
+        y_values = np.array(y)
+        past_y_values = np.array(past_y)
+        epochs_count = 1
+
+        data = x_values, y_values, past_y_values
+
+        losses = []
+        for epoch in range(epochs_count):
+            print("epoch ", epoch + 1, "of", epochs_count)
+            print(
+                "Initial G weights", np.array(generator.trainable_variables[0])[0][0][0]
+            )
+            print(
+                "Initial D weights",
+                np.array(discriminator.trainable_variables[0])[0][0][0],
+            )
+            real_price, generated_price, loss = train_step(
+                generator, discriminator, data, d_optimizer, g_optimizer
+            )
+            Real_price = []
+            Predicted_price = []
+            Predicted_price.append(generated_price)
+            Real_price.append(real_price)
+
+            losses.append(
+                {
+                    "D_loss": loss["discriminator_loss"].numpy(),
+                    "G_loss": loss["generator_loss"].numpy(),
+                    "epoch": epoch,
+                }
+            )
+            print(
+                "Discriminator Loss: ",
+                loss["discriminator_loss"].numpy(),
+                "Generator Loss: ",
+                loss["generator_loss"].numpy(),
+            )
+            print("--------------------------------------------------------------")
+
+        # Flatten the arrays
+        final = []
+        predicted = np.array(generated_price)
+        for i in range(len(real_price)):
+            final.append({"actual": real_price[i][0], "predicted": predicted[i][0]})
+
+        print(len(final))
+        # print(final)
+        print(losses)
+
+    train() */
+
+
+/* """     
+batch_no = 1
+batches_generated_data = np.empty((0, self.look_ahead))  # type: ignore
+train_stepMemory = []
+for batch_x, batch_y, batch_past_y in batch_generator:
+    batch_ram_start = psutil.virtual_memory()
+d_batch_d_losses = []
+        # g_batch_g_losses = []
+batch_size = len(batch_x)
+with tf.GradientTape() as d_tape:
+print("------------------DISC---------------------")
+for _ in range(self.n_discriminator):
+    batch_d_loss = self.trianDiscriminatorOneStep(batch_x, batch_y, batch_past_y, batch_size)
+d_batch_d_losses.append(batch_d_loss)
+print(f'Batch loss (Discriminator) for {batch_no} : {np.array(batch_d_loss)}')
+
+d_loss = tf.reduce_mean(d_batch_d_losses)
+print(f"d_loss : {np.array(d_loss)}")
+
+            # Get the gradients w.r.t the discriminator loss
+d_grads = d_tape.gradient(d_loss, self.discriminator.trainable_variables)  # type: ignore
+            # Update the weights of the discriminator using the discriminator optimizer
+self.d_optimizer.apply_gradients(zip(d_grads, self.discriminator.trainable_variables))  # type: ignore
+            del d_grads
+
+with tf.GradientTape() as g_tape:
+print("------------------GENE---------------------")
+g_mse, g_sign, batch_g_loss, generated_data = self.trainGeneratorOneStep(batch_x, batch_y, batch_past_y)
+            # g_batch_g_losses.append(batch_g_loss)
+batches_generated_data = np.concatenate((batches_generated_data, generated_data), axis = 0)  # type: ignore
+print(f'Batch loss (Generater) for {batch_no} : {np.array(batch_g_loss)}')
+
+            # Get the gradients w.r.t the generator loss
+g_grads = g_tape.gradient(batch_g_loss, self.generator.trainable_variables)  # type: ignore
+            # Update the weights of the generator using the generator optimizer
+self.g_optimizer.apply_gradients(zip(g_grads, self.generator.trainable_variables))  # type: ignore
+            del g_grads
+
+batch_ram_end = psutil.virtual_memory()
+batch_ram_diff = (batch_ram_end.used / (1024 ** 2)) - (batch_ram_start.used / (1024 ** 2))
+train_stepMemory.append(batch_ram_diff)
+
+with file_writer_d_batch_loss.as_default():
+tf.summary.scalar("batch_losses", d_loss, self.global_step)  # type: ignore
+file_writer_d_batch_loss.flush()
+
+with file_writer_g_batch_loss.as_default():
+tf.summary.scalar("batch_losses", batch_g_loss, self.global_step)
+file_writer_g_batch_loss.flush()
+
+self.global_step = self.global_step + 1
+
+print(f'{batch_no} : {d_loss} : {batch_g_loss}')
+message = {
+    "batch": batch_no,
+    "log": {
+        "model": "WGAN_GP",
+        "batch": batch_no,
+        "size": batch_size,
+        "d_loss": np.array(d_loss).tolist(),  # Convert ndarray to list
+                "g_loss": np.array(batch_g_loss).tolist(),  # Convert ndarray to list
+                "g_mse": np.array(g_mse).tolist(),  # Convert ndarray to list
+                "g_sign": np.array(g_sign).tolist(),  # Convert ndarray to list
+                # "totalNoOfBatch": total_batches
+    }
+}
+self.broadcastTrainingStatus("batchEnd", message)
+batch_no = batch_no + 1
+
+print(f"Memory usage for step {step} : {train_stepMemory}")
+file_writer_d_batch_loss.close()
+file_writer_g_batch_loss.close() """
+
+""" # Train the discriminator (suggested: 5 times)
+for _ in range(self.n_discriminator):
+    batch_no = 1
+batch_d_losses = []
+        # total_batches = len(self.real_input_batches)  # type: ignore
+print("------------------DISC---------------------")
+with tf.GradientTape() as d_tape:
+for batch_x, batch_y, batch_past_y in batch_generator:
+                # batch_x = self.real_input_batches[i]  # type: ignore
+batch_size = len(batch_x)
+                # print(f"Batch size : {batch_size}")
+                # batch_y = self.real_price_batches[i]  # type: ignore
+                # batch_past_y = self.past_y_batches[i]  # type: ignore
+batch_d_loss = self.trianDiscriminatorOneStep(batch_x, batch_y, batch_past_y, batch_size)
+
+batch_d_losses.append(batch_d_loss)
+print(f'Batch loss (Discriminator) for {batch_no} : {np.array(batch_d_loss)}')
+message = {
+    "batch": batch_no,
+    "log": {
+        "model": "discriminator",
+        "batch": batch_no,
+        "size": batch_size,
+        "loss": np.array(batch_d_loss).tolist(),  # Convert ndarray to list
+                        # "totalNoOfBatch": total_batches
+    }
+}
+self.broadcastTrainingStatus("batchEnd", message)
+batch_no = batch_no + 1
+
+d_loss = tf.reduce_mean(batch_d_losses)
+print(f"d_loss : {np.array(d_loss)}")
+
+            # Get the gradients w.r.t the discriminator loss
+d_grads = d_tape.gradient(d_loss, self.discriminator.trainable_variables)  # type: ignore
+            # Update the weights of the discriminator using the discriminator optimizer
+self.d_optimizer.apply_gradients(zip(d_grads, self.discriminator.trainable_variables))  # type: ignore
+
+print("------------------DISC---------------------")
+
+    # Train the generator(default: 1 time)
+print("------------------GENE---------------------")
+batch_no = 1
+batch_g_losses = []
+batches_generated_data = np.empty((0, self.look_ahead))  # type: ignore
+with tf.GradientTape() as g_tape:
+        # total_batches = len(self.real_input_batches)  # type: ignore
+for batch_x, batch_y, batch_past_y in batch_generator:
+            # batch_x = self.real_input_batches[i]  # type: ignore
+batch_size = len(batch_x)
+            # batch_y = self.real_price_batches[i]  # type: ignore
+            # batch_past_y = self.past_y_batches[i]  # type: ignore
+g_mse, g_sign, batch_g_loss, generated_data = self.trainGeneratorOneStep(batch_x, batch_y, batch_past_y)
+
+batch_g_losses.append(batch_g_loss)
+batches_generated_data = np.concatenate((batches_generated_data, generated_data), axis = 0)  # type: ignore
+
+print(f'Batch loss (Generater) for {batch_no} : {np.array(batch_g_loss)}')
+message = {
+    "batch": batch_no,
+    "log": {
+        "model": "generator",
+        "batch": batch_no,
+        "size": batch_size,
+        "loss": np.array(batch_g_loss).tolist(),  # Convert ndarray to list
+                    "g_mse": np.array(g_mse).tolist(),  # Convert ndarray to list
+                    "g_sign": np.array(g_sign).tolist(),  # Convert ndarray to list
+                    # "totalNoOfBatch": total_batches
+    }
+}
+self.broadcastTrainingStatus("batchEnd", message)
+batch_no = batch_no + 1
+
+g_loss = tf.reduce_mean(batch_g_losses)
+print(f"g_loss : {np.array(g_loss)}")
+
+        # Get the gradients w.r.t the generator loss
+g_grads = g_tape.gradient(g_loss, self.generator.trainable_variables)  # type: ignore
+        # Update the weights of the generator using the generator optimizer
+self.g_optimizer.apply_gradients(zip(g_grads, self.generator.trainable_variables))  # type: ignore
+
+print("------------------GENE---------------------") """ */

@@ -34,9 +34,21 @@ backend/middleware/logger/logs/access.log
 backend/middleware/logger/logs/app.log
 backend/middleware/logger/old_logs/access_one.log
 backend/middleware/logger/old_logs/access.log
+backend/middleware/logger/logs/access_p2.log
+backend/middleware/logger/logs/app_p2.log
 backend/docs
 backend/ssl/localhost-key.pem
 backend/ssl/localhost.pem
 backend/models
 
 # "start": "concurrently --kill-others -r \"cd backend && npm start\" \"cd crypticsage && npm start\""
+backend/worker_celery/WGAN_GP/__pycache__
+backend/worker_celery/__pycache__
+backend/worker_celery/test
+backend/worker_celery/logs
+backend/worker_celery/venv
+backend/worker_celery/saved_models
+.vscode/settings.json
+backend/worker_celery/.env
+backend/worker_celery/test/new_data.json
+backend/worker_celery/test/test_data.json
