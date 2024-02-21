@@ -23,7 +23,7 @@ router.post('/rename_model', IController.renameModel)
 router.post('/make_new_prediction', IController.makeNewForecast)
 
 router.post('/generate_test_data', IController.testNewModel)
-router.post('/generate_test_data_two', IController.generateTestData)
+// router.post('/generate_test_data_two', IController.generateTestData)
 
 
 // Test routes

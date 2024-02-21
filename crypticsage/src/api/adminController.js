@@ -223,8 +223,8 @@ export const deleteModel = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const { model_id } = payload;
-    const response = await axios.post(`${baseUrl}/indicators/delete_model`, { model_id }, config, {
+    const { model_id, model_type } = payload;
+    const response = await axios.post(`${baseUrl}/indicators/delete_model`, { model_id, model_type }, config, {
         withCredentials: true
     })
     return response;

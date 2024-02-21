@@ -1838,6 +1838,12 @@ const fetchEntireHistDataFromDb = async ({ type, ticker_name, period }) => {
  */
 const fetchTickerHistDataFromDb = async (type, ticker_name, period, page_no, items_per_page, new_fetch_offset) => {
     try {
+        const meta_db = (await client).db(CRYPTICSAGE_DATABASE_NAME) // added total count from metadata
+        const meta_collection = meta_db.collection('binance_metadata')
+        const meta_data = await meta_collection.findOne({ ticker_name: ticker_name })
+        // @ts-ignore
+        const total_count = meta_data.data[period].ticker_count
+
         const db = (await client).db(HISTORICAL_DATABASE_NAME)
         const collection_name = `${type}_${ticker_name}_${period}`
         const collection = db.collection(collection_name)
@@ -1875,6 +1881,7 @@ const fetchTickerHistDataFromDb = async (type, ticker_name, period, page_no, ite
             t1.stopTimer(__filename.slice(__dirname.length + 1))
 
             output['ticker_name'] = ticker_name
+            output['total_count_db'] = total_count
             output['period'] = period
             output['page_no'] = page_no
             output['items_per_page'] = items_per_page

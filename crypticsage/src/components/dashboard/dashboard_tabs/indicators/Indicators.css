@@ -267,7 +267,12 @@ tr:hover .prediction-mse {
     letter-spacing: 0.5px;
     padding-top: 10px;
     padding-left: 10px;
-    z-index: 2;
+    z-index: 3;
+}
+
+.offset-left-axis {
+    /* padding-left: 60px; */
+    transform: translate(50px, 0px);
 }
 
 .model-hist-tooltip {
@@ -286,6 +291,15 @@ tr:hover .prediction-mse {
     display: flex;
     flex-direction: row;
     gap: 8px;
+}
+
+.model-hist-main-box-wgan {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    /* gap: 2px; */
+    /* backdrop-filter: blur(2px); */
+    backdrop-filter: saturate(150%) blur(1px);
 }
 
 .model-hist-values {
@@ -762,9 +776,9 @@ tr:hover .prediction-mse {
         transition: all 0.2s ease-in-out;
     }
 
-    .model-parameters-grid {
+    /* .model-parameters-grid {
         max-width: 80%;
-    }
+    } */
 
     .tooltip-prediction-box {
         width: 100%;

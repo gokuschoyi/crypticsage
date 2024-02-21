@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, IconButton, TextField, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, TextField, Tooltip } from '@mui/material'
 import { CloseFullscreenIcon, OpenInFullIcon } from '../../../../global/Icons'
 import { SaveCurrentModal, DeleteCurrentModal } from './modals'
 const PredictionOptions = ({
@@ -18,10 +18,7 @@ const PredictionOptions = ({
 }) => {
     return (
         <Box display='flex' flexDirection='column'>
-            <Box display='flex' flexDirection='column' justifyContent='space-between' alignItems='flex-start' className='prediction-chart-header'>
-                <Box display='flex' flexDirection='column' alignItems='start'>
-                    <Typography variant={predictedVlauesRedux.length !== 0 ? 'h6' : 'h5'} textAlign='start'>Predictions - {predictedVlauesRedux.length !== 0 && predictionChartType === 'scaled' ? 'original' : predictionChartType}</Typography>
-                </Box>
+            <Box display='flex' flexDirection='column' justifyContent='space-between' alignItems='flex-start' className='prediction-chart-header'>                
                 {predictedVlauesRedux.length !== 0 &&
                     <Box className='chart-action-box' pt={1}>
                         <Box display='flex' flexDirection='row' gap={'4px'} alignItems='center' className='model-chart-action-container'>

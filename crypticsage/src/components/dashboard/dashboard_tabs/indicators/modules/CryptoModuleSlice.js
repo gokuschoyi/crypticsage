@@ -50,6 +50,7 @@ const initialState = {
     barsFromToPredictions: { from: 0, to: 0 },
     selectedTickerName: '',
     selectedTickerPeriod: '4h',
+    total_count_db: 0,
     talibDescription: [],
     talibDescriptionCopy: [],
     cryptoDataInDb: [],
@@ -63,13 +64,16 @@ const initialState = {
         model_name: '',
         model_saved_to_db: false,
         training_parameters: {
+            to_train_count: 0,
             trainingDatasetSize: 80,
             timeStep: 14,
             lookAhead: 1,
             epoch: 1,
             hiddenLayer: 1,
             multiSelectValue: 'close',
-            modelType: 'Multi Step Single Output',
+            modelType: 'WGAN-GP',
+            intermediateResultStep: "50",
+            modelSaveStep: "50",
             batchSize: 32,
             transformation_order: [
                 { id: '1', name: 'OPEN', value: 'open', key: 'open' },
@@ -81,7 +85,12 @@ const initialState = {
             doValidation: false,
             earlyStopping: false,
             learningRate: 50,
-            scaledLearningRate: 0.01
+            scaledLearningRate: 0.001,
+            d_learningRate: 40,
+            g_learningRate: 10,
+            scaled_d_learningRate: 0.0004,
+            scaled_g_learningRate: 0.0001,
+            discriminator_iteration: 5
         },
         talibExecuteQueries: [],
         modelStartTime: '',
@@ -95,6 +104,11 @@ const initialState = {
             dates: [],
             standardized: [],
             scaled: []
+        },
+        wgan_intermediate_forecast: [],
+        wgan_final_forecast: {
+            predictions: [],
+            rmse: {}
         },
         predictionPaletteId: 0,
         lastLookAheadPredictions: [],
@@ -130,6 +144,9 @@ const cryptoModuleSlice = createSlice({
             state.modelData.model_id = action.payload.model_id;
             state.modelData.model_name = action.payload.model_name;
         },
+        setModelType: (state, action) => {
+            state.modelData.training_parameters.modelType = action.payload;
+        },
         setTrainingParameters: (state, action) => {
             state.modelData.training_parameters = { ...action.payload.model_params, transformation_order: action.payload.transformationOrder };
             state.modelData.talibExecuteQueries = action.payload.selected_functions;
@@ -148,6 +165,14 @@ const cryptoModuleSlice = createSlice({
         },
         setPredictedValues: (state, action) => {
             state.modelData.predictedValues = { ...state.modelData.predictedValues, ...action.payload };
+        },
+        setIntermediateForecastResults: (state, action) => {
+            const takenColors = state.modelData.wgan_intermediate_forecast.map((forecast) => forecast.color);
+            const availableColors = lineColors.filter((color) => !takenColors.includes(color));
+            state.modelData.wgan_intermediate_forecast.push({ ...action.payload, color: availableColors[0], show: true });
+        },
+        setWganFinalForecast: (state, action) => {
+            state.modelData.wgan_final_forecast = action.payload;
         },
         updatePredictedValues: (state, action) => {
             const { model_id, rmse, forecast, predictions_array, initial_forecast } = action.payload
@@ -274,8 +299,16 @@ const cryptoModuleSlice = createSlice({
             state.modelData.model_id = '';
             state.modelData.modelEndTime = '';
             state.modelData.model_saved_to_db = false;
-            state.modelData.training_parameters = initialState.modelData.training_parameters;
+            const to_train_c = state.modelData.training_parameters.to_train_count
+            const co_relationData = state.modelData.correlation_data
+            state.modelData.training_parameters = { ...initialState.modelData.training_parameters, to_train_count: to_train_c }
+            state.modelData = { ...state.modelData, correlation_data: co_relationData }
             state.modelData.talibExecuteQueries = [];
+            state.modelData.wgan_final_forecast = {
+                predictions: [],
+                rmse: {}
+            };
+            state.modelData.wgan_intermediate_forecast = [];
         },
         toggleToolTipSwitch: (state) => {
             state.toolTipOn = !state.toolTipOn;
@@ -331,7 +364,10 @@ const cryptoModuleSlice = createSlice({
             state.barsFromTo = { from: 0, to: 0 };
         },
         setCryptoDataInDbRedux: (state, action) => {
-            state.cryptoDataInDb = action.payload;
+            const { dataInDb, total_count_db } = action.payload;
+            state.cryptoDataInDb = dataInDb;
+            state.total_count_db = total_count_db === 0 ? 0 : total_count_db;
+            state.modelData.training_parameters.to_train_count = total_count_db * 0.5 > 1000 ? 1000 : total_count_db * 0.5
         },
         setStreamedTickerDataRedux: (state, action) => {
             state.streamedTickerData.push(action.payload);
@@ -586,6 +622,18 @@ const cryptoModuleSlice = createSlice({
                 }
             })
         },
+        toggleShowHideIntermediatePredictions: (state, action) => {
+            const { key } = action.payload
+            const current_state = state.modelData.wgan_intermediate_forecast
+
+            const foundIndex = current_state.findIndex((forecast) => forecast.epoch === key)
+
+            if (foundIndex !== -1) {
+                current_state[foundIndex].show = !current_state[foundIndex].show
+            }
+
+            state.modelData.wgan_intermediate_forecast = current_state
+        },
         toggleShowHideChartFlag: (state, action) => {
             const { id, name } = action.payload;
             const currentState = state.selectedFunctions;
@@ -769,12 +817,15 @@ export const {
     setModelSavedToDb
     , setUserModels
     , setModelId
+    , setModelType
     , setTrainingParameters
     , setStartWebSocket
     , setModelStartTime
     , setModelEndTime
     , setFeatureCorrelationData
     , setPredictedValues
+    , setIntermediateForecastResults
+    , setWganFinalForecast
     , updatePredictedValues
     , setModelDataAvailableFlag
     , setNewForecastData
@@ -807,6 +858,7 @@ export const {
     , setSelectedFunctionOptionalInputValues
     , setTalibResult
     , toggleShowHideChartFlag
+    , toggleShowHideIntermediatePredictions
     , toggleShowSettingsFlag
     , resetShowSettingsFlag
     , removeFromSelectedFunction

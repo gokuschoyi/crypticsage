@@ -54,9 +54,20 @@ redisSubscriber.on('message', async (channel, message) => {
         case 'eval_complete':
             userWS.send(JSON.stringify({ action: 'eval_complete', scores: messageData.scores }));
             break
+        case 'intermediate_forecast':
+            userWS.send(JSON.stringify({ action: 'intermediate_forecast', forecast: messageData.intermediate_forecast, rmse: messageData.rmse, epoch: messageData.epoch }));
+            break;
         case 'prediction_completed':
-            const predictions = await RedisUtil.getTestPredictions(messageData.id);
-            userWS.send(JSON.stringify({ action: 'prediction_completed', id: messageData.id, predictions: predictions }));
+            if (messageData.model === 'WGAN-GP') {
+                console.log(messageData.id)
+                const type = messageData.model
+                const predictions_data = await RedisUtil.getTestPredictions(messageData.id, type);
+                userWS.send(JSON.stringify({ action: 'prediction_completed', id: messageData.id, model_type: "WGAN-GP", predictions: predictions_data.predictions, rmse: predictions_data.rmse }));
+            } else {
+                const type = 'LSTM'
+                const predictions = await RedisUtil.getTestPredictions(messageData.id, type);
+                userWS.send(JSON.stringify({ action: 'prediction_completed', id: messageData.id, model_type: "LSTM", predictions: predictions }));
+            }
             break;
         case 'error':
             userWS.send(JSON.stringify({ action: 'error', message: messageData.message }));

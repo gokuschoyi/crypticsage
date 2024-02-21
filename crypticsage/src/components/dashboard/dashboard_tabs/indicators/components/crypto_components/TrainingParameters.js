@@ -8,11 +8,13 @@ import {
     Paper,
     Switch,
     Typography,
-    CircularProgress
+    CircularProgress,
+    Grid
 } from '@mui/material'
 import MultiSelect from './MultiSelect'
 import CustomSlider from './CustomSlider'
 import ReorderList from './ReorderList'
+import CustomInput from './CustomInput'
 import ResetTrainedModelModal from './modals/ResetTrainedModelModal'
 import { ArrowDropDownIcon, ArrowDropUpIcon } from '../../../../global/Icons'
 
@@ -24,6 +26,19 @@ const INPUT_OPTIONS = [
     "close",
 ]
 
+const MODEL_OPTIONS = [
+    "LSTM",
+    "WGAN-GP"
+]
+
+const INTERMEDIATE_RESULT_STEP_OPTIONS = [
+    "0",
+    "2",
+    "25",
+    "50",
+    "100",
+]
+
 const TrainingParameters = ({
     model_data,
     modelParams,
@@ -33,13 +48,16 @@ const TrainingParameters = ({
     trainingStartedFlag,
     setTransformationOrder,
     handleModelParamChange,
-    handleMultiselectOptions,
-    handleDoValidation,
-    handleEarlyStopping,
     handleStartModelTraining,
     handleClearModelData,
     handleParametersAccordianCollapse,
 }) => {
+    const handleDoValidation = () => {
+        handleModelParamChange('doValidation', !modelParams.doValidation)
+    }
+    const handleEarlyStopping = () => {
+        handleModelParamChange('earlyStopping', !modelParams.earlyStopping)
+    }
     return (
         <Box>
             <Paper elevtion={4} className='model-parameter-expandd-collapse-box' sx={{ display: "flex", flexDirection: "row", justifyContent: 'space-between', alignItems: 'center', padding: '4px', boxShadow: `${trainingParametersAccordianCollapse && 'none'}` }}>
@@ -78,67 +96,244 @@ const TrainingParameters = ({
                     </Box>
 
                     <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' gap='8px'>
-                        <Box display='flex' flexDirection='column' gap='8px' width='100%'>
-                            <Paper elevation={4} sx={{ padding: '4px' }}>
-                                <FormControlLabel
-                                    value="start"
-                                    sx={{ marginLeft: '0px', marginRight: '0px', width: '100%', justifyContent: 'space-between' }}
-                                    control={<Switch disabled={trainingStartedFlag} size="small" color="secondary" />}
-                                    label='Do validation on test set'
-                                    labelPlacement="start"
-                                    checked={modelParams.doValidation}
-                                    onChange={() => handleDoValidation()}
-                                />
-                            </Paper>
+                        <Grid container spacing={1}>
 
-                            <Paper elevation={4} sx={{ padding: '4px' }}>
-                                <FormControlLabel
-                                    value="start"
-                                    sx={{ marginLeft: '0px', marginRight: '0px', width: '100%', justifyContent: 'space-between' }}
-                                    control={<Switch disabled={trainingStartedFlag} size="small" color="secondary" />}
-                                    label='Perform Early Stopping'
-                                    labelPlacement="start"
-                                    checked={modelParams.earlyStopping}
-                                    onChange={() => handleEarlyStopping()}
-                                />
-                            </Paper>
-                            {/* <MultiSelect
-                                                inputLabel={'Model type'}
-                                                inputOptions={MODEL_OPTIONS}
-                                                selectedInputOptions={modelParams.modelType}
-                                                handleInputOptions={handleModelTypeOptions}
-                                                fieldName={'Model type'}
-                                                toolTipTitle={'Select a model type'}
+                            <Grid item xs={12} sm={6} md={4} lg={4} xl={3}>
+                                <Box display='flex' flexDirection='column' gap='8px' width='100%'>
+                                    <MultiSelect
+                                        inputLabel={'Model type'}
+                                        inputOptions={MODEL_OPTIONS}
+                                        selectedInputOptions={modelParams.modelType}
+                                        key_id={"modelType"}
+                                        handleInputOptions={handleModelParamChange}
+                                        fieldName={'Model type'}
+                                        toolTipTitle={'Select a model type'}
+                                        trainingStartedFlag={trainingStartedFlag}
+                                    />
+
+                                    <MultiSelect
+                                        inputLabel={'Prediction flag'}
+                                        inputOptions={INPUT_OPTIONS}
+                                        selectedInputOptions={modelParams.multiSelectValue}
+                                        key_id={"multiSelectValue"}
+                                        handleInputOptions={handleModelParamChange}
+                                        fieldName={'To predict'}
+                                        toolTipTitle={'Select one of the flags to be used to predict'}
+                                        trainingStartedFlag={trainingStartedFlag}
+                                    />
+
+                                    {modelParams.modelType === 'WGAN-GP' &&
+                                        <React.Fragment>
+                                            <CustomInput
+                                                tooltipMessage={'Input a number that represents the no of training inputs to take from the total available tickers.(Selects the last tickers)'}
+                                                name={'to_train_count'}
+                                                handleModelParamChange={handleModelParamChange}
+                                                value={modelParams.to_train_count}
+                                                disabled={trainingStartedFlag}
+                                            />
+
+                                            <MultiSelect
+                                                inputLabel={'Forecast step'}
+                                                inputOptions={INTERMEDIATE_RESULT_STEP_OPTIONS}
+                                                selectedInputOptions={modelParams.intermediateResultStep}
+                                                key_id={"intermediateResultStep"}
+                                                handleInputOptions={handleModelParamChange}
+                                                fieldName={'Intermediate Step'}
+                                                toolTipTitle={'Select a step at which point to send intermediate forecast. Select 0 for no intermediate forecast. If the step is greater than the total no of epochs, then the intermediate forecast will be sent at the end of the training as the final forecast.'}
                                                 trainingStartedFlag={trainingStartedFlag}
-                                            /> */}
-                            {modelParams.modelType !== 'Single Step Multiple Output' &&
-                                <MultiSelect
-                                    inputLabel={'Prediction flag'}
-                                    inputOptions={INPUT_OPTIONS}
-                                    selectedInputOptions={modelParams.multiSelectValue}
-                                    handleInputOptions={handleMultiselectOptions}
-                                    fieldName={'To predict'}
-                                    toolTipTitle={'Select one of the flags to be used to predict'}
-                                    trainingStartedFlag={trainingStartedFlag}
-                                />
-                            }
-                            <CustomSlider sliderValue={modelParams.trainingDatasetSize} name={'trainingDatasetSize'} handleModelParamChange={handleModelParamChange} label={'Training size'} min={50} max={95} sliderMin={0} sliderMax={100} disabled={trainingStartedFlag} />
-                            <CustomSlider sliderValue={modelParams.timeStep} name={'timeStep'} handleModelParamChange={handleModelParamChange} label={'Step Size'} min={2} max={100} sliderMin={2} sliderMax={100} disabled={trainingStartedFlag} />
-                            {(modelParams.modelType === 'Multi Step Single Output' || modelParams.modelType === 'Multi Step Multiple Output') &&
-                                <CustomSlider sliderValue={modelParams.lookAhead} name={'lookAhead'} handleModelParamChange={handleModelParamChange} label={'Look Ahead'} min={1} max={30} sliderMin={1} sliderMax={30} disabled={trainingStartedFlag} />
-                            }
-                            <CustomSlider sliderValue={modelParams.epoch} name={'epoch'} handleModelParamChange={handleModelParamChange} label={'Epochs'} min={1} max={500} sliderMin={1} sliderMax={500} disabled={trainingStartedFlag} />
-                            {modelParams.modelType !== 'Multi Step Single Output' &&
-                                <CustomSlider sliderValue={modelParams.hiddenLayer} name={'hiddenLayer'} handleModelParamChange={handleModelParamChange} label={'Hidden Layers'} min={1} max={20} sliderMin={1} sliderMax={10} disabled={trainingStartedFlag} />
-                            }
-                            <CustomSlider sliderValue={modelParams.batchSize} name={'batchSize'} handleModelParamChange={handleModelParamChange} label={'Batch Size'} min={1} max={100} sliderMin={1} sliderMax={100} disabled={trainingStartedFlag} />
-                            <CustomSlider sliderValue={modelParams.learningRate} name={'learningRate'} handleModelParamChange={handleModelParamChange} label={'L Rate'} min={1} max={100} sliderMin={1} sliderMax={100} scaledLearningRate={modelParams.scaledLearningRate} disabled={trainingStartedFlag} />
-                        </Box>
-                        <ReorderList orderList={transformationOrder} setOrderList={setTransformationOrder} disabled={trainingStartedFlag} />
+                                            />
+                                            
+                                            <MultiSelect
+                                                inputLabel={'Model save step'}
+                                                inputOptions={INTERMEDIATE_RESULT_STEP_OPTIONS}
+                                                selectedInputOptions={modelParams.modelSaveStep}
+                                                key_id={"modelSaveStep"}
+                                                handleInputOptions={handleModelParamChange}
+                                                fieldName={'Model Save Step'}
+                                                toolTipTitle={'Select a step at which point to save the generator model. Select 0 for no save. If the step is greater than the total no of epochs, then the model will be saved at the end of the training.'}
+                                                trainingStartedFlag={trainingStartedFlag}
+                                            />
+                                        </React.Fragment>
+                                    }
+
+                                    <Paper elevation={4} sx={{ padding: '4px' }}>
+                                        <FormControlLabel
+                                            value="start"
+                                            sx={{ marginLeft: '0px', marginRight: '0px', width: '100%', justifyContent: 'space-between' }}
+                                            control={<Switch disabled={trainingStartedFlag} size="small" color="secondary" />}
+                                            label='Do validation on test set'
+                                            labelPlacement="start"
+                                            checked={modelParams.doValidation}
+                                            onChange={() => handleDoValidation()}
+                                        />
+                                    </Paper>
+
+                                    <Paper elevation={4} sx={{ padding: '4px' }}>
+                                        <FormControlLabel
+                                            value="start"
+                                            sx={{ marginLeft: '0px', marginRight: '0px', width: '100%', justifyContent: 'space-between' }}
+                                            control={<Switch disabled={trainingStartedFlag} size="small" color="secondary" />}
+                                            label='Perform Early Stopping'
+                                            labelPlacement="start"
+                                            checked={modelParams.earlyStopping}
+                                            onChange={() => handleEarlyStopping()}
+                                        />
+                                    </Paper>
+                                </Box>
+                            </Grid>
+
+                            <Grid item xs={12} sm={6} md={4} lg={4} xl={3}>
+                                <Box display='flex' flexDirection='column' gap='8px' width='100%'>
+                                    <CustomSlider
+                                        sliderValue={modelParams.trainingDatasetSize}
+                                        name={'trainingDatasetSize'}
+                                        handleModelParamChange={handleModelParamChange}
+                                        label={'Training size'}
+                                        min={50}
+                                        max={95}
+                                        sliderMin={0}
+                                        sliderMax={100}
+                                        disabled={trainingStartedFlag}
+                                    />
+                                    <CustomSlider
+                                        sliderValue={modelParams.timeStep}
+                                        name={'timeStep'}
+                                        handleModelParamChange={handleModelParamChange}
+                                        label={'Step Size'}
+                                        min={2}
+                                        max={100}
+                                        sliderMin={2}
+                                        sliderMax={100}
+                                        disabled={trainingStartedFlag}
+                                    />
+                                    <CustomSlider
+                                        sliderValue={modelParams.lookAhead}
+                                        name={'lookAhead'}
+                                        handleModelParamChange={handleModelParamChange}
+                                        label={'Look Ahead'}
+                                        min={1}
+                                        max={30}
+                                        sliderMin={1}
+                                        sliderMax={30}
+                                        disabled={trainingStartedFlag}
+                                    />
+
+                                    {modelParams.modelType === 'WGAN-GP' &&
+                                        <CustomSlider
+                                            sliderValue={modelParams.epoch}
+                                            name={'epoch'}
+                                            handleModelParamChange={handleModelParamChange}
+                                            label={'Epochs'}
+                                            min={1}
+                                            max={2000}
+                                            sliderMin={1}
+                                            sliderMax={2000}
+                                            disabled={trainingStartedFlag}
+                                        />
+                                    }
+                                </Box>
+                            </Grid>
+
+                            <Grid item xs={12} sm={6} md={4} lg={4} xl={3}>
+                                <Box display='flex' flexDirection='column' gap='8px' width='100%'>
+                                    {modelParams.modelType === 'LSTM' &&
+                                        <CustomSlider
+                                            sliderValue={modelParams.epoch}
+                                            name={'epoch'}
+                                            handleModelParamChange={handleModelParamChange}
+                                            label={'Epochs'}
+                                            min={1}
+                                            max={500}
+                                            sliderMin={1}
+                                            sliderMax={500}
+                                            disabled={trainingStartedFlag}
+                                        />
+                                    }
+                                    {/* {modelParams.modelType !== 'Multi Step Single Output' &&
+                                        <CustomSlider sliderValue={modelParams.hiddenLayer} name={'hiddenLayer'} handleModelParamChange={handleModelParamChange} label={'Hidden Layers'} min={1} max={20} sliderMin={1} sliderMax={10} disabled={trainingStartedFlag} />
+                                    } */}
+
+                                    <CustomSlider
+                                        sliderValue={modelParams.batchSize}
+                                        name={'batchSize'}
+                                        handleModelParamChange={handleModelParamChange}
+                                        label={'Batch Size'}
+                                        min={1}
+                                        max={modelParams.modelType === 'WGAN-GP' ? 1000 : 100}
+                                        sliderMin={1}
+                                        sliderMax={modelParams.modelType === 'WGAN-GP' ? 1000 : 100}
+                                        disabled={trainingStartedFlag}
+                                    />
+
+                                    {modelParams.modelType === 'LSTM' &&
+                                        <CustomSlider
+                                            sliderValue={modelParams.learningRate}
+                                            name={'learningRate'}
+                                            handleModelParamChange={handleModelParamChange}
+                                            label={`L Rate`}
+                                            min={1}
+                                            max={100}
+                                            sliderMin={1}
+                                            sliderMax={100}
+                                            scaledLearningRate={modelParams.scaledLearningRate}
+                                            disabled={trainingStartedFlag}
+                                        />
+                                    }
+
+                                    {modelParams.modelType === 'WGAN-GP' &&
+                                        <React.Fragment>
+                                            <CustomSlider
+                                                sliderValue={modelParams.discriminator_iteration}
+                                                name={'discriminator_iteration'}
+                                                handleModelParamChange={handleModelParamChange}
+                                                label={'Critic Iterator'}
+                                                min={1}
+                                                max={5}
+                                                sliderMin={1}
+                                                sliderMax={5}
+                                                disabled={trainingStartedFlag}
+                                            />
+                                            <CustomSlider
+                                                sliderValue={modelParams.d_learningRate}
+                                                name={'d_learningRate'}
+                                                handleModelParamChange={handleModelParamChange}
+                                                label={`L Rate (Disc)`}
+                                                min={10}
+                                                max={100}
+                                                sliderMin={10}
+                                                sliderMax={100}
+                                                scaledLearningRate={modelParams.scaled_d_learningRate}
+                                                disabled={trainingStartedFlag}
+                                            />
+
+                                            <CustomSlider
+                                                sliderValue={modelParams.g_learningRate}
+                                                name={'g_learningRate'}
+                                                handleModelParamChange={handleModelParamChange}
+                                                label={`L Rate (Gen)`}
+                                                min={10}
+                                                max={100}
+                                                sliderMin={10}
+                                                sliderMax={100}
+                                                scaledLearningRate={modelParams.scaled_g_learningRate}
+                                                disabled={trainingStartedFlag}
+                                            />
+
+                                        </React.Fragment>
+                                    }
+                                </Box>
+                            </Grid>
+
+                            <Grid item xs={12} sm={6} md={4} lg={4} xl={3}>
+                                <ReorderList orderList={transformationOrder} setOrderList={setTransformationOrder} disabled={trainingStartedFlag} />
+                            </Grid>
+
+                        </Grid>
+
                     </Box>
                 </Box>
-            </Collapse>
-        </Box>
+            </Collapse >
+        </Box >
     )
 }
 

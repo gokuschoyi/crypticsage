@@ -21,6 +21,12 @@ import IndicatorSearch from "./crypto_components/IndicatorSearch";
 import MainChartOptions from "./crypto_components/MainChartOptions";
 import RMSEBarChart from "./crypto_components/RMSEBarChart";
 import CorelationMatrix from "./crypto_components/CorelationMatrix";
+
+import WGANGPProgress from "./crypto_components/WGANGPProgress";
+import WgangpMetricsChart from "./crypto_components/WgangpMetricsChart";
+import IntermediateForecastChart from "./crypto_components/IntermediateForecastChart";
+import WganFinalPredictionChart from "./crypto_components/WganFinalPredictionChart";
+
 export {
     CustomSlider,
     LinearProgressWithLabel,
@@ -45,4 +51,8 @@ export {
     MainChartOptions,
     RMSEBarChart,
     CorelationMatrix,
+    WGANGPProgress,
+    WgangpMetricsChart,
+    IntermediateForecastChart,
+    WganFinalPredictionChart
 }

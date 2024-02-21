@@ -1,21 +1,33 @@
 from sklearn.preprocessing import MinMaxScaler
+from dotenv import load_dotenv
+import tensorflow as tf
+from joblib import dump
+import pandas as pd
 import numpy as np
+import redis
+import json
+import os
+
+# Load environment variables from the .env file
+load_dotenv()
+
+redis_host = os.getenv("REDIS_HOST")
+redis_port = os.getenv("REDIS_PORT")
+redisStore = redis.Redis(host=redis_host, port=redis_port)  # type: ignore
+redisPubSubConn = redis.Redis(host=redis_host, port=redis_port)  # type: ignore
 
 
-def findIndex(transformation_order, to_predict):
+def getYLabels(data, transformation_order, to_predict, column_length):  # get the y labels from the train data
     index = None
     for i, item in enumerate(transformation_order):
         if item["value"] == to_predict:
             index = i
             break
-    return index
 
-
-def getYlabels(trainData, y_label_index):
-    y_value = trainData.iloc[
-        :, [i for i in range(len(trainData.columns)) if i == y_label_index]
+    y_labels = data.iloc[
+        :, [i for i in range(column_length) if i == index]
     ]
-    return y_value
+    return y_labels
 
 
 def scalar_function(x, y):
@@ -27,52 +39,30 @@ def scalar_function(x, y):
     return X_Scalar, Y_Scalar
 
 
-def tranform_data(xTrain_norm, yTrain_norm):
+def tranform_data(xTrain_norm, yTrain_norm, n_steps_in, n_steps_out, type_):
     X_data = np.array(xTrain_norm)
     y_data = np.array(yTrain_norm)
     X = list()
     y = list()
     past_y = list()
-    n_steps_in = 14
-    n_steps_out = 5
     length = len(X_data)
 
     for i in range(0, length, 1):
-        # print(i)
         X_value = X_data[i: i + n_steps_in][:, :]
         y_value = y_data[i + n_steps_in: i + (n_steps_in + n_steps_out)][:, 0]
         past_y_value = y_data[i: i + n_steps_in][:, :]
-        # print(i, len(X_value), len(y_value))
-        if len(X_value) == n_steps_in and len(y_value) == n_steps_out:
-            X.append(X_value)
-            y.append(y_value)
-            past_y.append(past_y_value)
-
+        if (type_ == 'training'):
+            if len(X_value) == n_steps_in and len(y_value) == n_steps_out:
+                X.append(X_value)
+                y.append(y_value)
+                past_y.append(past_y_value)
+        else:
+            if len(X_value) == n_steps_in:
+                X.append(X_value)
+                past_y.append(past_y_value)
+            if len(y_value) == n_steps_out:
+                y.append(y_value)
     return X, y, past_y
-
-
-def generate_batches(data, batch_size):
-    if len(data.shape) == 2:
-        num_samples, seq_length = data.shape
-    else:
-        num_samples, seq_length, features = data.shape
-
-    num_batches, remainder = divmod(num_samples, batch_size)
-
-    # Initialize an empty list to store batches
-    batch_list = []
-
-    # Handle the initial batch
-    if remainder > 0:
-        initial_batch = data[:remainder]
-        batch_list.append(initial_batch)
-
-    # Reshape the remaining data into batches
-    whole_batches = data[remainder:]
-    reshapedWholeBatches = whole_batches.reshape(num_batches, batch_size, seq_length, *data.shape[2:])
-    batch_list.extend(reshapedWholeBatches)
-
-    return batch_list
 
 
 def yield_batches(real_input, real_price, past_y, batchSize):
@@ -97,3 +87,231 @@ def yield_batches(real_input, real_price, past_y, batchSize):
 
     for input_batch, price_batch, past_y_batch in zip(reshaped_input_batches, reshaped_price_batches, reshaped_past_y_batches):
         yield input_batch, price_batch, past_y_batch
+
+
+def generate_additional_dates(dates_df, n):
+    # Get the last date in the DataFrame
+    last_date = dates_df.iloc[-1, 0]
+
+    # Get the frequency of the dates (assuming it's hourly)
+    frequency = pd.infer_freq(dates_df['date'])
+
+    # Generate n additional dates
+    additional_dates = pd.date_range(start=last_date, periods=n+1, freq=frequency)[1:]  # type: ignore
+
+    # Format the dates to the desired format
+    formatted_dates = [date.strftime("%m/%d/%Y, %I:%M:%S %p") for date in additional_dates]
+
+    # Create a DataFrame with the additional dates
+    additional_dates_df = pd.DataFrame({'date': formatted_dates, 'actual': 'null'})
+
+    # Concatenate the additional dates DataFrame with the original dates DataFrame
+    dates_df = pd.concat([dates_df, additional_dates_df]).reset_index(drop=True)
+
+    return dates_df
+
+
+def calculatePredictomRMSE(predictions, look_ahead):
+    sliced = predictions[look_ahead:predictions.shape[0]-look_ahead, 1:]
+    rmse_ = {}
+    real_value = sliced[:, 0]
+
+    for i in range(sliced.shape[1] - 1):
+        predicted_value = sliced[:, i+1]
+        real_tensor = tf.convert_to_tensor(real_value, dtype='float32')
+        pred_tensor = tf.convert_to_tensor(predicted_value, dtype='float32')
+        mse = np.mean(np.square(np.subtract(real_tensor, pred_tensor)))
+        rmse = np.sqrt(mse)
+        # print(f'RMSE for period {i+1}: {rmse}')
+        rmse_[f'period_{i+1}'] = f'{rmse}'
+
+    return rmse_
+
+
+def broadcastTrainingStatus(uid, event, message, process_id=None):
+    match event:
+        case 'feature_relations':
+            redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "feature_relations", "uid": uid, "metrics": message}),
+            )
+        case "notify":
+            redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "notify", "uid": uid, "message": message}),
+            )
+        case "epochBegin":
+            redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "epochBegin", "uid": uid, "epoch": message}),
+            )
+        case "epochEnd":
+            redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "epochEnd", "uid": uid, "epoch": message['epoch'], "log": message['log']})
+            )
+        case "batchEnd":
+            redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "batchEnd", "uid": uid, "batch": message['batch'], "log": message['log']})
+            )
+        case "trainingEnd":
+            redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "trainingEnd", "uid": uid})
+            )
+        case "prediction_completed":
+            redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "prediction_completed", "uid": uid, "model": 'WGAN-GP', "id": process_id})
+            )
+        case "intermediate_forecast":
+            redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "intermediate_forecast", "uid": uid, "intermediate_forecast": message['data'], "epoch": message['epoch'], "rmse": message['rmse']})
+            )
+        case "error":
+            redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "error", "uid": uid, "message": message}),
+            )
+
+
+def log_training_metrics(
+    losses,
+    epoch,
+    fw_d_loss,
+    fw_g_loss,
+    fw_g_mse,
+    fw_g_sign,
+    fw_g_rmse,
+    fw_g_mae,
+    fw_g_mape,
+):
+    with fw_d_loss.as_default():
+        tf.summary.scalar("training_losses", losses["discriminator_loss"].numpy(), epoch+1)
+        fw_d_loss.flush()
+
+    with fw_g_loss.as_default():
+        tf.summary.scalar("training_losses", losses["generator_loss"].numpy(), epoch+1)
+        fw_g_loss.flush()
+
+    with fw_g_mse.as_default():
+        tf.summary.scalar("losses", losses["g_mse"], epoch + 1)  # type: ignore
+        fw_g_mse.flush()
+
+    with fw_g_sign.as_default():
+        tf.summary.scalar("losses", losses["g_sign"], epoch + 1)  # type: ignore
+        fw_g_sign.flush()
+
+    with fw_g_rmse.as_default():
+        tf.summary.scalar("losses", losses["g_rmse"], epoch + 1)
+        fw_g_rmse.flush()
+
+    with fw_g_mae.as_default():
+        tf.summary.scalar("losses", losses["g_mae"], epoch + 1)
+        fw_g_mae.flush()
+
+    with fw_g_mape.as_default():
+        tf.summary.scalar("losses", losses["g_mape"], epoch + 1)
+        fw_g_mape.flush()
+
+
+def saveTrainScalers(model_id, x_scalar, y_scalar):
+    print('saving scalers')
+    scalar_folder_path = f'./saved_models/{model_id}/scalers'
+
+    if not os.path.exists(scalar_folder_path):
+        os.makedirs(scalar_folder_path)
+
+    x_scalar_path = f'{scalar_folder_path}/x_scalar'
+    y_scalar_path = f'{scalar_folder_path}/y_scalar'
+
+    dump(x_scalar, x_scalar_path)
+    dump(y_scalar, y_scalar_path)
+
+
+def plot_intermediate_predictions(y_scalar, intermediate_result_step, logs_dir, epoch, yt_test, fw_test_real, predictions):
+    if intermediate_result_step > 0:
+        if (epoch / 0.234234 == 0):
+            yt_test_scaled = tf.constant(y_scalar.inverse_transform(yt_test))  # type: ignore
+            with fw_test_real.as_default():
+                for step in range(yt_test.shape[0]):  # type: ignore
+                    tf.summary.scalar("test", yt_test_scaled[step][0], step)  # type: ignore
+                fw_test_real.flush()
+            del yt_test_scaled
+
+        # print(f"Predictions shape : {predictions.shape}")
+        predictions_scaled = tf.constant(y_scalar.inverse_transform(predictions))  # type: ignore
+
+        if ((epoch + 1) % intermediate_result_step == 0):
+            fw_test_pred = tf.summary.create_file_writer(logs_dir + f"/test/test_pred_{epoch+1}")  # type: ignore
+            with fw_test_pred.as_default():
+                for step in range(predictions.shape[0]):  # type: ignore
+                    tf.summary.scalar("test", predictions_scaled[step][0], step)  # type: ignore
+                fw_test_pred.flush()
+            fw_test_pred.close()
+
+
+def plot_validation_metrics(
+    val_losses,
+    epoch,
+    fw_validation_pred_mse,
+    fw_validation_pred_sign,
+    fw_validation_pred_rmse,
+    fw_validation_pred_mae,
+    fw_validation_pred_mape,
+):
+    with fw_validation_pred_mse.as_default():
+        tf.summary.scalar("test_metric", val_losses["mse"], epoch + 1)  # type: ignore
+        fw_validation_pred_mse.flush()
+
+    with fw_validation_pred_sign.as_default():
+        tf.summary.scalar("test_metric", val_losses["sign"], epoch + 1)
+        fw_validation_pred_sign.flush()
+
+    with fw_validation_pred_rmse.as_default():
+        tf.summary.scalar("test_metric", val_losses["rmse"], epoch + 1)
+        fw_validation_pred_rmse.flush()
+
+    with fw_validation_pred_mae.as_default():
+        tf.summary.scalar("test_metric", val_losses["mae"], epoch + 1)
+        fw_validation_pred_mae.flush()
+
+    with fw_validation_pred_mape.as_default():
+        tf.summary.scalar("test_metric", val_losses["mape"], epoch + 1)
+        fw_validation_pred_mape.flush()
+
+
+def saveModel(epoch, model_id, generator):
+    print('saving model weights')
+    # Generate a unique ID for the subfolder
+    subfolder_id = f'checkpoint_{epoch+1}'
+    main_folder_path = f'./saved_models/{model_id}'
+    subfolder_path = f'{main_folder_path}/{subfolder_id}'
+
+    # Create the main folder and subfolder if they don't exist
+    if not os.path.exists(subfolder_path):
+        os.makedirs(subfolder_path)
+
+    # Save the model in a file with the name of the epoch
+    file_path = f'{subfolder_path}/gen_model_{epoch+1}'
+    print(f'model save path : {file_path}')
+    generator.save_weights(file_path)  # type: ignore
+
+
+def initFileWriters(logs_dir):
+    metrics = [
+        "metrics_batch/d_batch_loss", "metrics_batch/g_batch_loss", "", "metrics_memory/train_memory",
+        "losses/d_loss", "losses/g_loss", "metrics/g_mse", "metrics/g_sign", "metrics/rmse", "metrics/mae", "metrics/mape",
+        "validation/pred_mse", "validation/pred_sign", "validation/pred_rmse", "validation/pred_mae", "validation/pred_mape",
+        "test/test_real"
+    ]
+
+    file_writers = {metric: tf.summary.create_file_writer(logs_dir + f"/{metric}") for metric in metrics}  # type: ignore
+    return file_writers
+
+
+def closeFileWriters(file_writers):
+    for writer in file_writers.values():
+        writer.close()

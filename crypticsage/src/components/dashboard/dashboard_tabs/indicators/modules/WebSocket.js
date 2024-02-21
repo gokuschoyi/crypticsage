@@ -7,7 +7,9 @@ import {
     setPredictedValues,
     setPredictionScores,
     setStartWebSocket,
-    setFeatureCorrelationData
+    setFeatureCorrelationData,
+    setIntermediateForecastResults,
+    setWganFinalForecast
 } from '../modules/CryptoModuleSlice'
 
 // Function to add a new message
@@ -44,6 +46,7 @@ const useWebSocket = (
     evaluating,
     batchLinearProgressRef,
     evalLinearProgressRef,
+    wgangpProgressRef,
     setBatchResult,
     setEvaluating,
     setTrainingStartedFlag,
@@ -60,6 +63,7 @@ const useWebSocket = (
         EVALUATING: 'evaluating',
         EVAL_COMPLETE: 'eval_complete',
         PREDICTION_COMPLETED: 'prediction_completed',
+        INTERMEDIATE_FORECAST: 'intermediate_forecast',
         ERROR: 'error'
     };
 
@@ -94,9 +98,9 @@ const useWebSocket = (
                         let epoch = data.epoch
                         batchEndBox = document.querySelector('.batch-end')
                         if (batchEndBox) {
-                            batchEndBox.querySelector('#epoch').textContent = `E : ${epoch + 1}`
+                            batchEndBox.querySelector('#epoch').textContent = `E : ${epoch}`
                         }
-                        dispatch(setEpochNo(epoch))
+                        dispatch(setEpochNo(epoch + 1))
                         break;
                     case ACTIONS.EPOCH_END:
                         dispatch(setEpochResults({ ...data.log, epoch: data.epoch }))
@@ -104,24 +108,52 @@ const useWebSocket = (
                         break;
                     case ACTIONS.BATCH_END:
                         if (!batchResult) { setBatchResult(true) }
-                        let totalNoOfBatch = data.log.totalNoOfBatch
-                        const percentageCompleted = parseFloat(((data.log.batch / totalNoOfBatch) * 100).toFixed(2)) || 0
-                        const bgColor = getColorForValue(percentageCompleted, 0, 100, '#C2185B', '#388E3C');
-                        if (batchLinearProgressRef.current) {
-                            const linearProgress = batchLinearProgressRef.current.querySelector('#linear-progress')
-                            let progressBar = linearProgress.querySelector('span')
+                        if (data.log?.model === 'discriminator' || data.log?.model === 'generator') {
+                            let totalNoOfBatch = data.log.totalNoOfBatch
+                            const percentageCompleted = parseFloat(((data.log.batch / totalNoOfBatch) * 100).toFixed(2)) || 0
+                            const bgColor = getColorForValue(percentageCompleted, 0, 100, '#C2185B', '#388E3C');
+                            if (wgangpProgressRef.current) {
+                                const linearProgress = wgangpProgressRef.current.querySelector('#linear-progress')
+                                let progressBar = linearProgress.querySelector('span')
 
-                            linearProgress.style.backgroundColor = bgColor;
-                            progressBar.style.transform = `translateX(-${100 - percentageCompleted}%)`
+                                linearProgress.style.backgroundColor = bgColor;
+                                const batchCount = wgangpProgressRef.current.querySelector('#batch-count')
 
-                            const batchCount = batchLinearProgressRef.current.querySelector('#batch-count')
-                            batchCount.innerHTML = `(${percentageCompleted}%) ${data.log.batch}/${totalNoOfBatch}`
-                        }
-                        batchEndBox = document.querySelector('.batch-end')
-                        if (batchEndBox) {
-                            batchEndBox.querySelector('#loss').textContent = `Loss : ${data.log.loss}`;
-                            batchEndBox.querySelector('#mse').textContent = `MSE : ${data.log.mse}`;
-                            batchEndBox.querySelector('#mae').textContent = `MAE : ${data.log.mae}`;
+                                batchCount.innerHTML = `(${percentageCompleted}%) ${data.log.batch}/${totalNoOfBatch}`
+                                progressBar.style.transform = `translateX(-${100 - percentageCompleted}%)`
+                                batchEndBox = document.querySelector('.batch-end')
+                                if (batchEndBox) {
+                                    if (data.log.model === 'discriminator') {
+                                        batchEndBox.querySelector('#model_type').textContent = `${data.log.model}`;
+                                        batchEndBox.querySelector('#n_critic').textContent = `Critic Iter : ${data.log.critic_iteration}`;
+                                        batchEndBox.querySelector('#loss').textContent = `Loss : ${data.log.loss}`;
+                                    } else {
+                                        batchEndBox.querySelector('#model_type').textContent = `${data.log.model}`;
+                                        batchEndBox.querySelector('#n_critic').textContent = ``;
+                                        batchEndBox.querySelector('#loss').textContent = `Loss : ${data.log.loss}`;
+                                    }
+                                }
+                            }
+                        } else {
+                            let totalNoOfBatch = data.log.totalNoOfBatch
+                            const percentageCompleted = parseFloat(((data.log.batch / totalNoOfBatch) * 100).toFixed(2)) || 0
+                            const bgColor = getColorForValue(percentageCompleted, 0, 100, '#C2185B', '#388E3C');
+                            if (batchLinearProgressRef.current) {
+                                const linearProgress = batchLinearProgressRef.current.querySelector('#linear-progress')
+                                let progressBar = linearProgress.querySelector('span')
+
+                                linearProgress.style.backgroundColor = bgColor;
+                                progressBar.style.transform = `translateX(-${100 - percentageCompleted}%)`
+
+                                const batchCount = batchLinearProgressRef.current.querySelector('#batch-count')
+                                batchCount.innerHTML = `(${percentageCompleted}%) ${data.log.batch}/${totalNoOfBatch}`
+                            }
+                            batchEndBox = document.querySelector('.batch-end')
+                            if (batchEndBox) {
+                                batchEndBox.querySelector('#loss').textContent = `Loss : ${data.log.loss}`;
+                                batchEndBox.querySelector('#mse').textContent = `MSE : ${data.log.mse}`;
+                                batchEndBox.querySelector('#mae').textContent = `MAE : ${data.log.mae}`;
+                            }
                         }
                         break;
                     case ACTIONS.TRAINING_END:
@@ -154,13 +186,21 @@ const useWebSocket = (
                         setEvaluating(false)
                         dispatch(setPredictionScores(data.scores))
                         break;
+                    case ACTIONS.INTERMEDIATE_FORECAST:
+                        const { action: a, ...rest } = data
+                        dispatch(setIntermediateForecastResults(rest))
+                        break;
                     case ACTIONS.PREDICTION_COMPLETED:
                         setTrainingStartedFlag(false)
-                        dispatch(setPredictedValues(data.predictions))
                         dispatch(setModelEndTime(new Date().getTime()))
-                        dispatch(setStartWebSocket(false))
+                        if (data.model_type === 'WGAN-GP') {
+                            dispatch(setWganFinalForecast({ predictions: data.predictions, rmse: data.rmse }))
+                        } else {
+                            dispatch(setPredictedValues(data.predictions))
+                        }
                         currentEpoch = 0
                         Success('Training completed successfully')
+                        dispatch(setStartWebSocket(false))
                         break;
                     case ACTIONS.ERROR:
                         setBatchResult(false)

@@ -20,7 +20,8 @@ const Dashboard = (props) => {
                 // Info('Connection is back')
             } else {
                 // console.log('No internet'); // Replace with your Error function or notification
-                Error('No internet')
+                // Error('No internet') // Some bullshit error popping up causing random crashes
+                console.log('No Internet')
             }
         } else {
             // Skip the first check on initial render

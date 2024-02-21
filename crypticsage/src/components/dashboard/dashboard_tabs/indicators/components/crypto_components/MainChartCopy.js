@@ -407,6 +407,7 @@ const MainChart = (props) => {
     const chartboxRef = useRef();
 
     const lastLookAheadPredictions = useSelector(state => state.cryptoModule.modelData.lastLookAheadPredictions)
+    const total_count_for_ticker_in_db = useSelector(state => state.cryptoModule.total_count_db)
 
     // const [finalTalibExecuteQuery, setFinalTalibExcuteQuery] = useState([])
     useEffect(() => {
@@ -691,7 +692,7 @@ const MainChart = (props) => {
                     const newData = res.data.fetchedResults.ticker_data
                     newDataRef.current = [...newData, ...newDataRef.current]
                     fetchPointRef.current = Math.floor(candleSticksInVisibleRange * 0.2) / -1
-                    dispatch(setCryptoDataInDbRedux(newDataRef.current))
+                    dispatch(setCryptoDataInDbRedux({ dataInDb: newDataRef.current, total_count_db: total_count_for_ticker_in_db }))
 
                     const uniqueData = checkForUniqueAndTransform(newDataRef.current)
 
