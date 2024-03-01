@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from keras import backend as K
 from .util import (
     plot_intermediate_predictions,
+    broadcastTrainingBatchLosses,
     generate_additional_dates,
     broadcastTrainingStatus,
     plot_validation_metrics,
@@ -13,8 +14,7 @@ from .util import (
     closeFileWriters,
     initFileWriters,
     scalar_function,
-    tranform_data,
-    yield_batches,
+    transform_data,
     getYLabels,
     saveModel,
 )
@@ -25,11 +25,11 @@ import logging
 import psutil
 import redis
 import keras
-import math
 import json
 import time
 import os
 
+# from memory_profiler import profile
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -42,21 +42,21 @@ redisStore = redis.Redis(host=redis_host, port=redis_port)  # type: ignore
 class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
     def __init__(self, process_id, uid, model_id, training_parameters, existing_data):
         super(WGANGP, self).__init__()
+        self.tb_logging = False
         self.g_optimizer = keras.optimizers.Adam(learning_rate=training_parameters['g_learning_rate'], beta_1=0.5, beta_2=0.9)
         self.d_optimizer = keras.optimizers.Adam(learning_rate=training_parameters['d_learning_rate'], beta_1=0.5, beta_2=0.9)
+        self.discriminator = keras.models.Model()
+        self.generator = keras.models.Model()
         self.total_training_batches = 0  # total number of training batches
-        self.global_step = 1  # step counter for tensorboard batch loss
         self.gp_lambda = 10
         self.lambda_1 = 0.5  # => adding extra losses significatively speeds up training and convergence)
         self.lambda_2 = 0.5  # => adding extra losses significatively speeds up training and convergence
 
         self.logs_dir = "logs/" + model_id
-        self.existing_data = existing_data
         self.process_id = process_id
-        self.discriminator = None
-        self.model_id = model_id
-        self.generator = None
         self.uid = uid
+        self.model_id = model_id
+        self.existing_data = existing_data # flag used to send corelation matrix to the client
 
         self.to_predict = training_parameters['to_predict']
         self.training_size = training_parameters['training_size']
@@ -116,7 +116,7 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
         }
 
     def fetchFeaturesFromRedis(self):  # fetch the features from redis and convert it to pandas dataframe. Also saves the split indes for train and test data
-        logging.critical(f"Fetching features from redis for process id : {self.process_id}")
+        logging.critical(f"{self.process_id} : Fetching features from redis.")
         features_redis = redisStore.hget(self.process_id, "features")
         df = pd.DataFrame.from_dict(json.loads(features_redis))  # type: ignore
         self.features_df = df  # type: ignore
@@ -129,7 +129,7 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
             broadcastTrainingStatus(self.uid, "feature_relations", json.loads(metrics))  # type: ignore
 
     def splitDataToTrainAndTest(self):  # split the data into train and test sets based on split index
-        logging.critical(f"Splitting data to train and test for process id : {self.process_id}")
+        logging.critical(f"{self.process_id} : Splitting data to train and test.")
         self.train_data = self.features_df.iloc[:self.split_index, :]
         self.test_data = self.features_df.iloc[self.split_index:, :]
         logging.info(f"Features shape : {self.features_df.shape}")
@@ -137,7 +137,7 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
         logging.info(f"Test data shape : {self.test_data.shape}")
 
     def normalizetrainingData(self):  # normalize the training data
-        logging.critical(f"Normalizing training data for process id : {self.process_id}")
+        logging.critical(f"{self.process_id} : Normalizing training data.")
         y_labels_train = getYLabels(self.train_data, self.transformation_order, self.to_predict, len(self.train_data.columns))
         X_Scalar, Y_Scalar = scalar_function(self.train_data, y_labels_train)
         self.xTrain_norm = X_Scalar.transform(self.train_data)
@@ -158,41 +158,42 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
         broadcastTrainingStatus(self.uid, "notify", "(6) : Training data normalized...")
 
     def transformDataForTraining(self):  # transform the data for training
-        logging.critical(f"Transforming data for training for process id : {self.process_id}")
-        xT, yT, past_yT = tranform_data(self.xTrain_norm, self.yTrain_norm, self.time_step, self.look_ahead, type_='training')
+        logging.critical(f"{self.process_id} : Transforming data for training.")
+        start = time.time()
+        xT, yT, past_yT = transform_data(self.xTrain_norm, self.yTrain_norm, self.time_step, self.look_ahead, type_='training')
+        logging.info(f"X, Y, PY shapes (Batch adjust B) : {xT.shape}, {yT.shape}, {past_yT.shape}")
+        
+        num_samples, seq_length, features = xT.shape
+        num_batches, remainder = divmod(num_samples, self.batchSize)
+        
+        xT=tf.slice(xT, [remainder, 0, 0], [num_samples-remainder, seq_length, features])
+        yT=tf.slice(yT, [remainder, 0], [num_samples-remainder, -1])
+        past_yT=tf.slice(past_yT, [remainder, 0, 0], [num_samples-remainder, seq_length, 1])
+        logging.info(f"X, Y, PY shapes (Batch adjust A) : {xT.shape}, {yT.shape}, {past_yT.shape}")
+        logging.info(f"TRANSFORM Time taken:  {time.time() - start}")
 
-        logging.info(f"X train shape : {np.array(xT).shape}")
-        logging.info(f"y train shape : {np.array(yT).shape}")
-        logging.info(f"past y shape : {np.array(past_yT).shape}")
-
-        print("-------------------------")
-        np_xtrain = np.array(xT)
-        total_batches = math.ceil(np_xtrain.shape[0] / self.batchSize)  # total number of training batches
-        self.total_training_batches = total_batches
-        del np_xtrain
-
-        self.x_train = np.array(xT)
-        self.y_train = np.array(yT)
-        self.past_y_train = np.array(past_yT)
+        self.total_training_batches = num_batches
+        self.x_train = xT
+        self.y_train = yT
+        self.past_y_train = past_yT
+        
         broadcastTrainingStatus(self.uid, "notify", "(7) : Training data created...")
 
-        xtSize = self.x_train.nbytes
-        ytSize = self.y_train.nbytes
-        pytSize = self.past_y_train.nbytes
-        logging.debug(f"Memory size of the array in bytes: {xtSize}")
-        logging.debug(f"Memory size of the array in bytes: {ytSize}")
-        logging.debug(f"Memory size of the array in bytes: {pytSize}")
-        logging.debug(f"Total memory in bytes: {round((xtSize+ytSize+pytSize)/ (1000*1000),3)} MB")
+        xtSize = self.x_train.shape[0] * self.x_train.shape[1] * self.x_train.shape[2] * 8 # type: ignore
+        ytSize = self.y_train.shape[0] * self.y_train.shape[1] * 8 # type: ignore
+        pytSize = self.past_y_train.shape[0] * self.past_y_train.shape[1] * self.past_y_train.shape[2] * 8 # type: ignore
+        logging.info(f"Memory size of the array in bytes : X, Y, PY : {xtSize}, {ytSize}, {pytSize}")
+        logging.info(f"Total memory in bytes: {round((xtSize+ytSize+pytSize)/ (1000*1000),3)} MB")
 
     def initializeModels(self):  # initialize the generator and discriminator models
-        logging.critical(f"Initializing models for process id : {self.process_id}")
+        logging.critical(f"{self.process_id} : Initializing generator and Discriminator models.")
         weight_initializer = RandomNormal(mean=0.00, stddev=0.02, seed=42)
         self.generator = Generator(weight_initializer, self.time_step, self.feature_size, self.look_ahead)
         self.discriminator = Discriminator(weight_initializer, self.time_step, self.look_ahead)
 
         broadcastTrainingStatus(self.uid, "notify", "(8) : Generator and Discriminator model initialized...")
 
-    def precess_data(self):
+    def precess_data(self): # process the data, fetch features, split data, normalize data, transform data and initialize models
         self.fetchFeaturesFromRedis()
         self.splitDataToTrainAndTest()
         self.normalizetrainingData()
@@ -200,7 +201,7 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
         self.initializeModels()
 
     @tf.function
-    def gradient_penalty(self, batch_size, real_output, generated_output) -> tf.Tensor:
+    def gradient_penalty(self, batch_size, real_output, generated_output) -> tf.Tensor: # calculate the gradient penalty
         # 1. get the interpolated data
         alpha = tf.random.normal([batch_size, self.time_step + self.look_ahead, 1], 0.0, 1.0)
         diff = generated_output - tf.cast(real_output, tf.float32)
@@ -216,15 +217,14 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
         if grads is not None:
             grads = grads[0]
 
-        del gp_tape
-
         # 3. Calculate the norm of the gradients
         norm = tf.sqrt(tf.reduce_sum(tf.square(grads), axis=[1, 2]))
         gp = tf.reduce_mean((norm - 1.0) ** 2)
         return gp
 
     @tf.function
-    def trianDiscriminatorOneStep(self, real_input, real_price, past_y, batch_size):
+    def trianDiscriminatorOneStep(self, real_input, real_price, past_y, batch_size): # train the discriminator for one step
+        print('train d one step traced')
         # transform the real data to the required format
         real_y_reshape = tf.reshape(real_price, [real_price.shape[0], real_price.shape[1], 1])
         real_output = tf.concat([tf.cast(past_y, tf.float32), tf.cast(real_y_reshape, tf.float32)], axis=1)
@@ -250,8 +250,9 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
 
         return d_loss
 
-    @tf.function
-    def trainGeneratorOneStep(self, real_input, real_price, past_y):
+    @tf.function 
+    def trainGeneratorOneStep(self, real_input, real_price, past_y): # train the generator for one step
+        print('train g one step traced')
         # generate fake output
         generated_data = self.generator(real_input, training=True)  # type: ignore
         generated_data_reshape = tf.reshape(generated_data, [generated_data.shape[0], generated_data.shape[1], 1])  # type: ignore # type: ignore
@@ -267,74 +268,62 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
         g_rmse = tf.sqrt(g_mse)
         g_mae = tf.reduce_mean(keras.losses.MAE(real_y_reshape, generated_data_reshape))
         g_mape = tf.reduce_mean(keras.losses.MAPE(real_y_reshape, generated_data_reshape))
-        g_sign = tf.reduce_mean(tf.abs(tf.subtract(tf.sign(tf.cast(real_y_reshape, 'float32')), tf.sign(generated_data_reshape))))
-        g_mean = (1) * (-tf.reduce_mean(G_generated))
+        g_sign = tf.reduce_mean(tf.abs(tf.subtract(tf.sign(tf.cast(real_y_reshape, tf.float32)), tf.sign(generated_data_reshape))))
+        g_mean = (-tf.reduce_mean(G_generated))
         g_loss = g_mean + (self.lambda_1) * (g_mse) + (self.lambda_2) * (g_sign)
 
         return g_mse, g_sign, g_loss, g_rmse, g_mae, g_mape
 
-    def train_step(
-        self,
-        epoch,
-        fw_d_batch_loss,
-        fw_g_batch_loss,
-        fw_trainStep_memory,
-    ):
-        train_ram_start = psutil.virtual_memory()
-        batch_d_losses = []
+    @tf.function
+    def getGeneratorPredictions(self, xt_test): # get the predictions from the generator
+        predictions = self.generator(xt_test)  
+        return predictions
+
+    def train_step(self, data_generator,trainDOneStep,trainGOneStep): # train the model for one epoch
         # Training the discriminator for n_discriminator times
         print("------------------DISC---------------------")
         for critic_iter in range(self.n_discriminator):
-            batch_generator = yield_batches(self.x_train, self.y_train, self.past_y_train, self.batchSize)
+            batch_d_losses = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
             batch_no = 1
-            batch_d_losses = []
 
             with tf.GradientTape() as d_tape:
-                for batch_x, batch_y, batch_past_y in batch_generator:
-                    batch_size = batch_x.shape[0]
-                    batch_d_loss = self.trianDiscriminatorOneStep(batch_x, batch_y, batch_past_y, batch_size)
-                    batch_d_losses.append(batch_d_loss)
-                    # print(f'(D) Batch loss for {batch_no} : {np.array(batch_d_loss)}')
+                for batch_x, batch_y, batch_past_y in data_generator:
+                    batch_d_loss = trainDOneStep(batch_x, batch_y, batch_past_y, self.batchSize)
+                    batch_d_losses= batch_d_losses.write(batch_d_losses.size(), batch_d_loss)
 
                     # individual batch losses for discriminator
-                    message = {
-                        "batch": batch_no,
-                        "log": {
-                            "model": "discriminator",
-                            "critic_iteration": critic_iter + 1,
-                            "batch": batch_no,
-                            "size": batch_size,
-                            "loss": np.array(batch_d_loss).tolist(),  # Convert ndarray to list
-                            "totalNoOfBatch": self.total_training_batches
-                        }
-                    }
-                    broadcastTrainingStatus(self.uid, "batchEnd", message)
+                    broadcastTrainingBatchLosses(
+                        model="discriminator",
+                        uid=self.uid,
+                        total_training_batches=self.total_training_batches,                        
+                        batch_no=batch_no,
+                        batch_size=self.batchSize,
+                        batch_d_loss=batch_d_loss,
+                        critic_iter=critic_iter,
+                        batch_g_loss=None,
+                        )
                     batch_no = batch_no + 1
 
-                d_loss = tf.reduce_mean(batch_d_losses)
-                print(f"D Loss for {critic_iter + 1} : {np.array(d_loss)}")
+                d_loss = tf.reduce_mean(batch_d_losses.stack())
+                print(f"D Loss for {critic_iter + 1} : {float(d_loss)}")
 
-                # Get the gradients w.r.t the discriminator loss
-                d_grads = d_tape.gradient(d_loss, self.discriminator.trainable_variables)  # type: ignore
-                # Update the weights of the discriminator using the discriminator optimizer
-                self.d_optimizer.apply_gradients(zip(d_grads, self.discriminator.trainable_variables))  # type: ignore
-                del d_grads
-            del d_tape
+            # Get the gradients w.r.t the discriminator loss
+            d_grads = d_tape.gradient(d_loss, self.discriminator.trainable_variables)  # type: ignore
+            # Update the weights of the discriminator using the discriminator optimizer
+            self.d_optimizer.apply_gradients(zip(d_grads, self.discriminator.trainable_variables))  # type: ignore
 
-        # Training the generator
-        batch_generator = yield_batches(self.x_train, self.y_train, self.past_y_train, self.batchSize)
+        # Training the generator once
         batch_no = 1
-        batch_g_losses = []
-        batch_g_mse_ = []
-        batch_g_sign_ = []
-        batch_g_rmse_ = []
-        batch_g_mae_ = []
-        batch_g_mape_ = []
+        batch_g_mse_ = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
+        batch_g_sign_ = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
+        batch_g_losses = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
+        batch_g_rmse_ = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
+        batch_g_mae_ = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
+        batch_g_mape_ = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
 
         print("------------------GENE---------------------")
         with tf.GradientTape() as g_tape:
-            for batch_x, batch_y, batch_past_y in batch_generator:
-                batch_size = batch_x.shape[0]
+            for batch_x, batch_y, batch_past_y in data_generator:
                 (
                     batch_g_mse,
                     batch_g_sign,
@@ -342,60 +331,40 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
                     batch_g_rmse,
                     batch_g_mae,
                     batch_g_mape,
-                ) = self.trainGeneratorOneStep(batch_x, batch_y, batch_past_y)  # type: ignore
-                batch_g_mse_.append(batch_g_mse)
-                batch_g_sign_.append(batch_g_sign)
-                batch_g_losses.append(batch_g_loss)
-                batch_g_rmse_.append(batch_g_rmse)
-                batch_g_mae_.append(batch_g_mae)
-                batch_g_mape_.append(batch_g_mape)
-
-                with fw_d_batch_loss.as_default():
-                    tf.summary.scalar("batch_losses", batch_d_losses[batch_no - 1], self.global_step)  # type: ignore
-                    fw_d_batch_loss.flush()
-
-                with fw_g_batch_loss.as_default():
-                    tf.summary.scalar("batch_losses", batch_g_loss, self.global_step)
-                    fw_g_batch_loss.flush()
-
-                self.global_step = self.global_step + 1
+                ) = trainGOneStep(batch_x, batch_y, batch_past_y)
+                batch_g_mse_ = batch_g_mse_.write(batch_g_mse_.size(), batch_g_mse)
+                batch_g_sign_ = batch_g_sign_.write(batch_g_sign_.size(), batch_g_sign)
+                batch_g_losses = batch_g_losses.write(batch_g_losses.size(), batch_g_loss)
+                batch_g_rmse_ = batch_g_rmse_.write(batch_g_rmse_.size(), batch_g_rmse)
+                batch_g_mae_ = batch_g_mae_.write(batch_g_mae_.size(), batch_g_mae)
+                batch_g_mape_ = batch_g_mape_.write(batch_g_mape_.size(), batch_g_mape)
 
                 # individual batch losses for generator
-                message = {
-                    "batch": batch_no,
-                    "log": {
-                        "model": "generator",
-                        "batch": batch_no,
-                        "size": batch_size,
-                        "loss": np.array(batch_g_loss).tolist(),  # Convert ndarray to list
-                        "totalNoOfBatch": self.total_training_batches
-                    }
-                }
-                broadcastTrainingStatus(self.uid, "batchEnd", message)
+                broadcastTrainingBatchLosses(
+                        model="generator",
+                        uid=self.uid,
+                        total_training_batches=self.total_training_batches,                        
+                        batch_no=batch_no,
+                        batch_size=self.batchSize,
+                        batch_d_loss=None,
+                        critic_iter=None,
+                        batch_g_loss=batch_g_loss,
+                        )
                 batch_no = batch_no + 1
 
-            g_loss = tf.reduce_mean(batch_g_losses)
-            g_mse = tf.reduce_mean(batch_g_mse_)
-            g_sign = tf.reduce_mean(batch_g_sign_)
-            g_rmse = tf.reduce_mean(batch_g_rmse_)
-            g_mae = tf.reduce_mean(batch_g_mae_)
-            g_mape = tf.reduce_mean(batch_g_mape_)
+            g_mse = tf.reduce_mean(batch_g_mse_.stack())
+            g_sign = tf.reduce_mean(batch_g_sign_.stack())
+            g_loss = tf.reduce_mean(batch_g_losses.stack())
+            g_rmse = tf.reduce_mean(batch_g_rmse_.stack())
+            g_mae = tf.reduce_mean(batch_g_mae_.stack())
+            g_mape = tf.reduce_mean(batch_g_mape_.stack())
 
-            print(f"G Loss : {np.array(g_loss)}")
+            print(f"G Loss : {float(g_loss)}")
 
-            # Get the gradients w.r.t the generator loss
-            g_grads = g_tape.gradient(g_loss, self.generator.trainable_variables)  # type: ignore
-            # Update the weights of the generator using the generator optimizer
-            self.g_optimizer.apply_gradients(zip(g_grads, self.generator.trainable_variables))  # type: ignore
-            del g_grads
-        del g_tape
-
-        train_ram_end = psutil.virtual_memory()
-        batch_ram_diff = (train_ram_end.used / (1024 ** 2)) - (train_ram_start.used / (1024 ** 2))
-
-        with fw_trainStep_memory.as_default():
-            tf.summary.scalar("memory", batch_ram_diff, epoch + 1)
-            fw_trainStep_memory.flush()
+        # Get the gradients w.r.t the generator loss
+        g_grads = g_tape.gradient(g_loss, self.generator.trainable_variables)  # type: ignore
+        # Update the weights of the generator using the generator optimizer
+        self.g_optimizer.apply_gradients(zip(g_grads, self.generator.trainable_variables))  # type: ignore
 
         return (
             {
@@ -409,42 +378,34 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
             }
         )
 
-    def validateOnTest(
-        self,
-        epoch,
-        fw_test_real,
-        fw_validation_pred_mse,
-        fw_validation_pred_sign,
-        fw_validation_pred_rmse,
-        fw_validation_pred_mae,
-        fw_validation_pred_mape
-    ):
+    def validateOnTest(self, epoch, fw_test_real): # validate the generator on test data
         # validate the model
         if (self.xt_test is None) or (self.yt_test is None):
-            xt_t, yt_t, past_yt_t = tranform_data(self.xTest_norm, self.yTest_norm, self.time_step, self.look_ahead, type_='training')
-            self.xt_test = np.array(xt_t)
-            self.yt_test = np.array(yt_t)
-            xt_test = tf.constant(self.xt_test)
-            yt_test = tf.constant(self.yt_test)
+            xt_t, yt_t, past_yt_t = transform_data(self.xTest_norm, self.yTest_norm, self.time_step, self.look_ahead, type_='training')
+            self.xt_test = xt_t
+            self.yt_test = yt_t
+            xt_test = xt_t
+            yt_test = yt_t
         else:
-            xt_test = tf.constant(self.xt_test)
-            yt_test = tf.constant(self.yt_test)
+            xt_test = self.xt_test
+            yt_test = self.yt_test
 
-        predictions = self.generator(xt_test)  # type: ignore
+        predictions = self.getGeneratorPredictions(xt_test)  # type: ignore
 
-        plot_intermediate_predictions(
-            self.y_scalar,
-            self.intermediate_result_step,
-            self.logs_dir,
-            epoch,
-            yt_test,
-            fw_test_real,
-            predictions,
-        )
+        if self.tb_logging:
+            plot_intermediate_predictions(
+                self.y_scalar,
+                self.intermediate_result_step,
+                self.logs_dir,
+                epoch,
+                yt_test,
+                fw_test_real,
+                predictions,
+            )
 
         g_mse_val = tf.reduce_mean(keras.losses.MSE(yt_test, predictions))
-        g_sign_val = tf.reduce_mean(tf.abs(tf.sign(tf.cast(yt_test, 'float32')) - tf.sign(predictions)))  # type: ignore
         g_rmse_val = tf.sqrt(g_mse_val)
+        g_sign_val = tf.reduce_mean(tf.abs(tf.sign(tf.cast(yt_test, 'float32')) - tf.sign(predictions)))  # type: ignore
         g_mae_val = tf.reduce_mean(keras.losses.MAE(yt_test, predictions))
         g_mape_val = tf.reduce_mean(keras.losses.MAPE(yt_test, predictions))
 
@@ -458,20 +419,10 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
             }
         }
 
-        plot_validation_metrics(
-            val_losses=message["validation_metrics"],
-            epoch=epoch,
-            fw_validation_pred_mse=fw_validation_pred_mse,
-            fw_validation_pred_sign=fw_validation_pred_sign,
-            fw_validation_pred_rmse=fw_validation_pred_rmse,
-            fw_validation_pred_mae=fw_validation_pred_mae,
-            fw_validation_pred_mape=fw_validation_pred_mape,
-        )
-
         print(f"Val MSE : {g_mse_val}, Val Sign : {g_sign_val}")
         return message
 
-    def generateForecast(self, forecast_type, epoch=None):
+    def generateForecast(self, forecast_type, epoch=None): # generate the forecast
         if (self.xTest_norm is None) or (self.yTest_norm is None):
             xTest_norm = self.x_scalar.transform(self.test_data)  # type: ignore
             yTest_norm = self.y_scalar.transform(getYLabels(self.test_data, self.transformation_order, self.to_predict, len(self.test_data.columns)))  # type: ignore
@@ -479,10 +430,10 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
             xTest_norm = self.xTest_norm
             yTest_norm = self.yTest_norm
 
-        xt_f, yt_f, past_yt_f = tranform_data(xTest_norm, yTest_norm, self.time_step, self.look_ahead, type_='forecast')
-        x_train_np = np.array(xt_f)
+        xt_f, yt_f, past_yt_f = transform_data(xTest_norm, yTest_norm, self.time_step, self.look_ahead, type_='forecast')
+        # x_train_np = xt_f
 
-        predictions = self.generator(x_train_np)  # type: ignore
+        predictions = self.getGeneratorPredictions(xt_f)  # type: ignore
         predictions_ = np.array(predictions)
         predictions_1d = predictions_.reshape(-1, 1)  # type: ignore
         predictions_scaled = self.y_scalar.inverse_transform(predictions_1d)  # type: ignore
@@ -524,44 +475,67 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
 
             broadcastTrainingStatus(self.uid, "intermediate_forecast", {"data": first_pred_array_obj, "rmse": first_rmse, "epoch": epoch})
 
-    def train(self):
-        file_writers = initFileWriters(self.logs_dir)
-        start_time = time.time()
+    def generatedConcreteFunctions(self): # Creating the concrete functions for the train steps, discriminator and generator
+        broadcastTrainingStatus(self.uid, "notify", "(9) : Tracing Discriminator and Generator functions...")
+        trainDOneStep = self.trianDiscriminatorOneStep.get_concrete_function( 
+            tf.TensorSpec(shape=[self.batchSize, self.time_step, self.feature_size], dtype=tf.float64),  # real_input
+            tf.TensorSpec(shape=[self.batchSize, self.look_ahead], dtype=tf.float64),  # real_price
+            tf.TensorSpec(shape=[self.batchSize, self.time_step, tf.constant(1)], dtype=tf.float64),  # past_y
+            tf.TensorSpec(shape=[], dtype=tf.int32),    # batch_size
+            )
+        
+        trainGOneStep = self.trainGeneratorOneStep.get_concrete_function(
+            tf.TensorSpec(shape=[self.batchSize, self.time_step, self.feature_size], dtype=tf.float64),
+            tf.TensorSpec(shape=[self.batchSize, self.look_ahead], dtype=tf.float64),
+            tf.TensorSpec(shape=[self.batchSize, self.time_step, 1], dtype=tf.float64)
+        )
+        broadcastTrainingStatus(self.uid, "notify", "(9) : Discriminator and Generator functions traced...")
+        
+        return trainDOneStep, trainGOneStep
+
+    def train(self): # train the model
+        if self.tb_logging: # initialize the file writers if true
+            file_writers = initFileWriters(self.logs_dir)
+            print(f'tensorboard --logdir={self.logs_dir}')
+        else:
+            file_writers={}
+        
         self.precess_data()  # process the data
-        print(f'tensorboard --logdir={self.logs_dir}')
 
+        start = time.time()
+        dataset_ = tf.data.Dataset.from_tensor_slices((self.x_train, self.y_train, self.past_y_train))
+        data_generator = dataset_.batch(self.batchSize).prefetch(tf.data.experimental.AUTOTUNE)
+        print(f"Time taken DATA GENE:, {time.time() - start}")
+        
+        trainDOneStep, trainGOneStep = self.generatedConcreteFunctions()  # get the concrete functions
+        
+        start_time = time.time()
         ram_beg_train = psutil.virtual_memory()
-        # train the model
-        for epoch in range(self.epochs):
-            broadcastTrainingStatus(self.uid, "epochBegin", epoch + 1)
+        broadcastTrainingStatus(self.uid, "notify", "(9) : Training has started...")
+        logging.critical(f"{self.process_id} : Training started")
+        # with tf.profiler.experimental.Profile(self.logs_dir, tf.profiler.experimental.ProfilerOptions(python_tracer_level=1)):
+        for epoch in range(self.epochs): # training the model
+            epochTime = time.time()
             logging.error(f"epoch {epoch + 1} of {self.epochs}")
-
-            loss = self.train_step(
-                epoch,
-                fw_d_batch_loss=file_writers["metrics_batch/d_batch_loss"],
-                fw_g_batch_loss=file_writers["metrics_batch/g_batch_loss"],
-                fw_trainStep_memory=file_writers["metrics_memory/train_memory"],
-            )
-
-            print(f"D Loss: {loss['discriminator_loss'].numpy()}, G Loss: {loss['generator_loss'].numpy()}")
-            log_training_metrics(  # log the training metrics for tensorboard
-                loss,
-                epoch,
-                fw_d_loss=file_writers["losses/d_loss"],
-                fw_g_loss=file_writers["losses/g_loss"],
-                fw_g_mse=file_writers["metrics/g_mse"],
-                fw_g_sign=file_writers["metrics/g_sign"],
-                fw_g_rmse=file_writers["metrics/rmse"],
-                fw_g_mae=file_writers["metrics/mae"],
-                fw_g_mape=file_writers["metrics/mape"],
-            )
-
+            broadcastTrainingStatus(self.uid, "epochBegin", epoch + 1)
+            train_ram_start = psutil.virtual_memory()
+            
+            loss = self.train_step(data_generator,trainDOneStep,trainGOneStep) # Train the model for one
+            
+            train_ram_end = psutil.virtual_memory()
+            batch_ram_diff = (train_ram_end.used / (1024 ** 2)) - (train_ram_start.used / (1024 ** 2))
+            loss['batch_ram_diff'] = batch_ram_diff
+            
             if self.model_save_checkpoint > 0 and ((epoch + 1) % self.model_save_checkpoint == 0):  # save the model after every model_save_checkpoint epochs
                 saveModel(epoch, self.model_id, self.generator)
-
-            message = {
+                
+            if self.intermediate_result_step > 0 and (epoch + 1) % self.intermediate_result_step == 0:  # generate the forecast after every intermediate_result epochs
+                self.generateForecast('intermediate_forecast', epoch + 1)
+            
+            message = { # message to broadcast to the client ( Training )
                 "epoch": epoch + 1,
                 "log": {
+                    "memory":loss['batch_ram_diff'],
                     "losses": {
                         "discriminator_loss": np.array(loss["discriminator_loss"]).tolist(),  # Convert ndarray to list
                         "generator_loss": np.array(loss["generator_loss"]).tolist(),  # Convert ndarray to list
@@ -575,26 +549,51 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
                     }
                 }
             }
+            
+            if self.tb_logging: # logging of train losses for tensorboard 
+                log_training_metrics(  # log the training metrics for tensorboard
+                    loss,
+                    epoch,
+                    fw_d_loss=file_writers["losses/d_loss"],
+                    fw_g_loss=file_writers["losses/g_loss"],
+                    fw_g_mse=file_writers["metrics/g_mse"],
+                    fw_g_sign=file_writers["metrics/g_sign"],
+                    fw_g_rmse=file_writers["metrics/rmse"],
+                    fw_g_mae=file_writers["metrics/mae"],
+                    fw_g_mape=file_writers["metrics/mape"],
+                    fw_memory=file_writers["metrics_memory/train_memory"]
+                )
 
-            if self.intermediate_result_step > 0 and (epoch + 1) % self.intermediate_result_step == 0:  # generate the forecast after every intermediate_result epochs
-                self.generateForecast('intermediate_forecast', epoch + 1)
-
-            if self.do_validation:
-                valTime = time.time()
+            if self.do_validation: # validate test data if true
+                fw_test_real = file_writers.get("test/test_real") or None
                 val_message = self.validateOnTest(
                     epoch,
-                    fw_test_real=file_writers["test/test_real"],
-                    fw_validation_pred_mse=file_writers["validation/pred_mse"],
-                    fw_validation_pred_sign=file_writers["validation/pred_sign"],
-                    fw_validation_pred_rmse=file_writers["validation/pred_rmse"],
-                    fw_validation_pred_mae=file_writers["validation/pred_mae"],
-                    fw_validation_pred_mape=file_writers["validation/pred_mape"],
+                    fw_test_real=fw_test_real,
                 )  # type: ignore
 
-                message["log"]["validation_metrics"] = val_message["validation_metrics"]
-                print(f"Validation time: {time.time() - valTime}")
+                message["log"]["validation_metrics"] = val_message["validation_metrics"] # message to broadcast to the client ( Validation )
+                
+                if self.tb_logging:
+                    plot_validation_metrics(
+                        val_losses=val_message["validation_metrics"],
+                        epoch=epoch,
+                        fw_validation_pred_mse=file_writers["validation/pred_mse"],
+                        fw_validation_pred_sign=file_writers["validation/pred_sign"],
+                        fw_validation_pred_rmse=file_writers["validation/pred_rmse"],
+                        fw_validation_pred_mae=file_writers["validation/pred_mae"],
+                        fw_validation_pred_mape=file_writers["validation/pred_mape"],
+                    )
 
+            print(f"D Loss: {loss['discriminator_loss'].numpy()}, G Loss: {loss['generator_loss'].numpy()}, Time taken: {time.time() - epochTime} sec")
+            
             broadcastTrainingStatus(self.uid, "epochEnd", message)
+
+        logging.critical(f"{self.process_id} : Training completed")
+        
+        ram_aft_train = psutil.virtual_memory()
+        ram_diff = (ram_aft_train.used / (1024 ** 2)) - (ram_beg_train.used / (1024 ** 2))
+        logging.error(f"Memory usage : {ram_diff}")
+        logging.error(f"Training time: {time.time() - start_time} sec")
 
         if(self.model_save_checkpoint == 0):
             saveModel(self.epochs - 1, self.model_id, self.generator)
@@ -602,23 +601,18 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
             saveModel(self.epochs - 1, self.model_id, self.generator)
         
         saveTrainScalers(self.model_id, self.x_scalar, self.y_scalar)
-        closeFileWriters(file_writers)
+        
+        if self.tb_logging:
+            closeFileWriters(file_writers)
+            print(f'tensorboard --logdir={self.logs_dir}')
 
-        ram_aft_train = psutil.virtual_memory()
-        ram_diff = (ram_aft_train.used / (1024 ** 2)) - (ram_beg_train.used / (1024 ** 2))
-        print(f"Memory usage : {ram_diff}")
-
-        print(f"Training time: {time.time() - start_time} sec")
-        print(f'tensorboard --logdir={self.logs_dir}')
         broadcastTrainingStatus(self.uid, "trainingEnd", "Training completed")
         broadcastTrainingStatus(self.uid, "notify", "(10) : Training completed")
+        
         # make the foreacst on the test data
         self.generateForecast('final_forecast')
         broadcastTrainingStatus(self.uid, "prediction_completed", "Training completed", process_id=self.process_id)
 
-        real_upscaled = self.y_scalar.inverse_transform(np.array(self.y_train))  # type: ignore
-        real_price = np.array(real_upscaled)
-
         K.clear_session()
 
-        return real_price  # type: ignore
+        return '(WORKER) : Training Completed!!'  # type: ignore

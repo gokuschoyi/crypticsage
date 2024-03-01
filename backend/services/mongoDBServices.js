@@ -2409,7 +2409,7 @@ const isMetadatAvailable = async (ticker_name) => {
 res() */
 //<------------------------CRYPTO-STOCKS SERVICES-------------------------->
 
-const saveModelForUser = async (user_id, ticker_name, ticker_period, model_id, model_name, model_data) => {
+const saveModelForUser = async (user_id, ticker_name, ticker_period, model_id, model_name, model_type, model_data) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const model_collection = db.collection('models')
@@ -2423,6 +2423,7 @@ const saveModelForUser = async (user_id, ticker_name, ticker_period, model_id, m
                 user_id,
                 model_id,
                 model_name,
+                model_type,
                 model_created_date: new Date().getTime(),
                 ticker_name,
                 ticker_period,

@@ -10,7 +10,7 @@ const WgangpMetricsChart = (props) => {
     const chartContainerRef = useRef()
     const chart = useRef(null)
     const metricLineSeriesRef = useRef({})
-    const metricColors = Object.keys(predictionsPalette).map(key => predictionsPalette[key])
+
     const chart_options = {
         autoSize: true,
         rightPriceScale: {
@@ -48,6 +48,7 @@ const WgangpMetricsChart = (props) => {
     }
 
     const render_chart = () => {
+        const metricColors = Object.keys(predictionsPalette).map(key => predictionsPalette[key])
         chart.current = createChart(chartContainerRef.current, chart_options);
         chart.current.timeScale().fitContent()
 
@@ -167,17 +168,15 @@ const WgangpMetricsChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [epochResults])
 
-    // clean up the chart when epochResult length = 0 and chart is present
-    // useEffect(() => {
-    //     if (chart.current && epochResults.length === 0) {
-    //         console.log('UE : WGAN-GP History chart clean up')
-    //         // const tooltip = document.querySelector('.model-hist-tooltip')
-    //         // tooltip.innerHTML = ''
-    //         metricLineSeriesRef.current = {}
-    //         chart.current.remove();
-    //         chart.current = null;
-    //     } else { return }
-    // })
+    useEffect(() => {
+        if (chart.current !== null) {
+            const metricColors = Object.keys(predictionsPalette).map(key => predictionsPalette[key])
+            Object.keys(metricLineSeriesRef.current).forEach((key, i) => {
+                // console.log('UPDATING COLORS', key, metricColors[i])
+                metricLineSeriesRef.current[key].applyOptions({ color: metricColors[i] })
+            })
+        }
+    }, [predictionsPalette])
 
     // set the tooltip for the chart
     useEffect(() => {

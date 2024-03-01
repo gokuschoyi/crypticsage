@@ -39,7 +39,7 @@ def scalar_function(x, y):
     return X_Scalar, Y_Scalar
 
 
-def tranform_data(xTrain_norm, yTrain_norm, n_steps_in, n_steps_out, type_):
+def transform_data(xTrain_norm, yTrain_norm, n_steps_in, n_steps_out, type_):
     X_data = np.array(xTrain_norm)
     y_data = np.array(yTrain_norm)
     X = list()
@@ -62,34 +62,17 @@ def tranform_data(xTrain_norm, yTrain_norm, n_steps_in, n_steps_out, type_):
                 past_y.append(past_y_value)
             if len(y_value) == n_steps_out:
                 y.append(y_value)
-    return X, y, past_y
-
-
-def yield_batches(real_input, real_price, past_y, batchSize):
-    num_samples, seq_length, features = real_input.shape
-    num_batches, remainder = divmod(num_samples, batchSize)
-
-    # Handle the initial batch
-    if remainder > 0:
-        initial_batch_input = real_input[:remainder]
-        initial_batch_price = real_price[:remainder]
-        initial_batch_past_y = past_y[:remainder]
-        yield initial_batch_input, initial_batch_price, initial_batch_past_y
-
-    # Reshape the remaining data into batches
-    real_input_batches = real_input[remainder:]
-    real_price_batches = real_price[remainder:]
-    past_y_batches = past_y[remainder:]
-
-    reshaped_input_batches = real_input_batches.reshape(num_batches, batchSize, seq_length, features)
-    reshaped_price_batches = real_price_batches.reshape(num_batches, batchSize, -1)
-    reshaped_past_y_batches = past_y_batches.reshape(num_batches, batchSize, seq_length, -1)
-
-    for input_batch, price_batch, past_y_batch in zip(reshaped_input_batches, reshaped_price_batches, reshaped_past_y_batches):
-        yield input_batch, price_batch, past_y_batch
+    del X_data, y_data
+    return tf.convert_to_tensor(X), tf.convert_to_tensor(y), tf.convert_to_tensor(past_y)
 
 
 def generate_additional_dates(dates_df, n):
+    # Convert the 'date' column to datetime format
+    dates_df['date'] = pd.to_datetime(dates_df['date'], format='%d/%m/%Y, %I:%M:%S %p')
+
+    # Convert the 'date' column to the desired format
+    dates_df['date'] = dates_df['date'].dt.strftime('%m/%d/%Y, %I:%M:%S %p')
+    
     # Get the last date in the DataFrame
     last_date = dates_df.iloc[-1, 0]
 
@@ -187,6 +170,7 @@ def log_training_metrics(
     fw_g_rmse,
     fw_g_mae,
     fw_g_mape,
+    fw_memory
 ):
     with fw_d_loss.as_default():
         tf.summary.scalar("training_losses", losses["discriminator_loss"].numpy(), epoch+1)
@@ -215,10 +199,13 @@ def log_training_metrics(
     with fw_g_mape.as_default():
         tf.summary.scalar("losses", losses["g_mape"], epoch + 1)
         fw_g_mape.flush()
+        
+    with fw_memory.as_default():
+        tf.summary.scalar("memory", losses['batch_ram_diff'], epoch + 1)
+        fw_memory.flush()
 
 
 def saveTrainScalers(model_id, x_scalar, y_scalar):
-    print('saving scalers')
     scalar_folder_path = f'./saved_models/{model_id}/scalers'
 
     if not os.path.exists(scalar_folder_path):
@@ -229,6 +216,7 @@ def saveTrainScalers(model_id, x_scalar, y_scalar):
 
     dump(x_scalar, x_scalar_path)
     dump(y_scalar, y_scalar_path)
+    print('Scalars saved.')
 
 
 def plot_intermediate_predictions(y_scalar, intermediate_result_step, logs_dir, epoch, yt_test, fw_test_real, predictions):
@@ -284,7 +272,6 @@ def plot_validation_metrics(
 
 
 def saveModel(epoch, model_id, generator):
-    print('saving model weights')
     # Generate a unique ID for the subfolder
     subfolder_id = f'checkpoint_{epoch+1}'
     main_folder_path = f'./saved_models/{model_id}'
@@ -296,13 +283,13 @@ def saveModel(epoch, model_id, generator):
 
     # Save the model in a file with the name of the epoch
     file_path = f'{subfolder_path}/gen_model_{epoch+1}'
-    print(f'model save path : {file_path}')
+    print(f'Model weights saved.  Path : {file_path}')
     generator.save_weights(file_path)  # type: ignore
 
 
 def initFileWriters(logs_dir):
     metrics = [
-        "metrics_batch/d_batch_loss", "metrics_batch/g_batch_loss", "", "metrics_memory/train_memory",
+        "metrics_batch/d_batch_loss", "metrics_batch/g_batch_loss", "metrics_memory/train_memory",
         "losses/d_loss", "losses/g_loss", "metrics/g_mse", "metrics/g_sign", "metrics/rmse", "metrics/mae", "metrics/mape",
         "validation/pred_mse", "validation/pred_sign", "validation/pred_rmse", "validation/pred_mae", "validation/pred_mape",
         "test/test_real"
@@ -315,3 +302,70 @@ def initFileWriters(logs_dir):
 def closeFileWriters(file_writers):
     for writer in file_writers.values():
         writer.close()
+
+
+def broadcastTrainingBatchLosses(model, uid, total_training_batches, batch_no, batch_size, batch_d_loss, critic_iter, batch_g_loss):
+    if model == 'discriminator':
+        message = {
+            "batch": batch_no,
+            "log": {
+                "model": "discriminator",
+                "critic_iteration": critic_iter + 1,
+                "batch": batch_no,
+                "size": batch_size, # type: ignore
+                "loss": float(batch_d_loss),  # Convert ndarray to list # type: ignore 
+                "totalNoOfBatch": total_training_batches 
+            }
+        }   
+        broadcastTrainingStatus(uid, "batchEnd", message)
+    else:
+        message = {
+            "batch": batch_no,
+            "log": {
+                "model": "generator",
+                "batch": batch_no,
+                "size": batch_size,
+                "loss": float(batch_g_loss),  # Convert ndarray to list
+                "totalNoOfBatch": total_training_batches
+            }
+        }
+        broadcastTrainingStatus(uid, "batchEnd", message)
+
+
+def yield_batches(real_input, real_price, past_y, batch_size):
+    num_samples, seq_length, features = real_input.shape
+    num_batches, remainder = divmod(num_samples, batch_size)
+
+    if remainder > 0:
+        initial_batch_input = tf.slice(real_input, [0,0,0], [remainder,real_input.shape[1],real_input.shape[2]])
+        initial_batch_price = tf.slice(real_price, [0,0], [remainder,real_price.shape[1]])
+        initial_batch_past_y = tf.slice(past_y, [0,0,0], [remainder,past_y.shape[1], past_y.shape[2]])
+        yield initial_batch_input, initial_batch_price, initial_batch_past_y
+
+    real_input_batches = tf.slice(real_input, [remainder,0,0],[batch_size * num_batches, real_input.shape[1], real_input.shape[2]])
+    real_price_batches = tf.slice(real_price, [remainder,0],[batch_size * num_batches,real_price.shape[1]])
+    past_y_batches = tf.slice(past_y,[remainder,0,0],[batch_size * num_batches, past_y.shape[1], past_y.shape[2]])
+
+    reshaped_input_batches = tf.reshape(real_input_batches, [num_batches, batch_size, seq_length, features])
+    reshaped_price_batches = tf.reshape(real_price_batches, [num_batches, batch_size, -1])
+    reshaped_past_y_batches = tf.reshape(past_y_batches, [num_batches, batch_size, seq_length, -1])
+    
+    # print(reshaped_input_batches.shape)
+    # print(reshaped_price_batches.shape)
+    # print(reshaped_past_y_batches.shape)
+
+    for input_batch, price_batch ,past_y_batch in zip(reshaped_input_batches, reshaped_price_batches, reshaped_past_y_batches):
+        yield input_batch, price_batch, past_y_batch
+
+
+def tfDatasetGenerator(real_input, real_price, past_y, batch_size):
+    dataset = tf.data.Dataset.from_generator(
+        lambda: yield_batches(real_input, real_price, past_y, batch_size),
+        output_signature=(
+            tf.TensorSpec(shape=(None, real_input.shape[1], real_input.shape[2]), dtype=tf.float32),
+            tf.TensorSpec(shape=(None, real_price.shape[1]), dtype=tf.float32),
+            tf.TensorSpec(shape=(None, past_y.shape[1], past_y.shape[2]), dtype=tf.float32),
+        )
+    )
+    
+    return dataset

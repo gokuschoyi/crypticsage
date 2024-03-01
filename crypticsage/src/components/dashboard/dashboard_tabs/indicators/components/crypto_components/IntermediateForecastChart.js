@@ -285,18 +285,6 @@ const IntermediateForecastChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [intermediate_forecasts])
 
-    // clean up the chart when epochResult length = 0 and chart is present
-    // useEffect(() => {
-    //     if (chart.current && intermediate_forecasts.length === 0) {
-    //         // console.log('UE :WGAN GP intermediate chart cleanup')
-    //         // const tooltip = document.querySelector('.model-hist-tooltip')
-    //         // tooltip.innerHTML = ''
-    //         forecastSeriesRef.current = {}
-    //         chart.current.remove();
-    //         chart.current = null;
-    //     } else { return }
-    // })
-
     // sets the background color of the chart based on theme
     useEffect(() => {
         // console.log('UE : Predctions Chart background')

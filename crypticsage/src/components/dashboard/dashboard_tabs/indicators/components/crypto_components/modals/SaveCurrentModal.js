@@ -40,7 +40,7 @@ const SaveCurrentModal = ({ handleSaveModel }) => {
                 <DialogTitle>{"Save the current model?"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-slide-description">
-                        Saves the current mode weights and data along with the predictions to the DB.
+                        Saves the current model weights and data along with the predictions to the DB.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

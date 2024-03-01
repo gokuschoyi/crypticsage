@@ -27,6 +27,8 @@ import WgangpMetricsChart from "./crypto_components/WgangpMetricsChart";
 import IntermediateForecastChart from "./crypto_components/IntermediateForecastChart";
 import WganFinalPredictionChart from "./crypto_components/WganFinalPredictionChart";
 
+import WgangpOptions from "./crypto_components/WgangpOptions";
+
 export {
     CustomSlider,
     LinearProgressWithLabel,
@@ -54,5 +56,6 @@ export {
     WGANGPProgress,
     WgangpMetricsChart,
     IntermediateForecastChart,
-    WganFinalPredictionChart
+    WganFinalPredictionChart,
+    WgangpOptions
 }

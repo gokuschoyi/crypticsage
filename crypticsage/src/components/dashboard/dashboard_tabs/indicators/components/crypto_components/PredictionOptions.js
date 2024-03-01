@@ -13,12 +13,14 @@ const PredictionOptions = ({
     setModelName,
     handleSaveModel,
     handleDeleteModel,
+    deleteModelOpen,
+    setDeleteModelOpen,
     handlePredictionsChartType,
     handlePredictionChartPalette
 }) => {
     return (
         <Box display='flex' flexDirection='column'>
-            <Box display='flex' flexDirection='column' justifyContent='space-between' alignItems='flex-start' className='prediction-chart-header'>                
+            <Box display='flex' flexDirection='column' justifyContent='space-between' alignItems='flex-start' className='prediction-chart-header'>
                 {predictedVlauesRedux.length !== 0 &&
                     <Box className='chart-action-box' pt={1}>
                         <Box display='flex' flexDirection='row' gap={'4px'} alignItems='center' className='model-chart-action-container'>
@@ -36,7 +38,11 @@ const PredictionOptions = ({
                                 <SaveCurrentModal handleSaveModel={handleSaveModel} />
 
                                 {!model_data.model_saved_to_db &&
-                                    <DeleteCurrentModal handleDeleteModel={handleDeleteModel} />
+                                    <DeleteCurrentModal
+                                        handleDeleteModel={handleDeleteModel}
+                                        deleteModelOpen={deleteModelOpen}
+                                        setDeleteModelOpen={setDeleteModelOpen}
+                                    />
                                 }
 
                                 {modelParams.modelType !== 'Single Step Multiple Output' &&

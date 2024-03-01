@@ -12,6 +12,7 @@ app = Celery(
 )
 
 app.conf.task_default_queue = "wgan_gp_training"
+app.conf.worker_max_tasks_per_child = 1
 
 if __name__ == "__main__":
     app.start()

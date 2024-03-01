@@ -700,22 +700,26 @@ const getModel = async (req, res) => {
 }
 
 const saveModel = async (req, res) => {
-    const {
-        scores,
-        model_id,
-        model_name,
-        ticker_name,
+    const payload = req.body.payload
+    const { 
+        model_type, 
+        model_id, 
+        model_name, 
+        ticker_name, 
         ticker_period,
-        epoch_results,
-        train_duration,
-        correlation_data,
-        predicted_result,
-        training_parameters,
         talibExecuteQueries,
-    } = req.body.payload
-    try {
-        const uid = res.locals.data.uid;
-        const model_data = {
+        epoch_results,
+        train_duration ,
+        correlation_data, 
+        training_parameters
+    } = payload
+    let model_data
+    if (model_type === 'LSTM') {
+        const {
+            scores,
+            predicted_result,
+        } = payload
+        model_data = {
             scores,
             epoch_results,
             train_duration,
@@ -724,7 +728,33 @@ const saveModel = async (req, res) => {
             training_parameters,
             talibExecuteQueries,
         }
-        const [model_save_status, modelSaveResult] = await MDBServices.saveModelForUser(uid, ticker_name, ticker_period, model_id, model_name, model_data)
+    } else {
+        const {
+            wgan_intermediate_forecast,
+            wgan_final_forecast
+        } = payload
+        model_data = {
+            epoch_results,
+            train_duration,
+            correlation_data,
+            training_parameters,
+            talibExecuteQueries,
+            wgan_intermediate_forecast,
+            wgan_final_forecast
+        }
+    }
+
+    try {
+        const uid = res.locals.data.uid;
+        const [model_save_status, modelSaveResult] = await MDBServices.saveModelForUser(
+            uid,
+            ticker_name,
+            ticker_period,
+            model_id,
+            model_name,
+            model_type,
+            model_data
+        )
         res.status(200).json({ message: 'Model saved successfully', model_save_status, modelSaveResult, user_id: uid })
     } catch (error) {
         log.error(error.stack)

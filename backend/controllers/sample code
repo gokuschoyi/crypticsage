@@ -3630,3 +3630,109 @@ const IntermediateForecastChart = (props) => {
 }
 
 export default IntermediateForecastChart
+
+
+
+
+
+# def yield_batches(real_input, real_price, past_y, batchSize):
+#     num_samples, seq_length, features = real_input.shape
+#     num_batches, remainder = divmod(num_samples, batchSize)
+
+#     # Handle the initial batch
+#     if remainder > 0:
+#         initial_batch_input = real_input[:remainder]
+#         initial_batch_price = real_price[:remainder]
+#         initial_batch_past_y = past_y[:remainder]
+#         yield initial_batch_input, initial_batch_price, initial_batch_past_y
+
+#     # Reshape the remaining data into batches
+#     real_input_batches = real_input[remainder:]
+#     real_price_batches = real_price[remainder:]
+#     past_y_batches = past_y[remainder:]
+
+#     reshaped_input_batches = real_input_batches.reshape(num_batches, batchSize, seq_length, features)
+#     reshaped_price_batches = real_price_batches.reshape(num_batches, batchSize, -1)
+#     reshaped_past_y_batches = past_y_batches.reshape(num_batches, batchSize, seq_length, -1)
+
+#     for input_batch, price_batch, past_y_batch in zip(reshaped_input_batches, reshaped_price_batches, reshaped_past_y_batches):
+#         yield input_batch, price_batch, past_y_batch
+        
+
+# def transform_data(xTrain_norm, yTrain_norm, time_step, look_ahead, type_):
+#     X_data = tf.convert_to_tensor(xTrain_norm)
+#     y_data = tf.convert_to_tensor(yTrain_norm)
+#     X = []
+#     y = []
+#     past_y = []
+#     length = X_data.shape[0]
+
+#     if type_ == 'training':
+#         for i in range(0, length - time_step - look_ahead +1, 1):
+#             X_value = tf.slice(X_data, [i, 0], [time_step, -1])
+#             y_value = tf.slice(y_data, [i + time_step,0], [look_ahead, -1])
+#             past_y_value = tf.slice(y_data, [i, 0], [time_step, -1])
+#             if X_value.shape[0] == time_step and y_value.shape[0] == look_ahead:
+#                 X.append(X_value)
+#                 y.append(y_value)
+#                 past_y.append(past_y_value)
+#     else:
+#         for i in range(0, length - time_step + 1, 1):
+#             X_value = tf.slice(X_data, [i, 0], [time_step, -1])
+#             past_y_value = tf.slice(y_data, [i, 0], [time_step, -1])
+
+#             if X_value.shape[0] == time_step:
+#                 X.append(X_value)
+#                 past_y.append(past_y_value)
+
+#             if(i - look_ahead >= 0):
+#                 y_value = tf.slice(y_data, [i - look_ahead + time_step,0], [look_ahead, -1])
+#                 if y_value.shape[0] == look_ahead:
+#                     y.append(y_value)
+
+#     X = tf.stack(X)
+#     y_stacked = tf.stack(y)
+#     y = tf.reshape(y_stacked, [y_stacked.shape[0], y_stacked.shape[1]])
+#     past_y = tf.stack(past_y)
+
+#     # print(f'Transformed data shape : {X.shape}, {y.shape}, {past_y.shape}')
+
+#     return X, y, past_y
+
+
+
+
+import keras
+import redis
+import json
+import os
+
+redis_host = os.getenv("REDIS_HOST")
+redis_port = os.getenv("REDIS_PORT")
+redisPubSubConn = redis.Redis(host=redis_host, port=redis_port)  # type: ignore
+
+class customCallback(keras.callbacks.Callback):
+    def __init__(self):
+        super(customCallback, self).__init__()
+        
+    def on_epoch_begin(self, epoch, logs):
+        uid=logs['uid']
+        print(f'From custom callback on epoch begin : {epoch}')
+        keys = list(logs.keys())
+        print(keys)
+        redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "epochBegin", "uid": uid, "epoch": epoch + 1}),
+            )
+        return super().on_epoch_begin(epoch, logs)
+    
+    def on_epoch_end(self, epoch, logs):
+        uid = logs['uid']
+        print(f'From custom callback on epoch end : {epoch}')
+        keys = list(logs.keys())
+        print(keys)
+        redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "epochEnd", "uid": uid, "epoch": epoch + 1, "log": logs['message']['log']})
+            )
+        return super().on_epoch_end(epoch, logs)

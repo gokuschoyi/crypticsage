@@ -72,46 +72,93 @@ import {
     WGANGPProgress,
     WgangpMetricsChart,
     IntermediateForecastChart,
-    WganFinalPredictionChart
+    WganFinalPredictionChart,
+    WgangpOptions
 } from '../components'
 
-const colorCombinations = [
-    {
-        actual: '#0047AB', // Deep Blue
-        predicted: '#FFA500', // Vibrant Orange
-        forecast: '#FFD700', // Bright Yellow
-        TP_up: '#FF69B4', // Hot Pink (for TP_up)
-        TP_down: '#00FA9A' // Medium Spring Green (for TP_down)
-    },
-    {
-        actual: '#B22222', // Classic Red
-        predicted: '#008080', // Soft Teal
-        forecast: '#BC8F8F', // Gentle Lavender
-        TP_up: '#FFFF00', // Yellow (for TP_up)
-        TP_down: '#FF6347' // Tomato (for TP_down)
-    },
-    {
-        actual: '#228B22', // Forest Green
-        predicted: '#800080', // Rich Purple
-        forecast: '#87CEEB', // Sky Blue
-        TP_up: '#FF4500', // Orange Red (for TP_up)
-        TP_down: '#20B2AA' // Light Sea Green (for TP_down)
-    },
-    {
-        actual: '#2F4F4F', // Dark Slate Gray
-        predicted: '#FF7F50', // Bright Coral
-        forecast: '#98FB98', // Pale Green
-        TP_up: '#00CED1', // Dark Turquoise (for TP_up)
-        TP_down: '#FFB6C1' // Light Pink (for TP_down)
-    },
-    {
-        actual: '#1E90FF', // Dark Slate Gray
-        predicted: '#32CD32', // Bright Coral
-        forecast: '#9370DB', // Pale Green
-        TP_up: '#FFD700', // Dark Turquoise (for TP_up)
-        TP_down: '#FF69B4' // Hot Pink (for TP_down)
-    }
-];
+const colorCombinations = {
+    "LSTM": [
+        {
+            actual: '#0047AB', // Deep Blue
+            predicted: '#FFA500', // Vibrant Orange
+            forecast: '#FFD700', // Bright Yellow
+            TP_up: '#FF69B4', // Hot Pink (for TP_up)
+            TP_down: '#00FA9A' // Medium Spring Green (for TP_down)
+        },
+        {
+            actual: '#B22222', // Classic Red
+            predicted: '#008080', // Soft Teal
+            forecast: '#BC8F8F', // Gentle Lavender
+            TP_up: '#FFFF00', // Yellow (for TP_up)
+            TP_down: '#FF6347' // Tomato (for TP_down)
+        },
+        {
+            actual: '#228B22', // Forest Green
+            predicted: '#800080', // Rich Purple
+            forecast: '#87CEEB', // Sky Blue
+            TP_up: '#FF4500', // Orange Red (for TP_up)
+            TP_down: '#20B2AA' // Light Sea Green (for TP_down)
+        },
+        {
+            actual: '#2F4F4F', // Dark Slate Gray
+            predicted: '#FF7F50', // Bright Coral
+            forecast: '#98FB98', // Pale Green
+            TP_up: '#00CED1', // Dark Turquoise (for TP_up)
+            TP_down: '#FFB6C1' // Light Pink (for TP_down)
+        },
+        {
+            actual: '#1E90FF', // Dark Slate Gray
+            predicted: '#32CD32', // Bright Coral
+            forecast: '#9370DB', // Pale Green
+            TP_up: '#FFD700', // Dark Turquoise (for TP_up)
+            TP_down: '#FF69B4' // Hot Pink (for TP_down)
+        }
+    ],
+    "WGAN-GP": [
+        {
+            actual: '#C200FB',
+            two: '#EC0868',
+            three: '#FC2F00',
+            four: '#EC7D10',
+            five: '#FFBC0A',
+        },
+        {
+            actual: '#DF2935',
+            two: '#86BA90',
+            three: '#F5F3BB',
+            four: '#CE506E',
+            five: '#DEA000',
+        },
+        {
+            actual: '#F46036',
+            two: '#2E294E',
+            three: '#1B998B',
+            four: '#E71D36',
+            five: '#C5D86D',
+        },
+        {
+            one: '#053225',
+            actual: '#E34A6F',
+            three: '#F7B2BD',
+            four: '#B21198',
+            five: '#60A561',
+        },
+        {
+            actual: '#F72585',
+            two: '#7209B7',
+            three: '#3A0CA3',
+            four: '#32CD75',
+            five: '#4CC9F0',
+        },
+        {
+            actual: '#713E5A',
+            two: '#63A375',
+            three: '#EDC79B',
+            four: '#D57A66',
+            five: '#CA6680',
+        }
+    ]
+};
 
 const MODEL_OPTIONS_VALUE = {
     "LSTM": "multi_input_single_output_step",
@@ -333,6 +380,7 @@ const CryptoModule = () => {
     const [modelName, setModelName] = useState(model_data.model_name)
 
     const [modelTypeOpen, setModelTypeOpen] = useState(false)
+    // eslint-disable-next-line no-unused-vars
     const [modelType, setModelTypeState] = useState('')
 
     const handleModelParamChange = (name, value) => {
@@ -611,7 +659,8 @@ const CryptoModule = () => {
     }, [model_data.modelEndTime, model_data.modelStartTime])
 
     const handleSaveModel = () => {
-        const saveModelPayload = {
+        let saveModelPayload = {
+            model_type: modelParams.modelType,
             scores: model_data.score,
             model_id: model_data.model_id,
             model_name: modelName,
@@ -624,7 +673,13 @@ const CryptoModule = () => {
             training_parameters: model_data.training_parameters,
             talibExecuteQueries: model_data.talibExecuteQueries,
         }
-        // console.log(saveModelPayload)
+        if(model_data.training_parameters.modelType === 'WGAN-GP'){
+            delete saveModelPayload['scores']
+            delete saveModelPayload['predicted_result']
+            saveModelPayload['wgan_intermediate_forecast'] = model_data.intermediate_forecasts
+            saveModelPayload['wgan_final_forecast'] = model_data.wgan_final_forecast
+        }
+        console.log(saveModelPayload)
 
         saveModel({ token, payload: saveModelPayload })
             .then((res) => {
@@ -648,6 +703,7 @@ const CryptoModule = () => {
             })
     }
 
+    const [deleteModelOpen, setDeleteModelOpen] = useState(false)
     const handleDeleteModel = () => {
         const model_id = model_data.model_id
         deleteModel({ token, payload: { model_id, model_type: modelParams.modelType } })
@@ -655,9 +711,11 @@ const CryptoModule = () => {
                 Success(res.data.message)
                 modelProcessDurationRef.current = ''
                 dispatch(resetCurrentModelData())
+                setDeleteModelOpen(false)
             })
             .catch((err) => {
                 console.log(err.message)
+                setDeleteModelOpen(false)
             })
     }
 
@@ -729,12 +787,12 @@ const CryptoModule = () => {
     const [modelMetrics, setModelMetrics] = useState({ metrics: {}, mse: {} })
 
     const paletteIdRedux = useSelector(state => state.cryptoModule.modelData.predictionPaletteId)
-    const [predictionChartPalette, setPredictionChartPalette] = useState(colorCombinations[paletteIdRedux])
+    const [predictionChartPalette, setPredictionChartPalette] = useState(colorCombinations[modelParams.modelType][paletteIdRedux])
+
     const handlePredictionChartPalette = ({ id }) => {
         // console.log(id)
         dispatch(setPredictionPaletteId(id))
-        setPredictionChartPalette(colorCombinations[id])
-        // console.log(colorCombinations[id])
+        setPredictionChartPalette(colorCombinations[modelParams.modelType][id])
     }
 
     const intermediate_forecasts = useSelector(state => state.cryptoModule.modelData.wgan_intermediate_forecast)
@@ -895,11 +953,13 @@ const CryptoModule = () => {
                                         modelParams={modelParams}
                                         predictedVlauesRedux={predictedVlauesRedux}
                                         predictionChartType={predictionChartType}
-                                        colorCombinations={colorCombinations}
+                                        colorCombinations={colorCombinations[modelParams.modelType]}
                                         paletteIdRedux={paletteIdRedux}
                                         setModelName={setModelName}
                                         handleSaveModel={handleSaveModel}
                                         handleDeleteModel={handleDeleteModel}
+                                        deleteModelOpen={deleteModelOpen}
+                                        setDeleteModelOpen={setDeleteModelOpen}
                                         handlePredictionsChartType={handlePredictionsChartType}
                                         handlePredictionChartPalette={handlePredictionChartPalette}
                                     />
@@ -1005,9 +1065,26 @@ const CryptoModule = () => {
                                         />
                                     )
                                     }
+
                                     <CorelationMatrix
                                         transformation_order={transformationOrder}
                                     />
+
+                                    <Box pt={2}>
+                                        <WgangpOptions
+                                            paletteIdRedux={paletteIdRedux}
+                                            colorCombinations={colorCombinations[modelParams.modelType]}
+                                            handlePredictionChartPalette={handlePredictionChartPalette}
+                                            modelName={modelName}
+                                            setModelName={setModelName}
+                                            handleSaveModel={handleSaveModel}
+                                            handleDeleteModel={handleDeleteModel}
+                                            deleteModelOpen={deleteModelOpen}
+                                            setDeleteModelOpen={setDeleteModelOpen}
+                                            savedToDb={model_data.model_saved_to_db}
+                                        />
+                                    </Box>
+
                                 </Grid>
                             </Grid>
 
@@ -1049,15 +1126,15 @@ const CryptoModule = () => {
                             </Grid>
 
                             <Grid container>
-                                <Grid item sm={12} md={6} lg={6} xl={4} p={2} sx={{ width: '100%' }}>
-                                    {intermediate_forecasts.length > 0 &&
+                                {intermediate_forecasts.length > 0 &&
+                                    <Grid item sm={12} md={6} lg={6} xl={4} p={2} sx={{ width: '100%' }}>
                                         <IntermediateForecastChart
                                             intermediate_forecasts={intermediate_forecasts}
                                             epochs={modelParams.epoch}
                                             forecast_step={modelParams.intermediateResultStep}
                                         />
-                                    }
-                                </Grid>
+                                    </Grid>
+                                }
 
                                 <Grid item sm={12} md={6} lg={6} xl={4} p={2} sx={{ width: '100%' }}>
                                     {wgan_final_forecast.length > 0 &&

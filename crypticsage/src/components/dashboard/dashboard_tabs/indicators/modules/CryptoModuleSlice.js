@@ -278,6 +278,12 @@ const cryptoModuleSlice = createSlice({
             state.modelData.model_id = '';
             state.modelData.modelStartTime = '';
             state.modelData.modelEndTime = '';
+
+            state.modelData.wgan_final_forecast = {
+                predictions: [],
+                rmse: {}
+            };
+            state.modelData.wgan_intermediate_forecast = [];
         },
         resetModelData: (state) => {
             state.modelData.epoch_results = [];

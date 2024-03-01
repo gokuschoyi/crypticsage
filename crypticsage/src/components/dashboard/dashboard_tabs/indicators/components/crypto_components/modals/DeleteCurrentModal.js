@@ -4,15 +4,14 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="left" ref={ref} {...props} />;
 });
-const DeleteCurrentModal = ({ handleDeleteModel }) => {
-    const [open, setOpen] = React.useState(false);
+const DeleteCurrentModal = ({ handleDeleteModel, deleteModelOpen, setDeleteModelOpen }) => {
 
     const handleClickOpen = () => {
-        setOpen(true);
+        setDeleteModelOpen(true);
     };
 
     const handleClose = () => {
-        setOpen(false);
+        setDeleteModelOpen(false);
     };
 
     return (
@@ -26,7 +25,7 @@ const DeleteCurrentModal = ({ handleDeleteModel }) => {
             </Tooltip>
 
             <Dialog
-                open={open}
+                open={deleteModelOpen}
                 TransitionComponent={Transition}
                 keepMounted
                 onClose={handleClose}

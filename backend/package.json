@@ -5,7 +5,8 @@
   "main": "server.js",
   "nodemonConfig": {
     "ignore": [
-      "./models"
+      "./models",
+      "./worker_celery"
     ]
   },
   "scripts": {
