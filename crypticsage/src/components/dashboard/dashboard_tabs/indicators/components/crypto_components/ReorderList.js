@@ -154,8 +154,8 @@ const ReorderList = ({ orderList, setOrderList, disabled }) => { // orderList is
     }, [disabled])
 
     const handleOrderReset = () => {
-        console.log('Reset order clicked')
-        let originalOrder = []
+        // console.log('Reset order clicked')
+        // let originalOrder = []
 
         let talibList = []
 
@@ -171,10 +171,12 @@ const ReorderList = ({ orderList, setOrderList, disabled }) => { // orderList is
             })
         })
 
-        originalOrder = [...transformationOrder, ...talibList]
-        // console.log('original order', originalOrder)
-        setIndicators(originalOrder);
-        setOrderList(originalOrder);
+        // originalOrder = [...transformationOrder, ...talibList]
+        // console.log('original order', talibList, transformationOrder)
+        const unionArray = transformationOrder.concat(talibList.filter(item2 => !transformationOrder.some(item1 => item1.id === item2.id)));
+        // console.log(unionArray)
+        setIndicators(unionArray);
+        setOrderList(unionArray);
     }
 
     return (

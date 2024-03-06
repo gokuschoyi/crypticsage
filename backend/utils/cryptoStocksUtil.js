@@ -1170,7 +1170,7 @@ const generateStockReport = async (symbol) => {
 }
 
 const getStockSummaryDetails = async (symbol) => {
-    log.info(`Fetching symbol summary for ${symbol}`)
+    log.info(`-------------------Fetching symbol summary for ${symbol}-------------------`)
 
     let qSummary = {}
     qSummary = await generateStockReport(symbol)
@@ -1355,17 +1355,19 @@ const getStockSummaryDetails = async (symbol) => {
         stockProfile['combinedPriceSummary'] = transformedPriceSummary
 
 
-        const insideHld = stockProfile['insiderHolders'].holders
-        const insideTran = stockProfile['insiderTransactions']
-        const added = insideHld.map((item, index) => {
-            const matched = insideTran.find((element) => element.name === item.name)
-            return {
-                ...item,
-                transactions: matched?.transactions || []
-            }
-        })
-        stockProfile['insiderHolders'].holders = added
-        delete stockProfile.insiderTransactions
+        const insideHld = stockProfile['insiderHolders']?.holders
+        if(insideHld !== undefined){
+            const insideTran = stockProfile['insiderTransactions']
+            const added = insideHld.map((item, index) => {
+                const matched = insideTran.find((element) => element.name === item.name)
+                return {
+                    ...item,
+                    transactions: matched?.transactions || []
+                }
+            })
+            stockProfile['insiderHolders'].holders = added
+            delete stockProfile.insiderTransactions
+        }
         return stockProfile
     }
     // console.log(added)

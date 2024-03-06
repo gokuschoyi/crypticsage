@@ -1,7 +1,6 @@
 import React from 'react'
 import { Box, Typography, useTheme, Grid } from '@mui/material'
 import { convertKeysForDisplay } from '../../modules/CryptoModuleUtils'
-import { useSelector } from 'react-redux';
 import '../../modules/module.css'
 
 const getColorForValue = (value) => {
@@ -66,12 +65,11 @@ const style = {
     }
 };
 
-const CorelationMatrix = ({ transformation_order }) => {
+const CorelationMatrix = ({ transformation_order, correlation_data_redux }) => {
     const theme = useTheme()
-    const final_data = useSelector(state => state.cryptoModule.modelData.correlation_data)
+
     return (
         <Box>
-            {(final_data !== null && final_data.length > 0) &&
                 <Box style={{ width: '400px', display: '-webkit-box' }}>
                     <Box className='corelation-matrix-box'>
                         {/* Row for top labels */}
@@ -79,7 +77,7 @@ const CorelationMatrix = ({ transformation_order }) => {
                             <Grid item>
                                 <Box style={{ width: cell_size, flex: 1, margin: '2px', height: cell_size }} /> {/* Empty box for corner */}
                             </Grid>
-                            {transformation_order.slice(0, final_data.length).map(order => (
+                            {transformation_order.slice(0, correlation_data_redux.length).map(order => (
                                 <Grid item key={order.id}>
                                     <Box style={{ ...style.cell, flex: 1, margin: '2px' }} title={`${order.name}`}>
                                         <Typography
@@ -93,7 +91,7 @@ const CorelationMatrix = ({ transformation_order }) => {
                         </Grid>
 
                         {/* Rows for matrix and side labels */}
-                        {final_data.map((row, rowIndex) => (
+                        {correlation_data_redux.map((row, rowIndex) => (
                             <Grid container key={rowIndex}>
                                 {/* Side label */}
                                 <Grid item>
@@ -118,7 +116,7 @@ const CorelationMatrix = ({ transformation_order }) => {
                                             <span className="tooltiptext"
                                                 style={{
                                                     transform: colIndex > (row.length / 2) - 1 ? 'translateX(-55%)' : 'translateX(55%)',
-                                                    top: rowIndex > (final_data.length / 2) - 1 ? '-65px' : '55%',
+                                                    top: rowIndex > (correlation_data_redux.length / 2) - 1 ? '-65px' : '55%',
                                                 }}
                                             >
                                                 {`R    : ${value.r.toFixed(3)} `}
@@ -145,10 +143,7 @@ const CorelationMatrix = ({ transformation_order }) => {
                             <span style={{ ...style.scaleLabel, color: `${theme.palette.primary.newWhite}` }}>1</span>
                         </Box>
                     </Box>
-
-
                 </Box>
-            }
         </Box >
     )
 }

@@ -1219,7 +1219,7 @@ const StocksModule = () => {
     }, [stockSummary, stockstoken, token, dispatch])
 
     useEffect(() => {
-        console.log('UE : gsap handler')
+        // console.log('UE : gsap handler')
         const stockSections = document.querySelectorAll('.stock-header')
         const observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
@@ -1246,6 +1246,9 @@ const StocksModule = () => {
     })
 
     // console.log(stockSummaryState)
+    const checkObjectLength = (obj) => {
+        return Object.keys(obj).length === 0;
+    }
 
     return (
         <Box className='stock-module-container'>
@@ -1264,9 +1267,9 @@ const StocksModule = () => {
                         {stockSummaryState.combinedPriceSummary && <CombinedPriceSummary summary={stockSummaryState} />}
                         {stockSummaryState.calendarEvents && <CalendarEvents summary={stockSummaryState} />}
                         {stockSummaryState.combinedEarnings && <CombinedEarnings summary={stockSummaryState} />}
-                        {stockSummaryState.combinedCashflowStatement && <CombinedReports report_title='Cash Flow Report' data_key='combinedCashflowStatement' report_key='cashflowStatements' summary={stockSummaryState} />}
-                        {stockSummaryState.combinedBalanceSheet && <CombinedReports report_title='Balance Sheet Report' data_key='combinedBalanceSheet' report_key='balanceSheetStatements' summary={stockSummaryState} />}
-                        {stockSummaryState.cominedIncomeStatement && <CombinedReports report_title='Income Statement' data_key='cominedIncomeStatement' report_key='incomeStatementHistory' summary={stockSummaryState} />}
+                        {!checkObjectLength(stockSummaryState.combinedCashflowStatement.annual) && <CombinedReports report_title='Cash Flow Report' data_key='combinedCashflowStatement' report_key='cashflowStatements' summary={stockSummaryState} />}
+                        {!checkObjectLength(stockSummaryState.combinedBalanceSheet.annual) && <CombinedReports report_title='Balance Sheet Report' data_key='combinedBalanceSheet' report_key='balanceSheetStatements' summary={stockSummaryState} />}
+                        {!checkObjectLength(stockSummaryState.cominedIncomeStatement.annual) && <CombinedReports report_title='Income Statement' data_key='cominedIncomeStatement' report_key='incomeStatementHistory' summary={stockSummaryState} />}
                         {stockSummaryState.defaultKeyStatistics && <DefaultKeyStats summary={stockSummaryState} />}
                         {stockSummaryState.financialData && <FinancialData summary={stockSummaryState} />}
                         {stockSummaryState.fundOwnership && <CustomOwnership ownership_type='Fund Ownership' data_key='fundOwnership' summary={stockSummaryState} />}

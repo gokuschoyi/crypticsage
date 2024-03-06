@@ -187,10 +187,9 @@ const calculateFeatureMetrics = async ({ features }) => {
  * @param {Array} param.tickerHist
  * @param {Object} param.finalTalibResult
  * @param {Array} param.transformation_order
- * @param {string} [param.uid]
- * @returns {Promise<array>}
+ * @returns {Promise<{features: Array<>, metrics: Array<Array<{r: number, p: number, cov: number, stat: number}>>}>}
  */
-const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult, transformation_order, uid }) => {
+const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult, transformation_order }) => {
     const features = tickerHist.map((item, i) => {
         return transformation_order.map(order => {
             if (order.value in item) {
@@ -212,9 +211,9 @@ const transformDataToRequiredShape = async ({ tickerHist, finalTalibResult, tran
 
     const metrics = await calculateFeatureMetrics({ features })
     // console.log("New metrics : ", metrics)
-    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'feature_relations', uid, metrics }))
+    // redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'feature_relations', uid, metrics }))
 
-    return features
+    return { features, metrics }
 }
 
 /**

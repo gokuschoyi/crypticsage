@@ -2455,7 +2455,8 @@ const fetchUserModels = async (user_id) => {
             model_created_date: 1,
             ticker_name: 1,
             ticker_period: 1,
-            model_data: 1
+            model_data: 1,
+            model_type: 1
         }
 
         const pipeline = [

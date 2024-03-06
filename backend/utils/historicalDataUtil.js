@@ -9,7 +9,7 @@ const MDBServices = require('../services/mongoDBServices')
 
 // ------------------------------------Y-FINANCE-----------------------------------------//
 
-// new date 12/13/1980, 1:30:00 AM to 1980-12-13 (mm/dd/yyy to yyyy-mm-dd) 
+// new date 12/13/1980, 1:30:00 AM to 1980-12-13 (mm/dd/yyy to yyyy-mm-dd) // Not being used anywhere
 const formatDateForProcessInitialSaveHistoricalDataYFinance = (param) => {
     log.info(`Date param : ${param}`)
     const [date, tz] = param.split(', ');
@@ -18,13 +18,14 @@ const formatDateForProcessInitialSaveHistoricalDataYFinance = (param) => {
     return formattedDate;
 }
 
-// new Date 10/07/2023, 12:19:38 pm to yyyy-mm-dd
+// changed formats again. not sure what happens here but it works... 
+// Date flip flops between dd-mm-yyyy and yyyy-mm-dd
+// new Date 10/07/2023, 12:19:38 pm (dd-mm-yyy to yyyy-mm-dd)
 const formatDateForYFinance = (param) => {
     log.info(`Date param yf fetch : ${param}`)
-    const newDt = new Date(param)
-    const d = newDt.getDate()
-    const m = newDt.getMonth() + 1
-    const y = newDt.getFullYear()
+    const [date, tz] = param.split(', ');
+    const [d, m, y] = date.split('/')
+
     const formattedDate = `${y}-${m}-${d}`;
     return formattedDate;
 }

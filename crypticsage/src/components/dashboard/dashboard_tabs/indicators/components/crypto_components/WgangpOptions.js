@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, TextField } from '@mui/material'
-import { SaveCurrentModal, DeleteCurrentModal } from './modals'
+import { SaveCurrentModal, DeleteCurrentModal, RetrainWGANModal } from './modals'
 const WgangpOptions = ({
     paletteIdRedux,
     colorCombinations,
@@ -11,10 +11,11 @@ const WgangpOptions = ({
     handleDeleteModel,
     deleteModelOpen,
     setDeleteModelOpen,
-    savedToDb
+    savedToDb,
+    retrain_options_payload
 }) => {
     return (
-        <Box display='flex' flexDirection='row' gap={'4px'} alignItems='center' className='model-chart-action-container'>
+        <Box display='flex' flexDirection='row' gap={'4px'} alignItems='center' className='model-chart-action-container wgan'>
             <TextField
                 size='small'
                 inputProps={{ style: { height: '10px', width: '200px' } }}
@@ -40,7 +41,7 @@ const WgangpOptions = ({
                     />
                 ))}
             </Box>
-
+            <RetrainWGANModal retrain_options_payload={retrain_options_payload}/>
             <SaveCurrentModal handleSaveModel={handleSaveModel} />
             {!savedToDb &&
                 <DeleteCurrentModal

@@ -539,7 +539,7 @@ const SavedModels = ({
     return (
         <Box className='saved-models-body'>
             <Box display='flex' flexDirection='column' gap='5px' className='all-saved-model' width='fit-content'>
-                {user_models_redux.filter(model => model.ticker_period === selected_ticker_period && model.ticker_name === selected_ticker_name).map((model, index) => {
+                {user_models_redux.filter(model => model.ticker_period === selected_ticker_period && model.ticker_name === selected_ticker_name && model.model_type === 'LSTM').map((model, index) => {
                     const { model_name, model_id, model_created_date } = model
                     return (
                         <Paper key={index} elevation={4} className='single-saved-model' sx={{ color: toShowModelId === model_id ? `${theme.palette.primary.main}` : `${theme.palette.text.primary}` }}>

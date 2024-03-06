@@ -1,4 +1,4 @@
-import React, {  useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { createChart } from 'lightweight-charts';
 import { Box, useTheme, IconButton, Typography } from '@mui/material'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -29,7 +29,6 @@ const lineColors = [
 
 const WganFinalPredictionChart = (props) => {
     const { wgan_final_forecast } = props
-    // console.log('final pridict first', wgan_final_forecast)
 
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
@@ -73,13 +72,14 @@ const WganFinalPredictionChart = (props) => {
     }
 
     const HideIcon = ({ inter_key, show_chart_flag }) => {
+        const [toggled, setToggled] = useState(show_chart_flag)
         const handleToggleShowHideChart = ({ inter_key }) => {
-            console.log('clicked to hide', inter_key, show_chart_flag)
+            setToggled(!toggled)
+            // console.log('clicked to hide', inter_key, show_chart_flag)
             predictionSeriesref.current[inter_key].visible = !predictionSeriesref.current[inter_key].visible;
             predictionSeriesref.current[inter_key].line.applyOptions({
                 visible: predictionSeriesref.current[inter_key].visible
             });
-            // dispatch(toggleShowHideIntermediatePredictions({ key: inter_key }))
         }
 
         return (
@@ -89,7 +89,7 @@ const WganFinalPredictionChart = (props) => {
                 aria-label="Hide chart"
                 color="secondary"
                 onClick={handleToggleShowHideChart.bind(null, { inter_key: inter_key })}>
-                {show_chart_flag ?
+                {toggled ?
                     <VisibilityIcon className='smaller-icon' />
                     :
                     <VisibilityOffIcon className='smaller-icon' />
@@ -104,14 +104,14 @@ const WganFinalPredictionChart = (props) => {
             <Box className='model-hist-legend'>
                 <Box className='model-hist-main-box-wgan'>
                     <Box>
-                        <Typography className='model-hist-tooltip-epoch' style={{ fontSize: '12px' }} id="prediction-date">Date : {tooltipState.date}</Typography>
+                        <Typography className='model-hist-tooltip-epoch' style={{ fontSize: '12px' }} id="prediction-date">Date : </Typography>
                     </Box>
 
                     <Box className='model-hist-tooltip-item'>
                         <Box style={{ display: 'flex', flexDirection: 'row', justifyContent: "space-between", alignItems: 'center', gap: '4px' }}>
                             <Box style={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: `blue` }}></Box>
-                            <Typography className='model-hist-tooltip-item-key' id={`actual_key`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>Actual</Typography>
-                            <Typography className='model-hist-tooltip-item-value' id={`actual_value`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>{tooltipState.actual}</Typography>
+                            <Typography className='model-hist-tooltip-item-key' id={`actual_key_pred`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>Actual</Typography>
+                            <Typography className='model-hist-tooltip-item-value' id={`actual_value_pred`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'></Typography>
                         </Box>
                     </Box>
 
@@ -122,8 +122,8 @@ const WganFinalPredictionChart = (props) => {
                                 <Box className='model-hist-tooltip-item' sx={{ minWidth: '130px', justifyContent: 'space-between' }}>
                                     <Box style={{ display: 'flex', flexDirection: 'row', justifyContent: "space-between", alignItems: 'center', gap: '4px' }}>
                                         <Box style={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: `${color}` }}></Box>
-                                        <Typography className='model-hist-tooltip-item-key' id={`${series_key[i]}_key`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>P : {series_key[i]}</Typography>
-                                        <Typography className='model-hist-tooltip-item-value' id={`${series_key[i]}_value`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>{tooltipState[series_key[i]]}</Typography>
+                                        <Typography className='model-hist-tooltip-item-key' id={`${series_key[i]}_key_pred`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>P : </Typography>
+                                        <Typography className='model-hist-tooltip-item-value' id={`${series_key[i]}_value_pred`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'></Typography>
                                     </Box>
                                     <HideIcon inter_key={series_key[i]} show_chart_flag={visible} />
                                 </Box>
@@ -174,7 +174,6 @@ const WganFinalPredictionChart = (props) => {
 
         return () => {
             console.log('CLEANUP : WGAN GP final prediction chart cleanup')
-
             chart.current.remove();
             chart.current = null;
             predictionSeriesref.current = {}
@@ -189,7 +188,6 @@ const WganFinalPredictionChart = (props) => {
     }, {})
     series_key['date'] = ''
 
-    const [tooltipState, setTooltipStae] = React.useState(series_key)
 
     const tooltipHandler = (param) => {
         if (
@@ -203,17 +201,19 @@ const WganFinalPredictionChart = (props) => {
         ) {
             return;
         } else {
-            let obj = {}
-            obj['date'] = new Date(param.time * 1000).toLocaleString()
+            const pDate = document.getElementById('prediction-date')
+            pDate.innerHTML = `Date : ${new Date(param.time * 1000).toLocaleString()}`
             const ttKeys = Object.keys(wgan_final_forecast[0]).filter(key => key !== "date")
             const toShow = ttKeys.filter(key => predictionSeriesref.current[key].visible)
 
             toShow.forEach(key => {
+                const key_element = document.getElementById(`${key}_key_pred`)
+                const value_element = document.getElementById(`${key}_value_pred`)
+                key_element.innerHTML = key === 'actual' ? 'Actual : ' : `P : ${key}`
                 const data = param.seriesData.get(predictionSeriesref.current[key]['line'])
-                obj[key] = data.value.toFixed(2)
+                value_element.innerHTML = data.value.toFixed(2)
             })
 
-            setTooltipStae(obj)
         }
     }
 

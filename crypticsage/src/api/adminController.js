@@ -178,11 +178,31 @@ export const executeTalibFunction = async ({ token, payload }) => {
     return response;
 }
 
+export const getCorelationMatrix = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/indicators/get_corelation_matrix`, { payload }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
 export const startModelTraining = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
     const response = await axios.post(`${baseUrl}/indicators/start_model_training`, { payload }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
+export const retrain_wgan_Model = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/indicators/retrain_model`, { payload }, config, {
         withCredentials: true
     })
     return response;
@@ -270,5 +290,14 @@ export const renameModel = async ({ token, payload }) => {
     const response = await axios.post(`${baseUrl}/indicators/rename_model`, { model_id, model_name }, config, {
         withCredentials: true
     })
+    return response;
+}
+
+export const getModelCheckPoints = async ({ token, model_id }) => {
+    const config = {
+        headers: { "Authorization": `Bearer ${token}` },
+        withCredentials: true
+    };
+    const response = await axios.get(`${baseUrl}/indicators/get_model_checkpoints?model_id=${model_id}`, config)
     return response;
 }

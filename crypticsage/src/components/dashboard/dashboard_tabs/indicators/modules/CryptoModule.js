@@ -7,6 +7,7 @@ import { Indicators } from '../components/IndicatorDescription';
 import { useSelector } from 'react-redux'
 import { Success, Info, Warning } from '../../../global/CustomToasts'
 import { ResetOnModelChange } from '../components/crypto_components/modals';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import {
     Box
     , Typography
@@ -15,11 +16,14 @@ import {
     , useTheme
     , useMediaQuery
     , Paper
+    , Button
+    , IconButton
 } from '@mui/material'
 
 import {
     getHistoricalTickerDataFroDb,
     fetchLatestTickerForUser,
+    getCorelationMatrix,
     startModelTraining,
     getUserModels,
     saveModel,
@@ -49,7 +53,8 @@ import {
     formatMillisecond,
     generateRandomModelName,
     checkForUniqueAndTransform,
-    checkIfNewTickerFetchIsRequired
+    checkIfNewTickerFetchIsRequired,
+    generateTalibFunctionsForExecution
 } from './CryptoModuleUtils'
 
 
@@ -367,28 +372,35 @@ const CryptoModule = () => {
     }
 
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
-    const [trainingParametersAccordianCollapse, setTrainingParametersAccordianCollapse] = useState(!sm)
-    const handleParametersAccordianCollapse = () => {
-        setTrainingParametersAccordianCollapse((prev) => !prev)
-    }
 
     // Model training parameters
-    const model_parameters = useSelector(state => state.cryptoModule.modelData.training_parameters)
-    const userModels = useSelector(state => state.cryptoModule.userModels)
     const model_data = useSelector(state => state.cryptoModule.modelData)
+    const userModels = useSelector(state => state.cryptoModule.userModels)
+    const model_parameters = model_data.training_parameters
     const [modelParams, setModelParams] = useState({ ...model_parameters })
     const [modelName, setModelName] = useState(model_data.model_name)
 
+    const retrain_options_payload = {
+        model_id: model_data.model_id,
+        selectedTickerPeriod,
+        selectedTickerName,
+        selectedFunctions,
+        tDataReduxL: tDataRedux.length,
+    }
+
     const [modelTypeOpen, setModelTypeOpen] = useState(false)
-    // eslint-disable-next-line no-unused-vars
-    const [modelType, setModelTypeState] = useState('')
+
+    const scaledValue = (value, max) => {
+        const scl = (value) / (100 - 1) * max
+        const trucned_no = scl.toString().match(/^-?\d+(?:\.\d{0,5})?/)[0]
+        return parseFloat(trucned_no)
+    }
 
     const handleModelParamChange = (name, value) => {
         if (name === 'modelType') {
-            if (model_data.model_id !== '' && !model_data.model_saved_to_db) {
-                setModelTypeState(value)
+            if (model_data.model_id !== '' && !model_data.model_saved_to_db) { // Training has been done and model is not saved
                 setModelTypeOpen(true)
-            } else if (model_data.model_id !== '' && model_data.model_saved_to_db) {
+            } else if (model_data.model_id !== '' && model_data.model_saved_to_db) { // Training has been done and model is saved. 
                 setModelParams(() => ({ ...model_parameters }))
                 dispatch(resetModelData())
                 dispatch(setModelType(value))
@@ -396,7 +408,6 @@ const CryptoModule = () => {
                 let { modelType, ...rest } = model_parameters
                 setModelParams(() => ({ modelType: value, ...rest }))
             } else {
-                setModelTypeState('')
                 setModelParams((prev) => {
                     return {
                         ...prev,
@@ -405,6 +416,25 @@ const CryptoModule = () => {
                 })
             }
         } else {
+            if (name === 'd_learningRate' || name === 'g_learningRate') {
+                const max = 0.001
+                let scaled = scaledValue(value, max)
+                setModelParams((prev) => ({ ...prev, [name === 'd_learningRate' ? 'scaled_d_learningRate' : "scaled_g_learningRate"]: scaled }))
+            } else if (name === 'learningRate') {
+                const minValue = 0.0001;
+                const maxValue = 0.01;
+
+                // Calculate the exponentially scaled value
+                const normalizedValue = (value - 1) / (100 - 1);
+                const scaledValue = minValue * Math.pow(maxValue / minValue, normalizedValue);
+                setModelParams((prev) => {
+                    return {
+                        ...prev,
+                        'scaledLearningRate': parseFloat(scaledValue.toFixed(4))
+                    }
+                })
+            }
+
             setModelParams((prev) => {
                 return {
                     ...prev,
@@ -420,44 +450,6 @@ const CryptoModule = () => {
     // console.log('Changed order list: ', transformationOrder.findIndex(elem=> elem.value === 'close'))
     // console.log(transformationOrder)
 
-    // setting converted learning rate
-    useEffect(() => {
-        const scaledValue = (value, max) => {
-            const scl = (value) / (100 - 1) * max
-            const trucned_no = scl.toString().match(/^-?\d+(?:\.\d{0,5})?/)[0]
-            return parseFloat(trucned_no)
-        }
-        if (modelParams.modelType === 'WGAN-GP') {
-            const max = 0.001
-            const d_scaled = scaledValue(modelParams.d_learningRate, max)
-            const g_scaled = scaledValue(modelParams.g_learningRate, max)
-            setModelParams((prev) => {
-                return {
-                    ...prev,
-                    'scaled_d_learningRate': d_scaled,
-                    'scaled_g_learningRate': g_scaled
-                }
-            })
-        } else {
-            const minValue = 0.0001;
-            const maxValue = 0.01;
-
-            // Calculate the exponentially scaled value
-            const normalizedValue = (modelParams.learningRate - 1) / (100 - 1);
-            const scaledValue = minValue * Math.pow(maxValue / minValue, normalizedValue);
-
-            // Calculate the exponentially scaled value
-            // console.log(parseFloat(scaledValue.toFixed(4)))
-
-            setModelParams((prev) => {
-                return {
-                    ...prev,
-                    'scaledLearningRate': parseFloat(scaledValue.toFixed(4))
-                }
-            })
-        }
-    }, [modelParams.learningRate, modelParams.modelType, modelParams.d_learningRate, modelParams.g_learningRate])
-
     // Execute query to start model training
     const [noFuncSelected, setNoFuncSelected] = useState('')
     const handleStartModelTraining = () => {
@@ -469,80 +461,9 @@ const CryptoModule = () => {
         } else {
             console.log('Sending model training query...', modelParams)
             setTrainingStartedFlag(true)
-
             setw_gan_error({})
+            const fTalibExecuteQuery = generateTalibFunctionsForExecution({ selectedFunctions, tDataReduxL: tDataRedux.lenght, selectedTickerPeriod, selectedTickerName })
 
-            let fTalibExecuteQuery = []
-            selectedFunctions.forEach((unique_func) => {
-                const { outputs } = unique_func;
-                const func = unique_func.functions;
-                func.forEach((f) => {
-                    const { inputs, optInputs, name, id } = f;
-                    let inputEmpty = false;
-                    let talibExecuteQuery = {}
-                    let tOITypes = {}
-                    const transformedOptionalInputs = optInputs.reduce((result, item) => {
-                        result[item.name] = item.defaultValue
-                        tOITypes[item.name] = item.type;
-                        return result;
-                    }, {})
-
-                    let outputkeys = {}
-                    let outputsCopy = [...outputs]
-                    outputkeys = outputsCopy.reduce((result, output) => {
-                        result[output.name] = output.name;
-                        return result;
-                    }, {});
-
-                    let converted = {}
-                    inputs.map((input) => {
-                        if (input.flags) {
-                            Object.keys(input.flags).forEach((key) => {
-                                converted[input.flags[key]] = input.flags[key];
-                            })
-                            return input
-                        } else {
-                            if (input.value === '') {
-                                inputEmpty = true;
-                                converted[input.name] = "";
-                                return {
-                                    ...input,
-                                    errorFlag: true,
-                                    helperText: 'Please select a valid input',
-                                };
-                            } else {
-                                converted[input.name] = input.value;
-                                return {
-                                    ...input,
-                                    errorFlag: false,
-                                    helperText: '',
-                                };
-                            }
-                        }
-                    })
-
-                    talibExecuteQuery['name'] = name;
-                    talibExecuteQuery['startIdx'] = 0;
-                    talibExecuteQuery['endIdx'] = tDataRedux.length - 1;
-                    talibExecuteQuery = { ...talibExecuteQuery, ...converted, ...transformedOptionalInputs }
-
-
-                    let payload = {
-                        func_query: talibExecuteQuery,
-                        func_param_input_keys: converted,
-                        func_param_optional_input_keys: tOITypes,
-                        func_param_output_keys: outputkeys,
-                        db_query: {
-                            asset_type: 'crypto',
-                            fetch_count: tDataRedux.length,
-                            period: selectedTickerPeriod,
-                            ticker_name: selectedTickerName
-                        }
-                    }
-                    fTalibExecuteQuery.push({ id, payload, inputEmpty })
-                })
-            })
-            fTalibExecuteQuery = fTalibExecuteQuery.filter((item) => !item.inputEmpty)
             let model_training_parameters = {
                 model_type: MODEL_OPTIONS_VALUE[modelParams.modelType],
                 to_predict: modelParams.multiSelectValue,
@@ -580,7 +501,7 @@ const CryptoModule = () => {
                     model_training_parameters
                 }
             }).then((res) => {
-
+                setCorelation_matrix([])
                 dispatch(setModelEndTime(''))
                 const modelId = res.data.job_id
                 const model_name = generateRandomModelName(cryptotoken, selectedTokenPeriod)
@@ -610,10 +531,71 @@ const CryptoModule = () => {
         }
     }
 
+    const transformation_order_ref = useRef(transformationOrder)
+    const [corelation_matrix, setCorelation_matrix] = useState([])
+    const [corelation_matrix_error, setCorelation_matrix_error] = useState('')
+    const handleCalculateCorrelationMatrix = () => {
+        // console.log('Calculate Correlation clicked...', transformationOrder)
+        // console.log('Old state..', transformation_order_ref.current)
+        if (transformationOrder.length === 5) {
+            setCorelation_matrix_error('Select a function from below...')
+            return
+        }
+        const checkOrder = (old, new_) => {
+            if (old.length !== new_.length) return false;
+            for (let i = 0; i < old.length; i++) {
+                if (old[i].id !== new_[i].id) {
+                    // console.log(old[i].id, new_[i].id)
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        const payload = {
+            transformation_order: transformationOrder,
+            talibExecuteQueries: generateTalibFunctionsForExecution({ selectedFunctions, tDataReduxL: tDataRedux.lenght, selectedTickerPeriod, selectedTickerName })
+        }
+
+        const order = checkOrder(transformation_order_ref.current, transformationOrder)
+        if (!order) {
+            // console.log('Order changed or new func added.')
+            setCorelation_matrix_error('')
+            // console.log(order)
+            getCorelationMatrix({ token, payload })
+                .then((res) => {
+                    // console.log(res.data)
+                    setCorelation_matrix(res.data.corelation_matrix)
+                })
+                .catch((err) => {
+                    console.log(err)
+                })
+        } else if (order && corelation_matrix.length === 0) {
+            // console.log('Order is same but no data.')
+            setCorelation_matrix_error('')
+            getCorelationMatrix({ token, payload })
+                .then((res) => {
+                    // console.log(res.data)
+                    setCorelation_matrix(res.data.corelation_matrix)
+                })
+                .catch((err) => {
+                    console.log(err)
+                })
+        } else {
+            // console.log('Order is not changed.')
+            setCorelation_matrix_error('Order has not changed or same data.')
+        }
+
+        transformation_order_ref.current = transformationOrder
+    }
+
     // resetting the model training error prompt
     useEffect(() => {
         if (selectedFunctions.length > 0 && noFuncSelected !== '' && (modelParams.to_train_count !== '' || modelParams.to_train_count !== 0)) {
             setNoFuncSelected('')
+        }
+        if (selectedFunctions.length > 0) {
+            setCorelation_matrix_error('')
         }
     }, [selectedFunctions, noFuncSelected, modelParams.to_train_count])
 
@@ -633,10 +615,10 @@ const CryptoModule = () => {
         } else {
             console.log('No model present or model has been saved')
         }
-        setModelParams(() => ({ ...model_parameters }))
         dispatch(resetModelData())
         dispatch(setStartWebSocket(false))
-        dispatch(setModelType(model_parameters.modelType))
+        dispatch(setModelType(modelParams.modelType))
+        setModelParams(() => ({ ...model_parameters, modelType: modelParams.modelType, }))
         setModelTypeOpen(false)
     }
 
@@ -673,7 +655,7 @@ const CryptoModule = () => {
             training_parameters: model_data.training_parameters,
             talibExecuteQueries: model_data.talibExecuteQueries,
         }
-        if(model_data.training_parameters.modelType === 'WGAN-GP'){
+        if (model_data.training_parameters.modelType === 'WGAN-GP') {
             delete saveModelPayload['scores']
             delete saveModelPayload['predicted_result']
             saveModelPayload['wgan_intermediate_forecast'] = model_data.intermediate_forecasts
@@ -741,6 +723,9 @@ const CryptoModule = () => {
 
     const notifyMessageBoxRef = useRef(null)
     const epochResults = useSelector(state => state.cryptoModule.modelData.epoch_results)
+    const intermediate_forecasts = useSelector(state => state.cryptoModule.modelData.wgan_intermediate_forecast)
+    const wgan_final_forecast = useSelector(state => state.cryptoModule.modelData.wgan_final_forecast.predictions)
+    const correlation_data_redux = useSelector(state => state.cryptoModule.modelData.correlation_data)
 
     const [batchResult, setBatchResult] = useState(false)
     const [evaluating, setEvaluating] = useState(false)
@@ -795,8 +780,6 @@ const CryptoModule = () => {
         setPredictionChartPalette(colorCombinations[modelParams.modelType][id])
     }
 
-    const intermediate_forecasts = useSelector(state => state.cryptoModule.modelData.wgan_intermediate_forecast)
-    const wgan_final_forecast = useSelector(state => state.cryptoModule.modelData.wgan_final_forecast.predictions)
 
     return (
         <Box className='crypto-module-container'>
@@ -906,14 +889,12 @@ const CryptoModule = () => {
                                 model_data={model_data}
                                 modelParams={modelParams}
                                 transformationOrder={transformationOrder}
-                                trainingParametersAccordianCollapse={trainingParametersAccordianCollapse}
                                 noFuncSelected={noFuncSelected}
                                 trainingStartedFlag={trainingStartedFlag}
                                 setTransformationOrder={setTransformationOrder}
                                 handleModelParamChange={handleModelParamChange}
                                 handleStartModelTraining={handleStartModelTraining}
                                 handleClearModelData={handleClearModelData}
-                                handleParametersAccordianCollapse={handleParametersAccordianCollapse}
                             />
                             {Object.keys(w_gan_error).length > 0 &&
                                 <Box display={'flex'} flexDirection={'column'} alignItems={'start'} pt={2} pl={1} color={'red'}>
@@ -924,6 +905,42 @@ const CryptoModule = () => {
                                     </ul>
                                 </Box>
                             }
+
+                            <Box pt={2}>
+                                <Box display='flex' flexDirection='column' justifyContent='space-between'>
+                                    <Box display='flex' gap='8px' alignItems='center' width='320px' justifyContent='space-between'>
+                                        <Typography variant='h5' textAlign='start'>Corelation Matrix</Typography>
+                                        <Box display='flex' gap='8px' alignItems='center'>
+                                            <Button
+                                                sx={{
+                                                    height: '26px',
+                                                }}
+                                                variant='outlined'
+                                                size='small'
+                                                color='secondary'
+                                                disabled={trainingStartedFlag}
+                                                onClick={(e) => handleCalculateCorrelationMatrix()}
+                                            >
+                                                MATRIX
+                                            </Button>
+                                            <IconButton disabled={trainingStartedFlag} onClick={(e) => setCorelation_matrix([])}>
+                                                <DeleteForeverIcon className='small-icon' />
+                                            </IconButton>
+                                        </Box>
+                                    </Box>
+                                    <Box display='flex' gap='8px' alignItems='center'>
+                                        {corelation_matrix_error !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{corelation_matrix_error}</Typography>}
+                                    </Box>
+                                </Box>
+                                <Box pt={1}>
+                                    {(corelation_matrix && corelation_matrix.length > 0) &&
+                                        <CorelationMatrix
+                                            transformation_order={transformation_order_ref.current}
+                                            correlation_data_redux={corelation_matrix}
+                                        />
+                                    }
+                                </Box>
+                            </Box>
                         </Grid>
                     </Grid>
 
@@ -980,9 +997,12 @@ const CryptoModule = () => {
                                         />
                                     }
 
-                                    <CorelationMatrix
-                                        transformation_order={model_parameters.transformation_order}
-                                    />
+                                    {(correlation_data_redux && correlation_data_redux.length > 0) &&
+                                        <CorelationMatrix
+                                            transformation_order={model_parameters.transformation_order}
+                                            correlation_data_redux={correlation_data_redux}
+                                        />
+                                    }
 
                                     {/* Prediction set metrics */}
                                     {(predictedVlauesRedux.length !== 0) &&
@@ -1033,6 +1053,7 @@ const CryptoModule = () => {
                         </Grid>
                         :
                         <Box className='tensor-flow-grid' display='flex' flexDirection='column'> {/* wgan-gp model training results */}
+
                             {trainingStartedFlag ?
                                 <Box display='flex' justifyContent='flex-start' p={2}>
                                     <Typography
@@ -1049,9 +1070,10 @@ const CryptoModule = () => {
                                     </Typography>
                                 </Box>
                                 :
-                                <Box display='flex' height='100%' alignItems='center' justifyContent='flex-start' p={2} >
-                                    <Paper elevation={4} style={{ padding: '5px' }}>Start training to view predictions</Paper>
-                                </Box>
+                                (Object.keys(wgan_final_forecast).length > 0 ? '' :
+                                    <Box display='flex' height='100%' alignItems='center' justifyContent='flex-start' p={2} >
+                                        <Paper elevation={4} style={{ padding: '5px' }}>Start training to view predictions</Paper>
+                                    </Box>)
                             }
 
                             <Grid container>
@@ -1065,10 +1087,12 @@ const CryptoModule = () => {
                                         />
                                     )
                                     }
-
-                                    <CorelationMatrix
-                                        transformation_order={transformationOrder}
-                                    />
+                                    {(correlation_data_redux && correlation_data_redux.length === model_parameters.transformation_order.length) &&
+                                        <CorelationMatrix
+                                            transformation_order={model_parameters.transformation_order}
+                                            correlation_data_redux={correlation_data_redux}
+                                        />
+                                    }
 
                                     <Box pt={2}>
                                         <WgangpOptions
@@ -1082,67 +1106,64 @@ const CryptoModule = () => {
                                             deleteModelOpen={deleteModelOpen}
                                             setDeleteModelOpen={setDeleteModelOpen}
                                             savedToDb={model_data.model_saved_to_db}
+                                            retrain_options_payload={retrain_options_payload}
                                         />
                                     </Box>
 
                                 </Grid>
                             </Grid>
-
-                            <Grid container>
-                                <Grid item md={12} lg={6} xl={modelParams.doValidation ? 4 : 6} p={2} sx={{ width: '100%' }}> {/* training losses d and g */}
-                                    <Box gap={'8px'} display='flex' flexDirection='column'>
-                                        <WgangpMetricsChart
-                                            epochResults={epochResults}
-                                            type={'losses'}
-                                            predictionsPalette={predictionChartPalette}
-                                            totalEpochs={modelParams.epoch}
-                                        />
-                                    </Box>
-                                </Grid>
-
-                                <Grid item md={12} lg={6} xl={modelParams.doValidation ? 4 : 6} p={2} sx={{ width: '100%' }}> {/* training metrics g */}
-                                    <Box gap={'8px'} display='flex' flexDirection='column'>
-                                        <WgangpMetricsChart
-                                            epochResults={epochResults}
-                                            type={'training_metrics'}
-                                            predictionsPalette={predictionChartPalette}
-                                            totalEpochs={modelParams.epoch}
-                                        />
-                                    </Box>
-                                </Grid>
-
-                                {modelParams.doValidation &&
-                                    <Grid item md={12} lg={6} xl={4} p={2} sx={{ width: '100%' }}>
+                            {epochResults.length > 0 &&
+                                <Grid container>
+                                    <Grid item md={12} lg={6} xl={modelParams.doValidation ? 4 : 6} p={2} sx={{ width: '100%' }}> {/* training losses d and g */}
                                         <Box gap={'8px'} display='flex' flexDirection='column'>
                                             <WgangpMetricsChart
                                                 epochResults={epochResults}
-                                                type={'validation_metrics'}
+                                                type={'losses'}
                                                 predictionsPalette={predictionChartPalette}
-                                                totalEpochs={modelParams.epoch}
                                             />
                                         </Box>
                                     </Grid>
-                                }
-                            </Grid>
+                                    {/* training metrics g */}
+                                    <Grid item md={12} lg={6} xl={modelParams.doValidation ? 4 : 6} p={2} sx={{ width: '100%' }}>
+                                        <Box gap={'8px'} display='flex' flexDirection='column'>
+                                            <WgangpMetricsChart
+                                                epochResults={epochResults}
+                                                type={'training_metrics'}
+                                                predictionsPalette={predictionChartPalette}
+                                            />
+                                        </Box>
+                                    </Grid>
+
+                                    {model_parameters.doValidation &&
+                                        <Grid item md={12} lg={6} xl={4} p={2} sx={{ width: '100%' }}>
+                                            <Box gap={'8px'} display='flex' flexDirection='column'>
+                                                <WgangpMetricsChart
+                                                    epochResults={epochResults}
+                                                    type={'validation_metrics'}
+                                                    predictionsPalette={predictionChartPalette}
+                                                />
+                                            </Box>
+                                        </Grid>
+                                    }
+                                </Grid>
+                            }
 
                             <Grid container>
                                 {intermediate_forecasts.length > 0 &&
                                     <Grid item sm={12} md={6} lg={6} xl={4} p={2} sx={{ width: '100%' }}>
                                         <IntermediateForecastChart
                                             intermediate_forecasts={intermediate_forecasts}
-                                            epochs={modelParams.epoch}
-                                            forecast_step={modelParams.intermediateResultStep}
                                         />
                                     </Grid>
                                 }
 
-                                <Grid item sm={12} md={6} lg={6} xl={4} p={2} sx={{ width: '100%' }}>
-                                    {wgan_final_forecast.length > 0 &&
+                                {wgan_final_forecast.length > 0 &&
+                                    <Grid item sm={12} md={6} lg={6} xl={4} p={2} sx={{ width: '100%' }}>
                                         <WganFinalPredictionChart
                                             wgan_final_forecast={wgan_final_forecast}
                                         />
-                                    }
-                                </Grid>
+                                    </Grid>
+                                }
                             </Grid>
 
                         </Box>

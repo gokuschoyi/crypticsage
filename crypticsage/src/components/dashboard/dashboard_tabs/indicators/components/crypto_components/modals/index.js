@@ -4,11 +4,13 @@ import ResetTrainedModelModal from "./ResetTrainedModelModal";
 import DeleteSavedModel from "./DeleteSavedModel";
 
 import ResetOnModelChange from "./ResetOnModelChange";
+import RetrainWGANModal from "./RetrainWGANModal";
 
 export {
     DeleteCurrentModal,
     SaveCurrentModal,
     ResetTrainedModelModal,
     DeleteSavedModel,
-    ResetOnModelChange
+    ResetOnModelChange,
+    RetrainWGANModal
 }

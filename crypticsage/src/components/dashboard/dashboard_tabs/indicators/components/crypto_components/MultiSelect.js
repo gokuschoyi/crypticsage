@@ -25,7 +25,7 @@ const NEW_MODEL_DESCRIPTION = {
 
 const MultiSelect = (props) => {
     const theme = useTheme()
-    const { inputLabel, inputOptions, selectedInputOptions, key_id, handleInputOptions, fieldName, toolTipTitle, trainingStartedFlag } = props
+    const { inputLabel, inputOptions, selectedInputOptions, handleInputOptions, fieldName, toolTipTitle, trainingStartedFlag, error = false } = props
     const [tooltipMessage, setTooltipMessage] = useState(toolTipTitle)
     useEffect(() => {
         if (inputLabel === 'Model type') {
@@ -35,7 +35,7 @@ const MultiSelect = (props) => {
     }, [inputLabel, selectedInputOptions])
 
     return (
-        <Paper elevation={8}>
+        <Paper elevation={8} sx={{ width: '100%' }}>
             <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' gap={'40px'} pl={'4px'} pr={'4px'} pt={'7px'} pb={'7px'}>
                 <Box sx={{ width: '100%' }}>
                     <Autocomplete
@@ -47,10 +47,12 @@ const MultiSelect = (props) => {
                         name='multiSelectValue'
                         options={inputOptions}
                         value={selectedInputOptions} // Set the selected value
-                        onChange={(event, newValue) => handleInputOptions(key_id, newValue)} // Handle value change
+                        onChange={(event, newValue) => handleInputOptions(newValue)} // Handle value change
                         sx={{ width: 'auto' }}
                         renderInput={(params) => <TextField {...params}
                             variant="standard"
+                            error={error}
+                            helperText={error ? 'Please select a checkpoint' : null}
                             sx={{
                                 '& .MuiOutlinedInput-root': {
                                     '& fieldset': {

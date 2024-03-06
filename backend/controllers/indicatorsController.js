@@ -279,6 +279,27 @@ const checkIfValidationIsPossible = (ticker_hist_length, time_step, look_ahead, 
     return messages
 }
 
+// if this func is called before wgan training,
+// the redis key used here will be used for all further trainig to fetch data from redis.
+const calculateCoRelationMatrix = async (req, res) => {
+    const { transformation_order, talibExecuteQueries } = req.body.payload
+    const { db_query: { asset_type, ticker_name, period } } = talibExecuteQueries[0].payload;
+    const uid = res.locals.data.uid;
+    const redis_key_for_hist_data = `${uid}_${asset_type}-${ticker_name}-${period}_historical_data`
+
+    log.info(`Redis key for re train : ${redis_key_for_hist_data}`)
+    try {
+        const historicalData = await fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period })
+        const talibResult = await TFMUtil.processSelectedFunctionsForModelTraining({ selectedFunctions: talibExecuteQueries, tickerHistory: historicalData })
+        const { tickerHist, finalTalibResult } = await TFMUtil.trimDataBasedOnTalibSmallestLength({ finalTalibResult: talibResult, tickerHistory: historicalData })
+        const { features, metrics } = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult, transformation_order })
+        res.status(200).json({ message: 'Correlation matrix calculated successfully', corelation_matrix: metrics })
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model training failed' })
+    }
+}
+
 const process_data_request = async ({
     uid
     , model_id
@@ -408,11 +429,12 @@ const process_data_request = async ({
                     tickerHist,
                     finalTalibResult,
                     transformation_order,
-                    uid
                 }
                 try {
                     // @ts-ignore
-                    features = await step_function(transform_payload)
+                    const { features: fs_, metrics } = await step_function(transform_payload)
+                    features = fs_
+                    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'feature_relations', uid, metrics }))
                 } catch (error) {
                     const newErrorMessage = { func_error: error.message, message: 'Error in combining OHLCV and selected function data', step: i }
                     throw new Error(JSON.stringify(newErrorMessage));
@@ -460,6 +482,17 @@ const process_data_request = async ({
     return { train_possible: { status: true }, test_possible: { status: true } }
 }
 
+const checkOrder = (old, new_) => {
+    if (old.length !== new_.length) return false;
+    for (let i = 0; i < old.length; i++) {
+        if (old[i].id !== new_[i].id) {
+            // console.log(old[i].id, new_[i].id)
+            return false;
+        }
+    }
+    return true;
+}
+
 const procssModelTraining = async (req, res) => {
     const { fTalibExecuteQuery, model_training_parameters } = req.body.payload
     const uid = res.locals.data.uid;
@@ -501,7 +534,7 @@ const procssModelTraining = async (req, res) => {
             // check if the historical data is present in redis or not
             const isHistoricalDataPresent = await wganpgDataRedis.exists(redis_key_for_hist_data)
             if (isHistoricalDataPresent === 1) {
-                console.log('Historical data is present in redis, calling celery worker : ', isHistoricalDataPresent)
+                log.warn(`Historical data is present in redis, checking parameters: ${isHistoricalDataPresent}...`)
 
                 const training_params = JSON.parse(await wganpgDataRedis.hget(redis_key_for_hist_data, 'training_parameters'))
                 const {
@@ -514,16 +547,20 @@ const procssModelTraining = async (req, res) => {
                     do_validation: d_v
                 } = training_params
 
+                const orderChanged = checkOrder(to, transformation_order)
+                console.log('TRANSFOR ORFDER', orderChanged)
+
                 // checking if transformation_order or slice_index has changed, if so fetch and process the new data
                 if (
+                    orderChanged &&
                     si === slice_index &&
-                    to?.length === transformation_order.length &&
                     train_s === training_size &&
                     ts === time_step &&
                     la === look_ahead &&
                     bs === batchSize &&
                     d_v === do_validation
                 ) {
+                    log.warn('Parameters have not changed, calling celery worker with existing data...')
                     redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `Features present in redis, Celery worker called...` }))
 
                     // set the modified features in the redis store
@@ -564,6 +601,7 @@ const procssModelTraining = async (req, res) => {
                     });
                     res.status(200).json({ message: 'Gan model training started', finalRs: [], job_id: model_id });
                 } else {
+                    log.warn('Parameters have changed, processing data...')
                     console.log('transformation_order or slice_index has changed, fetching the required data')
                     // @ts-ignore
                     const { train_possible, test_possible } = await process_data_request({
@@ -587,7 +625,7 @@ const procssModelTraining = async (req, res) => {
                     }
                 }
             } else {
-                console.log('Historical data not present in redis, fetching the required data')
+                log.warn('Historical data not present in redis, fetching the required data')
                 // @ts-ignore
                 const { train_possible, test_possible } = await process_data_request({
                     uid,
@@ -685,7 +723,86 @@ const procssModelTraining = async (req, res) => {
         log.error(error.message)
         throw error
     }
+}
 
+const getDifferentKeys = (obj1, obj2) => {
+    const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
+    const differentKeys = [];
+
+    keys.forEach(key => {
+        if (obj1[key] !== obj2[key]) {
+            differentKeys.push(key);
+        }
+    });
+
+    return differentKeys;
+}
+
+const retrainModel = async (req, res) => {
+    const { additional_data, fTalibExecuteQuery, fullRetrainParams } = req.body.payload
+    const { model_id, checkpoint } = additional_data
+    const { db_query: { asset_type, ticker_name, period } } = fTalibExecuteQuery[0].payload;
+
+    log.info(`Re-Training model : ${model_id}`) // add asset type, tickername and period from FE
+    const uid = res.locals.data.uid;
+    const redis_key_for_hist_data = `${uid}_${asset_type}-${ticker_name}-${period}_historical_data`
+    log.info(`Redis key for re train : ${redis_key_for_hist_data}`)
+    try {
+        const isHistoricalDataPresent = await wganpgDataRedis.exists(redis_key_for_hist_data)
+        if (isHistoricalDataPresent === 1) {
+            log.warn('Similar training data exists, checking training parameters...')
+            const training_params_redis = JSON.parse(await wganpgDataRedis.hget(redis_key_for_hist_data, 'training_parameters'))
+
+            // Check for keys that have changes, exclude transformation_order
+            const { transformation_order: retrain_transformation_order, model_type: retrainModelType, ...restRetrainParams } = fullRetrainParams
+            const { transformation_order: redis_transformation_order, model_type: redisModelType, ...restParamsRedis } = training_params_redis
+
+            const diff_keys = getDifferentKeys(restRetrainParams, restParamsRedis)
+            if (diff_keys.length === 0) {
+                log.info('parameters are same, retraining the model...')
+                // call the celery python worker
+                const task = pyClient.createTask("celeryTasks.retrainModel");
+                task.delay({
+                    message: 'Request from node to retrain model.',
+                    uid,
+                    m_id: model_id,
+                    model_proces_id: redis_key_for_hist_data,
+                    existing_data: true,
+                    checkpoint
+                });
+                res.status(200).json({ message: 'Model re-training started', job_id: model_id });
+            } else {
+                log.warn('Parameters are different, updating them in redis...')
+                console.log('Parameters with different values', diff_keys)
+
+                await wganpgDataRedis.hset(redis_key_for_hist_data, {
+                    training_parameters: JSON.stringify({
+                        ...restRetrainParams,
+                        transformation_order: retrain_transformation_order
+                    })
+                })
+
+                // call the celery python worker
+                const task = pyClient.createTask("celeryTasks.retrainModel");
+                task.delay({
+                    message: 'Request from node to retrain model.',
+                    uid,
+                    m_id: model_id,
+                    model_proces_id: redis_key_for_hist_data,
+                    existing_data: true,
+                    checkpoint
+                });
+                res.status(200).json({ message: 'Model re-training started', job_id: model_id });
+            }
+
+        } else {
+            log.warn('No data exists for the parameters. Will require Full data fetch')
+            res.status(200).json({ message: 'No data exists for the parameters. Will require Full data fetch' })
+        }
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model retraining failed' })
+    }
 }
 
 const getModel = async (req, res) => {
@@ -701,16 +818,16 @@ const getModel = async (req, res) => {
 
 const saveModel = async (req, res) => {
     const payload = req.body.payload
-    const { 
-        model_type, 
-        model_id, 
-        model_name, 
-        ticker_name, 
+    const {
+        model_type,
+        model_id,
+        model_name,
+        ticker_name,
         ticker_period,
         talibExecuteQueries,
         epoch_results,
-        train_duration ,
-        correlation_data, 
+        train_duration,
+        correlation_data,
         training_parameters
     } = payload
     let model_data
@@ -926,14 +1043,14 @@ const makeNewForecast = async (req, res) => {
 
         // Step 4
         // Transforiming the data to required shape before tranforming to tensor/2D array
-        const featuresX = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult, transformation_order })
-        log.notice(`featuresX length : ${featuresX.length}`)
+        const { features: features_, metrics } = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult, transformation_order })
+        log.notice(`featuresX length : ${features_.length}`)
 
         // Step 5
         // Standardize the array of features
         const mean_tensor = tf.tensor(mean_array)
         const variance_tensor = tf.tensor(variance_array)
-        const standardized_features = tf.div(tf.sub(tf.tensor(featuresX), mean_tensor), tf.sqrt(variance_tensor));
+        const standardized_features = tf.div(tf.sub(tf.tensor(features_), mean_tensor), tf.sqrt(variance_tensor));
         const standardizedData = standardized_features.arraySync();
         // @ts-ignore
         log.notice(`Standardized data length : ${standardizedData.length}`)
@@ -1052,12 +1169,26 @@ const renameModel = async (req, res) => {
     }
 }
 
-// @ts-ignore
-
-
-
-
-// @ts-ignore
+const getModelCheckpoints = async (req, res) => {
+    const { model_id } = req.query
+    let checkpoints = []
+    try {
+        const model_path = `./worker_celery/saved_models/${model_id}`
+        if (fs.existsSync(model_path)) {
+            // console.log('Model data present')
+            checkpoints = fs.readdirSync(model_path, { withFileTypes: true })
+                .filter(dirent => dirent.isDirectory())
+                .map(dirent => dirent.name)
+                .filter(name => name.startsWith('checkpoint'));
+        } else {
+            console.log('Model data does not exist')
+        }
+        res.status(200).json({ message: 'Model checkpoints fetched successfully', checkpoints })
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model checkpoints fetching failed' })
+    }
+}
 
 
 const testNewModel = async (req, res) => {
@@ -1130,7 +1261,9 @@ const testNewModel = async (req, res) => {
 module.exports = {
     getIndicatorDesc,
     executeTalibFunction,
+    calculateCoRelationMatrix,
     procssModelTraining,
+    retrainModel,
     getModel,
     saveModel,
     deleteModel,
@@ -1140,5 +1273,5 @@ module.exports = {
     makeNewForecast,
     renameModel,
     testNewModel,
-
+    getModelCheckpoints,
 }

@@ -1,3 +1,4 @@
+import pprint
 from WGAN_GP.trainer import WGANGP
 from dotenv import load_dotenv
 from celeryWorker import app
@@ -22,7 +23,7 @@ def trainModel(data):
     model_process_id = data["model_proces_id"]
     existing_data = data["existing_data"]
     print(message)  # message from nodejs server
-    print(f'existing_data : {existing_data}')
+    print(f"existing_data : {existing_data}")
     print(f"Training has started for user : {uid}, model process id : {model_process_id}")
     time.sleep(0.3)
     # fetch the training parameters from redis
@@ -36,3 +37,25 @@ def trainModel(data):
     wgan_gp.train()
 
     print("Training completed")
+
+
+@app.task
+def retrainModel(data):
+    message = data["message"]
+    uid = data["uid"]
+    model_id = data["m_id"]
+    model_process_id = data["model_proces_id"]
+    existing_data = data["existing_data"]
+    checkpoint = data["checkpoint"]
+    print(message)
+    print(f"Model ID : {model_id}")
+    print(f"Checkpoint : {checkpoint}")
+    print(f"existing_data : {existing_data}")
+    
+    t_param_redis = redisStore.hget(model_process_id, "training_parameters")
+    training_parameters = json.loads(t_param_redis)  # type: ignore
+    print(training_parameters)
+
+    print(f"Retraining has started for user : {uid}, model process id : {model_process_id}")
+    time.sleep(2)
+    print(f"Retraining completed for user : {uid}, model process id : {model_process_id}")

@@ -208,7 +208,7 @@ module.exports = async (job) => {
 
                     try {
                         // @ts-ignore
-                        result = await step(parameters)
+                        const { features: result, metrics } = await step(parameters)
                         const trainSplitRatio = training_size / 100
                         // @ts-ignore
                         const trainSplit = Math.floor(result.length * trainSplitRatio)
@@ -216,6 +216,7 @@ module.exports = async (job) => {
                         const trainFeatures = result.slice(0, trainSplit)
                         // @ts-ignore
                         const testFeatures = result.slice(trainSplit)
+                        redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'feature_relations', uid, metrics }))
                         await redisStep.hset(modelCheckpointName, {
                             step: i + 1,
                             train_features: JSON.stringify(trainFeatures),

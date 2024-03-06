@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
     Box,
     Button,
@@ -9,7 +9,9 @@ import {
     Switch,
     Typography,
     CircularProgress,
-    Grid
+    Grid,
+    useMediaQuery,
+    useTheme
 } from '@mui/material'
 import MultiSelect from './MultiSelect'
 import CustomSlider from './CustomSlider'
@@ -44,21 +46,20 @@ const TrainingParameters = ({
     model_data,
     modelParams,
     transformationOrder,
-    trainingParametersAccordianCollapse,
     noFuncSelected,
     trainingStartedFlag,
     setTransformationOrder,
     handleModelParamChange,
     handleStartModelTraining,
     handleClearModelData,
-    handleParametersAccordianCollapse,
 }) => {
-    const handleDoValidation = () => {
-        handleModelParamChange('doValidation', !modelParams.doValidation)
+    const theme = useTheme()
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    const [trainingParametersAccordianCollapse, setTrainingParametersAccordianCollapse] = useState(!sm)
+    const handleParametersAccordianCollapse = () => {
+        setTrainingParametersAccordianCollapse((prev) => !prev)
     }
-    const handleEarlyStopping = () => {
-        handleModelParamChange('earlyStopping', !modelParams.earlyStopping)
-    }
+
     return (
         <Box>
             <Paper elevtion={4} className='model-parameter-expandd-collapse-box' sx={{ display: "flex", flexDirection: "row", justifyContent: 'space-between', alignItems: 'center', padding: '4px', boxShadow: `${trainingParametersAccordianCollapse && 'none'}` }}>
@@ -85,7 +86,7 @@ const TrainingParameters = ({
                                     onClick={(e) => handleStartModelTraining()}
                                     endIcon={trainingStartedFlag && <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />}
                                 >
-                                    {trainingStartedFlag ? 'Training' : 'Train'}
+                                    {trainingStartedFlag ? 'Training' : 'TRAIN'}
                                 </Button>
                                 <ResetTrainedModelModal
                                     handleClearModelData={handleClearModelData}
@@ -105,8 +106,9 @@ const TrainingParameters = ({
                                         inputLabel={'Model type'}
                                         inputOptions={MODEL_OPTIONS}
                                         selectedInputOptions={modelParams.modelType}
-                                        key_id={"modelType"}
-                                        handleInputOptions={handleModelParamChange}
+                                        handleInputOptions={(newValue) => {
+                                            handleModelParamChange('modelType', newValue)
+                                        }}
                                         fieldName={'Model type'}
                                         toolTipTitle={'Select a model type'}
                                         trainingStartedFlag={trainingStartedFlag}
@@ -116,8 +118,9 @@ const TrainingParameters = ({
                                         inputLabel={'Prediction flag'}
                                         inputOptions={INPUT_OPTIONS}
                                         selectedInputOptions={modelParams.multiSelectValue}
-                                        key_id={"multiSelectValue"}
-                                        handleInputOptions={handleModelParamChange}
+                                        handleInputOptions={(newValue) => {
+                                            handleModelParamChange('multiSelectValue', newValue)
+                                        }}
                                         fieldName={'To predict'}
                                         toolTipTitle={'Select one of the flags to be used to predict'}
                                         trainingStartedFlag={trainingStartedFlag}
@@ -137,19 +140,21 @@ const TrainingParameters = ({
                                                 inputLabel={'Forecast step'}
                                                 inputOptions={INTERMEDIATE_RESULT_STEP_OPTIONS}
                                                 selectedInputOptions={modelParams.intermediateResultStep}
-                                                key_id={"intermediateResultStep"}
-                                                handleInputOptions={handleModelParamChange}
+                                                handleInputOptions={(newValue) => {
+                                                    handleModelParamChange('intermediateResultStep', newValue)
+                                                }}
                                                 fieldName={'Intermediate Step'}
                                                 toolTipTitle={'Select a step at which point to send intermediate forecast. Select 0 for no intermediate forecast. If the step is greater than the total no of epochs, then the intermediate forecast will be sent at the end of the training as the final forecast.'}
                                                 trainingStartedFlag={trainingStartedFlag}
                                             />
-                                            
+
                                             <MultiSelect
                                                 inputLabel={'Model save step'}
                                                 inputOptions={INTERMEDIATE_RESULT_STEP_OPTIONS}
                                                 selectedInputOptions={modelParams.modelSaveStep}
-                                                key_id={"modelSaveStep"}
-                                                handleInputOptions={handleModelParamChange}
+                                                handleInputOptions={(newValue) => {
+                                                    handleModelParamChange('modelSaveStep', newValue)
+                                                }}
                                                 fieldName={'Model Save Step'}
                                                 toolTipTitle={'Select a step at which point to save the generator model. Select 0 for no save. If the step is greater than the total no of epochs, then the model will be saved at the end of the training.'}
                                                 trainingStartedFlag={trainingStartedFlag}
@@ -165,7 +170,7 @@ const TrainingParameters = ({
                                             label='Do validation on test set'
                                             labelPlacement="start"
                                             checked={modelParams.doValidation}
-                                            onChange={() => handleDoValidation()}
+                                            onChange={() => handleModelParamChange('doValidation', !modelParams.doValidation)}
                                         />
                                     </Paper>
 
@@ -177,7 +182,7 @@ const TrainingParameters = ({
                                             label='Perform Early Stopping'
                                             labelPlacement="start"
                                             checked={modelParams.earlyStopping}
-                                            onChange={() => handleEarlyStopping()}
+                                            onChange={() => handleModelParamChange('earlyStopping', !modelParams.earlyStopping)}
                                         />
                                     </Paper>
                                 </Box>
@@ -326,7 +331,11 @@ const TrainingParameters = ({
                             </Grid>
 
                             <Grid item xs={12} sm={6} md={4} lg={4} xl={3}>
-                                <ReorderList orderList={transformationOrder} setOrderList={setTransformationOrder} disabled={trainingStartedFlag} />
+                                <ReorderList
+                                    orderList={transformationOrder}
+                                    setOrderList={setTransformationOrder}
+                                    disabled={trainingStartedFlag}
+                                />
                             </Grid>
 
                         </Grid>

@@ -6,7 +6,8 @@
   "nodemonConfig": {
     "ignore": [
       "./models",
-      "./worker_celery"
+      "./worker_celery",
+      "../crypticsage"
     ]
   },
   "scripts": {
@@ -39,7 +40,7 @@
     "uuid": "^9.0.0",
     "winston": "^3.10.0",
     "ws": "^8.13.0",
-    "yahoo-finance2": "^2.8.0"
+    "yahoo-finance2": "^2.9.1"
   },
   "devDependencies": {
     "clean-jsdoc-theme": "^4.2.10",

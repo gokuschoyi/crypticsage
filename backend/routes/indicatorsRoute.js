@@ -10,6 +10,8 @@ router.post('/get_talib_desc', IController.getIndicatorDesc)
 router.post('/execute_talib_function', handleTokenRedisStorage, IController.executeTalibFunction)
 
 router.post('/start_model_training', IController.procssModelTraining)
+router.post('/retrain_model', IController.retrainModel)
+router.post('/get_corelation_matrix', IController.calculateCoRelationMatrix)
 
 router.post('/get_model', IController.getModel)
 router.post('/save_model', IController.saveModel)
@@ -19,6 +21,8 @@ router.post('/delete_user_model', IController.deleteUserModel)
 router.post('/check_for_model', IController.checkIfModelExists)
 router.post('/get_model_result', IController.getModelResult)
 router.post('/rename_model', IController.renameModel)
+
+router.get('/get_model_checkpoints', IController.getModelCheckpoints)
 
 router.post('/make_new_prediction', IController.makeNewForecast)
 

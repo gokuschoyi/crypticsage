@@ -338,6 +338,81 @@ export const calculateTolerance = (data, tolerance) => {
     };
 }
 
+export const generateTalibFunctionsForExecution = ({ selectedFunctions, tDataReduxL, selectedTickerPeriod, selectedTickerName }) => {
+    let fTalibExecuteQuery = [];
+    selectedFunctions.forEach((unique_func) => {
+        const { outputs } = unique_func;
+        const func = unique_func.functions;
+        func.forEach((f) => {
+            const { inputs, optInputs, name, id } = f;
+            let inputEmpty = false;
+            let talibExecuteQuery = {}
+            let tOITypes = {}
+            const transformedOptionalInputs = optInputs.reduce((result, item) => {
+                result[item.name] = item.defaultValue
+                tOITypes[item.name] = item.type;
+                return result;
+            }, {})
+
+            let outputkeys = {}
+            let outputsCopy = [...outputs]
+            outputkeys = outputsCopy.reduce((result, output) => {
+                result[output.name] = output.name;
+                return result;
+            }, {});
+
+            let converted = {}
+            inputs.map((input) => {
+                if (input.flags) {
+                    Object.keys(input.flags).forEach((key) => {
+                        converted[input.flags[key]] = input.flags[key];
+                    })
+                    return input
+                } else {
+                    if (input.value === '') {
+                        inputEmpty = true;
+                        converted[input.name] = "";
+                        return {
+                            ...input,
+                            errorFlag: true,
+                            helperText: 'Please select a valid input',
+                        };
+                    } else {
+                        converted[input.name] = input.value;
+                        return {
+                            ...input,
+                            errorFlag: false,
+                            helperText: '',
+                        };
+                    }
+                }
+            })
+
+            talibExecuteQuery['name'] = name;
+            talibExecuteQuery['startIdx'] = 0;
+            talibExecuteQuery['endIdx'] = tDataReduxL - 1;
+            talibExecuteQuery = { ...talibExecuteQuery, ...converted, ...transformedOptionalInputs }
+
+
+            let payload = {
+                func_query: talibExecuteQuery,
+                func_param_input_keys: converted,
+                func_param_optional_input_keys: tOITypes,
+                func_param_output_keys: outputkeys,
+                db_query: {
+                    asset_type: 'crypto',
+                    fetch_count: tDataReduxL,
+                    period: selectedTickerPeriod,
+                    ticker_name: selectedTickerName
+                }
+            }
+            fTalibExecuteQuery.push({ id, payload, inputEmpty })
+        })
+    })
+    fTalibExecuteQuery = fTalibExecuteQuery.filter((item) => !item.inputEmpty)
+    return fTalibExecuteQuery
+}
+
 // const diff = actual - predicted;
 
 /* if (diff > 0) { // actual > predicted predicted below actual
