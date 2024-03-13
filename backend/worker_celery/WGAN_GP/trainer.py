@@ -534,7 +534,7 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
         logging.critical(f"{self.process_id} : Training started")
         # with tf.profiler.experimental.Profile(self.logs_dir, tf.profiler.experimental.ProfilerOptions(python_tracer_level=1)):
         for epoch in range(self.epochs): # training the model
-            broadcastTrainingStatus(self.uid, "epochBegin", epoch + 1)
+            broadcastTrainingStatus(self.uid, "epochBegin", epoch)
             logging.error(f"epoch {epoch + 1} of {self.epochs}")
             epoch_start_time = time.time()
             train_ram_start = psutil.virtual_memory()

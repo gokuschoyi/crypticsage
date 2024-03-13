@@ -173,8 +173,13 @@
     width: 100%;
 }
 
-.prediction-lookahead-slider-box {
+.prediction-lookahead-slider-box, .tolerance-slider-box {
     width: 50%;
+}
+
+.wgan-prediction-tolerance-slider{
+    display: flex;
+    flex-direction: row;
 }
 
 .saved-model-name {
@@ -293,6 +298,17 @@ tr:hover .prediction-mse {
     gap: 8px;
 }
 
+.initial-forecast-line-box{
+    display: flex;
+    flex-direction: column;
+}
+
+.model-hist-values-initial{
+    text-align: start;
+    display: flex;
+    flex-direction: column;
+}
+
 .model-hist-main-box-wgan {
     align-items: flex-start;
     display: flex;
@@ -387,6 +403,20 @@ tr:hover .prediction-mse {
 .MuiTabs-indicator {
     background-color: red;
     margin: 9px 0px;
+}
+.tab-wgan{
+    height: 20px;
+    border: 1px solid white;
+    border-radius: 5px;
+    transition: all 0.2s ease-in-out;
+    min-height: auto;
+}
+
+
+.tab-wgan:hover {
+    transition: all 0.2s ease-in-out;
+    background-color: beige;
+    color: black;
 }
 
 .tab {
@@ -729,6 +759,12 @@ tr:hover .prediction-mse {
     .batch-end-text {
         width: 140px;
     }
+    .wgan-prediction-tolerance-slider{
+        flex-direction: column;
+    }
+    .prediction-lookahead-slider-box, .tolerance-slider-box{
+        width: 100%;
+    } 
 }
 
 @media screen and (max-width : 900px) {

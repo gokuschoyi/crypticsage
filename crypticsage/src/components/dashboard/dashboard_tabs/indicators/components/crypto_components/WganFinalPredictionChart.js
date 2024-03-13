@@ -1,8 +1,15 @@
+import { ErrorBoundary } from "react-error-boundary";
 import React, { useRef, useEffect, useState } from 'react'
 import { createChart } from 'lightweight-charts';
-import { Box, useTheme, IconButton, Typography } from '@mui/material'
+import { Box, useTheme, IconButton, Typography, Skeleton, Paper } from '@mui/material'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+
+const logError = (error, info) => {
+    // Do something with the error, e.g. log to an external API
+    console.log('error', error)
+};
+
 
 const lineColors = [
     '#D32F2F', // Red
@@ -28,7 +35,7 @@ const lineColors = [
 ];
 
 const WganFinalPredictionChart = (props) => {
-    const { wgan_final_forecast } = props
+    const { wgan_final_forecast, trainingStartedFlag } = props
 
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
@@ -138,7 +145,7 @@ const WganFinalPredictionChart = (props) => {
 
 
     useEffect(() => {
-        if (chart.current === null) {
+        if (chart.current === null && wgan_final_forecast.length > 0) {
             // console.log('UE predict vals',wgan_final_forecast)
 
             chart.current = createChart(chartContainerRef.current, chart_options)
@@ -173,20 +180,14 @@ const WganFinalPredictionChart = (props) => {
         }
 
         return () => {
-            console.log('CLEANUP : WGAN GP final prediction chart cleanup')
-            chart.current.remove();
+            // console.log('CLEANUP : WGAN GP final prediction chart cleanup')
+            chart.current && chart.current.remove();
             chart.current = null;
             predictionSeriesref.current = {}
 
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [wgan_final_forecast])
-
-
-    let series_key = Object.keys(wgan_final_forecast[0]).reduce((obj, key) => {
-        return { ...obj, [key]: '' }
-    }, {})
-    series_key['date'] = ''
 
 
     const tooltipHandler = (param) => {
@@ -219,7 +220,7 @@ const WganFinalPredictionChart = (props) => {
 
     // set the tooltip for the chart
     useEffect(() => {
-        if (chart.current) {
+        if (chart.current && wgan_final_forecast.length > 0) {
             chart.current.subscribeCrosshairMove(tooltipHandler)
         } else {
             return
@@ -276,13 +277,42 @@ const WganFinalPredictionChart = (props) => {
     }, []);
 
     return (
-        <Box display='flex' flexDirection='column' gap='8px'>
-            <Box display={'flex'} alignItems={'flex-start'}>PREDICTIONS</Box>
-            <Box className='wgangp-final-predictions-box' sx={{ height: wgan_final_forecast.length > 0 ? '280px' : '0px' }}>
-                {chart.current && <ToolTipComponent />}
+        <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
+            <Box className='wgangp-final-predictions-box' display='flex' flexDirection='column' width="100%" height='300px' >
+                {trainingStartedFlag ? (
+                    <Box className='prediction-loader' position='relative' width='100%' height='100%'>
+                        <Skeleton variant="rectangular" width="100%" height='100%' />
+                        <Box position='absolute' top='42%' left='50%' sx={{ transform: 'translate(-50%, -50%)' }} width='fit-content' display='flex' flexDirection='row' justifyContent='center'>
+                            <Typography variant='custom' id='loader-message-text' style={{ textAlign: 'center', whiteSpace: 'nowrap', textOverflow: 'ellipssis', overflow: 'hidden', maxWidth: '400px' }}>Training started</Typography>
+                            <div className="center">
+                                <div className="wave"></div>
+                                <div className="wave"></div>
+                                <div className="wave"></div>
+                                <div className="wave"></div>
+                                <div className="wave"></div>
+                                <div className="wave"></div>
+                                <div className="wave"></div>
+                                <div className="wave"></div>
+                                <div className="wave"></div>
+                                <div className="wave"></div>
+                                <div className="wave"></div>
+                            </div>
+                        </Box>
+                    </Box>
+                ) : (Object.keys(wgan_final_forecast).length > 0 ? '' :
+                    <Box display='flex' height='100%' alignItems='center' justifyContent='center' p={1} >
+                        <Paper elevation={4} style={{ padding: '5px' }}>Start training to view predictions</Paper>
+                    </Box>
+                )
+                }
+
+                <Box className='wgangp-final-predictions-box' >
+                    {chart.current && wgan_final_forecast.length > 0 && <ToolTipComponent />}
+                </Box>
                 <Box ref={chartContainerRef} height='100%' width='100%'></Box>
             </Box>
-        </Box>
+
+        </ErrorBoundary>
     )
 }
 

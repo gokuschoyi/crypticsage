@@ -1,10 +1,22 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import { Tooltip, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Button, Slide } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { deleteModel } from '../../../../../../../api/adminController'
+import { Success } from '../../../../../global/CustomToasts'
+import { resetCurrentModelData } from '../../../modules/CryptoModuleSlice'
+
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="left" ref={ref} {...props} />;
 });
-const DeleteCurrentModal = ({ handleDeleteModel, deleteModelOpen, setDeleteModelOpen }) => {
+
+
+const DeleteCurrentModal = ({ modelProcessDurationRef }) => {
+    const dispatch = useDispatch()
+    const token = useSelector(state => state.auth.accessToken);
+    const model_id = useSelector(state => state.cryptoModule.modelData.model_id)
+    const modelType = useSelector(state => state.cryptoModule.modelData.training_parameters.modelType)
+    const [deleteModelOpen, setDeleteModelOpen] = useState(false)
 
     const handleClickOpen = () => {
         setDeleteModelOpen(true);
@@ -13,6 +25,21 @@ const DeleteCurrentModal = ({ handleDeleteModel, deleteModelOpen, setDeleteModel
     const handleClose = () => {
         setDeleteModelOpen(false);
     };
+
+
+    const handleDeleteModel = () => {
+        deleteModel({ token, payload: { model_id, model_type: modelType } })
+            .then((res) => {
+                Success(res.data.message)
+                modelProcessDurationRef.current = ''
+                dispatch(resetCurrentModelData())
+                setDeleteModelOpen(false)
+            })
+            .catch((err) => {
+                console.log(err.message)
+                setDeleteModelOpen(false)
+            })
+    }
 
     return (
         <React.Fragment>

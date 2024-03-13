@@ -3,9 +3,13 @@ import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, B
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="left" ref={ref} {...props} />;
 });
-const ResetOnModelChange = ({ open, setOpen, handleRemove }) => {
+const ResetOnModelChange = ({ open, setOpen, handleRemove, type }) => {
     const handleClose = () => {
         setOpen(false);
+    }
+    const message = {
+        'modelType_change': "Previous model run has not been saved. Changing model type will remove all previous model parameters and predictions. Do you want to continue?",
+        'training_clicked': "Previous model run has not been saved. Training the model again without saving will remove all previous model parameters and predictions. Do you want to continue?"
     }
 
     return (
@@ -20,8 +24,7 @@ const ResetOnModelChange = ({ open, setOpen, handleRemove }) => {
                 <DialogTitle>{"Reset everything?"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-slide-description">
-                        Previous model run has not been saved. Changing model type will remove all previous model parameters and predictions.
-                        Do you want to continue?
+                        {message[type]}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

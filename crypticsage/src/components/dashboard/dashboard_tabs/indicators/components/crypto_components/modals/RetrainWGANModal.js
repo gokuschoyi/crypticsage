@@ -28,9 +28,16 @@ const scaledValue = (value, max) => {
     return parseFloat(trucned_no)
 }
 
-const RetrainWGANModal = ({ retrain_options_payload: { model_id, selectedTickerPeriod, selectedTickerName, selectedFunctions, tDataReduxL } }) => {
+const RetrainWGANModal = () => {
     const token = useSelector(state => state.auth.accessToken);
     const modelParams = useSelector(state => state.cryptoModule.modelData.training_parameters)
+
+    const model_id = useSelector(state => state.cryptoModule.modelData.model_id)
+    const selectedFunctions = useSelector(state => state.cryptoModule.selectedFunctions)
+    const tDataReduxL = useSelector(state => state.cryptoModule.cryptoDataInDb).length
+    const selectedTickerPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
+    const selectedTickerName = useSelector(state => state.cryptoModule.selectedTickerName)
+
     const [retrainModel, setRetrainModel] = useState(false)
     const [checkpoints, setCheckpoints] = useState([])
     const [checkpointError, setCheckpointError] = useState(false)

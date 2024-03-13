@@ -98,7 +98,7 @@ const useWebSocket = (
                         let epoch = data.epoch
                         batchEndBox = document.querySelector('.batch-end')
                         if (batchEndBox) {
-                            batchEndBox.querySelector('#epoch').textContent = `E : ${epoch}`
+                            batchEndBox.querySelector('#epoch').textContent = `E : ${epoch + 1}`
                         }
                         dispatch(setEpochNo(epoch + 1))
                         break;

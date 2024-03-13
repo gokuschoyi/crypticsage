@@ -351,9 +351,15 @@ const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTes
     }) */
 
     return (
-        <Box>
+        <Box display={'flex'} flexDirection={'column'} gap={'4px'}>
+            <Box className='model-history-chart-box' sx={{ height: epochResults.length > 0 ? '280px' : '0px' }}>
+                <Box className='model-hist-legend'>
+                    <Box className='model-hist-tooltip'></Box>
+                </Box>
+                <Box ref={chartContainerRef} height='100%' width='100%'></Box>
+            </Box>
             {isValidatingOnTestSet && epochResults.length > 0 &&
-                <Box display={'flex'} flexDirection={'row'} alignItems={'start'} pl={1} pb={1}>
+                <Box display={'flex'} flexDirection={'row'} alignItems={'start'} pl={1} pt={2}>
                     <FormControl>
                         <RadioGroup
                             row
@@ -412,12 +418,6 @@ const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTes
                     <Box></Box>
                 </Box>
             }
-            <Box className='model-history-chart-box' sx={{ height: epochResults.length > 0 ? '280px' : '0px' }}>
-                <Box className='model-hist-legend'>
-                    <Box className='model-hist-tooltip'></Box>
-                </Box>
-                <Box ref={chartContainerRef} height='100%' width='100%'></Box>
-            </Box>
         </Box>
     )
 }

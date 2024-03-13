@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, FormControlLabel, Switch, TextField, useTheme, Autocomplete, Typography } from '@mui/material'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { toggleToolTipSwitch, toggleShowPredictionSwitch } from '../../modules/CryptoModuleSlice'
 
 const TICKER_PERIODS = [
@@ -16,19 +16,20 @@ const TICKER_PERIODS = [
 ]
 
 const MainChartOptions = ({
-    selectedTokenPeriod,
     handlePeriodChange,
     toolTipSwitchFlag,
     predictedVlauesRedux,
-    showPredictionSwitchFlag,
-    modelParams,
+    lookAhead,
     predictionLookAhead,
-    handleMainChartPredictionLookaAhead,
+    setPredictionLookAhead,
     actualFetchLength,
     ohlcDataLength,
 }) => {
     const theme = useTheme()
     const dispatch = useDispatch()
+    const showPredictionSwitchFlag = useSelector(state => state.cryptoModule.showPredictions)
+    const selectedTokenPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
+
     return (
         <Box className='ticker-period-selector-top' pl={2} pr={2} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' gap='10px'>
             <Box className='autocomplete-select-box' width='200px'>
@@ -68,7 +69,7 @@ const MainChartOptions = ({
                         checked={toolTipSwitchFlag}
                         onChange={() => dispatch(toggleToolTipSwitch())}
                     />
-                    {predictedVlauesRedux.length !== 0 &&
+                    {predictedVlauesRedux &&
                         <Box className='prediction-days'>
                             <FormControlLabel
                                 value="start"
@@ -85,9 +86,9 @@ const MainChartOptions = ({
                                     disableClearable
                                     disablePortal={false}
                                     id="selec-look-ahead-period"
-                                    options={Array.from({ length: modelParams.lookAhead }, (_, i) => `+${i + 1}`)}
+                                    options={Array.from({ length: lookAhead }, (_, i) => `+${i + 1}`)}
                                     value={`+${predictionLookAhead}`} // Set the selected value
-                                    onChange={(event, newValue) => handleMainChartPredictionLookaAhead(newValue)} // Handle value change
+                                    onChange={(event, newValue) => setPredictionLookAhead(parseInt(newValue.split('+')[1]))} // Handle value change
                                     sx={{ width: 'auto' }}
                                     renderInput={(params) => <TextField size='small' {...params}
                                         sx={{

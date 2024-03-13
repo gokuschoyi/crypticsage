@@ -28,6 +28,19 @@ const TimeTracker = ({ createdAt }) => {
     );
 }
 
+const ErrorComp = ({ error_message, test_possible, train_possible }) => {
+    return (
+        <Box>
+            <Typography variant='custom'>{error_message}</Typography>
+            <ul className='wgan_ul'>
+                {!test_possible.status && <li style={{ listStyleType: 'circle', fontSize: '12px' }}>{`\u2043`}{test_possible.message}</li>}
+                {!train_possible.status && <li style={{ listStyleType: 'circle', fontSize: '12px' }}>{`\u2043`}{train_possible.message}</li>}
+            </ul>
+        </Box>
+
+    )
+}
+
 const Notifications = (props) => {
     const { notifications, clear, remove, markAllAsRead, markAsRead, unreadCount } = props
     const theme = useTheme();
@@ -145,9 +158,16 @@ const Notifications = (props) => {
                                                         </Typography>
                                                     </Box>
                                                     :
-                                                    <Typography variant='body2'>
-                                                        {notification.content}
-                                                    </Typography>
+                                                    notification.type === 'warning' ?
+                                                        <Box>
+                                                            {notification.content && notification.content.props && notification.content.props.error_message &&
+                                                                <ErrorComp {...notification.content.props} />
+                                                            }
+                                                        </Box>
+                                                        :
+                                                        <Typography variant='body2'>
+                                                            {notification.content}
+                                                        </Typography>
                                                 }
                                             </Box>
                                             <Box display={'flex'} flexDirection={'row'} gap={'4px'}>

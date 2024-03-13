@@ -1,5 +1,5 @@
-import pprint
 from WGAN_GP.trainer import WGANGP
+from WGAN_GP import forecasting
 from dotenv import load_dotenv
 from celeryWorker import app
 import redis
@@ -59,3 +59,35 @@ def retrainModel(data):
     print(f"Retraining has started for user : {uid}, model process id : {model_process_id}")
     time.sleep(2)
     print(f"Retraining completed for user : {uid}, model process id : {model_process_id}")
+
+
+@app.task
+def makePrediction(data):
+    message = data["message"]
+    uid = data["uid"]
+    model_id = data["m_id"]
+    print(message)
+
+    time.sleep(0.3)
+    result = forecasting.makeForecast(data)
+    # result = result.numpy().tolist()  # type: ignore
+
+    final_result = {
+        "uid": uid,
+        "model_id": model_id,
+        "predictions": json.dumps(result),
+    }
+    return final_result
+
+
+@app.task
+def convertPredictionToCorrectFormat(data):
+    message = data["message"]
+    print(message)
+
+    time.sleep(0.3)
+    result = forecasting.convertPredictionToCorrectFormat(data)
+    # result = result.numpy().tolist()  # type: ignore
+
+    final_result = {"transformed": json.dumps(result)}
+    return final_result

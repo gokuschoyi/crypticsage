@@ -231,51 +231,73 @@ const executeTalibFunction = async (req, res) => {
     res.status(200).json({ message: "Execute Talib Function request success", result: final_res, info })
 }
 
-const checkIfValidationIsPossible = (ticker_hist_length, time_step, look_ahead, training_size, batchSize, do_validation) => {
-    let messages = {
+const checkIfValidationIsPossible = (
+    ticker_hist_length
+    , time_step
+    , look_ahead
+    , training_size
+    , batchSize
+    , do_validation
+) => {
+    const messages = {
         train_possible: {
             status: true,
-            message: ''
+            message: '',
+            train_fraction: 0,
+            samples: 0,
+            total_train_batches: 0,
         },
         test_possible: {
             status: true,
-            message: ''
+            message: '',
+            test_fraction: 0,
+            samples: 0,
         },
-        recommendation: []
-    }
+        recommendation: [],
+    };
+
     // @ts-ignore
-    const training_fraction = parseInt(ticker_hist_length * (training_size / 100))
-    const test_fraction = ticker_hist_length - training_fraction
-    // console.log('train and test parts : ', training_fraction, test_fraction)
-    messages['train_possible']['train_fraction'] = training_fraction
-    messages['test_possible']['test_fraction'] = test_fraction
+    const training_fraction = Math.floor((ticker_hist_length * training_size) / 100); // eg. 80% of the data
+    const test_fraction = ticker_hist_length - training_fraction; // eg. 20% of the data
 
-    const train_features = training_fraction - time_step - look_ahead + 1
+    messages.train_possible.train_fraction = training_fraction;
+    messages.test_possible.test_fraction = test_fraction;
+
+    const train_features = training_fraction - time_step - look_ahead + 1 // Train features calculated based on timestep and lookahead
+    if (train_features > 0) {
+        messages.train_possible.samples = train_features;
+        const train_batches = Math.ceil(train_features / batchSize);
+        if (train_batches < 1) {
+            const required_slice_index = Math.ceil((batchSize + time_step + look_ahead - 1) / (training_size / 100));
+            messages.train_possible.status = false;
+            messages.train_possible.message = `Reduce the batch size to ${train_features} or less, or increase the slice index to ${required_slice_index}`
+        } else {
+            messages.train_possible.total_train_batches = train_batches
+        }
+    } else {
+        messages.train_possible.status = false;
+        messages.train_possible.message = `Increase the training size to ${training_fraction + time_step + look_ahead - 1} or more`
+    }
+
     const test_features = test_fraction - time_step - look_ahead + 1
-    // console.log("Count after transformation : ", train_features, test_features)
-    messages['train_possible']['samples'] = train_features
-    messages['test_possible']['samples'] = test_features
+    if (test_features > 0) {
+        messages.test_possible.samples = test_features;
 
-    // messages['test_possible']['status'] = test_features >= 1
-
-    const batch_possible = train_features / batchSize
-    messages['train_possible']['total_train_batches'] = batch_possible
-    if (batch_possible < 1) {
-        // console.log(batch_possible)
-        const required_slice_index = (batchSize + time_step + look_ahead - 1) / (training_size / 100)
-        messages['train_possible']['status'] = false
-        messages['train_possible']['message'] = `Reduce the batch size to ${train_features} or less, or increase the slice index to ${Math.round(required_slice_index) + 1}`
+        if (time_step + look_ahead > test_fraction && do_validation) {
+            const required_train_percentage = (training_fraction - time_step - look_ahead) / ticker_hist_length;
+            const required_slice_index = Math.ceil((time_step + look_ahead) / ((100 - training_size) / 100));
+            messages.test_possible.status = false;
+            messages.test_possible.message = `Decrease the train size to below ${parseFloat((required_train_percentage * 100).toFixed(2))}% or increase the slice index to ${required_slice_index}`;
+        }
+    } else {
+        const required = -test_features + test_fraction + 1
+        const required_sliceIndex = Math.ceil(required / ((100 - training_size) / 100));
+        const required_percentage = required / ticker_hist_length
+        console.log(required, required_sliceIndex, required_percentage)
+        messages.test_possible.status = false;
+        messages.test_possible.message = `Increase the slice index to ${required_sliceIndex} or more or decrease the training size below ${((1 - required_percentage) * 100).toFixed(2)}%`;
     }
 
-    const diff_test = time_step + look_ahead - test_fraction
-    // console.log('Diff_test',diff_test)
-    if (diff_test > 1 && do_validation) {
-        const required_train_percentage = (training_fraction - diff_test) / ticker_hist_length
-        const required_slice_index = (time_step + look_ahead) / ((100 - training_size) / 100)
-        // console.log('Required train percentage : ', required_train_percentage)
-        messages['test_possible']['status'] = false
-        messages['test_possible']['message'] = `Decrease the train size to below ${parseFloat((required_train_percentage * 100).toFixed(2))}% or increase the slice index to ${required_slice_index}`
-    }
     return messages
 }
 
@@ -309,6 +331,7 @@ const process_data_request = async ({
     , fTalibExecuteQuery
     , model_training_parameters
     , redis_key_for_hist_data
+    , samples
 }) => {
     // Model parameters
     const {
@@ -402,20 +425,15 @@ const process_data_request = async ({
                 try {
                     // @ts-ignore
                     trimmed = await step_function(trim_payload)
-                    const messages = checkIfValidationIsPossible(slice_index, time_step, look_ahead, training_size, batchSize, do_validation)
-                    const { train_possible, test_possible } = messages
-                    if (!train_possible.status || !test_possible.status) {
-                        return { train_possible, test_possible }
-                    }
                     datesAndActual = trimmed.tickerHist
-                        .slice(-(test_possible.samples + look_ahead - 1))
+                        .slice(-(samples + look_ahead - 1))
                         .map((ticker_point) =>
                         ({
                             date: new Date(ticker_point.openTime).toLocaleString(),
                             actual: ticker_point[to_predict]
                         })
                         )
-                    console.log(messages)
+                    // console.log(messages)
                 } catch (error) {
                     const newErrorMessage = { func_error: error.message, message: 'Error adjusting the ticker and talib result length', step: i }
                     throw new Error(JSON.stringify(newErrorMessage));
@@ -479,7 +497,6 @@ const process_data_request = async ({
                 break;
         }
     }
-    return { train_possible: { status: true }, test_possible: { status: true } }
 }
 
 const checkOrder = (old, new_) => {
@@ -602,19 +619,21 @@ const procssModelTraining = async (req, res) => {
                     res.status(200).json({ message: 'Gan model training started', finalRs: [], job_id: model_id });
                 } else {
                     log.warn('Parameters have changed, processing data...')
-                    console.log('transformation_order or slice_index has changed, fetching the required data')
-                    // @ts-ignore
-                    const { train_possible, test_possible } = await process_data_request({
-                        uid,
-                        model_id,
-                        asset_type,
-                        ticker_name,
-                        period,
-                        fTalibExecuteQuery,
-                        model_training_parameters,
-                        redis_key_for_hist_data
-                    })
+                    log.warn('transformation_order or slice_index has changed, fetching the required data')
+                    let { train_possible, test_possible } = checkIfValidationIsPossible(slice_index, time_step, look_ahead, training_size, batchSize, do_validation)
                     if (train_possible.status && test_possible.status) {
+                        let samples = test_possible.samples
+                        process_data_request({
+                            uid,
+                            model_id,
+                            asset_type,
+                            ticker_name,
+                            period,
+                            fTalibExecuteQuery,
+                            model_training_parameters,
+                            redis_key_for_hist_data,
+                            samples
+                        })
                         res.status(200).json({ message: 'Gan model training started', finalRs: [], job_id: model_id });
                     } else {
                         res.status(400).json({
@@ -626,19 +645,21 @@ const procssModelTraining = async (req, res) => {
                 }
             } else {
                 log.warn('Historical data not present in redis, fetching the required data')
-                // @ts-ignore
-                const { train_possible, test_possible } = await process_data_request({
-                    uid,
-                    model_id,
-                    asset_type,
-                    ticker_name,
-                    period,
-                    fTalibExecuteQuery,
-                    model_training_parameters,
-                    redis_key_for_hist_data
-                })
+                let { train_possible, test_possible } = checkIfValidationIsPossible(slice_index, time_step, look_ahead, training_size, batchSize, do_validation)
 
                 if (train_possible.status && test_possible.status) {
+                    let samples = test_possible.samples
+                    process_data_request({
+                        uid,
+                        model_id,
+                        asset_type,
+                        ticker_name,
+                        period,
+                        fTalibExecuteQuery,
+                        model_training_parameters,
+                        redis_key_for_hist_data,
+                        samples
+                    })
                     res.status(200).json({ message: 'Gan model training started', finalRs: [], job_id: model_id });
                 } else {
                     res.status(400).json({
@@ -971,9 +992,14 @@ const deleteModelFromLocalDirectory = async (model_id) => {
 }
 
 const checkIfModelExists = async (req, res) => {
-    const { model_id } = req.body
+    const { model_id, modelType } = req.body
     try {
-        const path = `./models/${model_id}`
+        let path = ''
+        if (modelType === 'LSTM') {
+            path = `./models/${model_id}`
+        } else {
+            path = `./worker_celery/saved_models/${model_id}`
+        }
         if (fs.existsSync(path)) {
             res.status(200).json({ message: 'Model data present', status: true })
         } else {
@@ -1015,8 +1041,9 @@ const makeNewForecast = async (req, res) => {
         const { transformation_order, timeStep, lookAhead, multiSelectValue } = training_parameters
         // console.log('Training parameters : ', model_train_period, model_first_prediction_date, timeStep, lookAhead, multiSelectValue)
 
-        const totalTickerCount = calcuteTotalTickerCountForForecast(model_train_period, model_first_prediction_date) // total no of ticker since initial model prediction
+        const totalTickerCount = calcuteTotalTickerCountForForecast(model_train_period, model_first_prediction_date) // 461 total no of ticker since initial model prediction
         const lastDate = model_first_prediction_date + (totalTickerCount * HDUtil.periodToMilliseconds(model_train_period))
+        log.notice(`First prediction date : ${new Date(model_first_prediction_date).toLocaleString()}` )
         log.notice(`Total ticker count since initial forecast : ${totalTickerCount}`)
         log.notice(`New forecast start date : ${new Date(lastDate).toLocaleString()}`)
 
@@ -1071,7 +1098,7 @@ const makeNewForecast = async (req, res) => {
 
         // @ts-ignore
         log.notice(`E_ key : ${e_key}`)
-        log.notice(`Features length : ${features.length}`)
+        log.notice(`Features length : ${features.length}`) // 1367
 
         // Step 7
         // Load the saved model from local directory
@@ -1106,12 +1133,12 @@ const makeNewForecast = async (req, res) => {
                 // @ts-ignore
                 forecast = predictions
             }
-            log.notice(`Final forecast length : ${forecast.length}`)
+            log.notice(`Final forecast length : ${forecast.length}`) //1367
 
             // getting dates to plot
 
-            const slicedTickerHist = tickerHist.slice(-(forecast.length - 1))
-            log.notice(`Sliced ticker hist length : ${slicedTickerHist.length}`)
+            const slicedTickerHist = tickerHist.slice(-(forecast.length - 1)) // removing the first date to align with the predictions
+            log.notice(`Sliced ticker hist length : ${slicedTickerHist.length}`) // 1366
             log.notice(`Last prediction date : ${slicedTickerHist[slicedTickerHist.length - 1].date}`)
 
             slicedTickerHist.forEach((item, index) => {
@@ -1120,13 +1147,12 @@ const makeNewForecast = async (req, res) => {
                 // const predictedValue = calculateOriginalPrice(forecast[index][0][0], variance_array[e_key], mean_array[e_key])
 
                 dates.push({
-                    openTime: strDate,
-                    open: item.openTime / 1000,
+                    date: strDate,
                     actual: actualValue,
                 })
             })
 
-            log.notice(`Dates length : ${dates.length}`)
+            log.notice(`Dates length : ${dates.length}`) // 1366
 
             let filtered_dates = dates.filter((item) => item.open * 1000 >= model_first_prediction_date)
             if (filtered_dates.length !== 0) {
@@ -1134,7 +1160,7 @@ const makeNewForecast = async (req, res) => {
             } else {
                 dates = dates
             }
-            log.notice(`Dates length after slice : ${dates.length}`)
+            log.notice(`Dates length after slice : ${dates.length}`) // 461
             log.notice(`Model Lookahead : ${lookAhead}`)
         } catch (error) {
             log.error(error.stack)
@@ -1147,13 +1173,138 @@ const makeNewForecast = async (req, res) => {
             lastPrediction: forecast.slice(-1)[0]
         }
 
-        log.notice(`Final forecast length : ${final_result_obj.new_forecast.length}`)
+        // log.notice(`Final forecast length : ${final_result_obj.new_forecast.length}`)
+
+        const fcst = forecast.slice((forecast.length - dates.length - 1), forecast.length)
+        const forecastTensor = tf.tensor(fcst)
+        console.log('Shape of forecast', forecastTensor.shape)
 
         // @ts-ignore
-        res.status(200).json({ message: 'Model forcast started', final_result_obj });
+        const reshapedForecast = tf.squeeze(forecastTensor, axis=-1)
+        console.log('reshaped', reshapedForecast.shape)
+
+        // call the celery python worker
+        const task = pyClient.createTask("celeryTasks.convertPredictionToCorrectFormat");
+        const data = {
+            message: 'Request from node to transform prediction data',
+            dates: JSON.stringify(dates),
+            forecast: JSON.stringify(reshapedForecast.arraySync()),
+            lookAhead,
+            period,
+            totalTickerCount,
+            mean : JSON.stringify(mean_array),
+            variance  :JSON.stringify(variance_array)
+        }
+
+        try {
+            const result = task.applyAsync([data]);
+            result.get()
+                .then(data => {
+                    console.log('Data from celery');
+                    res.status(200).json({ message: 'Model forcast started', result:JSON.parse(data.transformed) });
+                })
+                .catch(err => {
+                    console.log('Error from celery', err);
+                    res.status(400).json({ message: 'Model forecasting failed', error: err })
+                })
+        } catch (error) {
+            log.error(error.stack)
+            res.status(400).json({ message: 'Model forecasting failed', error: error.message })
+        }
+
+
+        // @ts-ignore
+        // res.status(200).json({ message: 'Model forcast started', final_result_obj });
     } catch (error) {
         log.error(error.stack)
         res.status(400).json({ message: 'Model training failed', error: error.message })
+    }
+}
+
+const makeWgangpForecast = async (req, res) => {
+    const { training_parameters, talibExecuteQueries, model_id, model_first_prediction_date, model_train_period } = req.body.payload
+    const uid = res.locals.data.uid;
+    try {
+        const { transformation_order, timeStep, lookAhead, multiSelectValue } = training_parameters
+        // console.log('Training parameters : ', model_train_period, model_first_prediction_date, timeStep, lookAhead, multiSelectValue)
+
+        const totalTickerCount = calcuteTotalTickerCountForForecast(model_train_period, model_first_prediction_date) // total no of ticker since initial model prediction
+        const lastDate = model_first_prediction_date + (totalTickerCount * HDUtil.periodToMilliseconds(model_train_period))
+        log.notice(`Total ticker count since initial forecast : ${totalTickerCount}`)
+        log.notice(`New forecast start date : ${new Date(lastDate).toLocaleString()}`)
+
+        // Step 1
+        // fetching the ticker data from db, fetching the last 100 data points as it is difficult ot figure out the exact length to fetch
+        // as the talin execute queries have varying offset values for calculation
+        const { payload: { db_query: { asset_type, period, ticker_name } } } = talibExecuteQueries[0];
+        const tickerDataForProcessing = await MDBServices.fetchTickerHistDataFromDb(asset_type, ticker_name, period, 1, 1500, 0)
+
+        // Step 2
+        // Calculating the taib functions for the ticker data
+        const talibResult = await TFMUtil.processSelectedFunctionsForModelTraining({
+            selectedFunctions: talibExecuteQueries,
+            tickerHistory: tickerDataForProcessing.ticker_data,
+        })
+
+        // Step 3
+        // Trim the tricker and talib result data based on smalles length
+        // @ts-ignore
+        const { tickerHist, finalTalibResult } = await TFMUtil.trimDataBasedOnTalibSmallestLength({
+            tickerHistory: tickerDataForProcessing.ticker_data,
+            finalTalibResult: talibResult,
+        })
+
+        const dates = tickerHist.map((data) => ({ date: new Date(data.openTime).toLocaleString(), actual: data[multiSelectValue] }))
+
+        console.log('ticker data : ', tickerHist[tickerHist.length - 1])
+
+        // Step 4
+        // Transforiming the data to required shape before tranforming to tensor/2D array
+        const { features: features_, metrics } = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult, transformation_order })
+        log.notice(`Fetched features length : ${features_.length}`)
+
+        let to_predict_index = 0
+        transformation_order.forEach((order, i) => {
+            if (order.value === multiSelectValue) {
+                to_predict_index = i
+                return
+            }
+        })
+
+        // call the celery python worker
+        const task = pyClient.createTask("celeryTasks.makePrediction");
+        const data = {
+            message: 'Request from node to make prediction',
+            uid,
+            m_id: model_id,
+            features: JSON.stringify(features_),
+            dates: JSON.stringify(dates),
+            to_predict_index: to_predict_index,
+            lookAhead: timeStep,
+            timeStep: lookAhead,
+            period: period,
+            totalTickerCount: totalTickerCount
+        }
+        try {
+            const result = task.applyAsync([data]);
+            result.get()
+                .then(data => {
+                    console.log('Data from celery');
+                    res.status(200).json({ message: 'Forecasting completed', result: JSON.parse(data.predictions) })
+                })
+                .catch(err => {
+                    console.log('Error from celery', err);
+                    res.status(400).json({ message: 'Model forecasting failed', error: err })
+                });
+        } catch (error) {
+            log.error(error.stack)
+            res.status(400).json({ message: 'Model forecasting failed', error: error.message })
+        }
+
+
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model forecasting failed', error: error.message })
     }
 }
 
@@ -1271,7 +1422,9 @@ module.exports = {
     checkIfModelExists,
     getModelResult,
     makeNewForecast,
+    makeWgangpForecast,
     renameModel,
     testNewModel,
     getModelCheckpoints,
+    checkIfValidationIsPossible
 }

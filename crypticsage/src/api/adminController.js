@@ -254,8 +254,8 @@ export const checkIfModelDataExists = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const { model_id } = payload;
-    const response = await axios.post(`${baseUrl}/indicators/check_for_model`, { model_id }, config, {
+    const { model_id, modelType } = payload;
+    const response = await axios.post(`${baseUrl}/indicators/check_for_model`, { model_id, modelType }, config, {
         withCredentials: true
     })
     return response;
@@ -280,6 +280,17 @@ export const makeNewPrediction = async ({ token, payload }) => {
         withCredentials: true
     })
     return response;
+}
+
+export const makeWganPrediction = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/indicators/make_wgan_prediction`, { payload }, config, {
+        withCredentials: true
+    })
+    return response;
+
 }
 
 export const renameModel = async ({ token, payload }) => {

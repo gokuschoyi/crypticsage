@@ -25,6 +25,7 @@ router.post('/rename_model', IController.renameModel)
 router.get('/get_model_checkpoints', IController.getModelCheckpoints)
 
 router.post('/make_new_prediction', IController.makeNewForecast)
+router.post('/make_wgan_prediction', IController.makeWgangpForecast)
 
 router.post('/generate_test_data', IController.testNewModel)
 // router.post('/generate_test_data_two', IController.generateTestData)

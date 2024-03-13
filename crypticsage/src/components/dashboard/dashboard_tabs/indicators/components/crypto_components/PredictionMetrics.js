@@ -18,7 +18,6 @@ const CRITERIA_DATA = [
 const PredictionMetrics = ({
     predictionLookAhead,
     model_parameters,
-    modelParams,
     modelMetrics,
     predictionChartType,
     trainingStartedFlag,
@@ -26,7 +25,7 @@ const PredictionMetrics = ({
 }) => {
     return (
         <Paper elevation={4} sx={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '8px 4px' }}>
-            {(predictionLookAhead && modelParams.lookAhead > 1) &&
+            {(predictionLookAhead && model_parameters.lookAhead > 1) &&
                 <Box className='prediction-lookahead-slider-box'>
                     <CustomSlider
                         sliderValue={predictionLookAhead}
