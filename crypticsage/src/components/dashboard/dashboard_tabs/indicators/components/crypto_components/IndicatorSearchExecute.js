@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { ErrorBoundary } from "react-error-boundary";
-import { Box, Grid, Typography } from '@mui/material'
+import { Box, Grid, Typography, useTheme, useMediaQuery } from '@mui/material'
 import { useSelector, useDispatch } from 'react-redux'
 import { setSelectedFlagInTalibDescription, setSelectedFunctions } from '../../modules/CryptoModuleSlice'
 import IndicatorSearch from './IndicatorSearch'
@@ -18,6 +18,8 @@ const IndicatorSearchExecute = ({
 }) => {
     const dispatch = useDispatch()
     // search and add function feature
+    const theme = useTheme()
+    const md = useMediaQuery(theme.breakpoints.down('lg'));
     const talibFunctions = useSelector(state => state.cryptoModule.talibDescription)
     const [searchedFunctions, setSearchedFunction] = useState([]);
     const [transformedFunctionsList, setTransformedFunctionList] = useState([]);
@@ -56,7 +58,7 @@ const IndicatorSearchExecute = ({
                 .map(group => group.functions)
                 .flat()
                 .find(func => func.name === func_name);
-            console.log(foundFunction)
+            // console.log(foundFunction)
 
             if (foundFunction) {
                 dispatch(setSelectedFlagInTalibDescription(
@@ -87,48 +89,39 @@ const IndicatorSearchExecute = ({
 
     }
     return (
-        <Grid container pt={2} pb={2} mb={2} mt={2}>
-            <Grid item xs={12} sm={12} md={12} lg={3} xl={3} pl={2} pr={2}>
+        <Box pt={2} mb={2} mt={'26px'} className='indicator-search-execute'>
+            <Box pr={2} pl={md && 2}>
                 <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
                     <IndicatorSearch
                         searchedFunctions={searchedFunctions}
-                        selectedFunctions={selectedFunctions}
                         transformedFunctionsList={transformedFunctionsList}
                         handleSearchedFunctions={handleSearchedFunctions}
                         handleAddSelectedFunction={handleAddSelectedFunction}
                     />
                 </ErrorBoundary>
-            </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={9} xl={9} pl={2} pr={2}>
-                {selectedFunctions.length === 0 ?
-                    (
-                        <Box display='flex' flexDirection='row' justifyContent='flex-start'>
-                            <Typography variant='h5' pl={1} pt={1} pb={1} sx={{ textAlign: 'start' }}>Select an indicator to plot</Typography>
-                        </Box>
-                    )
-                    :
-                    (
-                        <React.Fragment>
-                            <Box pl={1}>
-                                <Typography variant='h5' sx={{ textAlign: 'start' }}>Selected Indicators</Typography>
-                            </Box>
-                        </React.Fragment>
-                    )
+            </Box>
+            <Box pr={2} pl={md && 2}>
+                {selectedFunctions.length > 0 &&
+                    <Box pl={1} pt={1}>
+                        <Typography variant='h5' sx={{ textAlign: 'start' }}>Selected Indicators</Typography>
+                    </Box>
                 }
                 {selectedFunctions.length !== 0 &&
-                    <Grid container className='indicator-data-container'>
-                        {selectedFunctions.map((funcRedux, index) => {
-                            const { name } = funcRedux
-                            return (
-                                <Grid key={`${name}${index}`} item xs={12} sm={6} md={4} lg={4} xl={3}>
-                                    <SelectedFunctionContainer key={index} funcRedux={funcRedux} fetchValues={fetchValues} />
-                                </Grid>
-                            )
-                        })}
-                    </Grid>
+                    <Box className='fixed-height-box' sx={{ maxHeight: !md ? '480px' : '', overflowY: !md ? 'auto' : '', width: '100%' }}>
+                        <Grid container className='indicator-data-container'>
+                            {selectedFunctions.map((funcRedux, index) => {
+                                const { name } = funcRedux
+                                return (
+                                    <Grid key={`${name}${index}`} item xs={12} sm={6} md={4} lg={12} xl={12}>
+                                        <SelectedFunctionContainer key={index} funcRedux={funcRedux} fetchValues={fetchValues} />
+                                    </Grid>
+                                )
+                            })}
+                        </Grid>
+                    </Box>
                 }
-            </Grid>
-        </Grid>
+            </Box>
+        </Box>
     )
 }
 

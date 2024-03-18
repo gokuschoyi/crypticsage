@@ -174,7 +174,7 @@ const cryptoModuleSlice = createSlice({
         setWganFinalForecast: (state, action) => {
             state.modelData.wgan_final_forecast = action.payload;
         },
-        updatePredictedValues: (state, action) => {
+        updatePredictedValues: (state, action) => { // Not being used anymore in Saved LSTM and WGAN-GP
             const { model_id, rmse, forecast, predictions_array, initial_forecast } = action.payload
             const currentState = state.userModels
             const foundIndex = currentState.findIndex((model) => model.model_id === model_id);
@@ -189,7 +189,7 @@ const cryptoModuleSlice = createSlice({
                 }
             }
         },
-        setModelDataAvailableFlag: (state, action) => {
+        setModelDataAvailableFlag: (state, action) => { // Not being used anymore in Saved LSTM
             const { model_id, status } = action.payload
             const currentState = state.userModels
             const foundIndex = currentState.findIndex((model) => model.model_id === model_id);
@@ -200,17 +200,13 @@ const cryptoModuleSlice = createSlice({
             state.userModels = currentState;
         },
         setNewForecastData: (state, action) => {
-            const { model_id, new_forecast_dates, new_forecast, lastPrediction } = action.payload
+            const { model_id, final_forecast } = action.payload
             const currentState = state.userModels
 
             const foundIndex = currentState.findIndex((model) => model.model_id === model_id);
 
             if (foundIndex !== -1) {
-                currentState[foundIndex].model_data.latest_forecast_result = {
-                    new_forecast_dates: new_forecast_dates,
-                    new_forecast: new_forecast,
-                    lastPrediction: lastPrediction
-                }
+                currentState[foundIndex].model_data.latest_forecast_result = final_forecast
             }
             state.userModels = currentState;
         },

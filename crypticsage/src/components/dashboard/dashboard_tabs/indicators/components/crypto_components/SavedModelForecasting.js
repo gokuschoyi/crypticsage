@@ -1,8 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Box, Typography, Tabs, Tab } from '@mui/material'
 import SavedModelsLSTM from './SavedModelsLSTM'
 import SavedModelsWGANGP from './SavedModelsWGANGP'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+
+
+import { getUserSavedModels } from '../../../../../../api/user'
+import { setUserModels } from '../../modules/CryptoModuleSlice'
 
 function a11yProps(index) {
     return {
@@ -12,6 +16,9 @@ function a11yProps(index) {
 }
 
 const SavedModelForecasting = () => {
+    const token = useSelector(state => state.auth.accessToken);
+    const dispatch = useDispatch()
+
     const userModels = useSelector(state => state.cryptoModule.userModels)
     const selectedTickerPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
     const selectedTickerName = useSelector(state => state.cryptoModule.selectedTickerName)
@@ -24,6 +31,21 @@ const SavedModelForecasting = () => {
         setSelectedTab(newValue);
         setModelType(newValue === 0 ? 'LSTM' : 'WGAN-GP');
     };
+
+    const fetchedRef = useRef(false)
+    useEffect(() => {
+        if (userModels.length === 0 && !fetchedRef.current) {
+            fetchedRef.current = true
+            // console.log('fetching user models')
+            getUserSavedModels({ token }).then(response => {
+                dispatch(setUserModels(response.data.userModels))
+            }).catch(error => {
+                console.log('error', error)
+            })
+        } else {
+            // console.log('user models already fetched')
+        }
+    }, [userModels, token, dispatch])
 
     return (
         <Box p={2} sx={{ minHeight: '300px' }}>

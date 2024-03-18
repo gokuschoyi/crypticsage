@@ -4,7 +4,7 @@ import { Dot } from '../../modules/CryptoModuleUtils';
 import RMSEBarChart from './RMSEBarChart';
 import InitialForecastLineChart from './InitialForecastLineChart';
 import { DeleteSavedModel } from './modals';
-import { Success } from '../../../../global/CustomToasts'
+import { Success, Error } from '../../../../global/CustomToasts'
 import '../../modules/module.css'
 import {
     Box,
@@ -25,16 +25,13 @@ import {
     useDispatch
 } from 'react-redux';
 import {
-    updatePredictedValues,
     setNewForecastData,
     renameModel as renameModelInRedux,
-    setModelDataAvailableFlag,
     resetCurrentModelData,
     setUserModels
 } from '../../modules/CryptoModuleSlice'
 import {
-    checkIfModelDataExists,
-    getModelResult, makeNewPrediction,
+    makeNewPrediction,
     renameModel,
     deleteModelForUser,
     getUserModels
@@ -81,26 +78,105 @@ const calculateOriginalPrice = ({ value, variance, mean }) => {
     return parseFloat(((value * Math.sqrt(variance)) + mean).toFixed(2));
 };
 
+const TalibFuncSummary = ({ query }) => {
+    const { payload } = query
+    const { func_query, func_param_input_keys, func_param_optional_input_keys } = payload
+    const { name } = func_query
+
+    const [openIndicator, setOpenIndicator] = useState(''); // for opening and closing the indicator details
+    return (
+        <Grid item xs={12} sm={6} md={6} lg={6} xl={3}>
+            <Paper elevation={4} className='single-indicator-saved'>
+                <Box display='flex' flexDirection='row' alignItems='center' justifyContent={'space-between'}>
+                    <Box display='flex' flexDirection='row' alignItems='center' gap={'6px'} pl={1}>
+                        <Dot color='red' />
+                        <Typography variant='body2'>{name}</Typography>
+                    </Box>
+                    <IconButton size='small' aria-label="update" className='small-icon' color="secondary" onClick={() => setOpenIndicator((prev) => { if (prev === name) { return '' } else { return name } })}>
+                        {openIndicator === name ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+                    </IconButton>
+                </Box>
+                <Collapse in={openIndicator === name}>
+                    <Box display='flex' flexDirection='column' alignItems={'start'} pl={2}>
+                        {Object.keys(func_param_input_keys).map((key, index) => (
+                            <Typography key={index} variant='body2'>{key}</Typography>
+                        ))}
+                        {Object.keys(func_param_optional_input_keys).map((key, index) => {
+                            const value = func_query[key];
+                            return (
+                                <Typography key={index} variant='body2'>
+                                    {key} : {value !== undefined ? value : 'Not available'}
+                                </Typography>
+                            );
+                        })}
+                    </Box>
+                </Collapse>
+            </Paper>
+        </Grid>
+    )
+}
+
+const defaultselectedSavedModelData = {
+    model_created_date: null,
+    ticker_name: null,
+    model_name: null,
+    ticker_period: null,
+    model_data: {
+        training_parameters: null,
+        talibExecuteQueries: null,
+        scores: null,
+        epoch_results: null,
+        train_duration: null,
+    }
+}
+
+const transformLSTMPredictionData = (selectedModel, ohlcData) => {
+    // console.log('From transform lstm func')
+    let final = {}
+    const { model_data: { predicted_result, training_parameters: { multiSelectValue, lookAhead } } } = selectedModel
+
+    const forecast = predicted_result.forecast
+    const initialForecast = predicted_result.initial_forecast // only for the dates
+
+    const firstDate = new Date(initialForecast[0].open * 1000).getTime()
+    const lastDate = new Date(initialForecast[initialForecast.length - 1].open * 1000).getTime()
+    const toCompareActualValues = ohlcData.filter(ticker => ticker.openTime >= firstDate && ticker.openTime <= lastDate)
+
+    const first_key = initialForecast.map((fCast, index) => {
+        return {
+            openTime: fCast.open * 1000,
+            predicted: calculateOriginalPrice({ value: forecast[index], variance: predicted_result.label_variance, mean: predicted_result.label_mean }),
+            actual: toCompareActualValues[index] !== undefined ? toCompareActualValues[index][multiSelectValue] : null
+        }
+    })
+
+    final['0'] = first_key
+
+    for (let i = 1; i < lookAhead; i++) {
+        const last_prediction = predicted_result.predictions_array.slice(-i)
+        const prediction_to_add = last_prediction.map((prediction) => { return prediction[i] })
+        const forecast_sliced_from_start = forecast.slice(i)
+        let finalForecast = [...prediction_to_add, ...forecast_sliced_from_start]
+
+        let intermediate = []
+        finalForecast.forEach((prediction, index) => {
+            let tempKey = {
+                openTime: initialForecast[index].open * 1000,
+                predicted: calculateOriginalPrice({ value: prediction[0], variance: predicted_result.label_variance, mean: predicted_result.label_mean }),
+                actual: toCompareActualValues[index] !== undefined ? toCompareActualValues[index][multiSelectValue] : null
+            }
+            intermediate.push(tempKey)
+        })
+        final[`${i}`] = intermediate
+    }
+
+    return final
+}
 
 const SavedModels = ({
     selected_ticker_period,
     selected_ticker_name,
 }) => {
-    const defaultselectedSavedModelData = {
-        model_created_date: null,
-        ticker_name: null,
-        model_name: null,
-        ticker_period: null,
-        model_data: {
-            training_parameters: null,
-            talibExecuteQueries: null,
-            predicted_result: null,
-            scores: null,
-            epoch_results: null,
-            train_duration: null,
-        }
-    }
-
     const dispatch = useDispatch()
     const theme = useTheme();
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
@@ -109,8 +185,6 @@ const SavedModels = ({
     const user_models_redux = useSelector(state => state.cryptoModule.userModels).filter(model => model.model_type === 'LSTM')
     // const c_module = useSelector(state => state.cryptoModule.userModels)
     // console.log(c_module)
-
-    const [openIndicator, setOpenIndicator] = useState(''); // for opening and closing the indicator details
 
     const [open, setOpen] = useState(false);
     const [selectedSavedModelData, setSelectedSavedModelData] = useState(defaultselectedSavedModelData);
@@ -124,44 +198,70 @@ const SavedModels = ({
     } = selectedSavedModelData || {};
 
     const {
+        epoch_results,
         training_parameters,
         talibExecuteQueries,
-        predicted_result,
         scores,
-        epoch_results,
         train_duration,
     } = model_data;
 
+
     const [toShowModelId, setToShowModelId] = useState(null);
-    const handleShowModelDetails = ({ modelId, m_name }) => {
-        const modelData = user_models_redux.find((model) => model.model_id === modelId);
+    const [modelStatusColor, setModelStatusColor] = useState('red')
+    const [modelRMSE, setModelRMSE] = useState([])
+    const [initialPredictionsDate, setInitialPredictionsDate] = useState(null)
 
-        if (selectedSavedModelData?.model_id === modelId) {
-            setOpen((prevOpen) => !prevOpen);
+    const ohlcData = useSelector(state => state.cryptoModule.cryptoDataInDb)
+
+
+    const [allPredictions, setAllPredictions] = useState({})
+    const [selectedPrediction, setSelectedPrediction] = useState([])
+    const [selectedRMSEIndex, setSelectedRMSEIndex] = useState(0)
+
+    const handleShowSavedModelDetails = ({ modelId, m_name }) => {
+        if (modelId === toShowModelId) {
+            setOpen(false);
+            setToShowModelId(null);
         } else {
+            setToShowModelId(modelId);
             setOpen(true);
-        }
-
-        setSelectedSavedModelData(modelData);
-
-        if (modelId === toShowModelId && open === true) {
-            setToShowModelId(null)
-            setDefaultModelName('')
-            setModelStatusColor('red')
             setSelectedRMSEIndex(0)
-            setInitialPredictionsDates([])
-            setLatestForecastData([])
-            setNewForecastMetrics({ mse: 0, rmse: 0 })
-        } else {
-            setToShowModelId(modelId)
-            setModelStatusColor('red')
-            setDefaultModelName(m_name)
-            setSelectedRMSEIndex(0)
-            setInitialPredictionsDates([])
-            setLatestForecastData([])
-            setNewForecastMetrics({ mse: 0, rmse: 0 })
         }
     }
+
+    useEffect(() => {
+        if (toShowModelId !== null) {
+            console.log('Loading selected saved model data...')
+            const selectedModel = user_models_redux.find((model) => model.model_id === toShowModelId)
+            if (selectedModel) {
+                const modelAvailableInDb = selectedModel.model_data_available
+                setModelStatusColor(modelAvailableInDb ? 'green' : 'red')
+
+                const transformed_predictions = transformLSTMPredictionData(selectedModel, ohlcData)
+                // console.log('final', transformed_predictions, selectedRMSEIndex)
+                setAllPredictions(transformed_predictions)
+                setSelectedPrediction(transformed_predictions[`${selectedRMSEIndex}`])
+
+                setDefaultModelName(selectedModel.model_name)
+                setSelectedSavedModelData(selectedModel)
+                setModelRMSE(selectedModel.model_data.predicted_result.rmse);
+                setInitialPredictionsDate(selectedModel.model_data.predicted_result.initial_forecast[0].open);
+                setLatestForecastData(selectedModel.model_data.latest_forecast_result);
+            }
+        }
+
+        return () => {
+            console.log('cleaning up ...')
+            // setOpen(false)
+            // setToShowModelId(null)
+            setDefaultModelName('')
+            setSelectedSavedModelData(defaultselectedSavedModelData)
+            setModelRMSE([])
+            setInitialPredictionsDate(null)
+            setLatestForecastData({})
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [toShowModelId])
 
     const handleLocalClose = () => {
         setToShowModelId(null)
@@ -169,155 +269,11 @@ const SavedModels = ({
         // handleExpandedSelectedModelClose()
     }
 
-    const [modelStatusColor, setModelStatusColor] = useState('red')
     useEffect(() => {
-        // console.log('UE from saved model Check')
-        const selectedModel = user_models_redux.find((model) => model.model_id === toShowModelId)
-        if (toShowModelId !== null) {
-            const modelAvailableInDb = selectedModel?.model_data_available
-            // console.log(modelAvailableInDb)
-
-            if (modelAvailableInDb === undefined) {
-                const payload = {
-                    model_id: toShowModelId,
-                    modelType: 'LSTM'
-                }
-
-                checkIfModelDataExists({
-                    token, payload
-                })
-                    .then((res) => {
-                        // console.log(res.data.message, res.data.status)
-                        dispatch(setModelDataAvailableFlag({ model_id: toShowModelId, status: res.data.status }))
-                        if (res.data.status) {
-                            setModelStatusColor('green')
-                        } else {
-                            setModelStatusColor('red')
-                        }
-                    })
-                    .catch((err) => {
-                        console.log(err)
-                    })
-            } else {
-                if (modelAvailableInDb) {
-                    setModelStatusColor('green')
-                } else {
-                    setModelStatusColor('red')
-                }
-            }
+        if (selectedRMSEIndex !== null) {
+            setSelectedPrediction(allPredictions[`${selectedRMSEIndex}`])
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [toShowModelId])
-
-
-    const [modelRMSE, setModelRMSE] = useState([])
-    const [initialPredictionsDates, setInitialPredictionsDates] = useState([])
-
-    const [dataLoadingFlag, setDataLoadingFlag] = useState(false)
-    // fetching model result from API or Redux store, setting modelRMSE barchart data and initialPredictionsDates linechart data for dates
-    useEffect(() => {
-        // console.log('UE from saved model Initial Check')
-        const selectedModel = user_models_redux.find((model) => model.model_id === toShowModelId)
-        if (user_models_redux.length > 0 && toShowModelId !== null && selectedModel) {
-            if (Object.keys(selectedModel.model_data.predicted_result).length === 4) {
-                console.log('Model data does not exists')
-                const payload = {
-                    model_id: toShowModelId
-                }
-                setDataLoadingFlag(true)
-                getModelResult({
-                    token, payload
-                })
-                    .then((res) => {
-                        const model_result = res.data.model_data
-                        dispatch(updatePredictedValues(
-                            {
-                                model_id: toShowModelId,
-                                rmse: model_result.rmse,
-                                forecast: model_result.forecast,
-                                predictions_array: model_result.predictions_array,
-                                initial_forecast: model_result.initial_forecast
-                            }
-                        ))
-                        setModelRMSE(model_result.rmse)
-                        setInitialPredictionsDates(model_result.initial_forecast)
-                        setDataLoadingFlag(false)
-                    })
-                    .catch((err) => {
-                        console.log(err)
-                    })
-            } else {
-                console.log('Model data exists')
-                setModelRMSE(selectedModel.model_data.predicted_result.rmse)
-                setInitialPredictionsDates(selectedModel.model_data.predicted_result.initial_forecast)
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dispatch, toShowModelId, token])
-
-
-    const [selectedRMSEIndex, setSelectedRMSEIndex] = useState(0)
-    const [initialPredictions, setInitialPredictions] = useState([])
-
-    const ohlcData = useSelector(state => state.cryptoModule.cryptoDataInDb)
-    // combining initial predictions with actual values to plot for line chart based on the selectedRMSEIndex
-    useEffect(() => {
-        const selectedModel = user_models_redux.find((model) => model.model_id === toShowModelId)
-        if (initialPredictionsDates.length !== 0 && toShowModelId !== null && selectedModel) {
-            const forecast = selectedModel.model_data.predicted_result.forecast
-            // console.log(initialPredictionsDates, forecast)
-            let toPlotData = []
-            if (selectedRMSEIndex === 0) {
-                forecast.forEach((prediction, index) => {
-                    toPlotData.push({
-                        openTime: initialPredictionsDates[index].openTime,
-                        predicted: calculateOriginalPrice({ value: prediction[0], variance: predicted_result.label_variance, mean: predicted_result.label_mean })
-                    })
-                })
-            } else {
-                const last_prediction = selectedModel.model_data.predicted_result.predictions_array.slice(-selectedRMSEIndex)
-                // console.log(last_prediction)
-
-                const prediction_to_add = last_prediction.map((prediction) => { return prediction[selectedRMSEIndex] })
-                // console.log(prediction_to_add)
-
-                let forecast_sliced_from_start = forecast.slice(selectedRMSEIndex)
-                let finalForecast = [...prediction_to_add, ...forecast_sliced_from_start]
-                // console.log(forecast_sliced_from_start)
-                // console.log(finalForecast)
-
-                finalForecast.forEach((prediction, index) => {
-                    toPlotData.push({
-                        openTime: initialPredictionsDates[index].openTime,
-                        predicted: calculateOriginalPrice({ value: prediction[0], variance: predicted_result.label_variance, mean: predicted_result.label_mean })
-                    })
-                })
-            }
-
-            const firstDate = new Date(toPlotData[0].openTime).getTime()
-            const lastDate = new Date(toPlotData[toPlotData.length - 1].openTime).getTime()
-            const toCompareActualValues = ohlcData.filter(ticker => ticker.openTime >= firstDate && ticker.openTime <= lastDate)
-            // console.log(toCompareActualValues)
-            // console.log(toPlotData)
-
-            const finalData = toPlotData.map((prediction, index) => {
-                let actual = null;
-                if (toCompareActualValues[index] && new Date(prediction?.openTime).getTime() === toCompareActualValues[index].openTime) {
-                    actual = toCompareActualValues[index].close;
-                }
-                return {
-                    ...prediction,
-                    actual: parseFloat(parseFloat(actual).toFixed(2))
-                };
-            });
-
-            // console.log(finalData)
-
-            setInitialPredictions(finalData)
-
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedRMSEIndex, initialPredictionsDates])
+    }, [selectedRMSEIndex, allPredictions])
 
     const [trainingParamsCollapse, setTrainingParamsCollapse] = useState(false)
     const handleTrainingParametersCollapse = () => {
@@ -333,12 +289,13 @@ const SavedModels = ({
     const handleMakeNewPrediction = () => {
         console.log('Making new prediction')
         const selectedModelData = user_models_redux.find((model) => model.model_id === toShowModelId).model_data
-        const { training_parameters, talibExecuteQueries } = selectedModelData
+        const { training_parameters, talibExecuteQueries, predicted_result: { initial_forecast } } = selectedModelData
+        console.log(initial_forecast)
         const payload = {
             training_parameters,
             talibExecuteQueries,
             model_id: toShowModelId,
-            model_first_prediction_date: new Date(initialPredictionsDates[0].openTime).getTime(),
+            model_first_prediction_date: initial_forecast[0].open * 1000,
             model_train_period: ticker_period,
             mean_array: selectedModelData.predicted_result.mean_array,
             variance_array: selectedModelData.predicted_result.variance_array
@@ -375,23 +332,27 @@ const SavedModels = ({
                 setSelectedForecastData(selected_forecastData)
 
                 // save to redux for both lstm and wgan forecast
-                // dispatch(setNewForecastData({
-                //     model_id: toShowModelId,
-                //     new_forecast_dates: res.data.final_result_obj.new_forecast_dates,
-                //     new_forecast: res.data.final_result_obj.new_forecast,
-                //     lastPrediction: res.data.final_result_obj.lastPrediction
-                // }))
+                dispatch(setNewForecastData({
+                    model_id: toShowModelId,
+                    final_forecast: final_forecast
+                }))
                 setForecastLoadingFlag(false)
             })
             .catch((err) => {
-                console.log(err)
+                const errorMessage = err.response.data.error
+                console.log(err.response.data)
                 setForecastLoadingFlag(false)
+                if (errorMessage === 'TIMEOUT') {
+                    Error('Celery Worker un-available (Request Timed out). Try later.')
+                } else {
+                    Error('Error making new prediction')
+                }
             })
     }
 
     useEffect(() => {
         if (selectedRMSEIndex !== null && Object.keys(latestForecastData).length !== 0) {
-            console.log('Selected RMSE Index, forecast available', selectedRMSEIndex)
+            // console.log('Selected RMSE Index, forecast available', selectedRMSEIndex)
             const selected_forecastData = latestForecastData[`${selectedRMSEIndex}`]
             const { mse, rmse } = calculateMSE(selected_forecastData.map((data) => data.actual), selected_forecastData.map((data) => data.predicted))
             // console.log(mse, rmse)
@@ -403,25 +364,42 @@ const SavedModels = ({
     // calculates the remaining time for the next prediction after initial model creation only
     const [remainingTime, setRemainingTime] = useState(10);
     useEffect(() => {
-        let intervalId
-        const calculateRemainingTime = () => {
-            const periodInMilliSecond = periodToMilliseconds(ticker_period);
-            const start = new Date(initialPredictionsDates[0].openTime).getTime()
-            const end = start + periodInMilliSecond
+        let intervalId = null
 
+        const calculateRemainingTime = () => {
+            console.log('Calculating remaining time')
+            const periodInMilliSecond = periodToMilliseconds(ticker_period);
+            const end = initialPredictionsDate * 1000 + periodInMilliSecond
             const now = new Date().getTime()
             const remaining = Math.floor((end - now) / 1000)
 
             setRemainingTime(remaining > 0 ? remaining : 0);
+            // console.log(periodInMilliSecond, end, now, 'Remaining time :', remaining)
+
+            // Check if the remaining time is positive to start the interval
+            if (remaining > 0 && intervalId === null) {
+                intervalId = setInterval(calculateRemainingTime, 30000);
+            }
+
+            // Check if the remaining time becomes negative to clear the interval
+            if (remaining <= 0 && intervalId !== null) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
         };
 
-        if (initialPredictionsDates && initialPredictionsDates.length > 0) {
+        if (initialPredictionsDate !== null) {
+            // console.log('First date available', initialPredictionsDate * 1000)
             calculateRemainingTime(); // calculate remaining time immediately
-            intervalId = setInterval(calculateRemainingTime, 10000); // update every second
         }
 
-        return () => clearInterval(intervalId); // cleanup on unmount
-    }, [initialPredictionsDates, ticker_period]);
+        return () => {
+            // console.log('Clearing interval')
+            clearInterval(intervalId); // cleanup on unmount
+            intervalId = null
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialPredictionsDate]);
 
     // console.log('remaining Time :', remainingTime)
 
@@ -498,13 +476,13 @@ const SavedModels = ({
                 {user_models_redux.filter(model => model.ticker_period === selected_ticker_period && model.ticker_name === selected_ticker_name).map((model, index) => {
                     const { model_name, model_id, model_created_date } = model
                     return (
-                        <Paper key={index} elevation={4} className='single-saved-model' sx={{ color: toShowModelId === model_id ? `${theme.palette.primary.main}` : `${theme.palette.text.primary}` }}>
+                        <Paper key={index} elevation={4} className='single-saved-model' sx={{ color: toShowModelId === model_id && open ? `${theme.palette.primary.main}` : `${theme.palette.text.primary}` }}>
                             <Box display='flex' alignItems='center' justifyContent='space-between' pl={'5px'} pr={'5px'} title={`Model created on ${dayjs(model_created_date).format('lll')}`}>
                                 <Typography className='saved-model-name' sx={{ fontWeight: toShowModelId === model_id ? '600' : '400' }}>{model_name}</Typography>
                                 <Box display='flex'>
                                     <Tooltip placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                                         <span>
-                                            <IconButton onClick={handleShowModelDetails.bind(null, { modelId: model_id, m_name: model_name })} sx={{ padding: '6px', color: toShowModelId === model_id ? `${theme.palette.primary.main}` : `${theme.palette.text.primary}` }} >
+                                            <IconButton onClick={handleShowSavedModelDetails.bind(null, { modelId: model_id, m_name: model_name })} sx={{ padding: '6px', color: toShowModelId === model_id && open ? `${theme.palette.primary.main}` : `${theme.palette.text.primary}` }} >
                                                 <AspectRatioIcon className='small-icon' />
                                             </IconButton>
                                         </span>
@@ -560,12 +538,14 @@ const SavedModels = ({
                                         </IconButton>
                                     </Box>
                                 </Box>
+
                                 <Box className='basic-details'>
                                     <Typography variant='body2'><span style={{ display: 'inline-block', width: '80px', textAlign: 'start', fontWeight: '500' }}>Ticker name</span> : {ticker_name}</Typography>
                                     <Typography variant='body2'><span style={{ display: 'inline-block', width: '80px', textAlign: 'start', fontWeight: '500' }}>Period</span> : {ticker_period}</Typography>
                                     <Typography variant='body2'><span style={{ display: 'inline-block', width: '80px', textAlign: 'start', fontWeight: '500' }}>Time taken</span> : {formatMillisecond(train_duration)}</Typography>
                                     <Typography variant='body2'><span style={{ display: 'inline-block', width: '80px', textAlign: 'start', fontWeight: '500' }}>Date created</span> : {dayjs(model_created_date).format('lll')}</Typography>
                                 </Box>
+
                                 <Box className='basic-details2'>
                                     <Typography variant='body2'><span style={{ display: 'inline-block', width: '80px', textAlign: 'start', fontWeight: '500' }}>MSE (Train)</span> : {epoch_results[epoch_results.length - 1].mse}</Typography>
                                     <Typography variant='body2'><span style={{ display: 'inline-block', width: '80px', textAlign: 'start', fontWeight: '500' }}>RMSE (Train)</span> : {Math.sqrt(epoch_results[epoch_results.length - 1].mse)}</Typography>
@@ -643,41 +623,9 @@ const SavedModels = ({
                                                 </Typography>
                                                 <Box className='selected-indicators-saved-box'>
                                                     <Grid container spacing={1}>
-                                                        {talibExecuteQueries.map((query, index) => {
-                                                            const { payload } = query
-                                                            const { func_query, func_param_input_keys, func_param_optional_input_keys } = payload
-                                                            const { name } = func_query
-                                                            return (
-                                                                <Grid item xs={12} sm={6} md={6} lg={6} xl={3} key={index}>
-                                                                    <Paper elevation={4} key={index} className='single-indicator-saved'>
-                                                                        <Box display='flex' flexDirection='row' alignItems='center' justifyContent={'space-between'}>
-                                                                            <Box display='flex' flexDirection='row' alignItems='center' gap={'6px'} pl={1}>
-                                                                                <Dot color='red' />
-                                                                                <Typography key={index} variant='body2'>{name}</Typography>
-                                                                            </Box>
-                                                                            <IconButton size='small' aria-label="update" className='small-icon' color="secondary" onClick={() => setOpenIndicator((prev) => { if (prev === name) { return '' } else { return name } })}>
-                                                                                {openIndicator === name ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
-                                                                            </IconButton>
-                                                                        </Box>
-                                                                        <Collapse in={openIndicator === name}>
-                                                                            <Box display='flex' flexDirection='column' alignItems={'start'} pl={2}>
-                                                                                {Object.keys(func_param_input_keys).map((key, index) => (
-                                                                                    <Typography key={index} variant='body2'>{key}</Typography>
-                                                                                ))}
-                                                                                {Object.keys(func_param_optional_input_keys).map((key, index) => {
-                                                                                    const value = func_query[key];
-                                                                                    return (
-                                                                                        <Typography key={index} variant='body2'>
-                                                                                            {key} : {value !== undefined ? value : 'Not available'}
-                                                                                        </Typography>
-                                                                                    );
-                                                                                })}
-                                                                            </Box>
-                                                                        </Collapse>
-                                                                    </Paper>
-                                                                </Grid>
-                                                            )
-                                                        })}
+                                                        {talibExecuteQueries.map((query, index) =>
+                                                            <TalibFuncSummary key={index} query={query} />
+                                                        )}
                                                     </Grid>
                                                 </Box>
                                             </Box>
@@ -694,10 +642,7 @@ const SavedModels = ({
                                             </Box>
                                             <Box pt={1} sx={{ fontSize: '12px' }} className='rechart-chart' height='220px'>
                                                 {
-                                                    dataLoadingFlag ?
-                                                        <Skeleton variant="rectangular" width='100%' height='100%' />
-                                                        :
-                                                        modelRMSE.length !== 0 && <RMSEBarChart data={modelRMSE} selectedRMSEIndex={selectedRMSEIndex} setSelectedRMSEIndex={setSelectedRMSEIndex} />
+                                                    modelRMSE.length !== 0 && <RMSEBarChart data={modelRMSE} selectedRMSEIndex={selectedRMSEIndex} setSelectedRMSEIndex={setSelectedRMSEIndex} />
                                                 }
                                             </Box>
                                         </Box>
@@ -712,10 +657,7 @@ const SavedModels = ({
                                             </Box>
                                             <Box pt={'4px'} sx={{ fontSize: '12px' }} className='rechart-chart' height='220px'>
                                                 {
-                                                    dataLoadingFlag ?
-                                                        <Skeleton variant="rectangular" width='100%' height='100%' />
-                                                        :
-                                                        initialPredictions.length !== 0 && <InitialForecastLineChart data={initialPredictions} tt_key={'prediction'} />
+                                                    selectedPrediction.length !== 0 && <InitialForecastLineChart data={selectedPrediction} tt_key={'prediction'} />
                                                 }
                                             </Box>
                                         </Box>
@@ -733,7 +675,7 @@ const SavedModels = ({
                                                     </Typography>
                                                 </Box>
                                                 <Box pt={'4px'} sx={{ fontSize: '12px' }} className='rechart-chart' height='220px'>
-                                                    {(latestForecastData.length === 0 && !forecastLoadingFlag) ?
+                                                    {(Object.keys(latestForecastData).length === 0 && !forecastLoadingFlag) ?
                                                         <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
                                                             <Button size='small' variant='outlined' onClick={handleMakeNewPrediction} >Make Prediction</Button>
                                                         </Box>

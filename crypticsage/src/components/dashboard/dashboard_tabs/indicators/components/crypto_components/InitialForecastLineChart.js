@@ -52,17 +52,17 @@ const InitialForecastLineChart = ({ data, tt_key }) => {
 
     useEffect(() => {
         if (data.length === 0) {
-            console.log('No data')
+            // console.log(`No data ${tt_key}`)
             return
         } else {
-            console.log('Data found')
+            // console.log(`Data found ${tt_key}`)
             // console.log(data)
             chart.current = createChart(chartboxRef.current, chartOptions)
             chart.current.timeScale().fitContent();
 
             to_plot.forEach((key) => {
                 const lineData = data
-                    .map((d) => ({ time: new Date(d.openTime) / 1000, value: d[key] === 'null' ? '' : d[key] }))
+                    .map((d) => ({ time: new Date(d.openTime) / 1000, value: d[key] === 'null' || d[key] === null ? '' : d[key] }))
                     .filter((d) => d.value !== '')
                     // console.log(lineData)
                 const lineSeries = chart.current.addLineSeries({
@@ -90,7 +90,7 @@ const InitialForecastLineChart = ({ data, tt_key }) => {
 
         return () => {
             if (chart.current) {
-                console.log('Chart present and removed')
+                // console.log(`Chart present and removed ${tt_key}`)
                 chart.current.remove()
                 chart.current = null
             }
@@ -100,7 +100,7 @@ const InitialForecastLineChart = ({ data, tt_key }) => {
 
     // sets the tooltip for the chart
     useEffect(() => {
-        let tooltip = null
+        let tooltip = document.querySelector(`.saved-forecast-tooltip-${tt_key}`) || null
         const lossTooltipHandler = (param) => {
             if (
                 param.point === undefined ||
@@ -112,10 +112,10 @@ const InitialForecastLineChart = ({ data, tt_key }) => {
                 param.paneIndex !== 0
             ) {
                 // tooltip = document.querySelector('.tool-tip-indicators')
-                // tooltip.innerHTML = ''
+                tooltip.innerHTML = ''
                 return;
             } else {
-                tooltip = document.querySelector(`.saved-forecast-tooltip-${tt_key}`)
+                // tooltip = document.querySelector(`.saved-forecast-tooltip-${tt_key}`)
                 let tt_pred = ''
                 let tt_actu = ''
                 let dateStr = ''
@@ -162,11 +162,11 @@ const InitialForecastLineChart = ({ data, tt_key }) => {
 
         return () => {
             if (chart.current) {
-                // tooltip.innerHTML = ''
+                tooltip.innerHTML = ''
                 chart.current.unsubscribeCrosshairMove(lossTooltipHandler)
             }
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 
 

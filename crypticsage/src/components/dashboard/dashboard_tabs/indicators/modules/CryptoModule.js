@@ -14,8 +14,7 @@ import {
 } from '@mui/material'
 
 import {
-    IndicatorSearchExecute
-    , TrainingParameters
+    TrainingParameters
     , PredictionOptions
     , PredictionsChart
     , CorelationMatrix
@@ -261,11 +260,7 @@ const CryptoModule = () => {
 
     return (
         <Box className='crypto-module-container'>
-            <Box width='-webkit-fill-available'> {/* Header */}
-                <Header title={cryptotoken} />
-            </Box>
-
-            <Box mr={2} mb={2} ml={2} className='crypto-module-container-box'>
+            <Box m={2} className='crypto-module-container-box'>
 
                 <Box className='indicator-chart-grid'> {/* Main chart */}
                     <MainChartNew
@@ -273,17 +268,12 @@ const CryptoModule = () => {
                         lookAhead={model_parameters.lookAhead}
                         predictionLookAhead={predictionLookAhead}
                         setPredictionLookAhead={setPredictionLookAhead}
-                    />
-                </Box>
-
-                <Box className='selected-functions-box'> {/* Indicator search and run */}
-                    <IndicatorSearchExecute
                         selectedFunctions={selectedFunctions}
-                        fetchValues={fetchValues}
                     />
                 </Box>
 
-                <Box mb={2} mt={2} className='model-training-container'> {/* Model training parameters */}
+                {/* Model training parameters */}
+                <Box mb={2} mt={2} className='model-training-container'>
                     <Box className='tensor-flow-grid' p={2} >
                         <TrainingParameters
                             modelParams={modelParams}
@@ -416,7 +406,8 @@ const CryptoModule = () => {
                     }
                 </Box>
 
-                <Box className='user-saved-models-container'> {/* User saved models both LSTM & WGAN-GP */}
+                {/* User saved models both LSTM & WGAN-GP */}
+                <Box className='user-saved-models-container'>
                     <SavedModelForecasting />
                 </Box>
 

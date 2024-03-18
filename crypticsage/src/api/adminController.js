@@ -250,6 +250,7 @@ export const deleteModel = async ({ token, payload }) => {
     return response;
 }
 
+// Not being used anymore
 export const checkIfModelDataExists = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
@@ -261,6 +262,7 @@ export const checkIfModelDataExists = async ({ token, payload }) => {
     return response;
 }
 
+// Not being used anymore
 export const getModelResult = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }

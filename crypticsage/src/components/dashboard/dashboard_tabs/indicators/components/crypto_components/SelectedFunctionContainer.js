@@ -11,6 +11,7 @@ import {
     , setFunctionInputErrorFlagAndMessage
     , setTalibResult
 } from '../../modules/CryptoModuleSlice'
+import { Dot } from '../../modules/CryptoModuleUtils'
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -87,7 +88,7 @@ const SelectedFunctionContainer = (props) => {
     const defaultTalibFunctionsCopy = useSelector(state => state.cryptoModule.talibDescriptionCopy)
 
     const handleAddIndicator = (param) => {
-        console.log(param.func_name)
+        // console.log(param.func_name)
         const func_name = param.func_name
         let defaultGroup = defaultTalibFunctionsCopy.find((group) => group.group_name === group_name)
         let defaultFunction = defaultGroup.functions.find((func) => func.name === func_name)
@@ -111,7 +112,7 @@ const SelectedFunctionContainer = (props) => {
 
     const handleToggleShowHideChart = (param) => {
         const { id, name } = param
-        console.log(name, id)
+        // console.log(name, id)
         dispatch(toggleShowHideChartFlag({ id: id, name: name }))
     }
 
@@ -240,9 +241,25 @@ const SelectedFunctionContainer = (props) => {
 
     return (
         <Box width='100%' p={'5px'} className='indicator-function-box'>
-            <Accordion TransitionProps={{ mountOnEnter: true }} className='function-accordian' expanded={expanded === `${name}`} onChange={handleChange(`${name}`)}>
+            <Accordion
+                sx={{
+                    '& .MuiAccordionSummary-root.MuiButtonBase-root': {
+                        height: '30px',
+                        minHeight: '0px',
+                        padding: '0px 8px'
+                    },
+                    '& .MuiAccordionSummary-content': {
+                        margin: '0px'
+                    },
+                    '& .MuiAccordionSummary-content.Mui-expanded': {
+                        minHeight: '34px',
+                        margin: '4px 0px 4px 0px'
+                    }
+                }}
+                TransitionProps={{ mountOnEnter: true }} className='function-accordian' expanded={expanded === `${name}`} onChange={handleChange(`${name}`)}>
                 <AccordionSummary
-                    expandIcon={<ExpandMoreIcon sx={{color: `${theme.palette.primary.dark}`}}/>}
+                    className='accordian-summary-selected-functions'
+                    expandIcon={<ExpandMoreIcon sx={{ color: `${theme.palette.primary.dark}` }} />}
                     aria-controls="panel1a-content"
                     id="panel1a-header"
                     sx={{
@@ -250,13 +267,13 @@ const SelectedFunctionContainer = (props) => {
                         flexDirection: 'row',
                         width: '100%',
                         justifyContent: 'space-between',
-
                     }}
                 >
-                    <Box className='function-name' display='flex' flexDirection='row' alignItems='center' >
+                    <Box className='function-name' display='flex' flexDirection='row' gap='4px' alignItems='center' >
+                        <Dot color={functions.every(func => func.outputAvailable) ? 'green' : 'red'} />
                         <Typography
-                            variant='h6'
-                            fontWeight={400}
+                            variant='custom'
+                            // fontWeight={400}
                             className='talib-func-hint'
                             sx={{
                                 // Allow the text to overflow
@@ -272,11 +289,11 @@ const SelectedFunctionContainer = (props) => {
                     </Box>
                 </AccordionSummary>
 
-                <AccordionActions>
-                    <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' width='100%' pl={1} pr={1}>
-                        <Typography variant='h6' fontWeight='bold' sx={{ textAlign: 'start' }}>{name}</Typography>
-                        <IconButton disabled={functions[0].optInputs.length === 0 || functions.length === MAX_FUNCTION_DUPLICATES} size='small' aria-label="add query" color="secondary" onClick={handleAddIndicator.bind(null, { func_name: name })}>
-                            <Tooltip title="Add query" placement='top'>
+                <AccordionActions sx={{ padding: '0px 6px 0px 12px' }}>
+                    <Box display='flex' flexDirection='row' gap={1} alignItems='center' width='100%' pl={1} pr={1}>
+                        <Typography variant='custom' fontWeight='bold' sx={{ textAlign: 'start' }}>{name}</Typography>
+                        <IconButton sx={{padding:'2px'}} disabled={functions[0].optInputs.length === 0 || functions.length === MAX_FUNCTION_DUPLICATES} size='small' aria-label="add query" color="secondary" onClick={handleAddIndicator.bind(null, { func_name: name })}>
+                            <Tooltip title="Add query" placement='right'>
                                 <AddIcon className='small-icon' />
                             </Tooltip>
                         </IconButton>
@@ -287,16 +304,16 @@ const SelectedFunctionContainer = (props) => {
                     {functions.length > 0 && functions.map((func, index) => {
                         const { id, name, inputs, optInputs, outputAvailable, show_chart_flag } = func
                         return (
-                            <Box key={index} mt={1} borderRadius={2} pl={1} pr={1} pb={1} sx={{ backgroundColor: `${theme.palette.background.paper}` }}>
+                            <Box key={index} mb={1} borderRadius={2} pl={1} pr={1} pb={1} sx={{ backgroundColor: `${theme.palette.background.paper}` }}>
 
                                 <Box display='flex' justifyContent='space-between' alignItems='center' pl={1} flexDirection='row' pt={'5px'}>
                                     <Box>
-                                        <Typography variant='h5'>{index + 1}</Typography>
+                                        <Typography variant='custom'>{index + 1}</Typography>
                                     </Box>
-                                    <Box className='function-action-box' display='flex' flexDirection='row'>
+                                    <Box className='function-action-box' display='flex' flexDirection='row' gap={'4px'}>
 
                                         {outputAvailable &&
-                                            <IconButton size='small' aria-label="Hide shart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: id, name: name })}>
+                                            <IconButton sx={{padding:'2px'}}  size='small' aria-label="Hide shart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: id, name: name })}>
                                                 {show_chart_flag ?
                                                     <VisibilityIcon className='small-icon' />
                                                     :
@@ -305,7 +322,7 @@ const SelectedFunctionContainer = (props) => {
                                             </IconButton>
                                         }
 
-                                        <IconButton size='small' aria-label="execute query" color="secondary" onClick={handleGenerateQuery.bind(null, { id: id })}>
+                                        <IconButton sx={{padding:'2px'}} size='small' aria-label="execute query" color="secondary" onClick={handleGenerateQuery.bind(null, { id: id })}>
                                             {
                                                 outputAvailable
                                                     ? (talibExecuting ? <CircularProgress color="error" sx={{ margin: '2.5px' }} size={15} /> : <RestartAltIcon className='small-icon' />)
@@ -313,7 +330,7 @@ const SelectedFunctionContainer = (props) => {
                                             }
                                         </IconButton>
 
-                                        <IconButton size='small' aria-label="delete query" color="secondary" onClick={handleDeleteQuery.bind(null, { id: id })}>
+                                        <IconButton sx={{padding:'2px'}} size='small' aria-label="delete query" color="secondary" onClick={handleDeleteQuery.bind(null, { id: id })}>
                                             <Tooltip title="Delete query" placement='top'>
                                                 <DeleteOutlineIcon className='small-icon' />
                                             </Tooltip>
@@ -321,7 +338,7 @@ const SelectedFunctionContainer = (props) => {
                                     </Box>
                                 </Box>
 
-                                <Box className='indicator-inputs-selected' pt={'10px'} sx={{ textAlign: 'start' }}>
+                                <Box className='indicator-inputs-selected'  sx={{ textAlign: 'start' }}>
                                     <Typography variant='h6' textAlign='start' fontWeight='500' sx={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>INPUTS</Typography>
                                     {inputs.length > 0 && inputs.map((input, index) => {
                                         const { value, errorFlag, helperText } = input

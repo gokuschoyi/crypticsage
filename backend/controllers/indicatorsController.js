@@ -853,10 +853,15 @@ const saveModel = async (req, res) => {
     } = payload
     let model_data
     if (model_type === 'LSTM') {
-        const {
+        let {
             scores,
             predicted_result,
         } = payload
+
+        const { dates, predictions_array, label_mean, label_variance } = predicted_result
+        const rmse = IUtil.calculateScaledRMSE(dates, predictions_array, label_variance, label_mean, ticker_period)
+        predicted_result['rmse'] = rmse
+
         model_data = {
             scores,
             epoch_results,
@@ -1043,7 +1048,7 @@ const makeNewForecast = async (req, res) => {
 
         const totalTickerCount = calcuteTotalTickerCountForForecast(model_train_period, model_first_prediction_date) // 461 total no of ticker since initial model prediction
         const lastDate = model_first_prediction_date + (totalTickerCount * HDUtil.periodToMilliseconds(model_train_period))
-        log.notice(`First prediction date : ${new Date(model_first_prediction_date).toLocaleString()}` )
+        log.notice(`First prediction date : ${new Date(model_first_prediction_date).toLocaleString()}`)
         log.notice(`Total ticker count since initial forecast : ${totalTickerCount}`)
         log.notice(`New forecast start date : ${new Date(lastDate).toLocaleString()}`)
 
@@ -1180,7 +1185,7 @@ const makeNewForecast = async (req, res) => {
         console.log('Shape of forecast', forecastTensor.shape)
 
         // @ts-ignore
-        const reshapedForecast = tf.squeeze(forecastTensor, axis=-1)
+        const reshapedForecast = tf.squeeze(forecastTensor, axis = -1)
         console.log('reshaped', reshapedForecast.shape)
 
         // call the celery python worker
@@ -1192,26 +1197,20 @@ const makeNewForecast = async (req, res) => {
             lookAhead,
             period,
             totalTickerCount,
-            mean : JSON.stringify(mean_array),
-            variance  :JSON.stringify(variance_array)
+            mean: JSON.stringify(mean_array),
+            variance: JSON.stringify(variance_array)
         }
 
-        try {
-            const result = task.applyAsync([data]);
-            result.get()
-                .then(data => {
-                    console.log('Data from celery');
-                    res.status(200).json({ message: 'Model forcast started', result:JSON.parse(data.transformed) });
-                })
-                .catch(err => {
-                    console.log('Error from celery', err);
-                    res.status(400).json({ message: 'Model forecasting failed', error: err })
-                })
-        } catch (error) {
-            log.error(error.stack)
-            res.status(400).json({ message: 'Model forecasting failed', error: error.message })
-        }
-
+        const result = task.applyAsync([data]);
+        result.get(5000)
+            .then(data => {
+                console.log('Data from celery');
+                res.status(200).json({ message: 'Model forcast started', result: JSON.parse(data.transformed) });
+            })
+            .catch(err => {
+                console.log('Error from celery', err);
+                res.status(400).json({ message: 'Model forecasting failed', error: err.message })
+            })
 
         // @ts-ignore
         // res.status(200).json({ message: 'Model forcast started', final_result_obj });
@@ -1285,26 +1284,22 @@ const makeWgangpForecast = async (req, res) => {
             period: period,
             totalTickerCount: totalTickerCount
         }
-        try {
-            const result = task.applyAsync([data]);
-            result.get()
-                .then(data => {
-                    console.log('Data from celery');
-                    res.status(200).json({ message: 'Forecasting completed', result: JSON.parse(data.predictions) })
-                })
-                .catch(err => {
-                    console.log('Error from celery', err);
-                    res.status(400).json({ message: 'Model forecasting failed', error: err })
-                });
-        } catch (error) {
-            log.error(error.stack)
-            res.status(400).json({ message: 'Model forecasting failed', error: error.message })
-        }
 
+        const result = task.applyAsync([data]);
+        result.get(5000) // timeoout added in case celery worker is not running
+            .then(data => {
+                console.log('Data from celery');
+                res.status(200).json({ message: 'Forecasting completed', result: JSON.parse(data.predictions) })
+            })
+            .catch(err => {
+                console.log('Error from celery');
+                console.log(err.message);
+                res.status(400).json({ message: 'Celery Model forecasting failed', error: err.message })
+            });
 
     } catch (error) {
         log.error(error.stack)
-        res.status(400).json({ message: 'Model forecasting failed', error: error.message })
+        res.status(400).json({ message: 'Node Model forecasting failed', error: error.message })
     }
 }
 

@@ -5,6 +5,7 @@ import { Box, Skeleton, Grid } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import MainChartOptions from './MainChartOptions'
 import MainChartCopy from './MainChartCopy'
+import IndicatorSearchExecute from "./IndicatorSearchExecute";
 
 import { setSelectedTickerPeriod, resetStreamedTickerDataRedux, setCryptoDataInDbRedux } from '../../modules/CryptoModuleSlice'
 
@@ -25,6 +26,7 @@ const MainChart = ({
     , lookAhead
     , predictionLookAhead
     , setPredictionLookAhead
+    , selectedFunctions
 }) => {
     const dispatch = useDispatch()
     const params = useParams();
@@ -142,7 +144,7 @@ const MainChart = ({
 
 
     return (
-        <Grid container  pt={2} pb={2}>
+        <Grid container pt={2} pb={2}>
             <Grid item xs={12} sm={12} md={12} lg={9} xl={9}>
                 <Box className='options-main-chart-container'>
                     <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
@@ -184,7 +186,10 @@ const MainChart = ({
             </Grid>
 
             <Grid item xs={12} sm={12} md={12} lg={3} xl={3}>
-                {/* PlaceHolder */}
+                <IndicatorSearchExecute
+                    selectedFunctions={selectedFunctions}
+                    fetchValues={fetchValues}
+                />
             </Grid>
         </Grid>
     )

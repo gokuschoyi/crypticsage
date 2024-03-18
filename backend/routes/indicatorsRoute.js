@@ -30,6 +30,29 @@ router.post('/make_wgan_prediction', IController.makeWgangpForecast)
 router.post('/generate_test_data', IController.testNewModel)
 // router.post('/generate_test_data_two', IController.generateTestData)
 
+const fetchSavedUserModels = async (req, res) => {
+    try {
+        const uid = res.locals.data.uid;
+        console.log('uid', uid)
+        const userModels = await MDBServices.fetchUserModels(uid)
+        res.status(200).json({ message: 'User models fetched successfully', userModels })
+    } catch (error) {
+        res.status(400).json({ message: error.message })
+    }
+}
+
+router.get('/fetch_saved_user_models', fetchSavedUserModels)
+
+const tempsetrmse = async (req, res) => {
+    const { model_id, rmse } = req.body;
+    // const result = await MDBServices.temp_setLSTMRmse(model_id, rmse)
+    const testDtate = new Date().toLocaleString()
+
+    const uTime = new Date(testDtate).getTime()
+    res.status(200).json({ message: 'RMSE set successfully', testDtate, uTime })
+}
+
+router.put('/set_lstm_rmse', tempsetrmse)
 
 // Test routes
 const checkDuplicates = async (req, res, next) => {

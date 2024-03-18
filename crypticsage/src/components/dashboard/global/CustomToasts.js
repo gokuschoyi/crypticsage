@@ -1,4 +1,5 @@
 import { toast } from 'react-toastify';
+import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { InfoOutlinedIcon, ThumbUpOutlinedIcon, ReportProblemIcon, ReportOutlinedIcon } from './Icons'
 const theme = localStorage.getItem('userTheme') === 'false' ? 'light' : 'dark';
@@ -13,7 +14,7 @@ function generateRandomString() {
     return result;
 }
 
-const ErrorComp = ({ error_message, test_possible, train_possible }) => {
+const WarningComp = ({ error_message, test_possible, train_possible }) => {
     return (
         <Box>
             <Typography style={{ textAlign: 'start', fontSize: '0.75rem', lineHeight: 1.66, fontWeight: 500 }}>{error_message}</Typography>
@@ -23,6 +24,19 @@ const ErrorComp = ({ error_message, test_possible, train_possible }) => {
             </ul>
         </Box>
 
+    )
+}
+
+const ErrorComp = ({ func_error, message, step }) => {
+    return (
+        <React.Fragment>
+            <Typography variant='body2' >
+                {message} at step {step}
+            </Typography>
+            <Typography variant='body2'>
+                {func_error}
+            </Typography>
+        </React.Fragment>
     )
 }
 
@@ -58,7 +72,7 @@ export const Warning = (message) => {
 
 export const Warning_train = (props) => {
     console.log('error_message', props.error_message, 'test_posible', props.test_possible, 'train_possible', props.train_possible)
-    toast.warn(<ErrorComp {...props} />, {
+    toast.warn(<WarningComp {...props} />, {
         theme: theme,
         icon: <ReportProblemIcon size='small' />,
         position: "top-right",
@@ -86,6 +100,23 @@ export const Error = (message) => {
         toastId: generateRandomString(),
     });
 }
+
+export const LSTM_Warn = (props) => {
+    console.log('error_message', props)
+    toast.error(<ErrorComp {...props} />, {
+        theme: theme,
+        icon: <ReportOutlinedIcon size='small' />,
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        toastId: generateRandomString(),
+    })
+}
+
 
 export const Info = (message) => {
     toast.info(message, {

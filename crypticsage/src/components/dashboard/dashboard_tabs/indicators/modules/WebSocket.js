@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Success, Error, Warning } from '../../../global/CustomToasts'
+import { Success, Warning, LSTM_Warn } from '../../../global/CustomToasts'
 import {
     setModelEndTime,
     setEpochNo,
@@ -206,7 +206,8 @@ const useWebSocket = (
                         setBatchResult(false)
                         dispatch(setStartWebSocket(false))
                         setTrainingStartedFlag(false)
-                        Error(data.message)
+                        console.log('Error', data.message)
+                        LSTM_Warn(JSON.parse(data.message))
                         break;
                     default:
                         break;

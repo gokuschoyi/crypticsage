@@ -3,8 +3,8 @@ import { Box, Paper, Typography, Tooltip, Button, Skeleton, useMediaQuery, IconB
 import { useSelector, useDispatch } from 'react-redux'
 import dayjs from "dayjs";
 import { Dot } from '../../modules/CryptoModuleUtils';
-import { DeleteSavedModel } from './modals';
-import { Success } from '../../../../global/CustomToasts'
+import { DeleteSavedModel, RetrainWGANModal } from './modals';
+import { Success, Error } from '../../../../global/CustomToasts'
 import RMSEBarChart from './RMSEBarChart';
 import InitialForecastLineChart from './InitialForecastLineChart';
 
@@ -23,7 +23,6 @@ import {
 
 import {
     checkIfModelDataExists,
-    getModelResult,
     makeWganPrediction,
     renameModel,
     deleteModelForUser,
@@ -31,7 +30,6 @@ import {
 } from '../../../../../../api/adminController'
 
 import {
-    updatePredictedValues,
     setNewForecastData,
     renameModel as renameModelInRedux,
     setModelDataAvailableFlag,
@@ -132,6 +130,12 @@ const SavedModelsWGANGP = ({
     const [allPredictions, setAllPredictions] = useState({})
     const [selectedPrediction, setSelectedPrediction] = useState([])
 
+    const [forecastLoadingFlag, setForecastLoadingFlag] = useState(false)
+    const [latestForecastData, setLatestForecastData] = useState({})
+    const [selectedForecastData, setSelectedForecastData] = useState([])
+
+    // console.log(latestForecastData)
+
     const handleShowModelDetails = ({ modelId, m_name }) => {
         const modelData = user_models_redux.find((model) => model.model_id === modelId);
 
@@ -148,11 +152,16 @@ const SavedModelsWGANGP = ({
             setDefaultModelName('')
             setModelStatusColor('red')
             setModelRMSE([])
+            // setLatestForecastData({})
+            // setSelectedForecastData([])
         } else {
             // console.log('modelData', modelId, m_name, modelData)
             setToShowModelId(modelId)
             setDefaultModelName(m_name)
             setModelStatusColor('red')
+
+            setLatestForecastData(modelData.model_data.latest_forecast_result)
+            setSelectedForecastData([])
             const { value, unit } = generateMSESteps(selected_ticker_period)
             const rmse = []
             const res_rmse = modelData.model_data.wgan_final_forecast.rmse
@@ -321,15 +330,13 @@ const SavedModelsWGANGP = ({
         }
     }, [defaultModelName, model_name, toShowModelId])
 
-    const [forecastLoadingFlag, setForecastLoadingFlag] = useState(false)
-    const [latestForecastData, setLatestForecastData] = useState({})
-    const [selectedForecastData, setSelectedForecastData] = useState([])
+
 
     const handleMakeNewPrediction = () => {
         console.log('Making new prediction')
         setForecastLoadingFlag(true)
         const selectedModelData = user_models_redux.find((model) => model.model_id === toShowModelId).model_data
-        console.log(selectedModelData)
+        // console.log(selectedModelData)
         const { training_parameters, talibExecuteQueries } = selectedModelData
         const lookAhead = selectedModelData.training_parameters.lookAhead
 
@@ -348,7 +355,7 @@ const SavedModelsWGANGP = ({
             .then((res) => {
                 const final_forecast = {}
                 const new_predictions = res.data.result
-                console.log(new_predictions)
+                // console.log(new_predictions)
                 Object.keys(new_predictions[0])
                     .filter(key => key !== 'date' && key !== 'actual')
                     .forEach((key) => (
@@ -363,11 +370,21 @@ const SavedModelsWGANGP = ({
                 // console.log(final_forecast[`${selectedRMSEIndex}`])
                 setLatestForecastData(final_forecast)
                 setSelectedForecastData(final_forecast[`${selectedRMSEIndex}`])
+                dispatch(setNewForecastData({
+                    model_id: toShowModelId,
+                    final_forecast: final_forecast
+                }))
                 setForecastLoadingFlag(false)
             })
             .catch((err) => {
                 setForecastLoadingFlag(false)
-                console.log(err)
+                const errorMessage = err.response.data.error
+                console.log(err.response.data)
+                if (errorMessage === 'TIMEOUT') {
+                    Error('Celery Worker un-available (Request Timed out). Try later.')
+                } else {
+                    Error('Error making new prediction')
+                }
             })
     }
 
@@ -470,6 +487,7 @@ const SavedModelsWGANGP = ({
                                         </Box>
                                     </Box>
                                     <Box className='opend-model-actions' display='flex' gap={1} alignItems='center'>
+                                        {toShowModelId && <RetrainWGANModal type={'from_saved'} model_id={toShowModelId} />}
                                         <DeleteSavedModel
                                             handleModelDeletFromSaved={handleModelDeletFromSaved}
                                             model_id={toShowModelId}
@@ -679,7 +697,7 @@ const SavedModelsWGANGP = ({
                                                             :
                                                             forecastLoadingFlag
                                                                 ? <Skeleton variant="rectangular" width='100%' height='100%' />
-                                                                : <InitialForecastLineChart data={selectedForecastData} tt_key={'forecast'}/>
+                                                                : <InitialForecastLineChart data={selectedForecastData} tt_key={'forecast'} />
                                                         }
                                                     </Box>
                                                 </Box>

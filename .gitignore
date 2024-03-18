@@ -51,3 +51,4 @@ backend/worker_celery/saved_models
 backend/worker_celery/.env
 backend/worker_celery/wgan_tests
 
+crypticsage/src/components/dashboard/dashboard_tabs/indicators/components/crypto_components/test.js

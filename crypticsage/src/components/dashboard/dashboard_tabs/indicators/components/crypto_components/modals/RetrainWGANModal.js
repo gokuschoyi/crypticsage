@@ -28,15 +28,41 @@ const scaledValue = (value, max) => {
     return parseFloat(trucned_no)
 }
 
-const RetrainWGANModal = () => {
+const RetrainWGANModal = ({ type, model_id: m_id }) => {
     const token = useSelector(state => state.auth.accessToken);
-    const modelParams = useSelector(state => state.cryptoModule.modelData.training_parameters)
+    const model_params = useSelector(state => state.cryptoModule.modelData.training_parameters)
 
-    const model_id = useSelector(state => state.cryptoModule.modelData.model_id)
-    const selectedFunctions = useSelector(state => state.cryptoModule.selectedFunctions)
-    const tDataReduxL = useSelector(state => state.cryptoModule.cryptoDataInDb).length
-    const selectedTickerPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
-    const selectedTickerName = useSelector(state => state.cryptoModule.selectedTickerName)
+    const modelId = useSelector(state => state.cryptoModule.modelData.model_id)
+    const selected_unctions = useSelector(state => state.cryptoModule.selectedFunctions)
+    const tDataRedux_L = useSelector(state => state.cryptoModule.cryptoDataInDb).length
+    const selected_tickerPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
+    const selected_tickerName = useSelector(state => state.cryptoModule.selectedTickerName)
+
+    const userModels = useSelector(state => state.cryptoModule.userModels).filter(model => model.model_id === m_id)[0]
+
+    let modelParams, model_id, selectedFunctions, tDataReduxL, selectedTickerPeriod, selectedTickerName
+
+    if (type === 'from_saved') {
+        // console.log('Retrain from saved model')
+
+        modelParams = userModels.model_data.training_parameters
+        model_id = userModels.model_id
+        selectedFunctions = userModels.model_data.talibExecuteQueries
+        tDataReduxL = 500
+        selectedTickerPeriod = userModels.model_data.talibExecuteQueries[0].payload.db_query.period
+        selectedTickerName = userModels.model_data.talibExecuteQueries[0].payload.db_query.ticker_name
+
+    } else if (type === undefined) {
+        // console.log('Retrain from current model')
+
+        modelParams = model_params
+        model_id = modelId
+        selectedFunctions = selected_unctions
+        tDataReduxL = tDataRedux_L
+        selectedTickerPeriod = selected_tickerPeriod
+        selectedTickerName = selected_tickerName
+    }
+
 
     const [retrainModel, setRetrainModel] = useState(false)
     const [checkpoints, setCheckpoints] = useState([])
@@ -118,7 +144,7 @@ const RetrainWGANModal = () => {
             delete re_train_parameters.d_learning_rate
             delete re_train_parameters.g_learning_rate
             re_train_parameters['model_id'] = model_id
-            const fTalibExecuteQuery = generateTalibFunctionsForExecution({ selectedFunctions, tDataReduxL, selectedTickerPeriod, selectedTickerName })
+            const fTalibExecuteQuery = type === 'from_saved' ? userModels.model_data.talibExecuteQueries : generateTalibFunctionsForExecution({ selectedFunctions, tDataReduxL, selectedTickerPeriod, selectedTickerName })
 
             const fullRetrainParams = {
                 batchSize: modelParams.batchSize,
@@ -149,13 +175,13 @@ const RetrainWGANModal = () => {
 
             console.log('Talib + Full retrain params', final_payload)
 
-            retrain_wgan_Model({ token, payload: final_payload })
-                .then(res => {
-                    console.log('Retrain model response', res.data)
-                })
-                .catch(err => {
-                    console.log('Error retraining model', err)
-                })
+            // retrain_wgan_Model({ token, payload: final_payload })
+            //     .then(res => {
+            //         console.log('Retrain model response', res.data)
+            //     })
+            //     .catch(err => {
+            //         console.log('Error retraining model', err)
+            //     })
         }
     }
 

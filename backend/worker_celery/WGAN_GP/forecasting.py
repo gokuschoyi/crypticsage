@@ -151,7 +151,7 @@ def makeForecast(data):
     # print(f"Combined final : {combined_final.tail(10)}")
 
     data_to_send_to_client = combined_final[-(totalTickerCount + n_steps_out) :]
-    print(f"Data to send to client : {data_to_send_to_client}")
+    print(f"Data to send to client : {data_to_send_to_client.tail(10)}")
 
     pred_array_obj = data_to_send_to_client.to_dict(orient="records")
 
@@ -170,8 +170,8 @@ def convertPredictionToCorrectFormat(data):
     mean = json.loads(data["mean"])
     variance = json.loads(data["variance"])
 
-    print(f"Mean : {mean[0]}")
-    print(f"Variance : {variance[0]}")
+    # print(f"Mean : {mean[0]}")
+    # print(f"Variance : {variance[0]}")
 
     def calculate_original_price(value, variance, mean):
         if pd.isnull(value):
@@ -181,10 +181,10 @@ def convertPredictionToCorrectFormat(data):
     forecast = forecast.map(lambda x: calculate_original_price(x, variance[0], mean[0]))
     fill_values = fill_values.map(lambda x: calculate_original_price(x, variance[0], mean[0]))
     # print(f"Forecast : {forecast.head(5)}")
-    print(f"Forecast : {forecast.tail(10)}")
+    # print(f"Forecast : {forecast.tail(10)}")
 
     # print(f"Dates : {dates.head(5)}")
-    print(f"Dates : {dates.tail(10)}")
+    # print(f"Dates : {dates.tail(10)}")
 
     null_data_df = pd.DataFrame(np.full((n_steps_out - 1, n_steps_out), np.nan))  # creating null data for shifting
 
@@ -193,22 +193,22 @@ def convertPredictionToCorrectFormat(data):
     for col_index, col_name in enumerate(forecast.columns):  # shifting the columns to match the dates
         forecast[col_name] = forecast[col_name].shift(periods=col_index, fill_value=None)
 
-    print(f"Predictions : {forecast.tail(10)}")
+    # print(f"Predictions : {forecast.tail(10)}")
 
-    print(len(fill_values))
+    # print(len(fill_values))
 
     for i in range(len(fill_values)):  # filling the last values
         idx = len(forecast) - (i + 1)
         forecast.iloc[idx, :-1] = forecast.iloc[idx, :-1].fillna(fill_values[len(fill_values) - i])
 
-    print(f"Predictions : {forecast.tail(10)}")
+    # print(f"Predictions : {forecast.tail(10)}")
 
     additionalDates = generateAdditionalDates(dates, n_steps_out, period)
     combined_final = additionalDates.join(forecast).astype("str")
-    print(f"Combined final : {combined_final.tail(10)}")
+    # print(f"Combined final : {combined_final.tail(10)}")
 
     data_to_send_to_client = combined_final[-(totalTickerCount + n_steps_out) :]
-    print(f"Data to send to client : {data_to_send_to_client}")
+    print(f"Data to send to client : {data_to_send_to_client.tail(10)}")
 
     pred_array_obj = data_to_send_to_client.to_dict(orient="records")
 

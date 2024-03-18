@@ -15,6 +15,8 @@ const IUtil = require('../utils/indicatorUtil')
 const CRYPTICSAGE_DATABASE_NAME = 'crypticsage'
 const HISTORICAL_DATABASE_NAME = 'historical_data'
 
+const fs = require('fs')
+
 // Create a client to the database - global client for all services below
 const mongoUri = config.mongoUri ?? '';
 const client = MongoClient.connect(mongoUri)
@@ -2455,14 +2457,90 @@ const fetchUserModels = async (user_id) => {
             model_created_date: 1,
             ticker_name: 1,
             ticker_period: 1,
-            model_data: 1,
-            model_type: 1
+            model_type: 1,
+            model_data: {
+                $cond: {
+                    if: { $eq: ["$model_type", "LSTM"] },
+                    then: {
+                        $mergeObjects: [
+                            "$model_data",
+                            {
+                                predicted_result: {
+                                    $mergeObjects: [
+                                        "$model_data.predicted_result",
+                                        {
+                                            predictions_array: {
+                                                $slice: [
+                                                    "$model_data.predicted_result.predictions_array",
+                                                    { $multiply: ["$model_data.training_parameters.lookAhead", -1] }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    else: "$model_data"
+                }
+            }
         }
 
         const pipeline = [
             // Match documents with the specified user_id
             {
                 $match: { user_id }
+            },
+            {
+                $addFields: {
+                    'model_data.wgan_final_forecast.predictions': {
+                        $cond: {
+                            if: { $eq: ["$model_type", "WGAN-GP"] },
+                            then: {
+                                $slice: [
+                                    '$model_data.wgan_final_forecast.predictions',
+                                    { $multiply: ['$model_data.training_parameters.lookAhead', -1] }
+                                ]
+                            },
+                            else: "$$REMOVE" // This will remove the field if the condition is false
+                        }
+                    },
+                    'model_data.epoch_results': {
+                        $slice: ['$model_data.epoch_results', -1]
+                    },
+                }
+            },
+            {
+                $addFields: {
+                    'model_data.wgan_final_forecast': {
+                        $cond: {
+                            if: { $eq: ["$model_type", "LSTM"] },
+                            then: "$$REMOVE",
+                            else: "$model_data.wgan_final_forecast"
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    'model_data.predicted_result.initial_forecast': {
+                        $slice: [
+                            '$model_data.predicted_result.scaled',
+                            { $multiply: ['$model_data.training_parameters.lookAhead', -1] }
+                        ]
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    'model_data.predicted_result': {
+                        $cond: {
+                            if: { $eq: ["$model_type", "WGAN-GP"] },
+                            then: "$$REMOVE",
+                            else: "$model_data.predicted_result"
+                        }
+                    }
+                }
             },
             {
                 $project: projection_field
@@ -2473,8 +2551,7 @@ const fetchUserModels = async (user_id) => {
                     'model_data.predicted_result.dates',
                     'model_data.predicted_result.standardized',
                     'model_data.predicted_result.scaled',
-                    'model_data.predicted_result.predictions_array',
-                    'model_data.predicted_result.forecast',
+                    'model_data.correlation_data'
                 ]
             }
         ];
@@ -2482,10 +2559,26 @@ const fetchUserModels = async (user_id) => {
         // Perform the aggregation
         const userModels = await model_collection.aggregate(pipeline).toArray();
 
+        // const finalUserModels = []
         if (userModels.length > 0) {
             userModels.map((model) => {
-                const m_data = model.model_data
+                let { model_data: m_data, model_id, model_type } = model
+                // let m_data = model.model_data
                 m_data['latest_forecast_result'] = {}
+
+                let path = ''
+                if (model_type === 'LSTM') {
+                    path = `./models/${model_id}`
+                } else {
+                    path = `./worker_celery/saved_models/${model_id}`
+                }
+
+                if (fs.existsSync(path)) {
+                    model['model_data_available'] = true
+                } else {
+                    model['model_data_available'] = false
+                }
+
                 return {
                     ...model,
                     model_data: m_data
@@ -2497,6 +2590,22 @@ const fetchUserModels = async (user_id) => {
             return []
         }
 
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const temp_setLSTMRmse = async (model_id, rmse) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const model_collection = db.collection('models')
+
+        const query = { model_id }
+        const update = { $set: { 'model_data.predicted_result.rmse': rmse } }
+        const updated = await model_collection.updateOne(query, update)
+
+        return updated
     } catch (error) {
         log.error(error.stack)
         throw error
@@ -2540,6 +2649,8 @@ const getModelResult = async (user_id, model_id) => {
                     'model_data.train_duration',
                     'model_data.predicted_result.standardized',
                     'model_data.predicted_result.scaled',
+                    'model_data.predicted_result.mean_array',
+                    'model_data.predicted_result.variance_array'
                 ]
             }
         ]
@@ -2599,6 +2710,7 @@ const deleteUserModel = async (user_id, model_id) => {
 
 module.exports = {
     getUserByEmail
+    , temp_setLSTMRmse
     , checkUserExists
     , insertNewUser
     , makeUserLessonStatus

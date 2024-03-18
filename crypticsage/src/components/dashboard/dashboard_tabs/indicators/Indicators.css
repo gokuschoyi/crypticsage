@@ -749,6 +749,13 @@ tr:hover .prediction-mse {
     } */
 }
 
+@media screen and (min-width: 1200px){
+    .function-selector{
+        flex-direction: column;
+        padding-top: 8px;
+    }
+}
+
 @media screen and (max-width:1400px) {
     .batch-end-text {
         width: 125px;
