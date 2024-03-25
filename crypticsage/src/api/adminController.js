@@ -208,14 +208,11 @@ export const retrain_wgan_Model = async ({ token, payload }) => {
     return response;
 }
 
-export const getUserModels = async ({ token, payload }) => {
+export const getUserModels = async ({ token }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const { user_id } = payload;
-    const response = await axios.post(`${baseUrl}/indicators/get_model`, { user_id }, config, {
-        withCredentials: true
-    })
+    const response = await axios.post(`${baseUrl}/indicators/get_model`, { withCredentials: true }, config)
     return response;
 }
 
@@ -229,11 +226,11 @@ export const saveModel = async ({ token, payload }) => {
     return response;
 }
 
-export const deleteModelForUser = async ({ token, model_id }) => {
+export const deleteModelForUser = async ({ token, model_id, model_type }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const response = await axios.post(`${baseUrl}/indicators/delete_user_model`, { model_id }, config, {
+    const response = await axios.post(`${baseUrl}/indicators/delete_user_model`, { model_id, model_type }, config, {
         withCredentials: true
     })
     return response;
@@ -243,8 +240,8 @@ export const deleteModel = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const { model_id, model_type } = payload;
-    const response = await axios.post(`${baseUrl}/indicators/delete_model`, { model_id, model_type }, config, {
+    const { model_id, model_type, asset_type, ticker_name, period } = payload;
+    const response = await axios.post(`${baseUrl}/indicators/delete_model`, { model_id, model_type, asset_type, ticker_name, period }, config, {
         withCredentials: true
     })
     return response;
@@ -312,5 +309,13 @@ export const getModelCheckPoints = async ({ token, model_id }) => {
         withCredentials: true
     };
     const response = await axios.get(`${baseUrl}/indicators/get_model_checkpoints?model_id=${model_id}`, config)
+    return response;
+}
+
+export const addNewTrainingResults = async ({ token, payload }) => {
+    const config = {
+        headers: { "Authorization": `Bearer ${token}` },
+    };
+    const response = await axios.post(`${baseUrl}/indicators/update_new_predictions`, { payload }, config)
     return response;
 }

@@ -7,14 +7,15 @@ const IndicatorSearch = ({
     handleAddSelectedFunction,
 }) => {
     const theme = useTheme()
-    const md = useMediaQuery(theme.breakpoints.down('lg'));
+    const lg = useMediaQuery(theme.breakpoints.down('lg'));
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
     return (
         <Box>
             <Box className='search-indicator-box' display='flex' flexDirection='row' alignItems='center' >
                 <Box className='function-selector' width='100%' display={'flex'} flexDirection={'row'} gap={1}>
                     {transformedFunctionsList.length > 0 &&
                         <Autocomplete
-                            sx={{ backgroundColor: `${theme.palette.background.paperOne}`, width: md ? '400px' : '100%' }}
+                            sx={{ backgroundColor: `${theme.palette.background.paperOne}`, width: lg ? sm ? '100%' : '400px' : '100%' }}
                             disableCloseOnSelect={true}
                             value={searchedFunctions}
                             size='small'

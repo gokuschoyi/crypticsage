@@ -1,9 +1,17 @@
+import { ErrorBoundary } from "react-error-boundary";
 import React, { useEffect, useRef } from 'react'
 import { Box, useTheme } from '@mui/material'
 import { createChart } from 'lightweight-charts';
-const WgangpMetricsChart = (props) => {
-    const { type, epochResults, predictionsPalette } = props
+import { useSelector } from "react-redux";
 
+const logError = (error, info) => {
+    // Do something with the error, e.g. log to an external API
+    console.log('error', error)
+};
+
+const WgangpMetricsChart = (props) => {
+    const { type, epochResults, predictionsPalette, metricsChartReload } = props
+    const retrainFlag = useSelector(state => state.cryptoModule.modelData.retraining_flag)
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
     const textColor = theme.palette.primary.newWhite
@@ -53,11 +61,19 @@ const WgangpMetricsChart = (props) => {
         chart.current = createChart(chartContainerRef.current, chart_options);
         chart.current.timeScale().fitContent()
 
-        const data = epochResults.map((epochResult, index) => {
-            return epochResult[type]
-        })
+        // const data = epochResults.map((epochResult, index) => {
+        //     return epochResult[type]
+        // })
 
-        const dataKeys = Object.keys(data[0])
+        const testData = epochResults.map((epochResult, index) => {
+            return ({
+                ...epochResult[type],
+                epoch: epochResult.epoch
+            })
+        })
+        // console.log(testData)
+
+        const dataKeys = Object.keys(testData[0]).filter(key => key !== 'epoch')
         let baseOptions = {
             lineWidth: 2,
             lineType: 0,
@@ -65,9 +81,10 @@ const WgangpMetricsChart = (props) => {
         };
 
         dataKeys.forEach((key, index) => {
-            const lineData = data.map((metric, index) => {
-                return { time: index + 1, value: metric[key] }
+            const lineData = testData.map((metric, index) => {
+                return { time: metric.epoch, value: metric[key] }
             })
+            // console.log(lineData)
 
             baseOptions = { ...baseOptions, color: metricColors[index] }
 
@@ -95,6 +112,8 @@ const WgangpMetricsChart = (props) => {
             lineSeries.setData(lineData);
             metricLineSeriesRef.current[key] = lineSeries;
         })
+        // console.log(`Hcart rendered ${type}`)
+        chart.current.subscribeCrosshairMove(tooltipHandler)
     }
 
     const tooltipHandler = (param) => {
@@ -119,7 +138,7 @@ const WgangpMetricsChart = (props) => {
             let epoch = param.time
             Object.keys(metricLineSeriesRef.current).forEach((key, i) => {
                 const data = param.seriesData.get(metricLineSeriesRef.current[key]);
-                if(data === undefined) return
+                if (data === undefined) return
                 str += `
                 <div class='model-hist-tooltip-item'>
                     <div style="width:8px; height:8px; border-radius:10px; background-color:${metricColors[i]}"></div>
@@ -148,31 +167,11 @@ const WgangpMetricsChart = (props) => {
         }
     }
 
-    // Render the chart/Update the chart
-    useEffect(() => {
-        if (chart.current === null) {
-            // console.log(`NEW INIT : Chart not present, creating chart ${type}`)
-            render_chart()
-        } else {
-            // console.log('NEW UPDATE : Chart present, updating chart')
-            const dataToUpdate = epochResults.slice(-1)[0][type]
-            // console.log('dataToUpdate :', dataToUpdate)
-
-            const keys = Object.keys(dataToUpdate)
-            keys.forEach((key, index) => {
-                const lineData = { time: epochResults.length, value: dataToUpdate[key] }
-                metricLineSeriesRef.current[key].update({ ...lineData })
-            })
-        }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [epochResults])
-
     // cleanup the chart
     useEffect(() => {
         return () => {
             if (chart.current) {
-                // console.log(`NEW CLEANUP : Metrics chart UE ${type} & Predctions Chart tooltip unsubscription`);
+                // console.log(`CLEANUP : Metrics chart UE ${type} & Tooltip unsubscription`);
                 chart.current.unsubscribeCrosshairMove(tooltipHandler)
                 chart.current.remove();
                 chart.current = null;
@@ -181,6 +180,43 @@ const WgangpMetricsChart = (props) => {
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (retrainFlag && metricsChartReload && chart.current !== null) {
+            // console.log(`RETRAIN : Cleaning up chart ${type}`)
+            chart.current.remove();
+            chart.current = null;
+            metricLineSeriesRef.current = {};
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [retrainFlag])
+
+
+    // Render the chart/Update the chart
+    useEffect(() => {
+        if (chart.current === null) {
+            // console.log(`NEW INIT : Creating chart ${type}`)
+            render_chart()
+        } else {
+            // console.log('NEW UPDATE : Updating chart')
+            const last = epochResults.slice(-1)[0]
+            const dataToUpdate = last[type]
+            // console.log('dataToUpdate :', dataToUpdate)
+
+            const keys = Object.keys(dataToUpdate)
+            keys.forEach((key, index) => {
+                const lineData = { time: last.epoch, value: dataToUpdate[key] }
+                try {
+                    metricLineSeriesRef.current[key].update({ ...lineData })
+                } catch (e) {
+                    console.log('Error updating chart', e)
+                }
+            })
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [epochResults])
+
 
     // update the colors of the chart based on the palette
     useEffect(() => {
@@ -192,17 +228,6 @@ const WgangpMetricsChart = (props) => {
             })
         }
     }, [predictionsPalette])
-
-    // set the tooltip for the chart
-    useEffect(() => {
-        if (chart.current) {
-            // console.log('UE : Predctions Chart tooltip subscription')
-            chart.current.subscribeCrosshairMove(tooltipHandler)
-        } else {
-            return
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [chart])
 
     // sets the background color of the chart based on theme
     useEffect(() => {
@@ -245,15 +270,17 @@ const WgangpMetricsChart = (props) => {
     }, []);
 
     return (
-        <Box display='flex' flexDirection='column' gap='8px'>
-            {epochResults.length > 0 && <Box display={'flex'} alignItems={'flex-start'}>{type.toUpperCase()}</Box>}
-            <Box className='wgangp-metrics-chart-box' sx={{ height: epochResults.length > 0 ? '280px' : '0px' }}>
-                <Box className={type === 'training_metrics' || type === 'validation_metrics' ? 'model-hist-legend offset-left-axis' : 'model-hist-legend'}>
-                    <Box className={`model-hist-tooltip_${type}`}></Box>
+        <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
+            <Box display='flex' flexDirection='column' gap='8px'>
+                {epochResults.length > 0 && <Box display={'flex'} alignItems={'flex-start'}>{type.toUpperCase()}</Box>}
+                <Box className='wgangp-metrics-chart-box' sx={{ height: epochResults.length > 0 ? '280px' : '0px' }}>
+                    <Box className={type === 'training_metrics' || type === 'validation_metrics' ? 'model-hist-legend offset-left-axis' : 'model-hist-legend'}>
+                        <Box className={`model-hist-tooltip_${type}`}></Box>
+                    </Box>
+                    <Box ref={chartContainerRef} height='100%' width='100%'></Box>
                 </Box>
-                <Box ref={chartContainerRef} height='100%' width='100%'></Box>
             </Box>
-        </Box>
+        </ErrorBoundary>
     )
 }
 

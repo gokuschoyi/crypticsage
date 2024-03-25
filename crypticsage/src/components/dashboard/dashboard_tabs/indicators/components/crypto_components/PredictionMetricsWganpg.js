@@ -199,8 +199,8 @@ const PredictionMetricsWganpg = ({
                                 <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%' gap='5px'>
                                     <Box display='flex' flexDirection='row' gap='16px' width='95%' alignItems='center' justifyContent='space-between' className='model-metrics'>
                                         <Paper className='metricpaper-indi-two' elevation={2}>
-                                            <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>MSE</span> : {metrics.rmse}</Typography>
-                                            <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>RMSE</span> : {metrics.mse}</Typography>
+                                            <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>MSE</span> : {metrics.rmse.toFixed(2)}</Typography>
+                                            <Typography variant='custom' textAlign='start'><span style={{ fontWeight: 'bold' }}>RMSE</span> : {metrics.mse.toFixed(2)}</Typography>
                                         </Paper>
                                     </Box>
                                     <Tooltip title='Prediction chart RMSE and MSE'>

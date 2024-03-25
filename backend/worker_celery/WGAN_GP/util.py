@@ -4,6 +4,7 @@ import tensorflow as tf
 from joblib import dump
 import pandas as pd
 import numpy as np
+import shutil
 import redis
 import json
 import os
@@ -369,3 +370,36 @@ def tfDatasetGenerator(real_input, real_price, past_y, batch_size):
     )
     
     return dataset
+
+
+def getLastSavedModelCheckpoint(model_id):
+    model_folder_path = f'./saved_models/{model_id}'
+    # List all subfolders in the main folder
+    subfolders = [
+        name for name in os.listdir(model_folder_path) if os.path.isdir(os.path.join(model_folder_path, name))
+    ]
+    # Filter subfolders with the name pattern 'checkpoint_'
+    subfolders = [folder for folder in subfolders if folder.startswith("checkpoint_")]
+    # Extract the numeric part from each subfolder name and find the maximum
+    highest_checkpoint = max(int(folder.split("_")[1]) for folder in subfolders)
+    return highest_checkpoint
+
+
+def removeSavedModels(model_id, checkpoint):
+    model_path = f'./saved_models/{model_id}'
+    checkpoints = []
+    if os.path.exists(model_path):
+        # print('Model data present')
+        checkpoints = [name for name in os.listdir(model_path) if os.path.isdir(os.path.join(model_path, name)) and name.startswith('checkpoint')]
+        
+        filtered_checkpoints = [cp for cp in checkpoints if int(cp.split('_')[1]) > int(checkpoint.split('_')[1])]
+        for cp in filtered_checkpoints:
+            cp_folderpath = f"./saved_models/{model_id}/{cp}"
+            if os.path.exists(cp_folderpath):
+                shutil.rmtree(cp_folderpath)
+                print(f"Directory '{cp_folderpath}' removed successfully.")
+            else:
+                print(f"Directory '{cp_folderpath}' does not exist.")
+    else:
+        print('Model data does not exist')
+    return checkpoints

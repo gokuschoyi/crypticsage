@@ -7,12 +7,16 @@ const WgangpOptions = ({
     paletteIdRedux,
     handlePredictionChartPalette,
     savedToDb,
-    modelProcessDurationRef
+    modelProcessDurationRef,
+    setMetricsChartReload,
+    retrainHistSavePrompt,
+    setRetrainHistSavePrompt
 }) => {
     const model_name = useSelector(state => state.cryptoModule.modelData.model_name)
+    const loadingFromSaved = useSelector(state => state.cryptoModule.modelData.loading_from_saved_model)
     const [modelName, setModelName] = useState(model_name)
     return (
-        <Box display='flex' justifyContent={'space-between'} flexDirection='row' gap={'4px'} alignItems='center' className='model-chart-action-container wgan'>
+        <Box className='model-chart-action-container wgan'>
             <TextField
                 size='small'
                 inputProps={{ style: { height: '10px', width: '100%' } }}
@@ -23,7 +27,7 @@ const WgangpOptions = ({
                     setModelName(event.target.value);
                 }}
             />
-            <Box display='flex' flexDirection='row' alignItems={'center'}>
+            <Box className='wgan-options'>
                 <Box display='flex' flexDirection='row' gap='17px' paddingRight='6px' paddingLeft='6px'>
                     {colorCombinations.map((palette, index) => (
                         <Box key={index} sx={{
@@ -38,8 +42,16 @@ const WgangpOptions = ({
                         />
                     ))}
                 </Box>
-                <RetrainWGANModal />
-                <SaveCurrentModal modelName={modelName} />
+
+                {!loadingFromSaved &&
+                    <RetrainWGANModal type={'from_current'} setMetricsChartReload={setMetricsChartReload} />
+                }
+                <SaveCurrentModal
+                    modelName={modelName}
+                    retrainHistSavePrompt={retrainHistSavePrompt}
+                    setRetrainHistSavePrompt={setRetrainHistSavePrompt}
+                    setMetricsChartReload={setMetricsChartReload} 
+                />
                 {!savedToDb &&
                     <DeleteCurrentModal modelProcessDurationRef={modelProcessDurationRef} />
                 }

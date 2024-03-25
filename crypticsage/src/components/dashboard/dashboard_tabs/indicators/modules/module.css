@@ -230,4 +230,8 @@
         width: 100%;
     }
 
+    .name-changer-textfield {
+        width: 65%;
+    }
+
 }

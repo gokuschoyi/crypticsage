@@ -4,13 +4,14 @@ import React, { useState, useEffect, useRef } from 'react'
 import { formatMillisecond } from './CryptoModuleUtils'
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import Header from '../../../global/Header';
 import useWebSocket from './WebSocket';
 
 import {
     Box
     , Typography
     , Grid
+    , useTheme
+    , useMediaQuery
 } from '@mui/material'
 
 import {
@@ -122,6 +123,8 @@ const CryptoModule = () => {
     const { cryptotoken } = useParams();
     const module = window.location.href.split("/dashboard/indicators/")[1].split("/")[0]
     const modelProcessDurationRef = useRef('')
+    const theme = useTheme();
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
 
     const selectedTickerPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
     // const selectedTickerName = useSelector(state => state.cryptoModule.selectedTickerName)
@@ -216,6 +219,8 @@ const CryptoModule = () => {
     const wgan_final_forecast = useSelector(state => state.cryptoModule.modelData.wgan_final_forecast.predictions)
     const correlation_data_redux = useSelector(state => state.cryptoModule.modelData.correlation_data)
 
+    const retrainigFlag = useSelector(state => state.cryptoModule.modelData.retraining_flag)
+
     const [batchResult, setBatchResult] = useState(false)
     const [evaluating, setEvaluating] = useState(false)
     const [trainingStartedFlag, setTrainingStartedFlag] = useState(startWebSocket)
@@ -232,6 +237,7 @@ const CryptoModule = () => {
         batchLinearProgressRef,
         evalLinearProgressRef,
         wgangpProgressRef,
+        retrainigFlag,
         setBatchResult,
         setEvaluating,
         setTrainingStartedFlag,
@@ -258,9 +264,22 @@ const CryptoModule = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [startWebSocket])
 
+    const [metricsChartReload, setMetricsChartReload] = useState(true)
+    useEffect(() => {
+        if (retrainigFlag) {
+            // console.log('Retraining flag is true')
+            setTrainingStartedFlag(true)
+        } else {
+            // console.log('Retraining flag is false')
+            setTrainingStartedFlag(false)
+        }
+    }, [retrainigFlag])
+
+    const [retrainHistSavePrompt, setRetrainHistSavePrompt] = useState({ flag: false, retrain_checkpoint: '' })
+
     return (
         <Box className='crypto-module-container'>
-            <Box m={2} className='crypto-module-container-box'>
+            <Box m={sm ? 1 : 2} className='crypto-module-container-box'>
 
                 <Box className='indicator-chart-grid'> {/* Main chart */}
                     <MainChartNew
@@ -283,6 +302,8 @@ const CryptoModule = () => {
                             trainingStartedFlag={trainingStartedFlag}
                             setTrainingStartedFlag={setTrainingStartedFlag}
                             modelProcessDurationRef={modelProcessDurationRef}
+                            setRetrainHistSavePrompt={setRetrainHistSavePrompt}
+                            setMetricsChartReload={setMetricsChartReload}
                         />
                     </Box>
                 </Box>
@@ -316,6 +337,8 @@ const CryptoModule = () => {
                                             modelProcessDurationRef={modelProcessDurationRef}
                                             predictionChartType={predictionChartType}
                                             setPredictionChartType={setPredictionChartType}
+                                            retrainHistSavePrompt={retrainHistSavePrompt}
+                                            setRetrainHistSavePrompt={setRetrainHistSavePrompt}
                                         />
                                     }
                                 </Box>
@@ -365,6 +388,9 @@ const CryptoModule = () => {
                                                 handlePredictionChartPalette={handlePredictionChartPalette}
                                                 savedToDb={model_data.model_saved_to_db}
                                                 modelProcessDurationRef={modelProcessDurationRef}
+                                                setMetricsChartReload={setMetricsChartReload}
+                                                retrainHistSavePrompt={retrainHistSavePrompt}
+                                                setRetrainHistSavePrompt={setRetrainHistSavePrompt}
                                             />
                                         }
                                     </Box>
@@ -401,7 +427,7 @@ const CryptoModule = () => {
                                 </Grid>
                             </Grid>
 
-                            <WganTrainingResults predictionChartPalette={predictionChartPalette} /> {/* WGAN-GP model training results charts */}
+                            <WganTrainingResults predictionChartPalette={predictionChartPalette} metricsChartReload={metricsChartReload} /> {/* WGAN-GP model training results charts */}
                         </Box>
                     }
                 </Box>

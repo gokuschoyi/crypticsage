@@ -50,7 +50,7 @@ const SavedModelForecasting = () => {
     return (
         <Box p={2} sx={{ minHeight: '300px' }}>
             <Box className='saved-models-title' display='flex' flexDirection='column' pb={2}>
-                <Box height='32px' display='flex' gap='8px' alignItems='flex-start'>
+                <Box className='saved-model-title'>
                     <Typography variant='h4' textAlign='start'>Saved Models</Typography>
 
                     <Box className='crypto-stock-button'>

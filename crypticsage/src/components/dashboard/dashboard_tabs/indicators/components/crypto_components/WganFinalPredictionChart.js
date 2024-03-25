@@ -278,41 +278,35 @@ const WganFinalPredictionChart = (props) => {
 
     return (
         <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
-            <Box className='wgangp-final-predictions-box' display='flex' flexDirection='column' width="100%" height='300px' >
-                {trainingStartedFlag ? (
-                    <Box className='prediction-loader' position='relative' width='100%' height='100%'>
-                        <Skeleton variant="rectangular" width="100%" height='100%' />
-                        <Box position='absolute' top='42%' left='50%' sx={{ transform: 'translate(-50%, -50%)' }} width='fit-content' display='flex' flexDirection='row' justifyContent='center'>
-                            <Typography variant='custom' id='loader-message-text' style={{ textAlign: 'center', whiteSpace: 'nowrap', textOverflow: 'ellipssis', overflow: 'hidden', maxWidth: '400px' }}>Training started</Typography>
-                            <div className="center">
-                                <div className="wave"></div>
-                                <div className="wave"></div>
-                                <div className="wave"></div>
-                                <div className="wave"></div>
-                                <div className="wave"></div>
-                                <div className="wave"></div>
-                                <div className="wave"></div>
-                                <div className="wave"></div>
-                                <div className="wave"></div>
-                                <div className="wave"></div>
-                                <div className="wave"></div>
-                            </div>
-                        </Box>
-                    </Box>
-                ) : (Object.keys(wgan_final_forecast).length > 0 ? '' :
-                    <Box display='flex' height='100%' alignItems='center' justifyContent='center' p={1} >
-                        <Paper elevation={4} style={{ padding: '5px' }}>Start training to view predictions</Paper>
-                    </Box>
-                )
-                }
-
-                <Box className='wgangp-final-predictions-box' >
+            <Box className='wgangp-final-predictions-box' position='relative' display='flex' flexDirection='column' width="100%" height='300px' >
+                <Box className='wgangp-final-predictions-tooltip' >
                     {chart.current && wgan_final_forecast.length > 0 && <ToolTipComponent />}
                 </Box>
-                <Box ref={chartContainerRef} height='100%' width='100%'></Box>
+                <Box ref={chartContainerRef} className='wgangp-final-prediction-chart' height='100%' width='100%'></Box>
+
+                <Box position={'absolute'} sx={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                    {trainingStartedFlag ?
+                        <Box className='prediction-loader' width='100%' height='100%'>
+                            <Skeleton variant="rectangular" width="100%" height='100%' />
+                            <Box position='absolute' top='42%' left='50%' sx={{ transform: 'translate(-50%, -50%)' }} width='fit-content' display='flex' flexDirection='row' justifyContent='center'>
+                                <Typography variant='custom' id='loader-message-text' style={{ textAlign: 'center', whiteSpace: 'nowrap', textOverflow: 'ellipssis', overflow: 'hidden', maxWidth: '400px' }}>Training started</Typography>
+                                <div className="center">
+                                    {[...Array(11)].map((_, index) => (
+                                        <div key={index} className="wave"></div>
+                                    ))}
+                                </div>
+                            </Box>
+                        </Box>
+                        :
+                        !wgan_final_forecast.length &&
+                        <Box display='flex' alignItems='center' justifyContent='center' p={1} >
+                            <Paper elevation={4} style={{ padding: '5px' }}>Start training to view predictions</Paper>
+                        </Box>
+                    }
+                </Box>
             </Box>
 
-        </ErrorBoundary>
+        </ErrorBoundary >
     )
 }
 

@@ -8,6 +8,7 @@ import CustomInput from './CustomInput'
 import ResetTrainedModelModal from './modals/ResetTrainedModelModal'
 import CorelationMatrix from './CorelationMatrix'
 import { ResetOnModelChange } from './modals';
+// import DownloadIcon from '@mui/icons-material/Download';
 import {
     Box,
     Button,
@@ -20,17 +21,20 @@ import {
     CircularProgress,
     Grid,
     useMediaQuery,
-    useTheme
+    useTheme,
+    // Tooltip
 } from '@mui/material'
 
 import {
-    setModelStartTime
-    , resetModelData
+    resetModelData
     , setStartWebSocket
-    , setModelEndTime
     , setModelId
     , setTrainingParameters
     , setModelType
+    , setRetrainingFlag
+    , setRetrainHistorySavedToDb
+    , sliceEpochResults
+    , setRetrainParameters
 } from '../../modules/CryptoModuleSlice'
 
 import {
@@ -53,6 +57,8 @@ import {
     getCorelationMatrix
     , startModelTraining
     , deleteModel
+    // , getModelCheckPoints
+    , retrain_wgan_Model
 } from '../../../../../../api/adminController'
 
 const INPUT_OPTIONS = [
@@ -88,6 +94,61 @@ const scaledValue = (value, max) => {
     return parseFloat(trucned_no)
 }
 
+const TPAction = (props) => {
+    const {
+        loadingFromSaved
+        , trainingStartedFlag
+        , handleModelReTraining
+        , handleStartModelTraining
+        , handleClearModelData
+        , model_id
+        , noFuncSelected
+    } = props
+    return (
+        <Box display='flex' flexDirection='column' pb={2}>
+            <Box display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
+                <Typography variant='h5' textAlign='start'>Parameters</Typography>
+                <Box display='flex' alignItems='center' gap='10px'>
+                    {loadingFromSaved ?
+                        <Button
+                            sx={{
+                                height: '26px',
+                            }}
+                            variant='outlined'
+                            size='small'
+                            color='secondary'
+                            disabled={trainingStartedFlag}
+                            onClick={(e) => handleModelReTraining()}
+                            endIcon={trainingStartedFlag && <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />}
+                        >
+                            {trainingStartedFlag ? 'TRAINING' : 'RE-TRAIN'}
+                        </Button>
+                        :
+                        <Button
+                            sx={{
+                                height: '26px',
+                            }}
+                            variant='outlined'
+                            size='small'
+                            color='secondary'
+                            disabled={trainingStartedFlag}
+                            onClick={(e) => handleStartModelTraining()}
+                            endIcon={trainingStartedFlag && <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />}
+                        >
+                            {trainingStartedFlag ? 'TRAINING' : 'TRAIN'}
+                        </Button>
+                    }
+                    <ResetTrainedModelModal
+                        handleClearModelData={handleClearModelData}
+                        disabled={trainingStartedFlag}
+                        model_present={model_id === '' ? false : true} />
+                </Box>
+            </Box>
+            {noFuncSelected !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{noFuncSelected}</Typography>}
+        </Box>
+    )
+}
+
 const TrainingParameters = ({
     modelParams,
     setModelParams,
@@ -95,24 +156,34 @@ const TrainingParameters = ({
     setTransformationOrder,
     trainingStartedFlag,
     setTrainingStartedFlag,
-    modelProcessDurationRef
+    modelProcessDurationRef,
+    setRetrainHistSavePrompt,
+    setMetricsChartReload
 }) => {
     const theme = useTheme()
     const dispatch = useDispatch()
     const token = useSelector(state => state.auth.accessToken);
     const model_id = useSelector(state => state.cryptoModule.modelData.model_id)
     const model_saved_to_db = useSelector(state => state.cryptoModule.modelData.model_saved_to_db)
+    const asset_type = window.location.href.split("/dashboard/indicators/")[1].split("/")[0]
     const selectedFunctions = useSelector(state => state.cryptoModule.selectedFunctions)
     const selectedTickerPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
     const selectedTickerName = useSelector(state => state.cryptoModule.selectedTickerName)
     const model_parameters = useSelector(state => state.cryptoModule.modelData.training_parameters)
+
+    const loadingFromSaved = useSelector(state => state.cryptoModule.modelData.loading_from_saved_model)
+    const savedModelName = useSelector(state => state.cryptoModule.modelData.model_name)
+    const userModels = useSelector(state => state.cryptoModule.userModels)
+    const retrainHistSaved = useSelector(state => state.cryptoModule.modelData.retrain_history_saved)
+    const wganFinalPred = useSelector(state => state.cryptoModule.modelData.wgan_final_forecast.predictions)
+
     const [modelTypeOpen, setModelTypeOpen] = useState(false)
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const tDataRedux = 500
     const { cryptotoken } = useParams();
 
     const [trainingParametersAccordianCollapse, setTrainingParametersAccordianCollapse] = useState(!sm)
-    
+
     const handleParametersAccordianCollapse = () => {
         setTrainingParametersAccordianCollapse((prev) => !prev)
     }
@@ -125,9 +196,6 @@ const TrainingParameters = ({
                 setModelParams(() => ({ ...model_parameters }))
                 dispatch(resetModelData())
                 dispatch(setModelType(value))
-            } else if (JSON.stringify(model_parameters) !== JSON.stringify(modelParams)) {
-                let { modelType, ...rest } = model_parameters
-                setModelParams(() => ({ modelType: value, ...rest }))
             } else {
                 dispatch(setModelType(value))
                 setModelParams((prev) => {
@@ -280,7 +348,7 @@ const TrainingParameters = ({
             }
 
             console.log('Execute query + Model parameters', fTalibExecuteQuery, model_training_parameters)
-            dispatch(setModelStartTime(new Date().getTime()))
+            dispatch(resetModelData())
             dispatch(setStartWebSocket(true))
             startModelTraining({
                 token,
@@ -290,11 +358,9 @@ const TrainingParameters = ({
                 }
             }).then((res) => {
                 setCorelation_matrix([])
-                dispatch(setModelEndTime(''))
                 const modelId = res.data.job_id
                 const model_name = generateRandomModelName(cryptotoken, selectedTickerPeriod)
                 Success(res.data.message)
-                dispatch(resetModelData())
                 dispatch(setModelId({ model_id: modelId, model_name: model_name }))
                 dispatch(setTrainingParameters({ model_params: modelParams, selected_functions: fTalibExecuteQuery, transformationOrder: transformationOrder }))
             }).catch((err) => {
@@ -312,12 +378,124 @@ const TrainingParameters = ({
         }
     }
 
+    const loadedCheckpoints = useSelector(state => state.cryptoModule.modelData.loaded_chekpoints)
+    // console.log(loadedCheckpoints)
+    const [checkpoints, setCheckpoints] = useState(loadedCheckpoints.checkpoints)
+    const [selectedCheckpoint, setSelectedCheckpoint] = useState(loadedCheckpoints.selectedCheckpoint)
+    const [checkpointError, setCheckpointError] = useState(false)
+
+    // const loadModelCheckpoints = async () => {
+    //     getModelCheckPoints({ token, model_id }).then(res => {
+    //         const checkpoints = res.data.checkpoints
+    //         setCheckpoints(checkpoints)
+    //         const latestCheckpoint = checkpoints.reduce((largest, checkpoint) => {
+    //             const num = parseInt(checkpoint.split('_')[1]);
+    //             return num > largest ? num : largest;
+    //         }, 0);
+    //         checkpointError && setCheckpointError(false)
+    //         setSelectedCheckpoint(`checkpoint_${latestCheckpoint}`)
+    //     })
+    // }
+
+    useEffect(() => {
+        if (loadedCheckpoints.checkpoints.length > 0) {
+            setCheckpoints(loadedCheckpoints.checkpoints)
+            setSelectedCheckpoint(loadedCheckpoints.selectedCheckpoint)
+        }
+    }, [loadedCheckpoints])
+
+
+    const handleModelReTraining = () => { // Only if model is loaded from saved models
+        if (selectedCheckpoint === '') {
+            setCheckpointError(true)
+            return
+        } else if (!retrainHistSaved && wganFinalPred.length > 0) {
+            console.log('cp')
+            setRetrainHistSavePrompt({ flag: true, retrain_checkpoint: selectedCheckpoint, checkpoints, modelParams })
+            return
+        }
+
+        // Checking if the selected checkpoint is the latestes one or not.
+        // If not slice the epochResults for the metricsChart
+        const last_saved_model_checkpoint_no = checkpoints.reduce((largest, checkpoint) => {
+            const num = parseInt(checkpoint.split('_')[1]);
+            return num > largest ? num : largest;
+        }, 0);
+        const selected_checkpoint_no = parseInt(selectedCheckpoint.split('_').pop())
+        if (last_saved_model_checkpoint_no !== selected_checkpoint_no) {
+            console.log('TP : Checkpoint other than last one selected', last_saved_model_checkpoint_no, selected_checkpoint_no)
+            setMetricsChartReload(true)
+            dispatch(sliceEpochResults({ selected_cp_no: selected_checkpoint_no, from_: 'training_params' }))
+        } else {
+            setMetricsChartReload(false)
+            console.log('TP : Checkpoint selected is the latest one and Retraining model...')
+        }
+
+        // First training after loading the saved model. 
+        // If model runs are not saved the flow goes to the SaveCurrentModal from above
+        console.log('From TP component', model_id, retrainHistSaved, modelParams)
+        const fullRetrainParams = {
+            batchSize: modelParams.batchSize,
+            d_learning_rate: modelParams.scaled_d_learningRate,
+            do_validation: modelParams.doValidation,
+            early_stopping_flag: modelParams.earlyStopping,
+            epochs: modelParams.epoch,
+            g_learning_rate: modelParams.scaled_g_learningRate,
+            intermediate_result_step: parseInt(modelParams.intermediateResultStep),
+            look_ahead: modelParams.lookAhead,
+            model_save_checkpoint: parseInt(modelParams.modelSaveStep),
+            model_type: modelParams.modelType === "WGAN-GP" ? "GAN" : modelParams.modelType,
+            n_critic: modelParams.discriminator_iteration,
+            slice_index: modelParams.to_train_count,
+            time_step: modelParams.timeStep,
+            to_predict: modelParams.multiSelectValue,
+            training_size: modelParams.trainingDatasetSize,
+            transformation_order: modelParams.transformation_order,
+        }
+
+        const fTalibExecuteQuery = userModels.find((model) => model.model_id === model_id).model_data.talibExecuteQueries
+        const final_payload = {
+            additional_data: {
+                model_id: model_id,
+                checkpoint: selectedCheckpoint
+            },
+            fTalibExecuteQuery,
+            fullRetrainParams
+        }
+        console.log(final_payload)
+
+        dispatch(setRetrainHistorySavedToDb(false))
+        dispatch(setStartWebSocket(true))
+        dispatch(setRetrainingFlag(true))
+        dispatch(setRetrainParameters({ retrainParams: modelParams }))
+
+        retrain_wgan_Model({ token, payload: final_payload })
+            .then(res => {
+                Success('Model retraining started')
+                console.log('Retrain model response', res.data)
+            })
+            .catch(err => {
+                console.log('Error retraining model', err)
+            })
+
+    }
+
     // resetting entire training params and model data
     const handleClearModelData = () => {
         console.log(model_id, model_saved_to_db, modelParams.modelType)
         if (model_id !== '' && !model_saved_to_db) { // check if saved and then delete
             console.log('Model present and not saved, resetting Redux model and deleting from BE')
-            deleteModel({ token, payload: { model_id: model_id, model_type: modelParams.modelType } })
+            const payload = {
+                model_id: model_id,
+                model_type: modelParams.modelType,
+                asset_type: asset_type,
+                ticker_name: selectedTickerName,
+                period: selectedTickerPeriod
+            }
+
+            deleteModel({
+                token, payload
+            })
                 .then((res) => {
                     Success(res.data.message)
                 })
@@ -335,6 +513,8 @@ const TrainingParameters = ({
         setModelTypeOpen(false)
     }
 
+
+
     return (
         <React.Fragment>
             <ResetOnModelChange
@@ -350,52 +530,42 @@ const TrainingParameters = ({
                 type={'training_clicked'}
             />
             <Box alignItems='start' display='flex' pb={1} className='trainmodel-title'>
-                <Typography variant='h4'>Model Training</Typography>
+                <Typography variant='h4'>{loadingFromSaved ? 'Model Re-Training' : 'Model Training'}</Typography>
             </Box>
 
             <Box>
-                <Paper elevtion={4} className='model-parameter-expandd-collapse-box' sx={{ display: "flex", flexDirection: "row", justifyContent: 'space-between', alignItems: 'center', boxShadow: `${trainingParametersAccordianCollapse && 'none'}` }}>
-                    <Typography variant='h5'>Edit training parameters</Typography>
-                    <Box display='flex' justifyContent='center' alignItems='center' gap='8px'>
-                        {!trainingParametersAccordianCollapse && trainingStartedFlag &&
-                            <React.Fragment>
-                                <Typography variant='custom' textAlign='start' sx={{ color: 'yellow' }}>Training in progress</Typography>
-                                <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />
-                            </React.Fragment>
-                        }
-                        <IconButton sx={{ padding: '6px' }} onClick={handleParametersAccordianCollapse.bind(null, {})}>
-                            {trainingParametersAccordianCollapse ? <ArrowDropUpIcon className='small-icon' /> : <ArrowDropDownIcon className='small-icon' />}
-                        </IconButton>
+                <Paper elevtion={12} className='model-parameter-expandd-collapse-box' sx={{ display: "flex", flexDirection: "row", justifyContent: 'space-between', alignItems: 'center', boxShadow: `${trainingParametersAccordianCollapse && 'none'}` }}>
+                    <Box className='tp-loader-when-collapsed'>
+                        <Box className='training-param-name'>
+                            <Typography variant='h5'>Edit training parameters {loadingFromSaved ? 'for' : ''}</Typography>
+                            <Typography variant='h5' fontWeight={900} sx={{ textDecoration: 'underline' }}>{loadingFromSaved ? `${savedModelName}` : ''}</Typography>
+                        </Box>
+                        <Box display='flex' justifyContent='center' alignItems='center' gap='8px'>
+                            {!trainingParametersAccordianCollapse && trainingStartedFlag &&
+                                <React.Fragment>
+                                    <Typography variant='custom' textAlign='start' sx={{ color: `${theme.palette.error.main}` }}>Training in progress</Typography>
+                                    <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />
+                                </React.Fragment>
+                            }
+                            {/* <Button onClick={(e) => dispatch(setRetrainingFlag(false))}>clr</Button> */}
+                        </Box>
                     </Box>
+                    <IconButton sx={{ padding: '6px' }} onClick={handleParametersAccordianCollapse.bind(null, {})}>
+                        {trainingParametersAccordianCollapse ? <ArrowDropUpIcon className='small-icon' /> : <ArrowDropDownIcon className='small-icon' />}
+                    </IconButton>
                 </Paper>
 
                 <Collapse in={trainingParametersAccordianCollapse}>
                     <Box className='model-parameters-grid' pt={1}>
-                        <Box display='flex' flexDirection='column' pb={2}>
-                            <Box display='flex' flexDirection='row' alignItems='center' justifyContent='space-between'>
-                                <Typography variant='h5' textAlign='start'>Parameters</Typography>
-                                <Box display='flex' alignItems='center' gap='10px'>
-                                    <Button
-                                        sx={{
-                                            height: '26px',
-                                        }}
-                                        variant='outlined'
-                                        size='small'
-                                        color='secondary'
-                                        disabled={trainingStartedFlag}
-                                        onClick={(e) => handleStartModelTraining()}
-                                        endIcon={trainingStartedFlag && <CircularProgress style={{ width: '20px', height: '20px' }} color='secondary' />}
-                                    >
-                                        {trainingStartedFlag ? 'Training' : 'TRAIN'}
-                                    </Button>
-                                    <ResetTrainedModelModal
-                                        handleClearModelData={handleClearModelData}
-                                        disabled={trainingStartedFlag}
-                                        model_present={model_id === '' ? false : true} />
-                                </Box>
-                            </Box>
-                            {noFuncSelected !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{noFuncSelected}</Typography>}
-                        </Box>
+                        <TPAction
+                            loadingFromSaved={loadingFromSaved}
+                            trainingStartedFlag={trainingStartedFlag}
+                            handleModelReTraining={handleModelReTraining}
+                            handleStartModelTraining={handleStartModelTraining}
+                            handleClearModelData={handleClearModelData}
+                            model_id={model_id}
+                            noFuncSelected={noFuncSelected}
+                        />
 
                         <Box className='selected-function-value-displaybox' display='flex' flexDirection='column' alignItems='start' gap='8px'>
                             <Grid container spacing={1}>
@@ -410,7 +580,7 @@ const TrainingParameters = ({
                                             }}
                                             fieldName={'Model type'}
                                             toolTipTitle={'Select a model type'}
-                                            trainingStartedFlag={trainingStartedFlag}
+                                            trainingStartedFlag={loadingFromSaved ? true : trainingStartedFlag}
                                         />
 
                                         <MultiSelect
@@ -422,7 +592,7 @@ const TrainingParameters = ({
                                             }}
                                             fieldName={'To predict'}
                                             toolTipTitle={'Select one of the flags to be used to predict'}
-                                            trainingStartedFlag={trainingStartedFlag}
+                                            trainingStartedFlag={loadingFromSaved ? true : trainingStartedFlag}
                                         />
 
                                         {modelParams.modelType === 'WGAN-GP' &&
@@ -432,7 +602,7 @@ const TrainingParameters = ({
                                                     name={'to_train_count'}
                                                     handleModelParamChange={handleModelParamChange}
                                                     value={modelParams.to_train_count}
-                                                    disabled={trainingStartedFlag}
+                                                    disabled={loadingFromSaved ? true : trainingStartedFlag}
                                                 />
 
                                                 <MultiSelect
@@ -465,7 +635,7 @@ const TrainingParameters = ({
                                             <FormControlLabel
                                                 value="start"
                                                 sx={{ marginLeft: '0px', marginRight: '0px', width: '100%', justifyContent: 'space-between' }}
-                                                control={<Switch disabled={trainingStartedFlag} size="small" color="secondary" />}
+                                                control={<Switch disabled={loadingFromSaved ? true : trainingStartedFlag} size="small" color="secondary" />}
                                                 label='Do validation on test set'
                                                 labelPlacement="start"
                                                 checked={modelParams.doValidation}
@@ -498,7 +668,7 @@ const TrainingParameters = ({
                                             max={95}
                                             sliderMin={0}
                                             sliderMax={100}
-                                            disabled={trainingStartedFlag}
+                                            disabled={loadingFromSaved ? true : trainingStartedFlag}
                                         />
                                         <CustomSlider
                                             sliderValue={modelParams.timeStep}
@@ -509,7 +679,7 @@ const TrainingParameters = ({
                                             max={100}
                                             sliderMin={2}
                                             sliderMax={100}
-                                            disabled={trainingStartedFlag}
+                                            disabled={loadingFromSaved ? true : trainingStartedFlag}
                                         />
                                         <CustomSlider
                                             sliderValue={modelParams.lookAhead}
@@ -520,7 +690,7 @@ const TrainingParameters = ({
                                             max={30}
                                             sliderMin={1}
                                             sliderMax={30}
-                                            disabled={trainingStartedFlag}
+                                            disabled={loadingFromSaved ? true : trainingStartedFlag}
                                         />
 
                                         {modelParams.modelType === 'WGAN-GP' &&
@@ -535,6 +705,32 @@ const TrainingParameters = ({
                                                 sliderMax={2000}
                                                 disabled={trainingStartedFlag}
                                             />
+                                        }
+
+                                        {loadingFromSaved &&
+                                            <Box sx={{ display: 'flex', flexDirection: 'row', gap: '8px', width: '100%' }}>
+                                                <MultiSelect
+                                                    inputLabel={'Load Checkpoint'}
+                                                    inputOptions={checkpoints}
+                                                    selectedInputOptions={selectedCheckpoint}
+                                                    handleInputOptions={(newValue) => {
+                                                        setSelectedCheckpoint(newValue)
+                                                    }}
+                                                    fieldName={'checkpoint'}
+                                                    toolTipTitle={'Select the checkpoint for retraining. Selecting any other checkpoint other than the latest one will remove all saved model after the selected checkpoint.'}
+                                                    trainingStartedFlag={trainingStartedFlag}
+                                                    error={checkpointError}
+                                                />
+                                                {/* <Paper elevation={8} sx={{ width: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <Tooltip title={checkpoints.length > 0 ? 'Checkpoints loaded' : 'Load the model saved checkpoints.'} placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
+                                                        <span>
+                                                            <IconButton disabled={checkpoints.length > 0} onClick={loadModelCheckpoints}>
+                                                                <DownloadIcon sx={{ color: checkpoints.length > 0 ? 'green' : 'red' }} className='small-icon' />
+                                                            </IconButton>
+                                                        </span>
+                                                    </Tooltip>
+                                                </Paper> */}
+                                            </Box>
                                         }
                                     </Box>
                                 </Grid>
@@ -567,7 +763,7 @@ const TrainingParameters = ({
                                             max={modelParams.modelType === 'WGAN-GP' ? 1000 : 100}
                                             sliderMin={1}
                                             sliderMax={modelParams.modelType === 'WGAN-GP' ? 1000 : 100}
-                                            disabled={trainingStartedFlag}
+                                            disabled={loadingFromSaved ? true : trainingStartedFlag}
                                         />
 
                                         {modelParams.modelType === 'LSTM' &&
@@ -638,6 +834,20 @@ const TrainingParameters = ({
                                 </Grid>
                             </Grid>
                         </Box>
+
+                        {sm &&
+                            <Box pt={'8px'}>
+                                <TPAction
+                                    loadingFromSaved={loadingFromSaved}
+                                    trainingStartedFlag={trainingStartedFlag}
+                                    handleModelReTraining={handleModelReTraining}
+                                    handleStartModelTraining={handleStartModelTraining}
+                                    handleClearModelData={handleClearModelData}
+                                    model_id={model_id}
+                                    noFuncSelected={noFuncSelected}
+                                />
+                            </Box>
+                        }
                     </Box>
                 </Collapse >
 

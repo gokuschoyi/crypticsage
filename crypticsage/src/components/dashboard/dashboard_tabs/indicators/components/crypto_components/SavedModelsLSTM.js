@@ -181,7 +181,7 @@ const SavedModels = ({
     const theme = useTheme();
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const token = useSelector(state => state.auth.accessToken);
-    const userId = useSelector(state => state.auth.uid)
+    // const userId = useSelector(state => state.auth.uid)
     const user_models_redux = useSelector(state => state.cryptoModule.userModels).filter(model => model.model_type === 'LSTM')
     // const c_module = useSelector(state => state.cryptoModule.userModels)
     // console.log(c_module)
@@ -409,13 +409,15 @@ const SavedModels = ({
     // console.log('default value', defaultModelName)
     const handleModelDeletFromSaved = ({ model_id }) => {
         console.log('clicked', model_id)
-        deleteModelForUser({ token, model_id })
+        deleteModelForUser({ token, model_id, model_type: 'LSTM' })
             .then((res) => {
                 Success(res.data.message)
+                setOpen(false)
+                setToShowModelId(null)
                 if (model_id === model_data.model_id) {
                     dispatch(resetCurrentModelData())
                 }
-                getUserModels({ token, payload: { user_id: userId } })
+                getUserModels({ token })
                     .then((res) => {
                         dispatch(setUserModels(res.data.models))
                     })

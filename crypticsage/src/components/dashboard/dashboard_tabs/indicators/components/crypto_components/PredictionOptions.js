@@ -12,6 +12,8 @@ const PredictionOptions = ({
     modelProcessDurationRef,
     predictionChartType,
     setPredictionChartType,
+    retrainHistSavePrompt,
+    setRetrainHistSavePrompt
 }) => {
     const model_name = useSelector(state => state.cryptoModule.modelData.model_name)
     const [modelName, setModelName] = useState(model_name)
@@ -36,7 +38,11 @@ const PredictionOptions = ({
                             }}
                         />
                         <Box className='model-chart-action-box'>
-                            <SaveCurrentModal modelName={modelName} />
+                            <SaveCurrentModal
+                                modelName={modelName}
+                                retrainHistSavePrompt={retrainHistSavePrompt}
+                                setRetrainHistSavePrompt={setRetrainHistSavePrompt}
+                            />
 
                             {!savedToDb &&
                                 <DeleteCurrentModal modelProcessDurationRef={modelProcessDurationRef} />

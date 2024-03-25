@@ -17,6 +17,7 @@ router.post('/get_model', IController.getModel)
 router.post('/save_model', IController.saveModel)
 router.post('/delete_model', IController.deleteModel)
 router.post('/delete_user_model', IController.deleteUserModel)
+router.post('/update_new_predictions', IController.updateNewTrainingResults)
 
 router.post('/check_for_model', IController.checkIfModelExists)
 router.post('/get_model_result', IController.getModelResult)
@@ -43,13 +44,15 @@ const fetchSavedUserModels = async (req, res) => {
 
 router.get('/fetch_saved_user_models', fetchSavedUserModels)
 
+// celery test route
 const tempsetrmse = async (req, res) => {
     const { model_id, rmse } = req.body;
     // const result = await MDBServices.temp_setLSTMRmse(model_id, rmse)
-    const testDtate = new Date().toLocaleString()
+    // const testDtate = new Date().toLocaleString()
 
-    const uTime = new Date(testDtate).getTime()
-    res.status(200).json({ message: 'RMSE set successfully', testDtate, uTime })
+    // const uTime = new Date(testDtate).getTime()
+    const testRes = await IController.testing(model_id)
+    res.status(200).json({ message: 'RMSE set successfully', testRes })
 }
 
 router.put('/set_lstm_rmse', tempsetrmse)

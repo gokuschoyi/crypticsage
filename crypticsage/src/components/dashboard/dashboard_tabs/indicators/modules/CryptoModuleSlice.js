@@ -63,6 +63,7 @@ const initialState = {
         model_id: '',
         model_name: '',
         model_saved_to_db: false,
+        retrain_history_saved: false,
         training_parameters: {
             to_train_count: 0,
             trainingDatasetSize: 80,
@@ -96,6 +97,8 @@ const initialState = {
         modelStartTime: '',
         modelEndTime: '',
         startWebSocket: false,
+        retraining_flag: false,
+        loading_from_saved_model: false,
         progress_message: [],
         epoch_no: 0,
         correlation_data: null,
@@ -116,6 +119,10 @@ const initialState = {
             over_all_score: 0,
             scores: []
         },
+        loaded_chekpoints: {
+            checkpoints: [],
+            selectedCheckpoint: ''
+        }
     }
 }
 
@@ -140,6 +147,9 @@ const cryptoModuleSlice = createSlice({
             state.modelData.model_saved_to_db = action.payload.status
             state.modelData.model_name = action.payload.model_name
         },
+        setRetrainHistorySavedToDb: (state, action) => {
+            state.modelData.retrain_history_saved = action.payload
+        },
         setModelId: (state, action) => {
             state.modelData.model_id = action.payload.model_id;
             state.modelData.model_name = action.payload.model_name;
@@ -151,8 +161,47 @@ const cryptoModuleSlice = createSlice({
             state.modelData.training_parameters = { ...action.payload.model_params, transformation_order: action.payload.transformationOrder };
             state.modelData.talibExecuteQueries = action.payload.selected_functions;
         },
+        setRetrainParameters: (state, action) => {
+            const { model_id, model_name, model_saved_to_db, retrainParams } = action.payload;
+            if (model_id !== undefined || model_name !== undefined || model_saved_to_db !== undefined) {
+                console.log('From retrain wgan')
+                state.modelData.model_id = model_id;
+                state.modelData.model_name = model_name;
+                state.modelData.model_saved_to_db = model_saved_to_db
+                state.modelData.training_parameters = { ...retrainParams }
+            } else {
+                console.log('From TP wgan')
+                state.modelData.training_parameters = { ...retrainParams }
+            }
+        },
         setStartWebSocket: (state, action) => {
             state.modelData.startWebSocket = action.payload;
+        },
+        setRetrainingFlag: (state, action) => {
+            state.modelData.retraining_flag = action.payload;
+            if (action.payload === true) {
+                state.modelData.wgan_final_forecast = {
+                    predictions: [],
+                    rmse: {}
+                };
+            }
+        },
+        setLoadingFromSavedModel: (state, action) => {
+            state.modelData.loading_from_saved_model = action.payload;
+        },
+        sliceEpochResults: (state, action) => {
+            const { selected_cp_no, from_ } = action.payload
+            if (from_ === 'retrain_wgan') {
+                state.modelData.epoch_results = state.modelData.epoch_results.slice(0, selected_cp_no);
+            } else if (from_ === 'training_params') {
+                if (state.modelData.epoch_results.length > 0) {
+                    state.modelData.epoch_results = state.modelData.epoch_results.filter((er) => er.epoch <= selected_cp_no);
+                }
+            }
+        },
+        setLoadedCheckpoints: (state, action) => {
+            state.modelData.loaded_chekpoints.checkpoints = action.payload.checkpoints;
+            state.modelData.loaded_chekpoints.selectedCheckpoint = action.payload.selectedCheckpoint;
         },
         setModelStartTime: (state, action) => {
             state.modelData.modelStartTime = action.payload;
@@ -249,11 +298,11 @@ const cryptoModuleSlice = createSlice({
         },
         resetCurrentModelData: (state) => {
             state.modelData.training_parameters.transformation_order = [
-                { id: '1', name: 'OPEN', value: 'open' },
-                { id: '2', name: 'HIGH', value: 'high' },
-                { id: '3', name: 'LOW', value: 'low' },
-                { id: '4', name: 'CLOSE', value: 'close' },
-                { id: '5', name: 'VOLUME', value: 'volume' },
+                { id: '1', name: 'OPEN', value: 'open', key: 'open' },
+                { id: '2', name: 'HIGH', value: 'high', key: 'high' },
+                { id: '3', name: 'LOW', value: 'low', key: 'low' },
+                { id: '4', name: 'CLOSE', value: 'close', key: 'close' },
+                { id: '5', name: 'VOLUME', value: 'volume', key: 'volume' }
             ];
             state.modelData.epoch_results = [];
             state.modelData.correlation_data = null;
@@ -301,10 +350,19 @@ const cryptoModuleSlice = createSlice({
             state.modelData.model_id = '';
             state.modelData.modelEndTime = '';
             state.modelData.model_saved_to_db = false;
-            const to_train_c = state.modelData.training_parameters.to_train_count
-            const co_relationData = state.modelData.correlation_data
-            state.modelData.training_parameters = { ...initialState.modelData.training_parameters, to_train_count: to_train_c }
-            state.modelData = { ...state.modelData, correlation_data: co_relationData }
+            state.modelData.retrain_history_saved = false;
+            state.modelData.loading_from_saved_model = false;
+            state.modelData.loaded_chekpoints = {
+                checkpoints: [],
+                selectedCheckpoint: ''
+            }
+            // const co_relationData = state.modelData.correlation_data
+            state.modelData.training_parameters = {
+                ...initialState.modelData.training_parameters,
+                modelType: state.modelData.training_parameters.modelType,
+                to_train_count: state.total_count_db * 0.5 > 1000 ? 1000 : state.total_count_db * 0.5
+            }
+            // state.modelData = { ...state.modelData }
             state.modelData.talibExecuteQueries = [];
             state.modelData.wgan_final_forecast = {
                 predictions: [],
@@ -817,11 +875,17 @@ const cryptoModuleSlice = createSlice({
 const { reducer, actions } = cryptoModuleSlice;
 export const {
     setModelSavedToDb
+    , setRetrainHistorySavedToDb
     , setUserModels
     , setModelId
     , setModelType
     , setTrainingParameters
+    , setRetrainParameters
     , setStartWebSocket
+    , setRetrainingFlag
+    , setLoadingFromSavedModel
+    , sliceEpochResults
+    , setLoadedCheckpoints
     , setModelStartTime
     , setModelEndTime
     , setFeatureCorrelationData

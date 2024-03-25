@@ -1,5 +1,7 @@
+from matplotlib.font_manager import json_dump
 from WGAN_GP.trainer import WGANGP
 from WGAN_GP import forecasting
+from WGAN_GP import util
 from dotenv import load_dotenv
 from celeryWorker import app
 import redis
@@ -54,10 +56,15 @@ def retrainModel(data):
     
     t_param_redis = redisStore.hget(model_process_id, "training_parameters")
     training_parameters = json.loads(t_param_redis)  # type: ignore
-    print(training_parameters)
+    # print(training_parameters)
 
     print(f"Retraining has started for user : {uid}, model process id : {model_process_id}")
-    time.sleep(2)
+    time.sleep(0.3)
+
+    wgan_gp = WGANGP(
+        model_process_id, uid, model_id, training_parameters, existing_data, re_train=True, checkpoint=checkpoint
+    )
+    wgan_gp.train()
     print(f"Retraining completed for user : {uid}, model process id : {model_process_id}")
 
 
@@ -91,3 +98,12 @@ def convertPredictionToCorrectFormat(data):
 
     final_result = {"transformed": json.dumps(result)}
     return final_result
+
+
+@app.task
+def testing(data):
+    message = data["message"]
+    print(message)
+    time.sleep(2)
+    checkpoints = util.removeSavedModels(data["model_id"], data["checkpoint"])
+    return {"message": "Testing successful", "checkpoints": json.dumps(checkpoints)}

@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Paper, FormControlLabel, Switch, Tooltip, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Button, Slide } from '@mui/material';
+import { Box, Paper, FormControlLabel, Switch, Tooltip, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, Button, Slide, Typography } from '@mui/material';
 import LoopIcon from '@mui/icons-material/Loop';
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { getModelCheckPoints, retrain_wgan_Model } from '../../../../../../../api/adminController'
 import MultiSelect from '../MultiSelect'
 import CustomSlider from '../CustomSlider';
 import DownloadIcon from '@mui/icons-material/Download';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { generateTalibFunctionsForExecution } from '../../../modules/CryptoModuleUtils'
-
+import {
+    setLoadingFromSavedModel
+    , setRetrainParameters
+    , setRetrainingFlag
+    , setStartWebSocket
+    , sliceEpochResults
+    , setLoadedCheckpoints
+    , resetModelData
+} from '../../../modules/CryptoModuleSlice'
+import { Success } from '../../../../../global/CustomToasts';
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="left" ref={ref} {...props} />;
 });
@@ -28,7 +37,8 @@ const scaledValue = (value, max) => {
     return parseFloat(trucned_no)
 }
 
-const RetrainWGANModal = ({ type, model_id: m_id }) => {
+const RetrainWGANModal = ({ type, model_id: m_id, setMetricsChartReload }) => {
+    const dispatch = useDispatch()
     const token = useSelector(state => state.auth.accessToken);
     const model_params = useSelector(state => state.cryptoModule.modelData.training_parameters)
 
@@ -41,8 +51,12 @@ const RetrainWGANModal = ({ type, model_id: m_id }) => {
     const userModels = useSelector(state => state.cryptoModule.userModels).filter(model => model.model_id === m_id)[0]
 
     let modelParams, model_id, selectedFunctions, tDataReduxL, selectedTickerPeriod, selectedTickerName
+    const redux_model_id = useSelector(state => state.cryptoModule.modelData.model_id)
+    const redux_model_saved_to_db = useSelector(state => state.cryptoModule.modelData.model_saved_to_db)
+    const retrain_history_saved_to_db = useSelector(state => state.cryptoModule.modelData.retrain_history_saved)
+    const wganFinalPred = useSelector(state => state.cryptoModule.modelData.wgan_final_forecast.predictions)
 
-    if (type === 'from_saved') {
+    if (type === 'from_saved' && userModels !== undefined) {
         // console.log('Retrain from saved model')
 
         modelParams = userModels.model_data.training_parameters
@@ -52,7 +66,7 @@ const RetrainWGANModal = ({ type, model_id: m_id }) => {
         selectedTickerPeriod = userModels.model_data.talibExecuteQueries[0].payload.db_query.period
         selectedTickerName = userModels.model_data.talibExecuteQueries[0].payload.db_query.ticker_name
 
-    } else if (type === undefined) {
+    } else if (type === 'from_current') {
         // console.log('Retrain from current model')
 
         modelParams = model_params
@@ -63,6 +77,7 @@ const RetrainWGANModal = ({ type, model_id: m_id }) => {
         selectedTickerName = selected_tickerName
     }
 
+    const [goAndLoadError, setGoAndLoadError] = useState('')
 
     const [retrainModel, setRetrainModel] = useState(false)
     const [checkpoints, setCheckpoints] = useState([])
@@ -70,43 +85,63 @@ const RetrainWGANModal = ({ type, model_id: m_id }) => {
 
     let retrain_params = {
         checkpoint: '',
-        intermediate_result_step: modelParams.intermediateResultStep,
-        model_save_checkpoint: modelParams.modelSaveStep,
-        epochs: modelParams.epoch,
-        n_critic: modelParams.discriminator_iteration,
+        intermediate_result_step: '',
+        model_save_checkpoint: '',
+        epochs: 0,
+        n_critic: 5,
         d_learning_rate: 40,
         g_learning_rate: 10,
         scaled_d_learningRate: 0.0004,
         scaled_g_learningRate: 0.0001,
-        earlyStopping: modelParams.earlyStopping,
+        earlyStopping: false,
     }
     const [reTrainParams, setReTrainParams] = useState(retrain_params)
 
     useEffect(() => {
-        // console.log('Changing retrain params ...')
-        setReTrainParams((prev) => ({
-            ...prev,
-            checkpoint: '',
-            intermediate_result_step: modelParams.intermediateResultStep,
-            model_save_checkpoint: modelParams.modelSaveStep,
-            epochs: modelParams.epoch,
-            n_critic: modelParams.discriminator_iteration,
-            d_learning_rate: 40,
-            g_learning_rate: 10,
-            scaled_d_learningRate: 0.0004,
-            scaled_g_learningRate: 0.0001,
-            earlyStopping: modelParams.earlyStopping,
-        }))
+        // console.log('UE Changing retrain params ...')
+        if (modelParams !== undefined) {
+            console.log('Changing retrain params AVAILABLE...')
+            setReTrainParams((prev) => ({
+                ...prev,
+                checkpoint: '',
+                intermediate_result_step: modelParams.intermediateResultStep,
+                model_save_checkpoint: modelParams.modelSaveStep,
+                epochs: modelParams.epoch,
+                n_critic: modelParams.discriminator_iteration,
+                d_learning_rate: 40,
+                g_learning_rate: 10,
+                scaled_d_learningRate: 0.0004,
+                scaled_g_learningRate: 0.0001,
+                earlyStopping: modelParams.earlyStopping,
+            }))
+            setCheckpoints([])
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [modelParams.intermediateResultStep, modelParams.modelSaveStep, modelParams.epoch, modelParams.discriminator_iteration, modelParams.earlyStopping])
 
     const loadModelCheckpoints = async () => {
         getModelCheckPoints({ token, model_id }).then(res => {
             const checkpoints = res.data.checkpoints
             setCheckpoints(checkpoints)
+            const latestCheckpoint = checkpoints.reduce((largest, checkpoint) => {
+                const num = parseInt(checkpoint.split('_')[1]);
+                return num > largest ? num : largest;
+            }, 0);
             checkpointError && setCheckpointError(false)
-            setReTrainParams((prev) => ({ ...prev, checkpoint: checkpoints[0] }))
+            setReTrainParams((prev) => ({ ...prev, checkpoint: `checkpoint_${latestCheckpoint}` }))
         })
     }
+
+    useEffect(() => {
+        if (checkpoints.length > 0 && reTrainParams.checkpoint === '') {
+            const latestCheckpoint = checkpoints.reduce((largest, checkpoint) => {
+                const num = parseInt(checkpoint.split('_')[1]);
+                return num > largest ? num : largest;
+            }, 0);
+            const cp_string = `checkpoint_${latestCheckpoint}`
+            setReTrainParams((prev) => ({ ...prev, checkpoint: cp_string }))
+        }
+    }, [checkpoints, reTrainParams.checkpoint])
 
     const handleClickOpen = () => {
         setRetrainModel(true);
@@ -114,6 +149,7 @@ const RetrainWGANModal = ({ type, model_id: m_id }) => {
 
     const handleClose = () => {
         setRetrainModel(false);
+        setGoAndLoadError('')
     };
 
     const handleReTrainParamChange = (name, value) => {
@@ -135,7 +171,7 @@ const RetrainWGANModal = ({ type, model_id: m_id }) => {
     }
 
     const handleRetrainModel = () => {
-        console.log('Retraining model ...')
+        console.log('Retraining model ...', type)
         if (reTrainParams.checkpoint === '') {
             console.log('Checkpoint not selected')
             setCheckpointError(true)
@@ -175,13 +211,129 @@ const RetrainWGANModal = ({ type, model_id: m_id }) => {
 
             console.log('Talib + Full retrain params', final_payload)
 
-            // retrain_wgan_Model({ token, payload: final_payload })
-            //     .then(res => {
-            //         console.log('Retrain model response', res.data)
-            //     })
-            //     .catch(err => {
-            //         console.log('Error retraining model', err)
-            //     })
+            if (type === 'from_current') {
+                const max = checkpoints.sort((a, b) => {
+                    const nameA = parseInt(a.split('_').pop())
+                    const nameB = parseInt(b.split('_').pop())
+                    return nameA - nameB
+                })
+
+                const last_saved_model_checkpoint_no = parseInt(max[max.length - 1].split('_').pop())
+                const selected_checkpoint_no = parseInt(reTrainParams.checkpoint.split('_').pop())
+                if (last_saved_model_checkpoint_no !== selected_checkpoint_no) {
+                    console.log('Checkpoint other than last one selected', last_saved_model_checkpoint_no, selected_checkpoint_no)
+                    setMetricsChartReload(true)
+                    dispatch(sliceEpochResults({ selected_cp_no: selected_checkpoint_no, from_: 'retrain_wgan' }))
+                } else {
+                    setMetricsChartReload(false)
+                    console.log('Checkpoint selected is the latest one', last_saved_model_checkpoint_no, selected_checkpoint_no)
+                }
+                dispatch(setRetrainingFlag(true))
+                dispatch(setStartWebSocket(true))
+            } else {
+                console.log('Retrain from saved model')
+                if (redux_model_id !== '' && wganFinalPred.length > 0 && (redux_model_saved_to_db === false || retrain_history_saved_to_db === false)) {
+                    setGoAndLoadError('Cannot start training. Another model run present and not saved. Save or Reset the model and load again')
+                    return
+                } else {
+                    console.log('No model runs present, starting retrain')
+                    if (wganFinalPred.length > 0) {
+                        console.log('Resetting previous run model data')
+                        dispatch(resetModelData())
+                    }
+                    let modelParams_copy = JSON.parse(JSON.stringify(userModels.model_data.training_parameters))
+
+                    // console.log('previous run parameters', modelParams_copy)
+                    // console.log('Changed parameters', reTrainParams)
+
+                    modelParams_copy = {
+                        ...modelParams_copy,
+                        d_learningRate: reTrainParams.d_learning_rate,
+                        earlyStopping: reTrainParams.earlyStopping,
+                        epoch: reTrainParams.epochs,
+                        g_learningRate: reTrainParams.g_learning_rate,
+                        intermediateResultStep: reTrainParams.intermediate_result_step,
+                        modelSaveStep: reTrainParams.model_save_checkpoint,
+                        discriminator_iteration: reTrainParams.n_critic,
+                        scaled_d_learningRate: reTrainParams.scaled_d_learningRate,
+                        scaled_g_learningRate: reTrainParams.scaled_g_learningRate
+                    }
+
+                    // console.log('Redux mParams', model_params)
+                    console.log('After param changes if any', modelParams_copy)
+                    const model_name = userModels.model_name
+                    const savedModeId = userModels.model_id
+
+                    dispatch(setStartWebSocket(true))
+                    dispatch(setRetrainingFlag(true))
+                    dispatch(setLoadingFromSavedModel(true))
+                    dispatch(setRetrainParameters({
+                        retrainParams: modelParams_copy,
+                        model_name,
+                        model_id: savedModeId,
+                        model_saved_to_db: true
+                    }))
+                }
+            }
+
+            retrain_wgan_Model({ token, payload: final_payload })
+                .then(res => {
+                    setRetrainModel(false)
+                    Success('Model retraining started')
+                    console.log('Retrain model response', res.data)
+                })
+                .catch(err => {
+                    console.log('Error retraining model', err)
+                })
+        }
+    }
+
+    const loadSavedParameters = () => {
+        if (reTrainParams.checkpoint === '') {
+            console.log('Checkpoint not selected')
+            setCheckpointError(true)
+        } else if (redux_model_id !== '' && wganFinalPred.length > 0 && (redux_model_saved_to_db === false || retrain_history_saved_to_db === false)) {
+            setGoAndLoadError('Cannot Load Parameters. Another model run present and not saved. Save or Reset the model and load again')
+            return
+        } else {
+            setGoAndLoadError('')
+            if (wganFinalPred.length > 0) {
+                console.log('Resetting previous run model data')
+                dispatch(resetModelData())
+            }
+            console.log("Loading saved parameters")
+            let modelParams_copy = JSON.parse(JSON.stringify(userModels.model_data.training_parameters))
+
+            // console.log('previous run parameters', modelParams_copy)
+            // console.log('Changed parameters', reTrainParams)
+
+            modelParams_copy = {
+                ...modelParams_copy,
+                d_learningRate: reTrainParams.d_learning_rate,
+                earlyStopping: reTrainParams.earlyStopping,
+                epoch: reTrainParams.epochs,
+                g_learningRate: reTrainParams.g_learning_rate,
+                intermediateResultStep: reTrainParams.intermediate_result_step,
+                modelSaveStep: reTrainParams.model_save_checkpoint,
+                discriminator_iteration: reTrainParams.n_critic,
+                scaled_d_learningRate: reTrainParams.scaled_d_learningRate,
+                scaled_g_learningRate: reTrainParams.scaled_g_learningRate
+            }
+
+            // console.log('Redux mParams', model_params)
+            console.log('RETRAIN LOADING : After param changes if any')
+            const model_name = userModels.model_name
+            const savedModeId = userModels.model_id
+
+            dispatch(setLoadingFromSavedModel(true))
+            dispatch(setRetrainParameters({
+                retrainParams: modelParams_copy,
+                model_name,
+                model_id: savedModeId,
+                model_saved_to_db: true
+            }))
+            dispatch(setLoadedCheckpoints({ checkpoints: checkpoints, selectedCheckpoint: reTrainParams.checkpoint }))
+            setRetrainModel(false)
         }
     }
 
@@ -206,7 +358,9 @@ const RetrainWGANModal = ({ type, model_id: m_id }) => {
             >
                 <DialogTitle>{"RETRAIN MODEL"}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText id="alert-dialog-slide-description"></DialogContentText>
+                    <DialogContentText id="alert-dialog-slide-description">
+                        {goAndLoadError !== '' && <Typography variant='custom' style={{ color: 'red' }}>{goAndLoadError}</Typography>}
+                    </DialogContentText>
                     <Box display='flex' flexDirection='column' gap='8px'>
                         <Paper elevation={4} sx={{ padding: '4px' }}>
                             <FormControlLabel
@@ -329,6 +483,9 @@ const RetrainWGANModal = ({ type, model_id: m_id }) => {
                     </Tooltip>
                     <Button size='small' color='secondary' onClick={handleClose}>Cancel</Button>
                     <Button size='small' color='secondary' onClick={handleRetrainModel.bind(null, {})}>GO</Button>
+                    {type === 'from_saved' &&
+                        <Button size='small' color='secondary' onClick={loadSavedParameters}>Load</Button>
+                    }
                 </DialogActions>
             </Dialog>
         </React.Fragment>

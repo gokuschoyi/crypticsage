@@ -1,16 +1,21 @@
 import { useRef } from 'react';
 import { Success, Warning, LSTM_Warn } from '../../../global/CustomToasts'
 import {
+    setModelStartTime,
     setModelEndTime,
     setEpochNo,
     setEpochResults,
     setPredictedValues,
     setPredictionScores,
     setStartWebSocket,
+    setRetrainingFlag,
     setFeatureCorrelationData,
     setIntermediateForecastResults,
-    setWganFinalForecast
+    setWganFinalForecast,
+    setLoadedCheckpoints
 } from '../modules/CryptoModuleSlice'
+import { useSelector } from 'react-redux';
+import { getModelCheckPoints } from '../../../../../api/adminController'
 
 // Function to add a new message
 function addMessage(notifyMessageBoxRef, messageText) {
@@ -47,6 +52,7 @@ const useWebSocket = (
     batchLinearProgressRef,
     evalLinearProgressRef,
     wgangpProgressRef,
+    retrainigFlag,
     setBatchResult,
     setEvaluating,
     setTrainingStartedFlag,
@@ -66,6 +72,9 @@ const useWebSocket = (
         INTERMEDIATE_FORECAST: 'intermediate_forecast',
         ERROR: 'error'
     };
+
+    const token = useSelector(state => state.auth.accessToken);
+    const model_id = useSelector(state => state.cryptoModule.modelData.model_id)
 
     const createModelProgressWebSocket = () => {
         if (webSocket.current && webSocket.current.readyState === WebSocket.OPEN) {
@@ -92,9 +101,14 @@ const useWebSocket = (
                         break;
                     case ACTIONS.NOTIFY:
                         addMessage(notifyMessageBoxRef, data.message);
+                        if (data.message === '(10) : Training has started...') {
+                            console.log('Training started')
+                            dispatch(setModelEndTime(''))
+                            dispatch(setModelStartTime(new Date().getTime()))
+                            setBatchResult(true)
+                        }
                         break;
                     case ACTIONS.EPOCH_BEGIN:
-                        setBatchResult(true)
                         let epoch = data.epoch
                         batchEndBox = document.querySelector('.batch-end')
                         if (batchEndBox) {
@@ -108,7 +122,7 @@ const useWebSocket = (
                         break;
                     case ACTIONS.BATCH_END:
                         if (!batchResult) { setBatchResult(true) }
-                        if (data.log?.model === 'discriminator' || data.log?.model === 'generator') {
+                        if (data.log.model &&  (data.log.model === 'discriminator' || data.log.model === 'generator')) {
                             let totalNoOfBatch = data.log.totalNoOfBatch
                             const percentageCompleted = parseFloat(((data.log.batch / totalNoOfBatch) * 100).toFixed(2)) || 0
                             const bgColor = getColorForValue(percentageCompleted, 0, 100, '#C2185B', '#388E3C');
@@ -164,6 +178,17 @@ const useWebSocket = (
                         } else {
                             console.log('Model trained for all epochs')
                         }
+                        if (retrainigFlag) {
+                            getModelCheckPoints({ token, model_id }).then(res => {
+                                const checkpoints = res.data.checkpoints
+                                const latestCheckpoint = checkpoints.reduce((largest, checkpoint) => {
+                                    const num = parseInt(checkpoint.split('_')[1]);
+                                    return num > largest ? num : largest;
+                                }, 0);
+                                // console.log('Checkpoints', checkpoints, latestCheckpoint)
+                                dispatch(setLoadedCheckpoints({ checkpoints: checkpoints, selectedCheckpoint: `checkpoint_${latestCheckpoint}` }))
+                            })
+                        }
                         // setTrainingStartedFlag(false)
                         break;
                     case ACTIONS.EVALUATING:
@@ -201,10 +226,12 @@ const useWebSocket = (
                         currentEpoch = 0
                         Success('Training completed successfully')
                         dispatch(setStartWebSocket(false))
+                        dispatch(setRetrainingFlag(false))
                         break;
                     case ACTIONS.ERROR:
                         setBatchResult(false)
                         dispatch(setStartWebSocket(false))
+                        dispatch(setRetrainingFlag(false))
                         setTrainingStartedFlag(false)
                         console.log('Error', data.message)
                         LSTM_Warn(JSON.parse(data.message))

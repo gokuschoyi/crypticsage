@@ -30,12 +30,26 @@ const LOG_LEVELS = {
     emerg: 0,
 }
 
+function formatDateWithMilliseconds(unixMilliseconds) {
+    const date = new Date(unixMilliseconds);
+
+    const milliseconds = date.getMilliseconds();
+    const millisecondsString = milliseconds.toString().padStart(3, '0'); // Ensure 3 digits
+
+    const dateString = date.toLocaleString('en-AU');
+    const [date_, time] = dateString.split(', ')
+    const [hms, ampm] = time.split(' ')
+    const newTime = `${hms}:${millisecondsString}`
+
+    return `${date_}, ${newTime} ${ampm}`;
+}
+
 class Logger {
     constructor(loggerLabel) {
         // setting up custom loggers
         const APP_LOG_FORMAT = printf(
             ({ level, message, label, timestamp }) => {
-                const localTime = new Date(timestamp).toLocaleString()
+                const localTime = formatDateWithMilliseconds(timestamp)
                 const capLevel = level.toUpperCase()
                 const returnMessage = `${localTime} [${label}] ${capLevel}: ${message}`
                 return returnMessage

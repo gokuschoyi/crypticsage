@@ -11,7 +11,7 @@ const WGANGPProgress = ({wgangpProgressRef}) => {
                 <Box className={`model-progress_{}`} width='100%' variant='h6'>
                     <div className='batch-end'>
                         <div style={{ display: 'flex', flexDirection: 'row' }}>
-                            <div style={{ fontSize: '0.7rem', fontWeight: '500', textAlign: 'start' }} id='epoch'>E : 1</div>
+                            <div style={{ fontSize: '0.7rem', fontWeight: '500', textAlign: 'start', width:"60px" }} id='epoch'>E : 1</div>
                             <div className='batch-end-text' id='model_type'>DISC</div>
                             <div className='batch-end-text' id='n_critic'>Critic Iter : 1</div>
                             <div className='batch-end-text' id='loss'>Loss : 0.04927649209355232</div>

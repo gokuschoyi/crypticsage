@@ -1,9 +1,11 @@
+import re
 from .models_wgan_gp import Generator, Discriminator
 from keras.initializers import RandomNormal
 from dotenv import load_dotenv
 from keras import backend as K
 from .util import (
     plot_intermediate_predictions,
+    getLastSavedModelCheckpoint,
     broadcastTrainingBatchLosses,
     generate_additional_dates,
     broadcastTrainingStatus,
@@ -15,6 +17,7 @@ from .util import (
     initFileWriters,
     scalar_function,
     transform_data,
+    removeSavedModels,
     getYLabels,
     saveModel,
 )
@@ -40,7 +43,7 @@ redisStore = redis.Redis(host=redis_host, port=redis_port)  # type: ignore
 
 
 class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
-    def __init__(self, process_id, uid, model_id, training_parameters, existing_data):
+    def __init__(self, process_id, uid, model_id, training_parameters, existing_data, re_train=False, checkpoint=""):
         super(WGANGP, self).__init__()
         self.tb_logging = False
         self.g_optimizer = keras.optimizers.Adam(learning_rate=training_parameters['g_learning_rate'], beta_1=0.5, beta_2=0.9)
@@ -56,6 +59,8 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
         self.process_id = process_id
         self.uid = uid
         self.model_id = model_id
+        self.re_train = re_train
+        self.checkpoint = checkpoint
         self.existing_data = existing_data # flag used to send corelation matrix to the client
 
         self.to_predict = training_parameters['to_predict']
@@ -188,9 +193,17 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
     def initializeModels(self):  # initialize the generator and discriminator models
         logging.critical(f"{self.process_id} : Initializing generator and Discriminator models.")
         weight_initializer = RandomNormal(mean=0.00, stddev=0.02, seed=42)
-        self.generator = Generator(weight_initializer, self.time_step, self.feature_size, self.look_ahead)
+        generator = Generator(weight_initializer, self.time_step, self.feature_size, self.look_ahead)
         self.discriminator = Discriminator(weight_initializer, self.time_step, self.look_ahead)
-
+        
+        if self.re_train:
+            count = self.checkpoint.split("_")[1] # type: ignore
+            saved_model_path = f"./saved_models/{self.model_id}/{self.checkpoint}/gen_model_{count}"
+            print(f'Retrain,  Saved model path : {saved_model_path}')
+            generator.load_weights(f"{saved_model_path}")
+            self.generator = generator
+        else:
+            self.generator = generator
         broadcastTrainingStatus(self.uid, "notify", "(8) : Generator and Discriminator model initialized...")
 
     def process_data(self): # process the data, fetch features, split data, normalize data, transform data and initialize models
@@ -520,7 +533,19 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
             file_writers={}
 
         self.process_data()  # process the data
-
+        
+        epoch_start = 0
+        epoch_end = self.epochs
+        if self.re_train:
+            removeSavedModels(self.model_id, self.checkpoint) # Removing the models greater than selected checkpoint 
+            
+            latest_saved = int(self.checkpoint.split("_")[1])
+            print(f"Last saved checkpoint : {latest_saved}")
+            epoch_start = latest_saved
+            epoch_end = latest_saved + self.epochs
+            self.epochs = epoch_end
+            print(f"Epoch start : {epoch_start}, Epoch end : {epoch_end}")
+            
         start = time.time()
         dataset_ = tf.data.Dataset.from_tensor_slices((self.x_train, self.y_train, self.past_y_train))
         data_generator = dataset_.batch(self.batchSize).prefetch(tf.data.experimental.AUTOTUNE)
@@ -530,10 +555,10 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
 
         start_time = time.time()
         ram_beg_train = psutil.virtual_memory()
-        broadcastTrainingStatus(self.uid, "notify", "(9) : Training has started...")
+        broadcastTrainingStatus(self.uid, "notify", "(10) : Training has started...")
         logging.critical(f"{self.process_id} : Training started")
         # with tf.profiler.experimental.Profile(self.logs_dir, tf.profiler.experimental.ProfilerOptions(python_tracer_level=1)):
-        for epoch in range(self.epochs): # training the model
+        for epoch in range(epoch_start, epoch_end): # training the model
             broadcastTrainingStatus(self.uid, "epochBegin", epoch)
             logging.error(f"epoch {epoch + 1} of {self.epochs}")
             epoch_start_time = time.time()

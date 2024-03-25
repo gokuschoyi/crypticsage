@@ -5,7 +5,8 @@ import IntermediateForecastChart from './IntermediateForecastChart'
 import { useSelector } from 'react-redux'
 
 const WganTrainingResults = ({
-    predictionChartPalette
+    predictionChartPalette,
+    metricsChartReload
 }) => {
     const epochResults = useSelector(state => state.cryptoModule.modelData.epoch_results)
     const intermediate_forecasts = useSelector(state => state.cryptoModule.modelData.wgan_intermediate_forecast)
@@ -20,6 +21,7 @@ const WganTrainingResults = ({
                                 epochResults={epochResults}
                                 type={'losses'}
                                 predictionsPalette={predictionChartPalette}
+                                metricsChartReload={metricsChartReload}
                             />
                         </Box>
                     </Grid>
@@ -30,6 +32,7 @@ const WganTrainingResults = ({
                                 epochResults={epochResults}
                                 type={'training_metrics'}
                                 predictionsPalette={predictionChartPalette}
+                                metricsChartReload={metricsChartReload}
                             />
                         </Box>
                     </Grid>
@@ -41,6 +44,7 @@ const WganTrainingResults = ({
                                     epochResults={epochResults}
                                     type={'validation_metrics'}
                                     predictionsPalette={predictionChartPalette}
+                                    metricsChartReload={metricsChartReload}
                                 />
                             </Box>
                         </Grid>

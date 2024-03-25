@@ -10,8 +10,6 @@ import InitialForecastLineChart from './InitialForecastLineChart';
 
 import { ErrorBoundary } from "react-error-boundary";
 
-
-
 import {
     AspectRatioIcon,
     ArrowDropDownIcon,
@@ -22,7 +20,6 @@ import {
 } from '../../../../global/Icons'
 
 import {
-    checkIfModelDataExists,
     makeWganPrediction,
     renameModel,
     deleteModelForUser,
@@ -32,7 +29,6 @@ import {
 import {
     setNewForecastData,
     renameModel as renameModelInRedux,
-    setModelDataAvailableFlag,
     resetCurrentModelData,
     setUserModels
 } from '../../modules/CryptoModuleSlice'
@@ -73,21 +69,48 @@ const generateMSESteps = (period) => {
     }
 };
 
+const TalibFuncSummary = ({ query }) => {
+    const { payload } = query
+    const { func_query, func_param_input_keys, func_param_optional_input_keys } = payload
+    const { name } = func_query
+
+    const [openIndicator, setOpenIndicator] = useState(''); // for opening and closing the indicator details
+    return (
+        <Grid item xs={12} sm={6} md={6} lg={6} xl={3}>
+            <Paper elevation={4} className='single-indicator-saved'>
+                <Box display='flex' flexDirection='row' alignItems='center' justifyContent={'space-between'}>
+                    <Box display='flex' flexDirection='row' alignItems='center' gap={'6px'} pl={1}>
+                        <Dot color='red' />
+                        <Typography variant='body2'>{name}</Typography>
+                    </Box>
+                    <IconButton size='small' aria-label="update" className='small-icon' color="secondary" onClick={() => setOpenIndicator((prev) => { if (prev === name) { return '' } else { return name } })}>
+                        {openIndicator === name ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+                    </IconButton>
+                </Box>
+                <Collapse in={openIndicator === name}>
+                    <Box display='flex' flexDirection='column' alignItems={'start'} pl={2}>
+                        {Object.keys(func_param_input_keys).map((key, index) => (
+                            <Typography key={index} variant='body2'>{key}</Typography>
+                        ))}
+                        {Object.keys(func_param_optional_input_keys).map((key, index) => {
+                            const value = func_query[key];
+                            return (
+                                <Typography key={index} variant='body2'>
+                                    {key} : {value !== undefined ? value : 'Not available'}
+                                </Typography>
+                            );
+                        })}
+                    </Box>
+                </Collapse>
+            </Paper>
+        </Grid>
+    )
+}
+
 const SavedModelsWGANGP = ({
     selected_ticker_period,
     selected_ticker_name,
 }) => {
-    const theme = useTheme()
-    const dispatch = useDispatch()
-    const sm = useMediaQuery(theme.breakpoints.down('sm'));
-    const token = useSelector(state => state.auth.accessToken);
-    const ohlcData = useSelector(state => state.cryptoModule.cryptoDataInDb)
-    const user_models_redux = useSelector(state => state.cryptoModule.userModels).filter(model => model.model_type === 'WGAN-GP')
-    const [toShowModelId, setToShowModelId] = useState(null);
-    const [open, setOpen] = useState(false);
-    const [openIndicator, setOpenIndicator] = useState(''); // for opening and closing the indicator details
-
-
     const defaultselectedSavedModelData = {
         model_id: null,
         model_created_date: null,
@@ -104,7 +127,6 @@ const SavedModelsWGANGP = ({
             wgan_final_forecast: null,
         }
     }
-
     const [selectedSavedModelData, setSelectedSavedModelData] = useState(defaultselectedSavedModelData);
 
     const {
@@ -118,12 +140,19 @@ const SavedModelsWGANGP = ({
     const {
         epoch_results,
         train_duration,
-        correlation_data,
         training_parameters,
         talibExecuteQueries,
-        wgan_intermediate_forecast,
-        wgan_final_forecast,
     } = model_data;
+
+    const theme = useTheme()
+    const dispatch = useDispatch()
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    const token = useSelector(state => state.auth.accessToken);
+    const ohlcData = useSelector(state => state.cryptoModule.cryptoDataInDb)
+    const user_models_redux = useSelector(state => state.cryptoModule.userModels).filter(model => model.model_type === 'WGAN-GP')
+    const [toShowModelId, setToShowModelId] = useState(null);
+    const [modelStatusColor, setModelStatusColor] = useState('red')
+    const [open, setOpen] = useState(false);
 
     const [modelRMSE, setModelRMSE] = useState([])
     const [selectedRMSEIndex, setSelectedRMSEIndex] = useState(0)
@@ -134,76 +163,88 @@ const SavedModelsWGANGP = ({
     const [latestForecastData, setLatestForecastData] = useState({})
     const [selectedForecastData, setSelectedForecastData] = useState([])
 
-    // console.log(latestForecastData)
-
-    const handleShowModelDetails = ({ modelId, m_name }) => {
-        const modelData = user_models_redux.find((model) => model.model_id === modelId);
-
-        if (selectedSavedModelData?.model_id === modelId) {
-            setOpen((prevOpen) => !prevOpen);
+    const handleShowSavedModelDetails = ({ modelId }) => {
+        if (modelId === toShowModelId) {
+            setOpen(false);
+            setToShowModelId(null);
         } else {
+            setToShowModelId(modelId);
             setOpen(true);
+            setSelectedRMSEIndex(0)
         }
+    }
 
-        setSelectedSavedModelData({ ...modelData });
+    useEffect(() => {
+        if (toShowModelId !== null) {
+            console.log('Loading selected saved model data...',toShowModelId)
+            const modelData = user_models_redux.find((model) => model.model_id === toShowModelId);
+            if (modelData) {
+                const modelAvailableInDb = modelData.model_data_available
+                setModelStatusColor(modelAvailableInDb ? 'green' : 'red')
 
-        if (modelId === toShowModelId && open === true) {
-            setToShowModelId(null)
-            setDefaultModelName('')
-            setModelStatusColor('red')
-            setModelRMSE([])
-            // setLatestForecastData({})
-            // setSelectedForecastData([])
-        } else {
-            // console.log('modelData', modelId, m_name, modelData)
-            setToShowModelId(modelId)
-            setDefaultModelName(m_name)
-            setModelStatusColor('red')
+                const lookAhead = modelData.model_data.training_parameters.lookAhead
+                const predictionFlag = modelData.model_data.training_parameters.multiSelectValue
 
-            setLatestForecastData(modelData.model_data.latest_forecast_result)
-            setSelectedForecastData([])
-            const { value, unit } = generateMSESteps(selected_ticker_period)
-            const rmse = []
-            const res_rmse = modelData.model_data.wgan_final_forecast.rmse
-            Object.keys(res_rmse).forEach((key) => {
-                const new_key = key.split('_')[1]
-                rmse.push({
-                    name: `+${value * (parseInt(new_key))}${unit}`,
-                    rmse: res_rmse[key]
+                const forecast = modelData.model_data.wgan_final_forecast.predictions.slice(-lookAhead) // the forecast made at the end of the training
+                const firstDate = new Date(forecast[0].date).getTime()
+                const lastDate = new Date(forecast[forecast.length - 1].date).getTime()
+                const toCompareActualValues = ohlcData.filter(ticker => ticker.openTime >= firstDate && ticker.openTime <= lastDate) // actual values for the forecast period
+
+                const actualValuesAdded = forecast.map((obj, index) => {
+                    return {
+                        ...obj,
+                        actual: toCompareActualValues[index] !== undefined ? toCompareActualValues[index][predictionFlag] : null
+                    }
                 })
-            })
-            setModelRMSE(rmse)
 
-            const lookAhead = modelData.model_data.training_parameters.lookAhead
-            const predictionFlag = modelData.model_data.training_parameters.multiSelectValue
+                const final = {}
+                Object.keys(forecast[0])
+                    .filter(key => key !== "date" && key !== 'actual')
+                    .forEach((key, index) => (
+                        final[key] = forecast.map((obj, i) =>
+                        ({
+                            openTime: obj.date,
+                            predicted: obj[key],
+                            actual: actualValuesAdded[i].actual
+                        })
+                        ))
+                    )
+                setAllPredictions(final)
+                setSelectedPrediction(final[`${selectedRMSEIndex}`])
+                setDefaultModelName(modelData.model_name)
+                setSelectedSavedModelData({ ...modelData })
 
-            const forecast = modelData.model_data.wgan_final_forecast.predictions.slice(-lookAhead) // the forecast made at the end of the training
-            const firstDate = new Date(forecast[0].date).getTime()
-            const lastDate = new Date(forecast[forecast.length - 1].date).getTime()
-            const toCompareActualValues = ohlcData.filter(ticker => ticker.openTime >= firstDate && ticker.openTime <= lastDate) // actual values for the forecast period
-
-            const actualValuesAdded = forecast.map((obj, index) => {
-                return {
-                    ...obj,
-                    actual: toCompareActualValues[index] !== undefined ? toCompareActualValues[index][predictionFlag] : null
-                }
-            })
-
-            const final = {}
-            Object.keys(forecast[0])
-                .filter(key => key !== "date" && key !== 'actual')
-                .forEach((key, index) => (
-                    final[key] = forecast.map((obj, i) =>
-                    ({
-                        openTime: obj.date,
-                        predicted: obj[key],
-                        actual: actualValuesAdded[i].actual
+                const { value, unit } = generateMSESteps(selected_ticker_period)
+                const rmse = []
+                const res_rmse = modelData.model_data.wgan_final_forecast.rmse
+                Object.keys(res_rmse).forEach((key) => {
+                    const new_key = key.split('_')[1]
+                    rmse.push({
+                        name: `+${value * (parseInt(new_key))}${unit}`,
+                        rmse: res_rmse[key]
                     })
-                    ))
-                )
-            setAllPredictions(final)
-            setSelectedPrediction(final[`${selectedRMSEIndex}`])
+                })
+                setModelRMSE(rmse)
+                setLatestForecastData(modelData.model_data.latest_forecast_result)
+            }
+
+            return () => {
+                console.log('cleaning up ...')
+                // setOpen(false)
+                // setToShowModelId(null)
+                setDefaultModelName('')
+                setSelectedSavedModelData(defaultselectedSavedModelData)
+                setModelRMSE([])
+                setLatestForecastData({})
+            }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [toShowModelId])
+
+    const handleLocalClose = () => {
+        setToShowModelId(null)
+        setOpen(false)
+        // handleExpandedSelectedModelClose()
     }
 
     useEffect(() => {
@@ -212,59 +253,26 @@ const SavedModelsWGANGP = ({
         }
     }, [selectedRMSEIndex, allPredictions])
 
-    const [modelStatusColor, setModelStatusColor] = useState('red')
-    useEffect(() => {
-        // console.log('UE from saved model Check')
-        const selectedModel = user_models_redux.find((model) => model.model_id === toShowModelId)
-        if (toShowModelId !== null) {
-            const modelAvailableInDb = selectedModel?.model_data_available
-            // console.log(modelAvailableInDb)
-
-            if (modelAvailableInDb === undefined) {
-                const payload = {
-                    model_id: toShowModelId,
-                    modelType: 'WGAN-GP',
-                }
-
-                checkIfModelDataExists({
-                    token, payload
-                })
-                    .then((res) => {
-                        // console.log(res.data.message, res.data.status)
-                        dispatch(setModelDataAvailableFlag({ model_id: toShowModelId, status: res.data.status }))
-                        if (res.data.status) {
-                            setModelStatusColor('green')
-                        } else {
-                            setModelStatusColor('red')
-                        }
-                    })
-                    .catch((err) => {
-                        console.log(err)
-                    })
-            } else {
-                if (modelAvailableInDb) {
-                    setModelStatusColor('green')
-                } else {
-                    setModelStatusColor('red')
-                }
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [toShowModelId])
+    const [trainingParamsCollapse, setTrainingParamsCollapse] = useState(false)
+    const handleTrainingParametersCollapse = () => {
+        setTrainingParamsCollapse(!trainingParamsCollapse)
+    }
 
     const [defaultModelName, setDefaultModelName] = useState('')
     const [showModelNameChangeAction, setShowModelNameChangeAction] = useState(false)
-    const userId = useSelector(state => state.auth.uid)
 
     const handleModelDeletFromSaved = ({ model_id }) => {
         console.log('clicked', model_id)
-        deleteModelForUser({ token, model_id })
+        deleteModelForUser({ token, model_id, model_type: 'WGAN-GP' })
             .then((res) => {
                 Success(res.data.message)
-                if (model_id === model_data.model_id) {
+                setOpen(false)
+                setToShowModelId(null)
+                if (model_id === selectedSavedModelData.model_id) {
+                    // console.log('same model id resetting redux', selectedSavedModelData.model_id, model_id)
                     dispatch(resetCurrentModelData())
                 }
-                getUserModels({ token, payload: { user_id: userId } })
+                getUserModels({ token })
                     .then((res) => {
                         dispatch(setUserModels(res.data.models))
                     })
@@ -272,11 +280,6 @@ const SavedModelsWGANGP = ({
             .catch((err) => {
                 console.log(err)
             })
-    }
-
-    const [trainingParamsCollapse, setTrainingParamsCollapse] = useState(false)
-    const handleTrainingParametersCollapse = () => {
-        setTrainingParamsCollapse(!trainingParamsCollapse)
     }
 
     const handleNewModelName = (e) => {
@@ -309,12 +312,6 @@ const SavedModelsWGANGP = ({
     const revertModelNameChange = () => {
         console.log('Revert modelName: ', model_name)
         setDefaultModelName(model_name)
-    }
-
-    const handleLocalClose = () => {
-        setToShowModelId(null)
-        setOpen(false)
-        // handleExpandedSelectedModelClose()
     }
 
     useEffect(() => {
@@ -441,7 +438,7 @@ const SavedModelsWGANGP = ({
                                 <Box display='flex'>
                                     <Tooltip placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                                         <span>
-                                            <IconButton onClick={(e) => handleShowModelDetails({ modelId: model_id, m_name: model_name })} sx={{ padding: '6px', color: toShowModelId === model_id ? `${theme.palette.primary.main}` : `${theme.palette.text.primary}` }} >
+                                            <IconButton onClick={(e) => handleShowSavedModelDetails({ modelId: model_id, m_name: model_name })} sx={{ padding: '6px', color: toShowModelId === model_id ? `${theme.palette.primary.main}` : `${theme.palette.text.primary}` }} >
                                                 <AspectRatioIcon className='small-icon' />
                                             </IconButton>
                                         </span>
@@ -605,41 +602,9 @@ const SavedModelsWGANGP = ({
                                                 </Typography>
                                                 <Box className='selected-indicators-saved-box'>
                                                     <Grid container spacing={1}>
-                                                        {talibExecuteQueries.map((query, index) => {
-                                                            const { payload } = query
-                                                            const { func_query, func_param_input_keys, func_param_optional_input_keys } = payload
-                                                            const { name } = func_query
-                                                            return (
-                                                                <Grid item xs={12} sm={6} md={6} lg={6} xl={3} key={index}>
-                                                                    <Paper elevation={4} key={index} className='single-indicator-saved'>
-                                                                        <Box display='flex' flexDirection='row' alignItems='center' justifyContent={'space-between'}>
-                                                                            <Box display='flex' flexDirection='row' alignItems='center' gap={'6px'} pl={1}>
-                                                                                <Dot color='red' />
-                                                                                <Typography key={index} variant='body2'>{name}</Typography>
-                                                                            </Box>
-                                                                            <IconButton size='small' aria-label="update" className='small-icon' color="secondary" onClick={() => setOpenIndicator((prev) => { if (prev === name) { return '' } else { return name } })}>
-                                                                                {openIndicator === name ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
-                                                                            </IconButton>
-                                                                        </Box>
-                                                                        <Collapse in={openIndicator === name}>
-                                                                            <Box display='flex' flexDirection='column' alignItems={'start'} pl={2}>
-                                                                                {Object.keys(func_param_input_keys).map((key, index) => (
-                                                                                    <Typography key={index} variant='body2'>{key}</Typography>
-                                                                                ))}
-                                                                                {Object.keys(func_param_optional_input_keys).map((key, index) => {
-                                                                                    const value = func_query[key];
-                                                                                    return (
-                                                                                        <Typography key={index} variant='body2'>
-                                                                                            {key} : {value !== undefined ? value : 'Not available'}
-                                                                                        </Typography>
-                                                                                    );
-                                                                                })}
-                                                                            </Box>
-                                                                        </Collapse>
-                                                                    </Paper>
-                                                                </Grid>
-                                                            )
-                                                        })}
+                                                        {talibExecuteQueries.map((query, index) =>
+                                                            <TalibFuncSummary key={index} query={query} />
+                                                        )}
                                                     </Grid>
                                                 </Box>
                                             </Box>

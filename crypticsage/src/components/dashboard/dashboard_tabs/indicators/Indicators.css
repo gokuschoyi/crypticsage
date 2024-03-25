@@ -739,6 +739,44 @@ tr:hover .prediction-mse {
     }
 }
 
+.saved-model-title{
+    display: flex;
+    flex-direction: row;
+    height:32px;
+    gap:8px;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.training-param-name{
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+}
+
+.wgan-options{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.model-chart-action-container {
+    padding-top: 4px;
+    display: flex;
+    flex-direction: row;
+    gap:4px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.tp-loader-when-collapsed{
+    padding-left: 4px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
 @media screen and (min-width: 1400px) {
     .crypto-stocks-table-module {
         width: 1200px;
@@ -764,7 +802,7 @@ tr:hover .prediction-mse {
 
 @media screen and (max-width:1200px) {
     .batch-end-text {
-        width: 140px;
+        width: 110px;
     }
     .wgan-prediction-tolerance-slider{
         flex-direction: column;
@@ -861,10 +899,6 @@ tr:hover .prediction-mse {
         padding-bottom: 8px;
     }
 
-    .crypto-stock-button {
-        margin-left: 32px;
-    }
-
     .last-updated-date-refresh {
         display: flex;
         justify-content: space-between;
@@ -895,11 +929,6 @@ tr:hover .prediction-mse {
         transition: all 0.2s ease-in-out;
     }
 
-    /* .predictions-legend {
-        font-size: 8px;
-        transition: all 0.2s ease-in-out;
-    }
- */
     .model-hist-main-box {
         flex-direction: column;
         align-items: flex-start;
@@ -944,6 +973,10 @@ tr:hover .prediction-mse {
     }
 
     .model-chart-action-container {
+        display: flex;
+        flex-direction: column;
+        gap:4px;
+        align-items: flex-start;
         justify-content: space-between;
         width: 100%;
     }
@@ -953,11 +986,6 @@ tr:hover .prediction-mse {
         align-items: start;
         padding-bottom: 8px;
     }
-
-    /* .ticker-period-selector-top {
-        flex-direction: column;
-        align-items: flex-start;
-    } */
 
     .tooltip-prediction-box {
         justify-content: space-between;
@@ -981,9 +1009,24 @@ tr:hover .prediction-mse {
         flex-direction: column;
     }
 
-    /* .border-right {
-        border-right: 1px solid white !important;
-    } */
+    .saved-model-title{
+        flex-direction: column;
+        height: auto;
+        /* gap: 8px; */
+    }
+
+    .training-param-name{
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tp-loader-when-collapsed{
+        flex-direction: column;
+        gap:0px;
+        align-items: flex-start;
+        padding-left: 4px;
+        padding-bottom: 4px;
+    }
 }
 
 #wordToUnderline {

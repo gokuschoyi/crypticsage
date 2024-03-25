@@ -16,7 +16,10 @@ const DeleteCurrentModal = ({ modelProcessDurationRef }) => {
     const token = useSelector(state => state.auth.accessToken);
     const model_id = useSelector(state => state.cryptoModule.modelData.model_id)
     const modelType = useSelector(state => state.cryptoModule.modelData.training_parameters.modelType)
+    const period = useSelector(state => state.cryptoModule.selectedTickerPeriod)
+    const ticker_name = useSelector(state => state.cryptoModule.selectedTickerName)
     const [deleteModelOpen, setDeleteModelOpen] = useState(false)
+    const asset_type = window.location.href.split("/dashboard/indicators/")[1].split("/")[0]
 
     const handleClickOpen = () => {
         setDeleteModelOpen(true);
@@ -28,7 +31,17 @@ const DeleteCurrentModal = ({ modelProcessDurationRef }) => {
 
 
     const handleDeleteModel = () => {
-        deleteModel({ token, payload: { model_id, model_type: modelType } })
+        const payload = {
+            model_id,
+            model_type: modelType,
+            asset_type: asset_type,
+            ticker_name,
+            period
+        }
+        
+        deleteModel({
+            token, payload
+        })
             .then((res) => {
                 Success(res.data.message)
                 modelProcessDurationRef.current = ''

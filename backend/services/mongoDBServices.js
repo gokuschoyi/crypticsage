@@ -2584,17 +2584,139 @@ const fetchUserModels = async (user_id) => {
                     model_data: m_data
                 }
             })
-            return userModels
+            // return userModels
         }
         else {
             return []
         }
+
+        const additionalData = await getAdditionalTrainingRunResults(user_id)
+        if (additionalData.length > 0) {
+            // console.log('Additional data found')
+            const combined = userModels.map((model) => {
+                const matchingObj = additionalData.find((ob) => ob.model_id === model.model_id);
+                if (matchingObj) {
+                    return {
+                        ...model,
+                        additional_training_run_results: matchingObj.additional_training_run_results // Corrected variable name to `matchingObj`
+                    };
+                } else {
+                    return model; // Added else block to return original object if no match is found
+                }
+            });
+            return combined
+        }
+
+        return userModels
 
     } catch (error) {
         log.error(error.stack)
         throw error
     }
 }
+
+const addNewWganTrainingResults = async (data) => {
+    const {
+        uid,
+        model_created_date,
+        model_id,
+        epoch_results,
+        train_duration,
+        training_parameters,
+        wgan_intermediate_forecast,
+        wgan_final_forecast
+    } = data
+
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const model_collection = db.collection('models')
+
+        const data_to_update = {
+            epoch_results,
+            train_duration,
+            training_parameters,
+            wgan_intermediate_forecast,
+            wgan_final_forecast,
+            model_created_date
+        }
+
+        const query = { model_id, user_id: uid }
+        const updated = await model_collection.updateOne(query,
+            {
+                $push: { ['additional_training_run_results']: data_to_update }
+            }
+        )
+
+        return updated
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const getAdditionalTrainingRunResults = async (uid) => {
+    const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+    const model_collection = db.collection('models')
+
+    // Fetch additional trainining results for wgan models
+    const proj_field = {
+        _id: 0,
+        model_id: 1,
+        additional_training_run_results: 1
+    }
+
+    const pipeline = [
+        {
+            $match: {
+                user_id: uid,
+                model_type: 'WGAN-GP',
+                additional_training_run_results: { $exists: true }
+            }
+        },
+        {
+            $addFields: {
+                additional_training_run_results: {
+                    $map: {
+                        input: '$additional_training_run_results',
+                        as: 'result',
+                        in: {
+                            $mergeObjects: [
+                                { latest_forecast_result: {} },
+                                '$$result',
+                                {
+                                    wgan_final_forecast: {
+                                        predictions: {
+                                            $slice: [
+                                                '$$result.wgan_final_forecast.predictions',
+                                                { $multiply: ['$$result.training_parameters.lookAhead', -1] }
+                                            ]
+                                        },
+                                        rmse: '$$result.wgan_final_forecast.rmse'
+                                    },
+                                    epoch_results: { $slice: ['$$result.epoch_results', -1] }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            $project: proj_field
+        }
+    ]
+
+    let additional_data
+    try {
+        additional_data = await model_collection.aggregate(pipeline).toArray()
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+
+    return additional_data
+}
+
 
 const temp_setLSTMRmse = async (model_id, rmse) => {
     try {
@@ -2711,6 +2833,7 @@ const deleteUserModel = async (user_id, model_id) => {
 module.exports = {
     getUserByEmail
     , temp_setLSTMRmse
+    , addNewWganTrainingResults
     , checkUserExists
     , insertNewUser
     , makeUserLessonStatus

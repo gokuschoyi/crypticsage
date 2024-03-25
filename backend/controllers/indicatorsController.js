@@ -306,10 +306,10 @@ const checkIfValidationIsPossible = (
 const calculateCoRelationMatrix = async (req, res) => {
     const { transformation_order, talibExecuteQueries } = req.body.payload
     const { db_query: { asset_type, ticker_name, period } } = talibExecuteQueries[0].payload;
-    const uid = res.locals.data.uid;
-    const redis_key_for_hist_data = `${uid}_${asset_type}-${ticker_name}-${period}_historical_data`
+    // const uid = res.locals.data.uid;
+    // const redis_key_for_hist_data = `${uid}_${asset_type}-${ticker_name}-${period}_historical_data`
 
-    log.info(`Redis key for re train : ${redis_key_for_hist_data}`)
+    // log.info(`Redis key for re train : ${redis_key_for_hist_data}`)
     try {
         const historicalData = await fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period })
         const talibResult = await TFMUtil.processSelectedFunctionsForModelTraining({ selectedFunctions: talibExecuteQueries, tickerHistory: historicalData })
@@ -483,14 +483,6 @@ const process_data_request = async ({
                     })
                 })
 
-                const task = pyClient.createTask("celeryTasks.trainModel");
-                task.delay({
-                    message: 'Request from node to start WGAN_GP model training',
-                    uid,
-                    m_id: model_id,
-                    model_proces_id: redis_key_for_hist_data,
-                    existing_data: false
-                });
                 redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(5) : Features saved to redis and Celery worker called...` }))
                 break;
             default:
@@ -525,7 +517,7 @@ const procssModelTraining = async (req, res) => {
             console.log('Model parameters : ', model_training_parameters)
             const { db_query } = fTalibExecuteQuery[0].payload;
             const { asset_type, ticker_name, period } = db_query
-            const redis_key_for_hist_data = `${uid}_${asset_type}-${ticker_name}-${period}_historical_data`
+            const redis_key_for_hist_data = `${uid}_${model_id}_${asset_type}-${ticker_name}-${period}_historical_data`
 
             console.log('GAN redis data key name : ', redis_key_for_hist_data)
 
@@ -623,7 +615,7 @@ const procssModelTraining = async (req, res) => {
                     let { train_possible, test_possible } = checkIfValidationIsPossible(slice_index, time_step, look_ahead, training_size, batchSize, do_validation)
                     if (train_possible.status && test_possible.status) {
                         let samples = test_possible.samples
-                        process_data_request({
+                        await process_data_request({
                             uid,
                             model_id,
                             asset_type,
@@ -634,6 +626,16 @@ const procssModelTraining = async (req, res) => {
                             redis_key_for_hist_data,
                             samples
                         })
+
+                        const task = pyClient.createTask("celeryTasks.trainModel");
+                        task.delay({
+                            message: 'Request from node to start WGAN_GP model training',
+                            uid,
+                            m_id: model_id,
+                            model_proces_id: redis_key_for_hist_data,
+                            existing_data: false
+                        });
+
                         res.status(200).json({ message: 'Gan model training started', finalRs: [], job_id: model_id });
                     } else {
                         res.status(400).json({
@@ -649,7 +651,7 @@ const procssModelTraining = async (req, res) => {
 
                 if (train_possible.status && test_possible.status) {
                     let samples = test_possible.samples
-                    process_data_request({
+                    await process_data_request({
                         uid,
                         model_id,
                         asset_type,
@@ -660,6 +662,15 @@ const procssModelTraining = async (req, res) => {
                         redis_key_for_hist_data,
                         samples
                     })
+
+                    const task = pyClient.createTask("celeryTasks.trainModel");
+                    task.delay({
+                        message: 'Request from node to start WGAN_GP model training',
+                        uid,
+                        m_id: model_id,
+                        model_proces_id: redis_key_for_hist_data,
+                        existing_data: false
+                    });
                     res.status(200).json({ message: 'Gan model training started', finalRs: [], job_id: model_id });
                 } else {
                     res.status(400).json({
@@ -766,7 +777,7 @@ const retrainModel = async (req, res) => {
 
     log.info(`Re-Training model : ${model_id}`) // add asset type, tickername and period from FE
     const uid = res.locals.data.uid;
-    const redis_key_for_hist_data = `${uid}_${asset_type}-${ticker_name}-${period}_historical_data`
+    const redis_key_for_hist_data = `${uid}_${model_id}_${asset_type}-${ticker_name}-${period}_historical_data`
     log.info(`Redis key for re train : ${redis_key_for_hist_data}`)
     try {
         const isHistoricalDataPresent = await wganpgDataRedis.exists(redis_key_for_hist_data)
@@ -788,7 +799,7 @@ const retrainModel = async (req, res) => {
                     uid,
                     m_id: model_id,
                     model_proces_id: redis_key_for_hist_data,
-                    existing_data: true,
+                    existing_data: false, // check this stuff later
                     checkpoint
                 });
                 res.status(200).json({ message: 'Model re-training started', job_id: model_id });
@@ -810,7 +821,7 @@ const retrainModel = async (req, res) => {
                     uid,
                     m_id: model_id,
                     model_proces_id: redis_key_for_hist_data,
-                    existing_data: true,
+                    existing_data: false, // check this stuff later
                     checkpoint
                 });
                 res.status(200).json({ message: 'Model re-training started', job_id: model_id });
@@ -818,7 +829,48 @@ const retrainModel = async (req, res) => {
 
         } else {
             log.warn('No data exists for the parameters. Will require Full data fetch')
-            res.status(200).json({ message: 'No data exists for the parameters. Will require Full data fetch' })
+            const {
+                training_size,
+                time_step,
+                look_ahead,
+                batchSize,
+                do_validation,
+                slice_index,
+            } = fullRetrainParams
+
+            let { train_possible, test_possible } = checkIfValidationIsPossible(slice_index, time_step, look_ahead, training_size, batchSize, do_validation)
+            if (train_possible.status && test_possible.status) {
+                let samples = test_possible.samples
+                await process_data_request({
+                    uid,
+                    model_id,
+                    asset_type,
+                    ticker_name,
+                    period,
+                    fTalibExecuteQuery,
+                    model_training_parameters: fullRetrainParams,
+                    redis_key_for_hist_data,
+                    samples
+                })
+
+                // call the celery python worker
+                const task = pyClient.createTask("celeryTasks.retrainModel");
+                task.delay({
+                    message: 'Request from node to retrain model.',
+                    uid,
+                    m_id: model_id,
+                    model_proces_id: redis_key_for_hist_data,
+                    existing_data: false,
+                    checkpoint
+                });
+                res.status(200).json({ message: 'No data exists for the parameters. Will require Full data fetch', train_possible, test_possible })
+            } else {
+                res.status(400).json({
+                    message: 'Incorrect training, parameters. Adjust them and start training again',
+                    train_possible,
+                    test_possible
+                })
+            }
         }
     } catch (error) {
         log.error(error.stack)
@@ -827,9 +879,9 @@ const retrainModel = async (req, res) => {
 }
 
 const getModel = async (req, res) => {
-    const { user_id } = req.body
+    const uid = res.locals.data.uid
     try {
-        const models = await MDBServices.fetchUserModels(user_id)
+        const models = await MDBServices.fetchUserModels(uid)
         res.status(200).json({ message: 'Model fetched successfully', models })
     } catch (err) {
         log.error(err.stack)
@@ -905,16 +957,39 @@ const saveModel = async (req, res) => {
     }
 }
 
+const updateNewTrainingResults = async (req, res) => {
+    const uid = res.locals.data.uid;
+    const data = { ...req.body.payload, uid }
+
+    try {
+        const wgan_new_prediction_update = await MDBServices.addNewWganTrainingResults(data)
+        res.status(200).json({ message: 'Model updated successfully', wgan_new_prediction_update, user_id: uid })
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model update failed' })
+    }
+}
+
 const deleteModel = async (req, res) => {
-    const { model_id, model_type } = req.body
+    const uid = res.locals.data.uid;
+    const { model_id, model_type, asset_type, ticker_name, period } = req.body
     try {
         let deleted
         if (model_type === 'LSTM') {
             deleted = await deleteModelFromLocalDirectory(model_id)
         } else if (model_type === 'WGAN-GP') {
-            deleted = deleteWGANModelAndLogs(model_id)
+            deleted = await deleteWGANModelAndLogs(model_id)
         }
 
+        const redis_key_for_hist_data = `${uid}_${model_id}_${asset_type}-${ticker_name}-${period}_historical_data`
+        console.log('REDIS KEY TO REMOVE : ', redis_key_for_hist_data)
+        const dataPresent = await wganpgDataRedis.exists(redis_key_for_hist_data)
+        if (dataPresent) {
+            await wganpgDataRedis.del(redis_key_for_hist_data)
+            console.log('Data from redis cleared')
+        } else {
+            console.log('No data for that key present')
+        }
         if (deleted) {
             res.status(200).json({ message: 'Model deleted successfully' })
         }
@@ -927,11 +1002,16 @@ const deleteModel = async (req, res) => {
 
 const deleteUserModel = async (req, res) => {
     try {
-        const { model_id } = req.body
+        const { model_id, model_type } = req.body
         const uid = res.locals.data.uid;
         const user_model_deleted = await MDBServices.deleteUserModel(uid, model_id)
-        const deleted = await deleteModelFromLocalDirectory(model_id)
-        if (deleted && user_model_deleted) {
+        let model_deleted
+        if (model_type === 'LSTM') {
+            model_deleted = await deleteModelFromLocalDirectory(model_id)
+        } else if (model_type === 'WGAN-GP') {
+            model_deleted = await deleteWGANModelAndLogs(model_id)
+        }
+        if (model_deleted && user_model_deleted) {
             res.status(200).json({ message: 'Model deleted successfully' })
         }
     } catch (error) {
@@ -1315,25 +1395,45 @@ const renameModel = async (req, res) => {
     }
 }
 
+const getSavedModelCheckPoint = (model_id) => {
+    const model_path = `./worker_celery/saved_models/${model_id}`
+    let checkpoints = []
+    if (fs.existsSync(model_path)) {
+        // console.log('Model data present')
+        checkpoints = fs.readdirSync(model_path, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name)
+            .filter(name => name.startsWith('checkpoint'));
+    } else {
+        console.log('Model data does not exist')
+    }
+    return checkpoints
+}
+
 const getModelCheckpoints = async (req, res) => {
     const { model_id } = req.query
-    let checkpoints = []
     try {
-        const model_path = `./worker_celery/saved_models/${model_id}`
-        if (fs.existsSync(model_path)) {
-            // console.log('Model data present')
-            checkpoints = fs.readdirSync(model_path, { withFileTypes: true })
-                .filter(dirent => dirent.isDirectory())
-                .map(dirent => dirent.name)
-                .filter(name => name.startsWith('checkpoint'));
-        } else {
-            console.log('Model data does not exist')
-        }
+        const checkpoints = getSavedModelCheckPoint(model_id)
         res.status(200).json({ message: 'Model checkpoints fetched successfully', checkpoints })
     } catch (error) {
         log.error(error.stack)
         res.status(400).json({ message: 'Model checkpoints fetching failed' })
     }
+}
+
+// celery test endpoint
+const testing = async (model_id) => {
+    // call the celery python worker
+    const task = pyClient.createTask("celeryTasks.testing");
+    const result = task.applyAsync([{
+        message: 'Request from node to test testing.',
+        model_id: model_id,
+        checkpoint: 'checkpoint_340'
+    }])
+
+    result.get(5000)
+        .then(data => console.log(data))
+        .catch(err => console.log(err))
 }
 
 
@@ -1412,6 +1512,7 @@ module.exports = {
     retrainModel,
     getModel,
     saveModel,
+    updateNewTrainingResults,
     deleteModel,
     deleteUserModel,
     checkIfModelExists,
@@ -1421,5 +1522,6 @@ module.exports = {
     renameModel,
     testNewModel,
     getModelCheckpoints,
-    checkIfValidationIsPossible
+    checkIfValidationIsPossible,
+    testing
 }
