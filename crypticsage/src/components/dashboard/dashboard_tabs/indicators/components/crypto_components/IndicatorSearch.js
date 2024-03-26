@@ -1,21 +1,21 @@
 import React from 'react'
-import { Box, Autocomplete, Button, Typography, TextField, Chip, useTheme } from '@mui/material'
-import { Dot } from '../../modules/CryptoModuleUtils'
+import { Box, Autocomplete, Button, TextField, Chip, useTheme, useMediaQuery } from '@mui/material'
 const IndicatorSearch = ({
     searchedFunctions,
-    selectedFunctions,
     transformedFunctionsList,
     handleSearchedFunctions,
     handleAddSelectedFunction,
 }) => {
     const theme = useTheme()
+    const lg = useMediaQuery(theme.breakpoints.down('lg'));
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
     return (
         <Box>
             <Box className='search-indicator-box' display='flex' flexDirection='row' alignItems='center' >
-                <Box className='function-selector' width='350px'>
+                <Box className='function-selector' width='100%' display={'flex'} flexDirection={'row'} gap={1}>
                     {transformedFunctionsList.length > 0 &&
                         <Autocomplete
-                            sx={{ backgroundColor: `${theme.palette.background.paperOne}` }}
+                            sx={{ backgroundColor: `${theme.palette.background.paperOne}`, width: lg ? sm ? '100%' : '400px' : '100%' }}
                             disableCloseOnSelect={true}
                             value={searchedFunctions}
                             size='small'
@@ -31,7 +31,7 @@ const IndicatorSearch = ({
                             }}
                             renderTags={(value, getTagProps) =>
                                 value.map((option, index) => (
-                                    <Chip variant="outlined" label={option.label} {...getTagProps({ index })} />
+                                    <Chip variant="outlined" size='small' label={option.label} {...getTagProps({ index })} />
                                 ))
                             }
                             renderInput={(params) => (
@@ -40,37 +40,18 @@ const IndicatorSearch = ({
                                     variant="filled"
                                     label="Search for a function"
                                     placeholder="Search..."
+                                    size='small'
                                 />
                             )}
                         />
                     }
                     {searchedFunctions.length > 0 &&
-                        <Box display='flex' alignItems='start' pt={1}>
+                        <Box display='flex' alignItems='start'>
                             <Button size='small' color='secondary' variant='outlined' onClick={handleAddSelectedFunction.bind(null)}>Add Functions</Button>
                         </Box>
                     }
                 </Box>
             </Box>
-            {selectedFunctions.length !== 0 &&
-                <Box display='flex' flexDirection='column' alignItems='start' pt={1} pb={2}>
-                    {selectedFunctions.map((funcRedux, index) => {
-                        const { hint, functions } = funcRedux;
-                        return (
-                            <Box key={index}>
-                                {functions.map((func, funcIndex) => {
-                                    const { outputAvailable } = func;
-                                    return (
-                                        <Box key={funcIndex} display='flex' flexDirection='row' gap='4px' alignItems='center'>
-                                            <Dot color={outputAvailable ? 'green' : 'red'} />
-                                            <Typography className='selected-function-hint' variant='custom' sx={{ textAlign: 'start' }}>{hint}</Typography>
-                                        </Box>
-                                    );
-                                })}
-                            </Box>
-                        );
-                    })}
-                </Box>
-            }
         </Box>
     )
 }

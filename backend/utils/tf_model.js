@@ -29,6 +29,7 @@ function displayDataInTable(data, name) {
 }
 
 const type = config.single_step_type_two
+const MAIN_MODEL = true
 
 /**
  * Creates a model with the given parameters
@@ -42,7 +43,7 @@ const type = config.single_step_type_two
 const createModel = (model_parama) => {
     const {
         model_type,
-        input_layer_shape,
+        input_layer_shape: time_step,
         look_ahead,
         feature_count,
     } = model_parama
@@ -60,7 +61,7 @@ const createModel = (model_parama) => {
                             filters: 64,
                             kernelSize: 2,
                             activation: 'relu',
-                            inputShape: [input_layer_shape, feature_count]
+                            inputShape: [time_step, feature_count]
                         }));
 
                         // Add a MaxPooling1D layer
@@ -94,7 +95,7 @@ const createModel = (model_parama) => {
                             filters: 32,
                             kernelSize: 3,
                             activation: 'relu',
-                            inputShape: [input_layer_shape, feature_count]
+                            inputShape: [time_step, feature_count]
                         }));
 
                         model.add(tf.layers.conv1d({
@@ -133,7 +134,7 @@ const createModel = (model_parama) => {
                         }));
                         break;
                     default:
-                        let n_input = input_layer_shape * feature_count
+                        let n_input = time_step * feature_count
                         let n_output = 1
                         model.add(tf.layers.dense({
                             units: 100,
@@ -146,11 +147,50 @@ const createModel = (model_parama) => {
                         break;
                 }
             } else {
-                model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', inputShape: [input_layer_shape, feature_count] }));
-                model.add(tf.layers.repeatVector({ n: look_ahead }));
-                model.add(tf.layers.dropout({ rate: 0.1 }));
-                model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', returnSequences: true }));
-                model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [look_ahead, lstm_units] }));
+                if (MAIN_MODEL) {
+                    model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', inputShape: [time_step, feature_count] })); // 14, 8
+                    model.add(tf.layers.repeatVector({ n: look_ahead })); // 5
+                    model.add(tf.layers.dropout({ rate: 0.1 }));
+                    model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', returnSequences: true }));
+                    model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [look_ahead, lstm_units] }));
+                } else {
+                    model.add(tf.layers.lstm({ units: 50, activation: 'relu', inputShape: [time_step, feature_count] }));
+                    model.add(tf.layers.repeatVector({ n: 5 }));
+                    model.add(tf.layers.dropout({ rate: 0.1 }));
+                    model.add(tf.layers.lstm({ units: 50, activation: 'relu', returnSequences: true }));
+                    model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [look_ahead, lstm_units] }));
+
+                    model.add(tf.layers.conv1d({
+                        filters: 32,
+                        kernelSize: 2,
+                        strides: 1,
+                        padding: 'same',
+                        batchInputShape: [null, look_ahead, 1]
+                    }))
+
+                    model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+
+                    model.add(tf.layers.bidirectional({
+                        layer: tf.layers.lstm({
+                            units: 64,
+                            activation: 'relu',
+                            returnSequences: false,
+                            dropout: 0.3,
+                            recurrentDropout: 0.0
+                        })
+                    }))
+
+                    model.add(tf.layers.dense({ units: 64, activation: 'linear' }))
+                    model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+                    model.add(tf.layers.dropout({ rate: 0.2 }))
+
+                    model.add(tf.layers.dense({ units: 32, activation: 'linear' }))
+                    model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+                    model.add(tf.layers.dropout({ rate: 0.2 }))
+
+                    model.add(tf.layers.dense({ units: look_ahead }))
+                    model.add(tf.layers.reshape({ targetShape: [look_ahead, 1] }))
+                }
             }
             break;
         default:

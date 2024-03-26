@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, FormControlLabel, Switch, TextField, useTheme, Autocomplete, Typography } from '@mui/material'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { toggleToolTipSwitch, toggleShowPredictionSwitch } from '../../modules/CryptoModuleSlice'
 
 const TICKER_PERIODS = [
@@ -16,46 +16,50 @@ const TICKER_PERIODS = [
 ]
 
 const MainChartOptions = ({
-    selectedTokenPeriod,
     handlePeriodChange,
     toolTipSwitchFlag,
     predictedVlauesRedux,
-    showPredictionSwitchFlag,
-    modelParams,
+    lookAhead,
     predictionLookAhead,
-    handleMainChartPredictionLookaAhead,
+    setPredictionLookAhead,
     actualFetchLength,
     ohlcDataLength,
 }) => {
     const theme = useTheme()
     const dispatch = useDispatch()
+    const showPredictionSwitchFlag = useSelector(state => state.cryptoModule.showPredictions)
+    const selectedTokenPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
+    const selectedTickerName = useSelector(state => state.cryptoModule.selectedTickerName)
     return (
         <Box className='ticker-period-selector-top' pl={2} pr={2} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' gap='10px'>
-            <Box className='autocomplete-select-box' width='200px'>
-                <Autocomplete
-                    size='small'
-                    disableClearable
-                    disablePortal={false}
-                    id="selec-stock-select"
-                    options={TICKER_PERIODS}
-                    value={selectedTokenPeriod} // Set the selected value
-                    onChange={(event, newValue) => handlePeriodChange(newValue)} // Handle value change
-                    sx={{ width: 'auto' }}
-                    renderInput={(params) => <TextField size='small' {...params}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: `${theme.palette.primary.main} !important`,
-                                }
-                            },
-                            '& .MuiInputBase-input': {
-                                height: '10px'
-                            },
-                        }}
-                        label="Select a period"
-                        color="secondary"
-                    />}
-                />
+            <Box display={'flex'} flexDirection={'row'} alignItems={'center'} gap={1}>
+                <Typography variant='h4' sx={{ textAlign: 'justify' }}>{selectedTickerName}</Typography>
+                <Box className='autocomplete-select-box' width='200px'>
+                    <Autocomplete
+                        size='small'
+                        disableClearable
+                        disablePortal={false}
+                        id="selec-stock-select"
+                        options={TICKER_PERIODS}
+                        value={selectedTokenPeriod} // Set the selected value
+                        onChange={(event, newValue) => handlePeriodChange(newValue)} // Handle value change
+                        sx={{ width: 'auto' }}
+                        renderInput={(params) => <TextField size='small' {...params}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': {
+                                        borderColor: `${theme.palette.primary.main} !important`,
+                                    }
+                                },
+                                '& .MuiInputBase-input': {
+                                    height: '10px'
+                                },
+                            }}
+                            label="Select a period"
+                            color="secondary"
+                        />}
+                    />
+                </Box>
             </Box>
             <Box className='tooltip-prediction-box'>
                 <Box className='tooltip-prediction-box-controls'>
@@ -68,7 +72,7 @@ const MainChartOptions = ({
                         checked={toolTipSwitchFlag}
                         onChange={() => dispatch(toggleToolTipSwitch())}
                     />
-                    {predictedVlauesRedux.length !== 0 &&
+                    {predictedVlauesRedux &&
                         <Box className='prediction-days'>
                             <FormControlLabel
                                 value="start"
@@ -85,9 +89,9 @@ const MainChartOptions = ({
                                     disableClearable
                                     disablePortal={false}
                                     id="selec-look-ahead-period"
-                                    options={Array.from({ length: modelParams.lookAhead }, (_, i) => `+${i + 1}`)}
+                                    options={Array.from({ length: lookAhead }, (_, i) => `+${i + 1}`)}
                                     value={`+${predictionLookAhead}`} // Set the selected value
-                                    onChange={(event, newValue) => handleMainChartPredictionLookaAhead(newValue)} // Handle value change
+                                    onChange={(event, newValue) => setPredictionLookAhead(parseInt(newValue.split('+')[1]))} // Handle value change
                                     sx={{ width: 'auto' }}
                                     renderInput={(params) => <TextField size='small' {...params}
                                         sx={{

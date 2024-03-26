@@ -9,22 +9,6 @@ const tf = require('@tensorflow/tfjs-node');
 router.post('/get_talib_desc', IController.getIndicatorDesc)
 router.post('/execute_talib_function', handleTokenRedisStorage, IController.executeTalibFunction)
 
-router.post('/start_model_training', IController.procssModelTraining)
-
-router.post('/get_model', IController.getModel)
-router.post('/save_model', IController.saveModel)
-router.post('/delete_model', IController.deleteModel)
-router.post('/delete_user_model', IController.deleteUserModel)
-
-router.post('/check_for_model', IController.checkIfModelExists)
-router.post('/get_model_result', IController.getModelResult)
-router.post('/rename_model', IController.renameModel)
-
-router.post('/make_new_prediction', IController.makeNewForecast)
-
-router.post('/generate_test_data', IController.generateTestData)
-
-
 // Test routes
 const checkDuplicates = async (req, res, next) => {
     const { ticker_name, period } = req.body;
@@ -39,8 +23,7 @@ const checkDuplicates = async (req, res, next) => {
     }
 }
 
-router.post('/check_duplicates', checkDuplicates)
-
+// Test route 2
 const tfTEst = async (req, res, next) => {
     const input = [
         [13, 22, 3, 42, 5],
@@ -69,6 +52,7 @@ const tfTEst = async (req, res, next) => {
     res.status(200).json({ message: 'testing tf', mean: mean.arraySync(), sub: tfSub.arraySync(), variance: variance.arraySync(), stdData, originalData })
 }
 
+router.post('/check_duplicates', checkDuplicates)
 router.post('/tf_test', tfTEst)
 
 module.exports = router

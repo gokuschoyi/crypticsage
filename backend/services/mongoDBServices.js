@@ -15,6 +15,8 @@ const IUtil = require('../utils/indicatorUtil')
 const CRYPTICSAGE_DATABASE_NAME = 'crypticsage'
 const HISTORICAL_DATABASE_NAME = 'historical_data'
 
+const fs = require('fs')
+
 // Create a client to the database - global client for all services below
 const mongoUri = config.mongoUri ?? '';
 const client = MongoClient.connect(mongoUri)
@@ -1838,6 +1840,12 @@ const fetchEntireHistDataFromDb = async ({ type, ticker_name, period }) => {
  */
 const fetchTickerHistDataFromDb = async (type, ticker_name, period, page_no, items_per_page, new_fetch_offset) => {
     try {
+        const meta_db = (await client).db(CRYPTICSAGE_DATABASE_NAME) // added total count from metadata
+        const meta_collection = meta_db.collection('binance_metadata')
+        const meta_data = await meta_collection.findOne({ ticker_name: ticker_name })
+        // @ts-ignore
+        const total_count = meta_data.data[period].ticker_count
+
         const db = (await client).db(HISTORICAL_DATABASE_NAME)
         const collection_name = `${type}_${ticker_name}_${period}`
         const collection = db.collection(collection_name)
@@ -1875,6 +1883,7 @@ const fetchTickerHistDataFromDb = async (type, ticker_name, period, page_no, ite
             t1.stopTimer(__filename.slice(__dirname.length + 1))
 
             output['ticker_name'] = ticker_name
+            output['total_count_db'] = total_count
             output['period'] = period
             output['page_no'] = page_no
             output['items_per_page'] = items_per_page
@@ -2402,7 +2411,7 @@ const isMetadatAvailable = async (ticker_name) => {
 res() */
 //<------------------------CRYPTO-STOCKS SERVICES-------------------------->
 
-const saveModelForUser = async (user_id, ticker_name, ticker_period, model_id, model_name, model_data) => {
+const saveModelForUser = async (user_id, ticker_name, ticker_period, model_id, model_name, model_type, model_data) => {
     try {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const model_collection = db.collection('models')
@@ -2416,6 +2425,7 @@ const saveModelForUser = async (user_id, ticker_name, ticker_period, model_id, m
                 user_id,
                 model_id,
                 model_name,
+                model_type,
                 model_created_date: new Date().getTime(),
                 ticker_name,
                 ticker_period,
@@ -2447,13 +2457,90 @@ const fetchUserModels = async (user_id) => {
             model_created_date: 1,
             ticker_name: 1,
             ticker_period: 1,
-            model_data: 1
+            model_type: 1,
+            model_data: {
+                $cond: {
+                    if: { $eq: ["$model_type", "LSTM"] },
+                    then: {
+                        $mergeObjects: [
+                            "$model_data",
+                            {
+                                predicted_result: {
+                                    $mergeObjects: [
+                                        "$model_data.predicted_result",
+                                        {
+                                            predictions_array: {
+                                                $slice: [
+                                                    "$model_data.predicted_result.predictions_array",
+                                                    { $multiply: ["$model_data.training_parameters.lookAhead", -1] }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    else: "$model_data"
+                }
+            }
         }
 
         const pipeline = [
             // Match documents with the specified user_id
             {
                 $match: { user_id }
+            },
+            {
+                $addFields: {
+                    'model_data.wgan_final_forecast.predictions': {
+                        $cond: {
+                            if: { $eq: ["$model_type", "WGAN-GP"] },
+                            then: {
+                                $slice: [
+                                    '$model_data.wgan_final_forecast.predictions',
+                                    { $multiply: ['$model_data.training_parameters.lookAhead', -1] }
+                                ]
+                            },
+                            else: "$$REMOVE" // This will remove the field if the condition is false
+                        }
+                    },
+                    'model_data.epoch_results': {
+                        $slice: ['$model_data.epoch_results', -1]
+                    },
+                }
+            },
+            {
+                $addFields: {
+                    'model_data.wgan_final_forecast': {
+                        $cond: {
+                            if: { $eq: ["$model_type", "LSTM"] },
+                            then: "$$REMOVE",
+                            else: "$model_data.wgan_final_forecast"
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    'model_data.predicted_result.initial_forecast': {
+                        $slice: [
+                            '$model_data.predicted_result.scaled',
+                            { $multiply: ['$model_data.training_parameters.lookAhead', -1] }
+                        ]
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    'model_data.predicted_result': {
+                        $cond: {
+                            if: { $eq: ["$model_type", "WGAN-GP"] },
+                            then: "$$REMOVE",
+                            else: "$model_data.predicted_result"
+                        }
+                    }
+                }
             },
             {
                 $project: projection_field
@@ -2464,8 +2551,7 @@ const fetchUserModels = async (user_id) => {
                     'model_data.predicted_result.dates',
                     'model_data.predicted_result.standardized',
                     'model_data.predicted_result.scaled',
-                    'model_data.predicted_result.predictions_array',
-                    'model_data.predicted_result.forecast',
+                    'model_data.correlation_data'
                 ]
             }
         ];
@@ -2473,21 +2559,175 @@ const fetchUserModels = async (user_id) => {
         // Perform the aggregation
         const userModels = await model_collection.aggregate(pipeline).toArray();
 
+        // const finalUserModels = []
         if (userModels.length > 0) {
             userModels.map((model) => {
-                const m_data = model.model_data
+                let { model_data: m_data, model_id, model_type } = model
+                // let m_data = model.model_data
                 m_data['latest_forecast_result'] = {}
+
+                let path = ''
+                if (model_type === 'LSTM') {
+                    path = `./models/${model_id}`
+                } else {
+                    path = `./worker_celery/saved_models/${model_id}`
+                }
+
+                if (fs.existsSync(path)) {
+                    model['model_data_available'] = true
+                } else {
+                    model['model_data_available'] = false
+                }
+
                 return {
                     ...model,
                     model_data: m_data
                 }
             })
-            return userModels
+            // return userModels
         }
         else {
             return []
         }
 
+        const additionalData = await getAdditionalTrainingRunResults(user_id)
+        if (additionalData.length > 0) {
+            // console.log('Additional data found')
+            const combined = userModels.map((model) => {
+                const matchingObj = additionalData.find((ob) => ob.model_id === model.model_id);
+                if (matchingObj) {
+                    return {
+                        ...model,
+                        additional_training_run_results: matchingObj.additional_training_run_results // Corrected variable name to `matchingObj`
+                    };
+                } else {
+                    return model; // Added else block to return original object if no match is found
+                }
+            });
+            return combined
+        }
+
+        return userModels
+
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const addNewWganTrainingResults = async (data) => {
+    const {
+        uid,
+        model_created_date,
+        model_id,
+        epoch_results,
+        train_duration,
+        training_parameters,
+        wgan_intermediate_forecast,
+        wgan_final_forecast
+    } = data
+
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const model_collection = db.collection('models')
+
+        const data_to_update = {
+            epoch_results,
+            train_duration,
+            training_parameters,
+            wgan_intermediate_forecast,
+            wgan_final_forecast,
+            model_created_date
+        }
+
+        const query = { model_id, user_id: uid }
+        const updated = await model_collection.updateOne(query,
+            {
+                $push: { ['additional_training_run_results']: data_to_update }
+            }
+        )
+
+        return updated
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const getAdditionalTrainingRunResults = async (uid) => {
+    const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+    const model_collection = db.collection('models')
+
+    // Fetch additional trainining results for wgan models
+    const proj_field = {
+        _id: 0,
+        model_id: 1,
+        additional_training_run_results: 1
+    }
+
+    const pipeline = [
+        {
+            $match: {
+                user_id: uid,
+                model_type: 'WGAN-GP',
+                additional_training_run_results: { $exists: true }
+            }
+        },
+        {
+            $addFields: {
+                additional_training_run_results: {
+                    $map: {
+                        input: '$additional_training_run_results',
+                        as: 'result',
+                        in: {
+                            $mergeObjects: [
+                                { latest_forecast_result: {} },
+                                '$$result',
+                                {
+                                    wgan_final_forecast: {
+                                        predictions: {
+                                            $slice: [
+                                                '$$result.wgan_final_forecast.predictions',
+                                                { $multiply: ['$$result.training_parameters.lookAhead', -1] }
+                                            ]
+                                        },
+                                        rmse: '$$result.wgan_final_forecast.rmse'
+                                    },
+                                    epoch_results: { $slice: ['$$result.epoch_results', -1] }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            $project: proj_field
+        }
+    ]
+
+    let additional_data
+    try {
+        additional_data = await model_collection.aggregate(pipeline).toArray()
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+
+    return additional_data
+}
+
+
+const temp_setLSTMRmse = async (model_id, rmse) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const model_collection = db.collection('models')
+
+        const query = { model_id }
+        const update = { $set: { 'model_data.predicted_result.rmse': rmse } }
+        const updated = await model_collection.updateOne(query, update)
+
+        return updated
     } catch (error) {
         log.error(error.stack)
         throw error
@@ -2531,6 +2771,8 @@ const getModelResult = async (user_id, model_id) => {
                     'model_data.train_duration',
                     'model_data.predicted_result.standardized',
                     'model_data.predicted_result.scaled',
+                    'model_data.predicted_result.mean_array',
+                    'model_data.predicted_result.variance_array'
                 ]
             }
         ]
@@ -2590,6 +2832,8 @@ const deleteUserModel = async (user_id, model_id) => {
 
 module.exports = {
     getUserByEmail
+    , temp_setLSTMRmse
+    , addNewWganTrainingResults
     , checkUserExists
     , insertNewUser
     , makeUserLessonStatus

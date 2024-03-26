@@ -173,8 +173,13 @@
     width: 100%;
 }
 
-.prediction-lookahead-slider-box {
+.prediction-lookahead-slider-box, .tolerance-slider-box {
     width: 50%;
+}
+
+.wgan-prediction-tolerance-slider{
+    display: flex;
+    flex-direction: row;
 }
 
 .saved-model-name {
@@ -267,7 +272,12 @@ tr:hover .prediction-mse {
     letter-spacing: 0.5px;
     padding-top: 10px;
     padding-left: 10px;
-    z-index: 2;
+    z-index: 3;
+}
+
+.offset-left-axis {
+    /* padding-left: 60px; */
+    transform: translate(50px, 0px);
 }
 
 .model-hist-tooltip {
@@ -286,6 +296,26 @@ tr:hover .prediction-mse {
     display: flex;
     flex-direction: row;
     gap: 8px;
+}
+
+.initial-forecast-line-box{
+    display: flex;
+    flex-direction: column;
+}
+
+.model-hist-values-initial{
+    text-align: start;
+    display: flex;
+    flex-direction: column;
+}
+
+.model-hist-main-box-wgan {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    /* gap: 2px; */
+    /* backdrop-filter: blur(2px); */
+    backdrop-filter: saturate(150%) blur(1px);
 }
 
 .model-hist-values {
@@ -373,6 +403,20 @@ tr:hover .prediction-mse {
 .MuiTabs-indicator {
     background-color: red;
     margin: 9px 0px;
+}
+.tab-wgan{
+    height: 20px;
+    border: 1px solid white;
+    border-radius: 5px;
+    transition: all 0.2s ease-in-out;
+    min-height: auto;
+}
+
+
+.tab-wgan:hover {
+    transition: all 0.2s ease-in-out;
+    background-color: beige;
+    color: black;
 }
 
 .tab {
@@ -695,6 +739,44 @@ tr:hover .prediction-mse {
     }
 }
 
+.saved-model-title{
+    display: flex;
+    flex-direction: row;
+    height:32px;
+    gap:8px;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.training-param-name{
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+}
+
+.wgan-options{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.model-chart-action-container {
+    padding-top: 4px;
+    display: flex;
+    flex-direction: row;
+    gap:4px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.tp-loader-when-collapsed{
+    padding-left: 4px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
 @media screen and (min-width: 1400px) {
     .crypto-stocks-table-module {
         width: 1200px;
@@ -705,6 +787,13 @@ tr:hover .prediction-mse {
     } */
 }
 
+@media screen and (min-width: 1200px){
+    .function-selector{
+        flex-direction: column;
+        padding-top: 8px;
+    }
+}
+
 @media screen and (max-width:1400px) {
     .batch-end-text {
         width: 125px;
@@ -713,8 +802,14 @@ tr:hover .prediction-mse {
 
 @media screen and (max-width:1200px) {
     .batch-end-text {
-        width: 140px;
+        width: 110px;
     }
+    .wgan-prediction-tolerance-slider{
+        flex-direction: column;
+    }
+    .prediction-lookahead-slider-box, .tolerance-slider-box{
+        width: 100%;
+    } 
 }
 
 @media screen and (max-width : 900px) {
@@ -762,9 +857,9 @@ tr:hover .prediction-mse {
         transition: all 0.2s ease-in-out;
     }
 
-    .model-parameters-grid {
+    /* .model-parameters-grid {
         max-width: 80%;
-    }
+    } */
 
     .tooltip-prediction-box {
         width: 100%;
@@ -804,10 +899,6 @@ tr:hover .prediction-mse {
         padding-bottom: 8px;
     }
 
-    .crypto-stock-button {
-        margin-left: 32px;
-    }
-
     .last-updated-date-refresh {
         display: flex;
         justify-content: space-between;
@@ -838,11 +929,6 @@ tr:hover .prediction-mse {
         transition: all 0.2s ease-in-out;
     }
 
-    /* .predictions-legend {
-        font-size: 8px;
-        transition: all 0.2s ease-in-out;
-    }
- */
     .model-hist-main-box {
         flex-direction: column;
         align-items: flex-start;
@@ -887,6 +973,10 @@ tr:hover .prediction-mse {
     }
 
     .model-chart-action-container {
+        display: flex;
+        flex-direction: column;
+        gap:4px;
+        align-items: flex-start;
         justify-content: space-between;
         width: 100%;
     }
@@ -896,11 +986,6 @@ tr:hover .prediction-mse {
         align-items: start;
         padding-bottom: 8px;
     }
-
-    /* .ticker-period-selector-top {
-        flex-direction: column;
-        align-items: flex-start;
-    } */
 
     .tooltip-prediction-box {
         justify-content: space-between;
@@ -924,9 +1009,24 @@ tr:hover .prediction-mse {
         flex-direction: column;
     }
 
-    /* .border-right {
-        border-right: 1px solid white !important;
-    } */
+    .saved-model-title{
+        flex-direction: column;
+        height: auto;
+        /* gap: 8px; */
+    }
+
+    .training-param-name{
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tp-loader-when-collapsed{
+        flex-direction: column;
+        gap:0px;
+        align-items: flex-start;
+        padding-left: 4px;
+        padding-bottom: 4px;
+    }
 }
 
 #wordToUnderline {

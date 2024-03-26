@@ -9,7 +9,7 @@ import StocksTable from "./stock_components/StocksTable";
 import CustomBarChart from "./stock_components/BarChart";
 import ReorderList from "./crypto_components/ReorderList";
 import ModelHistoryChart from "./crypto_components/ModelHistoryChart";
-import SavedModels from "./crypto_components/SavedModels";
+import SavedModelsLSTM from "./crypto_components/SavedModelsLSTM";
 import PredictionMetrics from "./crypto_components/PredictionMetrics";
 import PredictionScoresTable from "./crypto_components/PredictionScoresTable";
 import TrainingLossTable from "./crypto_components/TrainingLossTable";
@@ -20,6 +20,23 @@ import TrainingParameters from "./crypto_components/TrainingParameters";
 import IndicatorSearch from "./crypto_components/IndicatorSearch";
 import MainChartOptions from "./crypto_components/MainChartOptions";
 import RMSEBarChart from "./crypto_components/RMSEBarChart";
+import CorelationMatrix from "./crypto_components/CorelationMatrix";
+
+import WGANGPProgress from "./crypto_components/WGANGPProgress";
+import WgangpMetricsChart from "./crypto_components/WgangpMetricsChart";
+import IntermediateForecastChart from "./crypto_components/IntermediateForecastChart";
+import WganFinalPredictionChart from "./crypto_components/WganFinalPredictionChart";
+
+import WgangpOptions from "./crypto_components/WgangpOptions";
+
+import MainChartNew from "./crypto_components/MainChart";
+import IndicatorSearchExecute from "./crypto_components/IndicatorSearchExecute";
+
+import WganTrainingResults from "./crypto_components/TrainingResultsWGANGP";
+import LstmTrainingResults from "./crypto_components/TrainingResultsLSTM";
+import PredictionMetricsWganpg from "./crypto_components/PredictionMetricsWganpg";
+import SavedModelForecasting from "./crypto_components/SavedModelForecasting";
+import SavedModelsWGANGP from "./crypto_components/SavedModelsWGANGP";
 
 export {
     CustomSlider,
@@ -33,7 +50,7 @@ export {
     CustomBarChart,
     ReorderList,
     ModelHistoryChart,
-    SavedModels,
+    SavedModelsLSTM,
     PredictionMetrics,
     PredictionScoresTable,
     TrainingLossTable,
@@ -44,4 +61,17 @@ export {
     IndicatorSearch,
     MainChartOptions,
     RMSEBarChart,
+    CorelationMatrix,
+    WGANGPProgress,
+    WgangpMetricsChart,
+    IntermediateForecastChart,
+    WganFinalPredictionChart,
+    WgangpOptions,
+    MainChartNew,
+    IndicatorSearchExecute,
+    WganTrainingResults,
+    LstmTrainingResults,
+    PredictionMetricsWganpg,
+    SavedModelForecasting,
+    SavedModelsWGANGP
 }

@@ -23,9 +23,13 @@ const CustomSlider = (props) => {
         const value = parseInt(val)
         if (value < min || value > max || value === slideValue) {
             return
-        } else {
-            setSlideValue(value)
-            handleModelParamChange(name, value)
+        } else { // if value is not a number, set it to empty string errorstill persists when value is nan (Check)
+            if (isNaN(value)) {
+                handleModelParamChange(name, '')
+            } else {
+                setSlideValue(value)
+                handleModelParamChange(name, value)
+            }
         }
     };
 
@@ -52,10 +56,15 @@ const CustomSlider = (props) => {
             <Box p={'4px 8px'} display='flex' flexDirection='column' alignItems='start'>
                 <Box display='flex' flexDirection='row' justifyContent='space-between' width='100%'>
                     <Typography id="training-size-slider" variant='custom'>{label} : {scaledLearningRate === undefined ? `${sliderValue}${label === 'Training size' ? '%' : ''}` : scaledLearningRate}</Typography>
-                    <Typography variant='custom'>(Min: {min}, Max: {max})</Typography>
+                    {name === 'g_learningRate' || name === 'd_learningRate'
+                        ?
+                        <Typography variant='custom'>({(min / 100000).toExponential()} to {(max / 100000).toExponential()})</Typography>
+                        :
+                        <Typography variant='custom'>(Min: {min}, Max: {max})</Typography>
+                    }
                 </Box>
 
-                <Box sx={{ width: "100%", display: 'flex', flexDirection: 'row', gap:'16px' }}>
+                <Box sx={{ width: "100%", display: 'flex', flexDirection: 'row', gap: '16px' }}>
                     <Slider
                         size='small'
                         color='secondary'
@@ -76,7 +85,7 @@ const CustomSlider = (props) => {
                         onChange={(e) => handleChange(e)}
                         onChangeCommitted={(e, val) => handleSliderValueChange(e, val)}
                     />
-                    {label === 'Epochs' &&
+                    {(label === 'Epochs' || label === 'Batch Size') &&
                         <Input
                             value={sliderValue}
                             size="small"

@@ -28,6 +28,31 @@ const TimeTracker = ({ createdAt }) => {
     );
 }
 
+const WarnComp = ({ error_message, test_possible, train_possible }) => {
+    return (
+        <Box>
+            <Typography variant='custom'>{error_message}</Typography>
+            <ul className='wgan_ul'>
+                {!test_possible.status && <li style={{ listStyleType: 'circle', fontSize: '12px' }}>{`\u2043`}{test_possible.message}</li>}
+                {!train_possible.status && <li style={{ listStyleType: 'circle', fontSize: '12px' }}>{`\u2043`}{train_possible.message}</li>}
+            </ul>
+        </Box>
+    )
+}
+
+const ErrorComp = ({ func_error, message, step }) => {
+    return (
+        <React.Fragment>
+            <Typography variant='body2' >
+                {message} at step {step}
+            </Typography>
+            <Typography variant='body2'>
+                {func_error}
+            </Typography>
+        </React.Fragment>
+    )
+}
+
 const Notifications = (props) => {
     const { notifications, clear, remove, markAllAsRead, markAsRead, unreadCount } = props
     const theme = useTheme();
@@ -136,18 +161,23 @@ const Notifications = (props) => {
                                         <Box pt={'2px'} display={'flex'} flexDirection={'row'} justifyContent={'space-between'} width={'100%'} alignItems={'center'}>
                                             <Box>
                                                 {notification.type === 'error' ?
-                                                    <Box>
-                                                        <Typography variant='body2' >
-                                                            {JSON.parse(notification.content).message} at step {JSON.parse(notification.content).step}
-                                                        </Typography>
+                                                    notification.content && notification.content.props && notification.content.props.func_error ?
+                                                        <ErrorComp {...notification.content.props} />
+                                                        :
                                                         <Typography variant='body2'>
-                                                            {JSON.parse(notification.content).func_error}
+                                                            {notification.content}
                                                         </Typography>
-                                                    </Box>
                                                     :
-                                                    <Typography variant='body2'>
-                                                        {notification.content}
-                                                    </Typography>
+                                                    notification.type === 'warning' ?
+                                                        <Box>
+                                                            {notification.content && notification.content.props && notification.content.props.error_message &&
+                                                                <WarnComp {...notification.content.props} />
+                                                            }
+                                                        </Box>
+                                                        :
+                                                        <Typography variant='body2'>
+                                                            {notification.content}
+                                                        </Typography>
                                                 }
                                             </Box>
                                             <Box display={'flex'} flexDirection={'row'} gap={'4px'}>

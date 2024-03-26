@@ -173,7 +173,7 @@ const CryptoTable = () => {
                 dispatch(setSelectedTickerName(dataId))
                 dispatch(resetDataLoadedState())
                 dispatch(resetShowSettingsFlag())
-                dispatch(setCryptoDataInDbRedux([]))
+                dispatch(setCryptoDataInDbRedux({ dataInDb: [], total_count_db: 0 }))
                 navigate(`/dashboard/indicators/crypto/${dataId}`)
             }
         } else {

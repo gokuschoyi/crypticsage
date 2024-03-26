@@ -62,7 +62,7 @@ function Stars(props) {
 
     useFrame((state, delta) => {
         // console.log(state)
-        ref.current.rotation.z = state.clock.elapsedTime * 0.01
+        ref.current.rotation.z = ref.current?.rotation.z && state.clock.elapsedTime * 0.01
         gsap.to(ref.current.rotation, {
             y: mouseX * 0.04,
             x: mouseY * 0.04,

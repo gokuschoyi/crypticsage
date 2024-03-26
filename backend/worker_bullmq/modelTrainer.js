@@ -201,13 +201,14 @@ module.exports = async (job) => {
                     parameters = {
                         tickerHist: JSON.parse(await redisStep.hget(modelCheckpointName, 'tickerHistory')),
                         finalTalibResult: JSON.parse(await redisStep.hget(modelCheckpointName, 'finalTalibResult')),
-                        transformation_order
+                        transformation_order,
+                        uid
                     }
                     // console.log(Object.keys(parameters))
 
                     try {
                         // @ts-ignore
-                        result = await step(parameters)
+                        const { features: result, metrics } = await step(parameters)
                         const trainSplitRatio = training_size / 100
                         // @ts-ignore
                         const trainSplit = Math.floor(result.length * trainSplitRatio)
@@ -215,6 +216,7 @@ module.exports = async (job) => {
                         const trainFeatures = result.slice(0, trainSplit)
                         // @ts-ignore
                         const testFeatures = result.slice(trainSplit)
+                        redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'feature_relations', uid, metrics }))
                         await redisStep.hset(modelCheckpointName, {
                             step: i + 1,
                             train_features: JSON.stringify(trainFeatures),
@@ -372,6 +374,7 @@ module.exports = async (job) => {
                             step: 8,
                         })
                         const newErrorMessage = { func_error: error.message, message: 'Error during training the model', step: i }
+                        console.log(error.stack)
                         throw new Error(JSON.stringify(newErrorMessage));
                     }
                     // @ts-ignore

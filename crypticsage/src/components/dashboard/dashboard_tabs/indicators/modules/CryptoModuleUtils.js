@@ -2,6 +2,57 @@ import { Tooltip, Box } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { tooltipClasses } from '@mui/material/Tooltip';
 
+export const convertKeysForDisplay = (key) => {
+    let final = ''
+    switch (key) {
+        case 'outRealUpperBand':
+            final = 'U'
+            break;
+        case 'outRealLowerBand':
+            final = 'L'
+            break;
+        case 'outRealMiddleBand':
+            final = 'M'
+            break;
+        case 'outInPhase':
+            final = 'Phase'
+            break;
+        case 'outQuadrature':
+            final = 'Quad'
+            break;
+        case 'outSine':
+            final = 'Sine'
+            break;
+        case 'outLeadSine':
+            final = 'LeadSine'
+            break;
+        case 'outMACD':
+            final = 'Out'
+            break;
+        case 'outMACDSignal':
+            final = 'Signal'
+            break;
+        case 'outMACDHist':
+            final = 'Hist'
+            break;
+        case 'outSlowK':
+            final = 'SlowK'
+            break;
+        case 'outSlowD':
+            final = 'SlowD'
+            break;
+        case 'outFastK':
+            final = 'FastK'
+            break;
+        case 'outFastD':
+            final = 'FastD'
+            break;
+        default:
+            break;
+    }
+    return final
+}
+
 export const Dot = ({ color }) => {
     return (
         <Box sx={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: color }}></Box>
@@ -285,6 +336,81 @@ export const calculateTolerance = (data, tolerance) => {
         recall: parseFloat(recall.toFixed(4)),
         f1: parseFloat(f1.toFixed(4))
     };
+}
+
+export const generateTalibFunctionsForExecution = ({ selectedFunctions, tDataReduxL, selectedTickerPeriod, selectedTickerName }) => {
+    let fTalibExecuteQuery = [];
+    selectedFunctions.forEach((unique_func) => {
+        const { outputs } = unique_func;
+        const func = unique_func.functions;
+        func.forEach((f) => {
+            const { inputs, optInputs, name, id } = f;
+            let inputEmpty = false;
+            let talibExecuteQuery = {}
+            let tOITypes = {}
+            const transformedOptionalInputs = optInputs.reduce((result, item) => {
+                result[item.name] = item.defaultValue
+                tOITypes[item.name] = item.type;
+                return result;
+            }, {})
+
+            let outputkeys = {}
+            let outputsCopy = [...outputs]
+            outputkeys = outputsCopy.reduce((result, output) => {
+                result[output.name] = output.name;
+                return result;
+            }, {});
+
+            let converted = {}
+            inputs.map((input) => {
+                if (input.flags) {
+                    Object.keys(input.flags).forEach((key) => {
+                        converted[input.flags[key]] = input.flags[key];
+                    })
+                    return input
+                } else {
+                    if (input.value === '') {
+                        inputEmpty = true;
+                        converted[input.name] = "";
+                        return {
+                            ...input,
+                            errorFlag: true,
+                            helperText: 'Please select a valid input',
+                        };
+                    } else {
+                        converted[input.name] = input.value;
+                        return {
+                            ...input,
+                            errorFlag: false,
+                            helperText: '',
+                        };
+                    }
+                }
+            })
+
+            talibExecuteQuery['name'] = name;
+            talibExecuteQuery['startIdx'] = 0;
+            talibExecuteQuery['endIdx'] = tDataReduxL - 1;
+            talibExecuteQuery = { ...talibExecuteQuery, ...converted, ...transformedOptionalInputs }
+
+
+            let payload = {
+                func_query: talibExecuteQuery,
+                func_param_input_keys: converted,
+                func_param_optional_input_keys: tOITypes,
+                func_param_output_keys: outputkeys,
+                db_query: {
+                    asset_type: 'crypto',
+                    fetch_count: tDataReduxL,
+                    period: selectedTickerPeriod,
+                    ticker_name: selectedTickerName
+                }
+            }
+            fTalibExecuteQuery.push({ id, payload, inputEmpty })
+        })
+    })
+    fTalibExecuteQuery = fTalibExecuteQuery.filter((item) => !item.inputEmpty)
+    return fTalibExecuteQuery
 }
 
 // const diff = actual - predicted;

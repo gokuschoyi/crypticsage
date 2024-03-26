@@ -50,6 +50,7 @@ const initialState = {
     barsFromToPredictions: { from: 0, to: 0 },
     selectedTickerName: '',
     selectedTickerPeriod: '4h',
+    total_count_db: 0,
     talibDescription: [],
     talibDescriptionCopy: [],
     cryptoDataInDb: [],
@@ -62,38 +63,55 @@ const initialState = {
         model_id: '',
         model_name: '',
         model_saved_to_db: false,
+        retrain_history_saved: false,
         training_parameters: {
+            to_train_count: 0,
             trainingDatasetSize: 80,
             timeStep: 14,
             lookAhead: 1,
             epoch: 1,
             hiddenLayer: 1,
             multiSelectValue: 'close',
-            modelType: 'Multi Step Single Output',
+            modelType: 'WGAN-GP',
+            intermediateResultStep: "50",
+            modelSaveStep: "50",
             batchSize: 32,
             transformation_order: [
-                { id: '1', name: 'OPEN', value: 'open' },
-                { id: '2', name: 'HIGH', value: 'high' },
-                { id: '3', name: 'LOW', value: 'low' },
-                { id: '4', name: 'CLOSE', value: 'close' },
-                { id: '5', name: 'VOLUME', value: 'volume' },
+                { id: '1', name: 'OPEN', value: 'open', key: 'open' },
+                { id: '2', name: 'HIGH', value: 'high', key: 'high' },
+                { id: '3', name: 'LOW', value: 'low', key: 'low' },
+                { id: '4', name: 'CLOSE', value: 'close', key: 'close' },
+                { id: '5', name: 'VOLUME', value: 'volume', key: 'volume' },
             ],
             doValidation: false,
             earlyStopping: false,
             learningRate: 50,
-            scaledLearningRate: 0.01
+            scaledLearningRate: 0.001,
+            d_learningRate: 40,
+            g_learningRate: 10,
+            scaled_d_learningRate: 0.0004,
+            scaled_g_learningRate: 0.0001,
+            discriminator_iteration: 5
         },
         talibExecuteQueries: [],
         modelStartTime: '',
         modelEndTime: '',
         startWebSocket: false,
+        retraining_flag: false,
+        loading_from_saved_model: false,
         progress_message: [],
         epoch_no: 0,
+        correlation_data: null,
         epoch_results: [],
         predictedValues: {
             dates: [],
             standardized: [],
             scaled: []
+        },
+        wgan_intermediate_forecast: [],
+        wgan_final_forecast: {
+            predictions: [],
+            rmse: {}
         },
         predictionPaletteId: 0,
         lastLookAheadPredictions: [],
@@ -101,6 +119,10 @@ const initialState = {
             over_all_score: 0,
             scores: []
         },
+        loaded_chekpoints: {
+            checkpoints: [],
+            selectedCheckpoint: ''
+        }
     }
 }
 
@@ -125,16 +147,59 @@ const cryptoModuleSlice = createSlice({
             state.modelData.model_saved_to_db = action.payload.status
             state.modelData.model_name = action.payload.model_name
         },
+        setRetrainHistorySavedToDb: (state, action) => {
+            state.modelData.retrain_history_saved = action.payload
+        },
         setModelId: (state, action) => {
             state.modelData.model_id = action.payload.model_id;
             state.modelData.model_name = action.payload.model_name;
+        },
+        setModelType: (state, action) => {
+            state.modelData.training_parameters.modelType = action.payload;
         },
         setTrainingParameters: (state, action) => {
             state.modelData.training_parameters = { ...action.payload.model_params, transformation_order: action.payload.transformationOrder };
             state.modelData.talibExecuteQueries = action.payload.selected_functions;
         },
+        setRetrainParameters: (state, action) => {
+            const { model_id, model_name, model_saved_to_db, retrainParams } = action.payload;
+            if (model_id !== undefined || model_name !== undefined || model_saved_to_db !== undefined) {
+                state.modelData.model_id = model_id;
+                state.modelData.model_name = model_name;
+                state.modelData.model_saved_to_db = model_saved_to_db
+                state.modelData.training_parameters = { ...retrainParams }
+            } else {
+                state.modelData.training_parameters = { ...retrainParams }
+            }
+        },
         setStartWebSocket: (state, action) => {
             state.modelData.startWebSocket = action.payload;
+        },
+        setRetrainingFlag: (state, action) => {
+            state.modelData.retraining_flag = action.payload;
+            if (action.payload === true) {
+                state.modelData.wgan_final_forecast = {
+                    predictions: [],
+                    rmse: {}
+                };
+            }
+        },
+        setLoadingFromSavedModel: (state, action) => {
+            state.modelData.loading_from_saved_model = action.payload;
+        },
+        sliceEpochResults: (state, action) => {
+            const { selected_cp_no, from_ } = action.payload
+            if (from_ === 'retrain_wgan') {
+                state.modelData.epoch_results = state.modelData.epoch_results.slice(0, selected_cp_no);
+            } else if (from_ === 'training_params') {
+                if (state.modelData.epoch_results.length > 0) {
+                    state.modelData.epoch_results = state.modelData.epoch_results.filter((er) => er.epoch <= selected_cp_no);
+                }
+            }
+        },
+        setLoadedCheckpoints: (state, action) => {
+            state.modelData.loaded_chekpoints.checkpoints = action.payload.checkpoints;
+            state.modelData.loaded_chekpoints.selectedCheckpoint = action.payload.selectedCheckpoint;
         },
         setModelStartTime: (state, action) => {
             state.modelData.modelStartTime = action.payload;
@@ -142,10 +207,21 @@ const cryptoModuleSlice = createSlice({
         setModelEndTime: (state, action) => {
             state.modelData.modelEndTime = action.payload;
         },
+        setFeatureCorrelationData: (state, action) => {
+            state.modelData.correlation_data = action.payload;
+        },
         setPredictedValues: (state, action) => {
             state.modelData.predictedValues = { ...state.modelData.predictedValues, ...action.payload };
         },
-        updatePredictedValues: (state, action) => {
+        setIntermediateForecastResults: (state, action) => {
+            const takenColors = state.modelData.wgan_intermediate_forecast.map((forecast) => forecast.color);
+            const availableColors = lineColors.filter((color) => !takenColors.includes(color));
+            state.modelData.wgan_intermediate_forecast.push({ ...action.payload, color: availableColors[0], show: true });
+        },
+        setWganFinalForecast: (state, action) => {
+            state.modelData.wgan_final_forecast = action.payload;
+        },
+        updatePredictedValues: (state, action) => { // Not being used anymore in Saved LSTM and WGAN-GP
             const { model_id, rmse, forecast, predictions_array, initial_forecast } = action.payload
             const currentState = state.userModels
             const foundIndex = currentState.findIndex((model) => model.model_id === model_id);
@@ -160,7 +236,7 @@ const cryptoModuleSlice = createSlice({
                 }
             }
         },
-        setModelDataAvailableFlag: (state, action) => {
+        setModelDataAvailableFlag: (state, action) => { // Not being used anymore in Saved LSTM
             const { model_id, status } = action.payload
             const currentState = state.userModels
             const foundIndex = currentState.findIndex((model) => model.model_id === model_id);
@@ -171,17 +247,13 @@ const cryptoModuleSlice = createSlice({
             state.userModels = currentState;
         },
         setNewForecastData: (state, action) => {
-            const { model_id, new_forecast_dates, new_forecast, lastPrediction } = action.payload
+            const { model_id, final_forecast } = action.payload
             const currentState = state.userModels
 
             const foundIndex = currentState.findIndex((model) => model.model_id === model_id);
 
             if (foundIndex !== -1) {
-                currentState[foundIndex].model_data.latest_forecast_result = {
-                    new_forecast_dates: new_forecast_dates,
-                    new_forecast: new_forecast,
-                    lastPrediction: lastPrediction
-                }
+                currentState[foundIndex].model_data.latest_forecast_result = final_forecast
             }
             state.userModels = currentState;
         },
@@ -224,13 +296,14 @@ const cryptoModuleSlice = createSlice({
         },
         resetCurrentModelData: (state) => {
             state.modelData.training_parameters.transformation_order = [
-                { id: '1', name: 'OPEN', value: 'open' },
-                { id: '2', name: 'HIGH', value: 'high' },
-                { id: '3', name: 'LOW', value: 'low' },
-                { id: '4', name: 'CLOSE', value: 'close' },
-                { id: '5', name: 'VOLUME', value: 'volume' },
+                { id: '1', name: 'OPEN', value: 'open', key: 'open' },
+                { id: '2', name: 'HIGH', value: 'high', key: 'high' },
+                { id: '3', name: 'LOW', value: 'low', key: 'low' },
+                { id: '4', name: 'CLOSE', value: 'close', key: 'close' },
+                { id: '5', name: 'VOLUME', value: 'volume', key: 'volume' }
             ];
             state.modelData.epoch_results = [];
+            state.modelData.correlation_data = null;
             state.modelData.epoch_no = initialState.modelData.epoch_no;
             state.modelData.predictedValues = {
                 dates: [],
@@ -248,9 +321,16 @@ const cryptoModuleSlice = createSlice({
             state.modelData.model_id = '';
             state.modelData.modelStartTime = '';
             state.modelData.modelEndTime = '';
+
+            state.modelData.wgan_final_forecast = {
+                predictions: [],
+                rmse: {}
+            };
+            state.modelData.wgan_intermediate_forecast = [];
         },
         resetModelData: (state) => {
             state.modelData.epoch_results = [];
+            state.modelData.correlation_data = null;
             state.modelData.epoch_no = initialState.modelData.epoch_no;
             state.modelData.predictedValues = {
                 dates: [],
@@ -268,8 +348,25 @@ const cryptoModuleSlice = createSlice({
             state.modelData.model_id = '';
             state.modelData.modelEndTime = '';
             state.modelData.model_saved_to_db = false;
-            state.modelData.training_parameters = initialState.modelData.training_parameters;
+            state.modelData.retrain_history_saved = false;
+            state.modelData.loading_from_saved_model = false;
+            state.modelData.loaded_chekpoints = {
+                checkpoints: [],
+                selectedCheckpoint: ''
+            }
+            // const co_relationData = state.modelData.correlation_data
+            state.modelData.training_parameters = {
+                ...initialState.modelData.training_parameters,
+                modelType: state.modelData.training_parameters.modelType,
+                to_train_count: state.total_count_db * 0.5 > 1000 ? 1000 : state.total_count_db * 0.5
+            }
+            // state.modelData = { ...state.modelData }
             state.modelData.talibExecuteQueries = [];
+            state.modelData.wgan_final_forecast = {
+                predictions: [],
+                rmse: {}
+            };
+            state.modelData.wgan_intermediate_forecast = [];
         },
         toggleToolTipSwitch: (state) => {
             state.toolTipOn = !state.toolTipOn;
@@ -325,7 +422,10 @@ const cryptoModuleSlice = createSlice({
             state.barsFromTo = { from: 0, to: 0 };
         },
         setCryptoDataInDbRedux: (state, action) => {
-            state.cryptoDataInDb = action.payload;
+            const { dataInDb, total_count_db } = action.payload;
+            state.cryptoDataInDb = dataInDb;
+            state.total_count_db = total_count_db === 0 ? 0 : total_count_db;
+            state.modelData.training_parameters.to_train_count = total_count_db * 0.5 > 1000 ? 1000 : total_count_db * 0.5
         },
         setStreamedTickerDataRedux: (state, action) => {
             state.streamedTickerData.push(action.payload);
@@ -580,6 +680,18 @@ const cryptoModuleSlice = createSlice({
                 }
             })
         },
+        toggleShowHideIntermediatePredictions: (state, action) => {
+            const { key } = action.payload
+            const current_state = state.modelData.wgan_intermediate_forecast
+
+            const foundIndex = current_state.findIndex((forecast) => forecast.epoch === key)
+
+            if (foundIndex !== -1) {
+                current_state[foundIndex].show = !current_state[foundIndex].show
+            }
+
+            state.modelData.wgan_intermediate_forecast = current_state
+        },
         toggleShowHideChartFlag: (state, action) => {
             const { id, name } = action.payload;
             const currentState = state.selectedFunctions;
@@ -761,13 +873,23 @@ const cryptoModuleSlice = createSlice({
 const { reducer, actions } = cryptoModuleSlice;
 export const {
     setModelSavedToDb
+    , setRetrainHistorySavedToDb
     , setUserModels
     , setModelId
+    , setModelType
     , setTrainingParameters
+    , setRetrainParameters
     , setStartWebSocket
+    , setRetrainingFlag
+    , setLoadingFromSavedModel
+    , sliceEpochResults
+    , setLoadedCheckpoints
     , setModelStartTime
     , setModelEndTime
+    , setFeatureCorrelationData
     , setPredictedValues
+    , setIntermediateForecastResults
+    , setWganFinalForecast
     , updatePredictedValues
     , setModelDataAvailableFlag
     , setNewForecastData
@@ -800,6 +922,7 @@ export const {
     , setSelectedFunctionOptionalInputValues
     , setTalibResult
     , toggleShowHideChartFlag
+    , toggleShowHideIntermediatePredictions
     , toggleShowSettingsFlag
     , resetShowSettingsFlag
     , removeFromSelectedFunction

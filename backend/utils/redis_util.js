@@ -76,25 +76,49 @@ const saveTestPredictions = (id, finalData) => {
     })
 }
 
-const getTestPredictions = (id) => {
-    return new Promise((resolve, reject) => {
-        redisClient.get(id, (error, result) => {
-            if (error) {
-                log.error('Error retrieving predictions from Redis')
-                log.error(error.stack);
-                reject(error)
-            } else if (result) {
-                if (config.debug_flag === 'true') {
-                    log.info(`Fetching predictions from Redis store`);
+const getTestPredictions = (id, type) => {
+    if (type === 'LSTM') { // fetch from redis bassed on model type
+        return new Promise((resolve, reject) => {
+            redisClient.get(id, (error, result) => {
+                if (error) {
+                    log.error('Error retrieving predictions from Redis')
+                    log.error(error.stack);
+                    reject(error)
+                } else if (result) {
+                    if (config.debug_flag === 'true') {
+                        log.info(`Fetching predictions from Redis store`);
+                    }
+                    let data = JSON.parse(result);
+                    resolve(data)
+                } else {
+                    log.warn('Predictions does not exist in Redis store');
+                    resolve(null)
                 }
-                let data = JSON.parse(result);
-                resolve(data)
-            } else {
-                log.warn('Predictions does not exist in Redis store');
-                resolve(null)
-            }
+            })
         })
-    })
+    } else {
+        return new Promise((resolve, reject) => {
+            redisClient.hmget(id, 'predictions', 'forecast_rmse', (error, result) => {
+                if (error) {
+                    log.error('Error retrieving predictions from Redis')
+                    log.error(error.stack);
+                    reject(error)
+                } else if (result) {
+                    if (config.debug_flag === 'true') {
+                        log.info(`Fetching predictions from Redis store`);
+                    }
+                    let data = {
+                        predictions: result[0] ? JSON.parse(result[0]) : null,
+                        rmse: result[1] ? JSON.parse(result[1]) : null,
+                    };
+                    resolve(data)
+                } else {
+                    log.warn('Predictions does not exist in Redis store');
+                    resolve(null)
+                }
+            })
+        })
+    }
 }
 
 module.exports = {

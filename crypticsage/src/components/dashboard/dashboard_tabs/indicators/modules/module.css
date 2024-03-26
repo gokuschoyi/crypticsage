@@ -44,7 +44,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     text-align: left;
-    gap: 0px 30px;
+    gap: 0px 26px;
     grid-auto-rows: minmax(auto, auto);
 }
 
@@ -108,6 +108,66 @@
     box-shadow: 0px 0px 4px 0px var(--mui-palette-background-default)
 }
 
+.tooltip {
+    position: relative;
+    display: inline-block;
+    /* border-bottom: 1px dotted black; */
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 160px;
+    background-color: black;
+    color: #fff;
+    text-align: start;
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 10px;
+
+    /* Position the tooltip */
+    position: absolute;
+    /* vertically center */
+    top: 55%;
+    /* transform: translateX(50%); */
+    /* move to right */
+    /* left: 100%; */
+    margin-left: 15px;
+    /* and add a small left margin */
+    z-index: 1;
+
+    /* Fade in tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.left {
+    /* reset defaults */
+    left: initial;
+    margin: initial;
+
+    /* set new values */
+    right: 100%;
+    margin-right: 15px;
+}
+
+.bottom {
+    /* reset defaults */
+    top: initial;
+    transform: initial;
+    left: initial;
+    margin: initial;
+
+    /* set new values */
+    bottom: 100%;
+    margin-bottom: 15px;
+
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
 @media screen and (max-width: 1420px) {
     .basic-details {
         grid-template-columns: 1fr 1fr;
@@ -168,6 +228,10 @@
 
     .model-name-changer {
         width: 100%;
+    }
+
+    .name-changer-textfield {
+        width: 65%;
     }
 
 }

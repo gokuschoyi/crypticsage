@@ -5,6 +5,7 @@ crypticsage/.pnp
 crypticsage/.pnp.js
 crypticsage/.env
 crypticsage/ssl
+backend/ssl
 
 crypticsage/.env
 
@@ -34,9 +35,20 @@ backend/middleware/logger/logs/access.log
 backend/middleware/logger/logs/app.log
 backend/middleware/logger/old_logs/access_one.log
 backend/middleware/logger/old_logs/access.log
+backend/middleware/logger/logs/access_p2.log
+backend/middleware/logger/logs/app_p2.log
 backend/docs
-backend/ssl/localhost-key.pem
-backend/ssl/localhost.pem
 backend/models
 
 # "start": "concurrently --kill-others -r \"cd backend && npm start\" \"cd crypticsage && npm start\""
+backend/worker_celery/WGAN_GP/__pycache__
+backend/worker_celery/__pycache__
+backend/worker_celery/test
+backend/worker_celery/logs
+backend/worker_celery/venv
+backend/worker_celery/saved_models
+.vscode/settings.json
+backend/worker_celery/.env
+backend/worker_celery/wgan_tests
+
+crypticsage/src/components/dashboard/dashboard_tabs/indicators/components/crypto_components/test.js
