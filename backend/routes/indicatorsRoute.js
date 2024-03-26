@@ -9,54 +9,6 @@ const tf = require('@tensorflow/tfjs-node');
 router.post('/get_talib_desc', IController.getIndicatorDesc)
 router.post('/execute_talib_function', handleTokenRedisStorage, IController.executeTalibFunction)
 
-router.post('/start_model_training', IController.procssModelTraining)
-router.post('/retrain_model', IController.retrainModel)
-router.post('/get_corelation_matrix', IController.calculateCoRelationMatrix)
-
-router.post('/get_model', IController.getModel)
-router.post('/save_model', IController.saveModel)
-router.post('/delete_model', IController.deleteModel)
-router.post('/delete_user_model', IController.deleteUserModel)
-router.post('/update_new_predictions', IController.updateNewTrainingResults)
-
-router.post('/check_for_model', IController.checkIfModelExists)
-router.post('/get_model_result', IController.getModelResult)
-router.post('/rename_model', IController.renameModel)
-
-router.get('/get_model_checkpoints', IController.getModelCheckpoints)
-
-router.post('/make_new_prediction', IController.makeNewForecast)
-router.post('/make_wgan_prediction', IController.makeWgangpForecast)
-
-router.post('/generate_test_data', IController.testNewModel)
-// router.post('/generate_test_data_two', IController.generateTestData)
-
-const fetchSavedUserModels = async (req, res) => {
-    try {
-        const uid = res.locals.data.uid;
-        console.log('uid', uid)
-        const userModels = await MDBServices.fetchUserModels(uid)
-        res.status(200).json({ message: 'User models fetched successfully', userModels })
-    } catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-}
-
-router.get('/fetch_saved_user_models', fetchSavedUserModels)
-
-// celery test route
-const tempsetrmse = async (req, res) => {
-    const { model_id, rmse } = req.body;
-    // const result = await MDBServices.temp_setLSTMRmse(model_id, rmse)
-    // const testDtate = new Date().toLocaleString()
-
-    // const uTime = new Date(testDtate).getTime()
-    const testRes = await IController.testing(model_id)
-    res.status(200).json({ message: 'RMSE set successfully', testRes })
-}
-
-router.put('/set_lstm_rmse', tempsetrmse)
-
 // Test routes
 const checkDuplicates = async (req, res, next) => {
     const { ticker_name, period } = req.body;
@@ -71,8 +23,7 @@ const checkDuplicates = async (req, res, next) => {
     }
 }
 
-router.post('/check_duplicates', checkDuplicates)
-
+// Test route 2
 const tfTEst = async (req, res, next) => {
     const input = [
         [13, 22, 3, 42, 5],
@@ -101,6 +52,7 @@ const tfTEst = async (req, res, next) => {
     res.status(200).json({ message: 'testing tf', mean: mean.arraySync(), sub: tfSub.arraySync(), variance: variance.arraySync(), stdData, originalData })
 }
 
+router.post('/check_duplicates', checkDuplicates)
 router.post('/tf_test', tfTEst)
 
 module.exports = router

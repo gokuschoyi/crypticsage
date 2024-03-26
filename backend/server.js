@@ -15,6 +15,7 @@ const contentManager = require('./routes/contentManagerRoute');
 const historicalData = require('./routes/historicalDataRoute')
 const fetchCryptoData = require('./routes/cryptoStocksRoute');
 const indicator = require('./routes/indicatorsRoute')
+const model = require('./routes/modelRoute')
 // const indicators = require('./routes/indicators/indicatorsRoute');
 
 const http = require('http');
@@ -87,6 +88,8 @@ app.use('/historicalData', verifyToken, historicalData)
 app.use('/crypto', verifyToken, fetchCryptoData)
 
 app.use('/indicators', verifyToken, indicator)
+
+app.use('/model', verifyToken, model);
 
 // app.use('/indicators', verifyToken, indicators); // remove later
 

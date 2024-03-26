@@ -107,26 +107,58 @@ const TalibFuncSummary = ({ query }) => {
     )
 }
 
+const transformWGANPredictions = (modelData, ohlcData) => {
+    const lookAhead = modelData.model_data.training_parameters.lookAhead
+    const predictionFlag = modelData.model_data.training_parameters.multiSelectValue
+
+    const forecast = modelData.model_data.wgan_final_forecast.predictions.slice(-lookAhead) // the forecast made at the end of the training
+    const firstDate = new Date(forecast[0].date).getTime()
+    const lastDate = new Date(forecast[forecast.length - 1].date).getTime()
+    const toCompareActualValues = ohlcData.filter(ticker => ticker.openTime >= firstDate && ticker.openTime <= lastDate) // actual values for the forecast period
+
+    const actualValuesAdded = forecast.map((obj, index) => {
+        return {
+            ...obj,
+            actual: toCompareActualValues[index] !== undefined ? toCompareActualValues[index][predictionFlag] : null
+        }
+    })
+
+    const final = {}
+    Object.keys(forecast[0])
+        .filter(key => key !== "date" && key !== 'actual')
+        .forEach((key, index) => (
+            final[key] = forecast.map((obj, i) =>
+            ({
+                openTime: obj.date,
+                predicted: obj[key],
+                actual: actualValuesAdded[i].actual
+            })
+            ))
+        )
+    return final
+}
+
+const defaultselectedSavedModelData = {
+    model_id: null,
+    model_created_date: null,
+    ticker_name: null,
+    model_name: null,
+    ticker_period: null,
+    model_data: {
+        epoch_results: null,
+        train_duration: null,
+        correlation_data: null,
+        training_parameters: null,
+        talibExecuteQueries: null,
+        wgan_intermediate_forecast: null,
+        wgan_final_forecast: null,
+    }
+}
+
 const SavedModelsWGANGP = ({
     selected_ticker_period,
     selected_ticker_name,
 }) => {
-    const defaultselectedSavedModelData = {
-        model_id: null,
-        model_created_date: null,
-        ticker_name: null,
-        model_name: null,
-        ticker_period: null,
-        model_data: {
-            epoch_results: null,
-            train_duration: null,
-            correlation_data: null,
-            training_parameters: null,
-            talibExecuteQueries: null,
-            wgan_intermediate_forecast: null,
-            wgan_final_forecast: null,
-        }
-    }
     const [selectedSavedModelData, setSelectedSavedModelData] = useState(defaultselectedSavedModelData);
 
     const {
@@ -175,42 +207,18 @@ const SavedModelsWGANGP = ({
     }
 
     useEffect(() => {
+        // console.log("UE : WGAN SAVED LOAD", toShowModelId)
         if (toShowModelId !== null) {
-            console.log('Loading selected saved model data...',toShowModelId)
+            // console.log('Loading saved WGAN model data...', toShowModelId)
             const modelData = user_models_redux.find((model) => model.model_id === toShowModelId);
             if (modelData) {
                 const modelAvailableInDb = modelData.model_data_available
                 setModelStatusColor(modelAvailableInDb ? 'green' : 'red')
 
-                const lookAhead = modelData.model_data.training_parameters.lookAhead
-                const predictionFlag = modelData.model_data.training_parameters.multiSelectValue
-
-                const forecast = modelData.model_data.wgan_final_forecast.predictions.slice(-lookAhead) // the forecast made at the end of the training
-                const firstDate = new Date(forecast[0].date).getTime()
-                const lastDate = new Date(forecast[forecast.length - 1].date).getTime()
-                const toCompareActualValues = ohlcData.filter(ticker => ticker.openTime >= firstDate && ticker.openTime <= lastDate) // actual values for the forecast period
-
-                const actualValuesAdded = forecast.map((obj, index) => {
-                    return {
-                        ...obj,
-                        actual: toCompareActualValues[index] !== undefined ? toCompareActualValues[index][predictionFlag] : null
-                    }
-                })
-
-                const final = {}
-                Object.keys(forecast[0])
-                    .filter(key => key !== "date" && key !== 'actual')
-                    .forEach((key, index) => (
-                        final[key] = forecast.map((obj, i) =>
-                        ({
-                            openTime: obj.date,
-                            predicted: obj[key],
-                            actual: actualValuesAdded[i].actual
-                        })
-                        ))
-                    )
+                const final = transformWGANPredictions(modelData, ohlcData)
                 setAllPredictions(final)
                 setSelectedPrediction(final[`${selectedRMSEIndex}`])
+
                 setDefaultModelName(modelData.model_name)
                 setSelectedSavedModelData({ ...modelData })
 
@@ -227,16 +235,14 @@ const SavedModelsWGANGP = ({
                 setModelRMSE(rmse)
                 setLatestForecastData(modelData.model_data.latest_forecast_result)
             }
+        }
 
-            return () => {
-                console.log('cleaning up ...')
-                // setOpen(false)
-                // setToShowModelId(null)
-                setDefaultModelName('')
-                setSelectedSavedModelData(defaultselectedSavedModelData)
-                setModelRMSE([])
-                setLatestForecastData({})
-            }
+        return () => {
+            // console.log('WGAN GP Saved Model : Cleaning up ...')
+            setDefaultModelName('')
+            setSelectedSavedModelData(defaultselectedSavedModelData)
+            setModelRMSE([])
+            setLatestForecastData({})
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [toShowModelId])
@@ -258,79 +264,8 @@ const SavedModelsWGANGP = ({
         setTrainingParamsCollapse(!trainingParamsCollapse)
     }
 
-    const [defaultModelName, setDefaultModelName] = useState('')
-    const [showModelNameChangeAction, setShowModelNameChangeAction] = useState(false)
-
-    const handleModelDeletFromSaved = ({ model_id }) => {
-        console.log('clicked', model_id)
-        deleteModelForUser({ token, model_id, model_type: 'WGAN-GP' })
-            .then((res) => {
-                Success(res.data.message)
-                setOpen(false)
-                setToShowModelId(null)
-                if (model_id === selectedSavedModelData.model_id) {
-                    // console.log('same model id resetting redux', selectedSavedModelData.model_id, model_id)
-                    dispatch(resetCurrentModelData())
-                }
-                getUserModels({ token })
-                    .then((res) => {
-                        dispatch(setUserModels(res.data.models))
-                    })
-            })
-            .catch((err) => {
-                console.log(err)
-            })
-    }
-
-    const handleNewModelName = (e) => {
-        // console.log(e.target.value)
-        setDefaultModelName(e.target.value)
-    }
-
-    const saveNewModelName = () => {
-        console.log('New modelName: ', defaultModelName)
-        const payload = {
-            model_id: toShowModelId,
-            model_name: defaultModelName
-        }
-
-        renameModel({
-            token, payload
-        })
-            .then((res) => {
-                if (res.data.status) {
-                    // console.log('name change success')
-                    dispatch(renameModelInRedux({ model_id: toShowModelId, newModelName: defaultModelName }))
-                    setShowModelNameChangeAction(false)
-                }
-            })
-            .catch((err) => {
-                console.log(err)
-            })
-    }
-
-    const revertModelNameChange = () => {
-        console.log('Revert modelName: ', model_name)
-        setDefaultModelName(model_name)
-    }
-
-    useEffect(() => {
-        // console.log('UE dft name check', model_name, defaultModelName)
-        if (toShowModelId !== null && model_name !== null && defaultModelName !== null) {
-            if (model_name === defaultModelName) {
-                // console.log('case 1')
-                setShowModelNameChangeAction(false)
-            } else {
-                // console.log('case 2')
-                setShowModelNameChangeAction(true)
-            }
-        }
-    }, [defaultModelName, model_name, toShowModelId])
-
-
-
     const handleMakeNewPrediction = () => {
-        console.log('Making new prediction')
+        // console.log('Making new prediction')
         setForecastLoadingFlag(true)
         const selectedModelData = user_models_redux.find((model) => model.model_id === toShowModelId).model_data
         // console.log(selectedModelData)
@@ -350,6 +285,7 @@ const SavedModelsWGANGP = ({
 
         makeWganPrediction({ token, payload })
             .then((res) => {
+                Success(res.data.message)
                 const final_forecast = {}
                 const new_predictions = res.data.result
                 // console.log(new_predictions)
@@ -376,7 +312,7 @@ const SavedModelsWGANGP = ({
             .catch((err) => {
                 setForecastLoadingFlag(false)
                 const errorMessage = err.response.data.error
-                console.log(err.response.data)
+                // console.log(err.response.data)
                 if (errorMessage === 'TIMEOUT') {
                     Error('Celery Worker un-available (Request Timed out). Try later.')
                 } else {
@@ -385,16 +321,82 @@ const SavedModelsWGANGP = ({
             })
     }
 
-    // console.log(Object.keys(latestForecastData).length)
-
     useEffect(() => {
         if (selectedRMSEIndex !== null && Object.keys(latestForecastData).length !== 0) {
-            console.log('Selected RMSE Index, forecast available', selectedRMSEIndex)
-            setSelectedForecastData(latestForecastData[`${selectedRMSEIndex}`])
+            const selected_forecastData = latestForecastData[`${selectedRMSEIndex}`]
+            // console.log('Selected RMSE Index, forecast available', selectedRMSEIndex)
+            setSelectedForecastData(selected_forecastData)
         } else { return }
     }, [selectedRMSEIndex, latestForecastData])
 
-    // console.log(selectedForecastData)
+    // handles the model name change
+    const [defaultModelName, setDefaultModelName] = useState('')
+    const [showModelNameChangeAction, setShowModelNameChangeAction] = useState(false)
+    const handleModelDeletFromSaved = ({ model_id }) => {
+        // console.log('clicked', model_id)
+        deleteModelForUser({ token, model_id, model_type: 'WGAN-GP' })
+            .then((res) => {
+                Success(res.data.message)
+                setOpen(false)
+                setToShowModelId(null)
+                if (model_id === selectedSavedModelData.model_id) {
+                    // console.log('same model id resetting redux', selectedSavedModelData.model_id, model_id)
+                    dispatch(resetCurrentModelData())
+                }
+                getUserModels({ token })
+                    .then((res) => {
+                        dispatch(setUserModels(res.data.models))
+                    })
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }
+
+    const handleNewModelName = (e) => {
+        // console.log(e.target.value)
+        setDefaultModelName(e.target.value)
+    }
+
+    const saveNewModelName = () => {
+        // console.log('New modelName: ', defaultModelName)
+        const payload = {
+            model_id: toShowModelId,
+            model_name: defaultModelName
+        }
+
+        renameModel({
+            token, payload
+        })
+            .then((res) => {
+                if (res.data.status) {
+                    // console.log('name change success')
+                    dispatch(renameModelInRedux({ model_id: toShowModelId, newModelName: defaultModelName }))
+                    setShowModelNameChangeAction(false)
+                }
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }
+
+    const revertModelNameChange = () => {
+        // console.log('Revert modelName: ', model_name)
+        setDefaultModelName(model_name)
+    }
+
+    useEffect(() => {
+        // console.log('UE dft name check', model_name, defaultModelName)
+        if (toShowModelId !== null && model_name !== null && defaultModelName !== null) {
+            if (model_name === defaultModelName) {
+                // console.log('case 1')
+                setShowModelNameChangeAction(false)
+            } else {
+                // console.log('case 2')
+                setShowModelNameChangeAction(true)
+            }
+        }
+    }, [defaultModelName, model_name, toShowModelId])
 
     // calculates the remaining time for the next prediction after initial model creation only
     const [remainingTime, setRemainingTime] = useState(10);
@@ -405,12 +407,20 @@ const SavedModelsWGANGP = ({
             const periodInMilliSecond = periodToMilliseconds(ticker_period);
             const start = new Date(startDate).getTime()
             const end = start + periodInMilliSecond
-
             const now = new Date().getTime()
             const remaining = Math.floor((end - now) / 1000)
-            // console.log(start, end, 'remaining', remaining)
 
             setRemainingTime(remaining > 0 ? remaining : 0);
+            // Check if the remaining time is positive to start the interval
+            if (remaining > 0 && intervalId === null) {
+                intervalId = setInterval(calculateRemainingTime, 30000);
+            }
+
+            // Check if the remaining time becomes negative to clear the interval
+            if (remaining <= 0 && intervalId !== null) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
         };
 
         const modelData = user_models_redux.find((model) => model.model_id === toShowModelId);
@@ -420,11 +430,14 @@ const SavedModelsWGANGP = ({
             const forecast = modelData.model_data.wgan_final_forecast.predictions.slice(-lookAhead)
             const startDate = new Date(forecast[0].date).getTime()
             calculateRemainingTime(startDate); // calculate remaining time immediately
-            intervalId = setInterval(calculateRemainingTime(startDate), 10000); // update every second
         }
 
-        return () => clearInterval(intervalId); // cleanup on unmount
-    }, [toShowModelId, user_models_redux, ticker_period]);
+        return () => {
+            clearInterval(intervalId); // cleanup on unmount
+            intervalId = null
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [toShowModelId]);
 
     return (
         <Box className='saved-models-body'>
@@ -438,7 +451,7 @@ const SavedModelsWGANGP = ({
                                 <Box display='flex'>
                                     <Tooltip placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                                         <span>
-                                            <IconButton onClick={(e) => handleShowSavedModelDetails({ modelId: model_id, m_name: model_name })} sx={{ padding: '6px', color: toShowModelId === model_id ? `${theme.palette.primary.main}` : `${theme.palette.text.primary}` }} >
+                                            <IconButton onClick={(e) => handleShowSavedModelDetails({ modelId: model_id })} sx={{ padding: '6px', color: toShowModelId === model_id ? `${theme.palette.primary.main}` : `${theme.palette.text.primary}` }} >
                                                 <AspectRatioIcon className='small-icon' />
                                             </IconButton>
                                         </span>
@@ -655,7 +668,7 @@ const SavedModelsWGANGP = ({
                                                         </Typography>
                                                     </Box>
                                                     <Box pt={'4px'} sx={{ fontSize: '12px' }} className='rechart-chart' height='220px'>
-                                                        {(selectedForecastData.length === 0 && !forecastLoadingFlag) ?
+                                                        {(Object.keys(latestForecastData).length === 0 && !forecastLoadingFlag) ?
                                                             <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
                                                                 <Button size='small' variant='outlined' onClick={handleMakeNewPrediction} >Make Prediction</Button>
                                                             </Box>

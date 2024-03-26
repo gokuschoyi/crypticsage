@@ -177,16 +177,6 @@ const SavedModels = ({
     selected_ticker_period,
     selected_ticker_name,
 }) => {
-    const dispatch = useDispatch()
-    const theme = useTheme();
-    const sm = useMediaQuery(theme.breakpoints.down('sm'));
-    const token = useSelector(state => state.auth.accessToken);
-    // const userId = useSelector(state => state.auth.uid)
-    const user_models_redux = useSelector(state => state.cryptoModule.userModels).filter(model => model.model_type === 'LSTM')
-    // const c_module = useSelector(state => state.cryptoModule.userModels)
-    // console.log(c_module)
-
-    const [open, setOpen] = useState(false);
     const [selectedSavedModelData, setSelectedSavedModelData] = useState(defaultselectedSavedModelData);
 
     const {
@@ -205,20 +195,31 @@ const SavedModels = ({
         train_duration,
     } = model_data;
 
-
+    const theme = useTheme();
+    const dispatch = useDispatch()
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
+    const token = useSelector(state => state.auth.accessToken);
+    const ohlcData = useSelector(state => state.cryptoModule.cryptoDataInDb)
+    const user_models_redux = useSelector(state => state.cryptoModule.userModels).filter(model => model.model_type === 'LSTM')
     const [toShowModelId, setToShowModelId] = useState(null);
     const [modelStatusColor, setModelStatusColor] = useState('red')
+    const [open, setOpen] = useState(false);
+
     const [modelRMSE, setModelRMSE] = useState([])
-    const [initialPredictionsDate, setInitialPredictionsDate] = useState(null)
-
-    const ohlcData = useSelector(state => state.cryptoModule.cryptoDataInDb)
-
-
+    const [selectedRMSEIndex, setSelectedRMSEIndex] = useState(0)
     const [allPredictions, setAllPredictions] = useState({})
     const [selectedPrediction, setSelectedPrediction] = useState([])
-    const [selectedRMSEIndex, setSelectedRMSEIndex] = useState(0)
 
-    const handleShowSavedModelDetails = ({ modelId, m_name }) => {
+    const [forecastLoadingFlag, setForecastLoadingFlag] = useState(false)
+    const [latestForecastData, setLatestForecastData] = useState({})
+    const [selectedForecastData, setSelectedForecastData] = useState([])
+
+    const [newForecastMetrics, setNewForecastMetrics] = useState({ mse: 0, rmse: 0 })
+
+    // const c_module = useSelector(state => state.cryptoModule.userModels)
+    // console.log(c_module)
+
+    const handleShowSavedModelDetails = ({ modelId }) => {
         if (modelId === toShowModelId) {
             setOpen(false);
             setToShowModelId(null);
@@ -230,8 +231,9 @@ const SavedModels = ({
     }
 
     useEffect(() => {
+        // console.log("UE : LSTM SAVED LOAD", toShowModelId)
         if (toShowModelId !== null) {
-            console.log('Loading selected saved model data...')
+            // console.log('Loading saved LSTM model data...', toShowModelId)
             const selectedModel = user_models_redux.find((model) => model.model_id === toShowModelId)
             if (selectedModel) {
                 const modelAvailableInDb = selectedModel.model_data_available
@@ -243,21 +245,17 @@ const SavedModels = ({
                 setSelectedPrediction(transformed_predictions[`${selectedRMSEIndex}`])
 
                 setDefaultModelName(selectedModel.model_name)
-                setSelectedSavedModelData(selectedModel)
+                setSelectedSavedModelData({ ...selectedModel })
                 setModelRMSE(selectedModel.model_data.predicted_result.rmse);
-                setInitialPredictionsDate(selectedModel.model_data.predicted_result.initial_forecast[0].open);
                 setLatestForecastData(selectedModel.model_data.latest_forecast_result);
             }
         }
 
         return () => {
-            console.log('cleaning up ...')
-            // setOpen(false)
-            // setToShowModelId(null)
+            // console.log('LSTM Saved Models : Cleaning up...')
             setDefaultModelName('')
             setSelectedSavedModelData(defaultselectedSavedModelData)
             setModelRMSE([])
-            setInitialPredictionsDate(null)
             setLatestForecastData({})
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -281,16 +279,11 @@ const SavedModels = ({
     }
 
     // To make new prediction
-    const [forecastLoadingFlag, setForecastLoadingFlag] = useState(false)
-    const [latestForecastData, setLatestForecastData] = useState({})
-    const [selectedForecastData, setSelectedForecastData] = useState([])
-    const [newForecastMetrics, setNewForecastMetrics] = useState({ mse: 0, rmse: 0 })
-
     const handleMakeNewPrediction = () => {
-        console.log('Making new prediction')
+        // console.log('Making new prediction')
         const selectedModelData = user_models_redux.find((model) => model.model_id === toShowModelId).model_data
         const { training_parameters, talibExecuteQueries, predicted_result: { initial_forecast } } = selectedModelData
-        console.log(initial_forecast)
+
         const payload = {
             training_parameters,
             talibExecuteQueries,
@@ -305,6 +298,7 @@ const SavedModels = ({
         setForecastLoadingFlag(true)
         makeNewPrediction({ token, payload })
             .then((res) => {
+                Success(res.data.message)
                 // console.log(res.data)
                 const { result } = res.data
                 // console.log(result)
@@ -361,54 +355,12 @@ const SavedModels = ({
         } else { return }
     }, [selectedRMSEIndex, latestForecastData])
 
-    // calculates the remaining time for the next prediction after initial model creation only
-    const [remainingTime, setRemainingTime] = useState(10);
-    useEffect(() => {
-        let intervalId = null
-
-        const calculateRemainingTime = () => {
-            console.log('Calculating remaining time')
-            const periodInMilliSecond = periodToMilliseconds(ticker_period);
-            const end = initialPredictionsDate * 1000 + periodInMilliSecond
-            const now = new Date().getTime()
-            const remaining = Math.floor((end - now) / 1000)
-
-            setRemainingTime(remaining > 0 ? remaining : 0);
-            // console.log(periodInMilliSecond, end, now, 'Remaining time :', remaining)
-
-            // Check if the remaining time is positive to start the interval
-            if (remaining > 0 && intervalId === null) {
-                intervalId = setInterval(calculateRemainingTime, 30000);
-            }
-
-            // Check if the remaining time becomes negative to clear the interval
-            if (remaining <= 0 && intervalId !== null) {
-                clearInterval(intervalId);
-                intervalId = null;
-            }
-        };
-
-        if (initialPredictionsDate !== null) {
-            // console.log('First date available', initialPredictionsDate * 1000)
-            calculateRemainingTime(); // calculate remaining time immediately
-        }
-
-        return () => {
-            // console.log('Clearing interval')
-            clearInterval(intervalId); // cleanup on unmount
-            intervalId = null
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialPredictionsDate]);
-
-    // console.log('remaining Time :', remainingTime)
-
     // handles the model name change
     const [defaultModelName, setDefaultModelName] = useState('')
     const [showModelNameChangeAction, setShowModelNameChangeAction] = useState(false)
     // console.log('default value', defaultModelName)
     const handleModelDeletFromSaved = ({ model_id }) => {
-        console.log('clicked', model_id)
+        // console.log('clicked', model_id)
         deleteModelForUser({ token, model_id, model_type: 'LSTM' })
             .then((res) => {
                 Success(res.data.message)
@@ -433,7 +385,7 @@ const SavedModels = ({
     }
 
     const saveNewModelName = () => {
-        console.log('New modelName: ', defaultModelName)
+        // console.log('New modelName: ', defaultModelName)
         const payload = {
             model_id: toShowModelId,
             model_name: defaultModelName
@@ -472,6 +424,45 @@ const SavedModels = ({
         }
     }, [defaultModelName, model_name, toShowModelId])
 
+    // calculates the remaining time for the next prediction after initial model creation only
+    const [remainingTime, setRemainingTime] = useState(10);
+    useEffect(() => {
+        let intervalId = null
+
+        const calculateRemainingTime = (startDate) => {
+            const periodInMilliSecond = periodToMilliseconds(ticker_period);
+            const end = startDate + periodInMilliSecond
+            const now = new Date().getTime()
+            const remaining = Math.floor((end - now) / 1000)
+
+            setRemainingTime(remaining > 0 ? remaining : 0);
+            // Check if the remaining time is positive to start the interval
+            if (remaining > 0 && intervalId === null) {
+                intervalId = setInterval(calculateRemainingTime, 30000);
+            }
+
+            // Check if the remaining time becomes negative to clear the interval
+            if (remaining <= 0 && intervalId !== null) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+        };
+
+        const modelData = user_models_redux.find((model) => model.model_id === toShowModelId);
+        if (toShowModelId !== '' && modelData) {
+            const startDate = modelData.model_data.predicted_result.initial_forecast[0].open * 1000
+
+            calculateRemainingTime(startDate); // calculate remaining time immediately
+        }
+
+        return () => {
+            // console.log('Clearing interval')
+            clearInterval(intervalId); // cleanup on unmount
+            intervalId = null
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [toShowModelId]);
+
     return (
         <Box className='saved-models-body'>
             <Box display='flex' flexDirection='column' gap='5px' className='all-saved-model' width='fit-content'>
@@ -484,7 +475,7 @@ const SavedModels = ({
                                 <Box display='flex'>
                                     <Tooltip placement='top' sx={{ cursor: 'pointer', padding: '6px' }}>
                                         <span>
-                                            <IconButton onClick={handleShowSavedModelDetails.bind(null, { modelId: model_id, m_name: model_name })} sx={{ padding: '6px', color: toShowModelId === model_id && open ? `${theme.palette.primary.main}` : `${theme.palette.text.primary}` }} >
+                                            <IconButton onClick={handleShowSavedModelDetails.bind(null, { modelId: model_id })} sx={{ padding: '6px', color: toShowModelId === model_id && open ? `${theme.palette.primary.main}` : `${theme.palette.text.primary}` }} >
                                                 <AspectRatioIcon className='small-icon' />
                                             </IconButton>
                                         </span>

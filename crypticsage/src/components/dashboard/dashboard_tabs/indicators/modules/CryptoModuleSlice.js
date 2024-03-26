@@ -164,13 +164,11 @@ const cryptoModuleSlice = createSlice({
         setRetrainParameters: (state, action) => {
             const { model_id, model_name, model_saved_to_db, retrainParams } = action.payload;
             if (model_id !== undefined || model_name !== undefined || model_saved_to_db !== undefined) {
-                console.log('From retrain wgan')
                 state.modelData.model_id = model_id;
                 state.modelData.model_name = model_name;
                 state.modelData.model_saved_to_db = model_saved_to_db
                 state.modelData.training_parameters = { ...retrainParams }
             } else {
-                console.log('From TP wgan')
                 state.modelData.training_parameters = { ...retrainParams }
             }
         },

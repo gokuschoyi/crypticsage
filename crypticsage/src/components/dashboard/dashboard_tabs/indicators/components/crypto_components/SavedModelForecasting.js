@@ -5,7 +5,7 @@ import SavedModelsWGANGP from './SavedModelsWGANGP'
 import { useSelector, useDispatch } from 'react-redux'
 
 
-import { getUserSavedModels } from '../../../../../../api/user'
+import { getUserModels } from '../../../../../../api/adminController'
 import { setUserModels } from '../../modules/CryptoModuleSlice'
 
 function a11yProps(index) {
@@ -37,8 +37,8 @@ const SavedModelForecasting = () => {
         if (userModels.length === 0 && !fetchedRef.current) {
             fetchedRef.current = true
             // console.log('fetching user models')
-            getUserSavedModels({ token }).then(response => {
-                dispatch(setUserModels(response.data.userModels))
+            getUserModels({ token }).then(response => {
+                dispatch(setUserModels(response.data.models))
             }).catch(error => {
                 console.log('error', error)
             })

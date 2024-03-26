@@ -100,7 +100,7 @@ const RetrainWGANModal = ({ type, model_id: m_id, setMetricsChartReload }) => {
     useEffect(() => {
         // console.log('UE Changing retrain params ...')
         if (modelParams !== undefined) {
-            console.log('Changing retrain params AVAILABLE...')
+            // console.log('Changing retrain params AVAILABLE...')
             setReTrainParams((prev) => ({
                 ...prev,
                 checkpoint: '',
@@ -232,7 +232,7 @@ const RetrainWGANModal = ({ type, model_id: m_id, setMetricsChartReload }) => {
                 dispatch(setStartWebSocket(true))
             } else {
                 console.log('Retrain from saved model')
-                if (redux_model_id !== '' && wganFinalPred.length > 0 && (redux_model_saved_to_db === false || retrain_history_saved_to_db === false)) {
+                if (redux_model_id !== '' && wganFinalPred.length > 0 && (redux_model_saved_to_db === false && retrain_history_saved_to_db === false)) {
                     setGoAndLoadError('Cannot start training. Another model run present and not saved. Save or Reset the model and load again')
                     return
                 } else {
@@ -292,7 +292,7 @@ const RetrainWGANModal = ({ type, model_id: m_id, setMetricsChartReload }) => {
         if (reTrainParams.checkpoint === '') {
             console.log('Checkpoint not selected')
             setCheckpointError(true)
-        } else if (redux_model_id !== '' && wganFinalPred.length > 0 && (redux_model_saved_to_db === false || retrain_history_saved_to_db === false)) {
+        } else if (redux_model_id !== '' && wganFinalPred.length > 0 && (redux_model_saved_to_db === false && retrain_history_saved_to_db === false)) {
             setGoAndLoadError('Cannot Load Parameters. Another model run present and not saved. Save or Reset the model and load again')
             return
         } else {

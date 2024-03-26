@@ -14,6 +14,7 @@
         "**/node_modules/*",
         "middleware/logger/logs",
         "worker_celery",
-        "controller/sample code"
+        "controller/sample code",
+        "jsconfig.json",
     ]
 }

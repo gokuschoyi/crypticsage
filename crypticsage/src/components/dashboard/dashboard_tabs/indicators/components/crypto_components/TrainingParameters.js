@@ -257,11 +257,19 @@ const TrainingParameters = ({
             return true;
         }
 
-        const payload = {
-            transformation_order: transformationOrder,
-            talibExecuteQueries: generateTalibFunctionsForExecution({ selectedFunctions, tDataReduxL: tDataRedux.lenght, selectedTickerPeriod, selectedTickerName })
+        let payload
+        if (loadingFromSaved) {
+            payload = {
+                transformation_order: transformationOrder,
+                talibExecuteQueries: userModels.find((model) => model.model_id === model_id).model_data.talibExecuteQueries
+            }
+        } else {
+            payload = {
+                transformation_order: transformationOrder,
+                talibExecuteQueries: generateTalibFunctionsForExecution({ selectedFunctions, tDataReduxL: tDataRedux.length, selectedTickerPeriod, selectedTickerName })
+            }
         }
-
+        
         const order = checkOrder(transformation_order_ref.current, transformationOrder)
         if (!order) {
             // console.log('Order changed or new func added.')
