@@ -3,6 +3,7 @@ import { createChart } from 'lightweight-charts';
 import { Box, useTheme } from '@mui/material'
 
 const DashboardChart = (props) => {
+    // eslint-disable-next-line no-unused-vars
     const { chartData, selectedTokenName, tokenUrl, gridLineToggle } = props;
     const theme = useTheme();
     const chartBackgroundColor = theme.palette.background.default
