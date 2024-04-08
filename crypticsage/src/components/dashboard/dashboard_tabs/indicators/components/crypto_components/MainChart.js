@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "react-error-boundary";
 import React, { useState, useRef, useEffect } from 'react'
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Skeleton, Grid } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import MainChartOptions from './MainChartOptions'
@@ -32,7 +32,7 @@ const MainChart = ({
     const params = useParams();
     const { cryptotoken } = params;
     const module = window.location.href.split("/dashboard/indicators/")[1].split("/")[0]
-
+    const navigate = useNavigate();
     const token = useSelector(state => state.auth.accessToken);
     const tokenPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
     const toolTipSwitchFlag = useSelector(state => state.cryptoModule.toolTipOn)
@@ -52,6 +52,7 @@ const MainChart = ({
             items_per_page: 500
         })
         tickerDataRef.current = false
+        navigate(`/dashboard/indicators/crypto/${cryptotoken}/${newValue}`);
     }
 
     let defaultFetchValues = {

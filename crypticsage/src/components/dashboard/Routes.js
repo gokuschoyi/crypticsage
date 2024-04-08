@@ -62,7 +62,7 @@ const TabRoutes = [
                 <CryptoStocksTableModule />
             </Suspense>
         } />,
-        <Route key='crypto-module' path="crypto/:cryptotoken?" element={
+        <Route key='crypto-module' path="crypto/:cryptotoken?/:period?" element={
             <Suspense fallback={<div>Loading Crypto Data</div>}>
                 <CryptoModule />
             </Suspense>

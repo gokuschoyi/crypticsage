@@ -35,6 +35,8 @@ const CryptoTable = () => {
     //<------ table logic ------>//
     const token = useSelector(state => state.auth.accessToken);
     const selectedToken = useSelector(state => state.cryptoModule.selectedTickerName);
+    const selectedTickerPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod);
+    const defaultTickerPeriod = '4h' // Default ticker period. Should be the same as in the redux state 
     const cryptoPreferences = useSelector(state => state.indicators.cryptoPreferences);
     const { currency: rCurr, order: rOrder, orderBy: rOrderBy } = cryptoPreferences
     const cryptoDataInRedux = useSelector(state => state.indicators.cryptoData);
@@ -168,13 +170,13 @@ const CryptoTable = () => {
         if (dataId !== null) {
             if (dataId === selectedToken) {
                 dispatch(resetShowSettingsFlag())
-                navigate(`/dashboard/indicators/crypto/${dataId}`)
+                navigate(`/dashboard/indicators/crypto/${dataId}/${selectedTickerPeriod}`)
             } else {
                 dispatch(setSelectedTickerName(dataId))
                 dispatch(resetDataLoadedState())
                 dispatch(resetShowSettingsFlag())
                 dispatch(setCryptoDataInDbRedux({ dataInDb: [], total_count_db: 0 }))
-                navigate(`/dashboard/indicators/crypto/${dataId}`)
+                navigate(`/dashboard/indicators/crypto/${dataId}/${defaultTickerPeriod}`)
             }
         } else {
             console.log("no token name present")

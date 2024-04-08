@@ -256,7 +256,7 @@ const MainChart = (props) => {
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
     const textColor = theme.palette.primary.newWhite
-    const resizeObserver = useRef();
+    // const resizeObserver = useRef();
 
     const chart_options = {
         autoSize: true,
@@ -403,21 +403,21 @@ const MainChart = (props) => {
     /**
      * Resize chart based on parent container resizes (chartboxRef.current).
      */
-    useEffect(() => {
-        // console.log('UE 3 : ResizeObserver')
-        resizeObserver.current = new ResizeObserver((entries) => {
-            const { width, height } = entries[0].contentRect;
-            // console.log(width, height);
-            chart.current.applyOptions({ width, height });
-        });
+    // useEffect(() => {
+    //     // console.log('UE 3 : ResizeObserver')
+    //     resizeObserver.current = new ResizeObserver((entries) => {
+    //         const { width, height } = entries[0].contentRect;
+    //         // console.log(width, height);
+    //         chart.current.applyOptions({ width, height });
+    //     });
 
-        resizeObserver.current.observe(chartboxRef.current);
+    //     resizeObserver.current.observe(chartboxRef.current);
 
-        return () => {
-            // console.log('UE 3 RETURN : resizeObserver')
-            resizeObserver.current.disconnect();
-        }
-    }, []);
+    //     return () => {
+    //         // console.log('UE 3 RETURN : resizeObserver')
+    //         resizeObserver.current.disconnect();
+    //     }
+    // }, []);
 
     /**
      * Adds the initial forecast after model trainign to the main chart

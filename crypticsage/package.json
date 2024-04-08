@@ -29,7 +29,6 @@
     "framer-motion": "^10.16.16",
     "gsap": "^3.11.4",
     "leva": "^0.9.34",
-    "lightweight-charts": "github:john-wallace-dev/lightweight-charts",
     "localforage": "^1.10.0",
     "maath": "^0.5.1",
     "react": "^18.2.0",
@@ -54,7 +53,8 @@
     "start": "export PORT=3001 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postinstall": "node copy_lwc.js"
   },
   "eslintConfig": {
     "extends": [

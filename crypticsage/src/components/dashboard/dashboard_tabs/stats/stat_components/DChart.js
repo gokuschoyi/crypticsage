@@ -41,17 +41,17 @@ const DashboardChart = (props) => {
 
         // handles dynamic chart resizing and setting values for cHeight and cWidth for tooltip position calculations.
         // Also gets the charts boundingClientRect to get the offsetLeft and offsetTop values for tooltip
-        const handleResize = () => {
-            cWidth = chartDom.clientWidth;
-            cHeight = chartDom.clientHeight;
-            chart.current.applyOptions({ width: cWidth, height: cHeight });
+        // const handleResize = () => {
+        //     cWidth = chartDom.clientWidth;
+        //     cHeight = chartDom.clientHeight;
+        //     chart.current.applyOptions({ width: cWidth, height: cHeight });
 
-            coinChartBox = document.getElementsByClassName('coin-chart-box')[0].getBoundingClientRect()
-            offsetLeft = Math.round(coinChartBox.left);
-            offsetTop = Math.round(coinChartBox.top)
+        //     coinChartBox = document.getElementsByClassName('coin-chart-box')[0].getBoundingClientRect()
+        //     offsetLeft = Math.round(coinChartBox.left);
+        //     offsetTop = Math.round(coinChartBox.top)
 
-            scrollYAxis = window.scrollY
-        };
+        //     scrollYAxis = window.scrollY
+        // };
 
         // gets the global mouse co-ordinates form the document- desktops
         const calculateMousePosition = (event) => {
@@ -152,12 +152,12 @@ const DashboardChart = (props) => {
                 }
             })
 
-            window.addEventListener('resize', handleResize);
+            // window.addEventListener('resize', handleResize);
             chartDom.addEventListener('mousemove', (event) => calculateMousePosition(event))
             chartDom.addEventListener('touchmove', (event) => handleTouchMove(event))
         }
         return () => {
-            window.removeEventListener('resize', handleResize);
+            // window.removeEventListener('resize', handleResize);
             chartDom.removeEventListener('mousemove', calculateMousePosition)
             chartDom.removeEventListener('touchmove', handleTouchMove)
             chart.current.remove();
@@ -166,18 +166,18 @@ const DashboardChart = (props) => {
     }, [chartData])
 
     // Resize chart on container resizes.
-    const resizeObserver = useRef();
-    useEffect(() => {
-        resizeObserver.current = new ResizeObserver((entries) => {
-            const { width, height } = entries[0].contentRect;
-            // console.log(width, height);
-            chart.current.applyOptions({ width, height });
-        });
+    // const resizeObserver = useRef();
+    // useEffect(() => {
+    //     resizeObserver.current = new ResizeObserver((entries) => {
+    //         const { width, height } = entries[0].contentRect;
+    //         // console.log(width, height);
+    //         chart.current.applyOptions({ width, height });
+    //     });
 
-        resizeObserver.current.observe(chartContainerRef.current);
+    //     resizeObserver.current.observe(chartContainerRef.current);
 
-        return () => resizeObserver.current.disconnect();
-    }, []);
+    //     return () => resizeObserver.current.disconnect();
+    // }, []);
 
     // applying theme to chart
     useEffect(() => {

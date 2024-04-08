@@ -1,4 +1,3 @@
-from matplotlib.font_manager import json_dump
 from WGAN_GP.trainer import WGANGP
 from WGAN_GP import forecasting
 from WGAN_GP import util

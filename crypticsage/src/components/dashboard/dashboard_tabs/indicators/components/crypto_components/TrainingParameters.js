@@ -5,6 +5,7 @@ import MultiSelect from './MultiSelect'
 import CustomSlider from './CustomSlider'
 import ReorderList from './ReorderList'
 import CustomInput from './CustomInput'
+import ACFandPACF from './ACFandPACF'
 import ResetTrainedModelModal from './modals/ResetTrainedModelModal'
 import CorelationMatrix from './CorelationMatrix'
 import { ResetOnModelChange } from './modals';
@@ -269,7 +270,7 @@ const TrainingParameters = ({
                 talibExecuteQueries: generateTalibFunctionsForExecution({ selectedFunctions, tDataReduxL: tDataRedux.length, selectedTickerPeriod, selectedTickerName })
             }
         }
-        
+
         const order = checkOrder(transformation_order_ref.current, transformationOrder)
         if (!order) {
             // console.log('Order changed or new func added.')
@@ -869,41 +870,50 @@ const TrainingParameters = ({
                     </Box>
                 }
 
-                <Box pt={2}>
-                    <Box display='flex' flexDirection='column' justifyContent='space-between'>
-                        <Box display='flex' gap='8px' alignItems='center' width='320px' justifyContent='space-between'>
-                            <Typography variant='h5' textAlign='start'>Corelation Matrix</Typography>
-                            <Box display='flex' gap='8px' alignItems='center'>
-                                <Button
-                                    sx={{
-                                        height: '26px',
-                                    }}
-                                    variant='outlined'
-                                    size='small'
-                                    color='secondary'
-                                    disabled={trainingStartedFlag}
-                                    onClick={(e) => handleCalculateCorrelationMatrix()}
-                                >
-                                    MATRIX
-                                </Button>
-                                <IconButton disabled={trainingStartedFlag} onClick={(e) => setCorelation_matrix([])}>
-                                    <DeleteForeverIcon className='small-icon' />
-                                </IconButton>
+                <Grid container>
+                    <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
+                        <Box pt={2}>
+                            <Box display='flex' flexDirection='column' justifyContent='space-between'>
+                                <Box display='flex' gap='8px' alignItems='center' width='320px' justifyContent='space-between'>
+                                    <Typography variant='h5' textAlign='start'>Corelation Matrix</Typography>
+                                    <Box display='flex' gap='8px' alignItems='center'>
+                                        <Button
+                                            sx={{
+                                                height: '26px',
+                                            }}
+                                            variant='outlined'
+                                            size='small'
+                                            color='secondary'
+                                            disabled={trainingStartedFlag}
+                                            onClick={(e) => handleCalculateCorrelationMatrix()}
+                                        >
+                                            MATRIX
+                                        </Button>
+                                        <IconButton disabled={trainingStartedFlag} onClick={(e) => setCorelation_matrix([])}>
+                                            <DeleteForeverIcon className='small-icon' />
+                                        </IconButton>
+                                    </Box>
+                                </Box>
+                                <Box display='flex' gap='8px' alignItems='center'>
+                                    {corelation_matrix_error !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{corelation_matrix_error}</Typography>}
+                                </Box>
+                            </Box>
+                            <Box pt={1}>
+                                {(corelation_matrix && corelation_matrix.length > 0) &&
+                                    <CorelationMatrix
+                                        transformation_order={transformation_order_ref.current}
+                                        correlation_data_redux={corelation_matrix}
+                                    />
+                                }
                             </Box>
                         </Box>
-                        <Box display='flex' gap='8px' alignItems='center'>
-                            {corelation_matrix_error !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{corelation_matrix_error}</Typography>}
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
+                        <Box pt={2}>
+                            <ACFandPACF trainingStartedFlag={trainingStartedFlag} />
                         </Box>
-                    </Box>
-                    <Box pt={1}>
-                        {(corelation_matrix && corelation_matrix.length > 0) &&
-                            <CorelationMatrix
-                                transformation_order={transformation_order_ref.current}
-                                correlation_data_redux={corelation_matrix}
-                            />
-                        }
-                    </Box>
-                </Box>
+                    </Grid>
+                </Grid>
             </Box >
         </React.Fragment>
     )

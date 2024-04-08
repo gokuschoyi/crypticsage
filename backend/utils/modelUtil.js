@@ -178,6 +178,94 @@ const calcuteTotalTickerCountForForecast = (train_period, first_date) => {
     return totalTickerCount
 }
 
+function getCriticalValue(confidenceLevel) {
+    // For a 95% confidence level, the critical value from the standard normal distribution is approximately 1.96
+    // You can replace this function with a lookup table or use a library for more accurate critical values
+    // For smaller sample sizes, consider using the t-distribution instead
+    switch (confidenceLevel) {
+        case 0.90:
+            return 1.645; // 90% confidence level
+        case 0.95:
+            return 1.96; // 95% confidence level
+        case 0.99:
+            return 2.576; // 99% confidence level
+        default:
+            return 1.96; // Default to 95% confidence level
+    }
+}
+
+function calculatACF(data, lag) {
+    // Calculate the mean of the data
+    const mean = data.reduce((acc, val) => acc + val, 0) / data.length;
+
+    // Calculate the auto-correlation for each lag value
+    const autoCorrelations = [];
+    for (let i = 0; i <= lag; i++) {
+        let sum = 0;
+        for (let j = 0; j < data.length - i; j++) {
+            sum += (data[j] - mean) * (data[j + i] - mean);
+        }
+        autoCorrelations.push(sum);
+    }
+
+    // Normalize the auto-correlation values
+    const normalizedACF = autoCorrelations.map((value, index) => {
+        return value / autoCorrelations[0]; // Divide by auto-correlation at lag 0
+    });
+
+    return normalizedACF;
+}
+
+function calculatePACF(acf, maxLag) {
+    const partialAutocorrs = [];
+    // Initialize arrays
+    let phi = [];
+    let newPhi = [];
+    phi[0] = acf[0]
+    newPhi[0] = acf[0]
+    partialAutocorrs.push(phi[0]);
+
+    // Calculate partial autocorrelations
+    for (let m = 1; m <= maxLag; m++) {
+        let sumTop = 0;
+        let sumBottom = 0;
+
+        for (let j = 1; j < m; j++) {
+            sumTop += phi[j] * acf[m - j];
+            sumBottom += phi[j] * acf[j];
+        }
+
+        const new_phi_val = (acf[m] - sumTop) / (1 - sumBottom);
+        newPhi[m] = new_phi_val
+
+        for (let k = 1; k < m; k++) {
+            newPhi[k] = phi[k] - newPhi[m] * phi[m - k];
+        }
+
+        for (let k = 0; k <= m; k++) {
+            phi[k] = newPhi[k];
+        }
+        partialAutocorrs.push(newPhi[m]);
+    }
+    return partialAutocorrs;
+}
+
+const calculate_confidence_interval = (pacfValues, confidence_level, n) => {
+    const zAlphaOver2 = getCriticalValue(confidence_level);
+
+    // Calculate standard error
+    const stdErr = 1 / Math.sqrt(n);
+
+    // Calculate margin of error
+    const marginOfError = zAlphaOver2 * stdErr;
+    // Calculate confidence intervals
+    const confidenceIntervals = pacfValues.map(pacf =>
+        pacf === 1 ? [pacf, pacf] : [pacf - marginOfError, pacf + marginOfError]
+    )
+
+    return confidenceIntervals;
+}
+
 module.exports = {
     checkOrder
     , checkIfValidationIsPossible
@@ -186,4 +274,7 @@ module.exports = {
     , deleteModelFromLocalDirectory
     , getSavedModelCheckPoint
     , calcuteTotalTickerCountForForecast
+    , calculatACF
+    , calculatePACF
+    , calculate_confidence_interval
 }

@@ -22,6 +22,7 @@ router.post('/make_wgan_prediction', ModelController.makeWgangpForecast)
 router.post('/get_model_result', ModelController.getModelResult)  // Can be converted to fetch further details of the model
 
 router.post('/generate_test_data', ModelController.testNewModel)
+router.post('/get_partial_auto_correlation', ModelController.partialAutoCorrelation)
 
 // celery test route
 const tempsetrmse = async (req, res) => {

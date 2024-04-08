@@ -18,6 +18,9 @@ const {
     deleteWGANModelAndLogs
     , deleteModelFromLocalDirectory
     , getSavedModelCheckPoint
+    , calculatACF
+    , calculatePACF
+    , calculate_confidence_interval
 } = require('../utils/modelUtil')
 
 const {
@@ -400,6 +403,30 @@ const testing = async (model_id) => {
         .catch(err => console.log(err))
 }
 
+const partialAutoCorrelation = async (req, res) => {
+    const { asset_type, ticker_name, period, maxLag, seriesName, confidenceLevel } = req.body
+
+    const historical_data = await MDBServices.fetchTickerHistDataFromDb(asset_type, ticker_name, period, 1, 500, 0)
+    const data = historical_data.ticker_data.map(item => parseFloat(item[seriesName]))
+
+    const acf = calculatACF(data, maxLag)
+    const pacf = calculatePACF(acf, maxLag);
+
+    // console.log('Auto correlation coefficients:', acf)
+    // console.log("Partial autocorrelation coefficients:", pacf);
+
+    const ci = calculate_confidence_interval(pacf, confidenceLevel, data.length)
+
+    let pacf_final = []
+    for (let i = 0; i < pacf.length; i++) {
+        pacf_final.push({ lag: i, acf: acf[i], pacf: pacf[i], lower_bound: ci[i][0] - pacf[i], upper_bound: ci[i][1] - pacf[i] })
+    }
+    res.status(200).json({
+        message: 'Partial Autocorrelation calculated successfully',
+        pacf_final,
+    })
+}
+
 module.exports = {
     procssModelTraining
     , retrainModel
@@ -416,4 +443,5 @@ module.exports = {
     , testNewModel
     , getModelResult
     , testing
+    , partialAutoCorrelation
 }

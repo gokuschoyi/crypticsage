@@ -261,6 +261,26 @@ tr:hover .prediction-mse {
     -moz-osx-font-smoothing: grayscale;
 }
 
+.tool-tip-pacf {
+    color: var(--mui-palette-primary-newWhite);
+    position: absolute;
+    box-sizing: border-box;
+    font-size: 11px;
+    text-align: left;
+    z-index: 1000;
+    top: 6px;
+    right: 6px;
+    pointer-events: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    flex-direction: row;
+    gap: 8px;
+    backdrop-filter: blur(2px);
+    border-radius: 10px;
+    width: fit-content;
+    align-items: flex-start;
+}
+
 .model-hist-legend {
     display: flex;
     flex-direction: column;
@@ -1026,6 +1046,11 @@ tr:hover .prediction-mse {
         align-items: flex-start;
         padding-left: 4px;
         padding-bottom: 4px;
+    }
+
+    .tool-tip-pacf{
+        flex-direction: column;
+        gap:0px;
     }
 }
 

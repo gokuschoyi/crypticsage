@@ -13,7 +13,7 @@ const CustomTokenCard = (props) => {
 
     const handleSymbolClick = ({ symbol }) => {
         if (symbol === 'N/A') return
-        const redirectURL = `/dashboard/indicators/crypto/${symbol}`
+        const redirectURL = `/dashboard/indicators/crypto/${symbol}/4h`
         if (symbol === selectedToken) {
             dispatch(resetShowSettingsFlag())
             navigate(redirectURL)

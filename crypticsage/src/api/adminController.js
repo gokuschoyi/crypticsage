@@ -210,6 +210,16 @@ export const getCorelationMatrix = async ({ token, payload }) => {
     return response;
 }
 
+export const getPartialAutoCorrelation = async ({ token, payload }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/model/get_partial_auto_correlation`, { ...payload }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
 export const getUserModels = async ({ token }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }

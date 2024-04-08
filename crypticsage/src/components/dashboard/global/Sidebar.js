@@ -40,7 +40,7 @@ const SidebarC = () => {
             const currentRoute = location.pathname.split('/');
             // console.log(currentRoute, selectedToken)
             // console.log(currentSideBarTab, currentRoute)
-            if (currentRoute.length === 5 && currentRoute[2] === 'indicators') {
+            if (currentRoute.length === 6 && currentRoute[2] === 'indicators') {
                 // console.log('indicators')
                 if (selectedToken !== currentRoute[2]) {
                     dispatch(setSidebarState('indicators'));
