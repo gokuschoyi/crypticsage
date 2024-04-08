@@ -26,6 +26,7 @@
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
+    "fancy-canvas": "2.1.0",
     "framer-motion": "^10.16.16",
     "gsap": "^3.11.4",
     "leva": "^0.9.34",
