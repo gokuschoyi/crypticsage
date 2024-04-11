@@ -13,6 +13,7 @@ import {
     , Autocomplete
     , TextField
     , useTheme
+    , Skeleton
 } from '@mui/material'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 
@@ -64,7 +65,7 @@ const ACFandPACF = ({ trainingStartedFlag }) => {
         crosshair: {
             vertLine: {
                 width: 4,
-                color: "rgba(224, 227, 235, 0.1)",
+                color: textColor,
                 style: 0,
             },
             horzLine: {
@@ -104,6 +105,7 @@ const ACFandPACF = ({ trainingStartedFlag }) => {
     // console.log(options)
 
     const [selectedOption, setSelectedOption] = useState({ seriesName: options[0], lag: 2, c_level: "95 %" })
+    const [loading, setLoading] = useState(false)
     // console.log(selectedOption)
 
     // Handle calculation of acf and pacf
@@ -118,6 +120,7 @@ const ACFandPACF = ({ trainingStartedFlag }) => {
                 setAcf_pacf_data([])
             }
         }
+        setLoading(true)
         const payload = {
             asset_type,
             ticker_name,
@@ -130,9 +133,11 @@ const ACFandPACF = ({ trainingStartedFlag }) => {
         getPartialAutoCorrelation({ token, payload })
             .then(response => {
                 setAcf_pacf_data(response.data.pacf_final)
+                setLoading(false)
             })
             .catch(error => {
                 console.log(error)
+                setLoading(false)
                 setAcf_pacf_error('Something went wrong, please try again later.')
             })
     }
@@ -240,6 +245,11 @@ const ACFandPACF = ({ trainingStartedFlag }) => {
                     horzLines: {
                         color: textColor
                     },
+                },
+                crosshair: {
+                    vertLine: {
+                        color: '#83838394',
+                    },
                 }
             })
         }
@@ -300,84 +310,9 @@ const ACFandPACF = ({ trainingStartedFlag }) => {
         <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
             <Box width="100%" height="100%">
                 <Box display='flex' flexDirection='column' gap={'4px'} pb={1}>
-                    <Typography variant='h5' textAlign='start'>ACF/PACF</Typography>
-                    <Box display='flex' gap='8px' alignItems='center' justifyContent='space-between'>
-                        <Box display='flex' gap='16px' alignItems='end'>
-                            <Box width='110px'>
-                                <Autocomplete
-                                    size='small'
-                                    disableClearable
-                                    disablePortal={false}
-                                    id="select-acf-pacf-series"
-                                    options={options}
-                                    value={selectedOption.seriesName} // Set the selected value
-                                    onChange={(event, newValue) => setSelectedOption((prev) => ({ ...prev, seriesName: newValue }))} // Handle value change
-                                    sx={{ width: 'auto' }}
-                                    renderInput={(params) => <TextField size='small' {...params}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
-                                                    borderColor: `${theme.palette.primary.main} !important`,
-                                                }
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                height: '10px'
-                                            },
-                                        }}
-                                        label="Select a series"
-                                        color="secondary"
-                                    />}
-                                />
-                            </Box>
-
-                            <Box width='110px'>
-                                <Autocomplete
-                                    size='small'
-                                    disableClearable
-                                    disablePortal={false}
-                                    id="select-confidence-level"
-                                    options={c_level_options}
-                                    value={selectedOption.c_level} // Set the selected value
-                                    onChange={(event, newValue) => setSelectedOption((prev) => ({ ...prev, c_level: newValue }))} // Handle value change
-                                    sx={{ width: 'auto' }}
-                                    renderInput={(params) => <TextField size='small' {...params}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
-                                                    borderColor: `${theme.palette.primary.main} !important`,
-                                                }
-                                            },
-                                            '& .MuiInputBase-input': {
-                                                height: '10px'
-                                            },
-                                        }}
-                                        label="C-Value"
-                                        color="secondary"
-                                    />}
-                                />
-                            </Box>
-
-                            <Box width='70px'>
-                                <TextField
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            '& fieldset': {
-                                                borderColor: `${theme.palette.primary.main} !important`,
-                                            }
-                                        },
-                                        '& .MuiInputBase-input': {
-                                            height: '10px'
-                                        },
-                                    }}
-                                    id="standard-basic"
-                                    label="Lag"
-                                    variant="standard"
-                                    value={selectedOption.lag}
-                                    onChange={(event) => {
-                                        setSelectedOption((prev) => ({ ...prev, lag: parseInt(event.target.value) || 0 }))
-                                    }}
-                                />
-                            </Box>
+                    <Box display='flex' flexDirection='row' gap={'4px'} alignItems={'center'} justifyContent={'space-between'}>
+                        <Typography variant='h5' textAlign='start'>ACF/PACF</Typography>
+                        <Box display={'flex'} gap={'4px'} alignItems={'center'}>
                             <Button
                                 sx={{
                                     height: '26px',
@@ -390,10 +325,87 @@ const ACFandPACF = ({ trainingStartedFlag }) => {
                             >
                                 GO
                             </Button>
+                            <IconButton disabled={trainingStartedFlag} onClick={(e) => setAcf_pacf_data([])}>
+                                <DeleteForeverIcon className='small-icon' />
+                            </IconButton>
                         </Box>
-                        <IconButton disabled={trainingStartedFlag} onClick={(e) => setAcf_pacf_data([])}>
-                            <DeleteForeverIcon className='small-icon' />
-                        </IconButton>
+                    </Box>
+                    <Box display='flex' gap='8px' alignItems='end' justifyContent='space-between'>
+                        <Box width='110px'>
+                            <Autocomplete
+                                size='small'
+                                disableClearable
+                                disablePortal={false}
+                                id="select-acf-pacf-series"
+                                options={options}
+                                value={selectedOption.seriesName} // Set the selected value
+                                onChange={(event, newValue) => setSelectedOption((prev) => ({ ...prev, seriesName: newValue }))} // Handle value change
+                                sx={{ width: 'auto' }}
+                                renderInput={(params) => <TextField size='small' {...params}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            '& fieldset': {
+                                                borderColor: `${theme.palette.primary.main} !important`,
+                                            }
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            height: '10px'
+                                        },
+                                    }}
+                                    label="Select a series"
+                                    color="secondary"
+                                />}
+                            />
+                        </Box>
+
+                        <Box width='110px'>
+                            <Autocomplete
+                                size='small'
+                                disableClearable
+                                disablePortal={false}
+                                id="select-confidence-level"
+                                options={c_level_options}
+                                value={selectedOption.c_level} // Set the selected value
+                                onChange={(event, newValue) => setSelectedOption((prev) => ({ ...prev, c_level: newValue }))} // Handle value change
+                                sx={{ width: 'auto' }}
+                                renderInput={(params) => <TextField size='small' {...params}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            '& fieldset': {
+                                                borderColor: `${theme.palette.primary.main} !important`,
+                                            }
+                                        },
+                                        '& .MuiInputBase-input': {
+                                            height: '10px'
+                                        },
+                                    }}
+                                    label="C-Value"
+                                    color="secondary"
+                                />}
+                            />
+                        </Box>
+
+                        <Box width='70px'>
+                            <TextField
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: `${theme.palette.primary.main} !important`,
+                                        }
+                                    },
+                                    '& .MuiInputBase-input': {
+                                        height: '9px'
+                                    },
+                                }}
+                                id="standard-basic"
+                                label="Lag"
+                                variant="standard"
+                                value={selectedOption.lag}
+                                onChange={(event) => {
+                                    setSelectedOption((prev) => ({ ...prev, lag: parseInt(event.target.value) || 0 }))
+                                }}
+                            />
+                        </Box>
                     </Box>
                     <Box display='flex' gap='8px' alignItems='center'>
                         {acf_pacf_error !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{acf_pacf_error}</Typography>}
@@ -401,6 +413,7 @@ const ACFandPACF = ({ trainingStartedFlag }) => {
                 </Box>
 
                 <Box sx={{ height: '250px', width: '100%', position: 'relative' }}>
+                    {loading && <Skeleton variant="rectangular" height={250} />}
                     <Box ref={chartContainerRef} height='100%' width='100%'></Box>
                     <Box className='tool-tip-pacf'></Box>
                 </Box>

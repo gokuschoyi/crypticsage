@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom';
 import MultiSelect from './MultiSelect'
@@ -7,8 +7,10 @@ import ReorderList from './ReorderList'
 import CustomInput from './CustomInput'
 import ACFandPACF from './ACFandPACF'
 import ResetTrainedModelModal from './modals/ResetTrainedModelModal'
-import CorelationMatrix from './CorelationMatrix'
+// import CorelationMatrix from './CorelationMatrix'
+import TPCMatrix from './TPCMatrix';
 import { ResetOnModelChange } from './modals';
+
 // import DownloadIcon from '@mui/icons-material/Download';
 import {
     Box,
@@ -41,7 +43,7 @@ import {
 import {
     ArrowDropDownIcon
     , ArrowDropUpIcon
-    , DeleteForeverIcon
+    // , DeleteForeverIcon
 } from '../../../../global/Icons'
 
 import {
@@ -55,8 +57,8 @@ import {
 } from '../../modules/CryptoModuleUtils'
 
 import {
-    getCorelationMatrix
-    , startModelTraining
+    // getCorelationMatrix
+    startModelTraining
     , deleteModel
     // , getModelCheckPoints
     , retrain_wgan_Model
@@ -236,72 +238,9 @@ const TrainingParameters = ({
     }
 
     const [w_gan_error, setw_gan_error] = useState({})
-    const transformation_order_ref = useRef(transformationOrder)
-    const [corelation_matrix, setCorelation_matrix] = useState([])
-    const [corelation_matrix_error, setCorelation_matrix_error] = useState('')
-
-    const handleCalculateCorrelationMatrix = () => {
-        // console.log('Calculate Correlation clicked...', transformationOrder)
-        // console.log('Old state..', transformation_order_ref.current)
-        if (transformationOrder.length === 5) {
-            setCorelation_matrix_error('Select a function from below...')
-            return
-        }
-        const checkOrder = (old, new_) => {
-            if (old.length !== new_.length) return false;
-            for (let i = 0; i < old.length; i++) {
-                if (old[i].id !== new_[i].id) {
-                    // console.log(old[i].id, new_[i].id)
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        let payload
-        if (loadingFromSaved) {
-            payload = {
-                transformation_order: transformationOrder,
-                talibExecuteQueries: userModels.find((model) => model.model_id === model_id).model_data.talibExecuteQueries
-            }
-        } else {
-            payload = {
-                transformation_order: transformationOrder,
-                talibExecuteQueries: generateTalibFunctionsForExecution({ selectedFunctions, tDataReduxL: tDataRedux.length, selectedTickerPeriod, selectedTickerName })
-            }
-        }
-
-        const order = checkOrder(transformation_order_ref.current, transformationOrder)
-        if (!order) {
-            // console.log('Order changed or new func added.')
-            setCorelation_matrix_error('')
-            // console.log(order)
-            getCorelationMatrix({ token, payload })
-                .then((res) => {
-                    // console.log(res.data)
-                    setCorelation_matrix(res.data.corelation_matrix)
-                })
-                .catch((err) => {
-                    console.log(err)
-                })
-        } else if (order && corelation_matrix.length === 0) {
-            // console.log('Order is same but no data.')
-            setCorelation_matrix_error('')
-            getCorelationMatrix({ token, payload })
-                .then((res) => {
-                    // console.log(res.data)
-                    setCorelation_matrix(res.data.corelation_matrix)
-                })
-                .catch((err) => {
-                    console.log(err)
-                })
-        } else {
-            // console.log('Order is not changed.')
-            setCorelation_matrix_error('Order has not changed or same data.')
-        }
-
-        transformation_order_ref.current = transformationOrder
-    }
+    // const transformation_order_ref = useRef(transformationOrder)
+    // const [corelation_matrix, setCorelation_matrix] = useState([])
+    // const [corelation_matrix_error, setCorelation_matrix_error] = useState('')
 
     const [noFuncSelected, setNoFuncSelected] = useState('')
     // resetting corelation matrix error prompt
@@ -309,10 +248,8 @@ const TrainingParameters = ({
         if (selectedFunctions.length > 0 && noFuncSelected !== '' && (modelParams.to_train_count !== '' || modelParams.to_train_count !== 0)) {
             setNoFuncSelected('')
         }
-        if (selectedFunctions.length > 0) {
-            setCorelation_matrix_error('')
-        }
     }, [selectedFunctions, noFuncSelected, modelParams.to_train_count])
+    
     const [unsavedTrain, setUnsavedTrain] = useState(false)
     const handleStartModelTraining = () => {
         if (selectedFunctions.length === 0) {
@@ -366,7 +303,7 @@ const TrainingParameters = ({
                     model_training_parameters
                 }
             }).then((res) => {
-                setCorelation_matrix([])
+                // setCorelation_matrix([])
                 const modelId = res.data.job_id
                 const model_name = generateRandomModelName(cryptotoken, selectedTickerPeriod)
                 Success(res.data.message)
@@ -870,51 +807,22 @@ const TrainingParameters = ({
                     </Box>
                 }
 
-                <Grid container>
+                <Grid container spacing={1} pt={2}>
                     <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
-                        <Box pt={2}>
-                            <Box display='flex' flexDirection='column' justifyContent='space-between'>
-                                <Box display='flex' gap='8px' alignItems='center' width='320px' justifyContent='space-between'>
-                                    <Typography variant='h5' textAlign='start'>Corelation Matrix</Typography>
-                                    <Box display='flex' gap='8px' alignItems='center'>
-                                        <Button
-                                            sx={{
-                                                height: '26px',
-                                            }}
-                                            variant='outlined'
-                                            size='small'
-                                            color='secondary'
-                                            disabled={trainingStartedFlag}
-                                            onClick={(e) => handleCalculateCorrelationMatrix()}
-                                        >
-                                            MATRIX
-                                        </Button>
-                                        <IconButton disabled={trainingStartedFlag} onClick={(e) => setCorelation_matrix([])}>
-                                            <DeleteForeverIcon className='small-icon' />
-                                        </IconButton>
-                                    </Box>
-                                </Box>
-                                <Box display='flex' gap='8px' alignItems='center'>
-                                    {corelation_matrix_error !== '' && <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{corelation_matrix_error}</Typography>}
-                                </Box>
-                            </Box>
-                            <Box pt={1}>
-                                {(corelation_matrix && corelation_matrix.length > 0) &&
-                                    <CorelationMatrix
-                                        transformation_order={transformation_order_ref.current}
-                                        correlation_data_redux={corelation_matrix}
-                                    />
-                                }
-                            </Box>
+                        <Box p={1} boxShadow={4}>
+                            <TPCMatrix
+                                transformationOrder={transformationOrder}
+                                trainingStartedFlag={trainingStartedFlag}
+                            />
                         </Box>
                     </Grid>
                     <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
-                        <Box pt={2}>
+                        <Box boxShadow={4} p={1}>
                             <ACFandPACF trainingStartedFlag={trainingStartedFlag} />
                         </Box>
                     </Grid>
                 </Grid>
-            </Box >
+            </Box>
         </React.Fragment>
     )
 }

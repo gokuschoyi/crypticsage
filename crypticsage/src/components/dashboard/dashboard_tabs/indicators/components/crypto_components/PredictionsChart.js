@@ -191,8 +191,8 @@ const PredictionsChart = (props) => {
                     if (prediction.predicted === null) {
                         return {
                             time: prediction.open,
-                            value: prediction.predicted,
-                            color: 'transparent'
+                            value: 0,
+                            color: '#fcfcfc00'
                         }
                     } else {
                         if (index < predictedValueRedux.length - (lookAhead + 1)) {
@@ -235,19 +235,19 @@ const PredictionsChart = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictedValueRedux])
 
-    const resizeObserver = useRef();
     // Resize chart on container resizes.
-    useEffect(() => {
-        resizeObserver.current = new ResizeObserver((entries) => {
-            const { width, height } = entries[0].contentRect;
-            // console.log(width, height);
-            chart.current && chart.current.applyOptions({ width, height });
-        });
+    // const resizeObserver = useRef();
+    // useEffect(() => {
+    //     resizeObserver.current = new ResizeObserver((entries) => {
+    //         const { width, height } = entries[0].contentRect;
+    //         // console.log(width, height);
+    //         chart.current && chart.current.applyOptions({ width, height });
+    //     });
 
-        resizeObserver.current.observe(predictionsChartRef.current);
+    //     resizeObserver.current.observe(predictionsChartRef.current);
 
-        return () => resizeObserver.current.disconnect();
-    }, []);
+    //     return () => resizeObserver.current.disconnect();
+    // }, []);
 
     const tolerance = 1
     // This useEffect is used to calculate the metrics of the model

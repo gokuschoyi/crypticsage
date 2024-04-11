@@ -69,77 +69,79 @@ const CorelationMatrix = ({ transformation_order, correlation_data_redux }) => {
     const theme = useTheme()
 
     return (
-        <Box style={{ width: '400px', display: '-webkit-box', paddingBottom:'8px' }}>
-            <Box className='corelation-matrix-box'>
-                {/* Row for top labels */}
-                <Grid container>
-                    <Grid item>
-                        <Box style={{ width: cell_size, flex: 1, margin: '2px', height: cell_size }} /> {/* Empty box for corner */}
-                    </Grid>
-                    {transformation_order.slice(0, correlation_data_redux.length).map(order => (
-                        <Grid item key={order.id}>
-                            <Box style={{ ...style.cell, flex: 1, margin: '2px' }} title={`${order.name}`}>
-                                <Typography
-                                    variant='custom'
-                                    style={{ ...style.legend, backgroundColor: `${theme.palette.background.default}` }}>
-                                    {capitalizeFirstCharOfEachWord(order.name, order.key)}
-                                </Typography>
-                            </Box>
-                        </Grid>
-                    ))}
-                </Grid>
-
-                {/* Rows for matrix and side labels */}
-                {correlation_data_redux.map((row, rowIndex) => (
-                    <Grid container key={rowIndex}>
-                        {/* Side label */}
+        <Box style={{ display: '-webkit-box' }}>
+            <Box pb={1} display={'flex'}>
+                <Box className='corelation-matrix-box'>
+                    {/* Row for top labels */}
+                    <Grid container>
                         <Grid item>
-                            <Box style={{ ...style.cell, flex: 1, margin: '2px' }} title={`${transformation_order[rowIndex].name}`}>
-                                <Typography variant='custom' style={{ ...style.legend, backgroundColor: `${theme.palette.background.default}` }}>{capitalizeFirstCharOfEachWord(transformation_order[rowIndex].name, transformation_order[rowIndex].key)}</Typography>
-                            </Box>
+                            <Box style={{ width: cell_size, flex: 1, margin: '2px', height: cell_size }} /> {/* Empty box for corner */}
                         </Grid>
-
-                        {/* Data cells */}
-                        {row.map((value, colIndex) => (
-                            <Grid item key={colIndex}>
-                                <Box
-                                    className='tooltip'
-                                    key={colIndex}
-                                    data-index={colIndex}
-                                    style={{
-                                        ...style.cell,
-                                        backgroundColor: getColorForValue(value.r),
-                                        flex: 1
-                                    }}
-                                >
-                                    <span className="tooltiptext"
-                                        style={{
-                                            transform: colIndex > (row.length / 2) - 1 ? 'translateX(-55%)' : 'translateX(55%)',
-                                            top: rowIndex > (correlation_data_redux.length / 2) - 1 ? '-65px' : '55%',
-                                        }}
-                                    >
-                                        {`R    : ${value.r.toFixed(3)} `}
-                                        <br />
-                                        {`P    : ${value.p}`}
-                                        <br />
-                                        {`COV  : ${value.cov}`}
-                                        <br />
-                                        {`STAT : ${value.stat}`}
-                                    </span>
-                                    {/* <Typography variant='custom' style={{ color: `${theme.palette.primary.newWhite}` }}>{value.r.toFixed(3)}</Typography> */}
+                        {transformation_order.slice(0, correlation_data_redux.length).map(order => (
+                            <Grid item key={order.id}>
+                                <Box style={{ ...style.cell, flex: 1, margin: '2px' }} title={`${order.name}`}>
+                                    <Typography
+                                        variant='custom'
+                                        style={{ ...style.legend, backgroundColor: `${theme.palette.background.default}` }}>
+                                        {capitalizeFirstCharOfEachWord(order.name, order.key)}
+                                    </Typography>
                                 </Box>
                             </Grid>
                         ))}
                     </Grid>
-                ))}
-            </Box>
 
-            {/* Color scale */}
-            <Box display="flex" flexDirection={'row'}>
-                <Box style={{ ...style.scale }}>
-                    <span style={{ ...style.scaleLabel, color: `${theme.palette.primary.newWhite}` }}>-1</span>
-                    <span style={{ ...style.scaleLabel, color: `${theme.palette.primary.newWhite}` }}>0</span>
-                    <span style={{ ...style.scaleLabel, color: `${theme.palette.primary.newWhite}` }}>1</span>
+                    {/* Rows for matrix and side labels */}
+                    {correlation_data_redux.map((row, rowIndex) => (
+                        <Grid container key={rowIndex}>
+                            {/* Side label */}
+                            <Grid item>
+                                <Box style={{ ...style.cell, flex: 1, margin: '2px' }} title={`${transformation_order[rowIndex].name}`}>
+                                    <Typography variant='custom' style={{ ...style.legend, backgroundColor: `${theme.palette.background.default}` }}>{capitalizeFirstCharOfEachWord(transformation_order[rowIndex].name, transformation_order[rowIndex].key)}</Typography>
+                                </Box>
+                            </Grid>
+
+                            {/* Data cells */}
+                            {row.map((value, colIndex) => (
+                                <Grid item key={colIndex}>
+                                    <Box
+                                        className='tooltip'
+                                        key={colIndex}
+                                        data-index={colIndex}
+                                        style={{
+                                            ...style.cell,
+                                            backgroundColor: getColorForValue(value.r),
+                                            flex: 1
+                                        }}
+                                    >
+                                        <span className="tooltiptext"
+                                            style={{
+                                                transform: colIndex > (row.length / 2) - 1 ? 'translateX(-55%)' : 'translateX(55%)',
+                                                top: rowIndex > (correlation_data_redux.length / 2) - 1 ? '-65px' : '55%',
+                                            }}
+                                        >
+                                            {`R    : ${value.r.toFixed(3)} `}
+                                            <br />
+                                            {`P    : ${value.p}`}
+                                            <br />
+                                            {`COV  : ${value.cov}`}
+                                            <br />
+                                            {`STAT : ${value.stat}`}
+                                        </span>
+                                        {/* <Typography variant='custom' style={{ color: `${theme.palette.primary.newWhite}` }}>{value.r.toFixed(3)}</Typography> */}
+                                    </Box>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    ))}
+                </Box>
+
+                {/* Color scale */}
+                <Box display="flex" flexDirection={'row'}>
+                    <Box style={{ ...style.scale }}>
+                        <span style={{ ...style.scaleLabel, color: `${theme.palette.primary.newWhite}` }}>-1</span>
+                        <span style={{ ...style.scaleLabel, color: `${theme.palette.primary.newWhite}` }}>0</span>
+                        <span style={{ ...style.scaleLabel, color: `${theme.palette.primary.newWhite}` }}>1</span>
+                    </Box>
                 </Box>
             </Box>
         </Box>

@@ -101,7 +101,7 @@ const useWebSocket = (
                         break;
                     case ACTIONS.NOTIFY:
                         addMessage(notifyMessageBoxRef, data.message);
-                        if (data.message === '(10) : Training has started...') {
+                        if (data.message === '(10) : Training has started...' || data.message === '(9/11) : Training the model...') {
                             console.log('Training started')
                             dispatch(setModelEndTime(''))
                             dispatch(setModelStartTime(new Date().getTime()))

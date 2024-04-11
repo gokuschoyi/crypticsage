@@ -18,7 +18,7 @@ const WgangpMetricsChart = (props) => {
     const chartContainerRef = useRef()
     const chart = useRef(null)
     const metricLineSeriesRef = useRef({})
-    const resizeObserver = useRef();
+    // const resizeObserver = useRef();
 
     const chart_options = {
         autoSize: true,
@@ -257,17 +257,17 @@ const WgangpMetricsChart = (props) => {
     }, [chartBackgroundColor, epochResults, textColor])
 
     // Resize chart on container resizes.
-    useEffect(() => {
-        resizeObserver.current = new ResizeObserver((entries) => {
-            const { width, height } = entries[0].contentRect;
-            // console.log(width, height);
-            chart.current && chart.current.applyOptions({ width, height });
-        });
+    // useEffect(() => {
+    //     resizeObserver.current = new ResizeObserver((entries) => {
+    //         const { width, height } = entries[0].contentRect;
+    //         // console.log(width, height);
+    //         chart.current && chart.current.applyOptions({ width, height });
+    //     });
 
-        resizeObserver.current.observe(chartContainerRef.current);
+    //     resizeObserver.current.observe(chartContainerRef.current);
 
-        return () => resizeObserver.current.disconnect();
-    }, []);
+    //     return () => resizeObserver.current.disconnect();
+    // }, []);
 
     return (
         <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>

@@ -37,11 +37,11 @@ yf_metadata_update_rule.minute = 5;
 yf_metadata_update_rule.second = 0;
 
 const log = (req, res, next) => {
-    logs.info(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);
+    logs.alert(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);
     next();
 }
 
-logs.info('Starting server...');
+logs.crit('Starting server...');
 
 if (config.schedulerFlag === 'true') {
     logs.info('Starting scheduled Crypto update...')
@@ -57,7 +57,7 @@ if (config.schedulerFlag === 'true') {
     })
 
 } else {
-    logs.info('Scheduler flag set to false, Change in env to enable scheduler');
+    logs.crit('Scheduler flag set to false, Change in env to enable scheduler');
 }
 
 app.use(express.json({ limit: '10mb' }))
@@ -104,7 +104,7 @@ if (config.https_flag === 'true') {
         })
 } else {
     app.listen(config.port, () => {
-        logs.info(`Express server listening on port : ${config.port}, HTTP`);
+        logs.crit(`Express server listening on port : ${config.port}, HTTP`);
     });
 }
 
@@ -113,7 +113,7 @@ if (config.websocketFlag === 'true') {
     // @ts-ignore
     const wsHttpServer = http.createServer(wsServer);
     wsHttpServer.listen(config.wsPort, () => {
-        logs.info(`WebSocket server running on port ${config.wsPort}`);
+        logs.crit(`WebSocket server running on port ${config.wsPort}`);
     });
 
     // Upgrade HTTP requests to WebSocket

@@ -1,6 +1,6 @@
 const logger = require('../middleware/logger/Logger');
 const log = logger.create(__filename.slice(__dirname.length + 1));
-
+const { redisClient } = require('../services/redis')
 const Validator = require('../utils/validator');
 const authServices = require('../services/authServices')
 
@@ -48,7 +48,34 @@ const signupUser = async (req, res) => {
     }
 }
 
+const logoutUser = async (req, res) => {
+    const uid = req.body.uid;
+    const pattern = uid + '*'; // Construct pattern to match keys with the specified UID prefix
+
+    redisClient.scan('0', 'MATCH', pattern, 'COUNT', '100', (err, reply) => {
+        if (err) {
+            console.error('Error scanning keys:', err);
+            return;
+        }
+        const keys = reply[1]; // Extract keys from reply
+        if (keys.length > 0) {
+            console.log('Keys found:', keys)
+            // redisClient.del(keys, (err, reply) => {
+            //     if (err) {
+            //         console.error('Error deleting keys:', err);
+            //     } else {
+            //         console.log('Keys deleted:', keys);
+            //     }
+            // });
+            res.status(200).json({ message: "User logout successful" });
+        } else {
+            console.log('No keys found matching the pattern:', pattern);
+        }
+    });
+}
+
 module.exports = {
     loginUser,
     signupUser,
+    logoutUser
 }

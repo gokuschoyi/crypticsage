@@ -42,7 +42,7 @@ const MAIN_MODEL = true
  */
 const createModel = (model_parama) => {
     const {
-        model_type,
+        model_type, // coule be used to switch model from the FE. Implement later.
         input_layer_shape: time_step,
         look_ahead,
         feature_count,
@@ -50,151 +50,143 @@ const createModel = (model_parama) => {
 
     const model = tf.sequential();
 
-    switch (model_type) {
-        case 'multi_input_single_output_step':
-            let lstm_units = 100;
-            if (look_ahead === 1) {
-                switch (type) {
-                    // @ts-ignore
-                    case 'CNN_One_Step':
-                        model.add(tf.layers.conv1d({
-                            filters: 64,
-                            kernelSize: 2,
-                            activation: 'relu',
-                            inputShape: [time_step, feature_count]
-                        }));
+    let lstm_units = 100;
+    if (look_ahead === 1) {
+        switch (type) {
+            case 'CNN_One_Step':
+                model.add(tf.layers.conv1d({
+                    filters: 64,
+                    kernelSize: 2,
+                    activation: 'relu',
+                    inputShape: [time_step, feature_count]
+                }));
 
-                        // Add a MaxPooling1D layer
-                        model.add(tf.layers.maxPooling1d({
-                            poolSize: 2
-                        }));
+                // Add a MaxPooling1D layer
+                model.add(tf.layers.maxPooling1d({
+                    poolSize: 2
+                }));
 
-                        // Add a Flatten layer
-                        model.add(tf.layers.flatten());
+                // Add a Flatten layer
+                model.add(tf.layers.flatten());
 
-                        // Add a dense layer with 50 units and ReLU activation
-                        model.add(tf.layers.dense({
-                            units: 50,
-                            activation: 'relu'
-                        }));
+                // Add a dense layer with 50 units and ReLU activation
+                model.add(tf.layers.dense({
+                    units: 50,
+                    activation: 'relu'
+                }));
 
-                        // Adding a dropout layer
-                        model.add(tf.layers.dropout({
-                            rate: 0.1 // Adjust the dropout rate as needed
-                        }));
+                // Adding a dropout layer
+                model.add(tf.layers.dropout({
+                    rate: 0.1 // Adjust the dropout rate as needed
+                }));
 
-                        // Add a dense layer with n_features units (no activation specified, defaults to linear)
-                        model.add(tf.layers.dense({
-                            units: 1,
-                            kernelRegularizer: tf.regularizers.l1()  // Adjust the regularization rate as needed
-                        }));
-                        break;
-                    // @ts-ignore
-                    case 'CNN_MultiChannel':
-                        model.add(tf.layers.conv1d({
-                            filters: 32,
-                            kernelSize: 3,
-                            activation: 'relu',
-                            inputShape: [time_step, feature_count]
-                        }));
+                // Add a dense layer with n_features units (no activation specified, defaults to linear)
+                model.add(tf.layers.dense({
+                    units: 1,
+                    kernelRegularizer: tf.regularizers.l1()  // Adjust the regularization rate as needed
+                }));
+                break;
+            case 'CNN_MultiChannel':
+                model.add(tf.layers.conv1d({
+                    filters: 32,
+                    kernelSize: 3,
+                    activation: 'relu',
+                    inputShape: [time_step, feature_count]
+                }));
 
-                        model.add(tf.layers.conv1d({
-                            filters: 32,
-                            kernelSize: 3,
-                            activation: 'relu'
-                        }));
+                model.add(tf.layers.conv1d({
+                    filters: 32,
+                    kernelSize: 3,
+                    activation: 'relu'
+                }));
 
-                        model.add(tf.layers.maxPooling1d({
-                            poolSize: 2
-                        }));
+                model.add(tf.layers.maxPooling1d({
+                    poolSize: 2
+                }));
 
-                        model.add(tf.layers.conv1d({
-                            filters: 16,
-                            kernelSize: 3,
-                            activation: 'relu'
-                        }));
+                model.add(tf.layers.conv1d({
+                    filters: 16,
+                    kernelSize: 3,
+                    activation: 'relu'
+                }));
 
-                        model.add(tf.layers.maxPooling1d({
-                            poolSize: 2
-                        }));
+                model.add(tf.layers.maxPooling1d({
+                    poolSize: 2
+                }));
 
-                        model.add(tf.layers.flatten());
+                model.add(tf.layers.flatten());
 
-                        model.add(tf.layers.dense({
-                            units: 100,
-                            activation: 'relu'
-                        }));
+                model.add(tf.layers.dense({
+                    units: 100,
+                    activation: 'relu'
+                }));
 
-                        model.add(tf.layers.dropout({
-                            rate: 0.1
-                        }));
+                model.add(tf.layers.dropout({
+                    rate: 0.1
+                }));
 
-                        model.add(tf.layers.dense({
-                            units: 1
-                        }));
-                        break;
-                    default:
-                        let n_input = time_step * feature_count
-                        let n_output = 1
-                        model.add(tf.layers.dense({
-                            units: 100,
-                            inputShape: [n_input],
-                            activation: 'relu',
-                        }));
-                        model.add(tf.layers.dense({
-                            units: n_output
-                        }));
-                        break;
-                }
-            } else {
-                if (MAIN_MODEL) {
-                    model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', inputShape: [time_step, feature_count] })); // 14, 8
-                    model.add(tf.layers.repeatVector({ n: look_ahead })); // 5
-                    model.add(tf.layers.dropout({ rate: 0.1 }));
-                    model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', returnSequences: true }));
-                    model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [look_ahead, lstm_units] }));
-                } else {
-                    model.add(tf.layers.lstm({ units: 50, activation: 'relu', inputShape: [time_step, feature_count] }));
-                    model.add(tf.layers.repeatVector({ n: 5 }));
-                    model.add(tf.layers.dropout({ rate: 0.1 }));
-                    model.add(tf.layers.lstm({ units: 50, activation: 'relu', returnSequences: true }));
-                    model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [look_ahead, lstm_units] }));
+                model.add(tf.layers.dense({
+                    units: 1
+                }));
+                break;
+            default:
+                let n_input = time_step * feature_count
+                let n_output = 1
+                model.add(tf.layers.dense({
+                    units: 100,
+                    inputShape: [n_input],
+                    activation: 'relu',
+                }));
+                model.add(tf.layers.dense({
+                    units: n_output
+                }));
+                break;
+        }
+    } else {
+        if (MAIN_MODEL) {
+            model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', inputShape: [time_step, feature_count] })); // 14, 8
+            model.add(tf.layers.repeatVector({ n: look_ahead })); // 5
+            model.add(tf.layers.dropout({ rate: 0.1 }));
+            model.add(tf.layers.lstm({ units: lstm_units, activation: 'relu', returnSequences: true }));
+            model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [look_ahead, lstm_units] }));
+        } else {
+            model.add(tf.layers.lstm({ units: 50, activation: 'relu', inputShape: [time_step, feature_count] }));
+            model.add(tf.layers.repeatVector({ n: 5 }));
+            model.add(tf.layers.dropout({ rate: 0.1 }));
+            model.add(tf.layers.lstm({ units: 50, activation: 'relu', returnSequences: true }));
+            model.add(tf.layers.timeDistributed({ layer: tf.layers.dense({ units: 1 }), inputShape: [look_ahead, lstm_units] }));
 
-                    model.add(tf.layers.conv1d({
-                        filters: 32,
-                        kernelSize: 2,
-                        strides: 1,
-                        padding: 'same',
-                        batchInputShape: [null, look_ahead, 1]
-                    }))
+            model.add(tf.layers.conv1d({
+                filters: 32,
+                kernelSize: 2,
+                strides: 1,
+                padding: 'same',
+                batchInputShape: [null, look_ahead, 1]
+            }))
 
-                    model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+            model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
 
-                    model.add(tf.layers.bidirectional({
-                        layer: tf.layers.lstm({
-                            units: 64,
-                            activation: 'relu',
-                            returnSequences: false,
-                            dropout: 0.3,
-                            recurrentDropout: 0.0
-                        })
-                    }))
+            model.add(tf.layers.bidirectional({
+                layer: tf.layers.lstm({
+                    units: 64,
+                    activation: 'relu',
+                    returnSequences: false,
+                    dropout: 0.3,
+                    recurrentDropout: 0.0
+                })
+            }))
 
-                    model.add(tf.layers.dense({ units: 64, activation: 'linear' }))
-                    model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
-                    model.add(tf.layers.dropout({ rate: 0.2 }))
+            model.add(tf.layers.dense({ units: 64, activation: 'linear' }))
+            model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+            model.add(tf.layers.dropout({ rate: 0.2 }))
 
-                    model.add(tf.layers.dense({ units: 32, activation: 'linear' }))
-                    model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
-                    model.add(tf.layers.dropout({ rate: 0.2 }))
+            model.add(tf.layers.dense({ units: 32, activation: 'linear' }))
+            model.add(tf.layers.leakyReLU({ alpha: 0.1 }))
+            model.add(tf.layers.dropout({ rate: 0.2 }))
 
-                    model.add(tf.layers.dense({ units: look_ahead }))
-                    model.add(tf.layers.reshape({ targetShape: [look_ahead, 1] }))
-                }
-            }
-            break;
-        default:
-            break;
+            model.add(tf.layers.dense({ units: look_ahead }))
+            model.add(tf.layers.reshape({ targetShape: [look_ahead, 1] }))
+        }
     }
 
     return model
@@ -231,8 +223,8 @@ const trainModel = async (
         early_stopping_flag,
         xTrain,
         yTrain,
-        xTrainTest,
-        yTrainTest,
+        xTrainTest, // [] if doValidation is false
+        yTrainTest, // [] if doValidation is false
         learning_rate,
     }
 ) => {
@@ -244,7 +236,7 @@ const trainModel = async (
     let reshapedYTensor
 
     if (look_ahead === 1) {
-        log.info('Train : Look ahead is 1, reshaping y-train')
+        // log.info('Train : Look ahead is 1, reshaping y-train')
         switch (type) {
             // @ts-ignore
             case 'CNN_One_Step':
@@ -326,19 +318,22 @@ const trainModel = async (
         metrics: ['mse', 'mae'],
     });
 
-    console.log(model.summary())
+    if (config.debug_flag === 'true') {
+        console.log(model.summary())
+    }
 
     const history = await model.fit(xTrainTensor, yTrainTensor,
         {
             batchSize: batch_size,
             epochs: epochs,
-            verbose: 1,
+            verbose: config.debug_flag === 'true' ? 1 : 0,
             validationData: do_validation ? [xTrainTestTensor, yTrainTestTensor] : null,
             callbacks: custom_callbacks
         });
 
-
-    console.log('History : ', history)
+    if (config.debug_flag === 'true') {
+        console.log('History : ', history)
+    }
     return { model }
 }
 
@@ -399,7 +394,7 @@ const evaluateModelOnTestSet = async (
             predictions.push(historySequence)
             history.push(xTrainTest[i])
         }
-        console.log('predictions length : ', predictions.length)
+        // console.log('predictions length : ', predictions.length)
         const lastInputHist = xTrainTest.slice(-1)
         lastPrediction = await forecast(trained_model_, lastInputHist)
 
@@ -419,8 +414,8 @@ const evaluateModelOnTestSet = async (
 
                     const overAllRMSE = sqrt(tf.losses.meanSquaredError(yTensor, transformedPredictions)).arraySync()
 
-                    // @ts-ignore
-                    let transforemdLastPrediction = lastPredTensor.reshape([lastPredTensor.shape[0], 1, 1])
+                    // @ts-ignore // shape changed from 3d to 2d array
+                    let transforemdLastPrediction = lastPredTensor.reshape([lastPredTensor.shape[0], 1])
 
                     if (config.debug_flag === 'true') {
                         console.log('Y Tensor shape : ' + yTensor.shape)

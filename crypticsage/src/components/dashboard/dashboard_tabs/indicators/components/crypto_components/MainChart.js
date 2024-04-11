@@ -9,17 +9,14 @@ import IndicatorSearchExecute from "./IndicatorSearchExecute";
 
 import { setSelectedTickerPeriod, resetStreamedTickerDataRedux, setCryptoDataInDbRedux } from '../../modules/CryptoModuleSlice'
 
-import { getHistoricalTickerDataFroDb, fetchLatestTickerForUser } from '../../../../../../api/adminController'
+import { getHistoricalTickerDataFroDb } from '../../../../../../api/adminController'
 
-import { checkIfNewTickerFetchIsRequired, checkForUniqueAndTransform, } from "../../modules/CryptoModuleUtils";
-
+import { checkForUniqueAndTransform, } from "../../modules/CryptoModuleUtils";
 
 const logError = (error, info) => {
     // Do something with the error, e.g. log to an external API
     console.log('error', error)
 };
-
-
 
 const MainChart = ({
     predictedVlauesRedux
@@ -67,14 +64,12 @@ const MainChart = ({
     const [chartData, setChartData] = useState([]) // data to be passed to chart
     const [fetchValues, setFetchValues] = useState(defaultFetchValues)
     const [actualFetchLength, setActualFetchLength] = useState(0)
-    const [newTickerLength, setNewTickerLength] = useState(0)
 
     // console.log(fetchValues)
 
     // to fetch ticker data
     const tickerDataRef = useRef(false)
     useEffect(() => {
-
         if (!tickerDataRef.current && ohlcData.length === 0) {
             // console.log('UE : Fetching ticker data from DB')
             tickerDataRef.current = true
@@ -92,53 +87,20 @@ const MainChart = ({
                 }
             })
                 .then((res) => {
-                    const dataInDb = res.data.fetchedResults.ticker_data
-                    let tC_inDb = res.data.fetchedResults.total_count_db
-                    console.log(tC_inDb)
-                    setActualFetchLength(dataInDb.length)
-                    const latestOpenTime = dataInDb[dataInDb.length - 1].openTime
-                    let [fetchLength, end] = checkIfNewTickerFetchIsRequired({ openTime: latestOpenTime, selectedTokenPeriod })
-                    setNewTickerLength(fetchLength)
-                    if (fetchLength > 0) {
-                        // console.log('UE : Fetching new tickers from binance')
-
-
-                        const updateQueries = {
-                            ticker_name: cryptotoken,
-                            period: selectedTokenPeriod,
-                            start: latestOpenTime,
-                            end: end,
-                        }
-
-                        fetchLatestTickerForUser({
-                            token,
-                            updateQueries
-                        })
-                            .then((res) => {
-                                const newData = res.data.newTickers
-                                dataInDb.push(...newData)
-                                converted = checkForUniqueAndTransform(dataInDb)
-                                console.log('Total fetched data length : ', converted.length, 'New tickers to fetch', fetchLength, 'Fetched : ', newData.length)
-                                setChartData(converted)
-                                dispatch(setCryptoDataInDbRedux({ dataInDb: dataInDb, total_count_db: tC_inDb }))
-                            })
-                            .catch(err => {
-                                console.log(err)
-                            })
-                    } else {
-                        converted = checkForUniqueAndTransform(dataInDb)
-                        console.log('Up to date : Fetched data length : ', converted.length)
-                        setChartData(converted)
-                        dispatch(setCryptoDataInDbRedux({ dataInDb: dataInDb, total_count_db: tC_inDb }))
-                    }
+                    const { ticker_data, total_count_db } = res.data.fetchedResults
+                    setActualFetchLength(ticker_data.length)
+                    converted = checkForUniqueAndTransform(ticker_data)
+                    console.log('Fetched data length : ', converted.length)
+                    setChartData(converted)
+                    dispatch(setCryptoDataInDbRedux({ dataInDb: ticker_data, total_count_db: total_count_db }))
                 })
                 .catch(err => {
                     console.log(err)
                 })
         } else {
             // console.log('UE : Fetching ticker data from redux')
-            const dataInDb = ohlcData
-            const converted = checkForUniqueAndTransform(dataInDb)
+            const converted = checkForUniqueAndTransform(ohlcData)
+            setActualFetchLength(ohlcData.length)
             setChartData(converted)
         }
     }, [ohlcData, fetchValues, token, cryptotoken, selectedTokenPeriod, dispatch])
@@ -173,10 +135,6 @@ const MainChart = ({
                                 (
                                     <MainChartCopy
                                         latestTime={chartData[chartData.length - 1].time * 1000 + 60000}
-                                        new_fetch_offset={newTickerLength}
-                                        symbol={cryptotoken}
-                                        selectedTokenPeriod={selectedTokenPeriod}
-                                        module={module}
                                         fetchValues={fetchValues}
                                     />
                                 )

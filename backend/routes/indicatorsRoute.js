@@ -1,13 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const { handleTokenRedisStorage } = require('../utils/redis_util')
 const IController = require('../controllers/indicatorsController')
 const MDBServices = require('../services/mongoDBServices')
 
 const tf = require('@tensorflow/tfjs-node');
 
 router.post('/get_talib_desc', IController.getIndicatorDesc)
-router.post('/execute_talib_function', handleTokenRedisStorage, IController.executeTalibFunction)
+router.post('/execute_talib_function', IController.executeTalibFunction)
 
 // Test routes
 const checkDuplicates = async (req, res, next) => {
@@ -49,7 +48,22 @@ const tfTEst = async (req, res, next) => {
         return originalRow;
     });
 
-    res.status(200).json({ message: 'testing tf', mean: mean.arraySync(), sub: tfSub.arraySync(), variance: variance.arraySync(), stdData, originalData })
+    // mean: mean.arraySync(), sub: tfSub.arraySync(), variance: variance.arraySync(), stdData, originalData 
+    // console.log('From Main', res.locals.data)
+    const uid = res.locals.data.uid
+    const entire_hist_data = await MDBServices.fetchEntireHistDataFromDb({ type: 'crypto', ticker_name: 'BTCUSDT', period: '4h', uid })
+
+    const type = 'crypto'
+    const ticker_name = 'BTCUSDT'
+    const period = '4h'
+    const { page_no } = req.body
+    // const data = await MDBServices.fetchTickerHistDataFromDb(uid, type, ticker_name, period, page_no, 10, 0)
+    // console.log('I route length', data.ticker_data.length)
+    // const data_count = await MDBServices.fetchTickerHistDataBasedOnCount(type, ticker_name, period, 100)
+
+    // const lstm_model = TF_Model.createModel({ model_type: 'lstm', input_layer_shape: 14, look_ahead: 3, feature_count: 5 })
+    // console.log(lstm_model.summary())
+    res.status(200).json({ message: 'testing tf', entire_hist_data })
 }
 
 router.post('/check_duplicates', checkDuplicates)

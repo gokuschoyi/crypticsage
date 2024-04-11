@@ -66,7 +66,7 @@ const getStockSummaryDetails = async (req, res) => {
     try {
         const stockSummaryDetails = await CSUtil.getYFinanceFullSummary(symbol)
         res.status(200).json({ message: "Get Stock Summary Details request success", stockSummaryDetails });
-    } catch(error) {
+    } catch (error) {
         log.error(error.stack)
         res.status(400).json({ message: "Get Stock Summary Details request error", error: error.message })
     }
@@ -79,7 +79,9 @@ const fetchTickerDataFromDB = async (req, res) => {
         if (isValidated) {
             // @ts-ignore
             const { asset_type, ticker_name, period, page_no, items_per_page } = payload
-            const fetchedResults = await CSServices.processFetchTickerDataFromDb({ asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset: params.new_fetch_offset })
+            const new_fetch_offset = params.new_fetch_offset || undefined
+            const uid = res.locals.data.uid
+            const fetchedResults = await MDBServices.fetchTickerHistDataFromDb(uid, asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset)
             res.status(200).json({ message: "Token Data fetched successfully", fetchedResults })
         }
     }

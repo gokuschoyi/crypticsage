@@ -241,7 +241,7 @@ const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTes
                                 <span>&nbsp;</span>
                                 <Typography class='model-hist-tooltip-item-key' style="display:flex; align-items:center; gap:4px;" variant='custom'>${key}</Typography>
                                 <span>&nbsp;&nbsp</span>
-                                <Typography class='model-hist-tooltip-item-value style="display:flex; align-items:center; gap:4px;" variant='custom'>${data.value}</Typography>
+                                <Typography class='model-hist-tooltip-item-value style="display:flex; align-items:center; gap:4px;" variant='custom'>${data.value.toFixed(6)}</Typography>
                             </div>
                         `
                     } else {
@@ -251,7 +251,7 @@ const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTes
                             <span>&nbsp;</span>
                             <Typography class='model-hist-tooltip-item-key' style="display:flex; align-items:center; gap:4px;" variant='custom'>${key}</Typography>
                                 <span>&nbsp;&nbsp;</span>
-                                <Typography class='model-hist-tooltip-item-value style="display:flex; align-items:center; gap:4px;" variant='custom'>${data.value}</Typography>
+                                <Typography class='model-hist-tooltip-item-value style="display:flex; align-items:center; gap:4px;" variant='custom'>${data.value.toFixed(6)}</Typography>
                             </div>
                         `
                     }
@@ -303,19 +303,19 @@ const ModelHistoryChart = ({ epochResults, predictionsPalette, isValidatingOnTes
         }
     }, [predictionsPalette])
 
-    const resizeObserver = useRef();
-    // Resize chart on container resizes.
-    useEffect(() => {
-        resizeObserver.current = new ResizeObserver((entries) => {
-            const { width, height } = entries[0].contentRect;
-            // console.log(width, height);
-            chart.current && chart.current.applyOptions({ width, height });
-        });
+    // const resizeObserver = useRef();
+    // // Resize chart on container resizes.
+    // useEffect(() => {
+    //     resizeObserver.current = new ResizeObserver((entries) => {
+    //         const { width, height } = entries[0].contentRect;
+    //         // console.log(width, height);
+    //         chart.current && chart.current.applyOptions({ width, height });
+    //     });
 
-        resizeObserver.current.observe(chartContainerRef.current);
+    //     resizeObserver.current.observe(chartContainerRef.current);
 
-        return () => resizeObserver.current.disconnect();
-    }, []);
+    //     return () => resizeObserver.current.disconnect();
+    // }, []);
 
     // sets the background color of the chart based on theme
     useEffect(() => {

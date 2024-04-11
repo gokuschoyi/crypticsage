@@ -24,7 +24,7 @@ const verifyToken = (req, res, next) => {
             }
             else {
                 res.locals.data = decodedToken;
-                log.info("Token verified")
+                // log.info("Token verified")
                 next();
             }
         })

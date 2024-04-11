@@ -28,12 +28,13 @@ const lineColors = [
 
 export const executeAllSelectedFunctions = createAsyncThunk(
     'cryptoModule/sendApiRequests',
-    async (finalTalibExecuteQuery, thunkAPI) => {
+    async (data, thunkAPI) => {
+        const { fTalibExecuteQuery: finalTalibExecuteQuery, uid } = data
         const allResponses = []
         for (const queryObj of finalTalibExecuteQuery) {
             const { id, payload } = queryObj;
             try {
-                const response = await axios.post(`${baseUrl}/indicators/execute_talib_function`, { payload }, {})
+                const response = await axios.post(`${baseUrl}/indicators/execute_talib_function`, { payload, uid }, {})
                 allResponses.push({ id, result: response.data.result })
             } catch (error) {
                 console.log(error)

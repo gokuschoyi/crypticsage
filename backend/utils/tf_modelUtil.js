@@ -556,7 +556,7 @@ const generateEvaluationData = async (
 
     const lastTestTensor = tf.tensor(lastSets)
 
-    console.log('lastSets prediction shape', lastTestTensor.shape, '\n')
+
     xTrainTest = [...xTrainTest, ...lastSets]
 
     // setting test set dates for plotting
@@ -573,7 +573,6 @@ const generateEvaluationData = async (
         })
     })
 
-    console.log('Original dates length : ', dates.length, new Date(dates[dates.length - 1].open * 1000).toLocaleString())
 
     let lastOriginal = yTrainTest[yTrainTest.length - 1]
     let latestTime = dates[dates.length - 1].open * 1000 // look_ahead no of ticker behind
@@ -587,9 +586,6 @@ const generateEvaluationData = async (
         })
     }
 
-    console.log('Dates length after addition: ', dates.length, new Date(dates[dates.length - 1].open * 1000).toLocaleString(), '\n')
-
-
     const fHistClose = parseFloat(lastDates[0].close).toFixed(2)
     const yTrainFClose = calculateOriginalPrice(yTrainTest[0][0][0], variance[e_key], mean[e_key])
     const lHistClose = parseFloat(lastDates[lastDates.length - 1].close).toFixed(2)
@@ -599,6 +595,10 @@ const generateEvaluationData = async (
     const lastHistStatus = lHistClose == yTrainLClose.toFixed(2) ? 'Same' : 'Different'
 
     if (config.debug_flag === 'true') {
+        console.log('lastSets prediction shape', lastTestTensor.shape, '\n')
+        console.log('Original dates length : ', dates.length, new Date(dates[dates.length - 1].open * 1000).toLocaleString())
+        console.log('Dates length after addition: ', dates.length, new Date(dates[dates.length - 1].open * 1000).toLocaleString(), '\n')
+
         console.log('Last actual history close :', ticker_history[ticker_history.length - 1].close)
         console.log('Last dates : ', lastDates.length, lastDates[0].close, lastDates[lastDates.length - 1].close)
         console.log('Last close price, lastdates', lHistClose, new Date(lastDates[lastDates.length - 1].openTime).toLocaleString())
@@ -633,352 +633,6 @@ const evaluateForecast = async (actual, predicted) => {
     return [overAllRMSE, scores]
 }
 
-const formatPredictedOutput = async ({ dates, model_type, look_ahead, tickerHist, time_step, trainSplit, yTrainTest, predictedPrice, forecast, id, label_mean, label_variance }) => {
-    let finalData = {}
-    let splitPoint
-    let slicedTickerHistCopy
-    let slicedTickerHistCopyLength
-    let tickerPeriodInMilliSecond
-    let latestTime
-    let originalData
-    let emptyObjects
-    let emptyArrayForYTrainTest
-    switch (model_type) {
-        case 'multi_input_single_output_no_step':
-            splitPoint = tickerHist.length - time_step - trainSplit + 1
-            console.log('Split point for getting time', splitPoint)
-
-            slicedTickerHistCopy = tickerHist.slice(-splitPoint) // slicing the histCopy to get the test data openTime
-            console.log('Train dataset length before padding', slicedTickerHistCopy.length, slicedTickerHistCopy[0], slicedTickerHistCopy[slicedTickerHistCopy.length - 1])
-            console.log('yTrainTest before padding', yTrainTest.length, yTrainTest[0], yTrainTest[yTrainTest.length - 1])
-
-            slicedTickerHistCopyLength = slicedTickerHistCopy.length
-            latestTime = slicedTickerHistCopy[slicedTickerHistCopyLength - 1].openTime
-            tickerPeriodInMilliSecond = slicedTickerHistCopy[1].openTime - slicedTickerHistCopy[0].openTime
-
-            //create look_ahead empty objects
-            emptyObjects = []
-            emptyArrayForYTrainTest = []
-            for (let i = 0; i < look_ahead; i++) {
-                emptyObjects.push({
-                    openTime: latestTime + (tickerPeriodInMilliSecond * (i + 1)),
-                })
-                emptyArrayForYTrainTest.push([null])
-            }
-            console.log(emptyObjects, emptyArrayForYTrainTest)
-
-            slicedTickerHistCopy = [...slicedTickerHistCopy, ...emptyObjects] //used to get the time only from slicedTickerHistCopy
-            yTrainTest = [...yTrainTest, ...emptyArrayForYTrainTest]
-
-            console.log('Combined with empty length', slicedTickerHistCopy.length, slicedTickerHistCopy[slicedTickerHistCopy.length - 1])
-            console.log('ytrain last', yTrainTest[slicedTickerHistCopy.length - 1])
-
-            let predictionsPlusActual = slicedTickerHistCopy.map((item, index) => {
-                const strDate = new Date(item.openTime).toLocaleString()
-                return {
-                    openTime: strDate,
-                    open: item.openTime / 1000,
-                    actual: index <= slicedTickerHistCopyLength ? yTrainTest[index][0] : null,
-                    predicted: index > look_ahead - 1 ? predictedPrice[index - look_ahead][0] : null
-                }
-            })
-
-            originalData = predictionsPlusActual.map((standardizedRow) => ({
-                ...standardizedRow,
-                actual: calculateOriginalPrice(standardizedRow.actual, label_variance, label_mean),
-                predicted: calculateOriginalPrice(standardizedRow.predicted, label_variance, label_mean),
-            }));
-
-            finalData = {
-                standardized: predictionsPlusActual,
-                scaled: originalData
-            }
-
-            console.log('Final result length', predictionsPlusActual.length, predictionsPlusActual[0], predictionsPlusActual[predictionsPlusActual.length - 1])
-            RedisUtil.saveTestPredictions(id, finalData)
-            // TF_Model.eventEmitter.emit('prediction_completed', id)
-            break;
-        case 'multi_input_multi_output_no_step':
-            splitPoint = tickerHist.length - time_step - trainSplit - look_ahead + 1
-            console.log('Split point for getting time', splitPoint)
-
-            slicedTickerHistCopy = tickerHist.slice(-splitPoint) // slicing the histCopy to get the test data openTime
-            const original = slicedTickerHistCopy
-            console.log('Train dataset length before padding', slicedTickerHistCopy.length, slicedTickerHistCopy[0], slicedTickerHistCopy[slicedTickerHistCopy.length - 1])
-            console.log('yTrainTest before padding', yTrainTest.length, yTrainTest[0], yTrainTest[yTrainTest.length - 1])
-
-            slicedTickerHistCopyLength = slicedTickerHistCopy.length
-            latestTime = slicedTickerHistCopy[slicedTickerHistCopyLength - 1].openTime
-            tickerPeriodInMilliSecond = slicedTickerHistCopy[1].openTime - slicedTickerHistCopy[0].openTime
-
-            console.log('Latest time', latestTime, tickerPeriodInMilliSecond)
-
-            let transformePredictedPrice = predictedPrice.map(standardizedRow => {
-                const originalRow = standardizedRow.map((val, index) => {
-                    const meanValue = label_mean[index];
-                    const stdDeviation = Math.sqrt(label_variance[index]);
-                    const originalValue = val * stdDeviation + meanValue;
-                    return originalValue;
-                });
-                return originalRow;
-            });
-
-            console.log(transformePredictedPrice[0], transformePredictedPrice[transformePredictedPrice.length - 1])
-
-            let latestPrediction = {
-                openTime: new Date(latestTime + tickerPeriodInMilliSecond).toLocaleString(),
-                time: (latestTime + tickerPeriodInMilliSecond) / 1000,
-                open: transformePredictedPrice[transformePredictedPrice.length - 1][0],
-                high: transformePredictedPrice[transformePredictedPrice.length - 1][1],
-                low: transformePredictedPrice[transformePredictedPrice.length - 1][2],
-                close: transformePredictedPrice[transformePredictedPrice.length - 1][3],
-                volume: transformePredictedPrice[transformePredictedPrice.length - 1][4]
-            }
-
-            //create look_ahead empty objects
-            emptyObjects = []
-            emptyArrayForYTrainTest = []
-            for (let i = 0; i < look_ahead; i++) {
-                emptyObjects.push({
-                    openTime: latestTime + (tickerPeriodInMilliSecond * (i + 1)),
-                    high: null,
-                    low: null,
-                    close: null,
-                    volume: null
-                })
-                emptyArrayForYTrainTest.push([null])
-            }
-            console.log(emptyObjects, emptyArrayForYTrainTest)
-
-            slicedTickerHistCopy = [...slicedTickerHistCopy, ...emptyObjects] //used to get the time only from slicedTickerHistCopy
-            yTrainTest = [...yTrainTest, ...emptyArrayForYTrainTest]
-
-            console.log('Combined with empty length', slicedTickerHistCopy.length, slicedTickerHistCopy[slicedTickerHistCopy.length - 1])
-            console.log('ytrain last', yTrainTest[slicedTickerHistCopy.length - 1])
-
-            let finalResult = slicedTickerHistCopy.map((item, index) => {
-                const strDate = new Date(item.openTime).toLocaleString()
-                return {
-                    openTime: strDate,
-                    time: item.openTime / 1000,
-                    open: index > look_ahead - 1 ? transformePredictedPrice[index - look_ahead][0] : null,
-                    high: index > look_ahead - 1 ? transformePredictedPrice[index - look_ahead][1] : null,
-                    low: index > look_ahead - 1 ? transformePredictedPrice[index - look_ahead][2] : null,
-                    close: index > look_ahead - 1 ? transformePredictedPrice[index - look_ahead][3] : null,
-                    volume: index > look_ahead - 1 ? transformePredictedPrice[index - look_ahead][4] : null,
-                }
-            })
-
-            const originalPlusPredictedMapped = original.map((item, index) => {
-                const strDate = new Date(item.openTime).toLocaleString()
-                return {
-                    openTime: strDate,
-                    time: item.openTime / 1000,
-                    open: parseFloat(item.open),
-                    high: parseFloat(item.high),
-                    low: parseFloat(item.low),
-                    close: parseFloat(item.close),
-                    volume: parseFloat(item.volume),
-                }
-            })
-
-            const originalPlusPredicted = [...originalPlusPredictedMapped, latestPrediction]
-
-
-            console.log('Final Result  : ', finalResult[0], finalResult[finalResult.length - 1])
-
-            finalData = {
-                standardized: originalPlusPredicted,
-                scaled: finalResult,
-            }
-            RedisUtil.saveTestPredictions(id, finalData)
-            // TF_Model.eventEmitter.emit('prediction_completed', id)
-            break;
-        case 'multi_input_single_output_step':
-            const predictions = tf.tensor(predictedPrice.slice(0, predictedPrice.length - (look_ahead - 1)))
-            const actual = tf.tensor(yTrainTest)
-            const [overAllRMSE, scores] = await evaluateForecast(actual, predictions);
-            // TF_Model.eventEmitter.emit('eval_complete', overAllRMSE)
-
-            console.log('Predicted first from prediction (predictedPrice): ', calculateOriginalPrice(predictedPrice[0][0][0], label_variance, label_mean))
-            console.log('Predicted last from prediction (predictedPrice): ', calculateOriginalPrice(predictedPrice[predictedPrice.length - 1][0][0], label_variance, label_mean))
-
-            console.log('Actual first date : ', new Date(dates[0].open * 1000).toLocaleString())
-            console.log('Actual last date : ', new Date(dates[dates.length - 1].open * 1000).toLocaleString())
-
-            /* const lastDateAfterLAAddition = dates[dates.length - 1].open * 1000
-            tickerPeriodInMilliSecond = (dates[1].open - dates[0].open) * 1000
-            console.log('Last date after look ahead addition : ', new Date(lastDateAfterLAAddition).toLocaleString()) */
-
-            // let forecastResult = []
-            /* for (let j = 1; j <= forecast.length; j++) {
-                forecastResult.push({
-                    openTime: new Date(lastDateAfterLAAddition + (tickerPeriodInMilliSecond * (j))).toLocaleString(),
-                    open: (lastDateAfterLAAddition + (tickerPeriodInMilliSecond * (j))) / 1000,
-                    actual: null,
-                    predicted: forecast[j - 1][0]
-                })
-            }
- */
-
-            finalData = {
-                dates: dates,
-                predictions_array: predictedPrice,
-                forecast,
-                label_mean,
-                label_variance,
-            }
-
-            // console.log('Final result length', predPlusActual.length, predPlusActual[0], predPlusActual[predPlusActual.length - 1])
-            // console.log('Final result scaled', originalData.length, originalData[0], originalData[originalData.length - 1])
-            RedisUtil.saveTestPredictions(id, finalData)
-        // TF_Model.eventEmitter.emit('prediction_completed', id)
-
-        //adjusting for the look-ahead missing values which are present in the last prediction
-        // const lastOriginal = yTrainTest[yTrainTest.length - 1]
-        // const lastPrediction = predictedPrice[predictedPrice.length - 1]
-
-        // displayDataInTable(lastOriginal, 'Last original vals')
-        // displayDataInTable(lastPrediction, 'Last predicted vals')
-        // console.log('Last original vals : ', lastOriginal)
-        // console.log('Last predicted vals : ', lastPrediction)
-
-        // latestTime = dates[dates.length - 1].open * 1000 // look_ahead no of ticker behind
-        // tickerPeriodInMilliSecond = (dates[1].open - dates[0].open) * 1000
-
-        /* let lastLookAheadPredictions = []
-        for (let i = 1; i <= lastOriginal.length; i++) {
-            lastLookAheadPredictions.push({
-                openTime: new Date(latestTime + (tickerPeriodInMilliSecond * (i))).toLocaleString(),
-                open: (latestTime + (tickerPeriodInMilliSecond * (i))) / 1000,
-                actual: lastOriginal[i - 1][0],
-                predicted: lastPrediction[i - 1][0]
-            })
-        }
-
-        console.log('Last look ahead predictions ')
-        console.table(lastLookAheadPredictions) */
-        // predPlusActual = [...predPlusActual, ...lastLookAheadPredictions]
-
-
-
-        // console.log('Over All RMSE on test set: ', overAllRMSE)
-        // @ts-ignore
-        // console.log('Total predicted values : ', scores.length)
-        // @ts-ignore
-        // console.log('RMSE for last 7 ticks : ', scores.slice(-7))
-
-        // splitPoint = tickerHist.length - trainSplit - time_step - look_ahead + 2
-        // console.log('Split point for getting time', splitPoint)
-
-        // console.log(tickerHist[trainSplit + time_step - 1], tickerHist[tickerHist.length - 1])
-        // let dates = []
-        // slicedTickerHistCopy = tickerHist.slice(trainSplit + time_step, tickerHist.length - (look_ahead - 1))
-        // console.log('Hist dataset length after trimming timestep, split and lookahead', slicedTickerHistCopy.length)
-        // console.log('Total no in tests (yTrainTest) : ', yTrainTest.length)
-        // displayDataInTable(yTrainTest[0], 'Samples of test set first (yTrainTest)')
-        // displayDataInTable(yTrainTest[yTrainTest.length - 1], 'Samples of test set last (yTrainTest)')
-        // console.log('Samples of test set (yTrainTest)', yTrainTest[0], yTrainTest[yTrainTest.length - 1])
-        // console.log('Total no of predictions : ', predictedPrice.length)
-
-        // console.log('First date in hist : ', new Date(slicedTickerHistCopy[0].openTime).toLocaleString(), 'Close : ', slicedTickerHistCopy[0].close)
-        // console.log('Original first from test (yTrainTest): ', calculateOriginalPrice(yTrainTest[0][0][0], label_variance, label_mean))
-
-        // console.log('Last date in hist : ', new Date(slicedTickerHistCopy[slicedTickerHistCopy.length - 1].openTime).toLocaleString(), 'Close : ', slicedTickerHistCopy[slicedTickerHistCopy.length - 1].close)
-        // console.log('Original last from test (yTrainTest): ', calculateOriginalPrice(yTrainTest[yTrainTest.length - 1][0][0], label_variance, label_mean))
-
-        // slicedTickerHistCopy = tickerHist.slice(-splitPoint) // slicing the histCopy to get the test data openTimek
-
-        /* slicedTickerHistCopyLength = slicedTickerHistCopy.length
-        latestTime = slicedTickerHistCopy[slicedTickerHistCopyLength - 1].openTime // look_ahead no of ticker behind
-        tickerPeriodInMilliSecond = slicedTickerHistCopy[1].openTime - slicedTickerHistCopy[0].openTime */
-
-        /* let predPlusActual = slicedTickerHistCopy.map((item, index) => {
-            const strDate = new Date(item.openTime).toLocaleString()
-            return {
-                openTime: strDate,
-                open: item.openTime / 1000,
-                actual: yTrainTest[index][0][0],
-                predicted: predictedPrice[index][0][0]
-            }
-        }) */
-        /* slicedTickerHistCopy.forEach((item, index) => {
-            const strDate = new Date(item.openTime).toLocaleString();
-            const actualValue = yTrainTest[index][0][0];
-
-            dates.push({
-                openTime: strDate,
-                open: item.openTime / 1000,
-                actual: actualValue,
-            })
-        }) */
-
-        /* const prediction_key = 0
-        let predPlusActual = slicedTickerHistCopy.map((item, index) => {
-            const strDate = new Date(item.openTime).toLocaleString();
-            const actualValue = yTrainTest[index][0][0];
-
-
-            let predictedValue = null;
-
-            if (index >= prediction_key) {
-                const shiftedIndex = index - prediction_key;
-                if (shiftedIndex < predictedPrice.length) {
-                    predictedValue = predictedPrice[shiftedIndex][prediction_key][0];
-                }
-            }
-
-
-             return {
-                 openTime: strDate,
-                 open: item.openTime / 1000,
-                 actual: actualValue,
-                 predicted: predictedValue
-             };
-        }); */
-
-
-
-        /* 
-        let predPlusActual = slicedTickerHistCopy.map((item, index) => {
-            const strDate = new Date(item.openTime).toLocaleString()
-            return {
-                openTime: strDate,
-                open: item.openTime / 1000,
-                actual: yTrainTest[index][0][0],
-                predicted: index >= prediction_key ? predictedPrice[index - prediction_key][prediction_key][0] : null
-            }
-        }) */
-
-        /* let predPlusActual = slicedTickerHistCopy.map((item, index) => {
-            const strDate = new Date(item.openTime).toLocaleString()
-            return {
-                openTime: index >= prediction_key ? strDate : null,
-                open: index >= prediction_key ? item.openTime / 1000 : null,
-                actual: index >= prediction_key ? yTrainTest[index - prediction_key][prediction_key][0] : null,
-                predicted: index >= prediction_key ? predictedPrice[index - prediction_key][prediction_key][0] : null
-            }
-        }) */
-
-
-
-        // predPlusActual = [...predPlusActual, ...forecastResult]
-
-        /* originalData = predPlusActual.map((standardizedRow) => ({
-            ...standardizedRow,
-            actual: calculateOriginalPrice(standardizedRow.actual, label_variance, label_mean),
-            predicted: calculateOriginalPrice(standardizedRow.predicted, label_variance, label_mean),
-        })); */
-
-
-        default:
-            break;
-    }
-
-    // return tickerDates
-}
-
-
 module.exports = {
     processSelectedFunctionsForModelTraining,
     trimDataBasedOnTalibSmallestLength,
@@ -988,7 +642,6 @@ module.exports = {
     inverseNormalizeData,
     createTrainingData,
     generateModelTrainigData,
-    formatPredictedOutput,
     generateEvaluationData,
     calculateFeatureMetrics
 }

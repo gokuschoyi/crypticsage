@@ -267,7 +267,7 @@ tr:hover .prediction-mse {
     box-sizing: border-box;
     font-size: 11px;
     text-align: left;
-    z-index: 1000;
+    z-index: 9;
     top: 6px;
     right: 6px;
     pointer-events: none;

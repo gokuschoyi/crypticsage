@@ -2,9 +2,9 @@ const logger = require('../middleware/logger/Logger');
 const log = logger.create(__filename.slice(__dirname.length + 1))
 const IUtil = require('../utils/indicatorUtil');
 const { createTimer } = require('../utils/timer')
-const { getValuesFromRedis } = require('../utils/redis_util');
 // @ts-ignore
 var talib = require('talib/build/Release/talib')
+const CacheUtil = require('../utils/cacheUtil')
 
 const getIndicatorDesc = async (req, res) => {
     log.info("TALib Version: " + talib.version);
@@ -141,16 +141,11 @@ const getIndicatorDesc = async (req, res) => {
 const executeTalibFunction = async (req, res) => {
     const { db_query, func_query, func_param_input_keys, func_param_optional_input_keys, func_param_output_keys } = req.body.payload;
     const { asset_type, ticker_name, period, fetch_count } = db_query;
+    const uid = res.locals.data?.uid || req.body.uid;
+    const ohlcv_cache_key = `${uid}_${asset_type}_${ticker_name}_${period}_ohlcv_data`
 
-    const cacheKey = `${asset_type}-${ticker_name}-${period}`;
-    const tokenDataFromRedisObj = await getValuesFromRedis(cacheKey);
-    // log.info(tokenDataFromRedisObj)
-    const tokenDataFromRedis = tokenDataFromRedisObj.data
-
-    if (tokenDataFromRedis.ticker_data.length > fetch_count) {
-        log.info('Slicing the ticker data as request length is less that redis length')
-        tokenDataFromRedis.ticker_data = tokenDataFromRedis.ticker_data.slice(tokenDataFromRedis.ticker_data.length - 1 - fetch_count, tokenDataFromRedis.ticker_data.length)
-    }
+    const from_msg = "Talib - OHLCV Data"
+    const tokenDataFromRedis = await CacheUtil.get_cached_data(ohlcv_cache_key, from_msg)
 
     // validates the optional input data
     let validatedInputData = IUtil.validateOptionalInputData({ func_query, opt_input_keys: func_param_optional_input_keys })

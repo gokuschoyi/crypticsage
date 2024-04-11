@@ -462,8 +462,10 @@ const Indicators = (props) => {
     const [talibDesc, setTalibDesc] = useState(talibDescriptionRedux) // grouped talib desc data
 
     // initial fetch talib descriptions
+    const loadedRef = useRef(false)
     useEffect(() => {
-        if (talibDescriptionRedux.length === 0) {
+        if (talibDescriptionRedux.length === 0 && !loadedRef.current) {
+            loadedRef.current = true
             // console.log('UE : Fetching talib descriptions')
             getIndicatorDesc({ token })
                 .then((res) => {

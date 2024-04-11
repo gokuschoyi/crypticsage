@@ -62,7 +62,7 @@ const InitialForecastLineChart = ({ data, tt_key }) => {
 
             to_plot.forEach((key) => {
                 const lineData = data
-                    .map((d) => ({ time: new Date(d.openTime) / 1000, value: d[key] === 'null' || d[key] === null ? '' : d[key] }))
+                    .map((d) => ({ time: new Date(d.openTime) / 1000, value: d[key] === 'null' || d[key] === null ? '' : parseFloat(d[key]) }))
                     .filter((d) => d.value !== '')
                     // console.log(lineData)
                 const lineSeries = chart.current.addLineSeries({
@@ -170,19 +170,19 @@ const InitialForecastLineChart = ({ data, tt_key }) => {
     }, [data])
 
 
-    const resizeObserver = useRef();
     // Resize chart on container resizes.
-    useEffect(() => {
-        resizeObserver.current = new ResizeObserver((entries) => {
-            const { width, height } = entries[0].contentRect;
-            // console.log(width, height);
-            chart.current && chart.current.applyOptions({ width, height });
-        });
+    // const resizeObserver = useRef();
+    // useEffect(() => {
+    //     resizeObserver.current = new ResizeObserver((entries) => {
+    //         const { width, height } = entries[0].contentRect;
+    //         // console.log(width, height);
+    //         chart.current && chart.current.applyOptions({ width, height });
+    //     });
 
-        resizeObserver.current.observe(chartboxRef.current);
+    //     resizeObserver.current.observe(chartboxRef.current);
 
-        return () => resizeObserver.current.disconnect();
-    }, []);
+    //     return () => resizeObserver.current.disconnect();
+    // }, []);
 
     // sets the background color of the chart based on theme
     useEffect(() => {

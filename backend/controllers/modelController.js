@@ -97,12 +97,12 @@ const retrainModel = async (req, res) => {
 const calculateCoRelationMatrix = async (req, res) => {
     const { transformation_order, talibExecuteQueries } = req.body.payload
     const { db_query: { asset_type, ticker_name, period } } = talibExecuteQueries[0].payload;
-    // const uid = res.locals.data.uid;
+    const uid = res.locals.data.uid;
     // const redis_key_for_hist_data = `${uid}_${asset_type}-${ticker_name}-${period}_historical_data`
 
     // log.info(`Redis key for re train : ${redis_key_for_hist_data}`)
     try {
-        const historicalData = await fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period })
+        const historicalData = await fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period, uid })
         const talibResult = await TFMUtil.processSelectedFunctionsForModelTraining({ selectedFunctions: talibExecuteQueries, tickerHistory: historicalData })
         const { tickerHist, finalTalibResult } = await TFMUtil.trimDataBasedOnTalibSmallestLength({ finalTalibResult: talibResult, tickerHistory: historicalData })
         const { features, metrics } = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult, transformation_order })
@@ -405,9 +405,9 @@ const testing = async (model_id) => {
 
 const partialAutoCorrelation = async (req, res) => {
     const { asset_type, ticker_name, period, maxLag, seriesName, confidenceLevel } = req.body
-
-    const historical_data = await MDBServices.fetchTickerHistDataFromDb(asset_type, ticker_name, period, 1, 500, 0)
-    const data = historical_data.ticker_data.map(item => parseFloat(item[seriesName]))
+    const uid = res.locals.data.uid;
+    const historical_data = await MDBServices.fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period, uid })
+    const data = historical_data.map(item => parseFloat(item[seriesName]))
 
     const acf = calculatACF(data, maxLag)
     const pacf = calculatePACF(acf, maxLag);

@@ -176,9 +176,9 @@ const generateTalibExecQuery = (selectedFunctions, end_length, selectedTickerPer
                 }
             };
 
-            console.log(Object.keys(converted).some(key => {
-                return converted[key] === ''
-            }))
+            // console.log(Object.keys(converted).some(key => {
+            //     return converted[key] === ''
+            // }))
 
             return { id, payload, inputEmpty: Object.keys(converted).some(key => converted[key] === '') }
         })
@@ -249,7 +249,9 @@ function checkAndApplyPulse(id, value, prevValue) {
 }
 
 const MainChart = (props) => {
-    const { latestTime, new_fetch_offset, symbol, selectedTokenPeriod, module, fetchValues } = props;
+    const { latestTime, fetchValues } = props;
+    const [module, symbol, selectedTokenPeriod] = window.location.href.split("/dashboard/indicators/")[1].split("/")
+    const new_fetch_offset = 0
     const token = useSelector(state => state.auth.accessToken);
     const toolTipSwitchFlag = useSelector(state => state.cryptoModule.toolTipOn)
     const prediction_flag = useSelector(state => state.cryptoModule.modelData.training_parameters.multiSelectValue)
@@ -318,7 +320,7 @@ const MainChart = (props) => {
     const total_count_for_ticker_in_db = useSelector(state => state.cryptoModule.total_count_db)
 
     const subscribedRef = useRef(false) // Used to stop the websocket form over-writing data when tooltip present
-
+    const uid = useSelector(state => state.auth.uid)
     /**
      * Generates the talib executeQueries for the selected function when the chart is scrolled to the rigth.
      * Makes a call to BE with new wxwc queries to process the selected functions.
@@ -330,7 +332,12 @@ const MainChart = (props) => {
         }
         const fTalibExecuteQuery = generateTalibExecQuery(selectedFunctionData, tData.length, selectedTickerPeriod, selectedTickerName)
             .filter((item) => !item.inputEmpty)
-        dispatch(executeAllSelectedFunctions(fTalibExecuteQuery))
+
+        const data = {
+            fTalibExecuteQuery,
+            uid
+        }
+        dispatch(executeAllSelectedFunctions(data))
         dispatch(toggleProcessSelectedFunctionsOnMoreData(false))
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [processMore])
@@ -942,7 +949,7 @@ const MainChart = (props) => {
                     close: parseFloat(close),
                 });
 
-                 // Update your volume chart series
+                // Update your volume chart series
                 candleStickVolumeSeriesRef.current.update({
                     time: openTime / 1000,
                     value: parseFloat(volume),
@@ -1045,7 +1052,7 @@ const MainChart = (props) => {
         const { id, name, group_name } = param
         dispatch(removeFromSelectedFunction({ id: id, name: name, group_name: group_name }))
     }
-    
+
     return (
         <Box className='chart-cont-dom' width="100%" height="100%" >
             <Box className='selected-function-legend'>

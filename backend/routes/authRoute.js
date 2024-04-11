@@ -43,5 +43,7 @@ router.post('/login', AuthController.loginUser)
  */
 router.post('/signup', AuthController.signupUser)
 
+router.post('/logout', AuthController.logoutUser)
+
 
 module.exports = router

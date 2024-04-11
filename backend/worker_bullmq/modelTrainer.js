@@ -99,7 +99,7 @@ module.exports = async (job) => {
         do_validation,
         early_stopping_flag
     } = model_training_parameters
-    console.log('Model parameters : ', model_training_parameters)
+    // console.log('Model parameters : ', model_training_parameters)
 
     const modelCheckpointName = `model_training_checkpoint_${model_id}`
     console.log('Model checkpoint name : ', modelCheckpointName)
@@ -134,6 +134,7 @@ module.exports = async (job) => {
                         type: asset_type,
                         ticker_name,
                         period,
+                        uid
                     }
                     // console.log(Object.keys(parameters))
 
@@ -379,7 +380,7 @@ module.exports = async (job) => {
                     }
                     // @ts-ignore
                     trained_model_ = result.model
-                    console.log('Optimizer : ', trained_model_.optimizer_.learningRate, trained_model_.optimizer_.beta1, trained_model_.optimizer_.beta2, trained_model_.optimizer_.epsilon)
+                    // console.log('Optimizer : ', trained_model_.optimizer_.learningRate, trained_model_.optimizer_.beta1, trained_model_.optimizer_.beta2, trained_model_.optimizer_.epsilon)
                     redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `(9/11) : TF Model trained...` }))
                     break;
                 case 10: // Saving the model, weights  and cleaning up // setting step

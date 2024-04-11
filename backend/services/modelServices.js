@@ -3,7 +3,7 @@ const log = logger.create(__filename.slice(__dirname.length + 1))
 
 const tf = require('@tensorflow/tfjs-node');
 const config = require('../config');
-const { fetchEntireHistDataFromDb, fetchTickerHistDataFromDb } = require('../services/mongoDBServices')
+const { fetchEntireHistDataFromDb, fetchTickerHistDataBasedOnCount } = require('../services/mongoDBServices')
 const TFMUtil = require('../utils/tf_modelUtil')
 const HDUtil = require('../utils/historicalDataUtil')
 const path = require('path');
@@ -89,7 +89,8 @@ const process_data_request = async ({
                 const history_payload = {
                     type: asset_type,
                     ticker_name,
-                    period
+                    period,
+                    uid
                 }
                 try {
                     // @ts-ignore
@@ -555,7 +556,7 @@ const makeLstmForecast = async (forecastData) => {
     // fetching the ticker data from db, fetching the last 100 data points as it is difficult ot figure out the exact length to fetch
     // as the talin execute queries have varying offset values for calculation
     const { payload: { db_query: { asset_type, period, ticker_name } } } = talibExecuteQueries[0];
-    const tickerDataForProcessing = await fetchTickerHistDataFromDb(asset_type, ticker_name, period, 1, 1500, 0)
+    const tickerDataForProcessing = await fetchTickerHistDataBasedOnCount(asset_type, ticker_name, period, 1500)
 
     // Step 2
     // Calculating the taib functions for the ticker data
@@ -733,7 +734,7 @@ const makeWganForecast = async (wganForecastData, uid) => {
     // fetching the ticker data from db, fetching the last 100 data points as it is difficult ot figure out the exact length to fetch
     // as the talin execute queries have varying offset values for calculation
     const { payload: { db_query: { asset_type, period, ticker_name } } } = talibExecuteQueries[0];
-    const tickerDataForProcessing = await fetchTickerHistDataFromDb(asset_type, ticker_name, period, 1, 1500, 0)
+    const tickerDataForProcessing = await fetchTickerHistDataBasedOnCount(asset_type, ticker_name, period, 1500)
 
     // Step 2
     // Calculating the taib functions for the ticker data

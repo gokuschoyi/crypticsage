@@ -263,18 +263,18 @@ const WganFinalPredictionChart = (props) => {
     }, [chartBackgroundColor, wgan_final_forecast, textColor])
 
     // Resize chart on container resizes.
-    const resizeObserver = useRef();
-    useEffect(() => {
-        resizeObserver.current = new ResizeObserver((entries) => {
-            const { width, height } = entries[0].contentRect;
-            // console.log(width, height);
-            chart.current && chart.current.applyOptions({ width, height });
-        });
+    // const resizeObserver = useRef();
+    // useEffect(() => {
+    //     resizeObserver.current = new ResizeObserver((entries) => {
+    //         const { width, height } = entries[0].contentRect;
+    //         // console.log(width, height);
+    //         chart.current && chart.current.applyOptions({ width, height });
+    //     });
 
-        resizeObserver.current.observe(chartContainerRef.current);
+    //     resizeObserver.current.observe(chartContainerRef.current);
 
-        return () => resizeObserver.current.disconnect();
-    }, []);
+    //     return () => resizeObserver.current.disconnect();
+    // }, []);
 
     return (
         <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
