@@ -266,6 +266,7 @@ async function processHistoricalData(job) {
             metaData: meta
         }
         let updateMetaRes = await MDBServices.updateTickerMetaData(type, ticker, period, metadata)
+        await MDBServices.updateTickerMeta_matched_value(meta.symbol, ticker)
         ins = [newIns, updateMetaRes]
     } else {
         ins = ['No Data Found']

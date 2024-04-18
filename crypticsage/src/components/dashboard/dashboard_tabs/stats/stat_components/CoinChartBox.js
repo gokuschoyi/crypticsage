@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { Box, Typography, FormControlLabel, Checkbox, Autocomplete, useTheme, Switch, TextField, Skeleton } from '@mui/material'
+import { Box, FormControlLabel, Checkbox, Autocomplete, useTheme, Switch, TextField, Skeleton } from '@mui/material'
 import { setTimePeriod, setSelectedCoinData, setSelectedCoinName } from '../StatsSlice'
 import { getHistoricalData } from '../../../../../api/crypto'
 import DashboardChart from './DChart.js';

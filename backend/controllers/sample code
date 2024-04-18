@@ -3736,3 +3736,226 @@ class customCallback(keras.callbacks.Callback):
                 json.dumps({"event": "epochEnd", "uid": uid, "epoch": epoch + 1, "log": logs['message']['log']})
             )
         return super().on_epoch_end(epoch, logs)
+
+
+
+// TradingViewWidget.jsx
+import { ErrorBoundary } from "react-error-boundary";
+import React, { useState, useEffect, useRef, memo } from 'react';
+import { Box, useTheme, Autocomplete, Chip, TextField } from '@mui/material'
+import { useSelector } from 'react-redux'
+
+const logError = (error, info) => {
+    // Do something with the error, e.g. log to an external API
+    console.log('error', error)
+};
+
+const widgetOptions = (chartBackgroundColor, ticker, type) => {
+    const baseOptions = {
+        "chartOnly": false,
+        "width": "100%",
+        "height": "100%",
+        "locale": "en",
+        "colorTheme": "dark",
+        "autosize": true,
+        "showVolume": false,
+        "showMA": false,
+        "hideDateRanges": false,
+        "hideMarketStatus": false,
+        "hideSymbolLogo": false,
+        "scalePosition": "right",
+        "scaleMode": "Normal",
+        "fontFamily": "-apple-system, BlinkMacSystemFont, Trebuchet MS, Roboto, Ubuntu, sans-serif",
+        "fontSize": "10",
+        "noTimeScale": false,
+        "valuesTracking": "1",
+        "changeMode": "price-and-percent",
+        "chartType": "area",
+        "maLineColor": "#2962FF",
+        "maLineWidth": 1,
+        "maLength": 9,
+        "backgroundColor": `${chartBackgroundColor}`,
+        "lineWidth": 2,
+        "lineType": 0,
+        "dateRanges": [
+            "5d|60",
+            "1m|30",
+            "3m|60",
+            "12m|1D",
+            "60m|1W",
+            "all|1M"
+        ]
+    }
+    if (type === 'Crypto') {
+        return {
+            "symbols": [
+                [
+                    `BINANCE:${ticker}|1D`
+                ]
+            ],
+            ...baseOptions
+        }
+    } else {
+        return {
+            "symbols": [
+                [
+                    `${ticker}|1D`
+                ]
+            ],
+            ...baseOptions
+        }
+    }
+}
+
+function TradingViewWidget() {
+    const theme = useTheme();
+    const chartBackgroundColor = theme.palette.background.default
+    // console.log(chartBackgroundColor)
+
+    const crypto_tokens = useSelector((state) => state.stats.cryptoDataAutoComplete)
+    const yf_tokens = useSelector((state) => state.stats.yf_ticker)
+    const [tOptions, setTOptions] = useState([])
+    const [selectedTicker, setSelectedTicker] = useState('');
+
+    useEffect(() => {
+        if (crypto_tokens.length === 0 || yf_tokens.length === 0) return
+        const transformed_options = [
+            ...crypto_tokens.filter(token => token.matched !== 'N/A').map((token) => { return { label: token.name, group: 'Crypto', matched: token.matched } }),
+            ...yf_tokens.map((token) => { return { label: token.matched, group: 'Stocks', matched: token.matched } })
+        ]
+
+        setTOptions(transformed_options)
+        setSelectedTicker(transformed_options[0])
+    }, [crypto_tokens, yf_tokens])
+
+    // console.log('Selected', tOptions, selectedTicker)
+
+    const loadedRef = useRef(false);
+    const container = useRef();
+
+    useEffect(() => {
+        let script
+        if (selectedTicker !== '') {
+            const existingScript = document.getElementById('tradingview-widget-script');
+            if (existingScript) {
+                console.log('Removing existing script and style')
+                existingScript.parentNode.removeChild(existingScript);
+                const container_style = container.current.querySelector('style')
+                if (container_style) container.current.removeChild(container_style)
+            }
+
+            // loadedRef.current = true;
+            script = document.createElement("script");
+            script.src = "https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js";
+            script.type = "text/javascript";
+            script.async = true;
+            script.id = "tradingview-widget-script";
+            const script_options = widgetOptions(chartBackgroundColor, selectedTicker.matched, selectedTicker.group)
+            // console.log('Script Options', script_options)
+
+            script.innerHTML = `${JSON.stringify(script_options)}`
+            container.current.appendChild(script);
+
+            const hide_cr = () => {
+                setTimeout(() => {
+                    // console.log('Script UE2', current_script)
+                    // const cp = current_script.getElementsByClassName('.js-copyright-label')
+
+                    // const cr = document.getElementsByClassName('.tv-widget-chart__copyrightingContainer')
+                    // const current_script = document.getElementById('tradingview-widget-script')
+
+                    // console.log(typeof current_script)
+                    // const copyrightLabel = current_script.getElementsByClassName('js-copyright-label')
+                    // console.log(copyrightLabel)
+
+                    const iFrame = document.getElementById('tradingview-widget-script')
+                    if (iFrame) {
+                        const cr = iFrame.contentWindow.document.querySelector('.tv-widget-chart__copyrightingContainer')
+                        if (cr) {
+                            console.log('CR', cr)
+                            cr.style.display = 'none'
+                        } else {
+                            console.log('CR not found')
+                        }
+                    } else {
+                        console.log('iFrame not found')
+                    }
+
+                }, 1000)
+            }
+
+            // script.onload = hide_cr
+
+        }
+
+        //Clean up function to remove the script when component unmounts
+        return () => {
+            // container.current && container.current.removeChild(script);
+        };
+
+    }, [chartBackgroundColor, selectedTicker]);
+
+    // useEffect(() => {
+    //     let timer;
+    //     if (selectedTicker !== '') {
+    //         timer = setTimeout(() => {
+    //             const current_script = document.getElementById('tradingview-widget-script')
+    //             console.log('Script UE2', current_script)
+
+    //             const test = document.getElementById('mediumwidgetembed')
+    //             console.log('tets', test)
+
+    //             const cp = current_script.getElementsByClassName('.js-copyright-label')
+    //             console.log(cp)
+    //         }, 4000)
+
+    //     } else return
+
+    //     return () => clearTimeout(timer)
+    // })
+
+    return (
+        <Box style={{ height: '281px' }}>
+            <Box pb={1}>
+                <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
+                    <Autocomplete
+                        sx={{ backgroundColor: `${theme.palette.background.paperOne}`, width: '250px' }}
+                        disableClearable
+                        disableCloseOnSelect={false}
+                        value={selectedTicker}
+                        size='small'
+                        multiple={false}
+                        limitTags={1}
+                        id="tags-filled"
+                        options={tOptions}
+                        groupBy={(option) => option.group}
+                        getOptionDisabled={(option) => selectedTicker.label === option.label}
+                        freeSolo={false}
+                        onChange={(event, newValue) => {
+                            setSelectedTicker(newValue)
+                        }}
+                        renderTags={(value, getTagProps) =>
+                            value.map((option, index) => (
+                                <Chip variant="outlined" size='small' label={option.label} {...getTagProps({ index })} />
+                            ))
+                        }
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="filled"
+                                label="Search for a ticker"
+                                placeholder="Search..."
+                                size='small'
+                            />
+                        )}
+                    />
+                </ErrorBoundary>
+            </Box>
+            <Box className="tradingview-widget-container" ref={container}>
+                
+            </Box>
+        </Box>
+    );
+}
+
+export default memo(TradingViewWidget);

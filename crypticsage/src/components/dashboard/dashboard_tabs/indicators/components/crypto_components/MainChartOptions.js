@@ -2,6 +2,7 @@ import React from 'react'
 import { Box, FormControlLabel, Switch, TextField, useTheme, Autocomplete, Typography } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { toggleToolTipSwitch, toggleShowPredictionSwitch } from '../../modules/CryptoModuleSlice'
+import SingleTicker from './SingleTicker'
 
 const TICKER_PERIODS = [
     '1m',
@@ -33,8 +34,11 @@ const MainChartOptions = ({
     return (
         <Box className='ticker-period-selector-top' pl={2} pr={2} display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' gap='10px'>
             <Box display={'flex'} flexDirection={'row'} alignItems={'center'} gap={1}>
-                <Typography variant='h4' sx={{ textAlign: 'justify' }}>{selectedTickerName}</Typography>
-                <Box className='autocomplete-select-box' width='200px'>
+                <Box width={'125px'}>
+                    <Typography variant='h4' sx={{ textAlign: 'justify' }}>{selectedTickerName}</Typography>
+                    <SingleTicker />
+                </Box>
+                <Box className='autocomplete-select-box' width='150px'>
                     <Autocomplete
                         size='small'
                         disableClearable
@@ -63,15 +67,18 @@ const MainChartOptions = ({
             </Box>
             <Box className='tooltip-prediction-box'>
                 <Box className='tooltip-prediction-box-controls'>
-                    <FormControlLabel
-                        value="start"
-                        sx={{ marginLeft: '0px', marginRight: '0px' }}
-                        control={<Switch size="small" color="secondary" />}
-                        label={toolTipSwitchFlag ? 'Hide Tooltips' : 'Show Tooltips'}
-                        labelPlacement="start"
-                        checked={toolTipSwitchFlag}
-                        onChange={() => dispatch(toggleToolTipSwitch())}
-                    />
+                    <Box display={'flex'} flexDirection={'column'}>
+                        <FormControlLabel
+                            value="start"
+                            sx={{ marginLeft: '0px', marginRight: '0px' }}
+                            control={<Switch size="small" color="secondary" />}
+                            label={toolTipSwitchFlag ? 'Hide Tooltips' : 'Show Tooltips'}
+                            labelPlacement="start"
+                            checked={toolTipSwitchFlag}
+                            onChange={() => dispatch(toggleToolTipSwitch())}
+                        />
+                        <Typography sx={{ textAlign: 'justify', fontSize: '0.65rem', fontWeight: '600' }}>AF:{actualFetchLength}, R:{ohlcDataLength} / {Math.round(ohlcDataLength / 500)}</Typography>
+                    </Box>
                     {predictedVlauesRedux &&
                         <Box className='prediction-days'>
                             <FormControlLabel
@@ -112,7 +119,6 @@ const MainChartOptions = ({
                         </Box>
                     }
                 </Box>
-                <Typography variant='custom' sx={{ textAlign: 'justify' }}>AF:{actualFetchLength}, R:{ohlcDataLength} / {Math.round(ohlcDataLength / 500)}</Typography>
             </Box>
         </Box>
     )

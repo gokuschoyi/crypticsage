@@ -16,7 +16,7 @@ const IndicatorSearch = ({
                     {transformedFunctionsList.length > 0 &&
                         <Autocomplete
                             sx={{ backgroundColor: `${theme.palette.background.paperOne}`, width: lg ? sm ? '100%' : '400px' : '100%' }}
-                            disableCloseOnSelect={true}
+                            disableCloseOnSelect={false}
                             value={searchedFunctions}
                             size='small'
                             multiple

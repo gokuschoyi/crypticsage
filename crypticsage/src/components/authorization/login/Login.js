@@ -14,24 +14,42 @@ import { useDispatch } from 'react-redux';
 import { setAuthState } from '../authSlice';
 // import { setUserModels } from '../../dashboard/dashboard_tabs/indicators/modules/CryptoModuleSlice'
 import { LoginUser } from '../../../api/auth';
-import { setRecentLessonAndQuizStatus } from '../../dashboard/dashboard_tabs/stats/StatsSlice'
+import { setRecentLessonAndQuizStatus, setWordOfTheDay } from '../../dashboard/dashboard_tabs/stats/StatsSlice'
+
+const process_login = (result) => {
+    return {
+        'accessToken': result.data.data.accessToken,
+        'displayName': result.data.data.displayName,
+        'email': result.data.data.email,
+        'emailVerified': result.data.data.emailVerified,
+        'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
+        'uid': result.data.data.uid,
+        'preferences': result.data.data.preferences || {},
+        'mobile_number': result.data.data.mobile_number || '',
+        'admin_status': result.data.data.admin_status,
+        'user_lesson_status': result.data.data.lesson_status || {},
+        'photoUrl': result.data.data.profile_image || '',
+    }
+}
+
 const Login = (props) => {
     const { switchState, setSignupSuccessMessage, signupSuccessMessage } = props
     const navigate = useNavigate()
     const dispatch = useDispatch()
-    const redirectToHome = () => {
-        navigate('/')
-    }
-
+    
     const theme = useTheme()
     const [open, setOpen] = useState(false);
     const [error, setError] = useState('');
     const [fPassword, setFPassword] = useState(false)
     const [forgotEmail, setForgotEmail] = useState('')
-
+    
     const initialLoginData = {
         email: '',
         password: '',
+    }
+    
+    const redirectToHome = () => {
+        navigate('/')
     }
 
     const [loginData, setLoginData] = React.useState(initialLoginData)
@@ -84,23 +102,11 @@ const Login = (props) => {
                     password
                 }
                 const result = await LoginUser(loginD)
-                const userData = {
-                    'accessToken': result.data.data.accessToken,
-                    'displayName': result.data.data.displayName,
-                    'email': result.data.data.email,
-                    'emailVerified': result.data.data.emailVerified,
-                    'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
-                    'uid': result.data.data.uid,
-                    'preferences': result.data.data.preferences || {},
-                    'mobile_number': result.data.data.mobile_number || '',
-                    'admin_status': result.data.data.admin_status,
-                    'user_lesson_status': result.data.data.lesson_status || {},
-                    'photoUrl': result.data.data.profile_image || '',
-                }
+                const userData = process_login(result)
                 localStorage.setItem('userTheme', userData.preferences.theme)
                 dispatch(setAuthState(userData))
-                // dispatch(setUserModels(result.data.data.userModels))
                 dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
+                dispatch(setWordOfTheDay(result.data.word))
                 setIsLoading(false)
                 navigate('/dashboard')
             } catch (err) {
@@ -122,23 +128,11 @@ const Login = (props) => {
         try {
             setIsLoading(true)
             const result = await LoginUser(loginData)
-            const userData = {
-                'accessToken': result.data.data.accessToken,
-                'displayName': result.data.data.displayName,
-                'email': result.data.data.email,
-                'emailVerified': result.data.data.emailVerified,
-                'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
-                'uid': result.data.data.uid,
-                'preferences': result.data.data.preferences || {},
-                'mobile_number': result.data.data.mobile_number || '',
-                'admin_status': result.data.data.admin_status,
-                'user_lesson_status': result.data.data.lesson_status || {},
-                'photoUrl': result.data.data.profile_image || '',
-            }
+            const userData = process_login(result)
             localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
-            // dispatch(setUserModels(result.data.data.userModels))
             dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
+            dispatch(setWordOfTheDay(result.data.word))
             setIsLoading(false)
             navigate('/dashboard')
         } catch (err) {
@@ -159,23 +153,11 @@ const Login = (props) => {
         try {
             setIsLoading(true)
             const result = await LoginUser(loginData)
-            const userData = {
-                'accessToken': result.data.data.accessToken,
-                'displayName': result.data.data.displayName,
-                'email': result.data.data.email,
-                'emailVerified': result.data.data.emailVerified,
-                'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
-                'uid': result.data.data.uid,
-                'preferences': result.data.data.preferences || {},
-                'mobile_number': result.data.data.mobile_number || '',
-                'admin_status': result.data.data.admin_status,
-                'user_lesson_status': result.data.data.lesson_status || {},
-                'photoUrl': result.data.data.profile_image || '',
-            }
+            const userData = process_login(result)
             localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
-            // dispatch(setUserModels(result.data.data.userModels))
             dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
+            dispatch(setWordOfTheDay(result.data.word))
             setIsLoading(false)
             navigate('/dashboard')
         } catch (err) {

@@ -2372,6 +2372,39 @@ const fetchTickerMetaFromDb = async (length) => {
     }
 }
 
+const getBinanceTickerList = async () => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const ticker_meta_collection = db.collection("binance_ticker_meta")
+        let tickerMeta = await ticker_meta_collection.aggregate([
+            { $project: { _id: 0 } }
+        ]).toArray()
+
+        tickerMeta = tickerMeta.sort((a, b) => a.market_cap_rank - b.market_cap_rank)
+
+        return tickerMeta
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const updateTickerMeta_matched_value = async (symbol, matched_value) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const ticker_meta_collection = db.collection("binance_ticker_meta")
+        const query = { symbol: symbol }
+        const update = { $set: { matched: matched_value } }
+        const options = { upsert: true }
+        const updated = await ticker_meta_collection.updateOne(query, update, options)
+        return updated
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+
+    }
+}
+
 /**
  * Function to check for duplicate data in db:crypticsage/binance_historical
  * @async
@@ -3032,12 +3065,14 @@ module.exports = {
     , removeLessonAndQuizStatusFromUsers
     , removeOneLessonAndQuizStatusFromUsers
     , removeQuizStatusFromUser
-    , deleteOneMetaData
     , deleteTickerHistDataFromDb
     , getFirstObjectForEachPeriod
     , getBinanceTIckerNames
     , saveOrUpdateTickerMeta
     , fetchTickerMetaFromDb
+    , deleteOneMetaData
+    , getBinanceTickerList
+    , updateTickerMeta_matched_value
     , checkTickerMetaDuplicateData
     , insertHistoricalDataToDb
     , fetchEntireHistDataFromDb

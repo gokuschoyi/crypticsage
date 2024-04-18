@@ -9,7 +9,8 @@ const CSUtil = require('../utils/cryptoStocksUtil')
 
 const CSController = require('../controllers/cryptoStocksController')
 
-router.post('/getCryptoData', CSController.getCryptoDataByMarketCap)
+// router.post('/getCryptoData', CSController.getCryptoDataByMarketCap)
+router.post('/getCryptoData', CSController.getBinanceTicker_meta)
 router.post('/getHistoricalData', CSController.getLatestTickerData) //change name to getRecentChartData
 router.post('/get-latest-crypto-data', CSController.getLatestCryptoData)
 router.post('/get-latest-stocks-data', CSController.getLatestStocksData)

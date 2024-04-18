@@ -35,7 +35,7 @@
 
 .selected-function-hint {
     max-width: 100%;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.3s ease-in-out;
 }
 
 .predictions-legend {
@@ -400,7 +400,7 @@ tr:hover .prediction-mse {
     display: flex;
     flex-direction: row;
     gap: 16px;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .tooltip-prediction-box-controls {
@@ -710,6 +710,27 @@ tr:hover .prediction-mse {
 
 }
 
+
+.single_ticker_box{
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.token-price-container, 
+.token-price-change-container{
+    display: flex;
+    flex-direction: row;
+}
+
+.digit-span{
+    font-size:0.65rem;
+    font-weight: 600;
+    align-items: end;
+}
+
 @keyframes fadeIn {
     0% {
         opacity: 0;
@@ -799,7 +820,7 @@ tr:hover .prediction-mse {
 
 @media screen and (min-width: 1400px) {
     .crypto-stocks-table-module {
-        width: 1200px;
+        width: 1300px;
     }
 
     /* .main-training-status-box {
@@ -917,6 +938,11 @@ tr:hover .prediction-mse {
         flex-direction: column;
         align-items: flex-start;
         padding-bottom: 8px;
+    }
+
+    .crypto-stock-button{
+        margin-left: 32px;
+        margin-bottom: 8px;
     }
 
     .last-updated-date-refresh {

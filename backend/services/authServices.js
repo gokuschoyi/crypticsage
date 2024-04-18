@@ -9,7 +9,7 @@ const types = require('../typedefs')
 const MDBServices = require('../services/mongoDBServices');
 const authUtil = require('../utils/authUtil');
 const { verifyGoogleCredentials } = require('../utils/googleAuthenticator')
-
+const getWordOfTheDay = require('../data/wodData')
 /**
  * @namespace authServices
  * @description Controller for handling all authentication related requests
@@ -92,7 +92,7 @@ const generateUserObjectForLogin = async (user, adminStatus, token) => {
  * @ignore
  * @param {string} email Email of the user
  * @param {string} password Password of the user
- * @returns {Promise<{ userData: types.UserLoginPayload, recentLessonQuiz: types.RecentLessonQuiz }>}
+ * @returns {Promise<{ userData: types.UserLoginPayload, recentLessonQuiz: types.RecentLessonQuiz, word:types.Word }>}
  */
 const handleEmailPasswordLogin = async (email, password) => {
     try {
@@ -114,10 +114,11 @@ const handleEmailPasswordLogin = async (email, password) => {
                 let recent_lesson_quiz = await authUtil.getRecentLessonAndQuiz(lesson_status, quiz_status, sectionIDs)
 
                 let userData = await generateUserObjectForLogin(user, adminStatus, token)
-
+                const wod = getWordOfTheDay()
                 return {
                     userData: userData,
-                    recentLessonQuiz: recent_lesson_quiz
+                    recentLessonQuiz: recent_lesson_quiz,
+                    word: wod
                 };
             }
         }
@@ -131,7 +132,7 @@ const handleEmailPasswordLogin = async (email, password) => {
  * Handles the login via google and returns the user object and recent lesson and quiz
  * @ignore
  * @param {string} credential The gmail credential of the user from google auth
- * @returns {Promise<{ userData: types.UserLoginPayload, recentLessonQuiz: types.RecentLessonQuiz }>}
+ * @returns {Promise<{ userData: types.UserLoginPayload, recentLessonQuiz: types.RecentLessonQuiz, word:types.Word }>}
  */
 const handleGoogleLogin = async (credential) => {
     try {
@@ -151,13 +152,15 @@ const handleGoogleLogin = async (credential) => {
                 const token = await generateJWTToken(email, user_name, uid)
                 let lesson_status = user[0].lesson_status
                 let quiz_status = user[0].quiz_status
-                let recent_lesson_quiz = await authUtil.getRecentLessonAndQuiz(lesson_status, quiz_status,sectionIDs)
+                let recent_lesson_quiz = await authUtil.getRecentLessonAndQuiz(lesson_status, quiz_status, sectionIDs)
 
                 let userData = await generateUserObjectForLogin(user, adminStatus, token)
 
+                const wod = getWordOfTheDay()
                 return {
                     userData: userData,
-                    recentLessonQuiz: recent_lesson_quiz
+                    recentLessonQuiz: recent_lesson_quiz,
+                    word: wod
                 };
             }
         }
@@ -171,7 +174,7 @@ const handleGoogleLogin = async (credential) => {
  * Handles the login via facebook and returns the user object and recent lesson and quiz
  * @ignore
  * @param {string} facebook_email Email of the user from facebook
- * @returns {Promise<{ userData: types.UserLoginPayload, recentLessonQuiz: types.RecentLessonQuiz }>}
+ * @returns {Promise<{ userData: types.UserLoginPayload, recentLessonQuiz: types.RecentLessonQuiz, word:types.Word }>}
  */
 const handleFacebookLogin = async (facebook_email) => {
     try {
@@ -189,9 +192,11 @@ const handleFacebookLogin = async (facebook_email) => {
 
             let userData = await generateUserObjectForLogin(user, adminStatus, token)
 
+            const wod = getWordOfTheDay()
             return {
                 userData: userData,
-                recentLessonQuiz: recent_lesson_quiz
+                recentLessonQuiz: recent_lesson_quiz,
+                word: wod
             };
         }
     } catch (error) {
@@ -207,12 +212,13 @@ const handleFacebookLogin = async (facebook_email) => {
  * @description Main function to handle all login types and returns the user object and recent lesson and quiz
  * @param {string} login_type The type of login `emailpassword` | `google` | `facebook`
  * @param {object} params The params object containing the login credentials
- * @returns {Promise<{ userData: types.UserLoginPayload, recentLessonQuiz: types.RecentLessonQuiz }>}
+ * @returns {Promise<{ userData: types.UserLoginPayload, recentLessonQuiz: types.RecentLessonQuiz, word:types.Word }>}
  */
 const processUserLogin = async (login_type, params) => {
     let userData
     let recent_lesson_quiz
     let processed = {}
+    let word
     switch (login_type) {
         case 'emailpassword':
             const email = params.email
@@ -233,9 +239,11 @@ const processUserLogin = async (login_type, params) => {
     }
     userData = processed.userData
     recent_lesson_quiz = processed.recentLessonQuiz
+    word = processed.word
     return {
         userData: userData,
-        recentLessonQuiz: recent_lesson_quiz
+        recentLessonQuiz: recent_lesson_quiz,
+        word: word
     };
 }
 

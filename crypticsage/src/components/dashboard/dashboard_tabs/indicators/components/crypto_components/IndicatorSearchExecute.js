@@ -89,7 +89,7 @@ const IndicatorSearchExecute = ({
 
     }
     return (
-        <Box pt={2} mb={2} mt={'26px'} className='indicator-search-execute'>
+        <Box pt={2} mb={!md && 2} mt={!md && '32px'} className='indicator-search-execute'>
             <Box pr={2} pl={md && 2}>
                 <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
                     <IndicatorSearch

@@ -12,6 +12,9 @@ router.post('/find_yf_ticker', CMController.findYFTicker) // admin dashboard - f
 router.post('/get_binance_tickers', CMController.getBinanceTickersIndb) // admin dashboard - dashborad binance info - completed
 router.post('/get_yfinance_tickers', CMController.getYfinanceTickersIndb) // admin dashboard -  yfinance info -completed
 
+router.post('/fetch_new_tickers_to_add', CMController.getNewTickersToAdd)
+router.post('/add_new_ticker_meta', CMController.addNewBinanceTickerMeta)
+
 router.post('/update_one_binance_ticker', CMController.updateOneBinanceTicker) // admin dashboard - update one binance ticker - completed
 router.post('/update_all_tickers', CMController.updateAllBinanceTickers) // admin dashboard - update all binance tickers - completed
 

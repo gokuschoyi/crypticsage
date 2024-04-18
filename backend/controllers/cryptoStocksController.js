@@ -8,15 +8,24 @@ const MDBServices = require('../services/mongoDBServices')
 // < - - - - - - - - - - Route Functions - - - - - - - - - - >
 
 // Fetches the top tickers by market cap from DB : Slider box on the frontend
-const getCryptoDataByMarketCap = async (req, res) => {
-    try {
-        var filteredCryptoData = await CSUtil.fetchTopTickerByMarketCap({ length: 20 })
-        res.status(200).json({ message: "Get Crypto Data request success", cryptoData: filteredCryptoData });
-    } catch (error) {
-        log.error(error.stack)
-        res.status(400).json({ message: "Get Crypto Data request error" })
-    }
+const getBinanceTicker_meta = async (req, res) => {
+    let tickerMeta = await MDBServices.getBinanceTickerList()
+    tickerMeta = tickerMeta.sort((a, b) => a.market_cap_rank - b.market_cap_rank)
+    // console.log('BT meta', tickerMeta.length)
+    // result.forEach(elm => { console.log(elm.symbol, elm?.matched) })
+    res.status(200).json({ message: "Get Binance Ticker Meta Data request success", cryptoData: tickerMeta, yf_ticker: [] });
 }
+
+// Fetches the top tickers by market cap from DB : Slider box on the frontend // Not being used
+// const getCryptoDataByMarketCap = async (req, res) => {
+//     try {
+//         var [filteredCryptoData, yf_ticker] = await CSUtil.fetchTopTickerByMarketCap({ length: 20 })
+//         res.status(200).json({ message: "Get Crypto Data request success", cryptoData: filteredCryptoData, yf_ticker });
+//     } catch (error) {
+//         log.error(error.stack)
+//         res.status(400).json({ message: "Get Crypto Data request error" })
+//     }
+// }
 
 // Fetches the historical data from CryptoCompare(OHLCV) : Ticker chart on the frontend
 const getLatestTickerData = async (req, res) => {
@@ -96,7 +105,8 @@ const fetchTickerDataFromDB = async (req, res) => {
 
 
 module.exports = {
-    getCryptoDataByMarketCap,
+    getBinanceTicker_meta,
+    // getCryptoDataByMarketCap,
     getLatestTickerData,
     getLatestCryptoData,
     getLatestStocksData,

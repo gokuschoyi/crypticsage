@@ -23,6 +23,7 @@ export const getHistoricalData = async (data) => {
     return response;
 }
 
+// Not used in the frontend
 export const getWordOfTheDay = async (data) => {
     let token = data.token;
     const config = {

@@ -61,4 +61,11 @@
  * @property {object} userInfo Facebook user info
  */
 
+/**
+ * @typedef {object} Word
+ * @property {string} word - The word of the day
+ * @property {string} meaning - The meaning of the word
+ * @property {string} url - The URL of the word
+ */
+
 exports.definitions = {};

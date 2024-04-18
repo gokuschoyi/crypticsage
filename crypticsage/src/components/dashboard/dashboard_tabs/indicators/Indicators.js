@@ -8,7 +8,7 @@ const Indicators = () => {
     return (
         <Box className='indicators-container'>
             <Outlet />
-        </Box >
+        </Box>
     )
 }
 

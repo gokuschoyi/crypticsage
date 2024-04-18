@@ -28,6 +28,24 @@ export const refreshTickerMeta = async ({ token, length }) => {
     return response;
 }
 
+export const getNewTickersToAdd = async ({ token }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/content/fetch_new_tickers_to_add`, { withCredentials: true }, config)
+    return response;
+}
+
+export const addNewBinanceTickerMeta = async ({ token, ticker_to_add }) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/content/add_new_ticker_meta`, { ticker_to_add }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
 export const deleteOneTickerMeta = async ({ token, symbol }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }

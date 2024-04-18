@@ -7,6 +7,7 @@ const CMServices = require('../services/contentManagerServices')
 const MDBServices = require('../services/mongoDBServices')
 const HDServices = require('../services/historicalDataServices')
 const CSUtil = require('../utils/cryptoStocksUtil')
+const CMUtil = require('../utils/contentManagerUtil')
 
 // <--- Admin Stats ---> //
 
@@ -79,11 +80,43 @@ const findYFTicker = async (req, res) => {
         res.status(400).json({ message: "Get YF Data request error", error: error.message })
     }
 }
+// Admin Side : New tickers that have not been added to the DB
+const getNewTickersToAdd = async (req, res) => {
+    const ticker_list_db = await MDBServices.getBinanceTickerList()
+    const ticker_fetch_length = 2 * ticker_list_db.length
+    const [latest_tickers, yf] = await CSUtil.fetchTopTickerByMarketCap({ length: ticker_fetch_length })
+    const new_tickers = latest_tickers.slice(ticker_list_db.length)
+    res.status(200).json({ message: "Get new tickers success", new_tickers });
+}
+
+// Admin Side : Add new ticker/s meta to the DB
+const addNewBinanceTickerMeta = async (req, res) => {
+    try {
+        const { ticker_to_add } = req.body
+        let symbolsFromBinance = await CMUtil.fetchSymbolsFromBinanceAPI()
+        let tickerNameAdded = ticker_to_add.map((ticker) => {
+            const matched = symbolsFromBinance.find((symbol) => symbol.baseAsset === ticker.symbol && symbol.quoteAsset === "USDT")
+            return {
+                ...ticker,
+                matched: matched ? matched.symbol : 'N/A',
+            }
+        })
+
+        const tickersWithNoDataInBinance = tickerNameAdded.filter((ticker) => ticker.matched === 'N/A')
+        const tickersWithNoHistData = tickerNameAdded.filter((ticker) => ticker.matched !== 'N/A')
+
+        // console.log(tickerNameAdded)
+
+        let result = await MDBServices.saveOrUpdateTickerMeta(ticker_to_add)
+        res.status(200).json({ message: "Add new ticker meta success", result, tickersWithNoDataInBinance, tickersWithNoHistData });
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: "Get Crypto Data request error", error: error.message })
+    }
+}
 
 const getBinanceTickersIndb = async (req, res) => {
     try {
-        const test = await CMServices.serviceGetBinanceTickerStatsFromDb()
-        let one = test[0]
         const [
             totalTickerCountInDb,
             totalTickersWithDataToFetch,
@@ -180,13 +213,13 @@ const fetchOneYfinanceTicker = async (req, res) => {
         const periods = ["1d", "1wk", "1mo"]
         const [uploadStatus, availableTickers, tickers] = await HDServices.processInitialSaveHistoricalDataYFinance({ tickersList: symbol, periods })
         const isMetaDataAvailable = await MDBServices.isMetadatAvailable(newSymbol)
-        if(!isMetaDataAvailable){ // add metadata
+        if (!isMetaDataAvailable) { // add metadata
             log.info(`Metadata unavaiable, adding metadata for ${newSymbol}`)
             await CSUtil.getYfinanceQuotes(symbol)
             const meta_type = 'full_summary'
             const full_summary = await CSUtil.getStockSummaryDetails(newSymbol)
             await MDBServices.updateYFinanceMetadata(newSymbol, meta_type, full_summary)
-        } else{
+        } else {
             log.info(`Metadata avaiable for ${newSymbol}`)
         }
         res.status(200).json({ message: "Yfinance tickers added", uploadStatus, availableTickers, tickers });
@@ -467,6 +500,8 @@ module.exports = {
     FASLatestTickerMetaData
     , deleteTickerMeta
     , findYFTicker
+    , getNewTickersToAdd
+    , addNewBinanceTickerMeta
     , getBinanceTickersIndb
     , getYfinanceTickersIndb
     , fetchOneBinanceTicker

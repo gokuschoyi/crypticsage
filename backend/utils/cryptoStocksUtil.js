@@ -154,10 +154,25 @@ const generateYFObject = (symbol, param) => {
 ]
 */
 const fetchTopTickerByMarketCap = async ({ length }) => {
-    try {
-        let cryptoData = await axios.get(`https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${length}&tsym=USD`)
+    try { // limit of 100 tickers per request
+        const no_pages = Math.ceil(length / 100)
+        let cryptoData = []
 
-        const undefinedRemoved = cryptoData.data.Data.filter((ticker) => {
+        for (let i = 0; i < no_pages; i++) {
+            // console.log(`fetching page ${i}`)
+            let len = 100;
+            if (i === no_pages - 1 && length % 100 !== 0) {
+                // If it's the last loop and there's a remaining part
+                len = length % 100; // Adjust length for the remaining part
+                // console.log('fetch length', len)
+            }
+            const url = `https://min-api.cryptocompare.com/data/top/mktcapfull?limit=${len}&tsym=USD&page=${i}`
+            // console.log(url)
+            let pageData = await axios.get(url)
+            cryptoData = [...cryptoData, ...pageData.data.Data]
+        }
+
+        const undefinedRemoved = cryptoData.filter((ticker) => {
             // console.log(ticker.RAW?.USD.PRICE)
             return ticker.RAW !== undefined;
         })
@@ -189,12 +204,14 @@ const fetchTopTickerByMarketCap = async ({ length }) => {
             // If a matching ticker is found, use its matched value, otherwise use false
             const matched = ticker ? ticker.ticker_name : 'N/A';
             // Return a new object with the matched key
-            return {...crypto, matched};
+            return { ...crypto, matched };
         });
-        
-        // console.log(filteredCryptoDataWithMatched)
 
-        return cryptoData = filteredCryptoDataWithMatched
+        // console.log(filteredCryptoDataWithMatched)
+        const collection_name = 'yfinance_metadata'
+        let yf_ticker = await MDBServices.getFirstObjectForEachPeriod(collection_name)
+        yf_ticker = yf_ticker.map((yf) => { return { matched: yf.ticker_name } })
+        return [filteredCryptoDataWithMatched, yf_ticker]
     } catch (error) {
         let formattedError = JSON.stringify(logger.formatError(error))
         log.error({ message: 'Error CryptoCompare', error: formattedError })
@@ -1356,7 +1373,7 @@ const getStockSummaryDetails = async (symbol) => {
 
 
         const insideHld = stockProfile['insiderHolders']?.holders
-        if(insideHld !== undefined){
+        if (insideHld !== undefined) {
             const insideTran = stockProfile['insiderTransactions']
             const added = insideHld.map((item, index) => {
                 const matched = insideTran.find((element) => element.name === item.name)

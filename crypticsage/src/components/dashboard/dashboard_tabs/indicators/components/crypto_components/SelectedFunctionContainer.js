@@ -246,7 +246,8 @@ const SelectedFunctionContainer = (props) => {
                     '& .MuiAccordionSummary-root.MuiButtonBase-root': {
                         height: '30px',
                         minHeight: '0px',
-                        padding: '0px 8px'
+                        padding: '0px 8px',
+                        transition: '0.3s ease-in-out'
                     },
                     '& .MuiAccordionSummary-content': {
                         margin: '0px'
@@ -254,6 +255,10 @@ const SelectedFunctionContainer = (props) => {
                     '& .MuiAccordionSummary-content.Mui-expanded': {
                         minHeight: '34px',
                         margin: '4px 0px 4px 0px'
+                    },
+                    '& .MuiAccordionSummary-root.MuiButtonBase-root.Mui-expanded': {
+                        height: '44px',
+                        transition: '0.3s ease-in-out'
                     }
                 }}
                 TransitionProps={{ mountOnEnter: true }} className='function-accordian' expanded={expanded === `${name}`} onChange={handleChange(`${name}`)}>
@@ -292,7 +297,7 @@ const SelectedFunctionContainer = (props) => {
                 <AccordionActions sx={{ padding: '0px 6px 0px 12px' }}>
                     <Box display='flex' flexDirection='row' gap={1} alignItems='center' width='100%' pl={1} pr={1}>
                         <Typography variant='custom' fontWeight='bold' sx={{ textAlign: 'start' }}>{name}</Typography>
-                        <IconButton sx={{padding:'2px'}} disabled={functions[0].optInputs.length === 0 || functions.length === MAX_FUNCTION_DUPLICATES} size='small' aria-label="add query" color="secondary" onClick={handleAddIndicator.bind(null, { func_name: name })}>
+                        <IconButton sx={{ padding: '2px' }} disabled={functions[0].optInputs.length === 0 || functions.length === MAX_FUNCTION_DUPLICATES} size='small' aria-label="add query" color="secondary" onClick={handleAddIndicator.bind(null, { func_name: name })}>
                             <Tooltip title="Add query" placement='right'>
                                 <AddIcon className='small-icon' />
                             </Tooltip>
@@ -313,7 +318,7 @@ const SelectedFunctionContainer = (props) => {
                                     <Box className='function-action-box' display='flex' flexDirection='row' gap={'4px'}>
 
                                         {outputAvailable &&
-                                            <IconButton sx={{padding:'2px'}}  size='small' aria-label="Hide shart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: id, name: name })}>
+                                            <IconButton sx={{ padding: '2px' }} size='small' aria-label="Hide shart" color="secondary" onClick={handleToggleShowHideChart.bind(null, { id: id, name: name })}>
                                                 {show_chart_flag ?
                                                     <VisibilityIcon className='small-icon' />
                                                     :
@@ -322,7 +327,7 @@ const SelectedFunctionContainer = (props) => {
                                             </IconButton>
                                         }
 
-                                        <IconButton sx={{padding:'2px'}} size='small' aria-label="execute query" color="secondary" onClick={handleGenerateQuery.bind(null, { id: id })}>
+                                        <IconButton sx={{ padding: '2px' }} size='small' aria-label="execute query" color="secondary" onClick={handleGenerateQuery.bind(null, { id: id })}>
                                             {
                                                 outputAvailable
                                                     ? (talibExecuting ? <CircularProgress color="error" sx={{ margin: '2.5px' }} size={15} /> : <RestartAltIcon className='small-icon' />)
@@ -330,7 +335,7 @@ const SelectedFunctionContainer = (props) => {
                                             }
                                         </IconButton>
 
-                                        <IconButton sx={{padding:'2px'}} size='small' aria-label="delete query" color="secondary" onClick={handleDeleteQuery.bind(null, { id: id })}>
+                                        <IconButton sx={{ padding: '2px' }} size='small' aria-label="delete query" color="secondary" onClick={handleDeleteQuery.bind(null, { id: id })}>
                                             <Tooltip title="Delete query" placement='top'>
                                                 <DeleteOutlineIcon className='small-icon' />
                                             </Tooltip>
@@ -338,7 +343,7 @@ const SelectedFunctionContainer = (props) => {
                                     </Box>
                                 </Box>
 
-                                <Box className='indicator-inputs-selected'  sx={{ textAlign: 'start' }}>
+                                <Box className='indicator-inputs-selected' sx={{ textAlign: 'start' }}>
                                     <Typography variant='h6' textAlign='start' fontWeight='500' sx={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>INPUTS</Typography>
                                     {inputs.length > 0 && inputs.map((input, index) => {
                                         const { value, errorFlag, helperText } = input

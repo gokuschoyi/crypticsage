@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     cryptoDataAutoComplete: [],
+    yf_ticker: [],
     selectedCoinName: '',
     selectedTokenName: '',
     selectedCoinData: [],
@@ -20,7 +21,8 @@ const statsSlice = createSlice({
     initialState,
     reducers: {
         setCryptoDataAutoComplete: (state, action) => {
-            state.cryptoDataAutoComplete = action.payload;
+            state.cryptoDataAutoComplete = action.payload.cryptoData;
+            state.yf_ticker = action.payload.yf_ticker
         },
         setSelectedCoinName: (state, action) => {
             state.selectedCoinName = action.payload.coinName;
@@ -42,6 +44,7 @@ const statsSlice = createSlice({
         },
         resetStatsState: (state) => {
             state.cryptoDataAutoComplete = [];
+            state.yf_ticker = [];
             state.selectedCoinData = [];
             state.selectedCoinName = '';
             state.selectedTokenName = '';

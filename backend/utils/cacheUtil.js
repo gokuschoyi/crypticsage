@@ -1,6 +1,6 @@
 const log = require('../middleware/logger/Logger').create(__filename.slice(__dirname.length + 1))
 const { redisClient } = require('../services/redis')
-const HDUtil = require('../utils/historicalDataUtil')
+const axios = require('axios').default;
 
 // Converts the period to milliseconds
 // INPUT : period
@@ -76,6 +76,95 @@ const pruneData = (new_data) => {
     }))
 }
 
+const formatPrintDate = (date) => {
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    }).format(new Date(date));
+    return formattedDate;
+}
+
+const divideTimePeriod = (startTime, endTime, period, limit) => {
+    const duration = endTime - startTime; // in milliseconds
+    const periodInMilliseconds = periodToMilliseconds(period);
+    const numberOfDivisions = Math.ceil(duration / (limit * periodInMilliseconds));
+    const divisions = [];
+
+    for (let i = 0; i < numberOfDivisions; i++) {
+        const start = startTime + i * limit * periodInMilliseconds;
+        const end = Math.min(start + limit * periodInMilliseconds, endTime);
+        divisions.push({ start, end });
+    }
+
+    return divisions;
+}
+
+const fetchData = async ({ ticker_name, period, start, end, type }) => {
+    let response = [];
+    let url = `https://api.binance.com/api/v3/klines?symbol=${ticker_name}&interval=${period}&startTime=${start}&endTime=${end}&limit=1000`;
+    // log.info(`Binance ${period} URL : ${url}`)
+    let lapsedTime, responseLength
+    try {
+        const responseFromBinance = await axios.get(url);
+
+        response = responseFromBinance.data;
+        responseLength = response.length
+
+        let sDate = formatPrintDate(start)
+        let eDate = formatPrintDate(end)
+
+        log.info(`Fetch type : (${type}) [${ticker_name} with period ${period} from ${sDate} to ${eDate}], Fetch count : ${responseLength}`)
+        return response
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+};
+
+const convertData = (data) => {
+    let transformedResult = data.map((item) => {
+        return {
+            openTime: item[0],
+            open: item[1],
+            high: item[2],
+            low: item[3],
+            close: item[4],
+            volume: item[5],
+            closeTime: item[6],
+            quoteAssetVolume: item[7],
+            trades: item[8],
+            takerBaseAssetVolume: item[9],
+            takerQuoteAssetVolume: item[10],
+        };
+    });
+    return transformedResult
+};
+// Added here because of circular dependecy with HDUtil
+const fetchBinanceHistoricalBetweenPeriods = async ({ ticker_name, period, start, end }) => {
+    try {
+        const limit = 1000;
+        const divisions = divideTimePeriod(start, end, period, limit);
+        let data = []
+        let type = `Update ${period}`
+        for (let i = 0; i < divisions.length; i++) {
+            let start = divisions[i].start
+            let end = divisions[i].end
+            let response = await fetchData({ ticker_name, period, start, end, type });
+            data = [...data, ...response]
+        }
+        let convertedData = convertData(data)
+        convertedData = convertedData.slice(1)
+        return convertedData
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
 const set_cached_historical_data = async (cache_key, data, period) => {
     log.info(`Setting cache for key: ${cache_key}`)
     log.info(`DB Data length : ${data.length}`)
@@ -102,7 +191,7 @@ const set_cached_historical_data = async (cache_key, data, period) => {
             end
         }
 
-        const newVals = await HDUtil.fetchBinanceHistoricalBetweenPeriods({ ...updateQueries })
+        const newVals = await fetchBinanceHistoricalBetweenPeriods({ ...updateQueries })
         prunedData = pruneData(newVals)
         // console.log('New tickers fetched (pruned):', prunedData)
         data.push(...prunedData)
@@ -156,7 +245,7 @@ const set_cached_ohlcv_data = async (cache_key, data) => {
             end
         }
 
-        const newVals = await HDUtil.fetchBinanceHistoricalBetweenPeriods({ ...updateQueries })
+        const newVals = await fetchBinanceHistoricalBetweenPeriods({ ...updateQueries })
         prunedData = pruneData(newVals)
 
         prunedData = prunedData.map((d) => {
@@ -167,7 +256,7 @@ const set_cached_ohlcv_data = async (cache_key, data) => {
         })
 
         data.ticker_data.push(...prunedData)
-        console.log(data.items_per_page)
+        // console.log(data.items_per_page)
         data.ticker_data = data.ticker_data.slice(-data.items_per_page)
         data.start_date = data.ticker_data.slice(-1)[0].date
         data.end_date = data.ticker_data[0].date

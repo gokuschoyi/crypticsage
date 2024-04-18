@@ -201,13 +201,29 @@ function debounce(func, delay) {
 // Generates the OHLCV tooltip HTML
 const generateOHLCV_String = (param) => {
     const { open, high, low, close, vol } = param
+    const getWidth = (open) => {
+        const str = `${open.toFixed(2)}`
+        const length = str.length
+        if (length === 4) {
+            return 45
+        } else if (length === 5) {
+            return 55
+        } else if (length === 6) {
+            return 65
+        } else if (length === 7) {
+            return 73
+        } else {
+            return 73
+        }
+    }
+    const width = getWidth(open)
     return `
     <div class="value-box">
-        <div style="width:73px; text-align:start">O : <span id="openValue">${Math.round(100 * open) / 100}</span></div>
-        <div style="width:73px; text-align:start">H : <span id="highValue">${Math.round(100 * high) / 100}</span></div>
-        <div style="width:73px; text-align:start">L : <span id="lowValue">${Math.round(100 * low) / 100}</span></div>
-        <div style="width:73px; text-align:start">C : <span id="closeValue">${Math.round(100 * close) / 100}</span></div>
-        <div style="width:73px; text-align:start">V : <span id="volumeValue">${(vol || 0).toFixed(2)}</span></div>
+        <div style="width:${width}px; text-align:start">O : <span id="openValue">${Math.round(100 * open) / 100}</span></div>
+        <div style="width:${width}px; text-align:start">H : <span id="highValue">${Math.round(100 * high) / 100}</span></div>
+        <div style="width:${width}px; text-align:start">L : <span id="lowValue">${Math.round(100 * low) / 100}</span></div>
+        <div style="width:${width}px; text-align:start">C : <span id="closeValue">${Math.round(100 * close) / 100}</span></div>
+        <div style="display:inline-block text-align:start">V : <span id="volumeValue">${(vol || 0).toFixed(2)}</span></div>
     </div>
     `
 }
@@ -559,7 +575,9 @@ const MainChart = (props) => {
             lastBarNoRef.current = barNo
         }
 
-        chart.current.timeScale().subscribeVisibleLogicalRangeChange(VLRCHandler)
+        if (total_count_for_ticker_in_db > 500) { // Only subscribing if there is enough data
+            chart.current.timeScale().subscribeVisibleLogicalRangeChange(VLRCHandler)
+        }
 
         return () => {
             // console.log("UE 5 RETURN : Debounce fetch")

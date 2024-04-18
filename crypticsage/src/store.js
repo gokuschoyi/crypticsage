@@ -15,7 +15,10 @@ import IndicatorsSlice from './components/dashboard/dashboard_tabs/indicators/In
 import cryptoModuleSlice from './components/dashboard/dashboard_tabs/indicators/modules/CryptoModuleSlice.js';
 import stockModuleSlice from './components/dashboard/dashboard_tabs/indicators/modules/StockModuleSlice.js';
 
+import adminSlice from '../src/components/admin/AdminSlice.js'
+
 const reducer = combineReducers({
+    admin: adminSlice,
     settings: settingsSlice,
     sidebar: sideBarSlice,
     section: sectionSlice,
@@ -33,7 +36,7 @@ const persistConfig = {
     storage: localforage,
     stateReconciler: autoMergeLevel2,
     serialize: true,
-    version: 7, // Update this number anytime changes are made to any of the redux slices. This will trigger the migration function below
+    version: 8, // Update this number anytime changes are made to any of the redux slices. This will trigger the migration function below
     migrate: (state, currentVersion) => {
         if (state && state._persist.version !== currentVersion) {
             console.log(`New state version ${currentVersion}. Clearing state`); // If the versions don't match, clear the state

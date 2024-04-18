@@ -17,7 +17,7 @@ const loginUser = async (req, res) => {
         let isInputValid = Validator.validateLoginInput({ login_type, params });
         if (isInputValid) {
             const loginData = await authServices.processUserLogin(login_type, params);
-            res.status(200).json({ message: "User login successful", data: loginData.userData, recent_lesson_quiz: loginData.recentLessonQuiz });
+            res.status(200).json({ message: "User login successful", data: loginData.userData, recent_lesson_quiz: loginData.recentLessonQuiz, word: loginData.word});
         }
     } catch (error) {
         log.error(error.stack)

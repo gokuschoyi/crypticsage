@@ -53,6 +53,11 @@ const Typography = (fontFamily) => ({
         lineHeight: 1.66,
         fontWeight: 500
     },
+    admin_stats: {
+        fontSize: '0.7rem',
+        lineHeight: 1.66,
+        fontWeight: 600
+    },
     subtitle1: {
         fontSize: '0.875rem',
         fontWeight: 600,

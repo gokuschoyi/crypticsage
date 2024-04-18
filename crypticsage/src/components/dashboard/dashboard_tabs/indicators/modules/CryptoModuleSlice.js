@@ -637,7 +637,9 @@ const cryptoModuleSlice = createSlice({
 
                     // Update the inputs array within the function
                     updatedFunction.outputAvailable = true;
-                    updatedFunction.display_name = `${name}_${optInputs[0].defaultValue}`;
+                    const df_value = optInputs[0]?.defaultValue || ''
+                    console.log(df_value)
+                    updatedFunction.display_name = `${name}_${df_value}`;
 
                     // Update the function within the found function's functions array
                     foundFunction.functions[foundFunctionToUpdateIndex] = updatedFunction;
@@ -659,7 +661,7 @@ const cryptoModuleSlice = createSlice({
                     name: name,
                     display_name: `${name}_${diffVal}`,
                     result: differentOutputs.data,
-                    visible: false,
+                    visible: splitPane ? true : false,
                     key: differentOutputs.key,
                     differentiatorValue: diffVal,
                     isDataNew: false,

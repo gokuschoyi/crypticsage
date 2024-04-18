@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { toast } from 'react-toastify';
-import { convert } from '../../../utils/Utils'
 // import BinanceChart from './BinanceChart'
-import PieChartComp from './PieChart'
-import { useSelector } from 'react-redux'
+import TickerWithHistoricalData from './TickerWithHistoricalData';
+import TickerWithNoHistoricalData from './TickerWithNoHistoricalData';
+import TickerSelector from './TickerSelector';
+import { useSelector, useDispatch } from 'react-redux'
 import { Success, Progress } from '../../dashboard/global/CustomToasts'
 import {
     getBinanceHistoricalStatFromDb,
@@ -12,385 +13,136 @@ import {
     checkFullUpdateStatus,
     fetchOneBinanceTicker,
     updateOneBinanceTicker,
-    checkProcessStatus
+    checkProcessStatus,
+    getNewTickersToAdd
 } from '../../../api/adminController'
 import {
     Box,
     Typography,
     Grid,
-    LinearProgress,
     TextField,
     Button,
     Tooltip,
     IconButton,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
     Skeleton,
-
+    Divider
 } from '@mui/material'
 import Collapse from '@mui/material/Collapse';
 import Fade from '@mui/material/Fade';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import DownloadIcon from '@mui/icons-material/Download';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
+import {
+    setBinanceStats
+    , setYfinanceStats
+    , setNewTickers
+} from '../AdminSlice'
 
-function formatDateDifferenceToNow(targetDate) {
-    const now = new Date().getTime();
-    const difference = Math.abs(now - targetDate);
-
-    const oneMinuteInMilliseconds = 60 * 1000;
-    const oneHourInMilliseconds = 60 * oneMinuteInMilliseconds;
-    const oneDayInMilliseconds = 24 * oneHourInMilliseconds;
-
-    const elapsedDays = Math.floor(difference / oneDayInMilliseconds);
-    const remainingMilliseconds = difference % oneDayInMilliseconds;
-    const elapsedHours = Math.floor(remainingMilliseconds / oneHourInMilliseconds);
-    const remainingMillisecondsAfterHours = remainingMilliseconds % oneHourInMilliseconds;
-    const elapsedMinutes = Math.floor(remainingMillisecondsAfterHours / oneMinuteInMilliseconds);
-
-    return [elapsedDays, elapsedHours, elapsedMinutes]
-}
-
-function generateElapsedDate(day, hr, m) {
-    const parts = []
-    if (day > 0) {
-        parts.push(`${day}d`)
-    }
-    if (hr > 0) {
-        parts.push(`${hr}h`)
-    }
-    if (m > 0) {
-        parts.push(`${m}m`)
-    }
-    if (m === 0) {
-        parts.push(`0m`)
-    }
-    return parts.join(':')
-}
-
-function returnGreaterThan4hColor(days) {
-    if (days > 7) {
-        return 'red';
-    } else if (days > 3 && days <= 7) {
-        return 'brown';
-    } else if (days >= 1 && days <= 3) {
-        return '#ff9c4a';
-    } else {
-        return '#04ff04';
-    }
-}
-
-function return1MColor(days, hrs) {
-    if (days > 1) {
-        return 'red';
-    } else if (days >= 1) {
-        return 'brown';
-    } else if (hrs > 4 && hrs <= 24) {
-        return '#ff9c4a';
-    } else {
-        return '#04ff04';
-    }
-}
-
-function getRandomHexColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
-
-/* const ProgressComp = ({ progress }) => {
+const StatusLegend = () => {
     return (
-        <Box className='progress-component' display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' gap={1}>
-            <Box sx={{ width: '100%' }} >
-                <LinearProgress color='error' variant="determinate" value={progress} />
-            </Box>
-            <Box display='flex' flexDirection='row' alignItems='center'>
-                <Typography variant="body2" color="text.secondary" sx={{ textWrap: 'nowrap' }}>{progress}%</Typography>
-            </Box>
-        </Box>
-    )
-} */
-
-const TickerWithHisoricalData = ({ ticker, handleUpdateBianceTicker }) => {
-    const { ticker_name, meta, data } = ticker;
-    const { image_url, market_cap_rank, name, asset_launch_date, id, max_supply, symbol } = meta;
-    const periodsInData = Object.keys(data);
-
-    const precedence = ["1m", "4h", "6h", "8h", "12h", "1d", "3d", "1w"]; // Define the precedence of keys
-
-    // Filter available keys based on precedence
-    const availableKeys = periodsInData.filter(key => precedence.includes(key));
-
-    // Calculate latest dates based on available keys
-    const latestDates = availableKeys.map(key => {
-        const lastHistorical = data[key].lastHistorical;
-        const [elapsedDays, elapsedHours, elapsedMinutes] = formatDateDifferenceToNow(lastHistorical);
-        return {
-            period: key,
-            strDate: generateElapsedDate(elapsedDays, elapsedHours, elapsedMinutes),
-            times: {
-                d: elapsedDays,
-                h: elapsedHours,
-                m: elapsedMinutes
-            }
-        }
-    });
-
-    let pieChartData = availableKeys.map(key => {
-        return {
-            period: key,
-            count: data[key].historical,
-            fill: getRandomHexColor()
-        }
-    })
-    let filtered = pieChartData.filter((item) => item.period !== '1m')
-    // console.log("PC data", filtered)
-
-    // console.log(ticker_name)
-    // console.log(latestDates)
-
-    let oneMColor = return1MColor(latestDates[0].times.d, latestDates[0].times.h, latestDates[0].times.m)
-    let color = returnGreaterThan4hColor(latestDates[1].times.d, latestDates[1].times.h, latestDates[1].times.m);
-
-    return (
-        <Box className='ticker-in-db-box' display='flex' flexDirection='column' alignItems='start' p={1} sx={{ backgroundColor: "#171818", borderRadius: '5px' }}>
-            <Box className='ticker-with-data-hist-title' display='flex' flexBasis='row' justifyContent='space-between' width='100%'>
-                <Box display='flex' flexDirection='row' alignItems='center' gap='5px'>
-                    <img className='token-image-hist-box' loading='lazy' src={`${image_url}`} alt='crypto' />
-                    <Typography className='hist-title' variant='h5' fontWeight='500'>{name}</Typography>
-                </Box>
-                <Box display='flex' justifyContent='flex-start' alignItems='center' gap='5px'>
-                    <Typography sx={{ fontSize: 16, fontWeight: '300' }} >
-                        R : {market_cap_rank}
-                    </Typography>
-                    {latestDates[0].times.d < 100 &&
-                        <Tooltip
-                            arrow
-                            placement='left'
-                            title={
-                                (
-                                    <Box
-                                        display='flex' flexDirection='row' gap='5px'
-                                    >
-                                        <Button color='primary' variant='contained' size='small' onClick={handleUpdateBianceTicker.bind(null, { ticker_name, type: "update" })}>Yes</Button>
-                                        <Button color='primary' variant='contained' size='small' onClick={() => console.log('No')}>No</Button>
-                                    </Box>
-                                )
-                            }
-                        >
-                            <IconButton size='small' aria-label="update" color="secondary">
-                                <DownloadIcon className='small-icon' />
-                            </IconButton>
-                        </Tooltip>
-                    }
-                </Box>
-            </Box>
-            <Box className='hist-meta' ml={1} pr={1} mt={1} width='100%'>
-                <Box display='flex' flexDirection='column' justifyContent='flex-start' alignItems='start' gap='5px' >
-                    <Box display='flex' flexDirection='row' width='100%' justifyContent='space-between'>
-                        <Box display='flex' flexDirection='column' justifyContent='flex-start' alignItems='start' gap='5px'>
-                            <Typography variant='h6' fontWeight='400'>ID : {id}</Typography>
-                            <Typography variant='h6' fontWeight='400'>Symbol : {symbol}</Typography>
-                            <Typography variant='h6' fontWeight='400'>Ticker : {ticker_name}</Typography>
-                            <Typography variant='h6' fontWeight='400'>Max Supply : {max_supply < 0 ? 'N/A' : convert(max_supply)}</Typography>
-                            <Typography variant='h6' fontWeight='400'>Launch Date : {asset_launch_date}</Typography>
-                        </Box>
-                        <Box height='150px' width='150px' justifyContent='center' display='flex'>
-                            <PieChartComp data={filtered} />
-                        </Box>
-                    </Box>
-
-                    <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' width='100%'>
-                        <Typography variant='h6' fontWeight='400'>Latest ticker ({latestDates[0].period}) : {latestDates[0].strDate} ago</Typography>
-                        {latestDates[0].times.d > 100 ?
-                            (
-                                <Box display='flex' alignItems='center'>
-                                    <Tooltip title="Majority Data Missing" placement='top'>
-                                        <ErrorOutlineIcon className='small-icon' />
-                                    </Tooltip>
-                                </Box>
-                            )
-                            :
-                            (
-                                <Box
-                                    sx={{
-                                        width: "8px",
-                                        height: "8px",
-                                        borderRadius: "50%",
-                                        backgroundColor: `${oneMColor}`,
-                                    }}
-                                ></Box>
-                            )
-                        }
-                    </Box>
-
-                    <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center' width='100%'>
-                        <Typography variant='h6' fontWeight='400'>Latest ticker ({latestDates[1].period}) : {latestDates[1].strDate} ago</Typography>
-                        {latestDates[1].times.d > 100 ?
-                            (
-                                <Box display='flex' alignItems='center'>
-                                    <Tooltip title="Majority Data Missing" placement='bottom'>
-                                        <ErrorOutlineIcon className='small-icon' />
-                                    </Tooltip>
-                                </Box>
-                            )
-                            :
-                            (
-                                <Box
-                                    sx={{
-                                        width: "8px",
-                                        height: "8px",
-                                        borderRadius: "50%",
-                                        backgroundColor: `${color}`,
-                                    }}
-                                ></Box>
-                            )
-                        }
-
-                    </Box>
-                </Box>
-
-
-            </Box>
-            <Box width='100%' pt={1}>
-                <Accordion className='accordian-period' TransitionProps={{ unmountOnExit: true }} >
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1a-content"/*  */
-                        id="panel1a-header"
-                    >
-                        <Typography>Period Data for {ticker_name} </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        {periodsInData.map((period, index) => {
-                            const periodData = data[period];
-                            const { historical, firstHistorical, lastHistorical } = periodData;
-                            return (
-                                <React.Fragment key={index}>
-                                    <Box className='period-info' pl={1} pr={1} mt='5px' mb='5px' display='flex' flexDirection='column' sx={{ backgroundColor: '#262727', borderRadius: '5px' }}>
-                                        <Box display='flex' flexDirection='row' justifyContent='space-between' >
-                                            <Typography variant='h5' fontWeight='400'>Period : {period}</Typography>
-                                        </Box>
-                                        <Box display='flex' flexDirection='column' alignItems='flex-start'>
-                                            <Typography variant='h6' fontWeight='400'>Ticker Count : {historical}</Typography>
-                                            <Typography variant='h6' fontWeight='400'>Latest : {new Date(lastHistorical).toLocaleString()}</Typography>
-                                            <Typography variant='h6' fontWeight='400'>Oldest : {new Date(firstHistorical).toLocaleString()}</Typography>
-                                        </Box>
-                                    </Box>
-                                </React.Fragment>
-                            )
-                        })}
-                    </AccordionDetails>
-                </Accordion>
-            </Box>
-        </Box>
-    )
-}
-
-const TickerWithNoHistData = ({ ticker, handleUpdateBianceTicker, handleDeleteTickerMeta, downloadFlag }) => {
-    const { id, symbol, ticker_name, max_supply, asset_launch_date, image_url, name, market_cap_rank } = ticker;
-    return (
-        <Box className='ticker-in-db-box' display='flex' flexDirection='column' alignItems='start' p={1} sx={{ backgroundColor: "#171818", borderRadius: '5px' }}>
-            <Box className='ticker-hist-title' display='flex' flexBasis='row' justifyContent='space-between' width='100%'>
-                <Box display='flex' flexDirection='row' alignItems='center' gap='5px'>
-                    <img className='token-image-hist-box' loading='lazy' src={`${image_url}`} alt='crypto' />
-                    <Typography className='hist-title' variant='h5' fontWeight='500' >{name}</Typography>
-                </Box>
-                <Box display='flex' justifyContent='flex-start' alignItems='center' gap={'4px'}>
-                    <Typography sx={{ fontSize: 16, fontWeight: '300' }} >
-                        R : {market_cap_rank}
-                    </Typography>
-                    {downloadFlag ?
-                        <Box>
-                            <Tooltip title="Fetch ticker data" placement='bottom'>
-                                <IconButton className='small-icon-button' size='small' aria-label="update" color="secondary" onClick={handleUpdateBianceTicker.bind(null, { ticker_name, type: "fullfetch" })}>
-                                    <DownloadIcon className='small-icon' />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Delete ticker" placement='bottom'>
-                                <IconButton className='small-icon-button' size='small' aria-label="update" color="secondary" onClick={handleDeleteTickerMeta.bind(null, { type: "noHistData", symbol })} >
-                                    <DeleteOutlineIcon className='small-icon' />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                        :
-                        <Box>
-                            <Tooltip title="Delete ticker" placement='bottom'>
-                                <IconButton className='small-icon-button' size='small' aria-label="update" color="secondary" onClick={handleDeleteTickerMeta.bind(null, { type: "noBinanceData", symbol })}>
-                                    <DeleteOutlineIcon className='small-icon' />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                    }
-
-                </Box>
-            </Box>
-            <Box className='hist-meta' ml={1} mt={1}>
-                <Box display='flex' flexDirection='column' justifyContent='flex-start' alignItems='start' gap='5px'>
-                    <Typography variant='h6' fontWeight='400'>ID : {id}</Typography>
-                    <Typography variant='h6' fontWeight='400'>Symbol : {symbol} ({ticker_name === null ? 'N/A' : ticker_name})</Typography>
-                    <Typography variant='h6' fontWeight='400'>Ticker : {ticker_name === null ? 'N/A' : ticker_name}</Typography>
-                    <Typography variant='h6' fontWeight='400'>Max Supply : {max_supply < 0 ? 'N/A' : max_supply}</Typography>
-                    <Typography variant='h6' fontWeight='400'>Launch Date : {asset_launch_date}</Typography>
-                </Box>
-            </Box>
+        <Box className='status-legends' display='flex' flexDirection='row' gap='15px' pr={1}>
+            <Tooltip title="Data upto date" placement='top' arrow>
+                <Box
+                    sx={{
+                        width: "12px",
+                        height: "12px",
+                        borderRadius: "50%",
+                        backgroundColor: 'green',
+                        cursor: 'pointer'
+                    }}
+                ></Box>
+            </Tooltip>
+            <Tooltip title="Couple of days old" placement='top' arrow>
+                <Box
+                    sx={{
+                        width: "12px",
+                        height: "12px",
+                        borderRadius: "50%",
+                        backgroundColor: '#ff9c4a',
+                        cursor: 'pointer'
+                    }}
+                ></Box>
+            </Tooltip>
+            <Tooltip title="Somw what old" placement='top' arrow>
+                <Box
+                    sx={{
+                        width: "12px",
+                        height: "12px",
+                        borderRadius: "50%",
+                        backgroundColor: 'brown',
+                        cursor: 'pointer'
+                    }}
+                ></Box>
+            </Tooltip>
+            <Tooltip title="Very old" placement='top' arrow>
+                <Box
+                    sx={{
+                        width: "12px",
+                        height: "12px",
+                        borderRadius: "50%",
+                        backgroundColor: 'red',
+                        cursor: 'pointer'
+                    }}
+                ></Box>
+            </Tooltip>
         </Box>
     )
 }
 
 const BinanceTickerInfo = () => {
+    const dispatch = useDispatch()
     const token = useSelector(state => state.auth.accessToken);
-    const [fetchedData, setFetchedData] = useState('');
+    const binanceStats = useSelector(state => state.admin.binance_stats)
+    // const newTickers_ = useSelector(state => state.admin.new_tickers)
+
+    const [fetchedData, setFetchedData] = useState({});
+    // const [newTickers, setNewTickersState] = useState([]);
     const [historicalStat, setHistoricalStat] = useState('');
     const [tickerRefreshValue, setTickerRefreshValue] = useState('');
     const [searchTicker, setSearchTicker] = useState('');
     const [sortDirection, setSortDirection] = useState("asc")
     const [isUpdated, setIsUpdated] = useState(false)
-    const [binanceChartData, setBinanceChartData] = useState([])
 
     const isInitialMount = useRef(false);
+    // Initial fetch of binance historical stats UE
     useEffect(() => {
-        if (!isInitialMount.current) {
+        if (Object.keys(binanceStats).length === 0 && !isInitialMount.current) {
             console.log('Initial Fetch Binance data UE')
             isInitialMount.current = true;
+
             getBinanceHistoricalStatFromDb({ token })
                 .then((res) => {
+                    dispatch(setBinanceStats(res.data))
                     setFetchedData(res.data)
                     setTickerRefreshValue(res.data.totalTickerCountInDb === 0 ? 5 : res.data.totalTickerCountInDb)
-                    const data = res.data.tickersWithHistData.map((ticker) => {
-                        return {
-                            tickerName: ticker.ticker_name,
-                            min: ticker.data['1m']?.historical,
-                            fourH: ticker.data['4h']?.historical,
-                            sixH: ticker.data['6h']?.historical,
-                            eigthH: ticker.data['8h']?.historical,
-                            twelveH: ticker.data['12h']?.historical,
-                            oneD: ticker.data['1d']?.historical,
-                            threeD: ticker.data['3d']?.historical,
-                            oneW: ticker.data['1w']?.historical,
-                        }
-                    })
-                    // console.log(data)
-                    setBinanceChartData(data)
                 })
                 .catch((err) => {
                     console.log(err)
                 })
-        }
-    });
 
+            getNewTickersToAdd({ token })
+                .then((res) => {
+                    dispatch(setNewTickers(res.data.new_tickers))
+                    // setNewTickersState(res.data.new_tickers)
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+        } else {
+            console.log('Hist stat present in redux...lodaing that')
+            setFetchedData(binanceStats)
+            setTickerRefreshValue(binanceStats.totalTickerCountInDb)
+            // setNewTickersState(newTickers_)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token, binanceStats]);
+
+    // Filtering based on search UE
     useEffect(() => {
-        if (fetchedData !== '') {
+        if (Object.keys(fetchedData).length > 0) {
             console.log('Filtering UE')
-            let updatedDataCopy = { ...fetchedData };
+            let updatedDataCopy = JSON.parse(JSON.stringify(fetchedData));
 
             // Function to filter tickers based on the name
             const filterTickersByName = (tickers, searchTicker) => {
@@ -420,6 +172,7 @@ const BinanceTickerInfo = () => {
 
     }, [searchTicker, fetchedData])
 
+    // Fetching updated data UE
     useEffect(() => {
         if (isUpdated) {
             console.log('Updated Fetch stats data UE')
@@ -436,30 +189,11 @@ const BinanceTickerInfo = () => {
         }
     }, [token, isUpdated])
 
-    /* useEffect(() => {
-        if (fetchedData !== '') {
-            console.log("Sorting UE")
-            let copiedData = { ...fetchedData }
-            let sortedData = copiedData.tickersWithHistData.sort((a, b) => {
-                if (sortDirection === 'desc') {
-                    return a.data["1m"].lastHistorical < b.data["1m"].lastHistorical ? -1 : 1
-                } else {
-                    return a.data["1m"].lastHistorical > b.data["1m"].lastHistorical ? -1 : 1
-                }
-            })
-            setHistoricalStat(prevStat => ({
-                ...prevStat,
-                tickersWithHistData: sortedData
-            }));
-        }
-
-    }, [sortDirection, fetchedData]) */
-
-
+    // Sorting based on last historical UE
     useEffect(() => {
-        if (fetchedData !== '') {
+        if (Object.keys(fetchedData).length > 0) {
             console.log("Sorting UE New")
-            let copiedData = { ...fetchedData }
+            let copiedData = JSON.parse(JSON.stringify(fetchedData));
 
             const precedence = ["1m", "4h", "6h", "8h", "12h", "1d", "3d", "1w"]; // Define the precedence of keys
 
@@ -757,42 +491,42 @@ const BinanceTickerInfo = () => {
                                         </Box>
                                     }
                                     PlaceHolder
-                                    {/* {binanceChartData && binanceChartData.length === 0 ?
-                                        (
-                                            <Box>Loading</Box>
-                                        )
-                                        :
-                                        (
-                                            <BinanceChart data={binanceChartData} />
-                                        )
-                                    } */}
                                 </Grid>
                             </Grid>
                         </Box>
 
                         {historicalStat.totalTickerCountInDb !== 0 &&
-                            <Box className='meta-update-count' display='flex' flexDirection='row' alignItems='center' pt={2} pb={2} gap={2}>
-                                <TextField
-                                    color='secondary'
-                                    label="Count"
-                                    value={tickerRefreshValue}
-                                    onChange={(e) => setTickerRefreshValue(e.target.value)}
-                                    id="outlined-size-small"
-                                    size="small"
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            '& fieldset': {
-                                                borderColor: '#E0E3E2',
-                                            }
-                                        }
-                                    }}
-                                />
-                                <Button size='small' color='primary' variant="contained" onClick={handleRefreshTickerMeta} >Refresh</Button>
-                                <Tooltip placement='top' arrow title="Refresh the tickers in DB. Count is the no of tickers to add or update. If count is more than total tickers, new tickers wil be fetched and added, else existing ticker meta is updated">
-                                    <IconButton>
-                                        <InfoOutlinedIcon />
-                                    </IconButton>
-                                </Tooltip>
+                            <Box className='meta-update-count' display='flex' flexDirection='row' pt={2} pb={2} gap={2}>
+                                <Box display='flex' flexDirection='row' alignItems='flex-start' gap={1}>
+                                    <TextField
+                                        color='secondary'
+                                        label="Count"
+                                        value={tickerRefreshValue}
+                                        onChange={(e) => setTickerRefreshValue(e.target.value)}
+                                        id="outlined-size-small"
+                                        size="small"
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: '#E0E3E2',
+                                                }
+                                            },
+                                            '& .MuiInputBase-input': {
+                                                height: '15px'
+                                            },
+                                        }}
+                                    />
+                                    <Button size='small' color='primary' variant="contained" onClick={handleRefreshTickerMeta} >Refresh</Button>
+                                    <Tooltip sx={{ padding: '4px' }} placement='top' arrow title="Refresh the tickers in DB. Count is the no of tickers to add or update. If count is more than total tickers, new tickers wil be fetched and added, else existing ticker meta is updated">
+                                        <IconButton>
+                                            <InfoOutlinedIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
+                                <Divider orientation="vertical" variant="middle" flexItem />
+                                <Box >
+                                    <TickerSelector />
+                                </Box>
                             </Box>
                         }
 
@@ -844,52 +578,7 @@ const BinanceTickerInfo = () => {
                                             <Box className='legend-update-collapse' pt={1} pb={1} display='flex' flexDirection='row' justifyContent='flex-end' gap='5px' alignItems='center'>
                                                 <Fade in={checkedWithHist}>
                                                     <Box display='flex' flexDirection='row' justifyContent='center' alignItems='center' gap='5px'>
-                                                        <Box className='status-legends' display='flex' flexDirection='row' gap='15px' pr={1}>
-                                                            <Tooltip title="Data upto date" placement='top' arrow>
-                                                                <Box
-                                                                    sx={{
-                                                                        width: "12px",
-                                                                        height: "12px",
-                                                                        borderRadius: "50%",
-                                                                        backgroundColor: 'green',
-                                                                        cursor: 'pointer'
-                                                                    }}
-                                                                ></Box>
-                                                            </Tooltip>
-                                                            <Tooltip title="Couple of days old" placement='top' arrow>
-                                                                <Box
-                                                                    sx={{
-                                                                        width: "12px",
-                                                                        height: "12px",
-                                                                        borderRadius: "50%",
-                                                                        backgroundColor: '#ff9c4a',
-                                                                        cursor: 'pointer'
-                                                                    }}
-                                                                ></Box>
-                                                            </Tooltip>
-                                                            <Tooltip title="Somw what old" placement='top' arrow>
-                                                                <Box
-                                                                    sx={{
-                                                                        width: "12px",
-                                                                        height: "12px",
-                                                                        borderRadius: "50%",
-                                                                        backgroundColor: 'brown',
-                                                                        cursor: 'pointer'
-                                                                    }}
-                                                                ></Box>
-                                                            </Tooltip>
-                                                            <Tooltip title="Very old" placement='top' arrow>
-                                                                <Box
-                                                                    sx={{
-                                                                        width: "12px",
-                                                                        height: "12px",
-                                                                        borderRadius: "50%",
-                                                                        backgroundColor: 'red',
-                                                                        cursor: 'pointer'
-                                                                    }}
-                                                                ></Box>
-                                                            </Tooltip>
-                                                        </Box>
+                                                        <StatusLegend />
 
                                                         <Box sx={{ backgroundColor: '#121212' }} borderRadius='5px'>
                                                             <Tooltip
@@ -927,7 +616,7 @@ const BinanceTickerInfo = () => {
                                                 {historicalStat.tickersWithHistData.map((ticker, index) => {
                                                     return (
                                                         <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
-                                                            <TickerWithHisoricalData ticker={ticker} handleUpdateBianceTicker={handleUpdateBianceTicker} />
+                                                            <TickerWithHistoricalData ticker={ticker} handleUpdateBianceTicker={handleUpdateBianceTicker} />
                                                         </Grid>
                                                     )
                                                 }
@@ -962,7 +651,7 @@ const BinanceTickerInfo = () => {
                                                 {historicalStat.tickersWithNoHistData.map((ticker, index) => {
                                                     return (
                                                         <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
-                                                            <TickerWithNoHistData ticker={ticker} handleUpdateBianceTicker={handleUpdateBianceTicker} handleDeleteTickerMeta={handleDeleteTickerMeta} downloadFlag={true} />
+                                                            <TickerWithNoHistoricalData ticker={ticker} handleUpdateBianceTicker={handleUpdateBianceTicker} handleDeleteTickerMeta={handleDeleteTickerMeta} downloadFlag={true} />
                                                         </Grid>
                                                     )
                                                 })}
@@ -996,7 +685,7 @@ const BinanceTickerInfo = () => {
                                                 {historicalStat.tickerWithNoDataInBinance.map((ticker, index) => {
                                                     return (
                                                         <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
-                                                            <TickerWithNoHistData ticker={ticker} handleDeleteTickerMeta={handleDeleteTickerMeta} downloadFlag={false} />
+                                                            <TickerWithNoHistoricalData ticker={ticker} handleDeleteTickerMeta={handleDeleteTickerMeta} downloadFlag={false} />
                                                         </Grid>
                                                     )
                                                 })}

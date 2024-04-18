@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import {
     setCryptoDataAutoComplete,
-    setWordOfTheDay
 } from './StatsSlice.js';
 
 import { setLessonFlag, setSectionFlag } from '../sections/SectionSlice'
@@ -11,7 +10,7 @@ import { setSidebarState } from '../../global/SideBarSlice'
 
 import './Stats.css'
 
-import { getCryptoData, getWordOfTheDay } from '../../../../api/crypto';
+import { getCryptoData } from '../../../../api/crypto';
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation, Mousewheel } from "swiper";
@@ -39,6 +38,7 @@ const Stats = (props) => {
 
     const [cryptoData, setCryptoData] = useState(null);
     const token = useSelector(state => state.auth.accessToken);
+    const wordData = useSelector(state => state.stats.wordOfTheDay)
 
     const CDAutoComplete = useSelector(state => state.stats.cryptoDataAutoComplete)
     const optionsLength = CDAutoComplete.length;
@@ -56,9 +56,9 @@ const Stats = (props) => {
                         token: token
                     }
                     getCryptoData(data).then((res) => {
-                        result = res.data.cryptoData;
-                        setCryptoData(result);
-                        dispatch(setCryptoDataAutoComplete(result))
+                        result = res.data;
+                        setCryptoData(result.cryptoData);
+                        dispatch(setCryptoDataAutoComplete({ cryptoData: result.cryptoData, yf_ticker: result.yf_ticker }))
                     })
                 } catch (e) {
                     console.log(e)
@@ -70,34 +70,35 @@ const Stats = (props) => {
     }, [optionsLength, dispatch, token, CDAutoComplete])
 
     //initial load of word of the day
-    const WODMounted = useRef(false);
-    const [wordOfTheDay, setWordOfTheDayL] = useState({});
-    const wordData = useSelector(state => state.stats.wordOfTheDay)
-    useEffect(() => {
-        if (!WODMounted.current) { // Only run if the component is mounted
-            WODMounted.current = true; // Set the mount state to true after the first run
-            if (Object.keys(wordData).length === 0) {
-                let result;
-                try {
-                    let data = {
-                        token: token
-                    }
-                    getWordOfTheDay(data).then((res) => {
-                        result = res.data.word;
-                        setWordOfTheDayL(result);
-                        dispatch(setWordOfTheDay(result));
-                    })
-                } catch (e) {
-                    console.log(e)
-                }
-            } else {
-                setWordOfTheDayL(wordData);
-            }
-        }
-    }, [token, dispatch, wordData])
+    // const WODMounted = useRef(false);
+    // const [wordOfTheDay, setWordOfTheDayL] = useState({});
+    // console.log(wordData)
 
+    // useEffect(() => {
+    //     if (!WODMounted.current) { // Only run if the component is mounted
+    //         WODMounted.current = true; // Set the mount state to true after the first run
+    //         if (Object.keys(wordData).length === 0) {
+    //             let result;
+    //             try {
+    //                 let data = {
+    //                     token: token
+    //                 }
+    //                 getWordOfTheDay(data).then((res) => {
+    //                     result = res.data.word;
+    //                     setWordOfTheDayL(result);
+    //                     dispatch(setWordOfTheDay(result));
+    //                 })
+    //             } catch (e) {
+    //                 console.log(e)
+    //             }
+    //         } else {
+    //             setWordOfTheDayL(wordData);
+    //         }
+    //     }
+    // }, [token, dispatch, wordData])
 
     //interval fetch of token for token slider // *** activate later ***
+
     /* useEffect(() => {
         const intervalId = setInterval(() => {
             let data = {
@@ -173,6 +174,7 @@ const Stats = (props) => {
             navigate(url)
         }
     };
+
     const redirectToQuiz = () => {
         console.log('redirect to quiz')
         const url = `quiz/${recentLessonAndQuiz.nextQuiz.quiz_id}`
@@ -188,8 +190,6 @@ const Stats = (props) => {
         dispatch(setSidebarState("quiz"))
         navigate(url)
     }
-
-
 
     function isEmptyObject(obj) {
         if (typeof obj !== 'object' || obj === null) {
@@ -216,6 +216,7 @@ const Stats = (props) => {
             }, 1000)
         }
     }) */
+    // console.log(cryptoData)
 
     return (
         <Box className='stat-container'>
@@ -223,6 +224,7 @@ const Stats = (props) => {
                 <Header title={title} subtitle={subtitle} />
                 <Box id="w-socket"></Box>
             </Box>
+
             <Box className='stat-cards-container'>
                 <div className="item-bg"></div>
                 <Grid container spacing={4}>
@@ -299,6 +301,7 @@ const Stats = (props) => {
                                             return (
                                                 <SwiperSlide key={index}>
                                                     <CustomTokenCard
+                                                        key={index}
                                                         title={token.symbol}
                                                         price={`$ ${token.current_price.toFixed(2)}`}
                                                         image={`${token.image_url}`}
@@ -317,6 +320,11 @@ const Stats = (props) => {
                             </Grid>
                         </Grid>
                     </Grid>
+                    {/* <Grid item xs={12} sm={12} md={12} lg={6} xl={12} className='coin-chart-grid-box'>
+                        <Box pt={2} pb={2} style={{ height: '350px' }} className='symbol-overview-box'>
+                            <SymbolOverview />
+                        </Box>
+                    </Grid> */}
                     <Grid item xs={12} sm={12} md={12} lg={6} xl={12} className='coin-chart-grid-box'>
                         <CoinChartBox />
                     </Grid>
@@ -332,12 +340,12 @@ const Stats = (props) => {
                         <CustomLongCard title='GO TO MODELS' subtitle='20/10/2023' content='View your various models' buttonName="GO TO MODELS" />
                     </Grid>
                     <Grid item xs={12} sm={12} md={12} lg={12}>
-                        {Object.keys(wordOfTheDay).length !== 0 &&
+                        {Object.keys(wordData).length !== 0 &&
                             <CustomLongCard
                                 title='WORD OF THE DAY'
-                                content={wordOfTheDay.word}
-                                subtitle={wordOfTheDay.meaning}
-                                link={wordOfTheDay.url}
+                                content={wordData.word}
+                                subtitle={wordData.meaning}
+                                link={wordData.url}
                             />
                         }
                     </Grid>

@@ -274,7 +274,7 @@ const CryptoTable = () => {
                                 <Table stickyHeader aria-label="sticky table" >
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell style={{ borderLeft: '1px solid white', minWidth: '195px' }}>
+                                            <TableCell style={{ borderLeft: '1px solid white', minWidth: '250px' }}>
                                                 <TableSortLabel
                                                     active={orderBy === 'market_cap_rank'}
                                                     direction={orderBy === 'market_cap_rank' ? order : 'asc'}
