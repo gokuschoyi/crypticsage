@@ -15,7 +15,7 @@ const CMUtil = require('../utils/contentManagerUtil')
 const FASLatestTickerMetaData = async (req, res) => {
     const { length } = req.body
     try {
-        let result = await CMServices.serviceFetchAndSaveLatestTickerMetaData({ length })
+        let [result] = await CMServices.serviceFetchAndSaveLatestTickerMetaData({ length })
         res.status(200).json({ message: "Get Crypto Data request success", result });
     } catch (error) {
         log.error(error.stack)

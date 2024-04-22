@@ -43,10 +43,11 @@ function findMissingNumbers(sequence) {
 // Updating the binance ticker metadata
 const serviceFetchAndSaveLatestTickerMetaData = async ({ length: f_length }) => {
     try {
+        if (f_length === undefined) f_length = 0
         let tickerMeta = await MDBServices.getBinanceTickerList() // Fetching from DB
 
         const length = Math.max(f_length, tickerMeta.length) + 5 // Offset to prevent missing data / additional fetch
-        let [cryptoData, yf_ticker] = await CSUtil.fetchTopTickerByMarketCap({ length })
+        let [cryptoData] = await CSUtil.fetchTopTickerByMarketCap({ length })
 
         // console.log('New ticker length', cryptoData.length)
         // console.log('Existing ticker length DB', tickerMeta.length)
@@ -55,7 +56,7 @@ const serviceFetchAndSaveLatestTickerMetaData = async ({ length: f_length }) => 
         let final_ticker = cryptoData.filter((crypto) => {
             return tickerMeta.some((ticker) => {
                 if (ticker.symbol === crypto.symbol) {
-                    // console.log('matched rank', crypto?.name, crypto.market_cap_rank, ticker?.name, ticker?.market_cap_rank)
+                    // console.log(crypto.market_cap_rank !== ticker?.market_cap_rank ? 'Rank mismatch' : 'Rank matched', crypto?.name, ticker?.name)
                     return true;
                 }
                 return false;
@@ -71,7 +72,7 @@ const serviceFetchAndSaveLatestTickerMetaData = async ({ length: f_length }) => 
 
         if (no_rank.length > 0) {
             log.info('Additional ticker fetch to check')
-            let [additional_ticker, yf] = await CSUtil.fetchTopTickerByMarketCap({ length: 2 * length })
+            let [additional_ticker] = await CSUtil.fetchTopTickerByMarketCap({ length: 2 * length })
             console.log('Additional fetch length', additional_ticker.length)
             additional_ticker.forEach((crypto) => {
                 const matched_no_rank = no_rank.find((ticker) => ticker.symbol === crypto.symbol)
@@ -105,12 +106,32 @@ const serviceFetchAndSaveLatestTickerMetaData = async ({ length: f_length }) => 
         final_ticker = final_ticker.sort((a, b) => a.market_cap_rank - b.market_cap_rank)
         // final_ticker.forEach((item) => { console.log(item.market_cap_rank, item.name) })
 
+        const symbols_ = final_ticker.map((item) => item.symbol)
+
         let result = await MDBServices.saveOrUpdateTickerMeta(final_ticker)
-        return result
+        return [result, symbols_]
         // return final_ticker
     } catch (error) {
         log.error(error.stack)
         throw error
+    }
+}
+
+// fetching an updating binance ticker info meta
+const serviceFetchAndUpdateBinanceTickerInfoMeta = async (symbols) => {
+    try {
+        let final_ticker_info_list = []
+        for (let i = 0; i < symbols.length; i++) {
+            const info = await CSUtil.fetchDataBySymbol({ symbol: symbols[i] })
+            log.info(`Fetched data for ${symbols[i]}`)
+            final_ticker_info_list.push({ symbol: symbols[i], info })
+        }
+
+        let result = await MDBServices.saveOrUpdateTickerInfoMeta(final_ticker_info_list)
+        return result
+    } catch (err) {
+        log.error(err.stack)
+        throw err
     }
 }
 
@@ -729,6 +750,7 @@ const serviceDeleteQuizFromDb = async ({ quizId, sectionId, lessonId }) => {
 
 module.exports = {
     serviceFetchAndSaveLatestTickerMetaData
+    , serviceFetchAndUpdateBinanceTickerInfoMeta
     , serviceGetBinanceTickerStatsFromDb
     , serviceGetYfinanceTickerStatsFromDb
     , serviceFetchOneBinanceTicker

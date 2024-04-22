@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import { Dot } from '../../modules/CryptoModuleUtils';
 import { DeleteSavedModel, RetrainWGANModal } from './modals';
 import { Success, Error } from '../../../../global/CustomToasts'
-import RMSEBarChart from './RMSEBarChart';
+import { RMSEBarChart } from './Training_Components';
 import InitialForecastLineChart from './InitialForecastLineChart';
 
 import { ErrorBoundary } from "react-error-boundary";

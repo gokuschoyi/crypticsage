@@ -26,13 +26,18 @@ const CMServices = require('./services/contentManagerServices')
 const CSUtil = require('./utils/cryptoStocksUtil');
 const schedule = require('node-schedule');
 
+const binance_ticker_meta_fetch_rule = new schedule.RecurrenceRule();
+binance_ticker_meta_fetch_rule.hour = 5;
+binance_ticker_meta_fetch_rule.minute = 50;
+binance_ticker_meta_fetch_rule.second = 0;
+
 const binance_ticker_fetch_rule = new schedule.RecurrenceRule();
-binance_ticker_fetch_rule.hour = 7;
+binance_ticker_fetch_rule.hour = 6;
 binance_ticker_fetch_rule.minute = 0;
 binance_ticker_fetch_rule.second = 0;
 
 const yf_metadata_update_rule = new schedule.RecurrenceRule();
-yf_metadata_update_rule.hour = 7;
+yf_metadata_update_rule.hour = 6;
 yf_metadata_update_rule.minute = 5;
 yf_metadata_update_rule.second = 0;
 
@@ -45,15 +50,24 @@ logs.crit('Starting server...');
 
 if (config.schedulerFlag === 'true') {
     logs.info('Starting scheduled Crypto update...')
-    const job = schedule.scheduleJob(binance_ticker_fetch_rule, async function () {
+    schedule.scheduleJob(binance_ticker_meta_fetch_rule, async function () {
+        logs.info(`Updating binance ticker meta (INFO). (Daily CRON), ${new Date()}`)
+        const [, symbols] = await CMServices.serviceFetchAndSaveLatestTickerMetaData({ length: 0 });
+        await CMServices.serviceFetchAndUpdateBinanceTickerInfoMeta(symbols);
+        logs.crit(`Binance Ticker meta and Info Updated`)
+    });
+
+    schedule.scheduleJob(binance_ticker_fetch_rule, async function () {
         logs.info(`Updating binance ticker. (Daily CRON), ${new Date()}`)
         let processIds = await CMServices.serviceUpdateAllBinanceTickers();
         logs.info(processIds);
+        logs.crit(`Binance Ticker Updated`)
     });
 
     schedule.scheduleJob(yf_metadata_update_rule, async function () {
         logs.info(`Updating yfinance metadata. (Daily CRON), ${new Date()}`)
         await CSUtil.yFinance_metaData_updater()
+        logs.crit(`yFinance Metadata Updated`)
     })
 
 } else {

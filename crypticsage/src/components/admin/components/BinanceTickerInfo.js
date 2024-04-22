@@ -235,7 +235,7 @@ const BinanceTickerInfo = () => {
 
                 const updateCounts = result.reduce(
                     (acc, curr) => {
-                        if (curr.modifiedCount) {
+                        if (curr.lastErrorObject.updatedExisting) {
                             acc.updatedCount++;
                         }
                         if (curr.insertedId) {

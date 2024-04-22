@@ -479,9 +479,11 @@ tr:hover .prediction-mse {
     background-color: var(--mui-palette-primary-new)
 }
 
-.crypto-details-tabel {
-    min-height: 50vh;
-    background-color: var(--mui-palette-primary-new)
+.crypto-details-table {
+    /* min-height: 50vh; */
+    background-color: var(--mui-palette-primary-new);
+    width:100%;
+    transition: width 0.5s ease;
 }
 
 .crypto-name {
@@ -492,9 +494,73 @@ tr:hover .prediction-mse {
     transition: all 0.2s ease-in-out;
 }
 
-.crypto-name>.crypto-content:hover {
+/* .crypto-name>.crypto-content:hover {
     transition: all 0.2s ease-in-out;
     transform: scale(1.06);
+} */
+
+.table-main {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-main-meta {
+    height:700px;
+    transition: height 0.5s ease;
+    width:100%;
+    border-collapse: collapse;
+}
+
+
+.half-collapsed {
+    height: 350px;
+    transition: height 0.5s ease;
+}
+
+.collapse-to-left {
+    width:315px;
+    transition: width 0.5s ease;
+}
+
+.supply-elements {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 4px;
+    width: 100%;
+    text-align: justify;
+}
+
+.info-url {
+    width:250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: start;
+}
+
+.crypto-table-info-main-container {
+    display: flex;
+    flex-direction: column;
+    /* gap:16px; */
+}
+
+.ticker-currency-last-updated {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    transition: all 0.5s ease;
+}
+
+.ticker-currency-last-updated-collapsed {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
+    padding-bottom: 8px;
+    transition: all 0.5s ease;
+    width:max-content;
 }
 
 .stocks-name {
@@ -515,7 +581,7 @@ tr:hover .prediction-mse {
 }
 
 .MuiTableCell-root {
-    padding: 12px;
+    padding: 10px;
     font-weight: 500;
 }
 
@@ -590,8 +656,7 @@ tr:hover .prediction-mse {
     width: 300px;
 }
 
-.mse-table-main,
-.table-main {
+.mse-table-main {
     border-collapse: collapse;
     width: 100%;
     /* margin-top: 10px; */
@@ -600,6 +665,7 @@ tr:hover .prediction-mse {
 
 .mse-table-main,
 .table-main,
+.table-main-meta,
 .table-head,
 .new-table-head {
     background-color: var(--mui-palette-background-paper);
@@ -823,6 +889,10 @@ tr:hover .prediction-mse {
         width: 1300px;
     }
 
+    .info-url {
+        width:100%;
+    }
+
     /* .main-training-status-box {
         width: 55%;
     } */
@@ -832,6 +902,17 @@ tr:hover .prediction-mse {
     .function-selector{
         flex-direction: column;
         padding-top: 8px;
+    }
+
+    .crypto-table-info-main-container{
+        flex-direction: row;
+        /* gap: 16px; */
+    }
+
+    .main-info-box {
+        max-height: 700px;
+        margin-top: 46px;
+        overflow-y: auto;
     }
 }
 
@@ -857,6 +938,11 @@ tr:hover .prediction-mse {
     .ticker-currency-last-updated {
         flex-direction: column;
         align-items: flex-start;
+        gap:8px;
+    }
+
+    .info-url {
+        width:180px;
     }
 
     .data-plus-settins-box {
@@ -913,6 +999,10 @@ tr:hover .prediction-mse {
     }
 
     .metricpaper-indi {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .supply-elements {
         grid-template-columns: 1fr 1fr;
     }
 }
@@ -1077,6 +1167,10 @@ tr:hover .prediction-mse {
     .tool-tip-pacf{
         flex-direction: column;
         gap:0px;
+    }
+
+    .info-url {
+        width:300px;
     }
 }
 

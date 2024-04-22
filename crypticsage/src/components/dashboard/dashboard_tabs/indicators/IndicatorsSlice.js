@@ -21,6 +21,17 @@ const indicatorsSlice = createSlice({
         setCryptoDataRedux: (state, action) => {
             state.cryptoData = action.payload.cryptoData;
         },
+        setTickerInfo: (state, action) => {
+            const { symbol, data } = action.payload;
+            const currentTickers = state.cryptoData;
+            const toUpdateIndex = currentTickers.findIndex(ticker => ticker.symbol === symbol);
+            if (toUpdateIndex !== -1) {
+                const toUpdate = currentTickers[toUpdateIndex];
+                toUpdate['info'] = data;
+                currentTickers[toUpdateIndex] = toUpdate;
+            }
+            state.cryptoData = currentTickers;
+        },
         setCryptoPreferencesRedux: (state, action) => {
             state.cryptoPreferences = action.payload.cryptoPreferences;
         },
@@ -43,6 +54,7 @@ const { reducer, actions } = indicatorsSlice;
 export const {
     setSelectedTab,
     setCryptoDataRedux,
+    setTickerInfo,
     setCryptoPreferencesRedux,
     setStocksDataRedux,
     resetIndicatorsState

@@ -438,7 +438,7 @@ const SelectedFunctionContainer = (props) => {
                     )}
                 </AccordionDetails>
             </Accordion>
-        </Box >
+        </Box>
     )
 }
 

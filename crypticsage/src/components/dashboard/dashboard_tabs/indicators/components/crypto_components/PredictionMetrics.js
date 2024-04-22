@@ -1,5 +1,5 @@
 import React from 'react'
-import CustomSlider from './CustomSlider'
+import { CustomSlider } from './Training_Components'
 import { InfoOutlinedIcon } from '../../../../global/Icons'
 import { NoMaxWidthTooltip, ClassificationTable } from '../../modules/CryptoModuleUtils'
 import {

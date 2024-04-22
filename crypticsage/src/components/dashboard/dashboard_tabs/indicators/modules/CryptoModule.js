@@ -1,7 +1,7 @@
 import { Indicators } from '../components/IndicatorDescription';
 import { setPredictionPaletteId } from './CryptoModuleSlice'
 import React, { useState, useEffect, useRef } from 'react'
-import { formatMillisecond } from './CryptoModuleUtils'
+import { formatMillisecond, returnColorCombinations } from './CryptoModuleUtils'
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import useWebSocket from './WebSocket';
@@ -16,11 +16,7 @@ import {
 
 import {
     TrainingParameters
-    , PredictionOptions
     , PredictionsChart
-    , CorelationMatrix
-    , WGANGPProgress
-    , WgangpOptions
     , MainChartNew
     , WganTrainingResults
     , LstmTrainingResults
@@ -29,89 +25,9 @@ import {
     , SavedModelForecasting
 } from '../components'
 
-const colorCombinations = {
-    "LSTM": [
-        {
-            actual: '#0047AB', // Deep Blue
-            predicted: '#FFA500', // Vibrant Orange
-            forecast: '#FFD700', // Bright Yellow
-            TP_up: '#FF69B4', // Hot Pink (for TP_up)
-            TP_down: '#00FA9A' // Medium Spring Green (for TP_down)
-        },
-        {
-            actual: '#B22222', // Classic Red
-            predicted: '#008080', // Soft Teal
-            forecast: '#BC8F8F', // Gentle Lavender
-            TP_up: '#FFFF00', // Yellow (for TP_up)
-            TP_down: '#FF6347' // Tomato (for TP_down)
-        },
-        {
-            actual: '#228B22', // Forest Green
-            predicted: '#800080', // Rich Purple
-            forecast: '#87CEEB', // Sky Blue
-            TP_up: '#FF4500', // Orange Red (for TP_up)
-            TP_down: '#20B2AA' // Light Sea Green (for TP_down)
-        },
-        {
-            actual: '#2F4F4F', // Dark Slate Gray
-            predicted: '#FF7F50', // Bright Coral
-            forecast: '#98FB98', // Pale Green
-            TP_up: '#00CED1', // Dark Turquoise (for TP_up)
-            TP_down: '#FFB6C1' // Light Pink (for TP_down)
-        },
-        {
-            actual: '#1E90FF', // Dark Slate Gray
-            predicted: '#32CD32', // Bright Coral
-            forecast: '#9370DB', // Pale Green
-            TP_up: '#FFD700', // Dark Turquoise (for TP_up)
-            TP_down: '#FF69B4' // Hot Pink (for TP_down)
-        }
-    ],
-    "WGAN-GP": [
-        {
-            actual: '#C200FB',
-            two: '#EC0868',
-            three: '#FC2F00',
-            four: '#EC7D10',
-            five: '#FFBC0A',
-        },
-        {
-            actual: '#DF2935',
-            two: '#86BA90',
-            three: '#F5F3BB',
-            four: '#CE506E',
-            five: '#DEA000',
-        },
-        {
-            actual: '#F46036',
-            two: '#2E294E',
-            three: '#1B998B',
-            four: '#E71D36',
-            five: '#C5D86D',
-        },
-        {
-            one: '#053225',
-            actual: '#E34A6F',
-            three: '#F7B2BD',
-            four: '#B21198',
-            five: '#60A561',
-        },
-        {
-            actual: '#F72585',
-            two: '#7209B7',
-            three: '#3A0CA3',
-            four: '#32CD75',
-            five: '#4CC9F0',
-        },
-        {
-            actual: '#713E5A',
-            two: '#63A375',
-            three: '#EDC79B',
-            four: '#D57A66',
-            five: '#CA6680',
-        }
-    ]
-};
+import { PredictionOptions, CorelationMatrix, WgangpOptions, WGANGPProgress } from '../components/crypto_components/Training_Components'
+
+const colorCombinations = returnColorCombinations()
 
 const MODEL_OPTIONS_VALUE = {
     "LSTM": "multi_input_single_output_step",
@@ -438,8 +354,8 @@ const CryptoModule = () => {
                 </Box>
 
                 <Indicators symbol={cryptotoken} fetchValues={fetchValues} />
-            </Box >
-        </Box >
+            </Box>
+        </Box>
     )
 }
 

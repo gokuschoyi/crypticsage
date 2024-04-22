@@ -3,15 +3,16 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Skeleton, Grid } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import MainChartOptions from './MainChartOptions'
 import MainChartCopy from './MainChartCopy'
-import IndicatorSearchExecute from "./IndicatorSearchExecute";
-
-import { setSelectedTickerPeriod, resetStreamedTickerDataRedux, setCryptoDataInDbRedux } from '../../modules/CryptoModuleSlice'
-
+import MainChartOptions from './MainChartOptions'
+import { IndicatorSearchExecute } from "./Training_Components";
 import { getHistoricalTickerDataFroDb } from '../../../../../../api/adminController'
-
-import { checkForUniqueAndTransform, } from "../../modules/CryptoModuleUtils";
+import { checkForUniqueAndTransform } from "../../modules/CryptoModuleUtils";
+import {
+    setSelectedTickerPeriod
+    , resetStreamedTickerDataRedux
+    , setCryptoDataInDbRedux
+} from '../../modules/CryptoModuleSlice'
 
 const logError = (error, info) => {
     // Do something with the error, e.g. log to an external API

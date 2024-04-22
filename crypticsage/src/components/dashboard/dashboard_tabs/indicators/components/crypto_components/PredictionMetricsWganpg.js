@@ -1,7 +1,7 @@
 import { InfoOutlinedIcon } from '../../../../global/Icons'
 import { ErrorBoundary } from "react-error-boundary";
 import { useSelector } from "react-redux";
-import CustomSlider from './CustomSlider'
+import { CustomSlider } from './Training_Components'
 import React, { useEffect } from 'react'
 import {
     Box,

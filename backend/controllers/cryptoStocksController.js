@@ -3,7 +3,7 @@ const log = logger.create(__filename.slice(__dirname.length + 1))
 const CSServices = require('../services/cryptoStocksServices')
 const CSUtil = require('../utils/cryptoStocksUtil');
 const Validator = require('../utils/validator')
-const MDBServices = require('../services/mongoDBServices')
+const MDBServices = require('../services/mongoDBServices');
 
 // < - - - - - - - - - - Route Functions - - - - - - - - - - >
 
@@ -101,6 +101,31 @@ const fetchTickerDataFromDB = async (req, res) => {
 
 }
 
+// Fetches the single ticker additional info from DB
+const fetchSingleTickerInfo = async (req, res) => {
+    const { symbol } = req.body
+    try {
+        const data = await MDBServices.fetch_single_b_ticker_info(symbol)
+        res.status(200).json({ message: "Single Ticker Info fetched successfully", data: data })
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: "Something went wrong", error: error.message })
+    }
+}
+
+// testing only
+const fetchSingleInfoFromYFianance = async (req, res) => {
+    try {
+        const { symbol } = req.body
+        console.log(symbol)
+        const result = await CSUtil.fetchBinaceInfoFromYahooFinance(symbol)
+        res.status(200).json({ message: "Single Ticker Info fetched successfully", data: result })
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: "Something went wrong", error: error.message })
+    }
+}
+
 // < - - - - - - - - - - Route Functions - - - - - - - - - - >
 
 
@@ -112,4 +137,6 @@ module.exports = {
     getLatestStocksData,
     getStockSummaryDetails,
     fetchTickerDataFromDB,
+    fetchSingleTickerInfo,
+    fetchSingleInfoFromYFianance
 }

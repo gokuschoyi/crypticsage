@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom';
-import MultiSelect from './MultiSelect'
-import CustomSlider from './CustomSlider'
 import ReorderList from './ReorderList'
-import CustomInput from './CustomInput'
 import ACFandPACF from './ACFandPACF'
-import ResetTrainedModelModal from './modals/ResetTrainedModelModal'
-// import CorelationMatrix from './CorelationMatrix'
 import TPCMatrix from './TPCMatrix';
-import { ResetOnModelChange } from './modals';
 
-// import DownloadIcon from '@mui/icons-material/Download';
+import {
+    MultiSelect
+    , CustomSlider
+    , CustomInput
+} from './Training_Components'
+
+import {
+    ResetOnModelChange
+    , ResetTrainedModelModal
+} from './modals';
+
 import {
     Box,
     Button,
@@ -249,7 +253,7 @@ const TrainingParameters = ({
             setNoFuncSelected('')
         }
     }, [selectedFunctions, noFuncSelected, modelParams.to_train_count])
-    
+
     const [unsavedTrain, setUnsavedTrain] = useState(false)
     const handleStartModelTraining = () => {
         if (selectedFunctions.length === 0) {
@@ -795,7 +799,7 @@ const TrainingParameters = ({
                             </Box>
                         }
                     </Box>
-                </Collapse >
+                </Collapse>
 
                 {Object.keys(w_gan_error).length > 0 &&
                     <Box display={'flex'} flexDirection={'column'} alignItems={'start'} pt={2} pl={1} color={'red'}>

@@ -3,35 +3,7 @@ import { Box, useTheme, Skeleton, Typography, Paper } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { useSelector, useDispatch } from 'react-redux';
 import { setBarsFromToPredictions, setStandardizedAndScaledPredictions } from '../../modules/CryptoModuleSlice'
-import { calculateTolerance } from '../../modules/CryptoModuleUtils'
-
-function calculateMSE(dates, allPredictions, mean, variance, predictionChartType, predictionLookAhead) {
-    let actual = []
-    let predictions = []
-    dates.forEach((date) => {
-        let actualScaled = predictionChartType === 'standardized' ? date.actual : calculateOriginalPrice(date.actual, variance, mean)
-        actual.push(actualScaled)
-    })
-    allPredictions.forEach((prediction) => {
-        let predicted = predictionChartType === 'standardized' ? prediction[predictionLookAhead - 1][0] : calculateOriginalPrice(prediction[predictionLookAhead - 1][0], variance, mean)
-        predictions.push(predicted)
-    })
-
-    let sum = 0;
-    for (let i = 0; i < actual.length; i++) {
-        let diff = predictions[i] - actual[i];
-        sum += diff * diff;
-    }
-
-    const mse = sum / actual.length;
-    const rmse = Math.sqrt(mse);
-    return { mse, rmse };
-}
-
-const calculateOriginalPrice = (value, variance, mean) => {
-    if (value === null) return null;
-    return (value * Math.sqrt(variance)) + mean;
-};
+import { calculateTolerance, calculateOriginalPrice, calculateMSE } from '../../modules/CryptoModuleUtils'
 
 const PredictionsChart = (props) => {
     const { predictionChartType, trainingStartedFlag, model_type, lookAhead, predictionLookAhead, setModelMetrics, predictionsPalette } = props
@@ -234,20 +206,6 @@ const PredictionsChart = (props) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictedValueRedux])
-
-    // Resize chart on container resizes.
-    // const resizeObserver = useRef();
-    // useEffect(() => {
-    //     resizeObserver.current = new ResizeObserver((entries) => {
-    //         const { width, height } = entries[0].contentRect;
-    //         // console.log(width, height);
-    //         chart.current && chart.current.applyOptions({ width, height });
-    //     });
-
-    //     resizeObserver.current.observe(predictionsChartRef.current);
-
-    //     return () => resizeObserver.current.disconnect();
-    // }, []);
 
     const tolerance = 1
     // This useEffect is used to calculate the metrics of the model
@@ -556,10 +514,8 @@ const PredictionsChart = (props) => {
                         </Box>
                     }
                 </Box>
-
-
-            </Box >
-        </Box >
+            </Box>
+        </Box>
     )
 }
 

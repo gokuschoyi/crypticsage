@@ -3,8 +3,7 @@ import { Box, Paper, FormControlLabel, Switch, Tooltip, IconButton, Dialog, Dial
 import LoopIcon from '@mui/icons-material/Loop';
 import { useSelector, useDispatch } from 'react-redux'
 import { getModelCheckPoints, retrain_wgan_Model } from '../../../../../../../api/adminController'
-import MultiSelect from '../MultiSelect'
-import CustomSlider from '../CustomSlider';
+import { MultiSelect, CustomSlider } from '../Training_Components';
 import DownloadIcon from '@mui/icons-material/Download';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { generateTalibFunctionsForExecution } from '../../../modules/CryptoModuleUtils'

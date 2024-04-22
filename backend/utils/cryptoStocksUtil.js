@@ -219,6 +219,84 @@ const fetchTopTickerByMarketCap = async ({ length }) => {
     }
 }
 
+const fetchDataBySymbol = async ({ symbol }) => {
+    try {
+        const data_by_symbol_url = `https://data-api.cryptocompare.com/asset/v1/data/by/symbol?asset_symbol=${symbol}`
+        const trading_signal_url = `https://min-api.cryptocompare.com/data/tradingsignals/intotheblock/latest?fsym=${symbol}`
+
+        const [data_by_symbol, trading_signals] = await Promise.all([
+            axios.get(data_by_symbol_url),
+            axios.get(trading_signal_url)
+        ])
+
+        const toLowerCaseKeys = (data) => {
+            // console.log('Key convert', data)
+            if (data === undefined || data === null || data.length === 0) {
+                return []
+            } else {
+                return data.map(obj =>
+                    Object.entries(obj).reduce((acc, [key, value]) => {
+                        acc[key.toLowerCase()] = value;
+                        return acc;
+                    }, {})
+                );
+            }
+        }
+
+        const cleanTradingSignals = (data) => {
+            if (Object.keys(data).length === 0 || data === undefined || data === null || data.length === 0) {
+                return []
+            } else {
+                const keys = ['concentrationVar', 'largetxsVar', 'addressesNetGrowth', 'inOutVar']
+                let final = []
+                for (const key of keys) {
+                    final.push({ key: key, data: data[key] || {} })
+                }
+                return final
+            }
+        }
+
+        const { data: { Data } } = data_by_symbol
+        const cleaned_data = {
+            basic: {
+                asset_type: Data.ASSET_TYPE,
+                created_on: Data.CREATED_ON,
+                updated_on: Data.UPDATED_ON,
+                website: Data.WEBSITE_URL,
+                name: Data.NAME,
+                launch_date: Data.LAUNCH_DATE,
+                logo_url: Data.LOGO_URL,
+                asset_short_description: Data.ASSET_DESCRIPTION_SNIPPET,
+                asset_description: Data.ASSET_DESCRIPTION,
+                asset_description_summary: Data.ASSET_DESCRIPTION_SUMMARY,
+            },
+            supply: {
+                max: Data.SUPPLY_MAX,
+                issued: Data.SUPPLY_ISSUED,
+                total: Data.SUPPLY_TOTAL,
+                circulating: Data.SUPPLY_CIRCULATING,
+                future: Data.SUPPLY_FUTURE,
+                locked: Data.SUPPLY_LOCKED,
+                burnt: Data.SUPPLY_BURNT,
+                staked: Data.SUPPLY_STAKED
+            },
+            asset_security_metrics: Data.ASSET_SECURITY_METRICS,
+            leaders: toLowerCaseKeys(Data.PROJECT_LEADERS),
+            hash_algorithm: Data.HASHING_ALGORITHM_TYPES || [],
+            asset_industries: toLowerCaseKeys(Data.ASSET_INDUSTRIES),
+            trading_signals: { time: trading_signals.data.Data.time, data: cleanTradingSignals(trading_signals.data.Data) },
+            layer_two_solutions: toLowerCaseKeys(Data.LAYER_TWO_SOLUTIONS),
+            privacy_solutions: toLowerCaseKeys(Data.PRIVACY_SOLUTIONS),
+            algorithm_types: toLowerCaseKeys(Data.CONSENSUS_ALGORITHM_TYPES),
+        }
+
+        return cleaned_data
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
 // Fetches the latest OHLC data for the specified tokenName and timeperiod with limit
 const getLatestOHLCForTicker = async ({ timeFrame, tokenName, limit }) => {
     try {
@@ -260,7 +338,7 @@ const yFinance_metaData_updater = async () => {
         log.info('Updating short summary for symbols')
         await getYfinanceQuotes(stock_symbols)
 
-        log.info('Updating full summary for stock')
+        log.info('Updating full summary for symbols')
         const meta_type = 'full_summary'
         for (const symb in stock_symbols) {
             const symbol = stock_symbols[symb]
@@ -312,7 +390,7 @@ const getYfinanceQuotes = async (symbols) => {
         log.warn('Fetch from URL failed, trying Yahoo Finance package');
         try {
             for (const symbol of symbols) {
-                console.log(symbol)
+                // console.log(symbol)
                 // @ts-ignore
                 const quoteData = await yahooFinance.quoteSummary(symbol, { modules: modules });
                 let transformedData = generateYFObject(symbol, quoteData);
@@ -326,6 +404,18 @@ const getYfinanceQuotes = async (symbols) => {
         }
     }
     return finalData
+}
+
+const fetchBinaceInfoFromYahooFinance = async (symbol) => {
+    try {
+        const quoteSearch = await yahooFinance.search(symbol);
+        const quoteSummary = await yahooFinance.quoteSummary(symbol, { modules: ['price', 'summaryDetail'] })
+        const quote = await yahooFinance.quote(symbol)
+        return [quoteSearch, quoteSummary, quote]
+    } catch (err) {
+        log.error(err.stack)
+        throw err
+    }
 }
 
 const yFinanceDataCleaner = (result) => {
@@ -1187,7 +1277,7 @@ const generateStockReport = async (symbol) => {
 }
 
 const getStockSummaryDetails = async (symbol) => {
-    log.info(`-------------------Fetching symbol summary for ${symbol}-------------------`)
+    log.info(`-------------------Fetching Full summary for ${symbol}-------------------`)
 
     let qSummary = {}
     qSummary = await generateStockReport(symbol)
@@ -1212,7 +1302,7 @@ const getStockSummaryDetails = async (symbol) => {
             // console.log(key)
             switch (key) {
                 case 'assetProfile':
-                    log.info('Payload assetProfile')
+                    // log.info('Payload assetProfile')
                     delete moduleValue.city
                     delete moduleValue.state
                     delete moduleValue.zip
@@ -1226,17 +1316,17 @@ const getStockSummaryDetails = async (symbol) => {
                     stockProfile[key] = moduleValue
                     break;
                 case 'recommendationTrend':
-                    log.info('Payload recommendationTrend')
+                    // log.info('Payload recommendationTrend')
                     delete moduleValue.maxAge
                     stockProfile[key] = moduleValue
                     break;
                 case 'indexTrend':
-                    log.info('Payload indexTrend')
+                    // log.info('Payload indexTrend')
                     delete moduleValue.maxAge
                     stockProfile[key] = moduleValue
                     break;
                 case 'price':
-                    log.info('Payload price')
+                    // log.info('Payload price')
                     delete moduleValue.maxAge
                     if (stockProfile['combinedPriceSummary'] === undefined) {
                         stockProfile['combinedPriceSummary'] = moduleValue
@@ -1245,7 +1335,7 @@ const getStockSummaryDetails = async (symbol) => {
                     }
                     break;
                 case 'summaryDetail':
-                    log.info('Payload summaryDetail')
+                    // log.info('Payload summaryDetail')
                     delete moduleValue.maxAge
                     if (stockProfile['combinedPriceSummary'] === undefined) {
                         stockProfile['combinedPriceSummary'] = moduleValue
@@ -1254,12 +1344,12 @@ const getStockSummaryDetails = async (symbol) => {
                     }
                     break;
                 case 'calendarEvents':
-                    log.info('Payload calendarEvents')
+                    // log.info('Payload calendarEvents')
                     delete moduleValue.maxAge
                     stockProfile[key] = moduleValue
                     break;
                 case 'earnings':
-                    log.info('Payload earnings')
+                    // log.info('Payload earnings')
                     delete moduleValue.maxAge
                     if (stockProfile['combinedEarnings'] === undefined) {
                         stockProfile['combinedEarnings'] = moduleValue
@@ -1268,7 +1358,7 @@ const getStockSummaryDetails = async (symbol) => {
                     }
                     break;
                 case 'earningsHistory':
-                    log.info('Payload earningsHistory')
+                    // log.info('Payload earningsHistory')
                     delete moduleValue.maxAge
                     if (stockProfile['combinedEarnings'] === undefined) {
                         stockProfile['combinedEarnings'] = moduleValue
@@ -1277,7 +1367,7 @@ const getStockSummaryDetails = async (symbol) => {
                     }
                     break;
                 case 'earningsTrend':
-                    log.info('Payload earningsTrend')
+                    // log.info('Payload earningsTrend')
                     delete moduleValue.maxAge
                     if (stockProfile['combinedEarnings'] === undefined) {
                         stockProfile['combinedEarnings'] = moduleValue
@@ -1286,62 +1376,62 @@ const getStockSummaryDetails = async (symbol) => {
                     }
                     break;
                 case 'cashflowStatementHistory':
-                    log.info('Payload cashflowStatementHistory')
+                    // log.info('Payload cashflowStatementHistory')
                     delete moduleValue.maxAge
                     stockProfile.combinedCashflowStatement.annual = moduleValue;
                     break;
                 case 'cashflowStatementHistoryQuarterly':
-                    log.info('Payload cashflowStatementHistoryQuarterly')
+                    // log.info('Payload cashflowStatementHistoryQuarterly')
                     delete moduleValue.maxAge
                     stockProfile.combinedCashflowStatement.quarterly = moduleValue;
                     break;
                 case 'balanceSheetHistory':
-                    log.info('Payload balanceSheetHistory')
+                    // log.info('Payload balanceSheetHistory')
                     delete moduleValue.maxAge
                     stockProfile.combinedBalanceSheet.annual = moduleValue;
                     break;
                 case 'balanceSheetHistoryQuarterly':
-                    log.info('Payload balanceSheetHistoryQuarterly')
+                    // log.info('Payload balanceSheetHistoryQuarterly')
                     delete moduleValue.maxAge
                     stockProfile.combinedBalanceSheet.quarterly = moduleValue;
                     break;
                 case 'incomeStatementHistory':
-                    log.info('Payload incomeStatementHistory')
+                    // log.info('Payload incomeStatementHistory')
                     delete moduleValue.maxAge
                     stockProfile.cominedIncomeStatement.annual = moduleValue;
                     break;
                 case 'incomeStatementHistoryQuarterly':
-                    log.info('Payload incomeStatementHistoryQuarterly')
+                    // log.info('Payload incomeStatementHistoryQuarterly')
                     delete moduleValue.maxAge
                     stockProfile.cominedIncomeStatement.quarterly = moduleValue;
                     break;
                 case 'defaultKeyStatistics':
-                    log.info('Payload defaultKeyStatistics')
+                    // log.info('Payload defaultKeyStatistics')
                     delete moduleValue.maxAge
                     stockProfile[key] = transformDefaultKeyStat(moduleValue)
                     break;
                 case 'financialData':
-                    log.info('Payload financialData')
+                    // log.info('Payload financialData')
                     delete moduleValue.maxAge
                     stockProfile[key] = transformFinancialData(moduleValue)
                     break;
                 case 'fundOwnership':
-                    log.info('Payload fundOwnership')
+                    // log.info('Payload fundOwnership')
                     delete moduleValue.maxAge
                     stockProfile[key] = moduleValue
                     break;
                 case 'insiderHolders':
-                    log.info('Payload insiderHolders')
+                    // log.info('Payload insiderHolders')
                     delete moduleValue.maxAge
                     stockProfile[key] = moduleValue
                     break;
                 case 'institutionOwnership':
-                    log.info('Payload institutionOwnership')
+                    // log.info('Payload institutionOwnership')
                     delete moduleValue.maxAge
                     stockProfile[key] = moduleValue
                     break;
                 case 'insiderTransactions':
-                    log.info('Payload insiderTransactions')
+                    // log.info('Payload insiderTransactions')
                     delete moduleValue.maxAge
                     const groupedArray = moduleValue.transactions.reduce((acc, obj) => {
                         const existingEntry = acc.find(entry => entry.name === obj.filerName);
@@ -1358,7 +1448,7 @@ const getStockSummaryDetails = async (symbol) => {
                     stockProfile[key] = groupedArray
                     break;
                 case 'upgradeDowngradeHistory':
-                    log.info('Payload upgradeDowngradeHistory')
+                    // log.info('Payload upgradeDowngradeHistory')
                     delete moduleValue.maxAge
                     stockProfile[key] = moduleValue
                     break;
@@ -1397,10 +1487,12 @@ module.exports = {
     , formatMillisecond
     , periodToMilliseconds
     , fetchTopTickerByMarketCap
+    , fetchDataBySymbol
     , getLatestOHLCForTicker
     , getYFinanceShortSummary
     , getYFinanceFullSummary
     , yFinance_metaData_updater
     , getYfinanceQuotes
     , getStockSummaryDetails
+    , fetchBinaceInfoFromYahooFinance
 }

@@ -3,7 +3,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Box, Grid, Typography, useTheme, useMediaQuery } from '@mui/material'
 import { useSelector, useDispatch } from 'react-redux'
 import { setSelectedFlagInTalibDescription, setSelectedFunctions } from '../../modules/CryptoModuleSlice'
-import IndicatorSearch from './IndicatorSearch'
+import { IndicatorSearch } from './Training_Components'
 import SelectedFunctionContainer from './SelectedFunctionContainer'
 
 

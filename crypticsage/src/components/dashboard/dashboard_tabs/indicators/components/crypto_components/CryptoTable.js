@@ -1,71 +1,109 @@
+import { ErrorBoundary } from "react-error-boundary";
 import React, { useRef, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { setCryptoDataRedux, setCryptoPreferencesRedux } from '../../IndicatorsSlice'
-import { setSelectedTickerName, resetDataLoadedState, resetShowSettingsFlag, setCryptoDataInDbRedux } from '../../modules/CryptoModuleSlice'
-import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../../global/Icons';
-import { getLatestCryptoData } from '../../../../../../api/crypto'
-import { convert, getLastUpdatedTimeString, getDateTime, getCurrencySymbol } from '../../../../../../utils/Utils'
+import { setCryptoDataRedux, setTickerInfo, setCryptoPreferencesRedux } from '../../IndicatorsSlice'
+import {  CloseIcon } from '../../../../global/Icons';
+import { getLatestCryptoData, fetchSingleTickerInfo } from '../../../../../../api/crypto'
 import {
     Box
-    , Typography
-    , TableContainer
-    , Table
-    , TableHead
-    , TableRow
-    , TableCell
-    , TableBody
-    , TableSortLabel
     , useTheme
     , Skeleton
     , IconButton
-    , MenuItem
-    , Select
-    , InputLabel
-    , FormControl
-    , Tooltip
+    , Divider
+    , Paper
+    , useMediaQuery
 } from '@mui/material'
+
+import {
+    CurrencySelectorAndRefresh
+    , StatsLegend
+    , CustomTable
+    , BasicBox
+    , SupplyBox
+    , LayerTwoSolutionsBox
+    , PrivacySolutionsBox
+    , TradingSignalsBox
+    , LeadersBox
+    , HashAlgorithmBox
+    , AssetIndustriesBox
+    , AlgorithmTypesBox
+    , AssetSecurityMetrics
+} from './CryptoTableInfoComponents'
+
+const logError = (error, info) => {
+    // Do something with the error, e.g. log to an external API
+    console.log('error', error)
+};
+
+const tableHeight = 700;
+
+const RenderTickerInfo = ({ info }) => {
+    const keys = Object.keys(info)
+    const component_mapping = {
+        basic: BasicBox,
+        supply: SupplyBox,
+        asset_security_metrics: AssetSecurityMetrics,
+        leaders: LeadersBox,
+        hash_algorithm: HashAlgorithmBox,
+        asset_industries: AssetIndustriesBox,
+        trading_signals: TradingSignalsBox,
+        layer_two_solutions: LayerTwoSolutionsBox,
+        privacy_solutions: PrivacySolutionsBox,
+        algorithm_types: AlgorithmTypesBox
+    }
+    const not_empty = keys.map(key => {
+        if (Array.isArray(info[key]) && info[key].length >= 1) {
+            return key
+        } else if (typeof info[key] === 'object' && Object.keys(info[key]).length > 2) {
+            return key
+        } else if (key === 'trading_signals' && info[key].data.length >= 1) {
+            return key
+        } else return undefined
+    }).filter(key => key !== undefined)
+
+    const empty = keys.filter(key => !not_empty.includes(key))
+    return (
+        <Box className='dynamic-render' display={'flex'} flexDirection={'column'} gap={1}>
+            {
+                not_empty.map(key => {
+                    const ComponentToRender = component_mapping[key]
+                    return (
+                        <React.Fragment key={key}>
+                            <ComponentToRender data={info[key]} />
+                            <Divider />
+                        </React.Fragment>
+                    )
+                })
+            }
+            {
+                empty.map(key => {
+                    const ComponentToRender = component_mapping[key]
+                    return (
+                        <React.Fragment key={key}>
+                            <ComponentToRender data={info[key]} />
+                            <Divider />
+                        </React.Fragment>
+                    )
+                })
+            }
+        </Box>
+    )
+}
+
 const CryptoTable = () => {
-    const theme = useTheme()
-    const tableHeight = 700;
-    const navigate = useNavigate();
-
     const dispatch = useDispatch();
-
-    //<------ table logic ------>//
+    const theme = useTheme()
+    const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const token = useSelector(state => state.auth.accessToken);
-    const selectedToken = useSelector(state => state.cryptoModule.selectedTickerName);
-    const selectedTickerPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod);
-    const defaultTickerPeriod = '4h' // Default ticker period. Should be the same as in the redux state 
     const cryptoPreferences = useSelector(state => state.indicators.cryptoPreferences);
-    const { currency: rCurr, order: rOrder, orderBy: rOrderBy } = cryptoPreferences
-    const cryptoDataInRedux = useSelector(state => state.indicators.cryptoData);
+
+    const cryptoDataInRedux = useSelector(state => state.indicators.cryptoData); // ticker meta data
     const [cryptoData, setCryptoData] = useState([]);
-    // console.log(cryptoPreferences)
 
     const [latestUpdatedDate, setLatestUpdatedDate] = useState('')
 
-    const [currency, setCurrency] = useState(rCurr)
+    const [currency, setCurrency] = useState(cryptoPreferences.currency)
     const [availableCurrencyList, setAvailableCurrencyList] = useState([])
-
-    const [open, setOpen] = React.useState(false);
-    // handles the user selection of currency and sets to currency
-    const handleCurrencyChange = (event) => {
-        if (event.target.value !== '') {
-            setCurrency(event.target.value);
-            dispatch(setCryptoPreferencesRedux({ cryptoPreferences: { ...cryptoPreferences, currency: event.target.value } }))
-        }
-    };
-
-    // handles open for select
-    const handleOpen = () => {
-        setOpen(true);
-    };
-
-    // handles close for select
-    const handleClose = () => {
-        setOpen(false);
-    };
 
     // get latest crypto data, sets states for available currencyList and latest updated date to latestUpdatedDate
     const loadedRef = useRef(false);
@@ -80,71 +118,28 @@ const CryptoTable = () => {
                 .then((res) => {
                     setCryptoData(res.data.cryptoData)
                     const cList = res.data.cryptoData[0].prices
-                    let cListArray = []
-                    for (const [key] of Object.entries(cList)) {
-                        cListArray.push(key)
-                    }
-                    setAvailableCurrencyList(cListArray)
+                    setAvailableCurrencyList(Object.keys(cList))
                     setLatestUpdatedDate(cList.USD.last_updated)
 
-                    let data = res.data.cryptoData
-                    dispatch(setCryptoDataRedux({ cryptoData: data }))
+                    dispatch(setCryptoDataRedux({ cryptoData: res.data.cryptoData }))
                 })
         } else if (cryptoDataInRedux.length > 0) {
-            // console.log('UE : ticker info fetch from redux')
             setCryptoData(cryptoDataInRedux)
             const cList = cryptoDataInRedux[0].prices
-            let cListArray = []
-            for (const [key] of Object.entries(cList)) {
-                cListArray.push(key)
-            }
-            setAvailableCurrencyList(cListArray)
+            setAvailableCurrencyList(Object.keys(cList))
             setLatestUpdatedDate(cList.USD.last_updated)
         } else {
             return
         }
     }, [cryptoDataInRedux, dispatch, token])
 
-    // console.log(currency, availableCurrencyList)
-
-    const [order, setOrder] = React.useState(rOrder);
-    const [orderBy, setOrderBy] = React.useState(rOrderBy);
-
-    // Sets the order and orderBy states
-    const handleRequestSort = (event, property) => {
-        const isAsc = orderBy === property && order === 'asc';
-        dispatch(setCryptoPreferencesRedux({ cryptoPreferences: { ...cryptoPreferences, order: isAsc ? 'desc' : 'asc', orderBy: property } }))
-        setOrder(isAsc ? 'desc' : 'asc');
-        setOrderBy(property);
-    };
-
-    // handler for sorting the table. Calls handleRequestSort to set the order and orderBy states
-    const createSortHandler = (property) => (event) => {
-        handleRequestSort(event, property);
-    };
-
-    //<------ table logic ------>//
-
-    // sorting logic    
-    useEffect(() => {
-        if (cryptoData.length > 0) {
-            console.log('UE : sorting')
-            const copyCryptoData = [...cryptoData];
-            const sortedArray = copyCryptoData.sort((a, b) => {
-                const valueA = a[orderBy] || a.prices[currency][orderBy] || 0;
-                const valueB = b[orderBy] || b.prices[currency][orderBy] || 0;
-                if (order === 'asc') {
-                    return valueA - valueB;
-                } else {
-                    return valueB - valueA;
-                }
-            });
-            dispatch(setCryptoDataRedux({ cryptoData: sortedArray }))
-            setCryptoData(sortedArray);
+    // handles the user selection of currency and sets to currency
+    const handleCurrencyChange = (event) => {
+        if (event.target.value !== '') {
+            setCurrency(event.target.value);
+            dispatch(setCryptoPreferencesRedux({ cryptoPreferences: { ...cryptoPreferences, currency: event.target.value } }))
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [order, orderBy, currency]);
-
+    };
 
     // refresh crypto data on click
     const refreshCryptoData = () => {
@@ -156,38 +151,88 @@ const CryptoTable = () => {
         }
         getLatestCryptoData(data)
             .then((res) => {
-                let data = res.data.cryptoData
-                dispatch(setCryptoDataRedux({ cryptoData: data }))
+                dispatch(setCryptoDataRedux({ cryptoData: res.data.cryptoData }))
                 const cList = res.data.cryptoData[0].prices
                 setLatestUpdatedDate(cList.USD.last_updated)
                 refreshIcon.classList.remove('rotate-icon');
             })
     }
 
-    //reddirect to '/dashboard/indicators/crypto/${dataId}' if matchedSymbol exists
-    const handleTokenPageLoad = (dataId) => {
-        console.log(dataId, selectedToken)
-        if (dataId !== null) {
-            if (dataId === selectedToken) {
-                dispatch(resetShowSettingsFlag())
-                navigate(`/dashboard/indicators/crypto/${dataId}/${selectedTickerPeriod}`)
-            } else {
-                dispatch(setSelectedTickerName(dataId))
-                dispatch(resetDataLoadedState())
-                dispatch(resetShowSettingsFlag())
-                dispatch(setCryptoDataInDbRedux({ dataInDb: [], total_count_db: 0 }))
-                navigate(`/dashboard/indicators/crypto/${dataId}/${defaultTickerPeriod}`)
-            }
+    const [tickerToLoadInfo, setTickerToLoadInfo] = useState({}) // ticker info to load
+    const [selectedTickerToLoad, setSelectedTickerToLoad] = useState('') // selected ticker
+    const [loadingInfo, setLoadingInfo] = useState(false) // loading info
+    const lg = useMediaQuery(theme.breakpoints.up('lg'));
+
+    const handleTickerInfoLoad = (dataId) => {
+        const table = document.getElementsByClassName('table-main-meta')[0]
+        const div = document.getElementsByClassName('crypto-details-table')[0]
+        const lastUpdated = document.getElementsByClassName('ticker-currency-last-updated')[0]
+        let symbol = ''
+        if (dataId === 'USDT') {
+            symbol = dataId
         } else {
-            console.log("no token name present")
+            symbol = dataId.split('USDT')[0]
+        }
+
+        if (table === undefined || div === undefined) {
+            setSelectedTickerToLoad(symbol)
+        } else {
+            setSelectedTickerToLoad(symbol)
+            if (lg) {
+                div.classList.toggle('crypto-details-table')
+                div.classList.toggle('collapse-to-left')
+                lastUpdated && lastUpdated.classList.toggle('ticker-currency-last-updated')
+                lastUpdated && lastUpdated.classList.toggle('ticker-currency-last-updated-collapsed')
+            } else {
+                table.classList.toggle('table-main-meta')
+                table.classList.toggle('half-collapsed')
+            }
+        }
+        const tickerInfo = cryptoData.find(ticker => ticker.symbol === symbol)
+
+        const { info } = tickerInfo
+        if (info) {
+            console.log('In redux')
+            setTickerToLoadInfo(tickerInfo.info)
+        } else {
+            console.log('Not in redux, fetching')
+            setLoadingInfo(true)
+            setTickerToLoadInfo({})
+            fetchSingleTickerInfo({ token, symbol })
+                .then((res) => {
+                    setTickerToLoadInfo(res.data.data)
+                    dispatch(setTickerInfo({ symbol, data: res.data.data }))
+                    setLoadingInfo(false)
+                })
+                .catch((error) => {
+                    console.log(error)
+                    setLoadingInfo(false)
+                })
         }
     }
 
-    // currency symbol based on the currency selected
-    const currencySymbol = getCurrencySymbol(currency)
+    const handleCloseTickerInfo = () => {
+        if (lg) {
+            const div = document.getElementsByClassName('collapse-to-left')[0]
+            const lastUpdated = document.getElementsByClassName('ticker-currency-last-updated-collapsed')[0]
+            div.classList.toggle('crypto-details-table')
+            div.classList.toggle('collapse-to-left')
+            lastUpdated.classList.toggle('ticker-currency-last-updated-collapsed')
+            lastUpdated.classList.toggle('ticker-currency-last-updated')
+            setTickerToLoadInfo({})
+            setSelectedTickerToLoad('')
+        } else {
+            const table = document.getElementsByClassName('half-collapsed')[0]
+            table.classList.toggle('table-main-meta')
+            table.classList.toggle('half-collapsed')
+            setTickerToLoadInfo({})
+            setSelectedTickerToLoad('')
+        }
+    }
+
     return (
         <Box className='crypto-container'>
-            <Box className='crypto-details-tabel' mr={4} ml={4}>
+            <Box mr={sm ? 2 : 4} ml={sm ? 2 : 4}>
                 {cryptoData.length === 0 ?
                     (
                         <Box className='skeleton-box' sx={{ height: `${tableHeight}px`, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -196,232 +241,56 @@ const CryptoTable = () => {
                     )
                     :
                     (
-                        <React.Fragment>
-                            <Box className='ticker-currency-last-updated' display='flex' flexDirection='row' alignItems='center' justifyContent='space-between' pl={1} pr={1} pt={1}>
-                                <Box className='currency-selector-date-refresh' display='flex' flexDirection='row' alignItems='center' gap={4}>
-                                    <FormControl sx={{ minWidth: 160 }}>
-                                        <InputLabel color='secondary' id="demo-controlled-open-select-label">Select Currency</InputLabel>
-                                        <Select
-                                            size='small'
-                                            labelId="demo-controlled-open-select-label"
-                                            id="demo-controlled-open-select"
-                                            open={open}
-                                            onClose={handleClose}
-                                            onOpen={handleOpen}
-                                            value={currency}
-                                            label="Select a currency"
-                                            color='secondary'
-                                            onChange={handleCurrencyChange}
-                                            sx={{
-                                                '& fieldset': {
-                                                    borderColor: 'red !important'
-                                                }
-                                            }}
-                                        >
-                                            <MenuItem value="">
-                                                <em>None</em>
-                                            </MenuItem>
-                                            {availableCurrencyList.map((item, index) => {
-                                                return (
-                                                    <MenuItem key={index} value={item}>{item}</MenuItem>
-                                                )
-                                            })}
-                                        </Select>
-                                    </FormControl>
-                                    <Box>
-                                        <IconButton
-                                            aria-label="refresh crypto data"
-                                            size="small"
-                                            onClick={refreshCryptoData}
-                                        >
-                                            <AutorenewIcon id='refresh-icon' sx={{ width: '20px', height: '20px' }} />
-                                        </IconButton>
-                                    </Box>
+                        <Box className='crypto-table-info-main-container'>
+                            <Box className='crypto-details-table' display={'flex'} flexDirection={'column'}>
+                                <Box className='ticker-currency-last-updated'>
+                                    <CurrencySelectorAndRefresh
+                                        currency={currency}
+                                        handleCurrencyChange={handleCurrencyChange}
+                                        availableCurrencyList={availableCurrencyList}
+                                        refreshCryptoData={refreshCryptoData}
+                                    />
+                                    <StatsLegend latestUpdatedDate={latestUpdatedDate} />
                                 </Box>
-                                <Box className='last-updated-status-legend' display='flex' flexDirection='row' alignItems='center' gap={2}>
-                                    <Box className='last-updated' height='60px' display='flex' alignItems='center' gap='10px'>
-                                        <Box>
-                                            <Box display='flex' flexDirection='row' gap='5px'>
-                                                <Typography fontSize='12px' fontWeight={500} color={theme.palette.text.secondary}>Updated : </Typography>
-                                                <Typography fontSize='12px' fontWeight={500} color={theme.palette.text.secondary}>{getLastUpdatedTimeString(latestUpdatedDate)}</Typography>
-                                            </Box>
-                                            <Box display='flex' justifyContent='flex-start'>
-                                                <Typography fontSize='12px' fontWeight={500} color={theme.palette.text.secondary}>{getDateTime(latestUpdatedDate)}</Typography>
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                    <Box className='status-legend' display='flex' flexDirection='column' >
-                                        <Box display='flex' flexDirection='row' gap={'10px'} alignItems='center'>
-                                            <Box height='8px' width='8px'
-                                                style={{
-                                                    borderRadius: '8px',
-                                                    backgroundColor: 'green'
-                                                }} />
-                                            <Typography fontSize='12px' fontWeight={400} color={theme.palette.text.secondary}>Data Available</Typography>
-                                        </Box>
-                                        <Box display='flex' flexDirection='row' gap={'10px'} alignItems='center'>
-                                            <Box height='8px' width='8px'
-                                                style={{
-                                                    borderRadius: '8px',
-                                                    backgroundColor: 'red'
-                                                }} />
-                                            <Typography fontSize='12px' fontWeight={400} color={theme.palette.text.secondary}>Data Un-Available</Typography>
-                                        </Box>
-                                    </Box>
-                                </Box>
+                                <CustomTable
+                                    selectedTickerToLoad={selectedTickerToLoad}
+                                    currency={currency}
+                                    cryptoPreferences={cryptoPreferences}
+                                    cryptoData={cryptoData}
+                                    setCryptoData={setCryptoData}
+                                    handleTickerInfoLoad={handleTickerInfoLoad}
+                                />
                             </Box>
-                            <TableContainer sx={{ maxHeight: tableHeight }}>
-                                <Table stickyHeader aria-label="sticky table" >
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell style={{ borderLeft: '1px solid white', minWidth: '250px' }}>
-                                                <TableSortLabel
-                                                    active={orderBy === 'market_cap_rank'}
-                                                    direction={orderBy === 'market_cap_rank' ? order : 'asc'}
-                                                    onClick={createSortHandler("market_cap_rank")}
-                                                >
-                                                    NAME
-                                                </TableSortLabel>
-                                            </TableCell>
-                                            <TableCell style={{ minWidth: '90px' }}>MKT CAP</TableCell>
-                                            <TableCell style={{ minWidth: '100px' }}>FD CAP</TableCell>
-                                            <TableCell style={{ minWidth: '90px' }}>PRICE {currencySymbol}</TableCell>
-                                            <TableCell style={{ minWidth: '148px' }}>H / L {currencySymbol}</TableCell>
-                                            <TableCell>MEDIAN</TableCell>
-                                            <TableCell style={{ minWidth: '110px' }}>COINS</TableCell>
-                                            <TableCell style={{ minWidth: '120px' }}>
-                                                <TableSortLabel
-                                                    active={orderBy === 'change_percentage_24_hrs'}
-                                                    direction={orderBy === 'change_percentage_24_hrs' ? order : 'asc'}
-                                                    onClick={createSortHandler("change_percentage_24_hrs")}
-                                                >
-                                                    % 24H {currencySymbol}
-                                                </TableSortLabel>
-                                            </TableCell>
-                                            <TableCell style={{ minWidth: '100px' }}>
-                                                <TableSortLabel
-                                                    active={orderBy === 'change_percentage_day'}
-                                                    direction={orderBy === 'change_percentage_day' ? order : 'asc'}
-                                                    onClick={createSortHandler("change_percentage_day")}
-                                                >
-                                                    % DAY {currencySymbol}
-                                                </TableSortLabel>
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {cryptoData.map((row, index) => {
-                                            const {
-                                                market_cap_rank,
-                                                id,
-                                                symbol,
-                                                name,
-                                                image_url,
-                                                max_supply,
-                                                prices,
-                                                matchedSymbol,
-                                                dataInDb
-                                            } = row;
-                                            const {
-                                                market_cap,
-                                                fd_market_cap,
-                                                current_price,
-                                                high_24h,
-                                                low_24h,
-                                                median,
-                                                supply,
-                                                change_percentage_24_hrs,
-                                                change_24_hrs,
-                                                change_percentage_day,
-                                                change_day,
-                                            } = prices[currency]
-                                            return (
-                                                <TableRow hover key={index} className={`row-id ${index}`}>
-                                                    <TableCell align='left' className='crypto-name'>
-                                                        <Box
-                                                            display='flex'
-                                                            flexDirection='row'
-                                                            alignItems='center'
-                                                            justifyContent='space-between'
-                                                            gap='5px'
-                                                            className={matchedSymbol !== null && dataInDb ? 'crypto-content' : ''}
-                                                            data-id={matchedSymbol !== null && dataInDb ? matchedSymbol : null}
-                                                            onClick={(e) => {
-                                                                const dataId = e.currentTarget.getAttribute('data-id')
-                                                                handleTokenPageLoad(dataId)
-                                                            }}
-                                                        >
-                                                            <Box display='flex' flexDirection='row' gap='5px'>
-                                                                <Box display='flex' flexDirection='row' gap='5px' alignItems='center' >
-                                                                    <Typography fontSize='10px' fontWeight={600}>{market_cap_rank}</Typography>
-                                                                    <img src={image_url} loading='lazy' alt={id} width='15px' height='15px' />
-                                                                    {name}
-                                                                </Box>
-                                                                <Box display='flex' alignItems='center'>
-                                                                    <Typography fontSize='10px' fontWeight={600}>({symbol})</Typography>
-                                                                </Box>
-                                                            </Box>
-                                                            <Tooltip title={matchedSymbol !== null && dataInDb ? 'Data available in Db' : matchedSymbol !== null && !dataInDb ? 'Data unavailable in Db' : 'Data unavailable in binance'} placement='top' arrow>
-                                                                <Box height='8px' width='8px'
-                                                                    style={{
-                                                                        borderRadius: '8px',
-                                                                        backgroundColor: matchedSymbol !== null && dataInDb
-                                                                            ? 'green'
-                                                                            : matchedSymbol !== null && !dataInDb
-                                                                                ? 'orange'
-                                                                                : 'red'
-                                                                    }}
-                                                                >
-                                                                </Box>
-                                                            </Tooltip>
-                                                        </Box>
-                                                    </TableCell>
-                                                    <TableCell>{convert(market_cap)}</TableCell>
-                                                    <TableCell>{convert(fd_market_cap)}</TableCell>
-                                                    <TableCell>{(current_price).toFixed(2)}</TableCell>
-                                                    <TableCell>{(high_24h).toFixed(2)} / {(low_24h).toFixed(2)}</TableCell>
-                                                    {/*<TableCell>{convert(high_24h)} / {convert(low_24h)}</TableCell>*/}
-                                                    <TableCell>{(median).toFixed(3)}</TableCell>
-                                                    <TableCell>{convert(supply)} {max_supply > 0 ? `of ${convert(max_supply)}` : ''}</TableCell>
-                                                    <TableCell>
-                                                        <Box display='flex' gap='5px' alignItems='center' justifyContent='space-between' sx={{ color: `${change_percentage_24_hrs >= 0 ? '#68e768' : 'red'}` }}>
-                                                            <Box display='flex' flexDirection='row' gap='5px'>
-                                                                <Box>{(change_percentage_24_hrs).toFixed(2)}%, </Box>
-                                                                <Box>{(change_24_hrs).toFixed(2)}</Box>
-                                                            </Box>
-                                                            <Box display='flex' alignItems='center' >
-                                                                {change_percentage_24_hrs >= 0
-                                                                    ? <ArrowDropUpIcon />
-                                                                    : <ArrowDropDownIcon />
-                                                                }
-                                                            </Box>
-                                                        </Box>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Box display='flex' gap='5px' alignItems='center' justifyContent='space-between' sx={{ color: `${change_percentage_day >= 0 ? '#68e768' : 'red'}` }}>
-                                                            <Box display='flex' flexDirection='row' gap='5px'>
-                                                                <Box>{(change_percentage_day).toFixed(2)}%, </Box>
-                                                                <Box>{(change_day).toFixed(2)}</Box>
-                                                            </Box>
-                                                            <Box display='flex' alignItems='center' >
-                                                                {change_percentage_day >= 0
-                                                                    ? <ArrowDropUpIcon sx={{ height: '20px', width: '20px' }} />
-                                                                    : <ArrowDropDownIcon sx={{ height: '20px', width: '20px' }} />
-                                                                }
-                                                            </Box>
-                                                        </Box>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )
-                                        })}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </React.Fragment>
+
+                            <Box className='main-info-box' sx={{ width: selectedTickerToLoad !== '' ? '100%' : '' }}>
+                                {Object.keys(tickerToLoadInfo).length > 0 ?
+                                    <Paper elevation={8} sx={{ margin: !lg ? '16px 0px 0px 0px' : '0px 0px 0px 16px' }}>
+                                        <Box display={'flex'} flexDirection={'column'} p={1}>
+                                            <Box display={'flex'} justifyContent={'end'}>
+                                                <IconButton onClick={handleCloseTickerInfo}>
+                                                    <CloseIcon className='small-icon' />
+                                                </IconButton>
+                                            </Box>
+                                            <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
+                                                <RenderTickerInfo info={tickerToLoadInfo} />
+                                            </ErrorBoundary>
+                                        </Box>
+                                    </Paper>
+                                    :
+                                    <Box>
+                                        {loadingInfo &&
+                                            <Box sx={{ margin: !lg ? '16px 0px 0px 0px' : '0px 0px 0px 16px', height: `${tableHeight}px`, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                <Skeleton animation="wave" variant="rounded" sx={{ position: 'absolute', bgcolor: '#3f3f40', width: '100%', height: '100%' }} />
+                                            </Box>
+                                        }
+                                    </Box>
+                                }
+                            </Box>
+                        </Box>
                     )
                 }
             </Box>
-        </Box >
+        </Box>
     )
 }
 

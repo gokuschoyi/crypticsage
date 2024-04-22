@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import CorelationMatrix from './CorelationMatrix'
+import { CorelationMatrix } from './Training_Components'
 import { useSelector } from 'react-redux'
 import {
     Box
@@ -134,7 +134,7 @@ const TPCMatrix = ({ transformationOrder, trainingStartedFlag }) => {
                     {corelation_matrix_error !== '' &&
                         <Box display={'flex'} alignItems={'center'} gap={1}>
                             <Typography variant='custom' textAlign='start' sx={{ color: 'red' }}>{corelation_matrix_error}</Typography>
-                            <IconButton style={{padding:'0px'}} disabled={trainingStartedFlag} onClick={(e) => setCorelation_matrix_error('')}>
+                            <IconButton style={{ padding: '0px' }} disabled={trainingStartedFlag} onClick={(e) => setCorelation_matrix_error('')}>
                                 <CloseIcon className='small-icon' />
                             </IconButton>
                         </Box>

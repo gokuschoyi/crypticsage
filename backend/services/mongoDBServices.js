@@ -2313,6 +2313,43 @@ const saveOrUpdateTickerMeta = async (cryptoData) => {
     }
 }
 
+const saveOrUpdateTickerInfoMeta = async (tickerInfo) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const metaCollection = db.collection('binance_ticker_meta')
+        let status = []
+        for (const tickerData of tickerInfo) {
+            const query = { symbol: tickerData.symbol };
+            const update = { $set: { info: tickerData.info } };
+            const options = { upsert: true };
+
+            let updated = await metaCollection.findOneAndUpdate(query, update, options);
+            status.push(updated)
+            log.info(`Ticker info updated for ${tickerData.symbol}`);
+        }
+        return status
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const fetch_single_b_ticker_info = async (symbol) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const metaCollection = db.collection('binance_ticker_meta')
+
+        const query = { symbol: symbol };
+        const projection = { _id: 0, info: 1 }
+        const tickerInfo = await metaCollection.findOne(query, { projection: projection });
+        // @ts-ignore
+        return tickerInfo.info
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
 /**
  * Fetches the saved ticker meta data from db:crypticsage/binance_ticker_meta
  * @async
@@ -3069,6 +3106,8 @@ module.exports = {
     , getFirstObjectForEachPeriod
     , getBinanceTIckerNames
     , saveOrUpdateTickerMeta
+    , saveOrUpdateTickerInfoMeta
+    , fetch_single_b_ticker_info
     , fetchTickerMetaFromDb
     , deleteOneMetaData
     , getBinanceTickerList

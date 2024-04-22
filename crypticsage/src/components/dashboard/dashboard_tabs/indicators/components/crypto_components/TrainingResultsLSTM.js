@@ -3,12 +3,14 @@ import React from 'react'
 import { Box, useTheme, useMediaQuery } from '@mui/material'
 import { useSelector } from 'react-redux'
 import ModelHistoryChart from './ModelHistoryChart'
-import CorelationMatrix from './CorelationMatrix'
 import PredictionMetrics from './PredictionMetrics'
-import TrainingLossTable from './TrainingLossTable'
-import PredictionScoresTable from './PredictionScoresTable'
-import BatchProgress from './BatchProgress'
-import EvaluationProgress from './EvaluationProgress'
+import {
+    PredictionScoresTable
+    , TrainingLossTable
+    , CorelationMatrix
+    , BatchProgress
+    , EvaluationProgress
+} from './Training_Components'
 
 const logError = (error, info) => {
     // Do something with the error, e.g. log to an external API
@@ -40,7 +42,7 @@ const TrainingResultsLSTM = ({
     const handelPredictionLookAheadSlider = (name, value) => {
         setPredictionLookAhead(value)
     }
-    
+
     return (
         <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
             <Box display='flex' flexDirection={'column'} gap={'4px'}>

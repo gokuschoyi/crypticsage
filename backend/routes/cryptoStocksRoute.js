@@ -17,6 +17,9 @@ router.post('/get-latest-stocks-data', CSController.getLatestStocksData)
 router.post('/get-stock-summary-details', CSController.getStockSummaryDetails)
 
 router.post('/fetch_token_data', CSController.fetchTickerDataFromDB) // converted
+router.post('/fetch_single_ticker_info', CSController.fetchSingleTickerInfo)
+
+router.post('/fetch_bin_from_yf', CSController.fetchSingleInfoFromYFianance) // testing
 
 const process = async (req, res) => {
     try {

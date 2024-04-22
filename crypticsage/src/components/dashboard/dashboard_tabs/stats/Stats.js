@@ -69,55 +69,6 @@ const Stats = (props) => {
         }
     }, [optionsLength, dispatch, token, CDAutoComplete])
 
-    //initial load of word of the day
-    // const WODMounted = useRef(false);
-    // const [wordOfTheDay, setWordOfTheDayL] = useState({});
-    // console.log(wordData)
-
-    // useEffect(() => {
-    //     if (!WODMounted.current) { // Only run if the component is mounted
-    //         WODMounted.current = true; // Set the mount state to true after the first run
-    //         if (Object.keys(wordData).length === 0) {
-    //             let result;
-    //             try {
-    //                 let data = {
-    //                     token: token
-    //                 }
-    //                 getWordOfTheDay(data).then((res) => {
-    //                     result = res.data.word;
-    //                     setWordOfTheDayL(result);
-    //                     dispatch(setWordOfTheDay(result));
-    //                 })
-    //             } catch (e) {
-    //                 console.log(e)
-    //             }
-    //         } else {
-    //             setWordOfTheDayL(wordData);
-    //         }
-    //     }
-    // }, [token, dispatch, wordData])
-
-    //interval fetch of token for token slider // *** activate later ***
-
-    /* useEffect(() => {
-        const intervalId = setInterval(() => {
-            let data = {
-                token: token
-            }
-            try {
-                getCryptoData(data).then(response => {
-                    setCryptoData(response.data.cryptoData);
-                })
-            } catch (err) {
-                console.log(err);
-            }
-        }, 30000);
-
-        return () => {
-            clearInterval(intervalId);
-        };
-    }, [token]); */
-
     //hover effect on tabs
     const hoverEffectPreference = useSelector(state => state.auth.preferences.dashboardHover)
     useEffect(() => {
@@ -197,26 +148,6 @@ const Stats = (props) => {
         }
         return Object.keys(obj).length === 0;
     }
-
-    /* const wsRef = useRef(false)
-    const user_uid = useSelector(state => state.auth.uid)
-
-    useEffect(() => {
-        if (!wsRef.current) {
-            wsRef.current = true
-            console.log(user_uid)
-            const ws = new WebSocket('ws://localhost:8081')
-            ws.onmessage = (event) => {
-                console.log(event)
-                document.getElementById('w-socket').innerHTML +=
-                    'Message from server: ' + event.data + "<br>";
-            };
-            setTimeout(() => {
-                ws.send(`${user_uid}`);
-            }, 1000)
-        }
-    }) */
-    // console.log(cryptoData)
 
     return (
         <Box className='stat-container'>

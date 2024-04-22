@@ -413,120 +413,180 @@ export const generateTalibFunctionsForExecution = ({ selectedFunctions, tDataRed
     return fTalibExecuteQuery
 }
 
-// const diff = actual - predicted;
+export const getColorForValue = (value) => {
+    // Interpolate between red (0) for -1, white (120) for 0, and light blue (240) for 1
+    let hue = ((value + 1) / 2) * 240;
+    return `hsl(${hue}, 70%, 53%)`;
+};
 
-/* if (diff > 0) { // actual > predicted predicted below actual
-    if (diff > tol) { // outside tolerance
-        TN++ // True Negative
-    } else { // within tolerance
-        FP++ // False Positive
-    }
-} else { // actual < predicted predicted above actual
-    if (Math.abs(diff) > tol) { // outside tolerance
-        FN++ // False Negative
-    } else { // within tolerance
-        TP++ // True Positive
-    }
-} */
-
-/* if (diff > 0) { // actual > predicted predicted below actual
-    if (diff > tol) {
-        FN++ // False Negative
+export const capitalizeFirstCharOfEachWord = (name, key) => {
+    if (name === key) {
+        return name.charAt(0).toUpperCase()
     } else {
-        TN++ // True Negative
+        return name.charAt(0).toUpperCase() + convertKeysForDisplay(key)
     }
-} else { // actual < predicted predicted above actual
-    if (Math.abs(diff) > tol) {
-        FP++ // False Positive
-    } else {
-        TP++ // True Positive
-    }
-} */
+}
 
-/* // If the difference is within the tolerance, it's either TP or TN
-if (Math.abs(diff) <= tol) {
-    // Condition for TP and TN
-    if ((actual > 0 && predicted > 0) || (actual <= 0 && predicted <= 0)) {
-        TP++; // True Positive
-    } else {
-        TN++; // True Negative
-    }
-} else {
-    // If the difference is outside the tolerance, it's either FP or FN
-    if (predicted > actual) {
-        FP++; // False Positive
-    } else {
-        FN++; // False Negative
-    }
-} */
+export const cell_size = 20
 
-/* export const calculateTolerance = (data, tolerance) => {
-    let TP = 0;
-    let FP = 0;
-    let TN = 0;
-    let FN = 0;
-    data = data.filter((value) => value.actual !== null && value.predicted !== null)
-        .forEach((prediction) => {
-            const actual = prediction.actual
-            const predicted = prediction.predicted
-            const tol = tolerance / 100 * actual
-            const diff = (actual - predicted)
-
-            // console.log('tol : ', tol, 'diff : ', diff)
-
-            if(diff > 0){
-                if (diff > tol) {
-                    FP += 1
-                } else {
-                    TN += 1
-                }
-            } else {
-                if (Math.abs(diff) > tol) {
-                    FN += 1
-                } else {
-                    TP += 1
-                }
-            }
-            console.log('TP : ', TP, 'FP : ', FP, 'TN : ', TN, 'FN : ', FN)
-        })
-} */
-
-
-/* const calculateMetrics = (data, thresholdLower = 0.01, thresholdUpper = 0.02) => {
-    let TP = 0;
-    let FP = 0;
-    let TN = 0;
-    let FN = 0;
-    data = data.filter((value) => value.actual !== null && value.predicted !== null)
-    for (let i = 0; i < data.length; i++) {
-        const actualChange = data[i].actual;
-        const predictedChange = data[i].predicted;
-        const percentChange = (predictedChange - actualChange) / actualChange;
-        // console.log(percentChange * 100)
-        if (percentChange >= -thresholdLower && percentChange <= thresholdLower) {
-            TP++;
-        } else if (percentChange >= thresholdLower && percentChange <= thresholdUpper) {
-            FN++;
-        } else if (percentChange > thresholdUpper) {
-            TN++;
-        } else if (percentChange < -thresholdLower) {
-            FP++;
+export const get_co_relation_styles = (cell_size) => {
+    return {
+        container: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            margin: '8px',
+        },
+        row: {
+            display: 'flex',
+        },
+        cell: {
+            width: cell_size, // Set cell width here
+            height: cell_size, // Set cell height here
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '2px',
+            borderRadius: '5px',
+        },
+        scale: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '12px', // Set the scale width here
+            // height: '20px', // Set the scale height here
+            borderRadius: '5px',
+            background: `linear-gradient(to bottom, hsl(0, 90%, 53%),hsl(127,90%,53%), hsl(240, 90%, 53%))`,
+            margin: `${cell_size + 6}px 0px 2px 10px`,
+        },
+        scaleLabel: {
+            fontSize: '12px',
+        },
+        legend: {
+            borderRadius: '50%',
+            minWidth: cell_size,
+            height: cell_size,
+            cursor: 'pointer',
+            padding: '2px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '10px',
         }
     }
+}
 
-    const accuracy = (TP + TN) / (TP + FP + TN + FN); // how close the predicted values are to the actual values based on the threshold. Higher the value better the model
-    const precision = TP / (TP + FP); // how many of the predicted values are actually correct. Higher the value better the model
-    const recall = TP / (TP + FN); // how many of the actual values are predicted correctly. Higher the value better the model
-    const f1 = (2 * precision * recall) / (precision + recall); // harmonic mean of precision and recall. Higher the value better the model
+export const calculateMSE = (dates, allPredictions, mean, variance, predictionChartType, predictionLookAhead) => {
+    let actual = []
+    let predictions = []
+    dates.forEach((date) => {
+        let actualScaled = predictionChartType === 'standardized' ? date.actual : calculateOriginalPrice(date.actual, variance, mean)
+        actual.push(actualScaled)
+    })
+    allPredictions.forEach((prediction) => {
+        let predicted = predictionChartType === 'standardized' ? prediction[predictionLookAhead - 1][0] : calculateOriginalPrice(prediction[predictionLookAhead - 1][0], variance, mean)
+        predictions.push(predicted)
+    })
 
+    let sum = 0;
+    for (let i = 0; i < actual.length; i++) {
+        let diff = predictions[i] - actual[i];
+        sum += diff * diff;
+    }
+
+    const mse = sum / actual.length;
+    const rmse = Math.sqrt(mse);
+    return { mse, rmse };
+}
+
+export const calculateOriginalPrice = (value, variance, mean) => {
+    if (value === null) return null;
+    return (value * Math.sqrt(variance)) + mean;
+};
+
+export const returnColorCombinations = () => {
     return {
-        TP,
-        FP,
-        TN,
-        FN,
-        accuracy: accuracy.toFixed(4),
-        precision: precision.toFixed(4),
-        recall: recall.toFixed(4),
-        f1: f1.toFixed(4)
-    };
-} */
+        "LSTM": [
+            {
+                actual: '#0047AB', // Deep Blue
+                predicted: '#FFA500', // Vibrant Orange
+                forecast: '#FFD700', // Bright Yellow
+                TP_up: '#FF69B4', // Hot Pink (for TP_up)
+                TP_down: '#00FA9A' // Medium Spring Green (for TP_down)
+            },
+            {
+                actual: '#B22222', // Classic Red
+                predicted: '#008080', // Soft Teal
+                forecast: '#BC8F8F', // Gentle Lavender
+                TP_up: '#FFFF00', // Yellow (for TP_up)
+                TP_down: '#FF6347' // Tomato (for TP_down)
+            },
+            {
+                actual: '#228B22', // Forest Green
+                predicted: '#800080', // Rich Purple
+                forecast: '#87CEEB', // Sky Blue
+                TP_up: '#FF4500', // Orange Red (for TP_up)
+                TP_down: '#20B2AA' // Light Sea Green (for TP_down)
+            },
+            {
+                actual: '#2F4F4F', // Dark Slate Gray
+                predicted: '#FF7F50', // Bright Coral
+                forecast: '#98FB98', // Pale Green
+                TP_up: '#00CED1', // Dark Turquoise (for TP_up)
+                TP_down: '#FFB6C1' // Light Pink (for TP_down)
+            },
+            {
+                actual: '#1E90FF', // Dark Slate Gray
+                predicted: '#32CD32', // Bright Coral
+                forecast: '#9370DB', // Pale Green
+                TP_up: '#FFD700', // Dark Turquoise (for TP_up)
+                TP_down: '#FF69B4' // Hot Pink (for TP_down)
+            }
+        ],
+        "WGAN-GP": [
+            {
+                actual: '#C200FB',
+                two: '#EC0868',
+                three: '#FC2F00',
+                four: '#EC7D10',
+                five: '#FFBC0A',
+            },
+            {
+                actual: '#DF2935',
+                two: '#86BA90',
+                three: '#F5F3BB',
+                four: '#CE506E',
+                five: '#DEA000',
+            },
+            {
+                actual: '#F46036',
+                two: '#2E294E',
+                three: '#1B998B',
+                four: '#E71D36',
+                five: '#C5D86D',
+            },
+            {
+                one: '#053225',
+                actual: '#E34A6F',
+                three: '#F7B2BD',
+                four: '#B21198',
+                five: '#60A561',
+            },
+            {
+                actual: '#F72585',
+                two: '#7209B7',
+                three: '#3A0CA3',
+                four: '#32CD75',
+                five: '#4CC9F0',
+            },
+            {
+                actual: '#713E5A',
+                two: '#63A375',
+                three: '#EDC79B',
+                four: '#D57A66',
+                five: '#CA6680',
+            }
+        ]
+    }
+}

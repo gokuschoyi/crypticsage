@@ -32,7 +32,7 @@ const CustomTokenCard = (props) => {
                 <Box className='token-box'>
                     {symbol !== 'N/A' ?
                         <Box className="underline-animation" display={'flex'} flexDirection='row' gap={1} justifyContent={'center'}>
-                            <Typography onClick={handleSymbolClick.bind(null, { symbol })} variant='h5' sx={{ margin: '0px', fontSize: 20, fontWeight: '500', textAlign: 'left' }} gutterBottom>
+                            <Typography variant='h5' sx={{ margin: '0px', fontSize: 20, fontWeight: '500', textAlign: 'left' }} gutterBottom>
                                 {symbol !== 'N/A' ? symbol.toUpperCase() : title.toUpperCase()}
                             </Typography>
                             <IconButton size='small' aria-label="update" color="secondary" onClick={handleSymbolClick.bind(null, { symbol })}>
