@@ -15,3 +15,11 @@ export const LoginUser = async (data) => {
     });
     return response;
 }
+
+export const signOutUser = async (uid) => {
+    const response = await axios.post(`${baseUrl}/auth/logout`, { uid }, {
+        withCredentials: false,
+        timeout: 10000
+    });
+    return response;
+}

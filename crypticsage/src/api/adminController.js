@@ -305,6 +305,16 @@ export const getModelCheckPoints = async ({ token, model_id }) => {
     return response;
 }
 
+export const quick_forecast = async ({ token, payload }) => {
+    const config = {
+        headers: { "Authorization": `Bearer ${token}` },
+        withCredentials: true
+    };
+    const response = await axios.post(`${baseUrl}/model/quick_forecasting`, { ...payload }, config)
+    return response;
+
+}
+
 export const makeNewPrediction = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }

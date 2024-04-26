@@ -1746,7 +1746,7 @@ const insertHistoricalDataToDb = async (type, ticker_name, period, token_data) =
  * @param {string} params.type crypto | forex | stock
  * @param {string} params.ticker_name the ticker name
  * @param {string} params.period 1m | 1h | 4h | 6h | 8h | 12h | 1d | 3d | 1w
- * @param {string} params.uid The user id
+ * @param {boolean} params.return_result_ true | false Weather to return the result or not
  * @returns {Promise<Array>} An object containing the fetched data 
  * @example
  * const type = 'crypto';
@@ -1766,9 +1766,9 @@ const insertHistoricalDataToDb = async (type, ticker_name, period, token_data) =
  * }, ... {}
  * ]
  */
-const fetchEntireHistDataFromDb = async ({ type, ticker_name, period, uid }) => {
+const fetchEntireHistDataFromDb = async ({ type, ticker_name, period, return_result_ }) => {
     // Check if the historical data is present in redis, if not fetch and save it to redis
-    const cacheKey = `${uid}_${type}_${ticker_name}_${period}`
+    const cacheKey = `${type}_${ticker_name}_${period}_full_historical_data`
     const t = createTimer(`Fetching entire ticker data for ${ticker_name}, ${period}`)
     if (config.debug_flag === 'true') {
         t.startTimer()
@@ -1815,7 +1815,7 @@ const fetchEntireHistDataFromDb = async ({ type, ticker_name, period, uid }) => 
                 t.stopTimer(__filename.slice(__dirname.length + 1))
             }
 
-            return tokenData
+            return return_result_ ? tokenData : []
         } else {
             log.info(`Data fetched from cache : ${tokenData.length}`)
             if (config.debug_flag === 'true') {
@@ -1823,7 +1823,7 @@ const fetchEntireHistDataFromDb = async ({ type, ticker_name, period, uid }) => 
                 console.log('Latest Data : ', tokenData[tokenData.length - 1], new Date(tokenData[tokenData.length - 1].openTime).toLocaleString())
                 t.stopTimer(__filename.slice(__dirname.length + 1))
             }
-            return tokenData
+            return return_result_ ? tokenData : []
         }
 
     } catch (error) {
@@ -1883,6 +1883,42 @@ const fetch_history_slice = async (params) => {
 }
 
 
+const fetch_sliced_data_from_redis = async (params) => {
+    let { ticker_name, type, period, page_no, items_per_page, new_fetch_offset } = params
+
+    // Fetching from Redis
+    const cacheKey = `${type}_${ticker_name}_${period}_full_historical_data`
+    let from_msg = "Historical Data Slicing"
+    let full_ticker_history = await CacheUtil.get_cached_data(cacheKey, from_msg)
+    full_ticker_history = full_ticker_history.reverse()
+
+    let tokenData = full_ticker_history.slice((page_no - 1) * items_per_page, page_no * items_per_page)
+    if (tokenData.length > 0) {
+        let output = {}
+        tokenData = tokenData.reverse().map((data) => {
+            return {
+                ...data,
+                date: new Date(data.openTime).toLocaleString(),
+            }
+        })
+
+        output['ticker_name'] = ticker_name
+        output['total_count_db'] = full_ticker_history.length
+        output['period'] = period
+        output['page_no'] = page_no
+        output['items_per_page'] = items_per_page
+        output['start_date'] = tokenData.slice(-1)[0].date
+        output['end_date'] = tokenData[0].date
+        output['total_count'] = tokenData.length
+        output['ticker_data'] = tokenData
+
+        return output
+    } else {
+        return ["No data found in binance_historical"]
+    }
+}
+
+
 /**
  * Fetches the ticker data from db:historical_data based on the ticker name, period, page_no and items_per_page.
  * Only being used for the main chart loading and debounced fetch
@@ -1938,7 +1974,7 @@ const fetchTickerHistDataFromDb = async (uid, type, ticker_name, period, page_no
 
         if (ohlchData === null) { // Initial load of tickers
             log.info('Fetching OHLCV data from db')
-            const history_slice = await fetch_history_slice({
+            const history_slice = await fetch_sliced_data_from_redis({
                 ticker_name
                 , type
                 , period
@@ -1972,7 +2008,7 @@ const fetchTickerHistDataFromDb = async (uid, type, ticker_name, period, page_no
 
             if (page_no > savedPageNo) {
                 log.info(`New Page data requested for ${page_no}, fetching additional OHLCV data from db`)
-                const history_slice = await fetch_history_slice({
+                const history_slice = await fetch_sliced_data_from_redis({
                     ticker_name
                     , type
                     , period
@@ -2008,68 +2044,6 @@ const fetchTickerHistDataFromDb = async (uid, type, ticker_name, period, page_no
         log.error(error.stack)
         throw error
     }
-
-    // try {
-    //     const meta_db = (await client).db(CRYPTICSAGE_DATABASE_NAME) // added total count from metadata
-    //     const meta_collection = meta_db.collection('binance_metadata')
-    //     const meta_data = await meta_collection.findOne({ ticker_name: ticker_name })
-    //     // @ts-ignore
-    //     const total_count = meta_data.data[period].ticker_count
-
-    //     const db = (await client).db(HISTORICAL_DATABASE_NAME)
-    //     const collection_name = `${type}_${ticker_name}_${period}`
-    //     const collection = db.collection(collection_name)
-    //     const sortQuery = { openTime: -1 }
-
-    //     new_fetch_offset = new_fetch_offset === undefined ? 0 : new_fetch_offset
-    //     // Calculate the number of documents to skip based on the page number and items per page
-    //     const skip = ((page_no - 1) * items_per_page) + new_fetch_offset;
-    //     const t = createTimer('Fetching data from binance_historical')
-    //     t.startTimer()
-    //     // @ts-ignore
-    //     const tokenData = await collection.find({}).sort(sortQuery).skip(skip).limit(items_per_page).toArray();
-    //     t.stopTimer(__filename.slice(__dirname.length + 1))
-    //     let finalResult = []
-
-    //     if (tokenData.length > 0) {
-    //         let output = {}
-    //         const t1 = createTimer("Adding date to token data - binance_historical")
-    //         t1.startTimer()
-    //         // console.time('Adding date to token data - binance_historical')
-    //         tokenData.reverse()
-    //         tokenData.map((data) => {
-    //             let obj = {
-    //                 date: new Date(data.openTime).toLocaleString(),
-    //                 openTime: data.openTime,
-    //                 open: data.open,
-    //                 high: data.high,
-    //                 low: data.low,
-    //                 close: data.close,
-    //                 volume: data.volume,
-    //             }
-    //             finalResult.push(obj)
-    //         })
-    //         // console.timeEnd('Adding date to token data - binance_historical')
-    //         t1.stopTimer(__filename.slice(__dirname.length + 1))
-
-    //         output['ticker_name'] = ticker_name
-    //         output['total_count_db'] = total_count
-    //         output['period'] = period
-    //         output['page_no'] = page_no
-    //         output['items_per_page'] = items_per_page
-    //         output['start_date'] = finalResult.slice(-1)[0].date
-    //         output['end_date'] = finalResult[0].date
-    //         output['total_count'] = finalResult.length
-    //         output['ticker_data'] = finalResult
-
-    //         return output
-    //     } else {
-    //         return ["No data found in binance_historical"]
-    //     }
-    // } catch (error) {
-    //     log.error(error.stack)
-    //     throw error
-    // }
 }
 
 /**

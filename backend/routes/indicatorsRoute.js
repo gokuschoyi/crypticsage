@@ -51,7 +51,7 @@ const tfTEst = async (req, res, next) => {
     // mean: mean.arraySync(), sub: tfSub.arraySync(), variance: variance.arraySync(), stdData, originalData 
     // console.log('From Main', res.locals.data)
     const uid = res.locals.data.uid
-    const entire_hist_data = await MDBServices.fetchEntireHistDataFromDb({ type: 'crypto', ticker_name: 'BTCUSDT', period: '4h', uid })
+    const entire_hist_data = await MDBServices.fetchEntireHistDataFromDb({ type: 'crypto', ticker_name: 'BTCUSDT', period: '4h', return_result_: true })
 
     const type = 'crypto'
     const ticker_name = 'BTCUSDT'

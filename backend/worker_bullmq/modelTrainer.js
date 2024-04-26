@@ -134,7 +134,7 @@ module.exports = async (job) => {
                         type: asset_type,
                         ticker_name,
                         period,
-                        uid
+                        return_result_: true
                     }
                     // console.log(Object.keys(parameters))
 

@@ -7,6 +7,7 @@ import redis
 import json
 import os
 import time
+import quickForecasting
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -97,6 +98,15 @@ def convertPredictionToCorrectFormat(data):
 
     final_result = {"transformed": json.dumps(result)}
     return final_result
+
+
+@app.task
+def quick_forecasting(data):
+    message = data["message"]
+    print(message)
+    time.sleep(0.5)
+    result = quickForecasting.perform_quick_forecasting(data)
+    return result
 
 
 @app.task

@@ -24,6 +24,8 @@ router.post('/get_model_result', ModelController.getModelResult)  // Can be conv
 router.post('/generate_test_data', ModelController.testNewModel)
 router.post('/get_partial_auto_correlation', ModelController.partialAutoCorrelation)
 
+router.post('/quick_forecasting', ModelController.quickForecasting)
+
 // celery test route
 const tempsetrmse = async (req, res) => {
     const { model_id, rmse } = req.body;

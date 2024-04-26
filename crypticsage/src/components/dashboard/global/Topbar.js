@@ -35,7 +35,7 @@ import "./Global.css"
 
 import { useNotificationCenter } from "react-toastify/addons/use-notification-center";
 import Notifications from "./Notifications";
-
+import { signOutUser } from '../../../api/auth'
 const notification_from_localStorage = JSON.parse(localStorage.getItem('user_notifications')) || []
 
 const Topbar = () => {
@@ -55,7 +55,7 @@ const Topbar = () => {
 
     const profileImage = useSelector(state => state.auth.photoUrl);
     const smallScreenToggleState = useSelector(state => state.sidebar.toggleSmallScreenSidebarState)
-
+    const uid = useSelector(state => state.auth.uid);
     const theme = useTheme();
     const mode = theme.palette.mode;
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
@@ -130,6 +130,13 @@ const Topbar = () => {
         dispatch(resetCryptoStockModule());
         dispatch(resetStocksDataInDbRedux());
         localStorage.removeItem('user_notifications');
+        signOutUser(uid)
+            .then((res) => {
+                console.log(res)
+            })
+            .catch((error) => {
+                console.log(error)
+            })
     }
 
     const userContainer = () => {

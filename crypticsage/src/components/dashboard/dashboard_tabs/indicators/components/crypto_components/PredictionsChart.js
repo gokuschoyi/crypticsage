@@ -354,6 +354,11 @@ const PredictionsChart = (props) => {
             chart.current.timeScale().subscribeVisibleLogicalRangeChange(barsInChartHandler)
         }
 
+        return () => {
+            // console.log("UE 5 RETURN : Debounce fetch")
+            chart.current.timeScale().unsubscribeVisibleLogicalRangeChange(barsInChartHandler)
+        }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictedValueRedux])
 

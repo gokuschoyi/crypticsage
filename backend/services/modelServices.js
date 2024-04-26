@@ -90,7 +90,7 @@ const process_data_request = async ({
                     type: asset_type,
                     ticker_name,
                     period,
-                    uid
+                    return_result_:true
                 }
                 try {
                     // @ts-ignore

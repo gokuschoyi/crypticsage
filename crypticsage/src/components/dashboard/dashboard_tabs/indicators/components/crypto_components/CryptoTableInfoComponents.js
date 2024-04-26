@@ -190,7 +190,7 @@ export const CustomTable = ({ selectedTickerToLoad, currency, cryptoPreferences,
                 dispatch(setSelectedTickerName(dataId))
                 dispatch(resetDataLoadedState())
                 dispatch(resetShowSettingsFlag())
-                dispatch(setCryptoDataInDbRedux({ dataInDb: [], total_count_db: 0 }))
+                dispatch(setCryptoDataInDbRedux({ dataInDb: [], total_count_db: 0, expires_at: 0 }))
                 navigate(`/dashboard/indicators/crypto/${dataId}/${defaultTickerPeriod}`)
             }
         } else {

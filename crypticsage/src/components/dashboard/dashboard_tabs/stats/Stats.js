@@ -234,8 +234,8 @@ const Stats = (props) => {
                                                     <CustomTokenCard
                                                         key={index}
                                                         title={token.symbol}
-                                                        price={`$ ${token.current_price.toFixed(2)}`}
-                                                        image={`${token.image_url}`}
+                                                        price={token.current_price?.toFixed(2)}
+                                                        image={token.image_url}
                                                         price_change_24h={token.price_change_24h}
                                                         price_change_percentage_24h={token.price_change_percentage_24h}
                                                         market_cap_rank={token.market_cap_rank}
@@ -282,7 +282,7 @@ const Stats = (props) => {
                     </Grid>
                 </Grid>
             </Box>
-        </Box >
+        </Box>
     )
 }
 

@@ -50,6 +50,7 @@ backend/worker_celery/saved_models
 .vscode/settings.json
 backend/worker_celery/.env
 backend/worker_celery/wgan_tests
+backend/worker_celery/chronos_models
 
 crypticsage/src/components/dashboard/dashboard_tabs/indicators/components/crypto_components/test.js
 backend/controllers/sample code

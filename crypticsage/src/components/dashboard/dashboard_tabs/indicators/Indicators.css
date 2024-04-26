@@ -225,7 +225,7 @@ tr:hover .prediction-mse {
     flex-direction: row;
     gap: 5px;
     min-height: 19px;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .value-box {
@@ -234,7 +234,7 @@ tr:hover .prediction-mse {
     flex-direction: row;
     gap: 5px;
     min-height: 19px;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .sel-func {
@@ -406,7 +406,7 @@ tr:hover .prediction-mse {
 .tooltip-prediction-box-controls {
     display: flex;
     flex-direction: row;
-    align-items: baseline;
+    align-items: center;
     gap: 5px;
 }
 
@@ -438,6 +438,18 @@ tr:hover .prediction-mse {
     background-color: beige;
     color: black;
 }
+
+.tab-qf {
+    height:26px;
+    border-radius: 5px;
+    transition: all 0.2s ease-in-out;
+    min-height: auto;
+}
+
+.quick-f-tabs.MuiTabs-indicator{
+    background-color: red;
+    margin: 4px 0px;
+} 
 
 .tab {
     height: 30px;
@@ -953,11 +965,13 @@ tr:hover .prediction-mse {
     .value-box {
         flex-direction: column;
         padding: 5px 0px;
+        align-items: flex-start;
     }
 
     .ohlcv-box {
         flex-direction: column;
         padding: 5px 10px;
+        align-items: flex-start;
     }
 
     .epoch {

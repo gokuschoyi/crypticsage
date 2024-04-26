@@ -21,7 +21,7 @@ const CustomTokenCard = (props) => {
             dispatch(setSelectedTickerName(symbol))
             dispatch(resetDataLoadedState())
             dispatch(resetShowSettingsFlag())
-            dispatch(setCryptoDataInDbRedux({ dataInDb: [], total_count_db: 0 }))
+            dispatch(setCryptoDataInDbRedux({ dataInDb: [], total_count_db: 0, expires_at: 0 }))
             navigate(redirectURL)
         }
     }

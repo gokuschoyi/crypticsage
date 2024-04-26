@@ -5,6 +5,8 @@ const { v4: uuidv4 } = require('uuid');
 const { fetchEntireHistDataFromDb } = require('../services/mongoDBServices')
 const MDBServices = require('../services/mongoDBServices')
 const IUtil = require('../utils/indicatorUtil');
+const CSUtil = require('../utils/cryptoStocksUtil')
+const CacheUtil = require('../utils/cacheUtil')
 const tf = require('@tensorflow/tfjs-node');
 
 const Redis = require("ioredis");
@@ -102,7 +104,7 @@ const calculateCoRelationMatrix = async (req, res) => {
 
     // log.info(`Redis key for re train : ${redis_key_for_hist_data}`)
     try {
-        const historicalData = await fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period, uid })
+        const historicalData = await fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period, return_result_: true })
         const talibResult = await TFMUtil.processSelectedFunctionsForModelTraining({ selectedFunctions: talibExecuteQueries, tickerHistory: historicalData })
         const { tickerHist, finalTalibResult } = await TFMUtil.trimDataBasedOnTalibSmallestLength({ finalTalibResult: talibResult, tickerHistory: historicalData })
         const { features, metrics } = await TFMUtil.transformDataToRequiredShape({ tickerHist, finalTalibResult, transformation_order })
@@ -388,6 +390,55 @@ const testNewModel = async (req, res) => {
     }
 }
 
+const quickForecasting = async (req, res) => {
+    try {
+        const { module, symbol, period, model_data } = req.body
+        const uid = res.locals.data.uid;
+        console.log('Quick forecasting', uid, module, symbol, period, model_data.forecasting_model)
+        // Fetch data and save to redis
+        const redis_ticker_hist_key = `${module}_${symbol}_${period}_full_historical_data`
+        console.log('Redis key for quick forecasting : ', redis_ticker_hist_key)
+
+        const is_hist_data_present = await CacheUtil.get_cached_data(redis_ticker_hist_key, 'quick forecasting', false)
+
+        if (!is_hist_data_present) {
+            log.warn('Data not present in cache for QF')
+            await MDBServices.fetchEntireHistDataFromDb({ type: module, ticker_name: symbol, period, return_result_: false })
+        } else {
+            log.info(`Data present in cache : ${is_hist_data_present.length}`)
+        }
+
+
+        // Call the celery task and return status
+        const task = pyClient.createTask("celeryTasks.quick_forecasting");
+        const result = task.applyAsync([{
+            message: 'Request from node to test quick forecasting.',
+            redis_key: redis_ticker_hist_key,
+            model_data: model_data,
+        }])
+
+        result.get()
+            .then(data => {
+                // console.log(data)
+                const last_date = data.last_date
+                const forecast = data.result
+                const period_to_ms = CSUtil.periodToMilliseconds(period)
+                const forecasted_data = forecast.map((item, i) => {
+                    return {
+                        date: new Date(last_date + (period_to_ms * (i + 1))).toLocaleString(),
+                        openTime: last_date + (period_to_ms * (i + 1)),
+                        ...item
+                    }
+                })
+                res.status(200).json({ message: 'Quick forecasting completed', forecast: forecasted_data })
+            })
+            .catch(err => console.log(err))
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Quick forecasting failed' })
+    }
+}
+
 // celery test endpoint
 const testing = async (model_id) => {
     // call the celery python worker
@@ -406,7 +457,7 @@ const testing = async (model_id) => {
 const partialAutoCorrelation = async (req, res) => {
     const { asset_type, ticker_name, period, maxLag, seriesName, confidenceLevel } = req.body
     const uid = res.locals.data.uid;
-    const historical_data = await MDBServices.fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period, uid })
+    const historical_data = await MDBServices.fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period, return_result_: true })
     const data = historical_data.map(item => parseFloat(item[seriesName]))
 
     const acf = calculatACF(data, maxLag)
@@ -444,4 +495,5 @@ module.exports = {
     , getModelResult
     , testing
     , partialAutoCorrelation
+    , quickForecasting
 }

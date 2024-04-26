@@ -1,3 +1,4 @@
+import { HLCAreaSeries } from "../../../../../../../node_modules/lightweight-charts/chart_plugin/hlc-area-series/hlc-area-series";
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { Box, useTheme, IconButton, Dialog, } from '@mui/material'
 import { createChart } from 'lightweight-charts';
@@ -17,6 +18,8 @@ import {
     , toggleProcessSelectedFunctionsOnMoreData
     , executeAllSelectedFunctions
 } from '../../modules/CryptoModuleSlice'
+
+import { getChronosAreaChartColors } from '../../modules/CryptoModuleUtils'
 
 
 import SettingsCard from './SettingsCard';
@@ -316,6 +319,9 @@ const MainChart = (props) => {
     const selectedTickerPeriod = useSelector(state => state.cryptoModule.selectedTickerPeriod)
     const selectedTickerName = useSelector(state => state.cryptoModule.selectedTickerName)
 
+    const quickForecastData = useSelector(state => state.cryptoModule.quick_forecasts)[selectedTickerName]?.filter(item => item.period === selectedTickerPeriod)
+    const [areaSeriesState, setAreaSeriesState] = useState({})
+
     const [predictionLineChart, setPredictionLineChart] = useState(null) // Initial model forecast
 
     const newFetchedDataCount = useRef(0)
@@ -402,9 +408,77 @@ const MainChart = (props) => {
             candleStickSeriesRef.current = null;
             candleStickVolumeSeriesRef.current = null;
             setChartSeriesState([])
+            setAreaSeriesState({})
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [symbol, selectedTokenPeriod])
+
+    /**
+     * Render the quick forecast chart on the main chart
+     */
+    useEffect(() => {
+        if (quickForecastData !== undefined) {
+            // console.log(quickForecastData, Object.keys(areaSeriesState))
+            if (chart.current !== null && Object.keys(areaSeriesState).length === 0) {
+                // console.log('Quick forecast data for ticker exists, adding to chart')
+
+                quickForecastData.forEach((f_data) => {
+                    const area_data = f_data.forecast.map((fore) => {
+                        const { date, openTime, ...rest } = fore
+                        return {
+                            time: openTime / 1000,
+                            ...rest
+                        }
+                    })
+
+                    const colors = getChronosAreaChartColors(f_data.model_type)
+                    const area_series = chart.current.addCustomSeries(new HLCAreaSeries(), {
+                        priceLineVisible: false,
+                        crosshairMarkerVisible: false,
+                        lastValueVisible: false,
+                        ticksVisible: false,
+                        highLineWidth: 0.5,
+                        lowLineWidth: 0.5,
+                        closeLineWidth: 0.5,
+                        visible: f_data.visible,
+                        ...colors
+                    })
+                    area_series.setData(area_data)
+                    setAreaSeriesState((prev) => {
+                        return {
+                            ...prev,
+                            [f_data.id]: {
+                                series: area_series,
+                                id: f_data.id,
+                                visible: f_data.visible,
+                                type: f_data.model_type,
+                                model: f_data.forecasting_model
+                            }
+                        }
+                    })
+                })
+            } else {
+                // console.log('Chart renderd, checking for updates')
+                const to_hide = Object.entries(areaSeriesState).filter(([key, val]) => !val.visible)
+                const to_show = Object.entries(areaSeriesState).filter(([key, val]) => val.visible)
+                // console.log(to_hide)
+                to_hide.forEach(([key, series_data]) => {
+                    series_data.series.applyOptions({ visible: series_data.visible })
+                })
+
+                to_show.forEach(([key, series_data]) => {
+                    series_data.series.applyOptions({ visible: series_data.visible })
+                })
+
+            }
+        } else {
+            // console.log('no data to render')
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [quickForecastData])
+    // console.log(quickForecastData)
+
 
     /**
      * sets the background color of the chart based on theme
@@ -422,25 +496,6 @@ const MainChart = (props) => {
             })
         }
     }, [chartBackgroundColor, textColor])
-
-    /**
-     * Resize chart based on parent container resizes (chartboxRef.current).
-     */
-    // useEffect(() => {
-    //     // console.log('UE 3 : ResizeObserver')
-    //     resizeObserver.current = new ResizeObserver((entries) => {
-    //         const { width, height } = entries[0].contentRect;
-    //         // console.log(width, height);
-    //         chart.current.applyOptions({ width, height });
-    //     });
-
-    //     resizeObserver.current.observe(chartboxRef.current);
-
-    //     return () => {
-    //         // console.log('UE 3 RETURN : resizeObserver')
-    //         resizeObserver.current.disconnect();
-    //     }
-    // }, []);
 
     /**
      * Adds the initial forecast after model trainign to the main chart
@@ -527,10 +582,10 @@ const MainChart = (props) => {
 
             getHistoricalTickerDataFroDb({ token, payload: fetchQuery })
                 .then((res) => {
-                    const newData = res.data.fetchedResults.ticker_data
-                    newDataRef.current = [...newData, ...newDataRef.current]
+                    const { ticker_data,  expires_at } = res.data.fetchedResults
+                    newDataRef.current = [...ticker_data, ...newDataRef.current]
                     fetchPointRef.current = Math.floor(candleSticksInVisibleRange * 0.2) / -1
-                    dispatch(setCryptoDataInDbRedux({ dataInDb: newDataRef.current, total_count_db: total_count_for_ticker_in_db }))
+                    dispatch(setCryptoDataInDbRedux({ dataInDb: newDataRef.current, total_count_db: total_count_for_ticker_in_db, expires_at }))
 
                     const uniqueData = checkForUniqueAndTransform(newDataRef.current)
 
@@ -575,16 +630,20 @@ const MainChart = (props) => {
             lastBarNoRef.current = barNo
         }
 
-        if (total_count_for_ticker_in_db > 500) { // Only subscribing if there is enough data
+        if (total_count_for_ticker_in_db > 500 && total_count_for_ticker_in_db !== tDataRedux.length) { // Only subscribing if there is enough data
             chart.current.timeScale().subscribeVisibleLogicalRangeChange(VLRCHandler)
+        }
+
+        if (total_count_for_ticker_in_db === tDataRedux.length) {
+            chart.current.timeScale().unsubscribeVisibleLogicalRangeChange(VLRCHandler)
         }
 
         return () => {
             // console.log("UE 5 RETURN : Debounce fetch")
-            chart.current.timeScale().unsubscribeVisibleTimeRangeChange(VLRCHandler)
+            chart.current.timeScale().unsubscribeVisibleLogicalRangeChange(VLRCHandler)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedFunctionData])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedFunctionData, tDataRedux.length])
 
     // Debounced handler for saving the Form-To of chart position
     const debouncedFromToSave = debounce((from, to) => {
@@ -610,7 +669,7 @@ const MainChart = (props) => {
 
         return () => {
             // console.log("UE 6 RETURN : Debounce From-to")
-            chart.current.timeScale().unsubscribeVisibleTimeRangeChange(barsInChartHandler)
+            chart.current.timeScale().unsubscribeVisibleLogicalRangeChange(barsInChartHandler)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -655,7 +714,7 @@ const MainChart = (props) => {
                         hour12: true
                     }
                 );
-                const data = param.seriesData.get(candleStickSeriesRef.current) || param.seriesData.get(predictionLineChart);
+                const data = param.seriesData.get(candleStickSeriesRef.current) || param.seriesData.get(predictionLineChart) || 0;
                 const volumeData = param.seriesData.get(candleStickVolumeSeriesRef.current)?.value || 0;
                 let open = 0, high = 0, low = 0, close = 0;
 
@@ -740,6 +799,26 @@ const MainChart = (props) => {
                     let finalStr = toolTipSwitchFlag ? `${newString}` : `${dateStr}${newString}`
                     ohlcvLegend.innerHTML = finalStr
                 }
+
+                const to_show = Object.entries(areaSeriesState).filter(([key, value]) => value.visible)
+                // console.log(to_show)
+
+                to_show.forEach(([key, series_data]) => {
+                    const q_predictions = param.seriesData.get(series_data.series)
+                    const div_to_insert = document.getElementsByClassName(`${series_data.id}`)[0]
+                    if (div_to_insert && q_predictions) {
+                        const str = `<div class="value-box" style="padding:0px">
+                        <div style="width:55px; text-align:start">C-${series_data.type}</div>
+                        <div style="width:105px; text-align:start">Median : <span id="median_pred">${Math.round(100 * q_predictions.close) / 100}</span></div>
+                        <div style="width:105px; text-align:start">High : <span id="high_pred">${Math.round(100 * q_predictions.high) / 100}</span></div>
+                        <div style="width:105px; text-align:start">Low : <span id="low_pred">${Math.round(100 * q_predictions.low) / 100}</span></div>
+                        </div>
+                        `
+                        div_to_insert.innerHTML = str
+                    }
+
+                })
+
             }
         }
 
@@ -750,7 +829,7 @@ const MainChart = (props) => {
             chart.current.unsubscribeCrosshairMove(toolTipHandler)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [predictionLineChart, toolTipSwitchFlag])
+    }, [predictionLineChart, toolTipSwitchFlag, areaSeriesState])
 
 
 
@@ -956,7 +1035,8 @@ const MainChart = (props) => {
         const createWebSocket = () => {
             binance_websocket.current.onmessage = (e) => {
                 const message = JSON.parse(e.data);
-                const { k: { t: openTime, o: open, h: high, l: low, c: close, v: volume } } = message;
+                const { k: { t: openTime, o: open, h: high, l: low, c: close, v: volume, x: stick_completed } } = message;
+
 
                 // Update your candlestick chart series
                 candleStickSeriesRef.current.update({
@@ -1009,7 +1089,8 @@ const MainChart = (props) => {
 
                 // updating 1 m data to redux and save to db, figure some other way to do this.
                 // Does not need to update every minute, maybe collect and send req in interval or in return of UE/Cleanup.
-                if (latestDateRf.current < openTime && selectedTokenPeriod === '1m') {
+                if (stick_completed && selectedTokenPeriod === '1m') {
+                    console.log('Last Period completed')
                     const fetchQuery = {
                         ticker_name: symbol,
                         period: selectedTokenPeriod,
@@ -1019,20 +1100,20 @@ const MainChart = (props) => {
                     // console.log('New ticker data available. Fetch one ticker', new Date(latestDateRf.current).toLocaleString(), new Date(latestDateRf.current + 59000).toLocaleString())
                     latestDateRf.current = openTime
 
-                    dispatch(setStreamedTickerDataRedux({
-                        time: openTime / 1000,
-                        open: parseFloat(open),
-                        high: parseFloat(high),
-                        low: parseFloat(low),
-                        close: parseFloat(close),
-                        volume: parseFloat(volume),
-                    }))
+                    // dispatch(setStreamedTickerDataRedux({
+                    //     time: openTime / 1000,
+                    //     open: parseFloat(open),
+                    //     high: parseFloat(high),
+                    //     low: parseFloat(low),
+                    //     close: parseFloat(close),
+                    //     volume: parseFloat(volume),
+                    // }))
 
-                    updateTickerWithOneDataPoint({ token, fetchQuery })
-                        .catch((err) => {
-                            console.log(err)
-                        })
-                    newFetchedDataCount.current = newFetchedDataCount.current + 1
+                    // updateTickerWithOneDataPoint({ token, fetchQuery })
+                    //     .catch((err) => {
+                    //         console.log(err)
+                    //     })
+                    // newFetchedDataCount.current = newFetchedDataCount.current + 1
                 }
             };
 
@@ -1071,10 +1152,67 @@ const MainChart = (props) => {
         dispatch(removeFromSelectedFunction({ id: id, name: name, group_name: group_name }))
     }
 
+    const handleToggleShowHideQP = (param) => {
+        const { id } = param
+        // console.log('Show hide : ', id)
+        setAreaSeriesState((prev) => {
+            return {
+                ...prev,
+                [id]: {
+                    ...prev[id],
+                    visible: !prev[id].visible
+                }
+            }
+        })
+    }
+
+    const handleDeleteQP = (param) => {
+        const { id } = param
+        console.log('Delete : ', id)
+    }
+
     return (
         <Box className='chart-cont-dom' width="100%" height="100%" >
             <Box className='selected-function-legend'>
                 <Box className='selected-function-unique ohlcv-box'></Box>
+
+                {areaSeriesState && Object.entries(areaSeriesState).map(([key, series_data]) => {
+                    const { id, visible } = series_data
+                    return (
+                        <Box key={key} className='selected-function-unique sel-func' justifyContent='space-between' alignItems='center'>
+                            <Box display='flex' flexDirection='row' alignItems='flex-start' className='data-plus-settins-box'>
+                                <Box className='single-data-box' display='flex' flexDirection='row' alignItems='center' gap={'5px'}>
+                                    <Box className={`${id}`}></Box>
+
+                                    <IconButton
+                                        size='small'
+                                        sx={{ padding: '2px' }}
+                                        aria-label="Hide chart"
+                                        color="secondary"
+                                        onClick={handleToggleShowHideQP.bind(null, { id: id })}
+                                    >
+                                        {visible ?
+                                            <VisibilityIcon className='smaller-icon' />
+                                            :
+                                            <VisibilityOffIcon className='smaller-icon' />
+                                        }
+                                    </IconButton>
+
+                                    <IconButton
+                                        size='small'
+                                        sx={{ padding: '2px' }}
+                                        aria-label="delete query"
+                                        color="secondary"
+                                        onClick={handleDeleteQP.bind(null, { id: id })}
+                                    >
+                                        <DeleteOutlineIcon className='smaller-icon' />
+                                    </IconButton>
+                                </Box>
+                            </Box>
+                        </Box>
+                    )
+                })}
+
                 {selectedFunctionData.map((selectedFunction, index) => {
                     const selectedFunc = selectedFunction.functions
                     const outputs = selectedFunction.outputs

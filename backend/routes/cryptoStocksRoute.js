@@ -16,7 +16,18 @@ router.post('/get-latest-crypto-data', CSController.getLatestCryptoData)
 router.post('/get-latest-stocks-data', CSController.getLatestStocksData)
 router.post('/get-stock-summary-details', CSController.getStockSummaryDetails)
 
-router.post('/fetch_token_data', CSController.fetchTickerDataFromDB) // converted
+const ticker_hist_middleware = async (req, res, next) => {
+    const { asset_type, ticker_name, period } = req.body
+    try {
+        await MDBServices.fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period, return_result_: false })
+    } catch (error) {
+        console.log(error.stack)
+        throw error
+    }
+    next()
+}
+
+router.post('/fetch_token_data', ticker_hist_middleware, CSController.fetchTickerDataFromDB) // converted
 router.post('/fetch_single_ticker_info', CSController.fetchSingleTickerInfo)
 
 router.post('/fetch_bin_from_yf', CSController.fetchSingleInfoFromYFianance) // testing

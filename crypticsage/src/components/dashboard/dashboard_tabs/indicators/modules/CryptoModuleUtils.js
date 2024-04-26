@@ -590,3 +590,24 @@ export const returnColorCombinations = () => {
         ]
     }
 }
+
+export const getChronosAreaChartColors = (model_type) => {
+    const colors = {
+        "tiny": {
+            highLineColor: '#049981',
+            lowLineColor: '#F23645',
+            closeLineColor: '#878993',
+            areaBottomColor: 'rgba(242, 54, 69, 0.2)',
+            areaTopColor: 'rgba(4, 153, 129, 0.2)',
+        },
+        "small": {
+            highLineColor: '#228B22',
+            lowLineColor: '#B22222',
+            closeLineColor: '#878993',
+            areaBottomColor: 'rgba(178, 34, 34, 0.2)',
+            areaTopColor: 'rgba(34, 139, 34, 0.2)',
+        },
+    }
+
+    return colors[model_type]
+}

@@ -88,12 +88,12 @@ const MainChart = ({
                 }
             })
                 .then((res) => {
-                    const { ticker_data, total_count_db } = res.data.fetchedResults
+                    const { ticker_data, total_count_db, expires_at } = res.data.fetchedResults
                     setActualFetchLength(ticker_data.length)
                     converted = checkForUniqueAndTransform(ticker_data)
                     console.log('Fetched data length : ', converted.length)
                     setChartData(converted)
-                    dispatch(setCryptoDataInDbRedux({ dataInDb: ticker_data, total_count_db: total_count_db }))
+                    dispatch(setCryptoDataInDbRedux({ dataInDb: ticker_data, total_count_db: total_count_db, expires_at }))
                 })
                 .catch(err => {
                     console.log(err)

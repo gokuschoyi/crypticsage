@@ -36,7 +36,7 @@ const persistConfig = {
     storage: localforage,
     stateReconciler: autoMergeLevel2,
     serialize: true,
-    version: 8, // Update this number anytime changes are made to any of the redux slices. This will trigger the migration function below
+    version: 9, // Update this number anytime changes are made to any of the redux slices. This will trigger the migration function below
     migrate: (state, currentVersion) => {
         if (state && state._persist.version !== currentVersion) {
             console.log(`New state version ${currentVersion}. Clearing state`); // If the versions don't match, clear the state

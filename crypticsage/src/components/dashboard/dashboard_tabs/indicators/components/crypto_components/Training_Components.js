@@ -199,15 +199,6 @@ export const CustomSlider = (props) => {
         handleModelParamChange(name, value)
     }
 
-    /* const handleBlur = () => {
-        if (slideValue < sliderMin) {
-            setSlideValue(sliderMin);
-        } else if (slideValue > sliderMax) {
-            setSlideValue(sliderMax);
-        }
-    } */
-
-
     return (
         <Paper elevation={6}>
             <Box p={'4px 8px'} display='flex' flexDirection='column' alignItems='start'>
@@ -503,7 +494,7 @@ export const IndicatorSearchExecute = ({
         setSearchedFunction((prev) => { return [] })
 
     }
-    
+
     return (
         <Box pt={2} mb={!md && 2} mt={!md && '32px'} className='indicator-search-execute'>
             <Box pr={2} pl={md && 2}>
@@ -871,3 +862,39 @@ export const PredictionScoresTable = ({ sm, score, selectedTickerPeriod }) => {
         </Paper>
     )
 }
+
+export const CountdownTimer = ({ endTime }) => {
+    const calculateTimeLeft = () => {
+        const difference = endTime - new Date().getTime();
+        let timeLeft = {};
+
+        if (difference > 0) {
+            timeLeft = {
+                days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+                minutes: Math.floor((difference / 1000 / 60) % 60),
+                seconds: Math.floor((difference / 1000) % 60)
+            };
+        }
+
+        return timeLeft;
+    };
+
+    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setTimeLeft(calculateTimeLeft());
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    });
+
+    return (
+        <Box display={'flex'} flexDirection={'row'} alignItems={'flex-start'}>
+            <Typography variant='custom'  sx={{ textAlign: 'start', fontSize: '0.65rem', fontWeight: '600' }}>
+                New Ticker in: {timeLeft.days}:{timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}
+            </Typography>
+        </Box>
+    );
+};

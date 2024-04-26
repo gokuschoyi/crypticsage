@@ -60,13 +60,13 @@ const logoutUser = async (req, res) => {
         const keys = reply[1]; // Extract keys from reply
         if (keys.length > 0) {
             console.log('Keys found:', keys)
-            // redisClient.del(keys, (err, reply) => {
-            //     if (err) {
-            //         console.error('Error deleting keys:', err);
-            //     } else {
-            //         console.log('Keys deleted:', keys);
-            //     }
-            // });
+            redisClient.del(keys, (err, reply) => {
+                if (err) {
+                    console.error('Error deleting keys:', err);
+                } else {
+                    console.log('Keys deleted:', keys);
+                }
+            });
             res.status(200).json({ message: "User logout successful" });
         } else {
             console.log('No keys found matching the pattern:', pattern);

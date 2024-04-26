@@ -5,6 +5,7 @@ const { createTimer } = require('../utils/timer')
 // @ts-ignore
 var talib = require('talib/build/Release/talib')
 const CacheUtil = require('../utils/cacheUtil')
+const MDBServices = require('../services/mongoDBServices')
 
 const getIndicatorDesc = async (req, res) => {
     log.info("TALib Version: " + talib.version);
@@ -145,7 +146,18 @@ const executeTalibFunction = async (req, res) => {
     const ohlcv_cache_key = `${uid}_${asset_type}_${ticker_name}_${period}_ohlcv_data`
 
     const from_msg = "Talib - OHLCV Data"
-    const tokenDataFromRedis = await CacheUtil.get_cached_data(ohlcv_cache_key, from_msg)
+    let tokenDataFromRedis;
+    tokenDataFromRedis = await CacheUtil.get_cached_data(ohlcv_cache_key, from_msg)
+
+    if (tokenDataFromRedis === null) { // Called only after existing data has expired in redis cache
+        const new_fetch_offset = 0
+        let hist = await MDBServices.fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period, return_result_: true })
+        hist = hist.reverse()
+        const ticker_data = hist.slice(0, fetch_count).reverse()
+        tokenDataFromRedis = {
+            ticker_data,
+        }
+    }
 
     // validates the optional input data
     let validatedInputData = IUtil.validateOptionalInputData({ func_query, opt_input_keys: func_param_optional_input_keys })

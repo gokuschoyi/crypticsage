@@ -55,6 +55,7 @@ const initialState = {
     talibDescription: [],
     talibDescriptionCopy: [],
     cryptoDataInDb: [],
+    ticker_expiration: 0,
     streamedTickerData: [],
     selectedFunctions: [],
     modifiedSelectedFunctionWithDataToRender: [],
@@ -124,7 +125,8 @@ const initialState = {
             checkpoints: [],
             selectedCheckpoint: ''
         }
-    }
+    },
+    quick_forecasts: {}
 }
 
 const cryptoModuleSlice = createSlice({
@@ -221,6 +223,21 @@ const cryptoModuleSlice = createSlice({
         },
         setWganFinalForecast: (state, action) => {
             state.modelData.wgan_final_forecast = action.payload;
+        },
+        setQuickForecasts: (state, action) => {
+            const { symbol, ...rest } = action.payload
+            if (state.quick_forecasts[symbol] === undefined) {
+                state.quick_forecasts[symbol] = [{
+                    id: uuidv4(),
+                    ...rest
+                }]
+            } else {
+                state.quick_forecasts[symbol].push({
+                    id: uuidv4(),
+                    ...rest
+                })
+            }
+            // state.quick_forecasts = state.quick_forecasts.concat(action.payload);
         },
         updatePredictedValues: (state, action) => { // Not being used anymore in Saved LSTM and WGAN-GP
             const { model_id, rmse, forecast, predictions_array, initial_forecast } = action.payload
@@ -423,7 +440,8 @@ const cryptoModuleSlice = createSlice({
             state.barsFromTo = { from: 0, to: 0 };
         },
         setCryptoDataInDbRedux: (state, action) => {
-            const { dataInDb, total_count_db } = action.payload;
+            const { dataInDb, total_count_db, expires_at } = action.payload;
+            state.ticker_expiration=expires_at;
             state.cryptoDataInDb = dataInDb;
             state.total_count_db = total_count_db === 0 ? 0 : total_count_db;
             state.modelData.training_parameters.to_train_count = total_count_db * 0.5 > 1000 ? 1000 : total_count_db * 0.5
@@ -638,7 +656,7 @@ const cryptoModuleSlice = createSlice({
                     // Update the inputs array within the function
                     updatedFunction.outputAvailable = true;
                     const df_value = optInputs[0]?.defaultValue || ''
-                    console.log(df_value)
+                    // console.log(df_value)
                     updatedFunction.display_name = `${name}_${df_value}`;
 
                     // Update the function within the found function's functions array
@@ -842,6 +860,7 @@ const cryptoModuleSlice = createSlice({
             state.modifiedSelectedFunctionWithDataToRender = [];
             state.modelData = initialState.modelData;
             state.userModels = [];
+            state.quick_forecasts = {};
         },
         setIsDataNewFlag: (state, action) => {
             const currentState = state.modifiedSelectedFunctionWithDataToRender;
@@ -893,6 +912,7 @@ export const {
     , setPredictedValues
     , setIntermediateForecastResults
     , setWganFinalForecast
+    , setQuickForecasts
     , updatePredictedValues
     , setModelDataAvailableFlag
     , setNewForecastData

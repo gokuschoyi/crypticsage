@@ -179,11 +179,11 @@ const set_cached_historical_data = async (cache_key, data, period) => {
     // console.log('Fetch length : ', fetchLength)
     // console.log('End :', new Date(end).toLocaleString())
 
-    let prunedData = []
+    let newVals = []
 
     if (fetchLength > 0) {
         log.info('New Data available, fetching new tickers from binance')
-        const ticker_name = cache_key.split('_')[2]
+        const ticker_name = cache_key.split('_')[1]
         const updateQueries = {
             ticker_name,
             period,
@@ -191,8 +191,13 @@ const set_cached_historical_data = async (cache_key, data, period) => {
             end
         }
 
-        const newVals = await fetchBinanceHistoricalBetweenPeriods({ ...updateQueries })
-        prunedData = pruneData(newVals)
+        try {
+            newVals = await fetchBinanceHistoricalBetweenPeriods({ ...updateQueries })
+        } catch (err) {
+            log.error(err)
+            return
+        }
+        let prunedData = pruneData(newVals)
         // console.log('New tickers fetched (pruned):', prunedData)
         data.push(...prunedData)
         log.info(`Updated fetched data length :  ${data.length}`)
@@ -208,16 +213,16 @@ const set_cached_historical_data = async (cache_key, data, period) => {
 
     await redisClient.set(cache_key, JSON.stringify(data));
     await redisClient.expire(cache_key, expires_in);
-    return prunedData;
+    return newVals;
 }
 
-const get_cached_data = async (cache_key, from_msg) => {
+const get_cached_data = async (cache_key, from_msg, should_return_ = true) => {
     log.info(`Checking cache for ${from_msg}. Key : ${cache_key}`)
     const isDataPresent = await redisClient.exists(cache_key);
     if (isDataPresent) {
         log.info(`Data found in cache for ${from_msg}`)
         const data = await redisClient.get(cache_key);
-        return JSON.parse(data);
+        return should_return_ ? JSON.parse(data) : [];
     } else {
         log.info(`Data not found in cache for ${from_msg}`)
         return null;
@@ -233,7 +238,7 @@ const set_cached_ohlcv_data = async (cache_key, data) => {
         selectedTokenPeriod: data.period
     })
 
-    let prunedData = []
+    let newVals = []
 
     if (fetchLength > 0) {
         log.info('New Data available, fetching new tickers from binance')
@@ -245,8 +250,8 @@ const set_cached_ohlcv_data = async (cache_key, data) => {
             end
         }
 
-        const newVals = await fetchBinanceHistoricalBetweenPeriods({ ...updateQueries })
-        prunedData = pruneData(newVals)
+        newVals = await fetchBinanceHistoricalBetweenPeriods({ ...updateQueries })
+        let prunedData = pruneData(newVals)
 
         prunedData = prunedData.map((d) => {
             return {
@@ -274,7 +279,7 @@ const set_cached_ohlcv_data = async (cache_key, data) => {
     await redisClient.set(cache_key, JSON.stringify(data));
     await redisClient.expire(cache_key, expires_in);
 
-    return prunedData
+    return newVals
 }
 
 const update_cached_ohlcv_data = async (cache_key, data) => {
