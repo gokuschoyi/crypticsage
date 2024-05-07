@@ -582,7 +582,7 @@ const MainChart = (props) => {
 
             getHistoricalTickerDataFroDb({ token, payload: fetchQuery })
                 .then((res) => {
-                    const { ticker_data,  expires_at } = res.data.fetchedResults
+                    const { ticker_data, expires_at } = res.data.fetchedResults
                     newDataRef.current = [...ticker_data, ...newDataRef.current]
                     fetchPointRef.current = Math.floor(candleSticksInVisibleRange * 0.2) / -1
                     dispatch(setCryptoDataInDbRedux({ dataInDb: newDataRef.current, total_count_db: total_count_for_ticker_in_db, expires_at }))
@@ -642,7 +642,7 @@ const MainChart = (props) => {
             // console.log("UE 5 RETURN : Debounce fetch")
             chart.current.timeScale().unsubscribeVisibleLogicalRangeChange(VLRCHandler)
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedFunctionData, tDataRedux.length])
 
     // Debounced handler for saving the Form-To of chart position
@@ -844,104 +844,78 @@ const MainChart = (props) => {
             // console.log('No chart to render : Callback');
             return;
         }
-
-        // console.log('Processing Main chart');
-
-        const reduxDataCopy = JSON.parse(JSON.stringify(modifiedSelectedFunctionWithDataToRender));
+        
+        const reduxDataCopy = [...modifiedSelectedFunctionWithDataToRender];
 
         // filter and remove charts with old data based on isDataNew flag
         const chartsWithNewData = reduxDataCopy.filter((f) => f.isDataNew === true);
         if (chartsWithNewData.length > 0) {
-            // console.log('Charts with new data', chartsWithNewData.length);
-            let updated = []
-            chartsWithNewData.forEach((f) => {
-                const seriesToRemove = chartSeriesState.find((series) => series.id === f.id && series.key === f.key);
-                if (seriesToRemove) {
-                    chart.current.removeSeries(seriesToRemove.series);
-                    seriesToRemove.series = null
-                    updated.push(seriesToRemove)
-                } else {
-                    updated.push(seriesToRemove)
+            chartsWithNewData.forEach((chart_data) => {
+                const to_remove_index = chartSeriesState.findIndex((series) => series.id === chart_data.id && series.key === chart_data.key);
+                if (to_remove_index !== -1) {
+                    const series_to_remove = chartSeriesState[to_remove_index]
+                    chart.current.removeSeries(series_to_remove.series)
+                    chartSeriesState[to_remove_index].series = null
                 }
             })
             dispatch(setIsDataNewFlag())
-        } else { // console.log("No new data for chart") 
         }
 
         // checking and rendering chart
-        selectedFunctionData.forEach((func) => {
-            const funcIds = func.functions.map((f) => f.id) // if count = 1 then it is a single function else if 2 a copy of same function is present
-            // console.log("Func id from redux", funcIds)
-            funcIds.forEach((id) => {
-                const filtered = reduxDataCopy.filter((chartData) => chartData.id === id);
-                // console.log("Filtered", filtered)
-                filtered.forEach((f, i) => {
-                    // console.log(f.splitPane)
-                    const existingInStateIndex = chartSeriesState.findIndex((series) => series.id === f.id && series.key === f.key);
-                    // console.log("Existing in state index", existingInStateIndex)
-                    // console.log("Existing in state", existingInState)
-                    if (existingInStateIndex !== -1) {
-                        // console.log('Existing in state', f.key)
-                        let existingInState = chartSeriesState[existingInStateIndex];
-                        if (existingInState.series !== null) {
-                            existingInState.visible = f.visible
-                            existingInState.series.applyOptions({ visible: f.visible });
-                        } else {
-                            const newSeries = chart.current.addLineSeries({
-                                color: existingInState.color,
-                                lineWidth: 1,
-                                visible: f.visible,
-                                priceLineVisible: false,
-                                lastValueVisible: false,
-                                pane: f.splitPane ? 1 : 0,
-                            });
-                            newSeries.setData(f.result);
-                            existingInState.series = newSeries
-                        }
-                    } else {
-                        // console.log("Does not exist in state", f.key)
-                        const newSeries = chart.current.addLineSeries({
-                            color: f.color,
-                            lineWidth: 1,
-                            visible: f.visible,
-                            priceLineVisible: false,
-                            lastValueVisible: false,
-                            pane: f.splitPane ? 1 : 0,
-                        });
-                        newSeries.setData(f.result);
-                        setChartSeriesState((prevSeries) => [...prevSeries,
-                        {
-                            name: f.name,
-                            series: newSeries,
-                            id: f.id,
-                            key: f.key,
-                            pane: f.splitPane ? 1 : 0,
-                            visible: f.visible,
-                            color: f.color
-                        }
-                        ]);
-                    }
+        reduxDataCopy.forEach((chart_data) => {
+            const existingInStateIndex = chartSeriesState.findIndex((series) => series.id === chart_data.id && series.key === chart_data.key);
+            if (existingInStateIndex !== -1) {
+                let existingInState = chartSeriesState[existingInStateIndex];
+                if (existingInState.series !== null) {
+                    existingInState.visible = chart_data.visible
+                    existingInState.series.applyOptions({ visible: chart_data.visible });
+                } else {
+                    const newSeries = chart.current.addLineSeries({
+                        color: existingInState.color,
+                        lineWidth: 1,
+                        visible: chart_data.visible,
+                        priceLineVisible: false,
+                        lastValueVisible: false,
+                        pane: chart_data.splitPane ? 1 : 0,
+                    });
+                    newSeries.setData(chart_data.result);
+                    existingInState.series = newSeries
+                }
+            } else {
+                const newSeries = chart.current.addLineSeries({
+                    color: chart_data.color,
+                    lineWidth: 1,
+                    visible: chart_data.visible,
+                    priceLineVisible: false,
+                    lastValueVisible: false,
+                    pane: chart_data.splitPane ? 1 : 0,
                 });
-            });
-        });
-
-        // checking and removing chart
-        const existingSeriesId = chartSeriesState.map((series) => ({ id: series.id, key: series.key }));
-        const functionsInState = reduxDataCopy.map((func) => ({ id: func.id, key: func.key }));
-        const difference = existingSeriesId.filter((series) => !functionsInState.some((func) => func.id === series.id && func.key === series.key));
-
-        // console.log(existingSeriesId)
-        // console.log(functionsInState)
-        // console.log(difference)
-
-        difference.forEach((func) => {
-            const seriesToRemove = chartSeriesState.find((series) => series.id === func.id && series.key === func.key);
-            if (seriesToRemove) {
-                chart.current.removeSeries(seriesToRemove.series);
-                // Update chartSeriesState to remove the deleted series
-                setChartSeriesState((prevSeries) => prevSeries.filter((series) => series.id !== func.id))
+                newSeries.setData(chart_data.result);
+                setChartSeriesState((prevSeries) => [...prevSeries,
+                {
+                    name: chart_data.name,
+                    series: newSeries,
+                    id: chart_data.id,
+                    key: chart_data.key,
+                    pane: chart_data.splitPane ? 1 : 0,
+                    visible: chart_data.visible,
+                    color: chart_data.color
+                }]);
             }
-        });
+        })
+
+        const existingSereisId = new Set(chartSeriesState.map(series => `${series.id}_${series.key}`))
+        const functionsInState = new Set(reduxDataCopy.map(func => `${func.id}_${func.key}`))
+        const difference = [...existingSereisId].filter(id => !functionsInState.has(id));
+
+        difference.forEach((id) => {
+            const seriesToRemoveIndex = chartSeriesState.findIndex(series => `${series.id}_${series.key}` === id);
+            if (seriesToRemoveIndex !== -1) {
+                const seriesToRemove = chartSeriesState[seriesToRemoveIndex];
+                chart.current.removeSeries(seriesToRemove.series);
+                setChartSeriesState(prevSeries => prevSeries.filter(series => `${series.id}_${series.key}` !== id))
+            }
+        })
 
         // Removing pane 1 if no chart is present
         paneOneChartLength.current = chartSeriesState.filter((series) => series.pane === 1).length
@@ -953,11 +927,7 @@ const MainChart = (props) => {
             // console.log("Remove pane")
             chart.current.removePane(1)
             removePaneFlag.current = false
-        } else {
-            // console.log("pane needed")
         }
-
-        // console.timeEnd('Chart Load Time');
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chartSeriesState, modifiedSelectedFunctionWithDataToRender]);
 

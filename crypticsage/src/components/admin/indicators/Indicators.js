@@ -254,7 +254,7 @@ const Indicators = (props) => {
                     })}
                 </Box>
             </Box>
-        </Box >
+        </Box>
     )
 }
 

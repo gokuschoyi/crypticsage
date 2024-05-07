@@ -4,46 +4,162 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const util = require('util');
 const readdir = util.promisify(fs.readdir);
+const config = require('../config');
+const { v4: uuidv4 } = require('uuid');
+const types = require('../typedefs')
+const jwt = require("jsonwebtoken");
 
 
 /**
- * @typedef {Object} Quiz
- * @property {string} sectionId
- * @property {string} sectionName
- * @property {string} lessonId
- * @property {string} lessonName
- * @property {string} quizId
- * @property {string} quizTitle
- * @property {boolean} quizDescription
- * @property {array} questions
- * @property {boolean} [quiz_completed]
- * @property {string} [quiz_completed_date]
- * @property {number} [quiz_score]
- * @property {number} [quiz_total]
+ * Generates a JWT Token for the user
+ * @ignore
+ * @param {string} email Email of the user 
+ * @param {string} user_name Name of the user 
+ * @param {string} uid Unique ID of the user 
+ * @returns {Promise<string>}
  */
+const generateJWTToken = async (email, user_name, uid) => {
+    try {
+        const token = jwt.sign(
+            {
+                email: email,
+                user_name: user_name,
+                uid: uid
+            },
+            config.tokenKey ?? '',
+            {
+                expiresIn: config.tokenExpirationTime
+            }
+        );
+        return token
+    } catch (error) {
+        log.error(error.stack)
+        throw new Error("Error generating JWT Token")
+    }
+}
 
 /**
- * @typedef {Object} Lesson
- * @property {string} lessonID
- * @property {string} lessonName
- * @property {Quiz[]} allQuizzes
+ * Checks if the user is admin or not
+ * @ignore
+ * @param {string} email Email of the user to check if admin or not
+ * @returns {boolean}
  */
+const checkIsAdmin = (email) => {
+    const adminList = ['goku@gmail.com', 'gokulsangamitrachoyi@gmail.com']
+    let admin_status = adminList.includes(email);
+    return admin_status
+}
 
 /**
- * @typedef {Object} Section
- * @property {string} sectionId
- * @property {string} sectionName
- * @property {Lesson[]} lessons
+ * Generates the user object for login
+ * @ignore
+ * @param {array} user User array object from the database
+ * @param {boolean} adminStatus Admin status of the user
+ * @param {string} token Access token of the user
+ * @returns {Promise<types.UserLoginPayload>}
  */
+const generateUserObjectForLogin = async (user, adminStatus, token) => {
+    const user_id = user[0].uid
+    // const userModels = await MDBServices.fetchUserModels(user_id) // user models being fetched from indicators page
+    let userData = {}
+
+    userData.accessToken = token;
+    // userData.userModels = userModels;
+    userData.admin_status = adminStatus;
+    userData.email = user[0].email;
+    userData.displayName = user[0].displayName;
+    userData.emailVerified = user[0].emailVerified;
+    userData.uid = user[0].uid;
+    userData.preferences = user[0].preferences;
+    userData.mobile_number = user[0].mobile_number;
+    userData.signup_type = user[0].signup_type;
+    userData.lesson_status = user[0].lesson_status;
+    userData.passwordEmptyFlag = user[0].password === '' ? true : false;
+    userData.profile_image = user[0].profile_image;
+
+    return userData
+}
 
 /**
- * @typedef {Object} OutputObject
- * @property {Section[]} quizzes
+ * Generates the user object for signup
+ * @ignore
+ * @param {string} type The type of signup `registration` | `google` | `facebook`
+ * @param {object} payload The payload object containing the signup credentials
+ * @returns {Promise<types.User>}
  */
+const generateUserObjectForSignup = async (type, payload) => {
+    /**
+     * @type {types.User}
+     */
+    let userData = {}
+    let userName, email, hashedPassword, mobile_number, lessonStatus, quizStatus, profile_image, emailVerified
+    switch (type) {
+        case 'registration':
+            ({ userName, email, hashedPassword, mobile_number, lessonStatus, quizStatus } = payload)
+            userData.displayName = userName;
+            userData.email = email;
+            userData.password = hashedPassword;
+            userData.mobile_number = mobile_number;
+            userData.profile_image = '';
+            userData.emailVerified = false;
+            userData.date = new Date().toLocaleString('au');
+            userData.uid = uuidv4();
+            userData.preferences = {
+                theme: true,
+                dashboardHover: true,
+                collapsedSidebar: true,
+            };
+            userData.signup_type = 'registration';
+            userData.lesson_status = lessonStatus;
+            userData.quiz_status = quizStatus;
+            break;
+        case 'google':
+            ({ userName, email, profile_image, emailVerified, lessonStatus, quizStatus } = payload)
+            userData.displayName = userName;
+            userData.email = email;
+            userData.password = '';
+            userData.mobile_number = '';
+            userData.profile_image = profile_image;
+            userData.emailVerified = emailVerified;
+            userData.date = new Date().toLocaleString('au');
+            userData.uid = uuidv4();
+            userData.preferences = {
+                theme: true,
+                dashboardHover: true,
+                collapsedSidebar: true,
+            };
+            userData.signup_type = 'google';
+            userData.lesson_status = lessonStatus;
+            userData.quiz_status = quizStatus;
+            break;
+        case 'facebook':
+            ({ userName, email, profile_image, lessonStatus, quizStatus } = payload)
+            userData.displayName = userName;
+            userData.email = email;
+            userData.password = '';
+            userData.mobile_number = '';
+            userData.profile_image = profile_image;
+            userData.emailVerified = false;
+            userData.date = new Date().toLocaleString('au');
+            userData.uid = uuidv4();
+            userData.preferences = {
+                theme: true,
+                dashboardHover: true,
+                collapsedSidebar: true,
+            };
+            userData.signup_type = 'facebook';
+            userData.lesson_status = lessonStatus;
+            userData.quiz_status = quizStatus;
+            break;
+        default:
+            throw new Error("Invalid signup type")
+    }
+    return userData
+}
 
 /**
  * @param {Object} userQuizStatus user quiz data from FE
- * @param {Array<Quiz>} quizCollection 
+ * @param {Array<types.Quiz>} quizCollection 
  * @returns {Promise<Object>} An object containing the transformed quiz data.
  */
 const transformQuizData = async (userQuizStatus, quizCollection) => {
@@ -83,7 +199,7 @@ const transformQuizData = async (userQuizStatus, quizCollection) => {
 
     //transforming quiz collection to required format
     /**
-     * @type {OutputObject}
+     * @type {types.OutputObject}
      */
     const outputObject = {
         quizzes: []
@@ -315,6 +431,10 @@ const sortAndGroupLessons = (lessonArray) => {
 };
 
 module.exports = {
+    checkIsAdmin,
+    generateJWTToken,
+    generateUserObjectForLogin,
+    generateUserObjectForSignup,
     transformQuizData,
     processUploadedCsv,
     getRecentLessonAndQuiz,

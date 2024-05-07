@@ -136,7 +136,7 @@ const getIndicatorDesc = async (req, res) => {
     }, {})
     desc = Object.values(grouped)
     // log.info({ totalFunctionCount, funcDesc })
-    res.status(200).json({ message: 'talib desc', desc })
+    res.status(200).json({ message: 'Talib description fetched successfully', desc })
 }
 
 const executeTalibFunction = async (req, res) => {

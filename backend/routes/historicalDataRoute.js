@@ -5,6 +5,7 @@ const HDController = require('../controllers/historicalDataController')
 const BUtil = require('../utils/historicalDataUtil')
 
 router.post('/save_initial_yfinance_data', HDController.initialSaveHistoricalDataYFinance)
+// moved to contentManagerRoute.js
 router.post('/update_historical_yFinance_data', HDController.updateHistoricalYFinanceData) // converted
 
 router.post('/save_binance_data', HDController.initialSaveHistoricalDataBinance) // converted

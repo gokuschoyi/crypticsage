@@ -128,7 +128,7 @@ export const updateAllYFinanceTickers = async ({ token, symbol }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const response = await axios.post(`${baseUrl}/historicalData/update_historical_yFinance_data`, { symbol }, config, {
+    const response = await axios.post(`${baseUrl}/content/update_historical_yFinance_data`, { symbol }, config, {
         withCredentials: true
     })
     return response;
@@ -202,7 +202,7 @@ export const startModelTraining = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const response = await axios.post(`${baseUrl}/model/start_model_training`, { payload }, config, {
+    const response = await axios.post(`${baseUrl}/model/start_model_training`, { ...payload }, config, {
         withCredentials: true
     })
     return response;
@@ -212,7 +212,7 @@ export const retrain_wgan_Model = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const response = await axios.post(`${baseUrl}/model/retrain_model`, { payload }, config, {
+    const response = await axios.post(`${baseUrl}/model/retrain_model`, { ...payload }, config, {
         withCredentials: true
     })
     return response;
@@ -222,7 +222,7 @@ export const getCorelationMatrix = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const response = await axios.post(`${baseUrl}/model/get_corelation_matrix`, { payload }, config, {
+    const response = await axios.post(`${baseUrl}/model/get_corelation_matrix`, { ...payload }, config, {
         withCredentials: true
     })
     return response;

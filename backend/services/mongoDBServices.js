@@ -438,9 +438,9 @@ const updateUserData = async (email, userData) => {
 
 /**
  * @typedef {Object} Preferences
- * @property {string} dashboardHover - The dashboard hover status.
- * @property {string} collapsedSidebar - The collapsed sidebar status.
- * @property {string} theme - The theme status.
+ * @property {boolean} dashboardHover - The dashboard hover status.
+ * @property {boolean} collapsedSidebar - The collapsed sidebar status.
+ * @property {boolean} theme - The theme status.
  */
 
 /**
@@ -490,24 +490,10 @@ const updateUserPreferences = async (email, preferences) => {
 }
 
 /**
- * @typedef {Object} LessonStatus
- * @property {string} section_id - The section id.
- * @property {string} lesson_id - The lesson id.
- * @property {string} lesson_name - The lesson name.
- * @property {string|null} next_chapter_id - The next chapter id.
- * @property {string|null} prev_chapter_id - The previous chapter id.
- * @property {string|null} parent_section_id - The parent section id.
- * @property {boolean} lesson_start - The lesson start status.
- * @property {number} lesson_progress - The lesson progress.
- * @property {boolean} lesson_completed - The lesson completion status.
- * @property {string} lesson_completed_date - The lesson completion date.
- */
-
-/**
  * Update the lesson status of a user by email.
  * @async
  * @param {string} email 
- * @param {LessonStatus} lesson_status 
+ * @param {types.LessonStatus} lesson_status 
  * @returns {Promise<Array>} An array containing the message, status flag and result of the update operation.
  * @example
  * const email = 'example@example.com';
@@ -2278,7 +2264,7 @@ const saveOrUpdateTickerMeta = async (cryptoData) => {
 
             let updated = await metaCollection.findOneAndUpdate(query, update, options);
             status.push(updated)
-            log.info(`Ticker metadata updated for ${tickerData.name}`);
+            // log.info(`Ticker metadata updated for ${tickerData.name}`);
         }
         return status
     } catch (error) {
@@ -2299,7 +2285,7 @@ const saveOrUpdateTickerInfoMeta = async (tickerInfo) => {
 
             let updated = await metaCollection.findOneAndUpdate(query, update, options);
             status.push(updated)
-            log.info(`Ticker info updated for ${tickerData.symbol}`);
+            // log.info(`Ticker info updated for ${tickerData.symbol}`);
         }
         return status
     } catch (error) {

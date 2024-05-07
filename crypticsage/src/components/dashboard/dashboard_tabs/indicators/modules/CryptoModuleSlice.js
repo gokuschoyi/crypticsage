@@ -441,7 +441,7 @@ const cryptoModuleSlice = createSlice({
         },
         setCryptoDataInDbRedux: (state, action) => {
             const { dataInDb, total_count_db, expires_at } = action.payload;
-            state.ticker_expiration=expires_at;
+            state.ticker_expiration = expires_at !== undefined ? expires_at : state.ticker_expiration;
             state.cryptoDataInDb = dataInDb;
             state.total_count_db = total_count_db === 0 ? 0 : total_count_db;
             state.modelData.training_parameters.to_train_count = total_count_db * 0.5 > 1000 ? 1000 : total_count_db * 0.5

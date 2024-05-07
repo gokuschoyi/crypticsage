@@ -123,7 +123,7 @@ const serviceFetchAndUpdateBinanceTickerInfoMeta = async (symbols) => {
         let final_ticker_info_list = []
         for (let i = 0; i < symbols.length; i++) {
             const info = await CSUtil.fetchDataBySymbol({ symbol: symbols[i] })
-            log.info(`Fetched data for ${symbols[i]}`)
+            // log.info(`Fetched data for ${symbols[i]}`)
             final_ticker_info_list.push({ symbol: symbols[i], info })
         }
 

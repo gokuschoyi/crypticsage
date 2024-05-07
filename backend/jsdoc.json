@@ -15,14 +15,20 @@
     ],
     "source": {
         "include": [
-            "./services/authServices.js",
-            "./typedefs.js",
             "./routes/authRoute.js",
-            "./routes/userRoute.js"
+            "./routes/userRoute.js",
+            "./routes/indicatorsRoute.js",
+            "./routes/cryptoStocksRoute.js",
+            "./routes/contentManagerRoute.js",
+            "./routes/modelRoute.js",
+            "./controllers/authController.js",
+            "./services/authServices.js",
+            "./typedefs.js"
         ],
         "includePattern": ".+\\.js(doc|x)?$",
         "exclude":[
-            "./node_modules"
+            "./node_modules",
+            "./worker_celery"
         ]
     },
     "tags":{
@@ -49,7 +55,9 @@
     "templates": {
         "default": {
             "useLongnameInNav": true
-        }
+        },
+        "cleverLinks": false,
+        "monospaceLinks": false
     },
     "markdown": {
         "hardwrap": false,

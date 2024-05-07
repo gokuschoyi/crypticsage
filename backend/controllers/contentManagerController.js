@@ -80,6 +80,7 @@ const findYFTicker = async (req, res) => {
         res.status(400).json({ message: "Get YF Data request error", error: error.message })
     }
 }
+
 // Admin Side : New tickers that have not been added to the DB
 const getNewTickersToAdd = async (req, res) => {
     const ticker_list_db = await MDBServices.getBinanceTickerList()
@@ -174,32 +175,21 @@ const updateOneBinanceTicker = async (req, res) => {
     }
 }
 
-const getLatestTickerDataForUser = async (req, res) => {
-    try {
-        const { updateQueries } = req.body
-        const newTickers = await CMServices.serviceGetLatestTickerDataForUser({ updateQueries })
-        res.status(200).json({ message: "Get Latest Ticker Data request success", newTickers });
-    } catch (error) {
-        log.error(error.stack)
-        res.status(400).json({ message: error.message });
-    }
-}
-
-const saveOneTickerDataForUser = async (req, res) => {
-    try {
-        const { fetchQuery } = req.body
-        const updateTickerWithOneDataPoint = await CMServices.serviceUpdateTickerWithOneDataPoint({ fetchQuery })
-        res.status(200).json({ message: "Save One Ticker Data request success", updateTickerWithOneDataPoint });
-    } catch (error) {
-        log.error(error.stack)
-        res.status(400).json({ message: error.message });
-    }
-}
-
 const updateAllBinanceTickers = async (req, res) => {
     try {
         const finalProcessIds = await CMServices.serviceUpdateAllBinanceTickers()
         res.status(200).json({ message: "Update All Binance Tickers request success", finalProcessIds });
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const updateHistoricalYFinanceData = async (req, res) => {
+    try {
+        const { symbol } = req.body
+        const diffArray = await HDServices.processUpdateHistoricalYFinanceData({ symbol })
+        res.status(200).json({ message: 'YF tokens updated', diffArray })
     } catch (error) {
         log.error(error.stack)
         res.status(400).json({ message: error.message });
@@ -251,6 +241,28 @@ const getProcessStatus = async (req, res) => {
         const { jobIds, type } = req.body
         const processStatus = await CMServices.serviceCheckOneBinanceTickerJobCompletition({ jobIds, type })
         res.status(200).json({ message: processStatus.message, status: processStatus.data });
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const getLatestTickerDataForUser = async (req, res) => {
+    try {
+        const { updateQueries } = req.body
+        const newTickers = await CMServices.serviceGetLatestTickerDataForUser({ updateQueries })
+        res.status(200).json({ message: "Get Latest Ticker Data request success", newTickers });
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const saveOneTickerDataForUser = async (req, res) => {
+    try {
+        const { fetchQuery } = req.body
+        const updateTickerWithOneDataPoint = await CMServices.serviceUpdateTickerWithOneDataPoint({ fetchQuery })
+        res.status(200).json({ message: "Save One Ticker Data request success", updateTickerWithOneDataPoint });
     } catch (error) {
         log.error(error.stack)
         res.status(400).json({ message: error.message });
@@ -506,6 +518,7 @@ module.exports = {
     , getYfinanceTickersIndb
     , fetchOneBinanceTicker
     , updateOneBinanceTicker
+    , updateHistoricalYFinanceData
     , getLatestTickerDataForUser
     , saveOneTickerDataForUser
     , updateAllBinanceTickers
