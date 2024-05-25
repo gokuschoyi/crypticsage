@@ -72,6 +72,10 @@ import ReportOutlinedIcon from '@mui/icons-material/ReportOutlined';
 import CheckIcon from '@mui/icons-material/Check';
 import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
 
+import SaveIcon from '@mui/icons-material/Save';
+import PreviewIcon from '@mui/icons-material/Preview';
+import InsightsIcon from '@mui/icons-material/Insights';
+
 
 export { 
     LightModeOutlinedIcon, 
@@ -133,5 +137,8 @@ export {
     ThumbUpOutlinedIcon,
     ReportProblemIcon,
     ReportOutlinedIcon,
-    MarkEmailReadOutlinedIcon
+    MarkEmailReadOutlinedIcon,
+    SaveIcon,
+    PreviewIcon,
+    InsightsIcon
 }

@@ -11,6 +11,8 @@ import WganFinalPredictionChart from "./crypto_components/WganFinalPredictionCha
 import PredictionMetricsWganpg from "./crypto_components/PredictionMetricsWganpg";
 import SavedModelForecasting from "./crypto_components/SavedModelForecasting";
 
+import IntermediateModels from "./crypto_components/IntermediateModels";
+
 export {
     CryptoTable,
     StocksTable,
@@ -23,4 +25,5 @@ export {
     PredictionsChart,
     PredictionMetricsWganpg,
     SavedModelForecasting,
+    IntermediateModels
 }

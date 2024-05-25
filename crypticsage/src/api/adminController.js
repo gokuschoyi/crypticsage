@@ -260,8 +260,8 @@ export const deleteModel = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const { model_id, model_type, asset_type, ticker_name, period } = payload;
-    const response = await axios.post(`${baseUrl}/model/delete_model`, { model_id, model_type, asset_type, ticker_name, period }, config, {
+    const { model_id, model_type, asset_type, ticker_name, period, delete_type, last_checkpoint } = payload;
+    const response = await axios.post(`${baseUrl}/model/delete_model`, { model_id, model_type, asset_type, ticker_name, period, delete_type, last_checkpoint }, config, {
         withCredentials: true
     })
     return response;
@@ -333,5 +333,24 @@ export const makeWganPrediction = async ({ token, payload }) => {
         withCredentials: true
     })
     return response;
+}
 
+export const getModelTrainingStatus = async (token, model_id) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/model/model_training_status`, { model_id }, config, {
+        withCredentials: true
+    })
+    return response;
+}
+
+export const getWganCachedTrainingData = async (token, payload) => {
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.post(`${baseUrl}/model/get_cached_training_result`, { ...payload }, config, {
+        withCredentials: true
+    })
+    return response;
 }

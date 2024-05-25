@@ -356,7 +356,7 @@ const PredictionsChart = (props) => {
 
         return () => {
             // console.log("UE 5 RETURN : Debounce fetch")
-            chart.current.timeScale().unsubscribeVisibleLogicalRangeChange(barsInChartHandler)
+            chart.current && chart.current.timeScale().unsubscribeVisibleLogicalRangeChange(barsInChartHandler)
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -440,7 +440,7 @@ const PredictionsChart = (props) => {
                         const high = data.high;
                         const low = data.low;
                         let newString = `
-                        <div class="value-box">
+                        <div class="value-box" style="align-items:start">
                             <div style="width:110px; text-align:flex-start">${date}</div>
                             <div style="width:73px; text-align:flex-start">O : <span id="openValue">${Math.round(100 * open) / 100}</span></div>
                             <div style="width:73px; text-align:flex-start">H : <span id="highValue">${Math.round(100 * high) / 100}</span></div>

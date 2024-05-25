@@ -206,11 +206,11 @@ const SelectedFunctionContainer = (props) => {
                 }
             }
 
-            console.log(payload)
+            // console.log(payload)
             setTalibExecuting(true)
             executeTalibFunction({ token, payload })
                 .then((res) => {
-                    console.log(res.data)
+                    // console.log(res.data)
                     dispatch(setTalibResult({ id: id, name: name, optInputs: optInputs, result: res.data.result }))
                     setTalibExecuting(false)
                 })

@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, createContext, useContext } from 'react'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SidebarC from '../../components/dashboard/global/Sidebar';
 import Topbar from '../../components/dashboard/global/Topbar';
 import { useOnlineStatus } from '../../utils/Utils';
-import { Error, Info } from '../../components/dashboard/global/CustomToasts'
 import { Outlet } from 'react-router-dom';
 import './Dashboard.css'
 import { Box } from '@mui/material';
+
+const SocketContext = createContext()
+
 const Dashboard = (props) => {
     const isOnline = useOnlineStatus();
 
@@ -55,6 +57,8 @@ const Dashboard = (props) => {
         }
     })
 
+    const w_socket = useRef(null) // global training socket reference
+
     return (
         <Box className="dashboard-container" >
             <ToastContainer
@@ -78,13 +82,20 @@ const Dashboard = (props) => {
                     overflow: "auto",
                 }}
             >
-                <Topbar />
-                <Box className='content-box'>
-                    <Outlet />
-                </Box>
+                <SocketContext.Provider value={w_socket}>
+                    <Topbar />
+                    <Box className='content-box'>
+                        <Outlet />
+                    </Box>
+                </SocketContext.Provider>
             </Box>
         </Box>
     )
+}
+
+// Create a custom hook to access the ref from Topbar
+export const useSocketRef = () => {
+    return useContext(SocketContext);
 }
 
 export default Dashboard

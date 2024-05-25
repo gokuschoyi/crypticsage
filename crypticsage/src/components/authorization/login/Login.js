@@ -15,6 +15,7 @@ import { setAuthState } from '../authSlice';
 // import { setUserModels } from '../../dashboard/dashboard_tabs/indicators/modules/CryptoModuleSlice'
 import { LoginUser } from '../../../api/auth';
 import { setRecentLessonAndQuizStatus, setWordOfTheDay } from '../../dashboard/dashboard_tabs/stats/StatsSlice'
+import { setModelsInProgress } from '../../dashboard/dashboard_tabs/indicators/modules/IntermediateModelSlice'
 
 const process_login = (result) => {
     return {
@@ -107,6 +108,7 @@ const Login = (props) => {
                 dispatch(setAuthState(userData))
                 dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
                 dispatch(setWordOfTheDay(result.data.word))
+                dispatch(setModelsInProgress(result.data.in_progress_models))
                 setIsLoading(false)
                 navigate('/dashboard')
             } catch (err) {
@@ -133,6 +135,7 @@ const Login = (props) => {
             dispatch(setAuthState(userData))
             dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
             dispatch(setWordOfTheDay(result.data.word))
+            dispatch(setModelsInProgress(result.data.in_progress_models))
             setIsLoading(false)
             navigate('/dashboard')
         } catch (err) {
@@ -158,6 +161,7 @@ const Login = (props) => {
             dispatch(setAuthState(userData))
             dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
             dispatch(setWordOfTheDay(result.data.word))
+            dispatch(setModelsInProgress(result.data.in_progress_models))
             setIsLoading(false)
             navigate('/dashboard')
         } catch (err) {
@@ -335,7 +339,7 @@ const Login = (props) => {
                     </Grid> */}
                 </Grid>
             </Box>
-        </Box >
+        </Box>
     )
 }
 

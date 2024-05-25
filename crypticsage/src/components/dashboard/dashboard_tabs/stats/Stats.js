@@ -18,10 +18,6 @@ import "swiper/css/pagination";
 import 'swiper/css/navigation';
 import "swiper/css";
 
-import CustomCard from './stat_components/CustomCard.js';
-import CustomLongCard from './stat_components/CustomLongCard.js';
-import CustomTokenCard from './stat_components/CustomTokenCard.js';
-import UploadTradingViewDataCard from './stat_components/UploadTradingViewDataCard.js';
 import Header from '../../global/Header';
 
 import {
@@ -29,7 +25,14 @@ import {
     Grid,
     Skeleton
 } from '@mui/material';
-import CoinChartBox from './stat_components/CoinChartBox';
+import {
+    CustomCard
+    , CustomLongCard
+    , CustomTokenCard
+    , UploadTradingViewDataCard
+    , CoinChartBox
+    , InProgressCard
+} from './stat_components';
 
 const Stats = (props) => {
     const { title, subtitle } = props
@@ -206,7 +209,7 @@ const Stats = (props) => {
                                 }
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
-                                <UploadTradingViewDataCard title='Upload Trading-View Files' subtitle='Upload your Trading View Files' buttonName="UPLOAD" />
+                                <InProgressCard />
                             </Grid>
                             <Grid item xs={12} sm={12} md={6} lg={6} xl={3}>
                                 {cryptoData === null ? <Skeleton variant="rectangle" sx={{ borderRadius: '20px' }} width="100%" height='100%' /> :
@@ -251,11 +254,7 @@ const Stats = (props) => {
                             </Grid>
                         </Grid>
                     </Grid>
-                    {/* <Grid item xs={12} sm={12} md={12} lg={6} xl={12} className='coin-chart-grid-box'>
-                        <Box pt={2} pb={2} style={{ height: '350px' }} className='symbol-overview-box'>
-                            <SymbolOverview />
-                        </Box>
-                    </Grid> */}
+
                     <Grid item xs={12} sm={12} md={12} lg={6} xl={12} className='coin-chart-grid-box'>
                         <CoinChartBox />
                     </Grid>
@@ -270,7 +269,10 @@ const Stats = (props) => {
                     <Grid item xs={12} sm={12} md={6} lg={4}>
                         <CustomLongCard title='GO TO MODELS' subtitle='20/10/2023' content='View your various models' buttonName="GO TO MODELS" />
                     </Grid>
-                    <Grid item xs={12} sm={12} md={12} lg={12}>
+                    <Grid item xs={12} sm={12} md={6} lg={6}>
+                        <UploadTradingViewDataCard title='Upload Trading-View Files' subtitle='Upload your Trading View Files' buttonName="UPLOAD" />
+                    </Grid>
+                    <Grid item xs={12} sm={12} md={12} lg={6}>
                         {Object.keys(wordData).length !== 0 &&
                             <CustomLongCard
                                 title='WORD OF THE DAY'

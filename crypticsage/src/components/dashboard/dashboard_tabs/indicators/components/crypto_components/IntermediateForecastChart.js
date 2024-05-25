@@ -5,7 +5,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const IntermediateForecastChart = (props) => {
-    const { intermediate_forecasts } = props
+    const { intermediate_forecasts, for_, collapseResults } = props
 
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
@@ -119,17 +119,17 @@ const IntermediateForecastChart = (props) => {
     const ToolTipComponent = React.memo(() => {
         const inter_forecast_keys = Object.keys(forecastSeriesRef.current).filter((key) => key !== 'actual')
         return (
-            <Box className='model-hist-legend'>
+            <Box className={collapseResults ? 'model-hist-legend show_intermediate' : 'model-hist-legend hide_intermediate'}>
                 <Box className='model-hist-main-box-wgan'>
                     <Box>
-                        <Typography className='model-hist-tooltip-epoch' style={{ fontSize: '12px' }} id="intermediate-forecast-date">Date :</Typography>
+                        <Typography className='model-hist-tooltip-epoch' style={{ fontSize: '12px' }} id={`intermediate-forecast-date_${for_}`}>Date :</Typography>
                     </Box>
 
                     <Box className='model-hist-tooltip-item'>
                         <Box style={{ display: 'flex', flexDirection: 'row', justifyContent: "space-between", alignItems: 'center', gap: '4px' }}>
                             <Box style={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: `blue` }}></Box>
-                            <Typography className='model-hist-tooltip-item-key' id={`actual_key`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>Actual</Typography>
-                            <Typography className='model-hist-tooltip-item-value' id={`actual_value`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>{ }</Typography>
+                            <Typography className='model-hist-tooltip-item-key' id={`actual_key_${for_}`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>Actual</Typography>
+                            <Typography className='model-hist-tooltip-item-value' id={`actual_value_${for_}`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>{ }</Typography>
                         </Box>
                     </Box>
 
@@ -140,8 +140,8 @@ const IntermediateForecastChart = (props) => {
                                 <Box className='model-hist-tooltip-item' sx={{ minWidth: '130px', justifyContent: 'space-between' }}>
                                     <Box style={{ display: 'flex', flexDirection: 'row', justifyContent: "space-between", alignItems: 'center', gap: '4px' }}>
                                         <Box style={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: `${color}` }}></Box>
-                                        <Typography className='model-hist-tooltip-item-key' id={`${forecast_key}_key`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>E : {forecast_key}</Typography>
-                                        <Typography className='model-hist-tooltip-item-value' id={`${forecast_key}_value`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'></Typography>
+                                        <Typography className='model-hist-tooltip-item-key' id={`${forecast_key}_key_${for_}`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>E : {forecast_key}</Typography>
+                                        <Typography className='model-hist-tooltip-item-value' id={`${forecast_key}_value_${for_}`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'></Typography>
                                     </Box>
                                     <HideIcon inter_key={forecast_key} show_chart_flag={visible} />
                                 </Box>
@@ -182,7 +182,7 @@ const IntermediateForecastChart = (props) => {
     useEffect(() => {
         return () => {
             if (chart.current) {
-                console.log(`NEW CLEANUP :Intermediate results & Predctions Chart tooltip unsubscription`);
+                // console.log(`NEW CLEANUP :Intermediate results & Predctions Chart tooltip unsubscription`);
                 chart.current.unsubscribeCrosshairMove(tooltipHandler)
                 chart.current.remove();
                 chart.current = null;
@@ -204,15 +204,15 @@ const IntermediateForecastChart = (props) => {
         ) {
             return;
         } else {
-            const iDate = document.getElementById('intermediate-forecast-date')
+            const iDate = document.getElementById(`intermediate-forecast-date_${for_}`)
             iDate.innerHTML = `Date : ${new Date(param.time * 1000).toLocaleString()}`
             const all_keys = Object.keys(forecastSeriesRef.current)
             const toShow = all_keys.filter((key) => forecastSeriesRef.current[key].visible === true)
             toShow.push('actual')
 
             toShow.forEach((key, i) => {
-                const key_element = document.getElementById(`${key}_key`)
-                const value_element = document.getElementById(`${key}_value`)
+                const key_element = document.getElementById(`${key}_key_${for_}`)
+                const value_element = document.getElementById(`${key}_value_${for_}`)
                 key_element.innerHTML = key === 'actual' ? 'Actual' : `E : ${key}`
                 const data = param.seriesData.get(forecastSeriesRef.current[key]['line']);
                 value_element.innerHTML = data.value.toFixed(2)
@@ -257,24 +257,14 @@ const IntermediateForecastChart = (props) => {
         }
     }, [chartBackgroundColor, intermediate_forecasts, textColor])
 
-    // Resize chart on container resizes.
-    const resizeObserver = useRef();
-    useEffect(() => {
-        resizeObserver.current = new ResizeObserver((entries) => {
-            const { width, height } = entries[0].contentRect;
-            // console.log(width, height);
-            chart.current && chart.current.applyOptions({ width, height });
-        });
-
-        resizeObserver.current.observe(chartContainerRef.current);
-
-        return () => resizeObserver.current.disconnect();
-    }, []);
-
     return (
         <Box display='flex' flexDirection='column' gap='8px'>
-            <Box display={'flex'} alignItems={'flex-start'}>INTERMEDIATE FORECAST</Box>
-            <Box className='wgangp-metrics-chart-box' sx={{ height: intermediate_forecasts.length > 0 ? '280px' : '0px' }}>
+            <Box display={'flex'} alignItems={'flex-start'}>
+                <Typography variant={for_ === '' ? 'h6' : 'h5'}>
+                    {for_ === '' ? "INTERMEDIATE FORECAST" : "Intermediate Forecast"}
+                </Typography>
+            </Box>
+            <Box className='wgangp-metrics-chart-box' sx={{ height: intermediate_forecasts.length > 0 ? for_ === '' ? '280px' : '300px' : '0px' }}>
                 <ToolTipComponent />
                 <Box ref={chartContainerRef} height='100%' width='100%'></Box>
             </Box>

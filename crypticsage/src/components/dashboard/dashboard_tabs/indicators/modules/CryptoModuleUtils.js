@@ -611,3 +611,21 @@ export const getChronosAreaChartColors = (model_type) => {
 
     return colors[model_type]
 }
+
+function interpolateColor(color1, color2, factor) {
+    let result = "#";
+    for (let i = 1; i <= 5; i += 2) {
+        let hex1 = parseInt(color1.substr(i, 2), 16);
+        let hex2 = parseInt(color2.substr(i, 2), 16);
+        let blended = Math.round(hex1 + (hex2 - hex1) * factor).toString(16);
+        while (blended.length < 2) blended = '0' + blended; // pad with zero
+        result += blended;
+    }
+    return result;
+}
+
+export const getProgressColorForValue = (value, min, max, startColor, endColor) => {
+    let factor = (value - min) / (max - min);
+    factor = Math.max(0, Math.min(1, factor)); // Clamp factor between 0 and 1
+    return interpolateColor(startColor, endColor, factor);
+}

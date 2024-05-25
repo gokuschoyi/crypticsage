@@ -4,6 +4,7 @@ import { ArrowDropUpIcon } from '../../../../global/Icons'
 
 const updatePriceChange = (oldPrice, newPrice, toAttach) => {
     let priceChangeDiv = document.getElementById(`${toAttach}`);
+    if(!priceChangeDiv) return
     priceChangeDiv.innerHTML = '';
 
     let oldPriceStr = oldPrice.toFixed(2);
@@ -50,7 +51,7 @@ const useBinanceWebSocket = (binanceWS_URL) => {
 
         return () => {
             if (websocketRef.current && websocketRef.current.readyState === 1) {
-                console.log('Closing Binance WebSocket connection (24h change)...');
+                // console.log('Closing Binance WebSocket connection (24h change)...');
                 websocketRef.current.close();
             }
         };
@@ -73,9 +74,9 @@ const SingleTicker = () => {
     useEffect(() => {
         if (b_ws.current) {
             b_ws.current.onopen = () => {
-                console.log('WebSocket connection opened');
+                console.log('WS ST: CONNECTION ESTABLISHED');
             };
-            // const ticker_p = document.getElementById('price_change')
+
             b_ws.current.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 updatePriceChange(valuesRef.current.price_change.value, parseFloat(data.p), 'st-price-box')
@@ -102,11 +103,11 @@ const SingleTicker = () => {
             };
 
             b_ws.current.onclose = () => {
-                console.log('WebSocket connection closed');
+                console.log('WS ST: CONNECTION CLOSED');
             };
 
             b_ws.current.onerror = (error) => {
-                console.error('WebSocket error:', error);
+                console.log('WS ST: CONNECTION ERROR', error);
             };
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

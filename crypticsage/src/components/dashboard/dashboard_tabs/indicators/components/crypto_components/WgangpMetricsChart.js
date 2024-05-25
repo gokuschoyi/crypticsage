@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "react-error-boundary";
 import React, { useEffect, useRef } from 'react'
-import { Box, useTheme } from '@mui/material'
+import { Box, useTheme, Typography, FormControlLabel, Switch } from '@mui/material'
 import { createChart } from 'lightweight-charts';
 import { useSelector } from "react-redux";
 
@@ -10,15 +10,13 @@ const logError = (error, info) => {
 };
 
 const WgangpMetricsChart = (props) => {
-    const { type, epochResults, predictionsPalette, metricsChartReload } = props
+    const { type, epochResults, predictionsPalette, metricsChartReload, for_ } = props
+    const { syncTooltip, setSyncTooltip, chart, metricLineSeriesRef } = props
     const retrainFlag = useSelector(state => state.cryptoModule.modelData.retraining_flag)
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
     const textColor = theme.palette.primary.newWhite
     const chartContainerRef = useRef()
-    const chart = useRef(null)
-    const metricLineSeriesRef = useRef({})
-    // const resizeObserver = useRef();
 
     const chart_options = {
         autoSize: true,
@@ -128,13 +126,13 @@ const WgangpMetricsChart = (props) => {
             param.point.y > chartContainerRef.current.clientHeight ||
             param.paneIndex !== 0
         ) {
-            tooltip = document.querySelector(`.model-hist-tooltip_${type}`)
+            tooltip = document.querySelector(`.model-hist-tooltip_${type}_${for_}`)
             tooltip.innerHTML = ''
             return;
         } else {
             let finalStr = ''
             let str = ''
-            tooltip = document.querySelector(`.model-hist-tooltip_${type}`)
+            tooltip = document.querySelector(`.model-hist-tooltip_${type}_${for_}`)
             let epoch = param.time
             Object.keys(metricLineSeriesRef.current).forEach((key, i) => {
                 const data = param.seriesData.get(metricLineSeriesRef.current[key]);
@@ -227,6 +225,7 @@ const WgangpMetricsChart = (props) => {
                 metricLineSeriesRef.current[key].applyOptions({ color: metricColors[i] })
             })
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [predictionsPalette])
 
     // sets the background color of the chart based on theme
@@ -254,28 +253,38 @@ const WgangpMetricsChart = (props) => {
                 }
             })
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chartBackgroundColor, epochResults, textColor])
-
-    // Resize chart on container resizes.
-    // useEffect(() => {
-    //     resizeObserver.current = new ResizeObserver((entries) => {
-    //         const { width, height } = entries[0].contentRect;
-    //         // console.log(width, height);
-    //         chart.current && chart.current.applyOptions({ width, height });
-    //     });
-
-    //     resizeObserver.current.observe(chartContainerRef.current);
-
-    //     return () => resizeObserver.current.disconnect();
-    // }, []);
 
     return (
         <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
             <Box display='flex' flexDirection='column' gap='8px'>
-                {epochResults.length > 0 && <Box display={'flex'} alignItems={'flex-start'}>{type.toUpperCase()}</Box>}
-                <Box className='wgangp-metrics-chart-box' sx={{ height: epochResults.length > 0 ? '280px' : '0px' }}>
+                {epochResults.length > 0 &&
+                    <Box display={'flex'} alignItems={'center'} flexDirection={"row"} gap={1}>
+                        <Typography variant={for_ === '' ? 'h6' : 'h5'}>
+                            {for_ !== '' ?
+                                type.split('_')
+                                    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                                    .join(' ')
+                                : type.toUpperCase()
+                            }
+                        </Typography>
+                        {type === 'losses' &&
+                            <FormControlLabel
+                                value="start"
+                                sx={{ marginLeft: '0px', marginRight: '0px' }}
+                                control={<Switch size="small" color="secondary" />}
+                                label={syncTooltip ? 'Unsync Tooltip' : 'Sync Tooltip'}
+                                labelPlacement="end"
+                                checked={syncTooltip}
+                                onChange={() => setSyncTooltip(!syncTooltip)}
+                            />
+                        }
+                    </Box>
+                }
+                <Box className='wgangp-metrics-chart-box' sx={{ height: epochResults.length > 0 ? for_ === '' ? '280px' : '300px' : '0px' }}>
                     <Box className={type === 'training_metrics' || type === 'validation_metrics' ? 'model-hist-legend offset-left-axis' : 'model-hist-legend'}>
-                        <Box className={`model-hist-tooltip_${type}`}></Box>
+                        <Box className={`model-hist-tooltip_${type}_${for_}`}></Box>
                     </Box>
                     <Box ref={chartContainerRef} height='100%' width='100%'></Box>
                 </Box>

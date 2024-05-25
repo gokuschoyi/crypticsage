@@ -35,7 +35,7 @@ const lineColors = [
 ];
 
 const WganFinalPredictionChart = (props) => {
-    const { wgan_final_forecast, trainingStartedFlag } = props
+    const { wgan_final_forecast, trainingStartedFlag, for_ } = props
 
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
@@ -44,6 +44,7 @@ const WganFinalPredictionChart = (props) => {
     const chartContainerRef = useRef()
     const chart = useRef(null)
     const predictionSeriesref = useRef({})
+    const [reload, setReload] = useState(false)
 
     const chart_options = {
         autoSize: true,
@@ -111,14 +112,14 @@ const WganFinalPredictionChart = (props) => {
             <Box className='model-hist-legend'>
                 <Box className='model-hist-main-box-wgan'>
                     <Box>
-                        <Typography className='model-hist-tooltip-epoch' style={{ fontSize: '12px' }} id="prediction-date">Date : </Typography>
+                        <Typography className='model-hist-tooltip-epoch' style={{ fontSize: '12px' }} id={`prediction-date_${for_}`}>Date : </Typography>
                     </Box>
 
                     <Box className='model-hist-tooltip-item'>
                         <Box style={{ display: 'flex', flexDirection: 'row', justifyContent: "space-between", alignItems: 'center', gap: '4px' }}>
                             <Box style={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: `blue` }}></Box>
-                            <Typography className='model-hist-tooltip-item-key' id={`actual_key_pred`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>Actual</Typography>
-                            <Typography className='model-hist-tooltip-item-value' id={`actual_value_pred`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'></Typography>
+                            <Typography className='model-hist-tooltip-item-key' id={`actual_key_pred_${for_}`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>Actual</Typography>
+                            <Typography className='model-hist-tooltip-item-value' id={`actual_value_pred_${for_}`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'></Typography>
                         </Box>
                     </Box>
 
@@ -129,8 +130,8 @@ const WganFinalPredictionChart = (props) => {
                                 <Box className='model-hist-tooltip-item' sx={{ minWidth: '130px', justifyContent: 'space-between' }}>
                                     <Box style={{ display: 'flex', flexDirection: 'row', justifyContent: "space-between", alignItems: 'center', gap: '4px' }}>
                                         <Box style={{ width: '8px', height: '8px', borderRadius: '10px', backgroundColor: `${color}` }}></Box>
-                                        <Typography className='model-hist-tooltip-item-key' id={`${series_key[i]}_key_pred`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>P : </Typography>
-                                        <Typography className='model-hist-tooltip-item-value' id={`${series_key[i]}_value_pred`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'></Typography>
+                                        <Typography className='model-hist-tooltip-item-key' id={`${series_key[i]}_key_pred_${for_}`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'>P : </Typography>
+                                        <Typography className='model-hist-tooltip-item-value' id={`${series_key[i]}_value_pred_${for_}`} style={{ fontSize: '10px', paddingTop: '2px' }} variant='custom'></Typography>
                                     </Box>
                                     <HideIcon inter_key={series_key[i]} show_chart_flag={visible} />
                                 </Box>
@@ -177,10 +178,14 @@ const WganFinalPredictionChart = (props) => {
                 }
                 predictionSeriesref.current[item.key]['line'].setData(item.data)
             })
+
+            chart.current.subscribeCrosshairMove(tooltipHandler)
+            setReload(!reload)
         }
 
         return () => {
             // console.log('CLEANUP : WGAN GP final prediction chart cleanup')
+            chart.current && chart.current.unsubscribeCrosshairMove(tooltipHandler)
             chart.current && chart.current.remove();
             chart.current = null;
             predictionSeriesref.current = {}
@@ -202,14 +207,14 @@ const WganFinalPredictionChart = (props) => {
         ) {
             return;
         } else {
-            const pDate = document.getElementById('prediction-date')
+            const pDate = document.getElementById(`prediction-date_${for_}`)
             pDate.innerHTML = `Date : ${new Date(param.time * 1000).toLocaleString()}`
             const ttKeys = Object.keys(wgan_final_forecast[0]).filter(key => key !== "date")
             const toShow = ttKeys.filter(key => predictionSeriesref.current[key].visible)
 
             toShow.forEach(key => {
-                const key_element = document.getElementById(`${key}_key_pred`)
-                const value_element = document.getElementById(`${key}_value_pred`)
+                const key_element = document.getElementById(`${key}_key_pred_${for_}`)
+                const value_element = document.getElementById(`${key}_value_pred_${for_}`)
                 key_element.innerHTML = key === 'actual' ? 'Actual : ' : `P : ${key}`
                 const data = param.seriesData.get(predictionSeriesref.current[key]['line'])
                 value_element.innerHTML = data.value.toFixed(2)
@@ -217,23 +222,6 @@ const WganFinalPredictionChart = (props) => {
 
         }
     }
-
-    // set the tooltip for the chart
-    useEffect(() => {
-        if (chart.current && wgan_final_forecast.length > 0) {
-            chart.current.subscribeCrosshairMove(tooltipHandler)
-        } else {
-            return
-        }
-
-        return () => {
-            if (chart.current) {
-                chart.current.unsubscribeCrosshairMove(tooltipHandler)
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wgan_final_forecast])
-
 
     // sets the background color of the chart based on theme
     useEffect(() => {
@@ -261,20 +249,6 @@ const WganFinalPredictionChart = (props) => {
             })
         }
     }, [chartBackgroundColor, wgan_final_forecast, textColor])
-
-    // Resize chart on container resizes.
-    // const resizeObserver = useRef();
-    // useEffect(() => {
-    //     resizeObserver.current = new ResizeObserver((entries) => {
-    //         const { width, height } = entries[0].contentRect;
-    //         // console.log(width, height);
-    //         chart.current && chart.current.applyOptions({ width, height });
-    //     });
-
-    //     resizeObserver.current.observe(chartContainerRef.current);
-
-    //     return () => resizeObserver.current.disconnect();
-    // }, []);
 
     return (
         <ErrorBoundary onError={logError} fallback={<div>Something went wrong</div>}>
@@ -306,7 +280,7 @@ const WganFinalPredictionChart = (props) => {
                 </Box>
             </Box>
 
-        </ErrorBoundary >
+        </ErrorBoundary>
     )
 }
 
