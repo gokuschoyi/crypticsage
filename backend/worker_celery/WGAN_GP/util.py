@@ -112,52 +112,76 @@ def calculatePredictomRMSE(predictions, look_ahead):
     return rmse_
 
 
-def broadcastTrainingStatus(uid, event, message, process_id=None):
+def broadcastTrainingStatus(model_id, event, message, process_id=None):
     match event:
         case 'feature_relations':
             redisPubSubConn.publish(
                 "model_training_channel",
-                json.dumps({"event": "feature_relations", "uid": uid, "metrics": message}),
+                json.dumps({"event": "feature_relations", "training_model_id": model_id, "metrics": message}),
             )
         case "notify":
             redisPubSubConn.publish(
                 "model_training_channel",
-                json.dumps({"event": "notify", "uid": uid, "message": message}),
+                json.dumps({"event": "notify", "training_model_id": model_id, "message": message}),
             )
         case "epochBegin":
             redisPubSubConn.publish(
                 "model_training_channel",
-                json.dumps({"event": "epochBegin", "uid": uid, "epoch": message}),
+                json.dumps({"event": "epochBegin", "training_model_id": model_id, "epoch": message["epoch"], "epochs":message["epochs"]}),
+            )
+            redisPubSubConn.publish(
+                "model_update_channel",
+                json.dumps({"event": "epochBegin", "update_model_id": model_id, "model_id":model_id, "epoch": message["epoch"], "epochs":message["epochs"]}),
             )
         case "epochEnd":
             redisPubSubConn.publish(
                 "model_training_channel",
-                json.dumps({"event": "epochEnd", "uid": uid, "epoch": message['epoch'], "log": message['log']})
+                json.dumps({"event": "epochEnd", "training_model_id": model_id, "epoch": message['epoch'], "log": message['log']})
+            )
+            redisPubSubConn.publish(
+                "model_update_channel",
+                json.dumps({"event": "epochEnd", "update_model_id": model_id, "model_id":model_id, "epoch": message['epoch'], "log": message['log']})
             )
         case "batchEnd":
             redisPubSubConn.publish(
                 "model_training_channel",
-                json.dumps({"event": "batchEnd", "uid": uid, "batch": message['batch'], "log": message['log']})
+                json.dumps({"event": "batchEnd", "training_model_id": model_id, "batch": message['batch'], "log": message['log']})
+            )
+            redisPubSubConn.publish(
+                "model_update_channel",
+                json.dumps({"event": "batchEnd", "update_model_id": model_id, "model_id":model_id, "batch": message['batch'], "log": message['log']})
             )
         case "trainingEnd":
             redisPubSubConn.publish(
                 "model_training_channel",
-                json.dumps({"event": "trainingEnd", "uid": uid})
+                json.dumps({"event": "trainingEnd", "training_model_id": model_id})
+            )
+            redisPubSubConn.publish(
+                "model_training_channel",
+                json.dumps({"event": "trainingEnd", "training_model_id": model_id, "model_id":model_id })
             )
         case "prediction_completed":
             redisPubSubConn.publish(
                 "model_training_channel",
-                json.dumps({"event": "prediction_completed", "uid": uid, "model": 'WGAN-GP', "id": process_id})
+                json.dumps({"event": "prediction_completed", "training_model_id": model_id, "model": 'WGAN-GP', "id": process_id})
+            )
+            redisPubSubConn.publish(
+                "model_update_channel",
+                json.dumps({"event": "prediction_completed", "update_model_id": model_id, "model_id":model_id, "model": 'WGAN-GP', "id": process_id})
             )
         case "intermediate_forecast":
             redisPubSubConn.publish(
                 "model_training_channel",
-                json.dumps({"event": "intermediate_forecast", "uid": uid, "intermediate_forecast": message['data'], "epoch": message['epoch'], "rmse": message['rmse']})
+                json.dumps({"event": "intermediate_forecast", "training_model_id": model_id, "intermediate_forecast": message['data'], "epoch": message['epoch'], "rmse": message['rmse']})
             )
         case "error":
             redisPubSubConn.publish(
                 "model_training_channel",
-                json.dumps({"event": "error", "uid": uid, "message": message}),
+                json.dumps({"event": "error", "training_model_id": model_id, "message": message}),
+            )
+            redisPubSubConn.publish(
+                "model_update_channel",
+                json.dumps({"event": "error", "update_model_id": model_id, "message": message})
             )
 
 
@@ -305,7 +329,7 @@ def closeFileWriters(file_writers):
         writer.close()
 
 
-def broadcastTrainingBatchLosses(model, uid, total_training_batches, batch_no, batch_size, batch_d_loss, critic_iter, batch_g_loss):
+def broadcastTrainingBatchLosses(model, model_id, total_training_batches, batch_no, batch_size, batch_d_loss, critic_iter, batch_g_loss):
     if model == 'discriminator':
         message = {
             "batch": batch_no,
@@ -318,7 +342,7 @@ def broadcastTrainingBatchLosses(model, uid, total_training_batches, batch_no, b
                 "totalNoOfBatch": total_training_batches 
             }
         }   
-        broadcastTrainingStatus(uid, "batchEnd", message)
+        broadcastTrainingStatus(model_id, "batchEnd", message)
     else:
         message = {
             "batch": batch_no,
@@ -330,7 +354,7 @@ def broadcastTrainingBatchLosses(model, uid, total_training_batches, batch_no, b
                 "totalNoOfBatch": total_training_batches
             }
         }
-        broadcastTrainingStatus(uid, "batchEnd", message)
+        broadcastTrainingStatus(model_id, "batchEnd", message)
 
 
 def yield_batches(real_input, real_price, past_y, batch_size):
@@ -363,9 +387,9 @@ def tfDatasetGenerator(real_input, real_price, past_y, batch_size):
     dataset = tf.data.Dataset.from_generator(
         lambda: yield_batches(real_input, real_price, past_y, batch_size),
         output_signature=(
-            tf.TensorSpec(shape=(None, real_input.shape[1], real_input.shape[2]), dtype=tf.float32),
-            tf.TensorSpec(shape=(None, real_price.shape[1]), dtype=tf.float32),
-            tf.TensorSpec(shape=(None, past_y.shape[1], past_y.shape[2]), dtype=tf.float32),
+            tf.TensorSpec(shape=(None, real_input.shape[1], real_input.shape[2]), dtype=tf.float32), # type: ignore
+            tf.TensorSpec(shape=(None, real_price.shape[1]), dtype=tf.float32), # type: ignore
+            tf.TensorSpec(shape=(None, past_y.shape[1], past_y.shape[2]), dtype=tf.float32), # type: ignore
         )
     )
     

@@ -6,6 +6,7 @@ const config = require('../config');
 const { fetchEntireHistDataFromDb, fetchTickerHistDataBasedOnCount } = require('../services/mongoDBServices')
 const TFMUtil = require('../utils/tf_modelUtil')
 const HDUtil = require('../utils/historicalDataUtil')
+const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const { Queue, Worker } = require('bullmq');
 const { redisClient } = require('../services/redis')
@@ -90,7 +91,7 @@ const process_data_request = async ({
                     type: asset_type,
                     ticker_name,
                     period,
-                    return_result_:true
+                    return_result_: true
                 }
                 try {
                     // @ts-ignore
@@ -151,6 +152,10 @@ const process_data_request = async ({
                     const { features: fs_, metrics } = await step_function(transform_payload)
                     features = fs_
                     redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'feature_relations', uid, metrics }))
+
+                    await wganpgDataRedis.hset(redis_key_for_hist_data, {
+                        feature_metrics: JSON.stringify(metrics)
+                    })
                 } catch (error) {
                     const newErrorMessage = { func_error: error.message, message: 'Error in combining OHLCV and selected function data', step: i }
                     throw new Error(JSON.stringify(newErrorMessage));
@@ -176,13 +181,11 @@ const process_data_request = async ({
 
 const trainWganModel = async (training_data, uid, model_id) => {
     const { model_training_parameters, fTalibExecuteQuery } = training_data
-    log.error(`Starting ${model_training_parameters.model_type} Initialization`)
+    log.info(`Starting ${model_training_parameters.model_type} Initialization`)
 
     const { db_query } = fTalibExecuteQuery[0].payload;
     const { asset_type, ticker_name, period } = db_query
     const redis_key_for_hist_data = `${uid}_${model_id}_${asset_type}-${ticker_name}-${period}_historical_data`
-
-    // console.log('GAN redis data key name : ', redis_key_for_hist_data)
 
     // Model parameters
     const {
@@ -190,158 +193,56 @@ const trainWganModel = async (training_data, uid, model_id) => {
         time_step,
         look_ahead,
         batchSize,
-        transformation_order,
         do_validation,
         slice_index,
     } = model_training_parameters
 
-    // check if the historical data is present in redis or not
-    const isHistoricalDataPresent = await wganpgDataRedis.exists(redis_key_for_hist_data)
-    if (isHistoricalDataPresent === 1) {
-        log.warn(`Historical data is present in redis, checking parameters: ${isHistoricalDataPresent}...`)
+    let { train_possible, test_possible } = checkIfValidationIsPossible(slice_index, time_step, look_ahead, training_size, batchSize, do_validation)
 
-        const training_params = JSON.parse(await wganpgDataRedis.hget(redis_key_for_hist_data, 'training_parameters'))
-        const {
-            transformation_order: to,
-            slice_index: si,
-            time_step: ts,
-            look_ahead: la,
-            batchSize: bs,
-            training_size: train_s,
-            do_validation: d_v
-        } = training_params
+    if (train_possible.status && test_possible.status) {
+        let samples = test_possible.samples
+        await process_data_request({
+            uid,
+            model_id,
+            asset_type,
+            ticker_name,
+            period,
+            fTalibExecuteQuery,
+            model_training_parameters,
+            redis_key_for_hist_data,
+            samples
+        })
 
-        const orderChanged = checkOrder(to, transformation_order)
-        console.log('TRANSFOR ORFDER', orderChanged)
+        const task_name = "celeryTasks.trainModel"
+        const args = [{
+            message: 'Request from node to start WGAN_GP model training',
+            uid,
+            m_id: model_id,
+            model_proces_id: redis_key_for_hist_data,
+            existing_data: true
+        }]
+        const kwargs = {}
+        const task_id = uuidv4()
 
-        // checking if transformation_order or slice_index has changed, if so fetch and process the new data
-        if (
-            orderChanged &&
-            si === slice_index &&
-            train_s === training_size &&
-            ts === time_step &&
-            la === look_ahead &&
-            bs === batchSize &&
-            d_v === do_validation
-        ) {
-            log.warn('Parameters have not changed, calling celery worker with existing data...')
-            redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'notify', uid, message: `Features present in redis, Celery worker called...` }))
+        pyClient.sendTask(task_name, args, kwargs, task_id)
 
-            // set the modified features in the redis store
-            const features = JSON.parse(await wganpgDataRedis.hget(redis_key_for_hist_data, 'features'))
-            const metrics = await TFMUtil.calculateFeatureMetrics({ features })
-            // console.log("New metrics : ", metrics)
-            // redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'feature_relations', uid, metrics }))
-
-            const { model_type, ...rest } = model_training_parameters
-            await wganpgDataRedis.hset(redis_key_for_hist_data, {
-                training_parameters: JSON.stringify({ ...rest }),
-                feature_metrics: JSON.stringify(metrics)
-            })
-
-            // call the celery python worker
-            const task = pyClient.createTask("celeryTasks.trainModel");
-            task.delay({
-                message: 'Request from node to start WGAN_GP model training',
-                uid,
-                m_id: model_id,
-                model_proces_id: redis_key_for_hist_data,
-                existing_data: true
-            });
-
-            return ({
-                status: true
-                , message: 'Gan model training started'
-                , info: 'Parameters have not changed.'
-                , finalRs: []
-                , job_id: model_id
-            });
-        } else {
-            log.warn('Parameters have changed, processing data...')
-            log.warn('transformation_order or slice_index has changed, fetching the required data')
-            let { train_possible, test_possible } = checkIfValidationIsPossible(slice_index, time_step, look_ahead, training_size, batchSize, do_validation)
-            if (train_possible.status && test_possible.status) {
-                let samples = test_possible.samples
-                await process_data_request({
-                    uid,
-                    model_id,
-                    asset_type,
-                    ticker_name,
-                    period,
-                    fTalibExecuteQuery,
-                    model_training_parameters,
-                    redis_key_for_hist_data,
-                    samples
-                })
-
-                const task = pyClient.createTask("celeryTasks.trainModel");
-                task.delay({
-                    message: 'Request from node to start WGAN_GP model training',
-                    uid,
-                    m_id: model_id,
-                    model_proces_id: redis_key_for_hist_data,
-                    existing_data: false
-                });
-
-                return ({
-                    status: true
-                    , message: 'Gan model training started'
-                    , info: 'Parameters have changed'
-                    , finalRs: []
-                    , job_id: model_id
-                });
-            } else {
-                return ({
-                    status: false,
-                    message: 'Incorrect training, parameters. Adjust them and start training again',
-                    train_possible,
-                    test_possible
-                })
-            }
-        }
+        return ({
+            status: true
+            , message: 'Gan model training started'
+            , info: 'Historical data not present in redis, fetching the required data'
+            , job_id: model_id
+            , task_id
+        });
     } else {
-        log.warn('Historical data not present in redis, fetching the required data')
-        let { train_possible, test_possible } = checkIfValidationIsPossible(slice_index, time_step, look_ahead, training_size, batchSize, do_validation)
-
-        if (train_possible.status && test_possible.status) {
-            let samples = test_possible.samples
-            await process_data_request({
-                uid,
-                model_id,
-                asset_type,
-                ticker_name,
-                period,
-                fTalibExecuteQuery,
-                model_training_parameters,
-                redis_key_for_hist_data,
-                samples
-            })
-
-            const task = pyClient.createTask("celeryTasks.trainModel");
-            task.delay({
-                message: 'Request from node to start WGAN_GP model training',
-                uid,
-                m_id: model_id,
-                model_proces_id: redis_key_for_hist_data,
-                existing_data: false
-            });
-            return ({
-                status: true
-                , message: 'Gan model training started'
-                , info: 'Historical data not present in redis, fetching the required data'
-                , finalRs: []
-                , job_id: model_id
-            });
-        } else {
-            return ({
-                status: false,
-                message: 'Incorrect training, parameters. Adjust them and start training again',
-                train_possible,
-                test_possible
-            })
-        }
+        return ({
+            status: false,
+            message: 'Incorrect training, parameters. Adjust them and start training again',
+            train_possible,
+            test_possible
+        })
     }
 }
+
 
 const trainLstmModel = async (training_data, uid, model_id) => {
     const { model_training_parameters, fTalibExecuteQuery } = training_data
@@ -421,11 +322,11 @@ const retrainWganModel = async (retraining_data, uid) => {
 
     const redis_key_for_hist_data = `${uid}_${model_id}_${asset_type}-${ticker_name}-${period}_historical_data`
 
-    log.error(`Starting WGAN-GP Re-Train Initialization`)
+    log.alert(`Starting WGAN-GP Re-Train Initialization`)
 
     const isHistoricalDataPresent = await wganpgDataRedis.exists(redis_key_for_hist_data)
     if (isHistoricalDataPresent === 1) {
-        log.warn('Similar training data exists, checking training parameters...')
+        log.info('Similar training data exists, checking training parameters...')
         const training_params_redis = JSON.parse(await wganpgDataRedis.hget(redis_key_for_hist_data, 'training_parameters'))
 
         // Check for keys that have changes, exclude transformation_order
@@ -436,20 +337,26 @@ const retrainWganModel = async (retraining_data, uid) => {
         if (diff_keys.length === 0) {
             log.info('parameters are same, retraining the model...')
             // call the celery python worker
-            const task = pyClient.createTask("celeryTasks.retrainModel");
-            task.delay({
+            const task_name = "celeryTasks.retrainModel"
+            const args = [{
                 message: 'Request from node to retrain model.',
                 uid,
                 m_id: model_id,
                 model_proces_id: redis_key_for_hist_data,
                 existing_data: false, // check this stuff later
                 checkpoint
-            });
+            }]
+            const kwargs = {}
+            const task_id = uuidv4()
+
+            pyClient.sendTask(task_name, args, kwargs, task_id)
+
             return ({
                 status: true
                 , message: 'Model re-training started'
                 , info: 'Similar training data : Parameters are same, retraining the model...'
                 , job_id: model_id
+                , task_id
             });
         } else {
             log.warn('Parameters are different, updating them in redis...')
@@ -463,20 +370,26 @@ const retrainWganModel = async (retraining_data, uid) => {
             })
 
             // call the celery python worker
-            const task = pyClient.createTask("celeryTasks.retrainModel");
-            task.delay({
+            const task_name = "celeryTasks.retrainModel"
+            const args = [{
                 message: 'Request from node to retrain model.',
                 uid,
                 m_id: model_id,
                 model_proces_id: redis_key_for_hist_data,
                 existing_data: false, // check this stuff later
                 checkpoint
-            });
+            }]
+            const kwargs = {}
+            const task_id = uuidv4()
+
+            pyClient.sendTask(task_name, args, kwargs, task_id)
+
             return ({
                 status: true
                 , message: 'Model re-training started'
                 , info: 'Similar training data : Parameters are differnt, retraining the model...'
                 , job_id: model_id
+                , task_id
             });
         }
 
@@ -507,15 +420,20 @@ const retrainWganModel = async (retraining_data, uid) => {
             })
 
             // call the celery python worker
-            const task = pyClient.createTask("celeryTasks.retrainModel");
-            task.delay({
+            const task_name = "celeryTasks.retrainModel"
+            const args = [{
                 message: 'Request from node to retrain model.',
                 uid,
                 m_id: model_id,
                 model_proces_id: redis_key_for_hist_data,
                 existing_data: false,
                 checkpoint
-            });
+            }]
+            const kwargs = {}
+            const task_id = uuidv4()
+
+            pyClient.sendTask(task_name, args, kwargs, task_id)
+
             return ({
                 status: true
                 , message: 'No data exists for the parameters. Will require Full data fetch'
@@ -523,6 +441,7 @@ const retrainWganModel = async (retraining_data, uid) => {
                 , train_possible
                 , test_possible
                 , job_id: model_id
+                , task_id
             })
         } else {
             return ({

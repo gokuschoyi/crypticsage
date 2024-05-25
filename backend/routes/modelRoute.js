@@ -224,6 +224,10 @@ router.post('/get_partial_auto_correlation', ModelController.partialAutoCorrelat
 router.post('/quick_forecasting', ModelController.quickForecasting)
 
 
+router.post('/get_cached_training_result', ModelController.getCachedTrainignResultsFromDB)
+router.post('/model_training_status', ModelController.getTrainingStatusForModel)
+
+
 
 router.post('/get_model_result', ModelController.getModelResult)  // Can be converted to fetch further details of the model
 router.post('/generate_test_data', ModelController.testNewModel)

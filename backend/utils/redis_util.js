@@ -125,7 +125,30 @@ const getTestPredictions = (id, type) => {
     }
 }
 
+const getWGANTrainingResult = (id) => {
+    return new Promise((resolve, reject) => {
+        redisClient.hgetall(id, (error, result) => {
+            if (error) {
+                log.error('Error retrieving training results from Redis')
+                log.error(error.stack);
+                reject(error)
+            } else if (result) {
+                if (Object.keys(result).length === 0) {
+                    log.warn('Training results does not exist in Redis store');
+                    resolve(null)
+                } else {
+                    resolve(result)
+                }
+            } else {
+                log.warn('Training results does not exist in Redis store');
+                resolve(null)
+            }
+        })
+    })
+}
+
 module.exports = {
     saveTestPredictions,
-    getTestPredictions
+    getTestPredictions,
+    getWGANTrainingResult
 }

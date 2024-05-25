@@ -101,7 +101,7 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
         self.yt_test = None  # transformed y test data
         self.past_yt_test = None  # transformed past y test data
 
-        broadcastTrainingStatus(self.uid, "notify", "WGAN_GP class initialized successfully")
+        broadcastTrainingStatus(self.model_id, "notify", "WGAN_GP class initialized successfully")
 
     def get_model_config(self):
         return {
@@ -131,7 +131,7 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
 
         if (self.existing_data):
             metrics = redisStore.hget(self.process_id, 'feature_metrics')
-            broadcastTrainingStatus(self.uid, "feature_relations", json.loads(metrics))  # type: ignore
+            broadcastTrainingStatus(self.model_id, "feature_relations", json.loads(metrics))  # type: ignore
 
     def splitDataToTrainAndTest(self):  # split the data into train and test sets based on split index
         logging.critical(f"{self.process_id} : Splitting data to train and test.")
@@ -160,7 +160,7 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
 
         logging.info(f"X train norm shape : {self.xTrain_norm.shape}")
         logging.info(f"Y train norm shape : {self.yTrain_norm.shape}")
-        broadcastTrainingStatus(self.uid, "notify", "(6) : Training data normalized...")
+        broadcastTrainingStatus(self.model_id, "notify", "(6) : Training data normalized...")
 
     def transformDataForTraining(self):  # transform the data for training
         logging.critical(f"{self.process_id} : Transforming data for training.")
@@ -182,7 +182,7 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
         self.y_train = yT
         self.past_y_train = past_yT
 
-        broadcastTrainingStatus(self.uid, "notify", "(7) : Training data created...")
+        broadcastTrainingStatus(self.model_id, "notify", "(7) : Training data created...")
 
         xtSize = self.x_train.shape[0] * self.x_train.shape[1] * self.x_train.shape[2] * 8 # type: ignore
         ytSize = self.y_train.shape[0] * self.y_train.shape[1] * 8 # type: ignore
@@ -202,9 +202,19 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
             print(f'Retrain,  Saved model path : {saved_model_path}')
             generator.load_weights(f"{saved_model_path}")
             self.generator = generator
+            
+            epoch_results_redis = redisStore.hget(self.process_id, "epoch_results")
+            intermediate_forecast_redis = redisStore.hget(self.process_id, "intermediate_forecast")
+            
+            if epoch_results_redis is not None:
+                redisStore.hmset(self.process_id, {"epoch_results": json.dumps([])})
+                
+            if intermediate_forecast_redis is not None:
+                redisStore.hmset(self.process_id, {"intermediate_forecast": json.dumps([])})
+            
         else:
             self.generator = generator
-        broadcastTrainingStatus(self.uid, "notify", "(8) : Generator and Discriminator model initialized...")
+        broadcastTrainingStatus(self.model_id, "notify", "(8) : Generator and Discriminator model initialized...")
 
     def process_data(self): # process the data, fetch features, split data, normalize data, transform data and initialize models
         self.fetchFeaturesFromRedis()
@@ -306,7 +316,7 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
                     # individual batch losses for discriminator
                     broadcastTrainingBatchLosses(
                         model="discriminator",
-                        uid=self.uid,
+                        model_id=self.model_id,
                         total_training_batches=self.total_training_batches,                        
                         batch_no=batch_no,
                         batch_size=self.batchSize,
@@ -354,7 +364,7 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
                 # individual batch losses for generator
                 broadcastTrainingBatchLosses(
                         model="generator",
-                        uid=self.uid,
+                        model_id=self.model_id,
                         total_training_batches=self.total_training_batches,                        
                         batch_no=batch_no,
                         batch_size=self.batchSize,
@@ -484,24 +494,40 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
 
             first_predictions = first_pred_df.values
             first_rmse = calculatePredictomRMSE(first_predictions, self.look_ahead)
-
-            broadcastTrainingStatus(self.uid, "intermediate_forecast", {"data": first_pred_array_obj, "rmse": first_rmse, "epoch": epoch})
+            
+            message_data= {
+                "data": first_pred_array_obj,
+                "rmse": first_rmse,
+                "epoch": epoch
+            }
+            
+            broadcastTrainingStatus(self.model_id, "intermediate_forecast", message_data)
+            
+            intermediate_forecast_redis = redisStore.hget(self.process_id, "intermediate_forecast")
+            
+            if intermediate_forecast_redis is not None:
+                intermediate_forecast = json.loads(intermediate_forecast_redis)  # type: ignore 
+                intermediate_forecast.append(message_data)
+                redisStore.hmset(self.process_id, {"intermediate_forecast": json.dumps(intermediate_forecast)})
+            else:
+                intermediate_forecast = [message_data]
+                redisStore.hmset(self.process_id, {"intermediate_forecast": json.dumps(intermediate_forecast)})
 
     def generatedConcreteFunctions(self): # Creating the concrete functions for the train steps, discriminator and generator
-        broadcastTrainingStatus(self.uid, "notify", "(9) : Tracing Discriminator and Generator functions...")
+        broadcastTrainingStatus(self.model_id, "notify", "(9) : Tracing Discriminator and Generator functions...")
         trainDOneStep = self.trianDiscriminatorOneStep.get_concrete_function( 
-            tf.TensorSpec(shape=[self.batchSize, self.time_step, self.feature_size], dtype=tf.float64),  # real_input
-            tf.TensorSpec(shape=[self.batchSize, self.look_ahead], dtype=tf.float64),  # real_price
-            tf.TensorSpec(shape=[self.batchSize, self.time_step, tf.constant(1)], dtype=tf.float64),  # past_y
-            tf.TensorSpec(shape=[], dtype=tf.int32),    # batch_size
+            tf.TensorSpec(shape=[self.batchSize, self.time_step, self.feature_size], dtype=tf.float64),  # real_input # type: ignore
+            tf.TensorSpec(shape=[self.batchSize, self.look_ahead], dtype=tf.float64),  # real_price # type: ignore
+            tf.TensorSpec(shape=[self.batchSize, self.time_step, tf.constant(1)], dtype=tf.float64),  # past_y # type: ignore
+            tf.TensorSpec(shape=[], dtype=tf.int32),    # batch_size # type: ignore
             )
 
         trainGOneStep = self.trainGeneratorOneStep.get_concrete_function(
-            tf.TensorSpec(shape=[self.batchSize, self.time_step, self.feature_size], dtype=tf.float64),
-            tf.TensorSpec(shape=[self.batchSize, self.look_ahead], dtype=tf.float64),
-            tf.TensorSpec(shape=[self.batchSize, self.time_step, 1], dtype=tf.float64)
+            tf.TensorSpec(shape=[self.batchSize, self.time_step, self.feature_size], dtype=tf.float64), # type: ignore
+            tf.TensorSpec(shape=[self.batchSize, self.look_ahead], dtype=tf.float64), # type: ignore
+            tf.TensorSpec(shape=[self.batchSize, self.time_step, 1], dtype=tf.float64) # type: ignore
         )
-        broadcastTrainingStatus(self.uid, "notify", "(9) : Discriminator and Generator functions traced...")
+        broadcastTrainingStatus(self.model_id, "notify", "(9) : Discriminator and Generator functions traced...")
 
         return trainDOneStep, trainGOneStep
 
@@ -555,11 +581,14 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
 
         start_time = time.time()
         ram_beg_train = psutil.virtual_memory()
-        broadcastTrainingStatus(self.uid, "notify", "(10) : Training has started...")
+        broadcastTrainingStatus(self.model_id, "notify", "(10) : Training has started...")
         logging.critical(f"{self.process_id} : Training started")
         # with tf.profiler.experimental.Profile(self.logs_dir, tf.profiler.experimental.ProfilerOptions(python_tracer_level=1)):
+        epoch_begin_message = {}
+        epoch_begin_message["epochs"] = self.epochs
         for epoch in range(epoch_start, epoch_end): # training the model
-            broadcastTrainingStatus(self.uid, "epochBegin", epoch)
+            epoch_begin_message["epoch"] = epoch
+            broadcastTrainingStatus(self.model_id, "epochBegin", epoch_begin_message)
             logging.error(f"epoch {epoch + 1} of {self.epochs}")
             epoch_start_time = time.time()
             train_ram_start = psutil.virtual_memory()
@@ -612,7 +641,17 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
             epoch_end_time = time.time() - epoch_start_time
             print(f"D Loss: {loss['discriminator_loss'].numpy():.6f}, G Loss: {loss['generator_loss'].numpy():.6f}, Time taken: {epoch_end_time:.6f} sec, Step Time : {epoch_end_time / ((self.n_discriminator + 1)*self.total_training_batches):.6f} sec")
 
-            broadcastTrainingStatus(self.uid, "epochEnd", message)
+            broadcastTrainingStatus(self.model_id, "epochEnd", message)
+            
+            epoch_results_redis = redisStore.hget(self.process_id, "epoch_results")
+            
+            if epoch_results_redis is not None:
+                epoch_results = json.loads(epoch_results_redis)  # type: ignore 
+                epoch_results.append(message)
+                redisStore.hmset(self.process_id, {"epoch_results": json.dumps(epoch_results)})
+            else:
+                epoch_results = [message]
+                redisStore.hmset(self.process_id, {"epoch_results": json.dumps(epoch_results)})
 
         logging.critical(f"{self.process_id} : Training completed")
 
@@ -632,12 +671,12 @@ class WGANGP(keras.models.Model):  # train functions for the wgan-gp model
             closeFileWriters(file_writers)
             print(f'tensorboard --logdir={self.logs_dir}')
 
-        broadcastTrainingStatus(self.uid, "trainingEnd", "Training completed")
-        broadcastTrainingStatus(self.uid, "notify", "(10) : Training completed")
+        broadcastTrainingStatus(self.model_id, "trainingEnd", "Training completed")
+        broadcastTrainingStatus(self.model_id, "notify", "(10) : Training completed")
 
         # make the foreacst on the test data
         self.generateForecast('final_forecast')
-        broadcastTrainingStatus(self.uid, "prediction_completed", "Training completed", process_id=self.process_id)
+        broadcastTrainingStatus(self.model_id, "prediction_completed", "Training completed", process_id=self.process_id)
 
         K.clear_session()
 

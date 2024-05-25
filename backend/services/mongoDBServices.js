@@ -1765,7 +1765,7 @@ const fetchEntireHistDataFromDb = async ({ type, ticker_name, period, return_res
         let from_msg = "Historical Data"
         tokenData = await CacheUtil.get_cached_data(cacheKey, from_msg)
         if (tokenData === null) {
-            log.info('Fetching data from db')
+            // log.info('Fetching data from db')
             const db = (await client).db(HISTORICAL_DATABASE_NAME)
             const collection_name = `${type}_${ticker_name}_${period}`
             const collection = db.collection(collection_name)
@@ -1803,7 +1803,7 @@ const fetchEntireHistDataFromDb = async ({ type, ticker_name, period, return_res
 
             return return_result_ ? tokenData : []
         } else {
-            log.info(`Data fetched from cache : ${tokenData.length}`)
+            // log.info(`Data fetched from cache : ${tokenData.length}`)
             if (config.debug_flag === 'true') {
                 log.info(`Initial Total Length : ${tokenData.length}`)
                 console.log('Latest Data : ', tokenData[tokenData.length - 1], new Date(tokenData[tokenData.length - 1].openTime).toLocaleString())
@@ -2374,7 +2374,7 @@ const getBinanceTickerList = async () => {
         const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
         const ticker_meta_collection = db.collection("binance_ticker_meta")
         let tickerMeta = await ticker_meta_collection.aggregate([
-            { $project: { _id: 0 } }
+            { $project: { _id: 0, info: 0 } }
         ]).toArray()
 
         tickerMeta = tickerMeta.sort((a, b) => a.market_cap_rank - b.market_cap_rank)
@@ -2609,6 +2609,185 @@ const isMetadatAvailable = async (ticker_name) => {
 }
 res() */
 //<------------------------CRYPTO-STOCKS SERVICES-------------------------->
+
+
+//<------------------------IN PROGRESS MODELS-------------------------->
+
+const add_inProgressModel = async (model_data) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const inProgressCollection = db.collection('models_in_progress');
+        const insertResult = await inProgressCollection.insertOne(model_data);
+        return insertResult
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const get_userInProgressModels = async (uid) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const inProgressCollection = db.collection('models_in_progress');
+        const agg = [
+            {
+                '$match': {
+                    'uid': uid,
+                    'model_train_start_time': { '$exists': true }
+                }
+            },
+            {
+                '$project': {
+                    '_id': 0,
+                    'talibExecuteQueries': 0,
+                    'cached_data': 0,
+                }
+            }
+        ]
+
+        const inProgressModel = await inProgressCollection.aggregate(agg).toArray();
+        return inProgressModel
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const getCachedTrainingResults = async (uid, model_id) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const inProgressCollection = db.collection('models_in_progress');
+        const agg = [
+            {
+                '$match': {
+                    'uid': uid,
+                    'model_id': model_id
+                }
+            },
+            {
+                '$project': {
+                    '_id': 0,
+                    'talibExecuteQueries': 1,
+                    'cached_data': 1,
+                }
+            }
+        ]
+
+        const cachedResults = await inProgressCollection.aggregate(agg).toArray();
+        return cachedResults[0]
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const getModelTrainingStatus = async (uid, model_id) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const inProgressCollection = db.collection('models_in_progress');
+        const completed = await inProgressCollection.aggregate([
+            {
+                '$match': {
+                    'uid': uid,
+                    'model_id': model_id
+                }
+            },
+            {
+                '$project': {
+                    '_id': 0,
+                    'training_completed': 1,
+                    'model_train_end_time': 1
+                }
+            }
+        ]).toArray();
+        if (completed.length > 0 && completed[0].training_completed) {
+            return [true, completed[0].model_train_end_time]
+        } else {
+            return [false, '']
+        }
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const update_inProgressModel = async (uid, model_id, completed_time, cached_data) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const inProgressCollection = db.collection('models_in_progress');
+
+        const query = { uid: uid, model_id: model_id }
+        const existingDocument = await inProgressCollection.findOne(query);
+        if (existingDocument) {
+            const update = [
+                {
+                    $set: {
+                        training_completed: true,
+                        model_train_end_time: completed_time,
+                        cached_data: {
+                            $mergeObjects: ["$cached_data", cached_data]
+                        }
+                    }
+                }
+            ];
+
+            const updated = await inProgressCollection.updateOne(query, update);
+            return updated
+        } else {
+            return { modifiedCount: 0 }
+        }
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const delete_inProgressModel = async (uid, model_id) => {
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const inProgressCollection = db.collection('models_in_progress');
+        const query = { uid: uid, model_id: model_id }
+        const deleted = await inProgressCollection.deleteOne(query);
+        return deleted
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+const getSavedWGANGPModelIds = async () => { // Fetching WGAN-GP models only
+    try {
+        const db = (await client).db(CRYPTICSAGE_DATABASE_NAME)
+        const inProgressCollection = db.collection('models');
+        const agg = [
+            {
+                '$match': {
+                    'model_type': 'WGAN-GP'
+                }
+            }, {
+                '$project': {
+                    'model_id': 1
+                }
+            }, {
+                '$group': {
+                    '_id': null,
+                    'ids': {
+                        '$push': '$model_id'
+                    }
+                }
+            }
+        ];
+        const cursor = inProgressCollection.aggregate(agg);
+        const result = await cursor.toArray();
+        return result[0].ids
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
+//<------------------------IN PROGRESS MODELS-------------------------->
+
 
 const saveModelForUser = async (user_id, ticker_name, ticker_period, model_id, model_name, model_type, model_data) => {
     try {
@@ -3083,7 +3262,14 @@ module.exports = {
     , fetchYFinanceFullSummary
     , updateYFinanceMetadata
     , isMetadatAvailable
+    , add_inProgressModel
+    , get_userInProgressModels
+    , getCachedTrainingResults
+    , getModelTrainingStatus
+    , update_inProgressModel
+    , delete_inProgressModel
     , saveModelForUser
+    , getSavedWGANGPModelIds
     , fetchUserModels
     , getModelResult
     , renameModelForUser

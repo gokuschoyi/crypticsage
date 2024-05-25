@@ -134,6 +134,48 @@ const deleteWGANModelAndLogs = async (model_id) => {
     }
 }
 
+const deleteIntermediateCheckpoints = async (model_id, last_checkpoint) => {
+    const path = `./worker_celery/saved_models/${model_id}`
+    try {
+        if (fs.existsSync(path)) {
+            const last_cp_number = parseInt(last_checkpoint.split('_')[1])
+            console.log('Last cp nu', last_cp_number)
+
+            const checkpoints_to_remove = fs.readdirSync(path, { withFileTypes: true })
+                .filter(dirent => dirent.isDirectory())
+                .filter((folder) => {
+                    const match = folder.name.match(/^checkpoint_(\d+)$/);
+                    if (match) {
+                        const checkpointNumber = parseInt(match[1], 10);
+                        return checkpointNumber > last_cp_number;
+                    }
+                    return false
+                })
+                .map((folder) => folder.name)
+            console.log('Checkpoints to remove', checkpoints_to_remove)
+
+            checkpoints_to_remove.forEach((checkpoint) => {
+                const checkpoint_path = `${path}/${checkpoint}`
+                fs.rm(checkpoint_path, { recursive: true }, (err) => {
+                    if (err) {
+                        throw err;
+                    }
+                    log.info(`Removed checkpoint : ${checkpoint}`)
+                });
+            })
+
+            return true
+        } else {
+            log.info(`Model file not found for : ${model_id}`)
+            return false
+        }
+
+    } catch (error) {
+        log.error(error.stack)
+        throw error
+    }
+}
+
 const deleteModelFromLocalDirectory = async (model_id) => {
     try {
         const path = `./models/${model_id}` // delete a directory in models with the foldername as model_id us fs
@@ -271,6 +313,7 @@ module.exports = {
     , checkIfValidationIsPossible
     , getDifferentKeys
     , deleteWGANModelAndLogs
+    , deleteIntermediateCheckpoints
     , deleteModelFromLocalDirectory
     , getSavedModelCheckPoint
     , calcuteTotalTickerCountForForecast

@@ -113,6 +113,18 @@ def quick_forecasting(data):
 def testing(data):
     message = data["message"]
     print(message)
+    print("Testing has started", data["model_id"])
     time.sleep(2)
-    checkpoints = util.removeSavedModels(data["model_id"], data["checkpoint"])
+    # checkpoints = util.removeSavedModels(data["model_id"], data["checkpoint"])
+
+    result = redisStore.hget("test_key", "test_value")
+    if result is not None:
+        print('Result : ',result, type(result))
+    else:
+        print('No result found')
+    # redisStore.rpush("test_key_", json.dumps({"key1": "value1", "key2": "value2"}))
+
+    # print(redisStore.lrange("test_key_", 0, -1))
+
+    checkpoints = {"checkpoints": "removed"}
     return {"message": "Testing successful", "checkpoints": json.dumps(checkpoints)}

@@ -7,7 +7,10 @@ const MDBServices = require('../services/mongoDBServices')
 const IUtil = require('../utils/indicatorUtil');
 const CSUtil = require('../utils/cryptoStocksUtil')
 const CacheUtil = require('../utils/cacheUtil')
+
 const tf = require('@tensorflow/tfjs-node');
+
+const fs = require('fs')
 
 const Redis = require("ioredis");
 // @ts-ignore
@@ -23,6 +26,7 @@ const {
     , calculatACF
     , calculatePACF
     , calculate_confidence_interval
+    , deleteIntermediateCheckpoints
 } = require('../utils/modelUtil')
 
 const {
@@ -40,9 +44,9 @@ const pyClient = celery.createClient(
 );
 
 const procssModelTraining = async (req, res) => {
-    const { model_training_parameters: { model_type } } = req.body
+    const { model_training_parameters: { model_type }, model_id } = req.body
     const uid = res.locals.data.uid;
-    const model_id = uuidv4();
+    // const model_id = uuidv4();
     const training_data = req.body
 
     log.info(`Starting model training with id : ${model_id}`)
@@ -78,7 +82,7 @@ const retrainModel = async (req, res) => {
     log.info(`Re-Training model : ${model_id}`) // add asset type, tickername and period from FE
     const uid = res.locals.data.uid;
     const redis_key_for_hist_data = `${uid}_${model_id}_${asset_type}-${ticker_name}-${period}_historical_data`
-    log.info(`Redis key for re train : ${redis_key_for_hist_data}`)
+    // log.info(`Redis key for re train : ${redis_key_for_hist_data}`)
 
     const retraining_data = req.body
     try {
@@ -187,7 +191,13 @@ const saveModel = async (req, res) => {
             model_type,
             model_data
         )
-        res.status(200).json({ message: 'Model saved successfully', model_save_status, modelSaveResult, user_id: uid })
+        const saveType = payload?.save_type || ''
+        let intermediate_delete_result
+        if (saveType === 'intermediate') {
+            console.log('Removing intermediate file from db (SAVE)')
+            intermediate_delete_result = await MDBServices.delete_inProgressModel(uid, model_id)
+        }
+        res.status(200).json({ message: 'Model saved successfully', model_save_status, modelSaveResult, user_id: uid, intermediate_delete_result })
     } catch (error) {
         log.error(error.stack)
         res.status(400).json({ message: 'Model saving failed' })
@@ -196,13 +206,29 @@ const saveModel = async (req, res) => {
 
 const deleteModel = async (req, res) => { // Deleting model from local directory and redis if not being saved
     const uid = res.locals.data.uid;
-    const { model_id, model_type, asset_type, ticker_name, period } = req.body
+    const {
+        model_id
+        , model_type
+        , asset_type
+        , ticker_name
+        , period
+        , delete_type
+        , last_checkpoint
+    } = req.body
     try {
-        let deleted
+        let deleted, intermediateModelDeleted
         if (model_type === 'LSTM') {
             deleted = await deleteModelFromLocalDirectory(model_id)
         } else if (model_type === 'WGAN-GP') {
-            deleted = await deleteWGANModelAndLogs(model_id)
+            if (delete_type === 'intermediate') {
+                intermediateModelDeleted = await MDBServices.delete_inProgressModel(uid, model_id)
+            }
+
+            if (last_checkpoint === undefined || last_checkpoint === '') {
+                deleted = await deleteWGANModelAndLogs(model_id)
+            } else {
+                deleted = await deleteIntermediateCheckpoints(model_id, last_checkpoint)
+            }
         }
 
         const redis_key_for_hist_data = `${uid}_${model_id}_${asset_type}-${ticker_name}-${period}_historical_data`
@@ -210,9 +236,9 @@ const deleteModel = async (req, res) => { // Deleting model from local directory
         const dataPresent = await wganpgDataRedis.exists(redis_key_for_hist_data)
         if (dataPresent) {
             await wganpgDataRedis.del(redis_key_for_hist_data)
-            console.log('Data from redis cleared')
+            log.info('Data from redis cleared')
         } else {
-            console.log('No data for that key present')
+            log.info('No data for that key present')
         }
         if (deleted) {
             res.status(200).json({ message: 'Model deleted successfully' })
@@ -247,11 +273,18 @@ const deleteUserModel = async (req, res) => { // If file has already been delete
 
 const updateNewTrainingResults = async (req, res) => {
     const uid = res.locals.data.uid;
-    const data = { ...req.body.payload, uid }
+    const { update_type, ...rest } = req.body.payload
+    const data = { ...rest, uid }
 
     try {
+        let intermediate_delete_result
+        if (update_type === 'intermediate') {
+            console.log('Removing intermediate file from db (UPDATE)')
+            const model_id = rest.model_id
+            intermediate_delete_result = await MDBServices.delete_inProgressModel(uid, model_id)
+        }
         const wgan_new_prediction_update = await MDBServices.addNewWganTrainingResults(data)
-        res.status(200).json({ message: 'Model updated successfully', wgan_new_prediction_update, user_id: uid })
+        res.status(200).json({ message: 'Model updated successfully', wgan_new_prediction_update, user_id: uid, intermediate_delete_result })
     } catch (error) {
         log.error(error.stack)
         res.status(400).json({ message: 'Model update failed' })
@@ -385,6 +418,39 @@ const quickForecasting = async (req, res) => {
     }
 }
 
+const getCachedTrainignResultsFromDB = async (req, res) => {
+    try {
+        const { uid, model_id } = req.body
+        const cached_result = await MDBServices.getCachedTrainingResults(uid, model_id)
+        cached_result.cached_data.epoch_results = cached_result.cached_data.epoch_results.map(item => ({ ...item.log, epoch: item.epoch }))
+        if (cached_result.cached_data.intermediate_forecast !== undefined) {
+            cached_result.cached_data.intermediate_forecast = cached_result.cached_data.intermediate_forecast.map(item => {
+                const { data, ...rest } = item
+                return {
+                    forecast: data,
+                    ...rest
+                }
+            })
+        }
+        res.status(200).json({ message: 'Model training fetched.', f_result: cached_result })
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model training results fetching failed' })
+    }
+}
+
+const getTrainingStatusForModel = async (req, res) => {
+    try {
+        const { model_id } = req.body
+        const uid = res.locals.data.uid;
+        const [training_completed, model_train_end_time] = await MDBServices.getModelTrainingStatus(uid, model_id)
+        res.status(200).json({ message: 'Model data fetched successfully', training_completed, model_train_end_time })
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: 'Model training results fetching failed' })
+    }
+}
+
 
 const getModelResult = async (req, res) => { // Only LSTM Models
     const { model_id } = req.body
@@ -466,16 +532,71 @@ const testNewModel = async (req, res) => {
 
 const testing = async (model_id) => { // celery test endpoint
     // call the celery python worker
-    const task = pyClient.createTask("celeryTasks.testing");
-    const result = task.applyAsync([{
-        message: 'Request from node to test testing.',
-        model_id: model_id,
-        checkpoint: 'checkpoint_340'
-    }])
+    // const task = pyClient.createTask("celeryTasks.testing");
+    // const taskName = "celeryTasks.testing"
+    // const args = [{
+    //     message: 'Request from node to test testing.',
+    //     model_id: model_id,
+    //     checkpoint: 'checkpoint_340'
+    // }]
+    // const kwargs = {}
+    // const taskId = `testing_${uuidv4()}`
+    // const result_ = pyClient.sendTask(taskName, args, kwargs, taskId)
+    // // const result = task.applyAsync([{
+    // //     message: 'Request from node to test testing.',
+    // //     model_id: model_id,
+    // //     checkpoint: 'checkpoint_340'
+    // // }])
 
-    result.get(5000)
-        .then(data => console.log(data))
-        .catch(err => console.log(err))
+    // result_.get(5000)
+    //     .then(data => {
+    //         console.log('test data', data)
+    //         return data
+    //     })
+    //     .catch(err => console.log(err))
+
+
+    // const result = await MDBServices.get_userInProgressModels('f6951b4d-4976-4a0c-986f-61e24f849510')
+    // await clear_wgan_models()
+    const last_checkpoint = 'checkpoint_5'
+    const deleteModelCheckpoints = await deleteIntermediateCheckpoints(model_id, last_checkpoint)
+    return deleteModelCheckpoints
+}
+
+// Clearing unsaved wgan-gp models
+const clear_wgan_models = async () => {
+    try {
+        const model_path = `./worker_celery/saved_models`
+        let model_names = []
+        if (fs.existsSync(model_path)) {
+            // console.log('Model data present')
+            model_names = fs.readdirSync(model_path, { withFileTypes: true })
+                .filter(dirent => dirent.isDirectory())
+                .map(dirent => dirent.name)
+        }
+
+        const saved_models = await MDBServices.getSavedWGANGPModelIds()
+
+        const to_remove = model_names.filter(item => !saved_models.includes(item))
+
+        to_remove.forEach((model) => {
+            const m_path = `./worker_celery/saved_models/${model}`
+            if (fs.existsSync(m_path)) {
+                fs.rm(m_path, { recursive: true }, (err) => {
+                    if (err) {
+                        throw err
+                    }
+                    log.info(`Removed model files : ${model}`)
+                });
+                return true
+            } else {
+                log.info(`Model file not found for : ${model}`)
+            }
+        })
+        return [model_names, saved_models, to_remove]
+    } catch (error) {
+        log.error(error.stack)
+    }
 }
 
 module.exports = {
@@ -491,9 +612,11 @@ module.exports = {
     , getModelCheckpoints
     , makeNewForecast
     , makeWgangpForecast
-    , testNewModel
-    , getModelResult
-    , testing
     , partialAutoCorrelation
     , quickForecasting
+    , getCachedTrainignResultsFromDB
+    , getTrainingStatusForModel
+    , getModelResult
+    , testNewModel
+    , testing
 }
