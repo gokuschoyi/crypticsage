@@ -157,7 +157,7 @@ def broadcastTrainingStatus(model_id, event, message, process_id=None):
                 json.dumps({"event": "trainingEnd", "training_model_id": model_id})
             )
             redisPubSubConn.publish(
-                "model_training_channel",
+                "model_update_channel",
                 json.dumps({"event": "trainingEnd", "training_model_id": model_id, "model_id":model_id })
             )
         case "prediction_completed":

@@ -308,6 +308,54 @@ const calculate_confidence_interval = (pacfValues, confidence_level, n) => {
     return confidenceIntervals;
 }
 
+const generateTrainingResult = (toSave, uid, model_id) => {
+    let modelId = model_id || '';
+    const tr_ = toSave.map((item) => {
+        if (item.session === 1) {
+            modelId = item.data.model_id
+            return {
+                user_id: uid,
+                model_id: item.data.model_id,
+                session: item.session,
+                checkpoints: item.checkpoints,
+                selectedCheckpoint: item.selectedCheckpoint,
+                model_data: item.data.model_data,
+                model_created_date: item.data.model_created_date,
+            }
+        } else {
+            return {
+                user_id: uid,
+                model_id: modelId,
+                session: item.session,
+                checkpoints: item.checkpoints,
+                selectedCheckpoint: item.selectedCheckpoint,
+                model_data: item.data,
+                model_created_date: item.data.model_created_date,
+            }
+        }
+    })
+
+    return tr_
+}
+
+const generateLSTMTrainingData = (to_save, uid) => {
+    const rmse = []
+    return [{
+        user_id: uid,
+        model_id: to_save.model_id,
+        session: 1,
+        model_created_date: to_save.model_created_date,
+        model_data: {
+            training_parameters: to_save.training_parameters,
+            talibExecuteQueries: to_save.talibExecuteQueries,
+            predicted_result: { ...to_save.predicted_result, rmse },
+            scores: to_save.scores,
+            epoch_results: to_save.epoch_results,
+            train_duration: to_save.train_duration,
+        }
+    }]
+}
+
 module.exports = {
     checkOrder
     , checkIfValidationIsPossible
@@ -320,4 +368,6 @@ module.exports = {
     , calculatACF
     , calculatePACF
     , calculate_confidence_interval
+    , generateTrainingResult
+    , generateLSTMTrainingData
 }

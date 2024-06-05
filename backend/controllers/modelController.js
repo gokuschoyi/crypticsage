@@ -8,6 +8,17 @@ const IUtil = require('../utils/indicatorUtil');
 const CSUtil = require('../utils/cryptoStocksUtil')
 const CacheUtil = require('../utils/cacheUtil')
 
+const {
+    saveUserModel
+    , saveSessionData
+    , fetchUserModels
+    , deleteUserModelAndSessions
+    , renameModelForUser
+    , getSavedWGANGPModelIds
+    , migrateLSTMData
+    , migrateWGANData
+} = require('../database/model')
+
 const tf = require('@tensorflow/tfjs-node');
 
 const fs = require('fs')
@@ -27,6 +38,8 @@ const {
     , calculatePACF
     , calculate_confidence_interval
     , deleteIntermediateCheckpoints
+    , generateTrainingResult
+    , generateLSTMTrainingData
 } = require('../utils/modelUtil')
 
 const {
@@ -98,15 +111,10 @@ const retrainModel = async (req, res) => {
     }
 }
 
-// if this func is called before wgan training, (not implemented yet)
-// the redis key used here will be used for all further trainig to fetch data from redis.
 const calculateCoRelationMatrix = async (req, res) => {
     const { transformation_order, talibExecuteQueries } = req.body
     const { db_query: { asset_type, ticker_name, period } } = talibExecuteQueries[0].payload;
-    // const uid = res.locals.data.uid;
-    // const redis_key_for_hist_data = `${uid}_${asset_type}-${ticker_name}-${period}_historical_data`
 
-    // log.info(`Redis key for re train : ${redis_key_for_hist_data}`)
     try {
         const historicalData = await fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period, return_result_: true })
         const talibResult = await TFMUtil.processSelectedFunctionsForModelTraining({ selectedFunctions: talibExecuteQueries, tickerHistory: historicalData })
@@ -122,7 +130,7 @@ const calculateCoRelationMatrix = async (req, res) => {
 const getModel = async (req, res) => {
     const uid = res.locals.data.uid
     try {
-        const models = await MDBServices.fetchUserModels(uid)
+        const models = await fetchUserModels(uid)
         res.status(200).json({ message: 'Model fetched successfully', models })
     } catch (err) {
         log.error(err.stack)
@@ -130,77 +138,57 @@ const getModel = async (req, res) => {
     }
 }
 
-const saveModel = async (req, res) => {
-    const payload = req.body.payload
-    const {
-        model_type,
-        model_id,
-        model_name,
-        ticker_name,
-        ticker_period,
-        talibExecuteQueries,
-        epoch_results,
-        train_duration,
-        correlation_data,
-        training_parameters
-    } = payload
-    let model_data
-    if (model_type === 'LSTM') {
-        let {
-            scores,
-            predicted_result,
-        } = payload
+const saveModelRuns = async (req, res) => {
+    const { save_type, to_save, model_type, from_ } = req.body
+    const uid = res.locals.data.uid;
+    if (save_type === 'initial' || save_type === 'bulk') {
+        console.log('Initial model & session save for model')
+        try {
+            const model_metadata = getModelMeta(to_save, uid)
+            let training_result = [];
+            if (model_type === 'WGAN-GP') {
+                training_result = generateTrainingResult(to_save, uid)
+            } else {
+                const { dates, predictions_array, label_mean, label_variance } = to_save.predicted_result
+                const ticker_period = to_save.ticker_period
+                const rmse = IUtil.calculateScaledRMSE(dates, predictions_array, label_variance, label_mean, ticker_period)
+                training_result = generateLSTMTrainingData(to_save, uid)
+                training_result[0].model_data.predicted_result['rmse'] = rmse
+            }
 
-        const { dates, predictions_array, label_mean, label_variance } = predicted_result
-        const rmse = IUtil.calculateScaledRMSE(dates, predictions_array, label_variance, label_mean, ticker_period)
-        predicted_result['rmse'] = rmse
+            const model_meta_result = await saveUserModel(model_metadata)
+            const session_save_result = await saveSessionData(training_result)
 
-        model_data = {
-            scores,
-            epoch_results,
-            train_duration,
-            correlation_data,
-            predicted_result,
-            training_parameters,
-            talibExecuteQueries,
+            if (model_meta_result[0] && session_save_result[0]) {
+                res.status(200).json({ message: 'Initial model & session saved successfully', model_meta_result, session_save_result })
+            } else {
+                res.status(400).json({ message: 'Model already saved', model_meta_result, session_save_result })
+            }
+        } catch (error) {
+            log.error(error.stack)
+            res.status(400).json({ message: 'Model saving failed' })
         }
-    } else {
-        const {
-            wgan_intermediate_forecast,
-            wgan_final_forecast
-        } = payload
-        model_data = {
-            epoch_results,
-            train_duration,
-            correlation_data,
-            training_parameters,
-            talibExecuteQueries,
-            wgan_intermediate_forecast,
-            wgan_final_forecast
+    } else if (save_type === 'update') { // redundant, can be removed (updateNewTrainingResults below)
+        console.log('update session data for model')
+        const model_id = req.body.model_id
+        try {
+            const training_result = generateTrainingResult(to_save, uid, model_id)
+            const session_save_result = await saveSessionData(training_result)
+
+            if (session_save_result[0]) {
+                res.status(200).json({ message: 'Model session data updated successfully', session_save_result })
+            }
+        } catch (error) {
+            log.error(error.stack)
+            res.status(400).json({ message: 'Model session data update failed' })
         }
     }
 
-    try {
-        const uid = res.locals.data.uid;
-        const [model_save_status, modelSaveResult] = await MDBServices.saveModelForUser(
-            uid,
-            ticker_name,
-            ticker_period,
-            model_id,
-            model_name,
-            model_type,
-            model_data
-        )
-        const saveType = payload?.save_type || ''
-        let intermediate_delete_result
-        if (saveType === 'intermediate') {
-            console.log('Removing intermediate file from db (SAVE)')
-            intermediate_delete_result = await MDBServices.delete_inProgressModel(uid, model_id)
-        }
-        res.status(200).json({ message: 'Model saved successfully', model_save_status, modelSaveResult, user_id: uid, intermediate_delete_result })
-    } catch (error) {
-        log.error(error.stack)
-        res.status(400).json({ message: 'Model saving failed' })
+    if (from_ === 'intermediate') {
+        console.log('Removing intermediate file from db (SAVE)')
+        const model_id = to_save[0]?.data.model_id
+        const intermediate_delete_result = await MDBServices.delete_inProgressModel(uid, model_id)
+        console.log(intermediate_delete_result)
     }
 }
 
@@ -254,7 +242,7 @@ const deleteUserModel = async (req, res) => { // If file has already been delete
     try {
         const { model_id, model_type } = req.body
         const uid = res.locals.data.uid;
-        const user_model_deleted = await MDBServices.deleteUserModel(uid, model_id)
+        const user_model_deleted = await deleteUserModelAndSessions(uid, model_id)
         let model_deleted
         if (model_type === 'LSTM') {
             model_deleted = await deleteModelFromLocalDirectory(model_id)
@@ -273,21 +261,23 @@ const deleteUserModel = async (req, res) => { // If file has already been delete
 
 const updateNewTrainingResults = async (req, res) => {
     const uid = res.locals.data.uid;
-    const { update_type, ...rest } = req.body.payload
-    const data = { ...rest, uid }
+    const { to_update, model_id, update_type } = req.body
 
     try {
         let intermediate_delete_result
         if (update_type === 'intermediate') {
             console.log('Removing intermediate file from db (UPDATE)')
-            const model_id = rest.model_id
             intermediate_delete_result = await MDBServices.delete_inProgressModel(uid, model_id)
         }
-        const wgan_new_prediction_update = await MDBServices.addNewWganTrainingResults(data)
-        res.status(200).json({ message: 'Model updated successfully', wgan_new_prediction_update, user_id: uid, intermediate_delete_result })
+        const training_result = generateTrainingResult(to_update, uid, model_id)
+        const session_save_result = await saveSessionData(training_result)
+
+        if (session_save_result[0]) {
+            res.status(200).json({ message: 'Model session data updated successfully', session_save_result })
+        }
     } catch (error) {
         log.error(error.stack)
-        res.status(400).json({ message: 'Model update failed' })
+        res.status(400).json({ message: 'Model session data update failed' })
     }
 }
 
@@ -295,7 +285,7 @@ const renameModel = async (req, res) => {
     const { model_id, model_name } = req.body
     try {
         const uid = res.locals.data.uid;
-        const model_name_save_status = await MDBServices.renameModelForUser(uid, model_id, model_name)
+        const model_name_save_status = await renameModelForUser(uid, model_id, model_name)
         res.status(200).json({ message: 'Model renamed successfully', status: model_name_save_status ? true : false })
     } catch (error) {
         log.error(error.stack)
@@ -451,6 +441,102 @@ const getTrainingStatusForModel = async (req, res) => {
     }
 }
 
+const getModelMeta = (toSave, uid) => {
+    const temp = toSave[0]?.data || toSave
+    return {
+        user_id: uid,
+        model_id: temp.model_id,
+        model_name: temp.model_name,
+        model_created_date: temp.model_created_date,
+        ticker_name: temp.ticker_name,
+        ticker_period: temp.ticker_period,
+        model_type: temp.model_type,
+    }
+}
+
+
+
+
+
+
+
+
+// <----------------- MIGRATION FUNCTIONS ----------------->
+
+
+const migrateLSTM_Data = async () => {
+    try {
+        const result = await migrateLSTMData()
+        const trans = result.map(item => {
+            return {
+                ...item,
+                session: 1
+            }
+        })
+        console.log(result.length)
+        for (let i = 0; i < trans.length; i++) {
+            const session_save_result = await saveSessionData([trans[i]])
+            console.log(session_save_result)
+        }
+
+        return trans
+    } catch (error) {
+        log.error(error.stack)
+        return []
+    }
+}
+
+const migrateWGAN_Data = async () => {
+    function generateCheckpoints(totalEpochs, modelSaveStep) {
+        const checkpoints = [];
+
+        // Loop through the epochs and add checkpoints at intervals of modelSaveStep
+        for (let epoch = modelSaveStep; epoch <= totalEpochs; epoch += modelSaveStep) {
+            checkpoints.push(`checkpoint_${epoch}`);
+        }
+
+        // If totalEpochs is not a multiple of modelSaveStep, add the final epoch checkpoint
+        if (totalEpochs % modelSaveStep !== 0) {
+            checkpoints.push(`checkpoint_${totalEpochs}`);
+        }
+
+        return checkpoints;
+    }
+    try {
+        const result = await migrateWGANData()
+        const selectedCheckpoint = ''
+        const transformed = result.map(item => {
+            if (item.model_data) {
+                const epoch = item.model_data.training_parameters.epoch
+                const model_save = parseInt(item.model_data.training_parameters.modelSaveStep)
+                const checkpoints = generateCheckpoints(epoch, model_save)
+                return {
+                    ...item,
+                    session: 1,
+                    checkpoints,
+                    selectedCheckpoint
+                }
+            } else { return }
+        })
+        for (let i = 0; i < transformed.length; i++) {
+            if (transformed[i] !== null) {
+                const session_save_result = await saveSessionData([transformed[i]])
+                console.log(session_save_result)
+            }
+        }
+
+        console.log(result.length, transformed.length)
+        return transformed
+
+    } catch (err) {
+        log.error(err.stack)
+        return []
+    }
+}
+
+// <----------------- MIGRATION FUNCTIONS ----------------->
+
+
 
 const getModelResult = async (req, res) => { // Only LSTM Models
     const { model_id } = req.body
@@ -575,7 +661,7 @@ const clear_wgan_models = async () => {
                 .map(dirent => dirent.name)
         }
 
-        const saved_models = await MDBServices.getSavedWGANGPModelIds()
+        const saved_models = await getSavedWGANGPModelIds()
 
         const to_remove = model_names.filter(item => !saved_models.includes(item))
 
@@ -604,7 +690,7 @@ module.exports = {
     , retrainModel
     , calculateCoRelationMatrix
     , getModel
-    , saveModel
+    , saveModelRuns
     , deleteModel
     , deleteUserModel
     , updateNewTrainingResults
@@ -616,6 +702,8 @@ module.exports = {
     , quickForecasting
     , getCachedTrainignResultsFromDB
     , getTrainingStatusForModel
+    , migrateLSTM_Data
+    , migrateWGAN_Data
     , getModelResult
     , testNewModel
     , testing

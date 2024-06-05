@@ -192,29 +192,29 @@ const createModel = (model_parama) => {
     return model
 }
 
-const epochBeginCallback = (uid, epoch) => {
-    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'epochBegin', uid, epoch: epoch }))
+const epochBeginCallback = (model_id, epoch) => {
+    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'epochBegin', training_model_id: model_id, epoch: epoch }))
 }
 
-const epochEndCallback = (uid, epoch, log) => {
-    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'epochEnd', uid, epoch: epoch, log: log }))
+const epochEndCallback = (model_id, epoch, log) => {
+    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'epochEnd', training_model_id: model_id, epoch: epoch, log: log }))
 };
 
-const batchEndCallback = (uid, batch, log, totalNoOfBatch) => {
+const batchEndCallback = (model_id, batch, log, totalNoOfBatch) => {
     let newLog = {
         ...log,
         totalNoOfBatch
     }
-    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'batchEnd', uid, batch: batch, log: newLog }))
+    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'batchEnd', training_model_id: model_id, batch: batch, log: newLog }))
 }
 
-const onTrainEndCallback = (uid) => {
-    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'trainingEnd', uid }))
+const onTrainEndCallback = (model_id) => {
+    redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'trainingEnd', training_model_id: model_id }))
 }
 
 const trainModel = async (
     {
-        uid,
+        model_id,
         model,
         epochs,
         batch_size,
@@ -298,16 +298,16 @@ const trainModel = async (
         ...(early_stopping_flag ? [earlyStopping] : []),
         new tf.CustomCallback({
             onEpochBegin: async (epoch) => {
-                epochBeginCallback(uid, epoch);
+                epochBeginCallback(model_id, epoch);
             },
             onEpochEnd: async (epoch, log) => {
-                epochEndCallback(uid, epoch, log);
+                epochEndCallback(model_id, epoch, log);
             },
             onBatchEnd: async (batch, log) => {
-                batchEndCallback(uid, batch, log, totalNoOfBatch)
+                batchEndCallback(model_id, batch, log, totalNoOfBatch)
             },
             onTrainEnd: async () => {
-                onTrainEndCallback(uid)
+                onTrainEndCallback(model_id)
             }
         })
     ]
@@ -387,7 +387,7 @@ const evaluateModelOnTestSet = async (
                     batch: i,
                     totalNoOfBatch: xTrainTest.length - 1
                 }
-                redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'evaluating', uid, log }))
+                redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'evaluating', training_model_id: model_id, log }))
             }
             let inputHist = history.slice(-1)
             let historySequence = await forecast(trained_model_, inputHist)
@@ -454,7 +454,7 @@ const evaluateModelOnTestSet = async (
         // console.log('Ytrain test : ', yTrainTest.slice(-10))
 
         let [score, scores] = evaluateForecast(yTrainTest, predictions)
-        redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'eval_complete', uid, scores: { rmse: score, scores: scores } }))
+        redisPublisher.publish('model_training_channel', JSON.stringify({ event: 'eval_complete', training_model_id: model_id, scores: { rmse: score, scores: scores } }))
 
         if (config.debug_flag === 'true') {
             log.notice(`xTrain test length : ${xTrainTest.length}, yTrain test length : ${yTrainTest.length}`)

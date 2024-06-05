@@ -75,7 +75,7 @@ router.post('/get_model', ModelController.getModel)
 
 /**
  * Endpoint to save the model.
- * @name /saveModel
+ * @name /saveModelRuns
  * @auth This route requires JWT Authentication with a valid access token (Bearer Token).
  * @path {POST} /model/save_model
  * @body {object} payload - The model save payload
@@ -87,7 +87,7 @@ router.post('/get_model', ModelController.getModel)
  * @response {string} user_id - The user id
  * @see [payload]{@link SavePayload}
  */
-router.post('/save_model', ModelController.saveModel)
+router.post('/save_model_runs', ModelController.saveModelRuns)
 
 /**
  * Endpoint to delete the model from local directory and redis if not being saved.
@@ -239,8 +239,9 @@ const tempsetrmse = async (req, res) => {
     // const testDtate = new Date().toLocaleString()
 
     // const uTime = new Date(testDtate).getTime()
-    const testRes = await ModelController.testing(model_id)
-    res.status(200).json({ message: 'RMSE set successfully', testRes })
+    // const testRes = await ModelController.migrateLSTM_Data()
+    // const testRes = await ModelController.migrateWGAN_Data()
+    res.status(200).json({ message: 'RMSE set successfully', testRes: 'no func to call'})
 }
 
 router.put('/set_lstm_rmse', tempsetrmse)

@@ -189,19 +189,26 @@
 
 /**
  * @typedef {Object} SavePayload
- * @property {string} model_id - The ID of the model.
- * @property {string} model_name - The name of the model.
+ * @property {string} save_type - The type of the save.
+ * @property {Object} to_save - The object to save.
  * @property {string} model_type - The type of the model.
- * @property {string} ticker_name - The ticker name.
- * @property {string} ticker_type - The ticker type.
- * @property {number} train_duration - The training duration.
- * @property {array} correlation_data - The correlation matrix data.
- * @property {FTalibExecuteQueries} talibExecuteQueries - The array of the talib query to be executed.
- * @property {ModelTrainingParameters} modelTrainingParameters - The model training parameters.
- * @property {Object} wgan_final_forecast - The final forecast of the WGAN model.
- * @property {array} epoch_results - The results of each epoch.
- * @see [saveModel]{@link module:route/model~/saveModel}
  */
+
+// /**
+//  * @typedef {Object} SavePayload
+//  * @property {string} model_id - The ID of the model.
+//  * @property {string} model_name - The name of the model.
+//  * @property {string} model_type - The type of the model.
+//  * @property {string} ticker_name - The ticker name.
+//  * @property {string} ticker_type - The ticker type.
+//  * @property {number} train_duration - The training duration.
+//  * @property {array} correlation_data - The correlation matrix data.
+//  * @property {FTalibExecuteQueries} talibExecuteQueries - The array of the talib query to be executed.
+//  * @property {ModelTrainingParameters} modelTrainingParameters - The model training parameters.
+//  * @property {Object} wgan_final_forecast - The final forecast of the WGAN model.
+//  * @property {array} epoch_results - The results of each epoch.
+//  * @see [saveModel]{@link module:route/model~/saveModel}
+//  */
 
 /**
  * @typedef {Object} UpdatePredictionPayload
