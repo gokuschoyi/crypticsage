@@ -11,7 +11,10 @@ import { resetStatsState } from '../dashboard_tabs/stats/StatsSlice.js';
 import { resetTransformedData } from "../dashboard_tabs/quiz/QuizSlice";
 import { resetIndicatorsState } from '../dashboard_tabs/indicators/IndicatorsSlice'
 import { resetCryptoStockModule } from '../dashboard_tabs/indicators/modules/CryptoModuleSlice'
+import { resetModelsInProgress } from '../dashboard_tabs/indicators/modules/IntermediateModelSlice'
 import { resetStocksDataInDbRedux } from '../dashboard_tabs/indicators/modules/StockModuleSlice'
+import { resetModelRunMeta } from '../dashboard_tabs/indicators/modules/ModelRunMetaSlice'
+
 import { useSelector, useDispatch } from 'react-redux';
 import {
     LightModeOutlinedIcon,
@@ -30,6 +33,8 @@ import {
     ManageAccountsOutlinedIcon,
     ArrowForwardIcon
 } from './Icons'
+
+import { useSocketRef } from "../../../pages/dashboard/Dashboard.js";
 
 import "./Global.css"
 
@@ -59,6 +64,16 @@ const Topbar = () => {
     const theme = useTheme();
     const mode = theme.palette.mode;
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const modelData = useSelector(state => state.cryptoModule.modelData)
+    const model_id = useSelector(state => state.cryptoModule.modelData.model_id);
+    const session_count = useSelector(state => state.modelRunMeta.run_count)
+    const inTrainingModels = useSelector(state => state.intermediateModel.models_in_progress)
+        .filter((model) => model.training_completed === false)
+        .map((model) => model.model_id)
+
+    const retrainModelTalibExecuteQueries = useSelector(state => state.cryptoModule.userModels)
+        .filter((model) => model.model_id === model_id)[0]?.model_data.talibExecuteQueries || []
 
     const colorMode = useContext(ColorModeContext);
 
@@ -102,7 +117,7 @@ const Topbar = () => {
             // content.style.setProperty('--marginLeft', '80px!important');
             // handleToggleSmallScreenSidebar()
             dispatch(handleReduxToggleSmallScreenSidebar({ value: !smallScreenToggleState }))
-            console.log('show sidebar');
+            // console.log('show sidebar');
         } else {
             let sidebar = document.getElementsByClassName('sidebar')[0]
             // let content = document.getElementsByClassName('content')[0]
@@ -112,15 +127,13 @@ const Topbar = () => {
             // content.style.setProperty('--marginLeft', '0px !important');
             // handleToggleSmallScreenSidebar()
             dispatch(handleReduxToggleSmallScreenSidebar({ value: !smallScreenToggleState }))
-            console.log('hide sidebar');
+            // console.log('hide sidebar');
         }
     }
 
-    // console.log(toggleNotifications);
-    const dispatch = useDispatch();
-    const logOut = async () => {
-        // localStorage.removeItem('userTheme');
-        dispatch(resetAuthState());
+    const webSocket = useSocketRef();
+
+    const resetReduxState = () => {
         dispatch(resetSettingsState());
         dispatch(resetSectionState());
         dispatch(resetSidebarState());
@@ -128,11 +141,67 @@ const Topbar = () => {
         dispatch(resetTransformedData());
         dispatch(resetIndicatorsState());
         dispatch(resetCryptoStockModule());
+        dispatch(resetModelsInProgress());
         dispatch(resetStocksDataInDbRedux());
+        dispatch(resetAuthState());
+        dispatch(resetModelRunMeta());
+        localStorage.removeItem('userTheme');
         localStorage.removeItem('user_notifications');
-        signOutUser(uid)
+    }
+
+    // console.log(toggleNotifications);
+    const dispatch = useDispatch();
+    const logOut = async () => {
+        resetReduxState()
+        let asset_type
+        let ticker_name
+        let period
+        if (!modelData.retraining_flag) {
+            const { db_query: { asset_type: at, ticker_name: tn, period: p } = {} } = modelData.talibExecuteQueries[0]?.payload || {}
+            asset_type = at
+            ticker_name = tn
+            period = p
+        } else {
+            const { db_query: { asset_type: at_r, ticker_name: tn_r, period: p_r } = {} } = retrainModelTalibExecuteQueries[0]?.payload || {}
+            asset_type = at_r
+            ticker_name = tn_r
+            period = p_r
+        }
+
+        // Resetting the training socket ref.
+        if (webSocket.current !== null) {
+            console.log('Closing socket, logout...')
+            webSocket.current.close();
+            webSocket.current = null
+        }
+
+        if (modelData.startWebSocket) {
+            inTrainingModels.push(model_id)
+        }
+
+        const payload = {
+            ticker_name,
+            period,
+            asset_type,
+            model_type: modelData.training_parameters.modelType,
+            model_name: modelData.model_name,
+            training_in_progress: modelData.startWebSocket,
+            re_train_flag: modelData.retraining_flag,
+            last_checkpoint: modelData.loaded_checkpoints.selectedCheckpoint,
+            talibExecuteQueries: modelData.talibExecuteQueries,
+            model_train_start_time: modelData.modelStartTime,
+            model_id: modelData.model_id,
+            task_id: modelData.task_id,
+            in_training: inTrainingModels,
+            training_parameters: modelData.training_parameters,
+            session_count
+        }
+
+        // console.log('logout payload:', payload)
+
+        signOutUser(uid, payload)
             .then((res) => {
-                console.log(res)
+                // console.log(res)
             })
             .catch((error) => {
                 console.log(error)

@@ -673,7 +673,6 @@ export const WgangpOptions = ({
     setRetrainHistSavePrompt
 }) => {
     const model_name = useSelector(state => state.cryptoModule.modelData.model_name)
-    const loadingFromSaved = useSelector(state => state.cryptoModule.modelData.loading_from_saved_model)
     const [modelName, setModelName] = useState(model_name)
     return (
         <Box className='model-chart-action-container wgan'>
@@ -703,9 +702,6 @@ export const WgangpOptions = ({
                     ))}
                 </Box>
 
-                {!loadingFromSaved &&
-                    <RetrainWGANModal type={'from_current'} setMetricsChartReload={setMetricsChartReload} />
-                }
                 <SaveCurrentModal
                     modelName={modelName}
                     retrainHistSavePrompt={retrainHistSavePrompt}

@@ -61,8 +61,12 @@ const initialState = {
     modifiedSelectedFunctionWithDataToRender: [],
     processSelectedFunctionsOnMoreData: false,
     userModels: [],
+    partial_chart_reset_flag: false,
     modelData: {
         model_id: '',
+        task_id: '',
+        initial_training_completed: false,
+        first_save: false,
         model_name: '',
         model_saved_to_db: false,
         retrain_history_saved: false,
@@ -121,7 +125,7 @@ const initialState = {
             over_all_score: 0,
             scores: []
         },
-        loaded_chekpoints: {
+        loaded_checkpoints: {
             checkpoints: [],
             selectedCheckpoint: ''
         }
@@ -133,45 +137,106 @@ const cryptoModuleSlice = createSlice({
     name: 'cryptoModule',
     initialState,
     reducers: {
-        setUserModels: (state, action) => {
-            // Remove models that are not present in the payload
-            state.userModels = state.userModels.filter(model =>
-                action.payload.find(payloadModel => payloadModel.model_id === model.model_id)
-            );
+        setPartialChartResetFlag: (state, action) => {
+            state.partial_chart_reset_flag = action.payload;
+        },
+        setLastSessionData: (state, action) => {
+            const { session, data, saved } = action.payload
+            let epoch_results, train_duration, training_parameters, wgan_intermediate_forecast, wgan_final_forecast, model_created_date
+            if (session === 1) {
+                ({
+                    epoch_results,
+                    train_duration,
+                    training_parameters,
+                    wgan_intermediate_forecast,
+                    wgan_final_forecast,
+                } = data.model_data);
+                model_created_date = data.model_created_date
+            } else {
+                ({
+                    epoch_results,
+                    train_duration,
+                    training_parameters,
+                    wgan_intermediate_forecast,
+                    wgan_final_forecast,
+                    model_created_date
+                } = data);
+            }
+            const last_epoch = epoch_results[epoch_results.length - 1].epoch
 
-            // Add new models from the payload
+            state.modelData.epoch_results = state.modelData.epoch_results.filter(e_res => e_res.epoch <= last_epoch)
+            state.modelData.modelEndTime = model_created_date
+            state.modelData.modelStartTime = model_created_date - train_duration
+            state.modelData.training_parameters = training_parameters
+            state.modelData.wgan_intermediate_forecast = wgan_intermediate_forecast
+            state.modelData.wgan_final_forecast = wgan_final_forecast
+            state.modelData.epoch_no = last_epoch
+
+            if (session === 1) {
+                state.modelData.model_saved_to_db = saved === undefined ? false : saved
+            } else {
+                state.modelData.retrain_history_saved = saved === undefined ? false : saved
+            }
+
+            state.modelData.loaded_checkpoints.checkpoints = []
+            state.modelData.loaded_checkpoints.selectedCheckpoint = ""
+
+        },
+        setUserModels: (state, action) => {
+            // Create a map from the payload for quick lookup
+            const payloadModelMap = action.payload.reduce((map, payloadModel) => {
+                map[payloadModel.model_id] = payloadModel;
+                return map;
+            }, {});
+
+            // Filter out models that are not present in the payload
+            state.userModels = state.userModels.filter(model => payloadModelMap[model.model_id]);
+
             action.payload.forEach(payloadModel => {
-                if (!state.userModels.find(model => model.model_id === payloadModel.model_id)) {
-                    state.userModels.push(payloadModel);
+                const existingModelIndex = state.userModels.findIndex(model => model.model_id === payloadModel.model_id)
+                if (existingModelIndex !== -1) {
+                    const existingData = state.userModels[existingModelIndex]
+
+                    if (existingData.model_type === 'WGAN-GP' && payloadModel.additional_training_run_results.length > existingData.additional_training_run_results.length) {
+                        state.userModels[existingModelIndex] = payloadModel
+                    }
+                } else {
+                    state.userModels.push(payloadModel)
                 }
-            });
+            })
         },
         setModelSavedToDb: (state, action) => {
             state.modelData.model_saved_to_db = action.payload.status
             state.modelData.model_name = action.payload.model_name
+            state.modelData.first_save = action.payload.status
         },
         setRetrainHistorySavedToDb: (state, action) => {
             state.modelData.retrain_history_saved = action.payload
         },
         setModelId: (state, action) => {
             state.modelData.model_id = action.payload.model_id;
-            state.modelData.model_name = action.payload.model_name;
+        },
+        setTaskId: (state, action) => {
+            state.modelData.task_id = action.payload.task_id
         },
         setModelType: (state, action) => {
             state.modelData.training_parameters.modelType = action.payload;
         },
         setTrainingParameters: (state, action) => {
-            state.modelData.training_parameters = { ...action.payload.model_params, transformation_order: action.payload.transformationOrder };
-            state.modelData.talibExecuteQueries = action.payload.selected_functions;
+            const { model_params, transformationOrder, selected_functions, model_name, task_id } = action.payload
+            state.modelData.training_parameters = { ...model_params, transformation_order: transformationOrder };
+            state.modelData.talibExecuteQueries = selected_functions;
+            state.modelData.model_name = model_name;
+            state.modelData.task_id = task_id || ''
         },
         setRetrainParameters: (state, action) => {
             const { model_id, model_name, model_saved_to_db, retrainParams } = action.payload;
-            if (model_id !== undefined || model_name !== undefined || model_saved_to_db !== undefined) {
+            if (model_id !== undefined || model_name !== undefined) {
                 state.modelData.model_id = model_id;
                 state.modelData.model_name = model_name;
-                state.modelData.model_saved_to_db = model_saved_to_db
                 state.modelData.training_parameters = { ...retrainParams }
             } else {
+                state.modelData.model_saved_to_db = model_saved_to_db
                 state.modelData.training_parameters = { ...retrainParams }
             }
         },
@@ -189,6 +254,7 @@ const cryptoModuleSlice = createSlice({
         },
         setLoadingFromSavedModel: (state, action) => {
             state.modelData.loading_from_saved_model = action.payload;
+            state.modelData.first_save = action.payload;
         },
         sliceEpochResults: (state, action) => {
             const { selected_cp_no, from_ } = action.payload
@@ -201,8 +267,8 @@ const cryptoModuleSlice = createSlice({
             }
         },
         setLoadedCheckpoints: (state, action) => {
-            state.modelData.loaded_chekpoints.checkpoints = action.payload.checkpoints;
-            state.modelData.loaded_chekpoints.selectedCheckpoint = action.payload.selectedCheckpoint;
+            state.modelData.loaded_checkpoints.checkpoints = action.payload.checkpoints;
+            state.modelData.loaded_checkpoints.selectedCheckpoint = action.payload.selectedCheckpoint;
         },
         setModelStartTime: (state, action) => {
             state.modelData.modelStartTime = action.payload;
@@ -223,6 +289,7 @@ const cryptoModuleSlice = createSlice({
         },
         setWganFinalForecast: (state, action) => {
             state.modelData.wgan_final_forecast = action.payload;
+            state.modelData.initial_training_completed = true;
         },
         setQuickForecasts: (state, action) => {
             const { symbol, ...rest } = action.payload
@@ -339,6 +406,13 @@ const cryptoModuleSlice = createSlice({
             state.modelData.model_id = '';
             state.modelData.modelStartTime = '';
             state.modelData.modelEndTime = '';
+            state.modelData.task_id = '';
+            state.modelData.initial_training_completed = false;
+            state.modelData.first_save = false;
+            state.modelData.loaded_checkpoints = {
+                checkpoints: [],
+                selectedCheckpoint: ''
+            }
 
             state.modelData.wgan_final_forecast = {
                 predictions: [],
@@ -365,10 +439,13 @@ const cryptoModuleSlice = createSlice({
             state.modelData.lastLookAheadPredictions = [];
             state.modelData.model_id = '';
             state.modelData.modelEndTime = '';
+            state.modelData.task_id = '';
+            state.modelData.initial_training_completed = false;
+            state.modelData.first_save = false;
             state.modelData.model_saved_to_db = false;
             state.modelData.retrain_history_saved = false;
             state.modelData.loading_from_saved_model = false;
-            state.modelData.loaded_chekpoints = {
+            state.modelData.loaded_checkpoints = {
                 checkpoints: [],
                 selectedCheckpoint: ''
             }
@@ -655,6 +732,7 @@ const cryptoModuleSlice = createSlice({
 
                     // Update the inputs array within the function
                     updatedFunction.outputAvailable = true;
+                    updatedFunction.show_chart_flag = true;
                     const df_value = optInputs[0]?.defaultValue || ''
                     // console.log(df_value)
                     updatedFunction.display_name = `${name}_${df_value}`;
@@ -679,7 +757,7 @@ const cryptoModuleSlice = createSlice({
                     name: name,
                     display_name: `${name}_${diffVal}`,
                     result: differentOutputs.data,
-                    visible: splitPane ? true : false,
+                    visible: true,
                     key: differentOutputs.key,
                     differentiatorValue: diffVal,
                     isDataNew: false,
@@ -894,10 +972,13 @@ const cryptoModuleSlice = createSlice({
 
 const { reducer, actions } = cryptoModuleSlice;
 export const {
-    setModelSavedToDb
+    setPartialChartResetFlag
+    , setLastSessionData
+    , setModelSavedToDb
     , setRetrainHistorySavedToDb
     , setUserModels
     , setModelId
+    , setTaskId
     , setModelType
     , setTrainingParameters
     , setRetrainParameters

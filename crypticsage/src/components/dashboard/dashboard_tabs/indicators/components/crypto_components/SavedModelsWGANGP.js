@@ -497,7 +497,7 @@ const SavedModelsWGANGP = ({
                                         </Box>
                                     </Box>
                                     <Box className='opend-model-actions' display='flex' gap={1} alignItems='center'>
-                                        {toShowModelId && <RetrainWGANModal type={'from_saved'} model_id={toShowModelId} />}
+                                        {toShowModelId && <RetrainWGANModal model_id={toShowModelId} />}
                                         <DeleteSavedModel
                                             handleModelDeletFromSaved={handleModelDeletFromSaved}
                                             model_id={toShowModelId}

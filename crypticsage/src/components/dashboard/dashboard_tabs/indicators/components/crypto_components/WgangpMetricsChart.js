@@ -2,7 +2,8 @@ import { ErrorBoundary } from "react-error-boundary";
 import React, { useEffect, useRef } from 'react'
 import { Box, useTheme, Typography, FormControlLabel, Switch } from '@mui/material'
 import { createChart } from 'lightweight-charts';
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setPartialChartResetFlag } from '../../modules/CryptoModuleSlice'
 
 const logError = (error, info) => {
     // Do something with the error, e.g. log to an external API
@@ -10,9 +11,11 @@ const logError = (error, info) => {
 };
 
 const WgangpMetricsChart = (props) => {
+    const dispatch = useDispatch()
     const { type, epochResults, predictionsPalette, metricsChartReload, for_ } = props
     const { syncTooltip, setSyncTooltip, chart, metricLineSeriesRef } = props
     const retrainFlag = useSelector(state => state.cryptoModule.modelData.retraining_flag)
+    const partialResetChartFlag = useSelector(state => state.cryptoModule.partial_chart_reset_flag)
     const theme = useTheme()
     const chartBackgroundColor = theme.palette.background.default
     const textColor = theme.palette.primary.newWhite
@@ -188,6 +191,17 @@ const WgangpMetricsChart = (props) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [retrainFlag])
+
+    useEffect(() => {
+        if (partialResetChartFlag) {
+            // console.log(`PARTIAL RESET : Cleaning up chart ${type}`)
+            chart.current.remove();
+            chart.current = null;
+            metricLineSeriesRef.current = {};
+            dispatch(setPartialChartResetFlag(false))
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [partialResetChartFlag])
 
 
     // Render the chart/Update the chart

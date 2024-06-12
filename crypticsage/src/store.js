@@ -13,6 +13,8 @@ import quizSlice from './components/dashboard/dashboard_tabs/quiz/QuizSlice.js';
 
 import IndicatorsSlice from './components/dashboard/dashboard_tabs/indicators/IndicatorsSlice.js';
 import cryptoModuleSlice from './components/dashboard/dashboard_tabs/indicators/modules/CryptoModuleSlice.js';
+import ModelRunMetaSlice from "./components/dashboard/dashboard_tabs/indicators/modules/ModelRunMetaSlice.js";
+import intermediateModelSlice from './components/dashboard/dashboard_tabs/indicators/modules/IntermediateModelSlice.js';
 import stockModuleSlice from './components/dashboard/dashboard_tabs/indicators/modules/StockModuleSlice.js';
 
 import adminSlice from '../src/components/admin/AdminSlice.js'
@@ -28,6 +30,8 @@ const reducer = combineReducers({
     quiz: quizSlice,
     indicators: IndicatorsSlice,
     cryptoModule: cryptoModuleSlice,
+    intermediateModel: intermediateModelSlice,
+    modelRunMeta: ModelRunMetaSlice,
     stockModule: stockModuleSlice,
 })
 
@@ -36,7 +40,7 @@ const persistConfig = {
     storage: localforage,
     stateReconciler: autoMergeLevel2,
     serialize: true,
-    version: 9, // Update this number anytime changes are made to any of the redux slices. This will trigger the migration function below
+    version: 10, // Update this number anytime changes are made to any of the redux slices. This will trigger the migration function below
     migrate: (state, currentVersion) => {
         if (state && state._persist.version !== currentVersion) {
             console.log(`New state version ${currentVersion}. Clearing state`); // If the versions don't match, clear the state

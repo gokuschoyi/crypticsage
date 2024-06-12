@@ -76,6 +76,8 @@ import SaveIcon from '@mui/icons-material/Save';
 import PreviewIcon from '@mui/icons-material/Preview';
 import InsightsIcon from '@mui/icons-material/Insights';
 
+import DownloadIcon from '@mui/icons-material/Download';
+
 
 export { 
     LightModeOutlinedIcon, 
@@ -140,5 +142,6 @@ export {
     MarkEmailReadOutlinedIcon,
     SaveIcon,
     PreviewIcon,
-    InsightsIcon
+    InsightsIcon,
+    DownloadIcon
 }

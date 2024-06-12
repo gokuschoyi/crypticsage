@@ -22,7 +22,7 @@ const DeleteSavedModel = ({ handleModelDeletFromSaved, model_id }) => {
 
     return (
         <React.Fragment>
-            <Tooltip title={'Delete the current model'} placement='top' style={{ cursor: 'pointer' }}>
+            <Tooltip title={'Delete the saved model'} placement='top' style={{ cursor: 'pointer' }}>
                 <span>
                     <IconButton sx={{ padding: '3px' }} onClick={handleClickOpen}>
                         <DeleteForeverIcon className='small-icon' />

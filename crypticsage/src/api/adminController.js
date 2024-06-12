@@ -246,11 +246,11 @@ export const getUserModels = async ({ token }) => {
     return response;
 }
 
-export const saveModel = async ({ token, payload }) => {
+export const saveModelSessions = async ({ token, payload }) => {
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    const response = await axios.post(`${baseUrl}/model/save_model`, { payload }, config, {
+    const response = await axios.post(`${baseUrl}/model/save_model_runs`, { ...payload }, config, {
         withCredentials: true
     })
     return response;
@@ -281,7 +281,7 @@ export const addNewTrainingResults = async ({ token, payload }) => {
     const config = {
         headers: { "Authorization": `Bearer ${token}` },
     };
-    const response = await axios.post(`${baseUrl}/model/update_new_predictions`, { payload }, config)
+    const response = await axios.post(`${baseUrl}/model/update_new_predictions`, { ...payload }, config)
     return response;
 }
 

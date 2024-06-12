@@ -5,6 +5,7 @@ import { formatMillisecond, returnColorCombinations } from './CryptoModuleUtils'
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import useWebSocket from './WebSocket';
+import { useSocketRef } from '../../../../../pages/dashboard/Dashboard'
 
 import {
     Box
@@ -23,6 +24,7 @@ import {
     , WganFinalPredictionChart
     , PredictionMetricsWganpg
     , SavedModelForecasting
+    , IntermediateModels
 } from '../components'
 
 import { PredictionOptions, CorelationMatrix, WgangpOptions, WGANGPProgress } from '../components/crypto_components/Training_Components'
@@ -39,6 +41,7 @@ const CryptoModule = () => {
     const { cryptotoken } = useParams();
     const module = window.location.href.split("/dashboard/indicators/")[1].split("/")[0]
     const modelProcessDurationRef = useRef('')
+    const [processDuration, setProcessDuration] = useState('') // Just to reload the page to update
     const theme = useTheme();
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -87,31 +90,14 @@ const CryptoModule = () => {
         if (model_data.modelEndTime !== '' && model_data.modelStartTime !== '') {
             const diff = model_data.modelEndTime - model_data.modelStartTime
             modelProcessDurationRef.current = formatMillisecond(diff)
+            setProcessDuration(formatMillisecond(diff))
         } else {
             // console.log('Process tome not available')
             modelProcessDurationRef.current = ''
+            setProcessDuration('')
         }
     }, [model_data.modelEndTime, model_data.modelStartTime])
 
-    // Elapsed time since model training started
-    // const [elapsed, setElapsed] = useState(0)
-    // useEffect(() => {
-    //     let interval
-    //     if (model_data.modelStartTime !== '' && model_data.modelEndTime === '') {
-    //         // console.log('Training started')
-    //         interval = setInterval(() => {
-    //             const currentTime = new Date().getTime()
-    //             const diff = currentTime - model_data.modelStartTime
-    //             setElapsed(formatMillisecond(diff))
-    //         }, 100)
-    //     } else if (model_data.modelStartTime !== '' && model_data.modelEndTime !== '') {
-    //         // console.log('Training completed or not started yet')
-    //         setElapsed(0)
-    //         clearInterval(interval)
-    //     }
-
-    //     return () => clearInterval(interval);
-    // }, [model_data.modelStartTime, model_data.modelEndTime])
 
     const predictedVlauesRedux = useSelector(state => state.cryptoModule.modelData.predictedValues.dates)
 
@@ -127,8 +113,6 @@ const CryptoModule = () => {
     }
 
     // websocket to get model training progress
-    const userId = useSelector(state => state.auth.uid)
-    const webSocketURL = process.env.NODE_ENV === 'development' ? `${process.env.REACT_APP_BASE_WEB_SOCKET_URL}/?user_id=${userId}` : `${process.env.REACT_APP_DEV_WEBSOCKET_URL}/?user_id=${userId}`;
     const startWebSocket = useSelector(state => state.cryptoModule.modelData.startWebSocket)
 
     const notifyMessageBoxRef = useRef(null)
@@ -144,8 +128,7 @@ const CryptoModule = () => {
     const batchLinearProgressRef = useRef(null)
     const evalLinearProgressRef = useRef(null)
     const wgangpProgressRef = useRef(null)
-    const { webSocket, createModelProgressWebSocket } = useWebSocket(
-        webSocketURL,
+    const { createModelProgressWebSocket } = useWebSocket(
         userSelectedEpoch,
         notifyMessageBoxRef,
         batchResult,
@@ -159,6 +142,7 @@ const CryptoModule = () => {
         setTrainingStartedFlag,
         dispatch
     )
+    const webSocket = useSocketRef()
     // WebSocket connection
     useEffect(() => {
         // console.log('UE : Socket start')
@@ -167,6 +151,7 @@ const CryptoModule = () => {
                 // console.log('Starting socket, flag = true and socket = null')
                 createModelProgressWebSocket()
             } else {
+                createModelProgressWebSocket()
                 // console.log('WS already present, socket not null')
             }
         } else {
@@ -192,7 +177,6 @@ const CryptoModule = () => {
     }, [retrainigFlag])
 
     const [retrainHistSavePrompt, setRetrainHistSavePrompt] = useState({ flag: false, retrain_checkpoint: '' })
-
     return (
         <Box className='crypto-module-container'>
             <Box m={sm ? 1 : 2} className='crypto-module-container-box'>
@@ -207,8 +191,7 @@ const CryptoModule = () => {
                     />
                 </Box>
 
-                {/* Model training parameters */}
-                <Box mb={2} mt={2} className='model-training-container'>
+                <Box mb={2} mt={2} className='model-training-container'> {/* Model training parameters */}
                     <Box className='tensor-flow-grid' p={2} >
                         <TrainingParameters
                             modelParams={modelParams}
@@ -224,9 +207,13 @@ const CryptoModule = () => {
                     </Box>
                 </Box>
 
+                <Box className='intermediate-model-container'>
+                    <IntermediateModels />
+                </Box>
+
                 <Box mb={2} mt={2} className='model-training-results'> {/* Model training results LSTM and WGAN-GP */}
-                    {modelParams.modelType === 'LSTM' ?
-                        <Grid container className='tensor-flow-grid' > {/* lstm model training results */}
+                    {modelParams.modelType === 'LSTM' &&
+                        <Grid container className='lstm tensor-flow-grid' > {/* lstm model training results */}
                             <Grid item md={12} lg={6} xl={6} p={2} sx={{ width: '100%' }}>
                                 <Box gap={'8px'} display='flex' flexDirection='column'>
                                     <Box display='flex' flexDirection='column' alignItems='start'>
@@ -263,7 +250,7 @@ const CryptoModule = () => {
                             <Grid item md={12} lg={6} xl={6} p={2} sx={{ width: '100%' }}> {/* lstm model training results */}
                                 <Box className='main-training-status-box' gap={'8px'} display='flex' flexDirection='column'>
                                     <Typography sx={{ textAlign: 'start' }} variant='h6'>
-                                        {modelProcessDurationRef.current !== '' ? `Time taken : ${modelProcessDurationRef.current}` : ''}
+                                        {processDuration !== '' ? `Time taken : ${processDuration}` : ''}
                                     </Typography>
 
                                     <LstmTrainingResults // LSTM model training results
@@ -281,8 +268,9 @@ const CryptoModule = () => {
                                 </Box>
                             </Grid>
                         </Grid>
-                        :
-                        <Box className='tensor-flow-grid' display='flex' flexDirection='column'> {/* wgan-gp model training results */}
+                    }
+                    {modelParams.modelType === 'WGAN-GP' &&
+                        <Box className='wgan-gp tensor-flow-grid' display='flex' flexDirection='column'> {/* wgan-gp model training results */}
                             <Grid container className='tensor-flow-grid'>
                                 <Grid item md={6} lg={6} xl={6} p={2} sx={{ width: '100%' }}> {/* wgan-gp model training results */}
                                     <Box display={'flex'} flexDirection={'column'} gap={'8px'}>
@@ -295,6 +283,7 @@ const CryptoModule = () => {
                                         <WganFinalPredictionChart // Prediction chart WGAN-GP
                                             wgan_final_forecast={wgan_final_forecast}
                                             trainingStartedFlag={trainingStartedFlag}
+                                            for_=''
                                         />
 
                                         {wgan_final_forecast.length > 0 &&
@@ -302,7 +291,7 @@ const CryptoModule = () => {
                                                 colorCombinations={colorCombinations[modelParams.modelType]}
                                                 paletteIdRedux={paletteIdRedux}
                                                 handlePredictionChartPalette={handlePredictionChartPalette}
-                                                savedToDb={model_data.model_saved_to_db}
+                                                savedToDb={model_data.model_saved_to_db || model_data.retrain_history_saved}
                                                 modelProcessDurationRef={modelProcessDurationRef}
                                                 setMetricsChartReload={setMetricsChartReload}
                                                 retrainHistSavePrompt={retrainHistSavePrompt}
@@ -316,7 +305,7 @@ const CryptoModule = () => {
                                     <Typography
                                         sx={{ textAlign: 'start', padding: '4px 0px 4px 4px' }}
                                         variant='h6'>
-                                        {modelProcessDurationRef.current !== '' ? `Time taken : ${modelProcessDurationRef.current}` : ''}
+                                        {processDuration !== '' ? `Time taken : ${processDuration}` : ''}
                                     </Typography>
 
                                     {(correlation_data_redux && correlation_data_redux.length === model_parameters.transformation_order.length) &&
@@ -348,8 +337,7 @@ const CryptoModule = () => {
                     }
                 </Box>
 
-                {/* User saved models both LSTM & WGAN-GP */}
-                <Box className='user-saved-models-container'>
+                <Box className='user-saved-models-container'> {/* User saved models both LSTM & WGAN-GP */}
                     <SavedModelForecasting />
                 </Box>
 
