@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { useOutletContext } from "react-router-dom";
 import { Box } from '@mui/material';
 import './Sections.css'
 import { useSelector } from 'react-redux';
@@ -27,10 +26,6 @@ const FirstRoute = ({ sectionId, lessonId }) => {
 };
 
 const Sections = (props) => {
-    const [setTest] = useOutletContext();
-    const hide = () => {
-        setTest(true);
-    }
     const { sectionId, lessonId } = useSelector(state => state.section)
     const [redirected, setRedirected] = React.useState(false);
 
@@ -44,11 +39,11 @@ const Sections = (props) => {
     // console.log(redirected)
 
     return (
-        <Box className='learning-container' onClick={hide}>
+        <Box className='learning-container'>
             {redirected ? (
                 <FirstRoute sectionId={sectionId} lessonId={lessonId} />
             ) : null}
-            <Outlet context={[setTest]} />
+            <Outlet />
         </Box>
     )
 }

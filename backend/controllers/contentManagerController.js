@@ -6,6 +6,8 @@ const Validator = require('../utils/validator')
 const CMServices = require('../services/contentManagerServices')
 const MDBServices = require('../services/mongoDBServices')
 const HDServices = require('../services/historicalDataServices')
+const CSUtil = require('../utils/cryptoStocksUtil')
+const CMUtil = require('../utils/contentManagerUtil')
 
 // <--- Admin Stats ---> //
 
@@ -13,7 +15,7 @@ const HDServices = require('../services/historicalDataServices')
 const FASLatestTickerMetaData = async (req, res) => {
     const { length } = req.body
     try {
-        let result = await CMServices.serviceFetchAndSaveLatestTickerMetaData({ length })
+        let [result] = await CMServices.serviceFetchAndSaveLatestTickerMetaData({ length })
         res.status(200).json({ message: "Get Crypto Data request success", result });
     } catch (error) {
         log.error(error.stack)
@@ -24,7 +26,7 @@ const FASLatestTickerMetaData = async (req, res) => {
 const deleteTickerMeta = async (req, res) => {
     try {
         const { symbol } = req.body
-        const deletedTickerMeta = await MDBServices.deleteOneMetaData({ symbol })
+        const deletedTickerMeta = await MDBServices.deleteOneMetaData(symbol)
         res.status(200).json({ message: "Delete Ticker Meta request success", deletedTickerMeta });
     } catch (error) {
         log.error(error.stack)
@@ -79,9 +81,50 @@ const findYFTicker = async (req, res) => {
     }
 }
 
+// Admin Side : New tickers that have not been added to the DB
+const getNewTickersToAdd = async (req, res) => {
+    const ticker_list_db = await MDBServices.getBinanceTickerList()
+    const ticker_fetch_length = 2 * ticker_list_db.length
+    const [latest_tickers, yf] = await CSUtil.fetchTopTickerByMarketCap({ length: ticker_fetch_length })
+    const new_tickers = latest_tickers.slice(ticker_list_db.length)
+    res.status(200).json({ message: "Get new tickers success", new_tickers });
+}
+
+// Admin Side : Add new ticker/s meta to the DB
+const addNewBinanceTickerMeta = async (req, res) => {
+    try {
+        const { ticker_to_add } = req.body
+        let symbolsFromBinance = await CMUtil.fetchSymbolsFromBinanceAPI()
+        let tickerNameAdded = ticker_to_add.map((ticker) => {
+            const matched = symbolsFromBinance.find((symbol) => symbol.baseAsset === ticker.symbol && symbol.quoteAsset === "USDT")
+            return {
+                ...ticker,
+                matched: matched ? matched.symbol : 'N/A',
+            }
+        })
+
+        const tickersWithNoDataInBinance = tickerNameAdded.filter((ticker) => ticker.matched === 'N/A')
+        const tickersWithNoHistData = tickerNameAdded.filter((ticker) => ticker.matched !== 'N/A')
+
+        // console.log(tickerNameAdded)
+
+        let result = await MDBServices.saveOrUpdateTickerMeta(ticker_to_add)
+        res.status(200).json({ message: "Add new ticker meta success", result, tickersWithNoDataInBinance, tickersWithNoHistData });
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: "Get Crypto Data request error", error: error.message })
+    }
+}
+
 const getBinanceTickersIndb = async (req, res) => {
     try {
-        const [totalTickerCountInDb, totalTickersWithDataToFetch, tickersWithHistData, tickersWithNoHistData, tickerWithNoDataInBinance] = await CMServices.serviceGetBinanceTickerStatsFromDb()
+        const [
+            totalTickerCountInDb,
+            totalTickersWithDataToFetch,
+            tickersWithHistData,
+            tickersWithNoHistData,
+            tickerWithNoDataInBinance
+        ] = await CMServices.serviceGetBinanceTickerStatsFromDb()
         let tickersWithHistDataLength = tickersWithHistData.length
         let tickersWithNoHistDataLength = tickersWithNoHistData.length
         res.status(200).json({
@@ -142,11 +185,33 @@ const updateAllBinanceTickers = async (req, res) => {
     }
 }
 
+const updateHistoricalYFinanceData = async (req, res) => {
+    try {
+        const { symbol } = req.body
+        const diffArray = await HDServices.processUpdateHistoricalYFinanceData({ symbol })
+        res.status(200).json({ message: 'YF tokens updated', diffArray })
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: error.message });
+    }
+}
+
 const fetchOneYfinanceTicker = async (req, res) => {
     try {
         const { symbol } = req.body
+        const newSymbol = symbol[0]
         const periods = ["1d", "1wk", "1mo"]
         const [uploadStatus, availableTickers, tickers] = await HDServices.processInitialSaveHistoricalDataYFinance({ tickersList: symbol, periods })
+        const isMetaDataAvailable = await MDBServices.isMetadatAvailable(newSymbol)
+        if (!isMetaDataAvailable) { // add metadata
+            log.info(`Metadata unavaiable, adding metadata for ${newSymbol}`)
+            await CSUtil.getYfinanceQuotes(symbol)
+            const meta_type = 'full_summary'
+            const full_summary = await CSUtil.getStockSummaryDetails(newSymbol)
+            await MDBServices.updateYFinanceMetadata(newSymbol, meta_type, full_summary)
+        } else {
+            log.info(`Metadata avaiable for ${newSymbol}`)
+        }
         res.status(200).json({ message: "Yfinance tickers added", uploadStatus, availableTickers, tickers });
     } catch (error) {
         let formattedError = JSON.stringify(logger.formatError(error))
@@ -162,7 +227,8 @@ const fetchOneYfinanceTicker = async (req, res) => {
 const deleteOneYfinanceTicker = async (req, res) => {
     try {
         const { symbol } = req.body
-        const deleteStatus = await MDBServices.deleteOneYfinanceTickerDromDb({ symbol })
+        const type = 'stock'
+        const deleteStatus = await MDBServices.deleteTickerHistDataFromDb(symbol, type)
         res.status(200).json({ message: "Yfinance tickers deleted", deleteStatus });
     } catch (error) {
         log.error(error.stack)
@@ -175,6 +241,28 @@ const getProcessStatus = async (req, res) => {
         const { jobIds, type } = req.body
         const processStatus = await CMServices.serviceCheckOneBinanceTickerJobCompletition({ jobIds, type })
         res.status(200).json({ message: processStatus.message, status: processStatus.data });
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const getLatestTickerDataForUser = async (req, res) => {
+    try {
+        const { updateQueries } = req.body
+        const newTickers = await CMServices.serviceGetLatestTickerDataForUser({ updateQueries })
+        res.status(200).json({ message: "Get Latest Ticker Data request success", newTickers });
+    } catch (error) {
+        log.error(error.stack)
+        res.status(400).json({ message: error.message });
+    }
+}
+
+const saveOneTickerDataForUser = async (req, res) => {
+    try {
+        const { fetchQuery } = req.body
+        const updateTickerWithOneDataPoint = await CMServices.serviceUpdateTickerWithOneDataPoint({ fetchQuery })
+        res.status(200).json({ message: "Save One Ticker Data request success", updateTickerWithOneDataPoint });
     } catch (error) {
         log.error(error.stack)
         res.status(400).json({ message: error.message });
@@ -205,7 +293,6 @@ const addSection = async (req, res) => {
         const params = req.body
         const isInputValid = Validator.validateAddSectionInputs({ params })
         if (isInputValid) {
-            const connectMessage = "Add Sections"
             const collectionName = 'sections'
             const { title, content, url } = params
             const sectionId = uuidv4();
@@ -215,7 +302,7 @@ const addSection = async (req, res) => {
                 url,
                 sectionId: sectionId,
             }
-            let insertedResult = await CMServices.serviceAddDocuments({ connectMessage, collectionName, document })
+            let insertedResult = await CMServices.serviceAddDocuments({ collectionName, document })
             res.status(200).json({ message: "Section added successfully", createdSectionId: sectionId, update: false, insertedResult });
         }
     } catch (error) {
@@ -232,7 +319,7 @@ const updateSection = async (req, res) => {
         if (isInputValid) {
             const { title, content, url, sectionId } = params
             const update = await CMServices.serviceUdpateSectionInDb({ title, content, url, sectionId })
-            res.status(200).json({ message: "Section updated successfully", update: true, update });
+            res.status(200).json({ message: "Section updated successfully", update: true });
         }
     } catch (error) {
         log.error(error.stack)
@@ -288,7 +375,6 @@ const addLesson = async (req, res) => {
         const params = req.body
         const isInputValid = Validator.validateAddLessonInputs({ params })
         if (isInputValid) {
-            const connectMessage = "Add Lesson"
             const collectionName = 'lessons'
             const { chapter_title, sectionId, lessonData } = params
             const lessonId = uuidv4();
@@ -298,7 +384,7 @@ const addLesson = async (req, res) => {
                 lessonData,
                 lessonId: lessonId,
             }
-            let insertedResult = await CMServices.serviceAddDocuments({ connectMessage, collectionName, document })
+            let insertedResult = await CMServices.serviceAddDocuments({ collectionName, document })
 
             res.status(200).json({ message: "Lesson added successfully", lessonId, insertedResult });
         }
@@ -372,7 +458,6 @@ const addQuizQuestions = async (req, res) => {
         const params = req.body
         const isInputValid = Validator.validateAddQuizInputs({ params })
         if (isInputValid) {
-            const connectMessage = "Add Quiz"
             const collectionName = 'quiz'
             const { quizData } = params
             const quizId = uuidv4();
@@ -380,7 +465,7 @@ const addQuizQuestions = async (req, res) => {
             quizData.questions.map((question) => {
                 question.question_id = uuidv4();
             })
-            let insertedResult = await CMServices.serviceAddDocuments({ connectMessage, collectionName, document: quizData })
+            let insertedResult = await CMServices.serviceAddDocuments({ collectionName, document: quizData })
             res.status(200).json({ message: "Quiz question added successfully", quizId, insertedResult });
         }
     } catch (error) {
@@ -424,27 +509,32 @@ const deleteQuizQuestion = async (req, res) => {
 // <--- Quiz ---> //
 
 module.exports = {
-    FASLatestTickerMetaData,
-    deleteTickerMeta,
-    findYFTicker,
-    getBinanceTickersIndb,
-    getYfinanceTickersIndb,
-    fetchOneBinanceTicker,
-    updateOneBinanceTicker,
-    updateAllBinanceTickers,
-    fetchOneYfinanceTicker,
-    deleteOneYfinanceTicker,
-    getProcessStatus,
-    getSections,
-    addSection,
-    updateSection,
-    deleteSection,
-    getLessons,
-    addLesson,
-    updateLesson,
-    deleteLesson,
-    getQuizQuestions,
-    addQuizQuestions,
-    updateQuizQuestions,
-    deleteQuizQuestion,
+    FASLatestTickerMetaData
+    , deleteTickerMeta
+    , findYFTicker
+    , getNewTickersToAdd
+    , addNewBinanceTickerMeta
+    , getBinanceTickersIndb
+    , getYfinanceTickersIndb
+    , fetchOneBinanceTicker
+    , updateOneBinanceTicker
+    , updateHistoricalYFinanceData
+    , getLatestTickerDataForUser
+    , saveOneTickerDataForUser
+    , updateAllBinanceTickers
+    , fetchOneYfinanceTicker
+    , deleteOneYfinanceTicker
+    , getProcessStatus
+    , getSections
+    , addSection
+    , updateSection
+    , deleteSection
+    , getLessons
+    , addLesson
+    , updateLesson
+    , deleteLesson
+    , getQuizQuestions
+    , addQuizQuestions
+    , updateQuizQuestions
+    , deleteQuizQuestion
 }

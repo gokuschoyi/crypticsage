@@ -1,0 +1,9 @@
+.schedule-container {
+    width: 100%;
+}
+
+@media screen and (min-width: 1400px) {
+    .schedule-container {
+        width: 1200px;
+    }
+}

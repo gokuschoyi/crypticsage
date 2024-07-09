@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './Login.css'
-import { Box, Typography, TextField, Button, IconButton, Grid, Alert, CircularProgress } from '@mui/material'
+import { Box, Typography, TextField, Button, IconButton, Grid, Alert, CircularProgress, useTheme } from '@mui/material'
 import Collapse from '@mui/material/Collapse';
 import { CloseIcon, FacebookIcon } from '../../dashboard/global/Icons';
 import Logo from '../../../assets/logoNew.png'
@@ -12,23 +12,45 @@ import { GoogleLogin } from '@react-oauth/google';
 
 import { useDispatch } from 'react-redux';
 import { setAuthState } from '../authSlice';
+// import { setUserModels } from '../../dashboard/dashboard_tabs/indicators/modules/CryptoModuleSlice'
 import { LoginUser } from '../../../api/auth';
-import { setRecentLessonAndQuizStatus } from '../../dashboard/dashboard_tabs/stats/StatsSlice'
+import { setRecentLessonAndQuizStatus, setWordOfTheDay } from '../../dashboard/dashboard_tabs/stats/StatsSlice'
+import { setModelsInProgress } from '../../dashboard/dashboard_tabs/indicators/modules/IntermediateModelSlice'
+
+const process_login = (result) => {
+    return {
+        'accessToken': result.data.data.accessToken,
+        'displayName': result.data.data.displayName,
+        'email': result.data.data.email,
+        'emailVerified': result.data.data.emailVerified,
+        'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
+        'uid': result.data.data.uid,
+        'preferences': result.data.data.preferences || {},
+        'mobile_number': result.data.data.mobile_number || '',
+        'admin_status': result.data.data.admin_status,
+        'user_lesson_status': result.data.data.lesson_status || {},
+        'photoUrl': result.data.data.profile_image || '',
+    }
+}
+
 const Login = (props) => {
     const { switchState, setSignupSuccessMessage, signupSuccessMessage } = props
     const navigate = useNavigate()
     const dispatch = useDispatch()
-    const redirectToHome = () => {
-        navigate('/')
-    }
-
+    
+    const theme = useTheme()
     const [open, setOpen] = useState(false);
     const [error, setError] = useState('');
     const [fPassword, setFPassword] = useState(false)
-
+    const [forgotEmail, setForgotEmail] = useState('')
+    
     const initialLoginData = {
         email: '',
         password: '',
+    }
+    
+    const redirectToHome = () => {
+        navigate('/')
     }
 
     const [loginData, setLoginData] = React.useState(initialLoginData)
@@ -56,6 +78,10 @@ const Login = (props) => {
         setFPassword(!fPassword)
     }
 
+    const handleForgotPassword = async () => {
+        console.log(forgotEmail)
+    }
+
     const handleLoginData = (e) => {
         const { name, value } = e.target
         setLoginData({ ...loginData, [name]: value })
@@ -64,7 +90,7 @@ const Login = (props) => {
     const [isLodaing, setIsLoading] = useState(false)
 
     const signinUser = async () => {
-        console.log("clicked")
+        // console.log("clicked")
         if (email === '' || password === '') {
             setError('Please fill all the fields')
         }
@@ -77,22 +103,12 @@ const Login = (props) => {
                     password
                 }
                 const result = await LoginUser(loginD)
-                const userData = {
-                    'accessToken': result.data.data.accessToken,
-                    'displayName': result.data.data.displayName,
-                    'email': result.data.data.email,
-                    'emailVerified': result.data.data.emailVerified,
-                    'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
-                    'uid': result.data.data.uid,
-                    'preferences': result.data.data.preferences || {},
-                    'mobile_number': result.data.data.mobile_number || '',
-                    'admin_status': result.data.data.admin_status,
-                    'user_lesson_status': result.data.data.lesson_status || {},
-                    'photoUrl': result.data.data.profile_image || '',
-                }
+                const userData = process_login(result)
                 localStorage.setItem('userTheme', userData.preferences.theme)
                 dispatch(setAuthState(userData))
                 dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
+                dispatch(setWordOfTheDay(result.data.word))
+                dispatch(setModelsInProgress(result.data.in_progress_models))
                 setIsLoading(false)
                 navigate('/dashboard')
             } catch (err) {
@@ -114,22 +130,12 @@ const Login = (props) => {
         try {
             setIsLoading(true)
             const result = await LoginUser(loginData)
-            const userData = {
-                'accessToken': result.data.data.accessToken,
-                'displayName': result.data.data.displayName,
-                'email': result.data.data.email,
-                'emailVerified': result.data.data.emailVerified,
-                'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
-                'uid': result.data.data.uid,
-                'preferences': result.data.data.preferences || {},
-                'mobile_number': result.data.data.mobile_number || '',
-                'admin_status': result.data.data.admin_status,
-                'user_lesson_status': result.data.data.lesson_status || {},
-                'photoUrl': result.data.data.profile_image || '',
-            }
+            const userData = process_login(result)
             localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
             dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
+            dispatch(setWordOfTheDay(result.data.word))
+            dispatch(setModelsInProgress(result.data.in_progress_models))
             setIsLoading(false)
             navigate('/dashboard')
         } catch (err) {
@@ -150,22 +156,12 @@ const Login = (props) => {
         try {
             setIsLoading(true)
             const result = await LoginUser(loginData)
-            const userData = {
-                'accessToken': result.data.data.accessToken,
-                'displayName': result.data.data.displayName,
-                'email': result.data.data.email,
-                'emailVerified': result.data.data.emailVerified,
-                'passwordEmptyFlag': result.data.data.passwordEmptyFlag,
-                'uid': result.data.data.uid,
-                'preferences': result.data.data.preferences || {},
-                'mobile_number': result.data.data.mobile_number || '',
-                'admin_status': result.data.data.admin_status,
-                'user_lesson_status': result.data.data.lesson_status || {},
-                'photoUrl': result.data.data.profile_image || '',
-            }
+            const userData = process_login(result)
             localStorage.setItem('userTheme', userData.preferences.theme)
             dispatch(setAuthState(userData))
             dispatch(setRecentLessonAndQuizStatus(result.data.recent_lesson_quiz))
+            dispatch(setWordOfTheDay(result.data.word))
+            dispatch(setModelsInProgress(result.data.in_progress_models))
             setIsLoading(false)
             navigate('/dashboard')
         } catch (err) {
@@ -218,16 +214,20 @@ const Login = (props) => {
                                         <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Login</Typography>
                                         <CircularProgress color="secondary" size='30px' style={{ display: isLodaing ? 'block' : 'none' }} />
                                     </Box>
-                                    <Box className="input-filed-box" display="flex" flexDirection="column">
+                                    <Box className="input-filed-box" display="flex" flexDirection="column" gap={2}>
                                         <TextField onChange={(e) => handleLoginData(e)} name='email' value={email}
+                                            size='small'
                                             sx={{
-                                                padding: '10px', '& label.Mui-focused': {
+                                                '& label.Mui-focused': {
                                                     color: 'white',
                                                 },
                                                 '& label': {
                                                     color: 'red',
                                                 },
                                                 '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': {
+                                                        borderColor: `${theme.palette.text.secondary}`,
+                                                    },
                                                     '&:hover fieldset': {
                                                         borderColor: 'red',
                                                     },
@@ -239,8 +239,8 @@ const Login = (props) => {
                                             id="outlined-login-email" label="Email" variant="outlined" type='text'
                                         />
                                         <TextField onChange={(e) => handleLoginData(e)} name='password' value={password}
+                                            size='small'
                                             sx={{
-                                                padding: '10px',
                                                 '& label.Mui-focused': {
                                                     color: 'white',
                                                 },
@@ -248,6 +248,9 @@ const Login = (props) => {
                                                     color: 'red',
                                                 },
                                                 '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': {
+                                                        borderColor: `${theme.palette.text.secondary}`,
+                                                    },
                                                     '&:hover fieldset': {
                                                         borderColor: 'red',
                                                     },
@@ -262,30 +265,25 @@ const Login = (props) => {
                                     <Box className='forgotpassword-box' justifyContent="end" display="flex">
                                         <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Forgot Password?</Typography>
                                     </Box>
+
                                     <Button onClick={signinUser} className='login-button' variant="contained" sx={{
                                         ':hover': {
                                             color: 'black !important',
                                             backgroundColor: 'white !important'
                                         }
                                     }}>LOGIN</Button>
+
                                     <Box className='login-box-noaccount' justifyContent="center" display="flex">
                                         <Typography className='signup-start' variant='div' fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Don't have an Account? <span className="signup" onClick={switchState} >Signup Now </span></Typography>
                                     </Box>
                                     <Box className="icon-box">
-                                        <Box className="footer-icon" alignItems='center' display='flex'>
-                                            <GoogleLogin shape='pill' type='icon' onSuccess={googleLoginSuccess} onError={errorMessage} state_cookie_domain='single-host-origin'  />
-                                        </Box>
-                                        <Box className="footer-icon">
-                                            <LoginSocialFacebook
-                                                appId={process.env.REACT_APP_FACEBOOK_APP_ID}
-                                                onResolve={facebookLoginSuccess}
-                                                onReject={errorMessage}
-                                            >
-                                                <IconButton size='large' aria-label="facebook" sx={{ color: 'white' }}>
-                                                    <FacebookIcon sx={{ width: '40px', height: '40px' }} />
-                                                </IconButton>
-                                            </LoginSocialFacebook>
-                                        </Box>
+                                        <GoogleLogin shape='pill' type='icon' size='medium' onSuccess={googleLoginSuccess} onError={errorMessage} state_cookie_domain='https://localhost:3001' allowed_parent_origin='https://localhost:3001/dashboard' />
+                                        <LoginSocialFacebook
+                                            appId={process.env.REACT_APP_FACEBOOK_APP_ID}
+                                            onResolve={facebookLoginSuccess}
+                                            onReject={errorMessage}
+                                            children={<FacebookIcon sx={{ color: 'white', cursor: 'pointer', width: '35px', height: '35px' }} />}
+                                        />
                                     </Box>
                                 </Box>
                                 :
@@ -295,8 +293,8 @@ const Login = (props) => {
                                     </Box>
                                     <Box className="input-filed-box" display="flex" flexDirection="column">
                                         <TextField name='email'
+                                            size='small'
                                             sx={{
-                                                padding: '10px',
                                                 '& label.Mui-focused': {
                                                     color: 'white',
                                                 },
@@ -304,6 +302,9 @@ const Login = (props) => {
                                                     color: 'red',
                                                 },
                                                 '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': {
+                                                        borderColor: `${theme.palette.text.secondary}`,
+                                                    },
                                                     '&:hover fieldset': {
                                                         borderColor: 'red',
                                                     },
@@ -312,17 +313,21 @@ const Login = (props) => {
                                                     color: 'white',
                                                 }
                                             }}
+                                            value={forgotEmail}
+                                            onChange={(event) => {
+                                                setForgotEmail(event.target.value);
+                                            }}
                                             id="outlined-basic-forgot-email" label="Enter your Email" variant="outlined" type='email' />
                                     </Box>
                                     <Box className='forgotpassword-box' justifyContent="end" display="flex">
-                                        <Typography onClick={handleFPassword} className="forgot-password" variant='a' fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Login</Typography>
+                                        <Button size='small' className='reset-button' variant="contained" onClick={handleForgotPassword} sx={{
+                                            ':hover': {
+                                                color: 'black !important',
+                                                backgroundColor: 'white !important'
+                                            }
+                                        }}>Submit</Button>
+                                        <Button size='small' onClick={handleFPassword} className='reset-button' variant="contained" sx={{}}>Go Back</Button>
                                     </Box>
-                                    <Button className='reset-button' variant="contained" sx={{
-                                        ':hover': {
-                                            color: 'black !important',
-                                            backgroundColor: 'white !important'
-                                        }
-                                    }}>Submit</Button>
                                 </Box>
                             }
                         </Box>
@@ -334,7 +339,7 @@ const Login = (props) => {
                     </Grid> */}
                 </Grid>
             </Box>
-        </Box >
+        </Box>
     )
 }
 

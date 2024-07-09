@@ -5,7 +5,7 @@ import YFinanceTickerInfo from '../components/YFinanceTickerInfo';
 
 // import { useOutletContext } from "react-router-dom";
 import AdminHeader from '../global/AdminHeader'
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, Divider } from '@mui/material'
 
 const Dashboard = (props) => {
     const { title, subtitle } = props;
@@ -26,13 +26,13 @@ const Dashboard = (props) => {
                     <Box id="w-socket"></Box>
                 </Box>
                 <BinanceTickerInfo />
-
+                <Divider />
                 <Box className='yFinance-stats-box' display='flex' mt={4} mb={2} justifyContent='flex-start' >
                     <Typography variant='h3' >Y-Finance Ticker Info</Typography>
                 </Box>
                 <YFinanceTickerInfo />
             </Box>
-        </Box >
+        </Box>
     )
 }
 

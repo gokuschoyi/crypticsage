@@ -121,3 +121,14 @@ export const getLatestLessonAndQuizResults = async (data) => {
     })
     return response;
 }
+
+export const getUserSavedModels = async (data) => {
+    let token = data.token;
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    const response = await axios.get(`${baseUrl}/indicators/fetch_saved_user_models`, config, {
+        withCredentials: true
+    })
+    return response;
+}   

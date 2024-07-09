@@ -1,3 +1,74 @@
+import { useState, useEffect } from "react";
+
+export const useOnlineStatus = () => {
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+    useEffect(() => {
+        const goOnline = () => setIsOnline(true);
+        const goOffline = () => setIsOnline(false);
+
+        window.addEventListener('online', goOnline);
+        window.addEventListener('offline', goOffline);
+
+        return () => {
+            window.removeEventListener('online', goOnline);
+            window.removeEventListener('offline', goOffline);
+        };
+    }, []);
+
+    return isOnline;
+}
+
+export const useElementSize = (className, delay = 0) => {
+    const [size, setSize] = useState({ width: 0, height: 0 });
+
+    useEffect(() => {
+        const element = document.getElementsByClassName(className)[0];
+
+        if (!element) {
+            console.warn(`Element with class ${className} not found.`);
+            return;
+        }
+
+        // Debounce function
+        let timeoutId = null;
+        const debounce = (func, delay) => {
+            return (...args) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    func(...args);
+                }, delay);
+            };
+        };
+
+        // Create a Resize Observer
+        const resizeObserver = new ResizeObserver(entries => {
+            if (entries[0]) {
+                const { width, height } = entries[0].contentRect;
+                debounceUpdateSize(width, height);
+            }
+        });
+
+        const debounceUpdateSize = debounce((newWidth, newHeight) => {
+            // Only update if the size is different
+            if ((newWidth !== size.width || newHeight !== size.height) && (newWidth !== 0 && newHeight !== 0)) {
+                setSize({ width: Math.round(newWidth), height: Math.round(newHeight) });
+            }
+        }, delay);
+
+        // Observe the element
+        resizeObserver.observe(element);
+
+        // Cleanup function
+        return () => {
+            resizeObserver.disconnect();
+            clearTimeout(timeoutId);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [className, delay]);
+    return size;
+}
+
 export const shortenDate = (dateString) => {
     if (dateString === '') { return '' } else {
         const [date, time] = dateString.split(", ");
@@ -18,7 +89,11 @@ export const capitalizeFirstLetter = (string) => {
 
 // convert large number to K, M, B, T
 export const convert = (n) => {
-    if (n < 1e3) return n.toFixed(4);
+    if (n === null) return 'N/A';
+    if (n < 0) {
+        return `-${convert(-n)}`;
+    }
+    if (n < 1e3) return n;
     if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + "K";
     if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(1) + "M";
     if (n >= 1e9 && n < 1e12) return +(n / 1e9).toFixed(1) + "B";

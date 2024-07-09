@@ -12,14 +12,7 @@ import {
 const WordMeaningDialog = (props) => {
     const { open, heading, wordMeaning, handleCloseWordMeaning } = props
     const theme = useTheme()
-    const buttonStyle = {
-        ':hover': {
-            color: 'black !important',
-            backgroundColor: '#d11d1d !important',
-            transition: '0.5s'
-        },
-        backgroundColor: `${theme.palette.secondary.main}`
-    }
+    
     return (
         <Dialog
             sx={{
@@ -31,16 +24,16 @@ const WordMeaningDialog = (props) => {
             maxWidth='sm'
             aria-describedby="alert-dialog-slide-description"
         >
-            <DialogTitle sx={{ color: `${theme.palette.secondary.main}`, textAlign: 'center' }}>{heading}</DialogTitle>
+            <DialogTitle sx={{ color: `${theme.palette.secondary.main}`, textAlign: 'start' }}>{heading}</DialogTitle>
             <DialogContent>
-                <Box sx={{ backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50px' }}>
+                <Box sx={{  display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50px' }}>
                     <Typography varient='h5' textAlign='start'>
                         {wordMeaning}
                     </Typography>
                 </Box>
             </DialogContent>
             <DialogActions sx={{ paddingRight: '25px' }}>
-                <Button sx={buttonStyle} onClick={handleCloseWordMeaning}>CLOSE</Button>
+                <Button size='small' variant='outlined' onClick={handleCloseWordMeaning}>CLOSE</Button>
             </DialogActions>
         </Dialog>
     )

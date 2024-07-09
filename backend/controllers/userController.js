@@ -2,7 +2,7 @@ const logger = require('../middleware/logger/Logger');
 const log = logger.create(__filename.slice(__dirname.length + 1))
 const Validator = require('../utils/validator');
 const userServices = require('../services/userServices')
-const wodData = require('../data/wodData')
+const getWordOfTheDay = require('../data/wodData')
 
 const verifyPassword = async (req, res) => {
 	try {
@@ -165,10 +165,8 @@ const fileUpload = async (req, res) => {
 }
 
 const wordOfTheDay = async (req, res) => {
-	let wordData = wodData[Math.floor(Math.random() * wodData.length)];
-	let objectkey = Object.keys(wordData)[0];
-	let word = wordData[objectkey];
-	res.status(200).json({ message: "Word of the day request success", word });
+	let wordData = getWordOfTheDay()
+	res.status(200).json({ message: "Word of the day request success", word: wordData });
 }
 
 module.exports = {

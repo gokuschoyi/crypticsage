@@ -3,7 +3,6 @@ import './Slide.css'
 import { Box, Button, useTheme, CardMedia, Grid } from '@mui/material'
 import TreeView from '@mui/lab/TreeView';
 import TreeItem from '@mui/lab/TreeItem';
-import { useOutletContext } from "react-router-dom";
 import { ChevronRightIcon, ExpandMoreIcon } from '../../../../global/Icons';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -24,11 +23,7 @@ const SlideComponent = (props) => {
     const { slides, counter } = useSelector(state => state.section);
     const sectionData = useSelector(state => state.section.sections)
     const lessonsData = useSelector(state => state.section.lessons)
-    const [setTest] = useOutletContext();
     const videoContent = document.getElementById('slide-video')
-    const hide = () => {
-        setTest(true);
-    }
     const slideData = slides.lessonData
     const renderTree = () => {
         return (
@@ -205,14 +200,14 @@ const SlideComponent = (props) => {
 
         const highlights = document.getElementsByClassName("highlight");
         for (const highlight of highlights) {
-            highlight.style.color = `red`
+            highlight.style.color = `${theme.palette.primary.light}`
             highlight.addEventListener("mouseover", function () {
                 this.style.backgroundColor = "white";
                 this.style.color = "black";
             });
             highlight.addEventListener("mouseout", function () {
                 this.style.backgroundColor = "";
-                this.style.color = "red";
+                this.style.color =  `${theme.palette.primary.light}`;
             });
             highlight.addEventListener("click", event => {
                 var word = event.target.textContent
@@ -260,14 +255,14 @@ const SlideComponent = (props) => {
     // console.log("currentLessonStatus", currentLessonStatus)
 
     return (
-        <Box className='introduction-container' onClick={hide}>
+        <Box className='introduction-container'>
             <Box className='lesson-tree' sx={{ color: `${theme.palette.secondary.main}` }}>
                 {renderTree()}
             </Box>
             <WordDialog open={open} handleClose={handleClose} word={clickedWord.word} meaning={clickedWord.meaning} />
             <Grid container spacing={{ xs: 4, sm: 3, md: 2 }} className='slide-container'>
                 <Grid item xs={12} sm={12} md={12} lg={6} xl={6} display='flex' alignItems='center'>
-                    <Box className='chapter-slide-container' sx={{ color: `${theme.palette.secondary.main}` }}>
+                    <Box className='chapter-slide-container' >
                         {ChapterSlide({ chapterTitle })}
                     </Box>
                 </Grid>
@@ -288,39 +283,24 @@ const SlideComponent = (props) => {
                         {started ? null :
                             <Button
                                 onClick={prev}
-                                variant="text"
-                                style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '25px', height: '30px' }}
-                                sx={{
-                                    ':hover': {
-                                        color: `black !important`,
-                                        backgroundColor: 'white !important',
-                                    },
-                                }}>PREV</Button>
+                                variant="outlined"
+                                style={{ margin: '5px', marginRight: '25px', height: '30px' }}
+                            >PREV</Button>
                         }
                         {finished
                             ?
                             <Button
                                 onClick={(e) => completeLesson(e)}
-                                variant="text"
-                                style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '25px', height: '30px' }}
-                                sx={{
-                                    ':hover': {
-                                        color: `black !important`,
-                                        backgroundColor: 'white !important',
-                                    },
-                                }}>COMPLETE
+                                variant="outlined"
+                                style={{ margin: '5px', marginRight: '25px', height: '30px' }}
+                            >COMPLETE
                             </Button>
                             :
                             <Button
                                 onClick={next}
-                                variant="text"
-                                style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '25px', height: '30px' }}
-                                sx={{
-                                    ':hover': {
-                                        color: `black !important`,
-                                        backgroundColor: 'white !important',
-                                    },
-                                }}>NEXT
+                                variant="outlined"
+                                style={{ margin: '5px', marginRight: '25px', height: '30px' }}
+                            >NEXT
                             </Button>
                         }
                     </Box>

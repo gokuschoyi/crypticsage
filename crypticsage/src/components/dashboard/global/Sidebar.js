@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useSelector, useDispatch } from 'react-redux';
 import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import CSLogo from '../../../assets/csLogo.png'
 import {
     HomeOutlinedIcon,
@@ -18,7 +18,7 @@ import {
     AdminPanelSettingsIcon,
     CandlestickChartIcon
 } from "./Icons";
-import { setSidebarState } from "./SideBarSlice";
+import { setSidebarState, handleReduxToggleSmallScreenSidebar } from "./SideBarSlice";
 
 const SidebarC = () => {
     const theme = useTheme();
@@ -26,26 +26,58 @@ const SidebarC = () => {
     const sm = useMediaQuery(theme.breakpoints.down('sm'));
     const md = useMediaQuery(theme.breakpoints.down('md'));
     const dispatch = useDispatch();
-    const { sidebarTab } = useSelector(state => state.sidebar);
+    const { sidebarTab, toggleSmallScreenSidebarState } = useSelector(state => state.sidebar);
     const { admin_status } = useSelector(state => state.auth);
     const userCollapsedSidebar = useSelector(state => state.auth.preferences.collapsedSidebar);
     const { collapseSidebar, collapsed } = useProSidebar();
 
+    const selectedToken = useSelector(state => state.cryptoModule.selectedTickerName)
+    const location = useLocation();
+    const isFirestRender = React.useRef(true);
+    useEffect(() => {
+        if (isFirestRender.current) {
+            isFirestRender.current = false;
+            const currentRoute = location.pathname.split('/');
+            // console.log(currentRoute, selectedToken)
+            // console.log(currentSideBarTab, currentRoute)
+            if (currentRoute.length === 6 && currentRoute[2] === 'indicators') {
+                // console.log('indicators')
+                if (selectedToken !== currentRoute[2]) {
+                    dispatch(setSidebarState('indicators'));
+                }
+            } else if (currentRoute.length === 2 && currentRoute[1] === 'dashboard') {
+                // console.log('dashboard')
+                if (selectedToken !== currentRoute[1]) {
+                    dispatch(setSidebarState('dashboardTab'));
+                }
+            }
+        }
+
+        return () => {
+            isFirestRender.current = true;
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch, location.pathname])
+
     //add md to dep to triggrer collapseSidebar
     //adding collapsed prevetents opening the sidebar
     useEffect(() => {
-        if (md) {
+        // console.log(sm, md, collapsed)
+        if (md && !sm) {
             if (!collapsed) {
-                collapseSidebar();
+                // console.log('md and collapsing')
+                collapseSidebar(true);
             }
         }
         if (sm) {
+            // dispatch(handleReduxToggleSmallScreenSidebar({ value: false }))
             if (!collapsed) {
-                collapseSidebar();
+                // console.log('sm and collapsing')
+                collapseSidebar(true);
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [collapseSidebar, md, sm])
+    }, [md, sm])
 
     const handleOnClick = (name) => {
         if (name === 'admin') {
@@ -57,8 +89,8 @@ const SidebarC = () => {
     }
 
     return (
-        <div className='sidebar' style={{ display: 'flex', height: '100%', position: 'fixed' }}>
-            <Sidebar transitionDuration={700} defaultCollapsed={userCollapsedSidebar} width="300px" style={{ height: '100vh' }} rootStyles={{
+        <div className={toggleSmallScreenSidebarState ? 'sidebar show-sidebar' : 'sidebar hide-sidebar'}>
+            <Sidebar transitionDuration={500} defaultCollapsed={userCollapsedSidebar} width="250px" style={{ height: '100vh', borderRight:`#3f3f3f 1px solid` }} rootStyles={{
                 [`.ps-sidebar-container`]: {
                     backgroundColor: `${theme.palette.primary.newBlack}`,
                 },
@@ -80,10 +112,10 @@ const SidebarC = () => {
                                 ml="15px"
                                 sx={{ height: '72px' }}
                             >
-                                <Typography variant="h3" color={theme.palette.secondary.main}>
+                                <Typography variant="h3" color={theme.palette.primary.main}>
                                     CRYPTICSAGE
                                 </Typography>
-                                <IconButton sx={{ color: `${theme.palette.secondary.main}` }} onClick={() => collapseSidebar()}>
+                                <IconButton sx={{ color: `${theme.palette.primary.main}` }} onClick={() => collapseSidebar()}>
                                     <MenuOutlinedIcon />
                                 </IconButton>
                             </Box>
@@ -97,14 +129,14 @@ const SidebarC = () => {
                                 sx={{ height: '72px' }}
                             >
                                 {!sm ?
-                                    (<IconButton style={{ color: `${theme.palette.text.primary}` }} onClick={() => collapseSidebar()}>
+                                    (<IconButton style={{ color: `${theme.palette.primary.main}` }} onClick={() => collapseSidebar()}>
                                         <MenuOutlinedIcon />
                                     </IconButton>)
                                     :
                                     (
-                                        <img 
-                                        style={{filter: `${mode === 'dark' ? 'invert(1)' : ''}`}}
-                                        className="smallscreen-logo" height="45px" alt='logo' src={CSLogo}></img>
+                                        <img
+                                            style={{ filter: `${mode === 'dark' ? 'invert(1)' : ''}` }}
+                                            className="smallscreen-logo" height="45px" alt='logo' src={CSLogo}></img>
                                     )
                                 }
                             </Box>
@@ -116,6 +148,7 @@ const SidebarC = () => {
                             style={{
                                 backgroundColor: sidebarTab === "dashboardTab" ? theme.palette.primary.newWhite : theme.palette.primary.newBlack,
                                 color: sidebarTab === "dashboardTab" ? theme.palette.primary.newBlack : theme.palette.primary.newWhite,
+                                borderTop: `#3f3f3f 1px solid`
                             }}
                             onClick={() => handleOnClick("dashboardTab")}
                             icon={<HomeOutlinedIcon />}
@@ -128,13 +161,13 @@ const SidebarC = () => {
                         <Typography
                             className='sidebar-label'
                             variant="h6"
-                            color='red'
+                            color={theme.palette.primary.main}
                             sx={{
                                 m: `${collapsed ? '5px 0px 5px 0px' : '15px 0 5px 20px'}`,
                                 textAlign: `${collapsed ? 'center' : 'left'}`
                             }}
                         >
-                            TOOLS
+                            PAGES
                         </Typography>
 
                         <MenuItem
@@ -224,7 +257,7 @@ const SidebarC = () => {
                         <Typography
                             className='sidebar-label'
                             variant="h6"
-                            color='red'
+                            color={theme.palette.primary.main}
                             sx={{ m: `${collapsed ? '5px 0px 5px 0px' : '15px 0 5px 20px'}`, textAlign: `${collapsed ? 'center' : 'left'}` }}
                         >
                             ACCOUNT

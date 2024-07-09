@@ -62,26 +62,6 @@ const updateBinanceData = async (req, res) => {
     }
 }
 
-const initialSaveHistoricalDataBinanceOneM = async (req, res) => {
-    try {
-        const result = await HDServices.processInitialSaveHistoricalDataBinanceOneM()
-        res.status(200).json({ message: result.message, finalResult: result.finalResult });
-    } catch (error) {
-        log.error(error.stack)
-        res.status(400).json({ message: error.message });
-    }
-}
-
-const updateBinanceOneMData = async (req, res) => {
-    try {
-        const result = await HDServices.processUpdateBinanceOneMData()
-        res.status(200).json({ message: result.message, finalResult: result.finalResult });
-    } catch (error) {
-        log.error(error.stack)
-        res.status(400).json({ message: error.message });
-    }
-}
-
 const checkJobCompletition = async (req, res) => {
     const { jobIds, type } = req.body
     try {
@@ -100,7 +80,5 @@ module.exports = {
     , updateHistoricalYFinanceData
     , initialSaveHistoricalDataBinance
     , updateBinanceData
-    , initialSaveHistoricalDataBinanceOneM
-    , updateBinanceOneMData
     , checkJobCompletition
 }

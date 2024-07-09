@@ -17,6 +17,7 @@ const connectionOptions = {
 let redisClient
 
 try {
+    // @ts-ignore
     redisClient = new Redis(connectionOptions);
 
     redisClient.on('error', (err) => {
@@ -24,7 +25,7 @@ try {
     });
 
     redisClient.once('ready', () => {
-        log.info(`Redis server running on port : ${config.redis_port}`);
+        log.crit(`Redis server running on port : ${config.redis_port}`);
     });
 
 } catch (error) {

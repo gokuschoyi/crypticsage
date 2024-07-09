@@ -1,6 +1,5 @@
 import React from 'react'
 import './Settings.css'
-import { useOutletContext } from "react-router-dom";
 import { useSelector } from 'react-redux'
 import Header from '../../global/Header'
 import { SettingSwitch, BasicSettings } from './settings_components'
@@ -9,10 +8,6 @@ import { Box } from '@mui/material'
 const Settings = (props) => {
     const { title, subtitle } = props
     const { tabName } = useSelector(state => state.settings)
-    const [setTest] = useOutletContext();
-    const hide = () => {
-        setTest(true);
-    }
 
     // const [tabName, setTabName] = React.useState('Basic Settings')
     /* const handleSettingSwitch = (tabName) => {
@@ -41,8 +36,8 @@ const Settings = (props) => {
     // console.log(tabName)
 
     return (
-        <Box className='settings-container' onClick={hide}>
-            <Box height='100%' width='-webkit-fill-available'>
+        <Box className='settings-container'>
+            <Box width='-webkit-fill-available'>
                 <Header title={title} subtitle={subtitle} />
             </Box>
             <Box className='settings-content'>

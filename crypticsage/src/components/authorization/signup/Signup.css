@@ -1,33 +1,34 @@
 .signup-button {
   background-color: red !important;
   color: white !important;
-  margin: 20px 0 20px 0 !important;
+  margin: 40px 0 20px 0 !important;
   letter-spacing: 5px;
 }
 
 .login-model-signup {
   width: 500px;
-  height:500px;
-  display:flex;
+  height: 500px;
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.animation-grid-signup{
-    display:flex;
-    justify-content: center;
+.animation-grid-signup {
+  display: flex;
+  justify-content: center;
 }
 
-.signup-container-left{
+.signup-container-left {
   width: 400px;
   height: auto;
+  transition: all 0.5s ease;
 }
 
-.animation-grid-signup{
+.animation-grid-signup {
   align-items: center;
 }
 
-.signup-box-already{
+.signup-box-already {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -36,20 +37,20 @@
   margin: 20px 0 20px 0 !important;
 }
 
-.signup-grid-container{
-  display:flex;
+.signup-grid-container {
+  display: flex;
   flex-direction: row;
   justify-content: center;
 }
 
-.signup-container{
+.signup-container {
   height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: black;
 }
 
-.signup-box{
+.signup-box {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -57,18 +58,26 @@
   height: 100%;
 }
 
-@media screen and (min-width : 1200px){
-  .signup-container{
+@media screen and (min-width : 1200px) {
+  .signup-container {
     height: 100vh;
   }
 }
 
-@media screen and (max-width : 1200px){
-  .signup-container{
+@media screen and (max-width : 1200px) {
+  .signup-container {
     min-height: 100vh;
   }
-  .signup-box{
+
+  /* .signup-box{
     height:auto;
     margin-top: 40px;
+  } */
+}
+
+@media screen and (max-width : 600px) {
+  .signup-container-left {
+    width: 300px;
+    transition: all 0.5s ease;
   }
 }

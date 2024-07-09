@@ -1,12 +1,9 @@
 import React from 'react'
-import { Box, Typography, Button, useTheme } from '@mui/material'
+import { Box, Typography, Button } from '@mui/material'
 const UploadTradingViewDataCard = (props) => {
     const { title, subtitle, buttonName } = props
-    const theme = useTheme()
     return (
-        <Box
-            className='card-trading-view-data hover'
-        >
+        <Box className='card-trading-view-data hover'>
             <Box className='info-box'>
                 <Typography variant='h4' textAlign='start' gutterBottom>
                     {title} :
@@ -16,14 +13,7 @@ const UploadTradingViewDataCard = (props) => {
                 </Typography>
             </Box>
             <Box className='action-box'>
-                <Button className='card-button' sx={{
-                    ':hover': {
-                        color: 'black !important',
-                        backgroundColor: 'red !important',
-                        transition: '0.5s'
-                    },
-                    backgroundColor: `${theme.palette.primary.main}`
-                }} size="small">{buttonName}</Button>
+                <Button className='card-button' variant='outlined' size="small">{buttonName}</Button>
             </Box>
         </Box>
     )

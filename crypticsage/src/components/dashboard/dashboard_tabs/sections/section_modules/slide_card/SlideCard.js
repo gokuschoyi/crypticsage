@@ -6,9 +6,10 @@ import SlideComponent from './Slide'
 import { setSlides, resetCounter, setLessonId } from '../../SectionSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { Box, Button, CircularProgress } from '@mui/material'
+import { Box, Button, CircularProgress, useTheme } from '@mui/material'
 const SlideCard = (props) => {
     const params = useParams();
+    const theme = useTheme()
     const { lessId } = params
     const { lessons, slides, sectionId } = useSelector(state => state.section)
     const dispatch = useDispatch();
@@ -41,18 +42,13 @@ const SlideCard = (props) => {
     return (
         <React.Fragment>
             <Box className='introduction-top'>
-                <Header title={slides?.chapter_title || 'test'} />
+                <Header title={slides?.chapter_title || `test`} />
                 <Box>
                     <Button
                         onClick={goBackToLessons}
-                        variant="text"
-                        style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '20px', height: '30px' }}
-                        sx={{
-                            ':hover': {
-                                color: `black !important`,
-                                backgroundColor: 'white !important',
-                            },
-                        }}>Go Back</Button>
+                        variant="outlined"
+                        style={{ margin: '5px', marginRight: '20px', height: '30px' }}
+                    >Go Back</Button>
                 </Box>
             </Box>
             <Box className='slides' pl={4} pr={4}>

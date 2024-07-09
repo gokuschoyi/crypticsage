@@ -1,82 +1,225 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState, useReducer, useRef } from 'react'
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+import relativeTime from "dayjs/plugin/relativeTime";
 import 'react-toastify/dist/ReactToastify.css';
-import CheckIcon from '@mui/icons-material/Check';
-import MarkAsUnreadOutlinedIcon from '@mui/icons-material/MarkAsUnreadOutlined';
-import { Box, Typography, FormControlLabel, Switch, useTheme, Button, Alert, IconButton } from '@mui/material';
+import { MarkEmailReadOutlinedIcon, CheckIcon, InfoOutlinedIcon, ThumbUpOutlinedIcon, ReportProblemIcon, ReportOutlinedIcon, DeleteForeverIcon } from './Icons'
+import { Box, Typography, FormControlLabel, Switch, useTheme, Button, Paper, IconButton } from '@mui/material';
+import { motion, AnimatePresence } from "framer-motion";
+
+dayjs.extend(duration);
+dayjs.extend(relativeTime);
+const TimeTracker = ({ createdAt }) => {
+    const [, forceUpdate] = useReducer((x) => x + 1, 0);
+    const intervalRef = useRef();
+    useEffect(() => {
+        intervalRef.current = setInterval(() => {
+            forceUpdate();
+        }, 1000);
+
+        return () => {
+            clearInterval(intervalRef.current);
+        };
+    }, []);
+    return (
+        <Box title={dayjs(createdAt).format('lll')}>
+            <Typography variant='body2'>{dayjs(createdAt).fromNow()}</Typography>
+        </Box>
+    );
+}
+
+const WarnComp = ({ error_message, test_possible, train_possible }) => {
+    return (
+        <Box>
+            <Typography variant='custom'>{error_message}</Typography>
+            <ul className='wgan_ul'>
+                {!test_possible.status && <li style={{ listStyleType: 'circle', fontSize: '12px' }}>{`\u2043`}{test_possible.message}</li>}
+                {!train_possible.status && <li style={{ listStyleType: 'circle', fontSize: '12px' }}>{`\u2043`}{train_possible.message}</li>}
+            </ul>
+        </Box>
+    )
+}
+
+const ErrorComp = ({ func_error, message, step }) => {
+    return (
+        <React.Fragment>
+            <Typography variant='body2' >
+                {message} at step {step}
+            </Typography>
+            <Typography variant='body2'>
+                {func_error}
+            </Typography>
+        </React.Fragment>
+    )
+}
+
 const Notifications = (props) => {
-    const { notifications, clear, markAllAsRead, markAsRead, unreadCount } = props
+    const { notifications, clear, remove, markAllAsRead, markAsRead, unreadCount } = props
     const theme = useTheme();
+
+    // console.log('notifications OG : ', notifications)
+
+    useEffect(() => {
+        if (notifications.length > 0) {
+            // console.log('new notifications or updated notifications ')
+            localStorage.setItem('user_notifications', JSON.stringify(notifications))
+        }
+    }, [notifications])
+
+    const markNotificationAsRead = ({ id }) => {
+        console.log(id)
+        markAsRead(id)
+    }
+
+    const markAllNotificationsAsRead = () => {
+        console.log('marking all as read')
+        markAllAsRead()
+    }
+
+    const removeNotification = ({ id }) => {
+        console.log('removing notification', id)
+        remove(id)
+    }
+
+    const clearNotifications = () => {
+        console.log('clearing notifications')
+        clear()
+        localStorage.setItem('user_notifications', JSON.stringify([]))
+    }
 
     const [showUnreadOnly, setShowUnreadOnly] = useState(false);
     const toggleFilter = (e) => {
         setShowUnreadOnly(!showUnreadOnly);
     };
+
+
+
     return (
         <Box className='notification-container'>
             <Box className='notification-header' display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
-                <Typography className='notification-title' variant="h6" sx={{ color: 'white' }}>Notifications</Typography>
+                <Typography className='notification-title' variant="h6" fontWeight={600} color={'primary'}>NOTIFICATIONS</Typography>
                 <FormControlLabel
                     control={
                         <Switch
                             onChange={toggleFilter}
-                            style={{ color: `${!showUnreadOnly ? theme.palette.primary.newBlack : theme.palette.primary.light}` }}
+                            color='secondary'
+                            size='small'
+                            sx={{
+                                '& .MuiSwitch-track': {
+                                    backgroundColor: `${theme.palette.secondary.main}`,
+                                }
+                            }}
                         />
                     }
                     label="UnRead"
-                    sx={{ color: 'white' }}
                 />
             </Box>
 
-            <Box className='notification-body' sx={{ color: 'white' }}>
-                {(!notifications.length ||
-                    (unreadCount === 0 && showUnreadOnly)) && (
-                        <h4>
-                            No new Notifications!
-                        </h4>
-                    )}
-                {(showUnreadOnly
-                    ? notifications.filter((v) => !v.read)
-                    : notifications
-                ).map((notification, key) => {
-                    return (
-                        <Alert
-                            className='notification-alert'
-                            key={key}
-                            severity={(notification.type) || "info"}
-                            action={
-                                notification.read ? (
-                                    <CheckIcon />
-                                ) : (
-                                    <IconButton
-                                        color="primary"
-                                        aria-label="upload picture"
-                                        component="span"
-                                        onClick={() => markAsRead(notification.id)}
-                                    >
-                                        <MarkAsUnreadOutlinedIcon />
-                                    </IconButton>
-                                )
-                            }
-                        >
-                            {notification.content}
-                        </Alert>
-                    );
-                })}
+            <Box className='notification-body' >
+                <AnimatePresence>
+                    {(!notifications.length ||
+                        (unreadCount === 0 && showUnreadOnly)) && (
+                            <motion.div
+                                key='no-notifications'
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                style={{ display: 'flex', height: '20%', alignItems: 'center', justifyContent: 'center', marginLeft: '10px', backgroundColor: `${theme.palette.background.paperOne}` }}
+                            >
+                                No new Notifications!
+                            </motion.div>
+                        )}
+                    <AnimatePresence>
+                        {(showUnreadOnly
+                            ? notifications.filter((v) => !v.read)
+                            : notifications
+                        ).map((notification, key) => {
+                            return (
+                                <motion.div
+                                    key={notification.id}
+                                    layout
+                                    initial={{ scale: 0.4, opacity: 0, y: 50 }}
+                                    exit={{
+                                        scale: 0,
+                                        opacity: 0,
+                                        transition: { duration: 0.2 }
+                                    }}
+                                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                                >
+                                    <Paper elevtion={2} className='notification-alert'>
+                                        <Box display={'flex'} flexDirection={'row'} justifyContent={'space-between'} width='100%' sx={{ color: `${theme.palette[notification.type].main}` }}>
+                                            <Box display={'flex'} flexDirection={'row'} gap='4px' alignItems={'center'}>
+                                                <Typography variant='custom'>{notifications.length - key}</Typography>
+                                                {notification.type === 'success' && <ThumbUpOutlinedIcon size='small' className='small-icon-notification' />}
+                                                {notification.type === 'warning' && <ReportProblemIcon size='small' className='small-icon-notification' />}
+                                                {notification.type === 'error' && <ReportOutlinedIcon size='small' className='small-icon-notification' />}
+                                                {notification.type === 'info' && <InfoOutlinedIcon size='small' className='small-icon-notification' />}
+                                            </Box>
+                                            <TimeTracker createdAt={notification.createdAt} />
+                                        </Box>
+
+                                        <Box pt={'2px'} display={'flex'} flexDirection={'row'} justifyContent={'space-between'} width={'100%'} alignItems={'center'}>
+                                            <Box>
+                                                {notification.type === 'error' ?
+                                                    notification.content && notification.content.props && notification.content.props.func_error ?
+                                                        <ErrorComp {...notification.content.props} />
+                                                        :
+                                                        <Typography variant='body2'>
+                                                            {notification.content}
+                                                        </Typography>
+                                                    :
+                                                    notification.type === 'warning' ?
+                                                        <Box>
+                                                            {notification.content && notification.content.props && notification.content.props.error_message &&
+                                                                <WarnComp {...notification.content.props} />
+                                                            }
+                                                        </Box>
+                                                        :
+                                                        <Typography variant='body2'>
+                                                            {notification.content}
+                                                        </Typography>
+                                                }
+                                            </Box>
+                                            <Box display={'flex'} flexDirection={'row'} gap={'4px'}>
+                                                <IconButton
+                                                    className='small-icon-notification'
+                                                    color="primary"
+                                                    aria-label="check"
+                                                    component="span"
+                                                    onClick={removeNotification.bind(null, { id: notification.id })}
+                                                >
+                                                    <DeleteForeverIcon size='small' className='small-icon-notification' />
+                                                </IconButton>
+                                                {notification.read ?
+                                                    (
+                                                        <CheckIcon size='small' className='small-icon-notification' color='success' />
+                                                    )
+                                                    :
+                                                    (
+                                                        <IconButton
+                                                            className='small-icon-notification'
+                                                            color="primary"
+                                                            aria-label="check"
+                                                            component="span"
+                                                            onClick={markNotificationAsRead.bind(null, { id: notification.id })}
+                                                        >
+                                                            <MarkEmailReadOutlinedIcon size='small' className='small-icon-notification' />
+                                                        </IconButton>
+                                                    )
+                                                }
+                                            </Box>
+                                        </Box>
+                                    </Paper>
+                                </motion.div>
+                            )
+                        })}
+                    </AnimatePresence>
+                </AnimatePresence>
             </Box>
 
             <Box className='notification-footer' display='flex' flexDirection='row' justifyContent='space-between'>
-                <Button onClick={clear} variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px' }} sx={{
-                    ':hover': {
-                        color: `black !important`,
-                        backgroundColor: 'white !important',
-                    },
-                }}>CLEAR</Button>
-                <Button onClick={markAllAsRead} variant="text" style={{ color: `#000000`, backgroundColor: 'red', margin: '5px' }} sx={{
-                    ':hover': {
-                        color: `black !important`,
-                        backgroundColor: 'white !important',
-                    },
-                }}>MARK All AS READ</Button>
+                <Button onClick={clearNotifications} color='secondary' variant="outlined" size='small' >CLEAR ALL</Button>
+                <Button onClick={markAllNotificationsAsRead} color='secondary' variant="outlined" size='small' >MARK All AS READ</Button>
             </Box>
         </Box>
     )

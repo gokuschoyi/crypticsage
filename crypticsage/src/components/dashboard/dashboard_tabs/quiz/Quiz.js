@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useOutletContext } from "react-router-dom";
 import Header from '../../global/Header';
 import { Box } from '@mui/material';
 import './Quiz.css'
@@ -20,11 +19,6 @@ const Quiz = (props) => {
     const [titleDesc, setTitleDesc] = useState({ title: title, subtitle: subtitle })
     const [qid, setQid] = useState()
 
-    //handles close of dri=opdown when clicked on main page
-    const [setTest] = useOutletContext();
-    const hide = () => {
-        setTest(true);
-    }
 
     //handle dropdown for each lesson
     const [expanded, setExpanded] = useState(false);
@@ -61,8 +55,8 @@ const Quiz = (props) => {
     })
 
     return (
-        <Box className='quiz-container' onClick={hide}>
-            <Box height='100%' width='-webkit-fill-available'>
+        <Box className='quiz-container'>
+            <Box width='-webkit-fill-available'>
                 <Header title={titleDesc.title} subtitle={titleDesc.subtitle} />
             </Box>
             <Box className='quiz-cards-container'>

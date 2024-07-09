@@ -5,8 +5,8 @@ import { KeyboardDoubleArrowRightOutlinedIcon, CheckOutlinedIcon, CloseIcon } fr
 import { Box, IconButton, Button, CircularProgress, Grid, CardContent, Typography, CardActions, useTheme } from '@mui/material'
 
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchLessons } from '../../../../../../api/db'
-import { setLessons, clearLessons, setSectionId, setLessonId } from '../../SectionSlice'
+import { fetchSections, fetchLessons } from '../../../../../../api/db'
+import { setSections, setLessons, clearLessons, setSectionId, setLessonId } from '../../SectionSlice'
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { shortenDate, capitalizeFirstLetter } from '../../../../../../utils/Utils'
@@ -30,10 +30,44 @@ const LessonCard = () => {
         }
     }) */
 
+    const sectionFetchRef = useRef(false)
+    useEffect(() => {
+        if (sections.length === 0 && !sectionFetchRef.current) {
+            sectionFetchRef.current = true
+            // console.log('no sections, fetching sections')
+            dispatch(setSectionId(sectId))
+            let data = {
+                token: token
+            }
+            fetchSections(data)
+                .then(res => {
+                    let sect = res.data.sections;
+                    const combinedArray = sect.map(section => {
+                        const sectionId = section.sectionId;
+                        if (allStatus[sectionId]) {
+                            return {
+                                ...section,
+                                section_status: allStatus[sectionId]
+                            };
+                        } else {
+                            return {
+                                ...section,
+                                section_status: []
+                            }
+                        }
+                    });
+                    dispatch(setSections(combinedArray))
+                })
+        } else {
+            // console.log('section exists in redux')
+            return
+        }
+    })
+
     // Fetch lessons from the database
     const fetchLessonMounted = useRef(false)
     useEffect(() => {
-        if (!fetchLessonMounted.current) {
+        if (!fetchLessonMounted.current && sections.length > 0) {
             fetchLessonMounted.current = true
             let data = {
                 token: token,
@@ -83,8 +117,10 @@ const LessonCard = () => {
     }
 
     const openSlide = (lessonId) => {
+        
         dispatch(setLessonId(lessonId))
         let lessonUrl = `/dashboard/sections/${sectionId}/${lessonId}`;
+        console.log('asasa', lessonUrl)
         navigate(lessonUrl)
     }
 
@@ -101,9 +137,9 @@ const LessonCard = () => {
     const LessonsBox = (props) => {
         const { title, lessonId, completed, date } = props
         return (
-            <Box className='lessons-container-box' sx={{ backgroundColor: `${theme.palette.primary.light}`, borderRadius: '10px' }}>
+            <Box className='lessons-container-box' sx={{ backgroundColor: `${theme.palette.background.paper}`, borderRadius: '10px' }}>
                 <CardContent className='text lesson-title-box' sx={{ width: 'fill-available' }}>
-                    <Typography variant="h5" className='rolling title' component='span' textAlign='start' sx={{ color: 'white' }}>
+                    <Typography variant="h5" className='rolling title' component='span' textAlign='start'>
                         {capitalizeFirstLetter(title)}
                     </Typography>
                     <Box className='status-box'>
@@ -112,12 +148,12 @@ const LessonCard = () => {
                             (
                                 <Box className='status'>
                                     <Box className='completed-status-box'>
-                                        <Typography variant="h6" textAlign='start' sx={{ color: 'white' }}>
+                                        <Typography variant="h6" textAlign='start'>
                                             Completed
                                         </Typography>
                                         <CheckOutlinedIcon sx={{ color: `${theme.palette.success.main}` }} />
                                     </Box>
-                                    <Typography variant="body1" textAlign='start' sx={{ color: 'white' }}>
+                                    <Typography variant="body1" textAlign='start'>
                                         {shortenDate(date)}
                                     </Typography>
                                 </Box>
@@ -126,10 +162,10 @@ const LessonCard = () => {
                             (
                                 <Box className='status'>
                                     <Box className='completed-status-box'>
-                                        <Typography variant="h6" textAlign='start' sx={{ color: 'white' }}>
+                                        <Typography variant="h6" textAlign='start'>
                                             Not Completed
                                         </Typography>
-                                        <CloseIcon sx={{ color: `${theme.palette.error.main}` }} />
+                                        <CloseIcon sx={{ color: `${theme.palette.primary.dark}` }} />
                                     </Box>
                                 </Box>
                             )
@@ -141,13 +177,8 @@ const LessonCard = () => {
                         onClick={(e) => openSlide(lessonId)}
                         variant="outlined"
                         size='small'
-                        style={{ color: 'white', backgroundColor: 'red', margin: '5px' }}
-                        sx={{
-                            ':hover': {
-                                color: 'black !important',
-                                backgroundColor: 'white !important'
-                            }
-                        }}>
+                        color='primary'
+                    >
                         <KeyboardDoubleArrowRightOutlinedIcon className='lesson-card-icon' />
                     </IconButton>
                 </CardActions>
@@ -162,14 +193,9 @@ const LessonCard = () => {
                 <Box display='flex' justifyContent='flex-end'>
                     <Button
                         onClick={goBackToSections}
-                        variant="text"
-                        style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '20px', height: '30px', width: '80px' }}
-                        sx={{
-                            ':hover': {
-                                color: `black !important`,
-                                backgroundColor: 'white !important',
-                            },
-                        }}>Go Back</Button>
+                        variant="outlined"
+                        style={{ margin: '5px', marginRight: '20px', height: '30px' }}
+                    >Go Back</Button>
                 </Box>
             </Box>
             <Box>
@@ -202,14 +228,9 @@ const LessonCard = () => {
                 <Box display='flex' justifyContent='flex-end'>
                     <Button
                         onClick={goBackToSections}
-                        variant="text"
-                        style={{ color: `#000000`, backgroundColor: 'red', margin: '5px', marginRight: '20px', height: '30px', width: '80px' }}
-                        sx={{
-                            ':hover': {
-                                color: `black !important`,
-                                backgroundColor: 'white !important',
-                            },
-                        }}>Go Back</Button>
+                        variant="outlined"
+                        style={{ margin: '5px', marginRight: '20px', height: '30px' }}
+                    >Go Back</Button>
                 </Box>
             </Box>
         </React.Fragment>

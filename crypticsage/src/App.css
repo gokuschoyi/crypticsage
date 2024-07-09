@@ -1,3 +1,12 @@
 .App {
   text-align: center;
 }
+
+:root {
+  --toastify-color-light: #fff !important;
+  --toastify-color-dark: #121212 !important;
+  --toastify-color-info: #64B5F6 !important;
+  --toastify-color-success: #4CAF50 !important;
+  --toastify-color-warning: #FF9800 !important;
+  --toastify-color-error: #e02f2f !important;
+}

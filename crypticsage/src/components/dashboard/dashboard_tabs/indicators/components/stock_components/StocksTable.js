@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux';
-import { getLatestStocksData } from '../../../../../api/crypto'
-import { convert, getLastUpdatedTimeString, getDateTime } from '../../../../../utils/Utils'
-import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../global/Icons';
+import { useSelector, useDispatch } from 'react-redux';
+import { getLatestStocksData } from '../../../../../../api/crypto'
+import { convert, getLastUpdatedTimeString, getDateTime } from '../../../../../../utils/Utils'
+import { ArrowDropUpIcon, ArrowDropDownIcon, AutorenewIcon } from '../../../../global/Icons';
 import {
     Box
     , Typography
@@ -19,8 +19,12 @@ import {
     , Collapse
 } from '@mui/material'
 
+import { setStocksDataRedux } from '../../IndicatorsSlice'
+import { setSelectedStockName, resetStateOnStockNameChange } from '../../modules/StockModuleSlice'
+import { useNavigate } from 'react-router-dom';
+
 function Row(props) {
-    const { row } = props;
+    const { row, handleStocksPageLoad } = props;
     const [openMore, setOpenMore] = React.useState(false);
     const switchCollapse = (e) => {
         setOpenMore((prev) => !prev)
@@ -63,7 +67,12 @@ function Row(props) {
                     </IconButton>
                 </TableCell>
                 <TableCell className='stocks-name'>
-                    <Box className='stocks-content'>
+                    <Box className='stocks-content' data-id={symbol}
+                        onClick={(e) => {
+                            const dataId = e.currentTarget.getAttribute('data-id')
+                            handleStocksPageLoad(dataId)
+                        }}
+                    >
                         {symbol}
                     </Box>
                 </TableCell>
@@ -185,15 +194,21 @@ const StocksTable = () => {
     const theme = useTheme()
     const tableHeight = 500;
 
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
     //<------ table logic ------>//
     const token = useSelector(state => state.auth.accessToken);
     const [stockData, setStockData] = useState([]);
     const [fetchedTime, setFetchedTime] = useState('');
+    const stockDataInRedux = useSelector(state => state.indicators.stocksData)
+    const [stockDataFetchError, setStockDataFetchError] = useState(false)
 
     // get latest stocks data
     const loadedRef = useRef(false);
     useEffect(() => {
-        if (!loadedRef.current) {
+        if (!loadedRef.current && stockDataInRedux.length === 0) {
+            console.log('UE : Stocks info fetch')
             loadedRef.current = true;
             let data = {
                 token: token,
@@ -203,9 +218,19 @@ const StocksTable = () => {
                     const time = Math.floor(Date.now() / 1000)
                     setFetchedTime(time);
                     setStockData(res.data.yFData)
+                    dispatch(setStocksDataRedux(res.data.yFData))
+                }).catch((err) => {
+                    setStockDataFetchError(true)
+                    // console.log(err)
                 })
+        } else {
+            console.log('UE : Stocks info fetch from redux')
+            const time = Math.floor(Date.now() / 1000)
+            setFetchedTime(time);
+            let reduxCopy = [...stockDataInRedux]
+            setStockData(reduxCopy)
         }
-    })
+    }, [stockDataInRedux, token, dispatch])
 
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('market_cap');
@@ -234,6 +259,7 @@ const StocksTable = () => {
         return sortedArray;
     }, [stockData, order, orderBy])
 
+    // this is redundant as the metatdata is alerady fetched daily remove later
     const refreshStockData = () => {
         console.log("refreshing stock data")
         const refreshIcon = document.getElementById('refresh-icon');
@@ -243,100 +269,122 @@ const StocksTable = () => {
         }
         getLatestStocksData(data)
             .then((res) => {
-                setStockData(res.data.yFData)
+                // setStockData(res.data.yFData)
+                dispatch(setStocksDataRedux(res.data.yFData))
                 const time = Math.floor(Date.now() / 1000)
                 setFetchedTime(time);
                 refreshIcon.classList.remove('rotate-icon');
             })
     }
 
+    const selectedStock = useSelector(state => state.stockModule.selectedStock)
+    const handleStocksPageLoad = (dataId) => {
+        console.log('handleStocksPageLoad : ', dataId)
+        if (dataId !== null) {
+            if (dataId === selectedStock) {
+                navigate(`/dashboard/indicators/stocks/${dataId}`)
+            } else { // reset state when stock name in redux and selected dont match
+                dispatch(setSelectedStockName(dataId))
+                dispatch(resetStateOnStockNameChange())
+                navigate(`/dashboard/indicators/stocks/${dataId}`)
+            }
+        }
+    }
+
     return (
         <Box className='stock-container'>
             <Box className='stocks-details-table' mr={4} ml={4}>
-                {stockData.length === 0 ?
-                    (
-                        <Box className='skeleton-box' sx={{ height: `${tableHeight}px`, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <Skeleton animation="wave" variant="rounded" sx={{ position: 'absolute', bgcolor: '#3f3f40', width: '95%', height: '95%' }} />
-                        </Box>
-                    )
-                    :
+                {stockDataFetchError === true ? (<Box className='error-message'>Error fetching stocks data</Box>) :
                     (
                         <React.Fragment>
-                            <Box className='last-updated-date-refresh' pl={1} pr={1} height='60px' display='flex' alignItems='center' gap='10px'>
-                                <Box>
-                                    <Box display='flex' flexDirection='row' gap='5px'>
-                                        <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>Last Updated : </Typography>
-                                        <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>{getLastUpdatedTimeString(fetchedTime)}</Typography>
-                                    </Box>
-                                    <Box display='flex' justifyContent='flex-start'>
-                                        <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>{getDateTime(fetchedTime)}</Typography>
-                                    </Box>
-                                </Box>
-                                <Box>
-                                    <IconButton
-                                        aria-label="refresh crypto data"
-                                        size="small"
-                                        onClick={refreshStockData}
-                                    >
-                                        <AutorenewIcon id='refresh-icon' sx={{ width: '20px', height: '20px' }} />
-                                    </IconButton>
-                                </Box>
-                            </Box>
-                            <TableContainer sx={{ maxHeight: tableHeight }}>
-                                <Table stickyHeader aria-label="sticky table" >
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell style={{ borderLeft: '1px solid white' }} />
-                                            <TableCell style={{ minWidth: '80px' }}>NAME</TableCell>
-                                            <TableCell style={{ minWidth: '225px' }}>
-                                                <TableSortLabel
-                                                    active={orderBy === 'open'}
-                                                    direction={orderBy === 'open' ? order : 'asc'}
-                                                    onClick={createSortHandler("open")}
-                                                >
-                                                    PRICE
-                                                </TableSortLabel>
-                                            </TableCell>
-                                            <TableCell style={{ minWidth: '160px' }}>
-                                                <TableSortLabel
-                                                    active={orderBy === 'fiftyTwoWeekHigh'}
-                                                    direction={orderBy === 'fiftyTwoWeekHigh' ? order : 'asc'}
-                                                    onClick={createSortHandler("fiftyTwoWeekHigh")}
-                                                >
-                                                    52 WEEK
-                                                </TableSortLabel>
-                                            </TableCell>
-                                            <TableCell style={{ minWidth: '250px' }}>
-                                                <TableSortLabel
-                                                    active={orderBy === 'market_cap'}
-                                                    direction={orderBy === 'market_cap' ? order : 'asc'}
-                                                    onClick={createSortHandler("market_cap")}
-                                                >
-                                                    MKT CAP
-                                                </TableSortLabel>
-                                            </TableCell>
-                                            <TableCell style={{ minWidth: '80px' }}>PEG</TableCell>
-                                            <TableCell style={{ minWidth: '80px' }}>Q EST</TableCell>
-                                            <TableCell style={{ minWidth: '140px' }}>
-                                                <TableSortLabel
-                                                    active={orderBy === 'rev_growth'}
-                                                    direction={orderBy === 'rev_growth' ? order : 'asc'}
-                                                    onClick={createSortHandler("rev_growth")}
-                                                >
-                                                    R GROWTH
-                                                </TableSortLabel>
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {stockData.map((row, index) => {
-                                            return (
-                                                <Row row={row} key={index} />
-                                            )
-                                        })}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
+                            {
+                                stockData.length === 0 ?
+                                    (
+                                        <Box className='skeleton-box' sx={{ height: `${tableHeight}px`, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                            <Skeleton animation="wave" variant="rounded" sx={{ position: 'absolute', bgcolor: '#3f3f40', width: '95%', height: '95%' }} />
+                                        </Box>
+                                    )
+                                    :
+                                    (
+                                        <React.Fragment>
+                                            <Box className='last-updated-date-refresh' pl={1} pr={1} height='60px' display='flex' alignItems='center' gap='10px'>
+                                                <Box>
+                                                    <Box display='flex' flexDirection='row' gap='5px'>
+                                                        <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>Last Updated : </Typography>
+                                                        <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>{getLastUpdatedTimeString(fetchedTime)}</Typography>
+                                                    </Box>
+                                                    <Box display='flex' justifyContent='flex-start'>
+                                                        <Typography fontSize='12px' fontWeight={600} color={theme.palette.text.secondary}>{getDateTime(fetchedTime)}</Typography>
+                                                    </Box>
+                                                </Box>
+                                                <Box>
+                                                    <IconButton
+                                                        aria-label="refresh crypto data"
+                                                        size="small"
+                                                        onClick={refreshStockData}
+                                                    >
+                                                        <AutorenewIcon id='refresh-icon' sx={{ width: '20px', height: '20px' }} />
+                                                    </IconButton>
+                                                </Box>
+                                            </Box>
+                                            <TableContainer sx={{ maxHeight: tableHeight }}>
+                                                <Table stickyHeader aria-label="sticky table" >
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell style={{ borderLeft: '1px solid white' }} />
+                                                            <TableCell style={{ minWidth: '80px' }}>NAME</TableCell>
+                                                            <TableCell style={{ minWidth: '225px' }}>
+                                                                <TableSortLabel
+                                                                    active={orderBy === 'open'}
+                                                                    direction={orderBy === 'open' ? order : 'asc'}
+                                                                    onClick={createSortHandler("open")}
+                                                                >
+                                                                    PRICE
+                                                                </TableSortLabel>
+                                                            </TableCell>
+                                                            <TableCell style={{ minWidth: '160px' }}>
+                                                                <TableSortLabel
+                                                                    active={orderBy === 'fiftyTwoWeekHigh'}
+                                                                    direction={orderBy === 'fiftyTwoWeekHigh' ? order : 'asc'}
+                                                                    onClick={createSortHandler("fiftyTwoWeekHigh")}
+                                                                >
+                                                                    52 WEEK
+                                                                </TableSortLabel>
+                                                            </TableCell>
+                                                            <TableCell style={{ minWidth: '250px' }}>
+                                                                <TableSortLabel
+                                                                    active={orderBy === 'market_cap'}
+                                                                    direction={orderBy === 'market_cap' ? order : 'asc'}
+                                                                    onClick={createSortHandler("market_cap")}
+                                                                >
+                                                                    MKT CAP
+                                                                </TableSortLabel>
+                                                            </TableCell>
+                                                            <TableCell style={{ minWidth: '80px' }}>PEG</TableCell>
+                                                            <TableCell style={{ minWidth: '80px' }}>Q EST</TableCell>
+                                                            <TableCell style={{ minWidth: '140px' }}>
+                                                                <TableSortLabel
+                                                                    active={orderBy === 'rev_growth'}
+                                                                    direction={orderBy === 'rev_growth' ? order : 'asc'}
+                                                                    onClick={createSortHandler("rev_growth")}
+                                                                >
+                                                                    R GROWTH
+                                                                </TableSortLabel>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {stockData.map((row, index) => {
+                                                            return (
+                                                                <Row row={row} key={index} handleStocksPageLoad={handleStocksPageLoad} />
+                                                            )
+                                                        })}
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
+                                        </React.Fragment>
+                                    )
+                            }
                         </React.Fragment>
                     )
                 }

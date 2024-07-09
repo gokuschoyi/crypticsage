@@ -22,7 +22,7 @@ const TakeQuiz = (props) => {
     const { isLoaded, setQid, quizId, setTitleDesc, goBackToQuiz } = props
     const { accessToken } = useSelector(state => state.auth)
     const dispatch = useDispatch()
-    
+
     const [quizQuestionCounter, setQuizQuestionCounter] = useState(0)
     const questionsRef = useRef(null)
     const incrementQuizQuestionCounter = () => {
@@ -151,15 +151,10 @@ const TakeQuiz = (props) => {
                                 value={option.option}
                                 control={
                                     <Radio
-                                        sx={{
-                                            color: red[900],
-                                            '&.Mui-checked': {
-                                                color: red[200],
-                                            },
-                                        }}
+                                        color='primary'
+                                        
                                     />}
                                 label={option.option}
-                                sx={{ color: 'white' }}
                             />
                         )
                     })}
@@ -199,8 +194,11 @@ const TakeQuiz = (props) => {
                         <Box>
                             <Button
                                 onClick={goBackToQuiz}
-                                variant="text"
-                                style={{ color: 'black', backgroundColor: 'white', border: '1px solid black', margin: '5px' }}
+                                variant="outlined"
+                                size='small'
+                                style={{
+                                    margin: '5px'
+                                }}
                             >Go Back</Button>
                         </Box>
                     </Grid>
@@ -232,19 +230,22 @@ const TakeQuiz = (props) => {
                                         </Typography>
                                         <Button
                                             onClick={goBackToQuiz}
-                                            variant="text"
-                                            style={{ color: 'black', backgroundColor: 'white', border: '1px solid black', margin: '5px' }}
+                                            variant="outlined"
+                                            size='small'
+                                            style={{
+                                                margin: '5px',
+                                            }}
                                         >Go Back</Button>
                                     </Box>
                                 </Box>
-                                <Box className='quiz-questions' ref={questionsRef} mt={2} sx={{ backgroundColor: `${theme.palette.primary.main}` }}>
+                                <Box className='quiz-questions' ref={questionsRef} mt={2} sx={{ backgroundColor: `${theme.palette.background.paper}` }}>
                                     {selectedQuizData[0].questions.map((question, index) => {
                                         return (
                                             <Box key={index} className='quiz-question'>
                                                 <Typography
                                                     variant='h6'
                                                     textAlign='start'
-                                                    sx={{ color: 'white', padding: '4px 16px' }}
+                                                    sx={{ padding: '4px 16px' }}
                                                 >
                                                     {index + 1} - {question.question}
                                                 </Typography>
@@ -262,23 +263,26 @@ const TakeQuiz = (props) => {
                                     <Box className='quiz-navigation-buttons' display='flex' flexDirection='row' gap='20px' alignItems='center'>
                                         <Button
                                             onClick={decrementQuizQuestionCounter}
-                                            variant="text"
-                                            style={{ color: 'black', backgroundColor: 'white', border: '1px solid black', margin: '5px' }}
+                                            variant="outlined"
+                                            size='small'
+                                            style={{ margin: '5px' }}
                                             disabled={quizQuestionCounter === 0}
                                         >Previous</Button>
                                         {selectedQuizData[0].questions.length === quizQuestionCounter + 1 ?
                                             <Box className='submit-quiz-button' display='flex' justifyContent='flex-end'>
                                                 <Button
                                                     onClick={submitQuiz}
-                                                    variant="text"
-                                                    style={{ color: 'black', backgroundColor: 'white', border: '1px solid black', margin: '5px' }}
+                                                    size='small'
+                                                    variant="outlined"
+                                                    style={{  margin: '5px' }}
                                                 >Submit</Button>
                                             </Box>
                                             :
                                             <Button
                                                 onClick={incrementQuizQuestionCounter}
-                                                variant="text"
-                                                style={{ color: 'black', backgroundColor: 'white', border: '1px solid black', margin: '5px' }}
+                                                variant="outlined"
+                                                size='small'
+                                                style={{ margin: '5px' }}
                                                 disabled={quizQuestionCounter === selectedQuizData[0].questions.length - 1}
                                             >Next</Button>
                                         }

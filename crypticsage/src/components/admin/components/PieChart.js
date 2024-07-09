@@ -6,7 +6,7 @@ const PieChartComp = (props) => {
     const color = ['#FF5733', '#5E35B1', '#0288D1', '#7B1FA2', '#388E3C', '#FBC02D', '#F44336', '#009688']
     return (
         <ResponsiveContainer width="100%" height="100%">
-            <PieChart width={150} height={150}>
+            <PieChart width={120} height={120}>
                 <Pie
                     data={data}
                     dataKey='count'

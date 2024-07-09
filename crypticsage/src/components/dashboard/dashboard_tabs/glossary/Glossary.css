@@ -1,3 +1,7 @@
+.glossary-container {
+  width: 100%;
+}
+
 .alphabet-box {
   display: flex;
   flex-wrap: wrap;
@@ -27,8 +31,8 @@
   cursor: pointer;
 }
 
-.search-result-count{
-    margin-left: 10px !important;
+.search-result-count {
+  margin-left: 10px !important;
 }
 
 .search-result {
@@ -41,6 +45,12 @@
 
 .search-field {
   margin-left: 0px !important;
+}
+
+@media screen and (min-width: 1400px) {
+  .glossary-container {
+    width: 1200px;
+  }
 }
 
 /* @media screen and (max-width: 600px) {

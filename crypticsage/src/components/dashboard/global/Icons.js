@@ -58,6 +58,27 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CandlestickChartIcon from '@mui/icons-material/CandlestickChart';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
+import AspectRatioIcon from '@mui/icons-material/AspectRatio';
+
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import ReportOutlinedIcon from '@mui/icons-material/ReportOutlined';
+import CheckIcon from '@mui/icons-material/Check';
+import MarkEmailReadOutlinedIcon from '@mui/icons-material/MarkEmailReadOutlined';
+
+import SaveIcon from '@mui/icons-material/Save';
+import PreviewIcon from '@mui/icons-material/Preview';
+import InsightsIcon from '@mui/icons-material/Insights';
+
+import DownloadIcon from '@mui/icons-material/Download';
+
+
 export { 
     LightModeOutlinedIcon, 
     DarkModeOutlinedIcon, 
@@ -107,5 +128,20 @@ export {
     RemoveIcon,
     ArrowForwardIcon,
     CandlestickChartIcon,
-    AutorenewIcon
+    AutorenewIcon,
+    InfoOutlinedIcon,
+    DeleteForeverIcon,
+    OpenInFullIcon,
+    CloseFullscreenIcon,
+    AspectRatioIcon,
+    CheckIcon,
+    ShowChartIcon,
+    ThumbUpOutlinedIcon,
+    ReportProblemIcon,
+    ReportOutlinedIcon,
+    MarkEmailReadOutlinedIcon,
+    SaveIcon,
+    PreviewIcon,
+    InsightsIcon,
+    DownloadIcon
 }

@@ -101,6 +101,11 @@
     .with-hist-data-title{
         justify-content: space-between;
     }
+
+    .meta-update-count{
+        flex-direction: column;
+        align-items: start;
+    }
     
 }
 

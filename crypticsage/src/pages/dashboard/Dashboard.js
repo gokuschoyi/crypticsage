@@ -1,65 +1,63 @@
-import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux';
+import React, { useEffect, useRef, createContext, useContext } from 'react'
 import { ToastContainer } from 'react-toastify';
-import { useProSidebar } from "react-pro-sidebar";
-import useMediaQuery from '@mui/material/useMediaQuery';
 import 'react-toastify/dist/ReactToastify.css';
 import SidebarC from '../../components/dashboard/global/Sidebar';
 import Topbar from '../../components/dashboard/global/Topbar';
+import { useOnlineStatus } from '../../utils/Utils';
 import { Outlet } from 'react-router-dom';
 import './Dashboard.css'
-import { Box, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
+
+const SocketContext = createContext()
+
 const Dashboard = (props) => {
-    const [toggleUser, setToggleUser] = React.useState(false);
-    const handleToggleUser = () => {
-        setToggleUser(!toggleUser);
-        if (toggleSettings || toggleNotifications) {
-            setToggleSettings(false);
-            setToggleNotifications(false);
+    const isOnline = useOnlineStatus();
+
+    const isOnlineCheckRef = React.useRef(false);
+    useEffect(() => {
+        if (isOnlineCheckRef.current) {
+            // Subsequent checks after the initial render
+            if (isOnline) {
+                console.log('Connection is back'); // Replace with your Info function or notification
+                // Info('Connection is back')
+            } else {
+                // console.log('No internet'); // Replace with your Error function or notification
+                // Error('No internet') // Some bullshit error popping up causing random crashes
+                console.log('No Internet')
+            }
+        } else {
+            // Skip the first check on initial render
+            isOnlineCheckRef.current = true;
         }
-    }
-
-    const [toggleSettings, setToggleSettings] = React.useState(false);
-    const handleToggleSettings = () => {
-        setToggleSettings(!toggleSettings);
-        if (toggleUser || toggleNotifications) {
-            setToggleUser(false);
-            setToggleNotifications(false);
-        }
-    }
-
-    const [toggleNotifications, setToggleNotifications] = React.useState(false);
-    const handleToggleNotifications = () => {
-        setToggleNotifications(!toggleNotifications);
-        if (toggleUser || toggleSettings) {
-            setToggleUser(false);
-            setToggleSettings(false);
-        }
-    }
-
-    const hide = () => {
-        setToggleUser(false);
-        setToggleSettings(false);
-        setToggleNotifications(false);
-        setTest(false);
-    }
-
-    const [test, setTest] = React.useState(false);
+    }, [isOnline]);
 
     useEffect(() => {
-        if (test) {
-            hide();
+        const outsideClickHandler = () => {
+            const notificationDropdown = document.getElementsByClassName('user-notification')[0];
+            const settingsDropdown = document.getElementsByClassName('user-settings')[0];
+            const userNavDropdown = document.getElementsByClassName('user-nav')[0];
+
+            if (notificationDropdown.classList.contains('show-notification')) {
+                notificationDropdown.classList.toggle('show-notification');
+            }
+            if (settingsDropdown.classList.contains('show-settings')) {
+                settingsDropdown.classList.toggle('show-settings');
+            }
+
+            if (userNavDropdown.classList.contains('show-user-nav')) {
+                userNavDropdown.classList.toggle('show-user-nav');
+            }
+        }
+
+        const content = document.getElementsByClassName('content-box')[0];
+        content.addEventListener('click', outsideClickHandler);
+
+        return () => {
+            content.removeEventListener('click', outsideClickHandler);
         }
     })
-    const toggleSmallScreenSidebarState = useSelector(state => state.sidebar.toggleSmallScreenSidebarState);
-    // console.log(toggleSmallScreenSidebarState)
-    const { collapsed } = useProSidebar();
-    const theme = useTheme();
-    const sm = useMediaQuery(theme.breakpoints.down('sm'));
-    const [toggleSmallScreenSidebar, setToggleSmallScreenSidebar] = useState(toggleSmallScreenSidebarState)
-    const handleToggleSmallScreenSidebar = () => {
-        setToggleSmallScreenSidebar((prev) => !prev)
-    }
+
+    const w_socket = useRef(null) // global training socket reference
 
     return (
         <Box className="dashboard-container" >
@@ -81,27 +79,23 @@ const Dashboard = (props) => {
                 }}
                 sx={{
                     flexGrow: 1,
-                    marginLeft: sm ? (toggleSmallScreenSidebar ? "0px !important" : "80px !important") : (collapsed ? "80px !important" : "300px !important"),
-                    transition: "margin-left 0.7s ease",
                     overflow: "auto",
                 }}
             >
-                <Topbar
-                    toggleUser={toggleUser}
-                    setToggleUser={handleToggleUser}
-                    toggleSettings={toggleSettings}
-                    setToggleSettings={handleToggleSettings}
-                    toggleNotifications={toggleNotifications}
-                    setToggleNotifications={handleToggleNotifications}
-                    toggleSmallScreenSidebar={toggleSmallScreenSidebar}
-                    handleToggleSmallScreenSidebar={handleToggleSmallScreenSidebar}
-                />
-                <Box className='content-box'>
-                    <Outlet context={[setTest]} />
-                </Box>
+                <SocketContext.Provider value={w_socket}>
+                    <Topbar />
+                    <Box className='content-box'>
+                        <Outlet />
+                    </Box>
+                </SocketContext.Provider>
             </Box>
         </Box>
     )
+}
+
+// Create a custom hook to access the ref from Topbar
+export const useSocketRef = () => {
+    return useContext(SocketContext);
 }
 
 export default Dashboard

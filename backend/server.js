@@ -1,3 +1,5 @@
+// @ts-nocheck
+const fs = require('fs');
 const express = require('express');
 var cors = require('cors')
 const { wsServer } = require('./websocket')
@@ -13,35 +15,80 @@ const contentManager = require('./routes/contentManagerRoute');
 const historicalData = require('./routes/historicalDataRoute')
 const fetchCryptoData = require('./routes/cryptoStocksRoute');
 const indicator = require('./routes/indicatorsRoute')
+const model = require('./routes/modelRoute')
 // const indicators = require('./routes/indicators/indicatorsRoute');
 
 const http = require('http');
+const https = require('https');
 const app = express();
 
-// const schedule = require('node-schedule');
-// const job = schedule.scheduleJob('*/10 * * * * *', function () {
-//     logs.info('The answer to life, the universe, and everything!');
-// });
+const CMServices = require('./services/contentManagerServices')
+const CSUtil = require('./utils/cryptoStocksUtil');
+const schedule = require('node-schedule');
+
+const binance_ticker_meta_fetch_rule = new schedule.RecurrenceRule();
+binance_ticker_meta_fetch_rule.hour = 5;
+binance_ticker_meta_fetch_rule.minute = 50;
+binance_ticker_meta_fetch_rule.second = 0;
+
+const binance_ticker_fetch_rule = new schedule.RecurrenceRule();
+binance_ticker_fetch_rule.hour = 6;
+binance_ticker_fetch_rule.minute = 0;
+binance_ticker_fetch_rule.second = 0;
+
+const yf_metadata_update_rule = new schedule.RecurrenceRule();
+yf_metadata_update_rule.hour = 6;
+yf_metadata_update_rule.minute = 5;
+yf_metadata_update_rule.second = 0;
 
 const log = (req, res, next) => {
-    logs.info(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);
+    logs.alert(`_________REQUEST RECEIVED_________ ${req.originalUrl}`);
     next();
 }
 
-logs.info('Starting server...');
+logs.crit('Starting server...');
+
+if (config.schedulerFlag === 'true') {
+    logs.info('Starting scheduled Crypto update...')
+    schedule.scheduleJob(binance_ticker_meta_fetch_rule, async function () {
+        logs.info(`Updating binance ticker meta (INFO). (Daily CRON), ${new Date()}`)
+        const [, symbols] = await CMServices.serviceFetchAndSaveLatestTickerMetaData({ length: 0 });
+        await CMServices.serviceFetchAndUpdateBinanceTickerInfoMeta(symbols);
+        logs.crit(`Binance Ticker meta and Info Updated`)
+    });
+
+    schedule.scheduleJob(binance_ticker_fetch_rule, async function () {
+        logs.info(`Updating binance ticker. (Daily CRON), ${new Date()}`)
+        let processIds = await CMServices.serviceUpdateAllBinanceTickers();
+        logs.info(processIds);
+        logs.crit(`Binance Ticker Updated`)
+    });
+
+    schedule.scheduleJob(yf_metadata_update_rule, async function () {
+        logs.info(`Updating yfinance metadata. (Daily CRON), ${new Date()}`)
+        await CSUtil.yFinance_metaData_updater()
+        logs.crit(`yFinance Metadata Updated`)
+    })
+
+} else {
+    logs.crit('Scheduler flag set to false, Change in env to enable scheduler');
+}
 
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
-app.use(cors({ origin: ['https://crypticsage.netlify.app', 'https://localhost:3001'], credentials: true }))
+app.use(cors({ origin: ['https://crypticsage.netlify.app', 'https://crypticsagev.netlify.app', 'https://localhost:3001'], credentials: true }))
 app.use(bodyParser.json());
 // app.use(logger)
 
 logger.setupAccessLog(app);
 app.use(log);
 
-app.post('/', verifyToken, async (req, res) => {
+const MDBServices = require('./services/mongoDBServices');
+const Users = require('./services/userServices');
+app.post('/test_ep', verifyToken, async (req, res) => {
     logs.info('Verify request received');
-    res.status(200).json({ message: "Verified" });
+    const testRes = await Users.processGetInitialQuizDataForUser({ email: res.locals.data.email })
+    res.status(200).json({ message: "Verified", data: testRes });
 })
 
 app.use('/auth', authentication);
@@ -56,21 +103,40 @@ app.use('/crypto', verifyToken, fetchCryptoData)
 
 app.use('/indicators', verifyToken, indicator)
 
+app.use('/model', verifyToken, model);
+
 // app.use('/indicators', verifyToken, indicators); // remove later
 
-app.listen(config.port, () => {
-    logs.info(`Express server listening on port ${config.port}`);
-});
-
-// Attach the WebSocket server to a separate HTTP server
-const wsHttpServer = http.createServer(wsServer);
-wsHttpServer.listen(config.wsPort, () => {
-    logs.info(`WebSocket server running on port ${config.wsPort}`);
-});
-
-// Upgrade HTTP requests to WebSocket
-wsHttpServer.on('upgrade', (request, socket, head) => {
-    wsServer.handleUpgrade(request, socket, head, (ws) => {
-        wsServer.emit('connection', ws, request);
+if (config.https_flag === 'true') {
+    https
+        .createServer({
+            key: fs.readFileSync('./ssl/localhost-key.pem'),
+            cert: fs.readFileSync('./ssl/localhost.pem')
+        }, app)
+        .listen(config.port, () => {
+            logs.info(`Express server listening on port : ${config.port}, HTTPS`);
+        })
+} else {
+    app.listen(config.port, () => {
+        logs.crit(`Express server listening on port : ${config.port}, HTTP`);
     });
-});
+}
+
+if (config.websocketFlag === 'true') {
+    // Attach the WebSocket server to a separate HTTP server
+    // @ts-ignore
+    const wsHttpServer = http.createServer(wsServer);
+    wsHttpServer.listen(config.wsPort, () => {
+        logs.crit(`WebSocket server running on port ${config.wsPort}`);
+    });
+
+    // Upgrade HTTP requests to WebSocket
+    wsHttpServer.on('upgrade', (request, socket, head) => {
+        // @ts-ignore
+        wsServer.handleUpgrade(request, socket, head, (ws) => {
+            wsServer.emit('connection', ws, request);
+        });
+    });
+} else {
+    logs.info('WebSocket flag set to false');
+}

@@ -2,11 +2,17 @@ import React from 'react'
 import { Box, Typography, Card, CardContent, CardMedia, Grid } from "@mui/material"
 import "./Features.css"
 import FEATURES_DATA from './FeatureContent'
+import SectionsImg from '../../../assets/sections.png'
+import LessonsImg from '../../../assets/lessons.png'
+import DashboardImg from '../../../assets/dashboard.png'
+import TechnicalImg from '../../../assets/technical.png'
+import TensorFlowImg from '../../../assets/tensorflow.png'
+import QuizzesImg from '../../../assets/quizzes.png'
 const Features = () => {
     const CustomCard = (props) => {
-        const { title, subtitle, content } = props
+        const { title, subtitle, content, src } = props
         return (
-            <Card className="features-card" sx={{ textAlign: 'start', backgroundColor:'#121212' }}>
+            <Card className="features-card" sx={{ textAlign: 'start', backgroundColor: '#121212' }}>
                 <CardContent sx={{ flex: '1 0 auto' }}>
                     <Typography variant="h3" fontWeight={400} color="#fafafa" className="padding-feature">
                         {title}
@@ -19,14 +25,15 @@ const Features = () => {
                     </Typography>
                 </CardContent>
 
-                <Box className='features-image-container'>
-                    <CardMedia
-                        component="img"
-                        
-                        image="https://picsum.photos/400/500"
-                        alt="Live from space album cover"
-                    />
-                </Box>
+                {src !== '' &&
+                    <Box className='features-image-container'>
+                        <CardMedia
+                            component="img"
+                            image={src === 'SectionsImg' ? SectionsImg : src === 'LessonsImg' ? LessonsImg : src === 'DashboardImg' ? DashboardImg : src === 'TechnicalImg' ? TechnicalImg : src === 'TensorFlowImg' ? TensorFlowImg : src === 'QuizzesImg' ? QuizzesImg : null}
+                            alt="Live from space album cover"
+                        />
+                    </Box>
+                }
             </Card>
         )
     }
@@ -38,7 +45,7 @@ const Features = () => {
                     {FEATURES_DATA.map((item, index) => {
                         return (
                             <Grid className='grid-item-container' sx={{ display: 'flex', justifyContent: 'center' }} item xs={12} sm={12} md={6} lg={6} key={index}>
-                                <CustomCard key={index} title={item.title} subtitle={item.subtitle} content={item.content} />
+                                <CustomCard key={index} title={item.title} subtitle={item.subtitle} content={item.content} src={item.imgSrc} />
                             </Grid>
                         )
                     })}

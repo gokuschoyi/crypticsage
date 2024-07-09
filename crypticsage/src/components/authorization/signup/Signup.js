@@ -5,7 +5,7 @@ import Collapse from '@mui/material/Collapse';
 import Logo from '../../../assets/logoNew.png'
 import { CloseIcon, FacebookIcon } from '../../dashboard/global/Icons';
 import { useNavigate } from 'react-router-dom';
-import Animation from '../animation/Animation';
+// import Animation from '../animation/Animation';
 import { SignupUser } from '../../../api/auth';
 
 import { LoginSocialFacebook } from "reactjs-social-login";
@@ -216,9 +216,9 @@ const Signup = (props) => {
 
     return (
         <Box className='signup-container'>
-            <Box className='logo-container'>
+            <Box className='logo-container' sx={{ marginLeft: '31px', marginTop: '22px' }}>
                 <Box display="flex" justifyContent="start">
-                    <Box pt={2} ml={2}>
+                    <Box>
                         <img src={Logo} alt="logo" className="logo" onClick={redirectToHome} />
                     </Box>
                 </Box>
@@ -253,12 +253,13 @@ const Signup = (props) => {
                                     <Typography variant="h1" fontWeight="300" sx={{ letterSpacing: '4px', color: 'white' }}>Signup</Typography>
                                     <CircularProgress color="secondary" size='30px' style={{ display: isLodaing ? 'block' : 'none' }} />
                                 </Box>
-                                <Box className="input-filed-box" display="flex" flexDirection="column">
+
+                                <Box className="input-filed-box" display="flex" flexDirection="column" gap={2}>
                                     <TextField
+                                        size='small'
                                         error={signupData.userName.error}
                                         helperText={signupData.userName.helperText}
                                         sx={{
-                                            padding: '10px',
                                             '& label.Mui-focused': {
                                                 color: 'white',
                                             },
@@ -266,6 +267,9 @@ const Signup = (props) => {
                                                 color: 'red',
                                             },
                                             '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: `${theme.palette.text.secondary}`,
+                                                },
                                                 '&:hover fieldset': {
                                                     borderColor: 'red',
                                                 },
@@ -283,10 +287,10 @@ const Signup = (props) => {
                                         type='text'
                                     />
                                     <TextField
+                                        size='small'
                                         error={signupData.email.error}
                                         helperText={signupData.email.helperText}
                                         sx={{
-                                            padding: '10px',
                                             '& label.Mui-focused': {
                                                 color: 'white',
                                             },
@@ -294,6 +298,9 @@ const Signup = (props) => {
                                                 color: 'red',
                                             },
                                             '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: `${theme.palette.text.secondary}`,
+                                                },
                                                 '&:hover fieldset': {
                                                     borderColor: 'red',
                                                 },
@@ -311,10 +318,10 @@ const Signup = (props) => {
                                         type='text'
                                     />
                                     <TextField
+                                        size='small'
                                         error={signupData.mobile_number.error}
                                         helperText={signupData.mobile_number.helperText}
                                         sx={{
-                                            padding: '10px',
                                             '& label.Mui-focused': {
                                                 color: 'white',
                                             },
@@ -322,6 +329,9 @@ const Signup = (props) => {
                                                 color: 'red',
                                             },
                                             '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: `${theme.palette.text.secondary}`,
+                                                },
                                                 '&:hover fieldset': {
                                                     borderColor: 'red',
                                                 },
@@ -339,10 +349,10 @@ const Signup = (props) => {
                                         type='text'
                                     />
                                     <TextField
+                                        size='small'
                                         error={signupData.password.error}
                                         helperText={signupData.password.helperText}
                                         sx={{
-                                            padding: '10px',
                                             '& label.Mui-focused': {
                                                 color: 'white',
                                             },
@@ -350,6 +360,9 @@ const Signup = (props) => {
                                                 color: 'red',
                                             },
                                             '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: `${theme.palette.text.secondary}`,
+                                                },
                                                 '&:hover fieldset': {
                                                     borderColor: 'red',
                                                 },
@@ -367,10 +380,10 @@ const Signup = (props) => {
                                         type='password'
                                     />
                                     <TextField
+                                        size='small'
                                         error={signupData.reenterPassword.error}
                                         helperText={signupData.reenterPassword.helperText}
                                         sx={{
-                                            padding: '10px',
                                             '& label.Mui-focused': {
                                                 color: 'white',
                                             },
@@ -378,6 +391,9 @@ const Signup = (props) => {
                                                 color: 'red',
                                             },
                                             '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: `${theme.palette.text.secondary}`,
+                                                },
                                                 '&:hover fieldset': {
                                                     borderColor: 'red',
                                                 },
@@ -395,36 +411,33 @@ const Signup = (props) => {
                                         type='password'
                                     />
                                 </Box>
+
                                 <Button onClick={signupUser} className='signup-button' variant="contained" sx={{
                                     ':hover': {
                                         color: 'black !important',
                                         backgroundColor: 'white !important'
                                     }
                                 }}>SIGN UP</Button>
+
                                 <Box className='signup-box-already' justifyContent="center" display="flex">
                                     <Typography className='signup-start' variant='div' fontWeight="300" sx={{ letterSpacing: '4px', color: `${theme.palette.secondary.main}` }}>Already have an account? <span className="signup" onClick={switchState} > Login </span></Typography>
                                 </Box>
                                 <Box className="icon-box" >
-                                    <Box className="footer-icon" alignItems='center' display='flex'>
-                                        <GoogleLogin shape='pill' type='icon' size='medium' onSuccess={googleSignUpSuccess} onError={errorMessage} state_cookie_domain='single-host-origin' />
-                                    </Box>
+                                    <GoogleLogin shape='pill' type='icon' size='medium' onSuccess={googleSignUpSuccess} onError={errorMessage} state_cookie_domain='single-host-origin' />
                                     <LoginSocialFacebook
                                         appId={process.env.REACT_APP_FACEBOOK_APP_ID}
                                         onResolve={facebookSignUpSuccess}
                                         onReject={errorMessage}
-                                    >
-                                        <IconButton size='large' aria-label="facebook" sx={{ color: 'white' }}>
-                                            <FacebookIcon sx={{ width: '40px', height: '40px' }} />
-                                        </IconButton>
-                                    </LoginSocialFacebook>
+                                        children={<FacebookIcon sx={{ color:'white',cursor: 'pointer', width: '35px', height: '35px' }} />}
+                                    />
                                 </Box>
                             </Box>
                         </Box>
                     </Grid>
                     <Grid className='animation-grid-signup' item xs={12} sm={12} md={12} lg={6}>
-                        <Box className='login-model-signup'>
+                        {/* <Box className='login-model-signup'>
                             <Animation />
-                        </Box>
+                        </Box> */}
                     </Grid>
                 </Grid>
             </Box>

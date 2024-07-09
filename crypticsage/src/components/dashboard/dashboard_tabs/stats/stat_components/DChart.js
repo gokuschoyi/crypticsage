@@ -1,17 +1,21 @@
 import React, { useEffect, useRef } from 'react'
 import { createChart } from 'lightweight-charts';
-import { Box } from '@mui/material'
+import { Box, useTheme } from '@mui/material'
 
 const DashboardChart = (props) => {
+    // eslint-disable-next-line no-unused-vars
     const { chartData, selectedTokenName, tokenUrl, gridLineToggle } = props;
-    
+    const theme = useTheme();
+    const chartBackgroundColor = theme.palette.background.default
+    // console.log(chartBackgroundColor)
 
     const chartContainerRef = useRef();
-
+    const chart = useRef();
+    // creating the chart
     useEffect(() => {
-    console.log("from DC chart")
+        // console.log("from DC chart")
 
-        let chart;
+        // let chart;
         let coinChartBox = document.getElementsByClassName('coin-chart-box')[0].getBoundingClientRect()
         let offsetLeft = Math.round(coinChartBox.left);
         let offsetTop = Math.round(coinChartBox.top)
@@ -34,21 +38,21 @@ const DashboardChart = (props) => {
                 close: chart.close,
             }
         })
-        console.log(chartData)
+        // console.log(chartData)
 
         // handles dynamic chart resizing and setting values for cHeight and cWidth for tooltip position calculations.
         // Also gets the charts boundingClientRect to get the offsetLeft and offsetTop values for tooltip
-        const handleResize = () => {
-            cWidth = chartDom.clientWidth;
-            cHeight = chartDom.clientHeight;
-            chart.applyOptions({ width: cWidth, height: cHeight });
+        // const handleResize = () => {
+        //     cWidth = chartDom.clientWidth;
+        //     cHeight = chartDom.clientHeight;
+        //     chart.current.applyOptions({ width: cWidth, height: cHeight });
 
-            coinChartBox = document.getElementsByClassName('coin-chart-box')[0].getBoundingClientRect()
-            offsetLeft = Math.round(coinChartBox.left);
-            offsetTop = Math.round(coinChartBox.top)
+        //     coinChartBox = document.getElementsByClassName('coin-chart-box')[0].getBoundingClientRect()
+        //     offsetLeft = Math.round(coinChartBox.left);
+        //     offsetTop = Math.round(coinChartBox.top)
 
-            scrollYAxis = window.scrollY
-        };
+        //     scrollYAxis = window.scrollY
+        // };
 
         // gets the global mouse co-ordinates form the document- desktops
         const calculateMousePosition = (event) => {
@@ -64,13 +68,12 @@ const DashboardChart = (props) => {
 
         if (fData.length > 0) {
             // console.log(cWidth, cHeight)
-            chart = createChart(chartContainerRef.current, {
-                width: cWidth,
-                height: cHeight,
+            chart.current = createChart(chartContainerRef.current, {
+                autoSize: true,
                 layout: {
                     background: {
                         type: 'solid',
-                        color: '#000000',
+                        color: theme.palette.background.default,
                     },
                     textColor: 'rgba(255, 255, 255, 0.9)',
                 },
@@ -95,22 +98,22 @@ const DashboardChart = (props) => {
                 },
             });
 
-            chart.timeScale().fitContent();
+            chart.current.timeScale().fitContent();
 
-            const candleStickSeries = chart.addCandlestickSeries({
+            const candleStickSeries = chart.current.addCandlestickSeries({
                 upColor: 'green',
                 downColor: 'red',
             });
 
             candleStickSeries.setData(fData);
 
-            const sma_series = chart.addLineSeries({ color: 'red', lineWidth: 1, title: 'price', pane:1 });
+            const sma_series = chart.current.addLineSeries({ color: 'red', lineWidth: 1, title: 'price', pane: 1 });
             const sma_data = chartData
                 .filter((d) => d.open)
                 .map((d) => ({ time: d.time, value: d.open }));
             sma_series.setData(sma_data);
 
-            chart.subscribeCrosshairMove((param) => {
+            chart.current.subscribeCrosshairMove((param) => {
                 if (
                     param.point === undefined ||
                     !param.time ||
@@ -124,14 +127,15 @@ const DashboardChart = (props) => {
                     // console.log(param.point)
                     // console.log({ toolTipXCoOrdinates, offsetLeft, toolTipYCoOrdinates, offsetTop, scrollYAxis })
 
-                    const dateStr = new Date(param.time * 1000).toLocaleDateString('en-AU');
+                    const [dateStr, time] = (new Date(param.time * 1000).toLocaleString('en-AU').split(','));
                     tooltip.style.display = 'block';
                     const data = param.seriesData.get(candleStickSeries);
                     const price = data.value !== undefined ? data.value : data.close;
                     tooltip.innerHTML = `
                     <div style="color: ${'rgba(255, 82, 82, 1)'}">${selectedTokenName}</div>
-                    <div style="font-size: 18px; margin: 4px 0px; color: ${'black'}">${Math.round(100 * price) / 100}</div>
+                    <div style="font-size: 14px; margin: 4px 0px; color: ${'black'}">C : ${Math.round(100 * price) / 100}</div>
                     <div style="color: ${'black'}">${dateStr}</div>
+                    <div style="color: ${'black'}">${time}</div>
                     `;
 
                     let diffX = toolTipXCoOrdinates - offsetLeft
@@ -149,21 +153,51 @@ const DashboardChart = (props) => {
                 }
             })
 
-            window.addEventListener('resize', handleResize);
+            // window.addEventListener('resize', handleResize);
             chartDom.addEventListener('mousemove', (event) => calculateMousePosition(event))
             chartDom.addEventListener('touchmove', (event) => handleTouchMove(event))
         }
         return () => {
-            window.removeEventListener('resize', handleResize);
+            // window.removeEventListener('resize', handleResize);
             chartDom.removeEventListener('mousemove', calculateMousePosition)
             chartDom.removeEventListener('touchmove', handleTouchMove)
-            chart.remove();
+            chart.current.remove();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chartData])
+
+    // Resize chart on container resizes.
+    // const resizeObserver = useRef();
+    // useEffect(() => {
+    //     resizeObserver.current = new ResizeObserver((entries) => {
+    //         const { width, height } = entries[0].contentRect;
+    //         // console.log(width, height);
+    //         chart.current.applyOptions({ width, height });
+    //     });
+
+    //     resizeObserver.current.observe(chartContainerRef.current);
+
+    //     return () => resizeObserver.current.disconnect();
+    // }, []);
+
+    // applying theme to chart
+    useEffect(() => {
+        if (chart.current !== undefined || chart.current !== null) {
+            chart.current.applyOptions({
+                layout: {
+                    background: {
+                        type: 'solid',
+                        color: chartBackgroundColor,
+                    },
+                    textColor: 'rgba(255, 255, 255, 0.9)',
+                }
+            })
+        }
+    }, [chartBackgroundColor])
 
     return (
         <Box className='chart-holder-box' width="100%" height="100%">
-            <Box ref={chartContainerRef}></Box>
+            <Box ref={chartContainerRef} width="100%" height="100%"></Box>
             <Box className='tool-tip'></Box>
         </Box>
     )

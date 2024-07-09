@@ -9,23 +9,22 @@ const processGetLatestCryptoData = async () => {
     try {
         const t = createTimer('processGetLatestCryptoData')
         t.startTimer()
-        // let sTime = performance.now()
 
         const t2 = createTimer('Fetching ticker meta from db')
         t2.startTimer()
-        // console.time("Fetching ticker meta from db")
-        let cryptoData = await MDBServices.fetchTickerMetaFromDb({ length: "max" })
+        const length = ''
+        let cryptoData = await MDBServices.fetchTickerMetaFromDb(length)
+        const collection_name = 'binance_metadata'
+        let cDataInDb = await MDBServices.getFirstObjectForEachPeriod(collection_name)
         t2.stopTimer(__filename.slice(__dirname.length + 1))
-        // console.timeEnd("Fetching ticker meta from db")
-
 
         const t3 = createTimer('Promise All')
         t3.startTimer()
-        // console.time("Promise All")
         const symbolKeys = cryptoData.map(item => item.symbol)
         const fsym = symbolKeys.join(',')
         const tsyms = 'USD,AUD,NZD,CAD,EUR,JPY'
         const { finalPriceData, ress } = await CSUtil.fetchDataFromUrls({ fsym, tsyms })
+
         const combinedData = cryptoData.map(item => {
             const symbol = item.symbol;
             const prices = {}
@@ -55,7 +54,7 @@ const processGetLatestCryptoData = async () => {
 
         let finalResult = combinedData.map((item) => {
             const matchingSymbol = ress.find(
-                (secondItem) => secondItem.baseAsset === item.symbol
+                (secondItem) => secondItem.baseAsset === item.symbol && secondItem.quoteAsset === "USDT"
             );
             return {
                 ...item,
@@ -63,12 +62,18 @@ const processGetLatestCryptoData = async () => {
             };
         })
 
-        cryptoData = finalResult
-        // let eTime = performance.now()
-        // const formattedTime = CSUtil.formatMillisecond(eTime - sTime)
+        let combinedDataWithDataInDb = finalResult.map((item) => {
+            const matchingSymbol = cDataInDb.find(
+                (secondItem) => item.matchedSymbol !== null && item.matchedSymbol === secondItem.ticker_name)
+            return {
+                ...item,
+                dataInDb: matchingSymbol ? true : false
+            }
+        })
+
+        cryptoData = combinedDataWithDataInDb
         const formattedTime = t.calculateTime()
         t3.stopTimer(__filename.slice(__dirname.length + 1))
-        // console.timeEnd("Promise All")
 
         return [cryptoData, formattedTime]
 
@@ -78,29 +83,19 @@ const processGetLatestCryptoData = async () => {
     }
 }
 
-const processFetchTickerDataFromDb = async ({ asset_type, ticker_name, period, page_no, items_per_page }) => {
-    const asset_class_db = {
-        "crypto": "binance",
-        "stocks": "yFinance_new"
-    }
-    try {
-        if (asset_type === "crypto" && (period === "2h" || period === "1h" || period === "30m" || period === "15m" || period === "5m" || period === "3m" || period === "1m")) {
-            log.info(`Fetching data for ${ticker_name} with period ${period} from binance_historical`)
-            const output = await MDBServices.fetchTickersFromBinanceHistoricalDb({ ticker_name, period, page_no, items_per_page })
-            return output
-        } else {
-            const dataSource = asset_class_db[asset_type]
-            log.info(`Fetching data for ${ticker_name} with period ${period} from crypticsage/${dataSource}`)
-            const output = await MDBServices.fetchTickersFromCrypticsageBinance({ dataSource, ticker_name, period, page_no, items_per_page })
-            return output
-        }
-    } catch (error) {
-        log.error(error.stack)
-        throw error
-    }
-}
+
+// change later to fetch data from historical_data // Not being used
+// const processFetchTickerDataFromDb = async ({ uid, asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset }) => {
+//     try {
+//         const fetchedData = await MDBServices.fetchTickerHistDataFromDb(uid, asset_type, ticker_name, period, page_no, items_per_page, new_fetch_offset)
+//         return fetchedData
+//     } catch (error) {
+//         log.error(error.stack)
+//         throw error
+//     }
+// }
 
 module.exports = {
     processGetLatestCryptoData
-    , processFetchTickerDataFromDb
+    // , processFetchTickerDataFromDb
 }

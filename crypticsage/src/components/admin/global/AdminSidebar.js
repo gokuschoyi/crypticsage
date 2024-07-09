@@ -16,6 +16,7 @@ import {
     CandlestickChartIcon,
 } from "../../dashboard/global/Icons";
 import { setAdminSidebarState } from "./AdminSidebarSiice";
+import { resetAdminState } from '../AdminSlice'
 
 const AdminSidebar = () => {
     const theme = useTheme();
@@ -38,6 +39,7 @@ const AdminSidebar = () => {
                 collapseSidebar();
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [collapseSidebar, md, sm])
 
     useEffect(() => {
@@ -66,6 +68,10 @@ const AdminSidebar = () => {
     }
     const mode = 'dark'
 
+    const handleRedirectToMain = () => {
+        dispatch(resetAdminState())
+    }
+
     return (
         <div className="admin-sidebar" style={{ display: 'flex', height: '100%', position: 'fixed' }}>
             <Sidebar transitionDuration={700} defaultCollapsed={true} width="300px" style={{ height: '100vh' }} rootStyles={{
@@ -90,7 +96,7 @@ const AdminSidebar = () => {
                             sx={{ height: '72px' }}
                         >
                             <Typography variant="h3" >
-                                <Link style={{ textDecoration: 'none', color: `${theme.palette.secondary.main}` }} to='/dashboard'>CRYPTICSAGE</Link>
+                                <Link onClick={(e) => handleRedirectToMain()} style={{ textDecoration: 'none', color: `${theme.palette.secondary.main}` }} to='/dashboard'>CRYPTICSAGE</Link>
                             </Typography>
 
                             <IconButton sx={{ color: `${theme.palette.secondary.main}` }} onClick={() => collapseSidebar()}>

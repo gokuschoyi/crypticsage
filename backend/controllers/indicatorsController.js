@@ -1,20 +1,131 @@
 const logger = require('../middleware/logger/Logger');
 const log = logger.create(__filename.slice(__dirname.length + 1))
+const IUtil = require('../utils/indicatorUtil');
+const { createTimer } = require('../utils/timer')
+// @ts-ignore
 var talib = require('talib/build/Release/talib')
-
-const { getValuesFromRedis } = require('../utils/redis_util')
-
+const CacheUtil = require('../utils/cacheUtil')
+const MDBServices = require('../services/mongoDBServices')
 
 const getIndicatorDesc = async (req, res) => {
     log.info("TALib Version: " + talib.version);
     var functions = talib.functions;
     var totalFunctionCount = 0;
     var funcDesc = talib.explain("ADX");
+    const excludeList = ["AVGDEV", "IMI"]
+    const functionsWithSplitPane = [
+        "BETA"
+        , "CORREL"
+        , "LINEARREG_ANGLE"
+        , "LINEARREG_SLOPE"
+        , "STDDEV"
+        , "VAR"
+        , "AD"
+        , "ADOSC"
+        , "OBV"
+        , "HT_DCPERIOD"
+        , "HT_DCPHASE"
+        , "HT_PHASOR"
+        , "HT_SINE"
+        , "HT_TRENDMODE"
+        , "ADX"
+        , "ADXR"
+        , "APO"
+        , "AROON"
+        , "AROONOSC"
+        , "BOP"
+        , "CCI"
+        , "CMO"
+        , "DX"
+        , "MACD"
+        , "MACDEXT"
+        , "MACDFIX"
+        , "MFI"
+        , "MINUS_DI"
+        , "MINUS_DM"
+        , "MOM"
+        , "PLUS_DI"
+        , "PLUS_DI"
+        , "PPO"
+        , "ROC"
+        , "ROCP"
+        , "ROCR"
+        , "ROCR100"
+        , "RSI"
+        , "STOCH"
+        , "STOCHF"
+        , "STOCHRSI"
+        , "TRIX"
+        , "ULTOSC"
+        , "WILLR"
+        , "ATR"
+        , "NATR"
+        , "TRANGE"
+    ]
+
     let desc = []
-    for (i in functions) {
-        totalFunctionCount++;
-        desc.push(functions[i])
-    }
+    functions.forEach((func) => {
+        if (!excludeList.includes(func.name)) {
+            totalFunctionCount++;
+            desc.push(func);
+        }
+    });
+
+    const updatedDesc = desc.map((func) => {
+        if (functionsWithSplitPane.includes(func.name)) {
+            return {
+                ...func,
+                splitPane: true
+            }
+        } else {
+            return {
+                ...func,
+                splitPane: false
+            }
+        }
+    })
+
+    desc = updatedDesc.map((func) => {
+        const { inputs, optInputs } = func
+        const modifiedInputs = inputs.map((input) => {
+            if (!input.flags) {
+                return {
+                    value: '',
+                    errorFlag: false,
+                    helperText: '',
+                    ...input,
+                };
+            } else {
+                const converted = {};
+                Object.keys(input.flags).forEach((key) => {
+                    // console.log(input.flags[key]);
+                    converted[input.flags[key]] = 'data key';
+                });
+
+                // Merge the converted properties with the original input
+                return {
+                    ...input,
+                    ...converted,
+                };
+            }
+        });
+
+        const modifiedOptionalInputs = optInputs.map((input) => {
+            return {
+                ...input,
+                errorFlag: false,
+                helperText: '',
+            }
+        })
+
+        return {
+            ...func,
+            inputs: modifiedInputs,
+            optInputs: modifiedOptionalInputs,
+            function_selected_flag: false,
+        }
+    })
+
     const grouped = desc.reduce((result, func) => {
         if (!result[func.group]) {
             result[func.group] = { group_name: func.group, functions: [func] }
@@ -24,47 +135,70 @@ const getIndicatorDesc = async (req, res) => {
         return result
     }, {})
     desc = Object.values(grouped)
-    log.info({ totalFunctionCount, funcDesc })
-    res.status(200).json({ message: 'talib desc', desc })
+    // log.info({ totalFunctionCount, funcDesc })
+    res.status(200).json({ message: 'Talib description fetched successfully', desc })
 }
 
-const calculateSMA = async (req, res) => {
-    const { asset_type, ticker_name, period, page_no, items_per_page } = req.body;
-    try {
-        const cacheKey = `${asset_type}-${ticker_name}-${period}-${page_no}-${items_per_page}`;
-        const tokendataFromRedis = await getValuesFromRedis(cacheKey);
-        let requiredTokenData = [];
-        requiredTokenData = tokendataFromRedis.ticker_data;
-        const d1 = requiredTokenData.map((item) => item.close)
-        log.info('Executing talib function')
-        var result = talib.execute({
-            name: "EMA",
-            startIdx: 0,
-            endIdx: d1.length - 1,
-            inReal: d1,
-            optInTimePeriod: 10
-        })
-        log.info('Talib function executed')
-        const fResult = result.result.outReal
-        const diff = requiredTokenData.length - fResult.length;
-        const emptyArr = [...new Array(diff)].map((d) => null)
-        const d3 = [...emptyArr, ...fResult]
-        requiredTokenData = requiredTokenData.map((item, index) => {
-            return {
-                openTime: new Date(item.openTime).toLocaleString(),
-                open: item.open,
-                close: item.close,
-                sma: d3[index]
-            }
-        })
-        res.status(200).json({ message: "Get Latest Token Data request success", requiredTokenData });
-    } catch (error) {
-        log.error(error.stack)
-        res.status(400).json({ message: "Get Latest Token Data request error" })
+const executeTalibFunction = async (req, res) => {
+    const { db_query, func_query, func_param_input_keys, func_param_optional_input_keys, func_param_output_keys } = req.body.payload;
+    const { asset_type, ticker_name, period, fetch_count } = db_query;
+    const uid = res.locals.data?.uid || req.body.uid;
+    const ohlcv_cache_key = `${uid}_${asset_type}_${ticker_name}_${period}_ohlcv_data`
+
+    const from_msg = "Talib - OHLCV Data"
+    let tokenDataFromRedis;
+    tokenDataFromRedis = await CacheUtil.get_cached_data(ohlcv_cache_key, from_msg)
+
+    if (tokenDataFromRedis === null) { // Called only after existing data has expired in redis cache
+        const new_fetch_offset = 0
+        let hist = await MDBServices.fetchEntireHistDataFromDb({ type: asset_type, ticker_name, period, return_result_: true })
+        hist = hist.reverse()
+        const ticker_data = hist.slice(0, fetch_count).reverse()
+        tokenDataFromRedis = {
+            ticker_data,
+        }
     }
+
+    // validates the optional input data
+    let validatedInputData = IUtil.validateOptionalInputData({ func_query, opt_input_keys: func_param_optional_input_keys })
+
+    // all data requreid for the function
+    let processed = IUtil.processInputData({ ticker_data: tokenDataFromRedis.ticker_data, func_input_keys: func_param_input_keys })
+
+    // final query to be executed
+    let finalFuncQuery = IUtil.addDataToFuncQuery({ func_query: validatedInputData, processed_data: processed })
+
+    // execute the talib function
+    const t = createTimer("Talib Function Execution")
+    t.startTimer()
+    var talResult;
+    try {
+        log.info('Executing talib function')
+        talResult = talib.execute(finalFuncQuery)
+    } catch (e) {
+        log.error(e)
+        res.status(400).json({ message: "Execute Talib Function request error" })
+    }
+
+    // format the output data
+    const { final_res, diff } = IUtil.formatOutputs({
+        ticker_data: tokenDataFromRedis.ticker_data,
+        talib_result: talResult,
+        output_keys: func_param_output_keys
+    })
+
+    t.stopTimer(__filename.slice(__dirname.length + 1))
+
+    const info = {
+        func_name: func_query.name,
+        diff: diff,
+        output_keys: func_param_output_keys,
+    }
+
+    res.status(200).json({ message: "Execute Talib Function request success", result: final_res, info })
 }
 
 module.exports = {
-    getIndicatorDesc,
-    calculateSMA
+    getIndicatorDesc
+    , executeTalibFunction
 }

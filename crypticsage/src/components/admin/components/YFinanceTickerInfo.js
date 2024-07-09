@@ -454,14 +454,16 @@ const YFinanceTickerInfo = () => {
                             </Box>
                             {yFinaceData.yFTickerInfo.length === 0 ?
                                 (
-                                    <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
-                                        <Typography variant='h5'>No YF tickers with historical data. Fetch First :P</Typography>
-                                    </Box>
+                                    <Collapse in={checkedYfHist}>
+                                        <Box mt={2} pt={4} pb={4} backgroundColor="#262727">
+                                            <Typography variant='h5'>No YF tickers with historical data. Fetch First :P</Typography>
+                                        </Box>
+                                    </Collapse>
                                 )
                                 :
                                 (
                                     <Collapse in={checkedYfHist}>
-                                        <Box className='ticker-data-box' pl={1} pr={1} mt={2} mb={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
+                                        <Box className='ticker-data-box' pl={1} pr={1} pb={2} mt={2} mb={2} sx={{ backgroundColor: "#262727", borderRadius: '5px' }}>
                                             <Box className='yf-update-all' pt={1} pb={1} display='flex' flexDirection='row' justifyContent='flex-end' gap='5px' alignItems='center'>
                                                 <Fade in={checkedYfHist}>
                                                     <Box display='flex' flexDirection='row' justifyContent='center' alignItems='center' gap='5px'>

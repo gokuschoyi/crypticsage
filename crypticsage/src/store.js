@@ -1,6 +1,6 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistReducer, persistStore } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+import localforage from 'localforage';
 import thunk from 'redux-thunk';
 import autoMergeLevel2 from 'redux-persist/es/stateReconciler/autoMergeLevel2';
 import sectionSlice from './components/dashboard/dashboard_tabs/sections/SectionSlice';
@@ -12,8 +12,15 @@ import statsSlice from './components/dashboard/dashboard_tabs/stats/StatsSlice.j
 import quizSlice from './components/dashboard/dashboard_tabs/quiz/QuizSlice.js';
 
 import IndicatorsSlice from './components/dashboard/dashboard_tabs/indicators/IndicatorsSlice.js';
+import cryptoModuleSlice from './components/dashboard/dashboard_tabs/indicators/modules/CryptoModuleSlice.js';
+import ModelRunMetaSlice from "./components/dashboard/dashboard_tabs/indicators/modules/ModelRunMetaSlice.js";
+import intermediateModelSlice from './components/dashboard/dashboard_tabs/indicators/modules/IntermediateModelSlice.js';
+import stockModuleSlice from './components/dashboard/dashboard_tabs/indicators/modules/StockModuleSlice.js';
+
+import adminSlice from '../src/components/admin/AdminSlice.js'
 
 const reducer = combineReducers({
+    admin: adminSlice,
     settings: settingsSlice,
     sidebar: sideBarSlice,
     section: sectionSlice,
@@ -22,12 +29,27 @@ const reducer = combineReducers({
     stats: statsSlice,
     quiz: quizSlice,
     indicators: IndicatorsSlice,
+    cryptoModule: cryptoModuleSlice,
+    intermediateModel: intermediateModelSlice,
+    modelRunMeta: ModelRunMetaSlice,
+    stockModule: stockModuleSlice,
 })
 
 const persistConfig = {
     key: 'root',
-    storage,
+    storage: localforage,
     stateReconciler: autoMergeLevel2,
+    serialize: true,
+    version: 10, // Update this number anytime changes are made to any of the redux slices. This will trigger the migration function below
+    migrate: (state, currentVersion) => {
+        if (state && state._persist.version !== currentVersion) {
+            console.log(`New state version ${currentVersion}. Clearing state`); // If the versions don't match, clear the state
+            return Promise.resolve(undefined); // This clears the old state
+        } else {
+            console.log(`State version ${currentVersion}. No migration needed`)
+            return Promise.resolve(state); // Otherwise, return the state as is
+        }
+    }
 }
 
 const persistedReducer = persistReducer(persistConfig, reducer);

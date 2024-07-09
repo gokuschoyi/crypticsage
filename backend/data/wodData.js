@@ -337,4 +337,11 @@ const wodData = [
     },
 ]
 
-module.exports = wodData
+const getWordOfTheDay = () => {
+    const data = wodData[Math.floor(Math.random() * wodData.length)];
+    let objectkey = Object.keys(data)[0];
+    let word = data[objectkey];
+    return word;
+}
+
+module.exports = getWordOfTheDay

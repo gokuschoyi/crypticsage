@@ -26,12 +26,15 @@
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
+    "fancy-canvas": "2.1.0",
+    "framer-motion": "^10.16.16",
     "gsap": "^3.11.4",
     "leva": "^0.9.34",
-    "lightweight-charts": "github:john-wallace-dev/lightweight-charts",
+    "localforage": "^1.10.0",
     "maath": "^0.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-error-boundary": "^4.0.13",
     "react-pro-sidebar": "^1.0.0",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.7.0",
@@ -40,16 +43,19 @@
     "reactjs-social-login": "^2.6.2",
     "recharts": "^2.7.3",
     "redux-persist": "^6.0.0",
+    "sortablejs": "^1.15.0",
     "swiper": "^9.1.0",
     "three": "^0.148.0",
     "typed.js": "^2.0.12",
+    "uuid": "^9.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "export PORT=3001 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postinstall": "node copy_lwc.js"
   },
   "eslintConfig": {
     "extends": [
